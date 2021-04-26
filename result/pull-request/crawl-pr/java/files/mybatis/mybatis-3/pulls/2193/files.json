@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "a1b9877ad344b2f6c15fe0471668a8a007cb64ea",
+    "filename": "src/main/java/org/apache/ibatis/session/defaults/DefaultSqlSessionFactory.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/mybatis/mybatis-3/blob/a25072c233694851360258dfa5f19ce30ba992a9/src/main/java/org/apache/ibatis/session/defaults/DefaultSqlSessionFactory.java",
+    "raw_url": "https://github.com/mybatis/mybatis-3/raw/a25072c233694851360258dfa5f19ce30ba992a9/src/main/java/org/apache/ibatis/session/defaults/DefaultSqlSessionFactory.java",
+    "contents_url": "https://api.github.com/repos/mybatis/mybatis-3/contents/src/main/java/org/apache/ibatis/session/defaults/DefaultSqlSessionFactory.java?ref=a25072c233694851360258dfa5f19ce30ba992a9",
+    "patch": "@@ -104,6 +104,7 @@ private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionI\n   }\n \n   private SqlSession openSessionFromConnection(ExecutorType execType, Connection connection) {\n+    Transaction tx = null;\n     try {\n       boolean autoCommit;\n       try {\n@@ -115,10 +116,11 @@ private SqlSession openSessionFromConnection(ExecutorType execType, Connection c\n       }\n       final Environment environment = configuration.getEnvironment();\n       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);\n-      final Transaction tx = transactionFactory.newTransaction(connection);\n+      tx = transactionFactory.newTransaction(connection);\n       final Executor executor = configuration.newExecutor(tx, execType);\n       return new DefaultSqlSession(configuration, executor, autoCommit);\n     } catch (Exception e) {\n+      closeTransaction(tx);\n       throw ExceptionFactory.wrapException(\"Error opening session.  Cause: \" + e, e);\n     } finally {\n       ErrorContext.instance().reset();"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "282aeb53032e8e44ad7bad1e991292ccbce108c7",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/palantir/tritium/blob/92b072fa63001ae6be2cebfcea4da80df678c9e0/build.gradle",
+    "raw_url": "https://github.com/palantir/tritium/raw/92b072fa63001ae6be2cebfcea4da80df678c9e0/build.gradle",
+    "contents_url": "https://api.github.com/repos/palantir/tritium/contents/build.gradle?ref=92b072fa63001ae6be2cebfcea4da80df678c9e0",
+    "patch": "@@ -76,7 +76,8 @@ allprojects {\n                 option('NullAway:AnnotatedPackages', 'com.palantir')\n \n                 // warnings not explicitly provided by error-prone\n-                error 'NullAway',\n+                error 'AutoCloseableMustBeClosed',\n+                        'NullAway',\n                         'Slf4jLogsafeArgs',\n                         'PreferCollectionTransform',\n                         'PreferListsPartition',"
+  },
+  {
+    "sha": "0ee95f0da6a84f80d235c8213e574109f7565365",
+    "filename": "changelog/@unreleased/pr-1009.v2.yml",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/palantir/tritium/blob/92b072fa63001ae6be2cebfcea4da80df678c9e0/changelog/@unreleased/pr-1009.v2.yml",
+    "raw_url": "https://github.com/palantir/tritium/raw/92b072fa63001ae6be2cebfcea4da80df678c9e0/changelog/@unreleased/pr-1009.v2.yml",
+    "contents_url": "https://api.github.com/repos/palantir/tritium/contents/changelog/@unreleased/pr-1009.v2.yml?ref=92b072fa63001ae6be2cebfcea4da80df678c9e0",
+    "patch": "@@ -0,0 +1,9 @@\n+type: improvement\n+improvement:\n+  description: |-\n+    Methods returning `AutoCloseable` marked as `@MustBeClosed`\n+\n+    ./gradlew clean compileJava compileTestJava -PerrorProneApply=AutoCloseableMustBeClosed\n+    ./gradlew format\n+  links:\n+  - https://github.com/palantir/tritium/pull/1009"
+  },
+  {
+    "sha": "55ea46a75e2b6d53152e5ad0281e7150aca8c2ac",
+    "filename": "tritium-metrics/src/main/java/com/palantir/tritium/metrics/InstrumentedSslServerSocketFactory.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/palantir/tritium/blob/92b072fa63001ae6be2cebfcea4da80df678c9e0/tritium-metrics/src/main/java/com/palantir/tritium/metrics/InstrumentedSslServerSocketFactory.java",
+    "raw_url": "https://github.com/palantir/tritium/raw/92b072fa63001ae6be2cebfcea4da80df678c9e0/tritium-metrics/src/main/java/com/palantir/tritium/metrics/InstrumentedSslServerSocketFactory.java",
+    "contents_url": "https://api.github.com/repos/palantir/tritium/contents/tritium-metrics/src/main/java/com/palantir/tritium/metrics/InstrumentedSslServerSocketFactory.java?ref=92b072fa63001ae6be2cebfcea4da80df678c9e0",
+    "patch": "@@ -16,6 +16,7 @@\n \n package com.palantir.tritium.metrics;\n \n+import com.google.errorprone.annotations.MustBeClosed;\n import java.io.IOException;\n import java.net.InetAddress;\n import java.net.ServerSocket;\n@@ -94,6 +95,7 @@ public int hashCode() {\n         return Objects.hash(name, delegate);\n     }\n \n+    @MustBeClosed\n     private ServerSocket wrap(ServerSocket serverSocket) throws IOException {\n         if (serverSocket instanceof SSLServerSocket) {\n             return new InstrumentedServerSocket((SSLServerSocket) serverSocket, listener);\n@@ -106,6 +108,7 @@ private ServerSocket wrap(ServerSocket serverSocket) throws IOException {\n         private final SSLServerSocket delegate;\n         private final HandshakeCompletedListener listener;\n \n+        @MustBeClosed\n         InstrumentedServerSocket(SSLServerSocket delegate, HandshakeCompletedListener listener) throws IOException {\n             this.delegate = delegate;\n             this.listener = listener;\n@@ -221,6 +224,7 @@ public Socket accept() throws IOException {\n             return wrap(delegate.accept());\n         }\n \n+        @MustBeClosed\n         private Socket wrap(Socket socket) {\n             if (socket instanceof SSLSocket && HandshakeInstrumentation.isSocketInstrumentationEnabled()) {\n                 ((SSLSocket) socket).addHandshakeCompletedListener(listener);"
+  },
+  {
+    "sha": "e29681d5c7c051e64e1bb374416511e52a847f59",
+    "filename": "tritium-metrics/src/main/java/com/palantir/tritium/metrics/InstrumentedSslSocketFactory.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/palantir/tritium/blob/92b072fa63001ae6be2cebfcea4da80df678c9e0/tritium-metrics/src/main/java/com/palantir/tritium/metrics/InstrumentedSslSocketFactory.java",
+    "raw_url": "https://github.com/palantir/tritium/raw/92b072fa63001ae6be2cebfcea4da80df678c9e0/tritium-metrics/src/main/java/com/palantir/tritium/metrics/InstrumentedSslSocketFactory.java",
+    "contents_url": "https://api.github.com/repos/palantir/tritium/contents/tritium-metrics/src/main/java/com/palantir/tritium/metrics/InstrumentedSslSocketFactory.java?ref=92b072fa63001ae6be2cebfcea4da80df678c9e0",
+    "patch": "@@ -16,6 +16,7 @@\n \n package com.palantir.tritium.metrics;\n \n+import com.google.errorprone.annotations.MustBeClosed;\n import java.io.IOException;\n import java.io.InputStream;\n import java.net.InetAddress;\n@@ -105,6 +106,7 @@ public int hashCode() {\n         return Objects.hash(delegate, name);\n     }\n \n+    @MustBeClosed\n     private Socket wrap(Socket socket) {\n         if (socket instanceof SSLSocket && HandshakeInstrumentation.isSocketInstrumentationEnabled()) {\n             ((SSLSocket) socket).addHandshakeCompletedListener(listener);"
+  },
+  {
+    "sha": "6d70b646fa1dae37fab83085406ca221c2ae2553",
+    "filename": "tritium-metrics/src/main/java/com/palantir/tritium/metrics/TaggedMetricsExecutorService.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/palantir/tritium/blob/92b072fa63001ae6be2cebfcea4da80df678c9e0/tritium-metrics/src/main/java/com/palantir/tritium/metrics/TaggedMetricsExecutorService.java",
+    "raw_url": "https://github.com/palantir/tritium/raw/92b072fa63001ae6be2cebfcea4da80df678c9e0/tritium-metrics/src/main/java/com/palantir/tritium/metrics/TaggedMetricsExecutorService.java",
+    "contents_url": "https://api.github.com/repos/palantir/tritium/contents/tritium-metrics/src/main/java/com/palantir/tritium/metrics/TaggedMetricsExecutorService.java?ref=92b072fa63001ae6be2cebfcea4da80df678c9e0",
+    "patch": "@@ -19,6 +19,7 @@\n import com.codahale.metrics.Counter;\n import com.codahale.metrics.Meter;\n import com.codahale.metrics.Timer;\n+import com.google.errorprone.annotations.MustBeClosed;\n import java.util.ArrayList;\n import java.util.Collection;\n import java.util.List;\n@@ -141,6 +142,7 @@ public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedE\n     }\n \n     @Nullable\n+    @MustBeClosed\n     private Timer.Context startQueueTimerIfEnabled() {\n         Timer queuedDurationTimer = queuedDuration;\n         return queuedDurationTimer == null ? null : queuedDurationTimer.time();"
+  },
+  {
+    "sha": "e590e899592ab1ae637178f0a515c776705af930",
+    "filename": "tritium-metrics/src/test/java/com/palantir/tritium/metrics/InstrumentedSslContextTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/palantir/tritium/blob/92b072fa63001ae6be2cebfcea4da80df678c9e0/tritium-metrics/src/test/java/com/palantir/tritium/metrics/InstrumentedSslContextTest.java",
+    "raw_url": "https://github.com/palantir/tritium/raw/92b072fa63001ae6be2cebfcea4da80df678c9e0/tritium-metrics/src/test/java/com/palantir/tritium/metrics/InstrumentedSslContextTest.java",
+    "contents_url": "https://api.github.com/repos/palantir/tritium/contents/tritium-metrics/src/test/java/com/palantir/tritium/metrics/InstrumentedSslContextTest.java?ref=92b072fa63001ae6be2cebfcea4da80df678c9e0",
+    "patch": "@@ -20,6 +20,7 @@\n import static org.assertj.core.api.Assumptions.assumeThat;\n \n import com.google.common.collect.MoreCollectors;\n+import com.google.errorprone.annotations.MustBeClosed;\n import com.palantir.tritium.event.InstrumentationProperties;\n import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;\n import com.palantir.tritium.metrics.registry.MetricName;\n@@ -258,6 +259,7 @@ void testSslSocketFactory_equality() throws IOException, GeneralSecurityExceptio\n         assertThat(instrumentedFirst.hashCode()).isNotEqualTo(instrumentedThirdDifferentName.hashCode());\n     }\n \n+    @MustBeClosed\n     private static Closeable server(SSLContext context) {\n         Undertow server = Undertow.builder()\n                 .addHttpsListener(PORT, \"0.0.0.0\", context)"
+  }
+]

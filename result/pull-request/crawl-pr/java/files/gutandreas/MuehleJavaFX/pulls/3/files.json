@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "9cdfe4d85928486e02bf7e023380c18b0f211f82",
+    "filename": "src/main/java/edu/andreasgut/sound/AudioPlayer.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/gutandreas/MuehleJavaFX/blob/4e15dabd82d2cbb4b5c1305345944601f8a94e21/src/main/java/edu/andreasgut/sound/AudioPlayer.java",
+    "raw_url": "https://github.com/gutandreas/MuehleJavaFX/raw/4e15dabd82d2cbb4b5c1305345944601f8a94e21/src/main/java/edu/andreasgut/sound/AudioPlayer.java",
+    "contents_url": "https://api.github.com/repos/gutandreas/MuehleJavaFX/contents/src/main/java/edu/andreasgut/sound/AudioPlayer.java?ref=4e15dabd82d2cbb4b5c1305345944601f8a94e21",
+    "patch": "@@ -58,6 +58,10 @@ public void chooseSound(MUSIC musicEnum){\n         }\n     }\n \n+    public void continueMusic(){\n+        currentAudioclip.play();\n+    }\n+\n     public void stopMusic(){\n         audioclipMENU.stop();\n         audioclipPLAY.stop();"
+  },
+  {
+    "sha": "95c289f4333a360218f02f47bfd93c0fa74d6d0e",
+    "filename": "src/main/java/edu/andreasgut/view/OptionsView.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 19,
+    "changes": 46,
+    "blob_url": "https://github.com/gutandreas/MuehleJavaFX/blob/4e15dabd82d2cbb4b5c1305345944601f8a94e21/src/main/java/edu/andreasgut/view/OptionsView.java",
+    "raw_url": "https://github.com/gutandreas/MuehleJavaFX/raw/4e15dabd82d2cbb4b5c1305345944601f8a94e21/src/main/java/edu/andreasgut/view/OptionsView.java",
+    "contents_url": "https://api.github.com/repos/gutandreas/MuehleJavaFX/contents/src/main/java/edu/andreasgut/view/OptionsView.java?ref=4e15dabd82d2cbb4b5c1305345944601f8a94e21",
+    "patch": "@@ -1,44 +1,51 @@\n package edu.andreasgut.view;\n \n+import edu.andreasgut.view.internet.MusicSwitchButton;\n import javafx.application.Platform;\n-import javafx.scene.control.Alert;\n-import javafx.scene.control.Button;\n-import javafx.scene.control.ButtonType;\n-import javafx.scene.control.ToggleButton;\n+import javafx.geometry.Pos;\n+import javafx.scene.control.*;\n import javafx.scene.image.Image;\n import javafx.scene.image.ImageView;\n-import javafx.scene.layout.Background;\n import javafx.scene.layout.HBox;\n-import javafx.scene.paint.Color;\n \n import java.util.Optional;\n \n public class OptionsView extends HBox {\n \n-    private ToggleButton audioStartStopToggleButton;\n+    private MusicSwitchButton audioOnOffMusicSwitchButton;\n+    private Label audioOnLabel, audioOffLabel;\n     private Button exitButton;\n     private ViewManager viewManager;\n+    private HBox audioHBox;\n     private boolean musicOn = true;\n \n     public OptionsView(ViewManager viewManager) {\n         this.viewManager = viewManager;\n         this.getStyleClass().add(\"optionView\");\n+        this.getStyleClass().add(\"w3schools/toggleSwitch.css\");\n+\n+\n+\n+        audioOnOffMusicSwitchButton = new MusicSwitchButton(this.viewManager);\n+        audioOnLabel = new Label(\"Musik an\");\n+        audioOffLabel = new Label(\"Musik aus\");\n+        audioHBox = new HBox();\n+        audioHBox.getChildren().addAll(audioOffLabel, audioOnOffMusicSwitchButton, audioOnLabel);\n+        audioHBox.setAlignment(Pos.CENTER);\n+        audioHBox.setSpacing(5);\n+\n \n-        audioStartStopToggleButton = new ToggleButton(\"Musik Ein\");\n-        audioStartStopToggleButton.setSelected(true);\n-        audioStartStopToggleButton.getStyleClass().add(\"toggleButtonOn\");\n-        audioStartStopToggleButton.setMinWidth(100);\n-        audioStartStopToggleButton.setMinHeight(50);\n \n         exitButton = new Button();\n         exitButton.setGraphic(new ImageView(new Image(\"edu/andreasgut/Images/ExitButton.png\", 50, 25, true, true)));\n-        exitButton.setMinWidth(100);\n-        exitButton.setMinHeight(50);\n+        exitButton.setMinWidth(60);\n+        exitButton.setMinHeight(30);\n         exitButton.getStyleClass().add(\"exitButton\");\n \n-        this.getChildren().addAll(audioStartStopToggleButton, exitButton);\n+        this.getChildren().addAll(audioHBox, exitButton);\n+\n \n-        audioStartStopToggleButton.setOnAction(action -> {\n+        /*audioStartStopToggleButton.setOnAction(action -> {\n                 if (!audioStartStopToggleButton.isSelected()){\n                 viewManager.getSoundManager().stopMusic();\n                 System.out.println(\"Musik wird gestoppt\");\n@@ -55,7 +62,7 @@ public OptionsView(ViewManager viewManager) {\n                     audioStartStopToggleButton.getStyleClass().add(\"toggleButtonOn\");\n                     musicOn = true;\n                 }\n-            });\n+            });*/\n \n         exitButton.setOnAction(action -> {\n             Alert alert = new Alert(Alert.AlertType.CONFIRMATION,\n@@ -71,7 +78,8 @@ else if(result.get() == ButtonType.YES){\n \n     }\n \n-    public boolean isMusicOn() {\n-        return musicOn;\n+\n+    public MusicSwitchButton getAudioOnOffSwitchButton() {\n+        return audioOnOffMusicSwitchButton;\n     }\n }"
+  },
+  {
+    "sha": "c5d3c10403cd65bb15014651b7a1d032a796746c",
+    "filename": "src/main/java/edu/andreasgut/view/StartMenuView.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/gutandreas/MuehleJavaFX/blob/4e15dabd82d2cbb4b5c1305345944601f8a94e21/src/main/java/edu/andreasgut/view/StartMenuView.java",
+    "raw_url": "https://github.com/gutandreas/MuehleJavaFX/raw/4e15dabd82d2cbb4b5c1305345944601f8a94e21/src/main/java/edu/andreasgut/view/StartMenuView.java",
+    "contents_url": "https://api.github.com/repos/gutandreas/MuehleJavaFX/contents/src/main/java/edu/andreasgut/view/StartMenuView.java?ref=4e15dabd82d2cbb4b5c1305345944601f8a94e21",
+    "patch": "@@ -194,7 +194,7 @@ private void setupStartButtonAction(){\n                     namePlayer1Textfield.getText().length()>0 && namePlayer2Textfield.getText().length()>0)){\n \n                 viewManager.getSoundManager().chooseSound(MUSIC.PLAY_SOUND);\n-                if (!viewManager.getOptionsView().isMusicOn()){\n+                if (!viewManager.getOptionsView().getAudioOnOffSwitchButton().getState()){\n                     viewManager.getSoundManager().stopMusic();\n                 }\n "
+  }
+]

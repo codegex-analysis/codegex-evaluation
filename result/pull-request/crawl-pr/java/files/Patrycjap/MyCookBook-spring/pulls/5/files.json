@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "933b73bc7f93ddfe3eb8c5bd4e6c6dd4b4f4da88",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/Patrycjap/MyCookBook-spring/blob/b8559e32e810d5b540cbada6cd0bb00afd1e0178/pom.xml",
+    "raw_url": "https://github.com/Patrycjap/MyCookBook-spring/raw/b8559e32e810d5b540cbada6cd0bb00afd1e0178/pom.xml",
+    "contents_url": "https://api.github.com/repos/Patrycjap/MyCookBook-spring/contents/pom.xml?ref=b8559e32e810d5b540cbada6cd0bb00afd1e0178",
+    "patch": "@@ -68,8 +68,11 @@\n             <groupId>org.springframework.boot</groupId>\n             <artifactId>spring-boot-starter-mail</artifactId>\n         </dependency>\n+        <dependency>\n+            <groupId>org.springframework.boot</groupId>\n+            <artifactId>spring-boot-starter-validation</artifactId>\n+        </dependency>\n     </dependencies>\n-\n     <build>\n         <plugins>\n             <plugin>"
+  },
+  {
+    "sha": "7b331892744e6c6981cba565d808f6421ea7caf7",
+    "filename": "src/main/java/pp/spring/cookbook/user/AuthenticationController.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 6,
+    "changes": 13,
+    "blob_url": "https://github.com/Patrycjap/MyCookBook-spring/blob/b8559e32e810d5b540cbada6cd0bb00afd1e0178/src/main/java/pp/spring/cookbook/user/AuthenticationController.java",
+    "raw_url": "https://github.com/Patrycjap/MyCookBook-spring/raw/b8559e32e810d5b540cbada6cd0bb00afd1e0178/src/main/java/pp/spring/cookbook/user/AuthenticationController.java",
+    "contents_url": "https://api.github.com/repos/Patrycjap/MyCookBook-spring/contents/src/main/java/pp/spring/cookbook/user/AuthenticationController.java?ref=b8559e32e810d5b540cbada6cd0bb00afd1e0178",
+    "patch": "@@ -2,8 +2,10 @@\n \n import org.springframework.stereotype.Controller;\n import org.springframework.ui.Model;\n+import org.springframework.validation.BindingResult;\n import org.springframework.web.bind.annotation.*;\n \n+import javax.validation.Valid;\n import java.util.List;\n import java.util.Optional;\n \n@@ -35,19 +37,18 @@ public String registerForm(Model model) {\n     }\n \n     @PostMapping(\"/register\")\n-    public String register(User user, @RequestParam(required = false) String error, Model model) {\n-        boolean showErrorMessage = false;\n-        if (error != null) {\n-            showErrorMessage = true;\n-            model.addAttribute(\"showErrorMessage\", showErrorMessage);\n+    public String register(Model model, @Valid @ModelAttribute User user,\n+                           BindingResult bindResult) {\n+        if (bindResult.hasErrors()) {\n+            model.addAttribute(\"showErrorMessage\", true);\n             return \"register\";\n         } else {\n             String firstName = user.getFirstName();\n             String lastName = user.getLastName();\n             String email = user.getEmail();\n             String rawPassword = user.getPassword();\n             userService.registerUser(firstName, lastName, email, rawPassword);\n-            model.addAttribute(\"showErrorMessage\", showErrorMessage);\n+            model.addAttribute(\"showErrorMessage\", false);\n             model.addAttribute(\"showSuccessMessage\", true);\n             return \"redirect:/login\";\n         }"
+  },
+  {
+    "sha": "46fb41a39169a12aaa971ee68a6bcf43bbc43034",
+    "filename": "src/main/java/pp/spring/cookbook/user/User.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/Patrycjap/MyCookBook-spring/blob/b8559e32e810d5b540cbada6cd0bb00afd1e0178/src/main/java/pp/spring/cookbook/user/User.java",
+    "raw_url": "https://github.com/Patrycjap/MyCookBook-spring/raw/b8559e32e810d5b540cbada6cd0bb00afd1e0178/src/main/java/pp/spring/cookbook/user/User.java",
+    "contents_url": "https://api.github.com/repos/Patrycjap/MyCookBook-spring/contents/src/main/java/pp/spring/cookbook/user/User.java?ref=b8559e32e810d5b540cbada6cd0bb00afd1e0178",
+    "patch": "@@ -1,6 +1,9 @@\n package pp.spring.cookbook.user;\n \n import javax.persistence.*;\n+import javax.validation.constraints.Email;\n+import javax.validation.constraints.NotBlank;\n+import javax.validation.constraints.Size;\n import java.util.Set;\n \n @Entity\n@@ -9,14 +12,23 @@\n     @Id\n     @GeneratedValue(strategy = GenerationType.IDENTITY)\n     private Long id;\n+\n+    @Email(message = \"Please enter email format\")\n     private String email;\n+\n     private String password;\n \n     @OneToMany(mappedBy = \"user\", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })\n     private Set<UserRole> roles;\n \n     private String passwordResetKey;\n+\n+    @NotBlank(message = \"Filed cannot be empty. Please enter a valid name.\")\n+    @Size(min = 3, message = \"Filed should contain minimum 3 characters\")\n     private String firstName;\n+\n+    @NotBlank(message = \"Filed can not be empty\")\n+    @Size(min = 3, message = \"Filed should contain minimum 3 characters. Please enter a valid surname.\")\n     private String lastName;\n \n "
+  },
+  {
+    "sha": "3518041ae64f09817f7ab2267aa2a90b8079bb4f",
+    "filename": "src/main/java/pp/spring/cookbook/user/UserService.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/Patrycjap/MyCookBook-spring/blob/b8559e32e810d5b540cbada6cd0bb00afd1e0178/src/main/java/pp/spring/cookbook/user/UserService.java",
+    "raw_url": "https://github.com/Patrycjap/MyCookBook-spring/raw/b8559e32e810d5b540cbada6cd0bb00afd1e0178/src/main/java/pp/spring/cookbook/user/UserService.java",
+    "contents_url": "https://api.github.com/repos/Patrycjap/MyCookBook-spring/contents/src/main/java/pp/spring/cookbook/user/UserService.java?ref=b8559e32e810d5b540cbada6cd0bb00afd1e0178",
+    "patch": "@@ -22,12 +22,12 @@ public UserService(PasswordEncoder passwordEncoder, UserRepository userRepositor\n         this.mailSenderService = mailSenderService;\n     }\n \n-    public void registerUser(String username, String rawPassword, String firstName, String lastName) {\n+    public void registerUser(String firstName, String lastName, String username, String rawPassword) {\n         User userToAdd = new User();\n \n-        userToAdd.setEmail(username);\n         userToAdd.setFirstName(firstName);\n         userToAdd.setLastName(lastName);\n+        userToAdd.setEmail(username);\n         String encryptedPassword = passwordEncoder.encode(rawPassword);\n         userToAdd.setPassword(encryptedPassword);\n         List<UserRole> list = Collections.singletonList(new UserRole(userToAdd, Role.ROLE_USER));"
+  },
+  {
+    "sha": "3dc174d0ca784138be2e7eb1ee78af244223891b",
+    "filename": "src/main/resources/templates/register.html",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/Patrycjap/MyCookBook-spring/blob/b8559e32e810d5b540cbada6cd0bb00afd1e0178/src/main/resources/templates/register.html",
+    "raw_url": "https://github.com/Patrycjap/MyCookBook-spring/raw/b8559e32e810d5b540cbada6cd0bb00afd1e0178/src/main/resources/templates/register.html",
+    "contents_url": "https://api.github.com/repos/Patrycjap/MyCookBook-spring/contents/src/main/resources/templates/register.html?ref=b8559e32e810d5b540cbada6cd0bb00afd1e0178",
+    "patch": "@@ -10,14 +10,17 @@ <h2 style=\"text-align: center\" class=\"mt-4\">Register</h2>\n         <div class=\"mb-3\">\n             <label for=\"firstName\" class=\"form-label\">Name</label>\n             <input type=\"text\" id=\"firstName\" required class=\"form-control\" th:field=\"*{firstName}\">\n+            <p style=\"color: red\" th:if=\"${#fields.hasErrors('firstName')}\" th:errors=\"*{firstName}\"></p>\n         </div>\n         <div class=\"mb-3\">\n             <label for=\"lastName\" class=\"form-label\">Surname</label>\n             <input type=\"text\" id=\"lastName\" required class=\"form-control\" th:field=\"*{lastName}\">\n+            <p style=\"color: red\" th:if=\"${#fields.hasErrors('lastName')}\" th:errors=\"*{lastName}\"></p>\n         </div>\n         <div class=\"mb-3\">\n             <label for=\"email\" class=\"form-label\">Username (email)</label>\n-            <input type=\"email\" id=\"email\" required class=\"form-control\" th:field=\"*{email}\">\n+            <input type=\"text\" id=\"email\" required class=\"form-control\" th:field=\"*{email}\">\n+            <p style=\"color: red\" th:if=\"${#fields.hasErrors('email')}\" th:errors=\"*{email}\"></p>\n         </div>\n         <div class=\"mb-3\">\n             <label for=\"password\" class=\"form-label\">Password</label>"
+  }
+]

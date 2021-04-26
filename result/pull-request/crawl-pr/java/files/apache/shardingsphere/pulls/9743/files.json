@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "183c66c59a9d6afc83310b6151bfc4db4c92c457",
+    "filename": "shardingsphere-infra/shardingsphere-infra-common/src/main/java/org/apache/shardingsphere/infra/metadata/auth/model/privilege/ShardingSpherePrivilege.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/apache/shardingsphere/blob/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-infra/shardingsphere-infra-common/src/main/java/org/apache/shardingsphere/infra/metadata/auth/model/privilege/ShardingSpherePrivilege.java",
+    "raw_url": "https://github.com/apache/shardingsphere/raw/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-infra/shardingsphere-infra-common/src/main/java/org/apache/shardingsphere/infra/metadata/auth/model/privilege/ShardingSpherePrivilege.java",
+    "contents_url": "https://api.github.com/repos/apache/shardingsphere/contents/shardingsphere-infra/shardingsphere-infra-common/src/main/java/org/apache/shardingsphere/infra/metadata/auth/model/privilege/ShardingSpherePrivilege.java?ref=3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd",
+    "patch": "@@ -63,6 +63,20 @@ public boolean hasPrivileges(final String schema, final Collection<PrivilegeType\n         return hasPrivileges(privileges) || databasePrivilege.hasPrivileges(schema, privileges);\n     }\n     \n+    /**\n+     * Has privilege for login and use db.\n+     *\n+     * @param schema schema\n+     * @return has or not\n+     */\n+    public boolean hasPrivileges(final String schema) {\n+        if (administrativePrivilege.getPrivileges().contains(PrivilegeType.SUPER) || !databasePrivilege.getGlobalPrivileges().isEmpty()\n+                || databasePrivilege.getSpecificPrivileges().containsKey(schema)) {\n+            return true;\n+        }\n+        return false;\n+    }\n+    \n     /**\n      * Has privileges.\n      *"
+  },
+  {
+    "sha": "cd8466dbd9f18e51733063a8428e7f91e8009b07",
+    "filename": "shardingsphere-proxy/shardingsphere-proxy-backend/src/main/java/org/apache/shardingsphere/proxy/backend/text/admin/mysql/executor/ShowDatabasesExecutor.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 4,
+    "changes": 11,
+    "blob_url": "https://github.com/apache/shardingsphere/blob/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-proxy/shardingsphere-proxy-backend/src/main/java/org/apache/shardingsphere/proxy/backend/text/admin/mysql/executor/ShowDatabasesExecutor.java",
+    "raw_url": "https://github.com/apache/shardingsphere/raw/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-proxy/shardingsphere-proxy-backend/src/main/java/org/apache/shardingsphere/proxy/backend/text/admin/mysql/executor/ShowDatabasesExecutor.java",
+    "contents_url": "https://api.github.com/repos/apache/shardingsphere/contents/shardingsphere-proxy/shardingsphere-proxy-backend/src/main/java/org/apache/shardingsphere/proxy/backend/text/admin/mysql/executor/ShowDatabasesExecutor.java?ref=3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd",
+    "patch": "@@ -54,10 +54,13 @@ public void execute(final BackendConnection backendConnection) {\n             return Collections.emptyList();\n         }\n         Collection<Object> result = new LinkedList<>();\n-        for (String each : ProxyContext.getInstance().getAllSchemaNames()) {\n-            // TODO : Need to check whether PrivilegeType.SHOW_DB is correct or enough?\n-            if (privilege.get().hasPrivileges(each, Collections.singletonList(PrivilegeType.SHOW_DB))) {\n-                result.add(each);\n+        if(privilege.get().hasPrivileges(Collections.singletonList(PrivilegeType.SHOW_DB))) {\n+            result.addAll(ProxyContext.getInstance().getAllSchemaNames());\n+        } else {\n+            for (String each : ProxyContext.getInstance().getAllSchemaNames()) {\n+                if (privilege.get().hasPrivileges(each)) {\n+                    result.add(each);\n+                }\n             }\n         }\n         return result;"
+  },
+  {
+    "sha": "5ceb162a760a2a154bd6e9e6eb5bd1e24c280533",
+    "filename": "shardingsphere-proxy/shardingsphere-proxy-backend/src/main/java/org/apache/shardingsphere/proxy/backend/text/admin/mysql/executor/UseDatabaseExecutor.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 3,
+    "changes": 4,
+    "blob_url": "https://github.com/apache/shardingsphere/blob/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-proxy/shardingsphere-proxy-backend/src/main/java/org/apache/shardingsphere/proxy/backend/text/admin/mysql/executor/UseDatabaseExecutor.java",
+    "raw_url": "https://github.com/apache/shardingsphere/raw/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-proxy/shardingsphere-proxy-backend/src/main/java/org/apache/shardingsphere/proxy/backend/text/admin/mysql/executor/UseDatabaseExecutor.java",
+    "contents_url": "https://api.github.com/repos/apache/shardingsphere/contents/shardingsphere-proxy/shardingsphere-proxy-backend/src/main/java/org/apache/shardingsphere/proxy/backend/text/admin/mysql/executor/UseDatabaseExecutor.java?ref=3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd",
+    "patch": "@@ -26,7 +26,6 @@\n import org.apache.shardingsphere.sql.parser.sql.common.statement.dal.UseStatement;\n import org.apache.shardingsphere.sql.parser.sql.common.util.SQLUtil;\n \n-import java.util.Collections;\n import java.util.Optional;\n \n /**\n@@ -48,7 +47,6 @@ public void execute(final BackendConnection backendConnection) {\n     \n     private boolean isAuthorizedSchema(final BackendConnection backendConnection, final String schema) {\n         Optional<ShardingSpherePrivilege> privilege = ProxyContext.getInstance().getMetaDataContexts().getAuthentication().findPrivilege(backendConnection.getGrantee());\n-        // TODO : Need to check whether PrivilegeType.USAGE is correct or enough?\n-        return privilege.isPresent() && privilege.get().hasPrivileges(schema, Collections.emptyList());\n+        return privilege.isPresent() && privilege.get().hasPrivileges(schema) ? true : false;\n     }\n }"
+  },
+  {
+    "sha": "511d430c1ccc4eb3deb796fe32df96cfaf27dc37",
+    "filename": "shardingsphere-proxy/shardingsphere-proxy-frontend/shardingsphere-proxy-frontend-mysql/src/main/java/org/apache/shardingsphere/proxy/frontend/mysql/auth/MySQLAuthenticationHandler.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 6,
+    "changes": 9,
+    "blob_url": "https://github.com/apache/shardingsphere/blob/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-proxy/shardingsphere-proxy-frontend/shardingsphere-proxy-frontend-mysql/src/main/java/org/apache/shardingsphere/proxy/frontend/mysql/auth/MySQLAuthenticationHandler.java",
+    "raw_url": "https://github.com/apache/shardingsphere/raw/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-proxy/shardingsphere-proxy-frontend/shardingsphere-proxy-frontend-mysql/src/main/java/org/apache/shardingsphere/proxy/frontend/mysql/auth/MySQLAuthenticationHandler.java",
+    "contents_url": "https://api.github.com/repos/apache/shardingsphere/contents/shardingsphere-proxy/shardingsphere-proxy-frontend/shardingsphere-proxy-frontend-mysql/src/main/java/org/apache/shardingsphere/proxy/frontend/mysql/auth/MySQLAuthenticationHandler.java?ref=3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd",
+    "patch": "@@ -22,14 +22,12 @@\n import org.apache.commons.codec.digest.DigestUtils;\n import org.apache.shardingsphere.db.protocol.mysql.constant.MySQLServerErrorCode;\n import org.apache.shardingsphere.db.protocol.mysql.packet.handshake.MySQLAuthPluginData;\n-import org.apache.shardingsphere.infra.metadata.auth.model.privilege.PrivilegeType;\n import org.apache.shardingsphere.infra.metadata.auth.model.privilege.ShardingSpherePrivilege;\n import org.apache.shardingsphere.infra.metadata.auth.model.user.Grantee;\n import org.apache.shardingsphere.infra.metadata.auth.model.user.ShardingSphereUser;\n import org.apache.shardingsphere.proxy.backend.context.ProxyContext;\n \n import java.util.Arrays;\n-import java.util.Collections;\n import java.util.Optional;\n \n /**\n@@ -57,11 +55,10 @@\n             return Optional.of(MySQLServerErrorCode.ER_ACCESS_DENIED_ERROR);\n         }\n         ShardingSpherePrivilege privilege = ProxyContext.getInstance().getMetaDataContexts().getAuthentication().getAuthentication().get(user.get());\n-        // TODO : privilege.getDataPrivilege().getSpecificPrivileges().containsKey(database) is bound to be replaced with privilege.hasPrivileges(schema, xxx) (xxx means the privileges needed here)\n-        if (!privilege.hasPrivileges(Collections.singletonList(PrivilegeType.SUPER)) && !privilege.getDatabasePrivilege().getSpecificPrivileges().containsKey(database)) {\n-            return Optional.of(MySQLServerErrorCode.ER_DBACCESS_DENIED_ERROR);\n+        if (null != privilege && privilege.hasPrivileges(database)) {\n+            return Optional.empty();\n         }\n-        return Optional.empty();\n+        return Optional.of(MySQLServerErrorCode.ER_DBACCESS_DENIED_ERROR);\n     }\n     \n     private boolean isPasswordRight(final String password, final byte[] authResponse) {"
+  },
+  {
+    "sha": "7ab414ad21a05efbb7e6b03ac55dca59e16de31d",
+    "filename": "shardingsphere-proxy/shardingsphere-proxy-frontend/shardingsphere-proxy-frontend-mysql/src/main/java/org/apache/shardingsphere/proxy/frontend/mysql/command/admin/initdb/MySQLComInitDbExecutor.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/apache/shardingsphere/blob/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-proxy/shardingsphere-proxy-frontend/shardingsphere-proxy-frontend-mysql/src/main/java/org/apache/shardingsphere/proxy/frontend/mysql/command/admin/initdb/MySQLComInitDbExecutor.java",
+    "raw_url": "https://github.com/apache/shardingsphere/raw/3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd/shardingsphere-proxy/shardingsphere-proxy-frontend/shardingsphere-proxy-frontend-mysql/src/main/java/org/apache/shardingsphere/proxy/frontend/mysql/command/admin/initdb/MySQLComInitDbExecutor.java",
+    "contents_url": "https://api.github.com/repos/apache/shardingsphere/contents/shardingsphere-proxy/shardingsphere-proxy-frontend/shardingsphere-proxy-frontend-mysql/src/main/java/org/apache/shardingsphere/proxy/frontend/mysql/command/admin/initdb/MySQLComInitDbExecutor.java?ref=3cfd72576f89cb8d5b0ec27c5ef49f3f437cd2fd",
+    "patch": "@@ -54,7 +54,6 @@\n     \n     private boolean isAuthorizedSchema(final String schema) {\n         Optional<ShardingSpherePrivilege> privilege = ProxyContext.getInstance().getMetaDataContexts().getAuthentication().findPrivilege(backendConnection.getGrantee());\n-        // TODO : privilege.hasPrivileges(schema, xxx) (xxx means the privileges needed here), rather than Collections.emptyList()\n-        return privilege.isPresent() && privilege.get().hasPrivileges(schema, Collections.emptyList());\n+        return privilege.map(shardingSpherePrivilege -> shardingSpherePrivilege.hasPrivileges(schema)).orElse(false);\n     }\n }"
+  }
+]

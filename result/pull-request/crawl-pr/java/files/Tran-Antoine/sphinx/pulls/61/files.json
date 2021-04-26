@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "2ef247075dc0c404959499d3de82fc3dfa5675a5",
+    "filename": "api/src/main/java/net/starype/quiz/api/database/ReadableRawMap.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/Tran-Antoine/sphinx/blob/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/database/ReadableRawMap.java",
+    "raw_url": "https://github.com/Tran-Antoine/sphinx/raw/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/database/ReadableRawMap.java",
+    "contents_url": "https://api.github.com/repos/Tran-Antoine/sphinx/contents/api/src/main/java/net/starype/quiz/api/database/ReadableRawMap.java?ref=c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208",
+    "patch": "@@ -1,11 +1,25 @@\n package net.starype.quiz.api.database;\n \n+import net.starype.quiz.api.util.StringUtils;\n+\n import java.util.Optional;\n \n public interface ReadableRawMap {\n \n     Optional<String> get(String key);\n \n+    default Optional<Integer> getInt(String key) {\n+        return StringUtils.mapOptionalNoThrow(get(key), Integer::valueOf);\n+    }\n+\n+    default Optional<Double> getDouble(String key) {\n+        return StringUtils.mapOptionalNoThrow(get(key), Double::valueOf);\n+    }\n+\n+    default Optional<Float> getFloat(String key) {\n+        return StringUtils.mapOptionalNoThrow(get(key), Float::valueOf);\n+    }\n+\n     default String getOrDefault(String key, String defaultValue) {\n         return get(key).orElse(defaultValue);\n     }"
+  },
+  {
+    "sha": "ef5df9c2cf968679388ecd529fdc03d0f3526872",
+    "filename": "api/src/main/java/net/starype/quiz/api/parser/BinaryLossMapper.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Tran-Antoine/sphinx/blob/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/BinaryLossMapper.java",
+    "raw_url": "https://github.com/Tran-Antoine/sphinx/raw/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/BinaryLossMapper.java",
+    "contents_url": "https://api.github.com/repos/Tran-Antoine/sphinx/contents/api/src/main/java/net/starype/quiz/api/parser/BinaryLossMapper.java?ref=c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208",
+    "patch": "@@ -17,7 +17,7 @@ public String getMapperName() {\n \r\n     @Override\r\n     public LossFunction map(ReadableRawMap config) {\r\n-        return new BinaryLossFunction(StringUtils.mapOptionalNoThrow(config.get(\"answer.evaluator.threshold\"), Double::parseDouble)\r\n+        return new BinaryLossFunction(config.getDouble(\"answer.evaluator.threshold\")\r\n                 .orElse(0.1));\r\n     }\r\n }\r"
+  },
+  {
+    "sha": "6416bbbe78183332196c3cd8a04403ec017eb8d9",
+    "filename": "api/src/main/java/net/starype/quiz/api/parser/DoubleEvaluatorMapper.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Tran-Antoine/sphinx/blob/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/DoubleEvaluatorMapper.java",
+    "raw_url": "https://github.com/Tran-Antoine/sphinx/raw/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/DoubleEvaluatorMapper.java",
+    "contents_url": "https://api.github.com/repos/Tran-Antoine/sphinx/contents/api/src/main/java/net/starype/quiz/api/parser/DoubleEvaluatorMapper.java?ref=c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208",
+    "patch": "@@ -28,7 +28,7 @@ public String getMapperName() {\n     @Override\r\n     public PartialEvaluator map(ReadableRawMap config) {\r\n         RangedAnswerFactory factory = new DoubleAnswerFactory()\r\n-                .withAcceptedRange(StringUtils.mapOptionalNoThrow(config.get(\"answer.evaluator.range\"), Float::parseFloat).orElse(0.1f))\r\n+                .withAcceptedRange(config.getDouble(\"answer.evaluator.range\").orElse(0.1))\r\n                 .withInterpolation(LOSS_FUNCTIONS_MATCHER.loadFromKey(\"answer.evaluator.interpolation\", config).orElse(new LinearLossFunction()));\r\n         return factory::createCorrectAnswer;\r\n     }\r"
+  },
+  {
+    "sha": "24926d8489c8a9f3ce2327e54ac034d16fd6bd48",
+    "filename": "api/src/main/java/net/starype/quiz/api/parser/IntegerEvaluatorMapper.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Tran-Antoine/sphinx/blob/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/IntegerEvaluatorMapper.java",
+    "raw_url": "https://github.com/Tran-Antoine/sphinx/raw/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/IntegerEvaluatorMapper.java",
+    "contents_url": "https://api.github.com/repos/Tran-Antoine/sphinx/contents/api/src/main/java/net/starype/quiz/api/parser/IntegerEvaluatorMapper.java?ref=c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208",
+    "patch": "@@ -20,7 +20,7 @@ public String getMapperName() {\n     @Override\r\n     public PartialEvaluator map(ReadableRawMap config) {\r\n         RangedAnswerFactory factory = new IntegerAnswerFactory()\r\n-                .withAcceptedRange(StringUtils.mapOptionalNoThrow(config.get(\"answer.evaluator.range\"), Float::parseFloat).orElse(0.1f))\r\n+                .withAcceptedRange(config.getFloat(\"answer.evaluator.range\").orElse(0.1f))\r\n                 .withInterpolation(DoubleEvaluatorMapper.LOSS_FUNCTIONS_MATCHER.loadFromKey(\"answer.evaluator.interpolation\", config).orElse(new LinearLossFunction()));\r\n         return factory::createCorrectAnswer;\r\n     }\r"
+  },
+  {
+    "sha": "266aa2ea2bd9cfc01c9458b944f621e686a377d0",
+    "filename": "api/src/main/java/net/starype/quiz/api/parser/QuestionParser.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 6,
+    "changes": 19,
+    "blob_url": "https://github.com/Tran-Antoine/sphinx/blob/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/QuestionParser.java",
+    "raw_url": "https://github.com/Tran-Antoine/sphinx/raw/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/QuestionParser.java",
+    "contents_url": "https://api.github.com/repos/Tran-Antoine/sphinx/contents/api/src/main/java/net/starype/quiz/api/parser/QuestionParser.java?ref=c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208",
+    "patch": "@@ -16,6 +16,7 @@\n \r\n import java.io.IOException;\r\n import java.util.*;\r\n+import java.util.function.Function;\r\n import java.util.stream.Collectors;\r\n \r\n /**\r\n@@ -86,9 +87,14 @@ public static Question parse(ReadableRawMap config) {\n     public static Set<DatabaseEntry> getDatabaseEntries(String content, DatabaseEntryFactory factory) {\r\n         CommentedConfig config = NightConfigParserUtils.loadConfigFromString(content);\r\n         Set<String> inlineEntriesSet = getKeysBySubPath(\"\", config.entrySet());\r\n-        Map<String, String> argMap = inlineEntriesSet.stream()\r\n-                .collect(Collectors.toMap(path -> path, path -> (config.get(path) instanceof List<?>) ?\r\n-                        StringUtils.pack(config.get(path)) : config.get(path)));\r\n+\r\n+        Function<String, String> func = path -> (config.get(path) instanceof List<?>)\r\n+                ? StringUtils.pack(config.get(path))\r\n+                : config.get(path);\r\n+\r\n+        Map<String, String> argMap = inlineEntriesSet\r\n+                .stream()\r\n+                .collect(Collectors.toMap(path -> path, func));\r\n \r\n         String rawText = config.get(\"question.text\");\r\n         String inlineTags = StringUtils.pack(config.get(\"tags\"));\r\n@@ -132,13 +138,13 @@ public static Question parseTOML(String filePath) throws IOException {\n \r\n     private static QuestionDifficulty loadDifficulty(CommentedConfig config) {\r\n         return DIFFICULTY_MATCHER\r\n-                .loadFromKey(DIFFICULTY, config::get)\r\n+                .loadFromKey(DIFFICULTY, ReadableConfig.of(config))\r\n                 .orElse(QuestionDifficulty.NORMAL);\r\n     }\r\n \r\n     private static AnswerProcessor loadProcessor(CommentedConfig config) {\r\n         return PROCESSOR_MATCHER\r\n-                .loadList(PROCESSORS, config::get)\r\n+                .loadList(PROCESSORS, ReadableConfig.of(config))\r\n                 .stream()\r\n                 .reduce(AnswerProcessor::combine)\r\n                 .orElse(IdentityProcessor.INSTANCE);\r\n@@ -154,7 +160,7 @@ private static AnswerProcessor loadProcessor(ReadableRawMap config) {\n \r\n     private static AnswerEvaluator loadEvaluator(CommentedConfig config, AnswerProcessor processor, List<String> rawAnswers) {\r\n         return EVALUATOR_MATCHER\r\n-                .loadFromKeyOrDefault(EVALUATOR_NAME, config::get)\r\n+                .loadFromKeyOrDefault(EVALUATOR_NAME, ReadableConfig.of(config))\r\n                 .create(StringUtils.map(rawAnswers, Answer::fromString), processor);\r\n     }\r\n \r\n@@ -164,4 +170,5 @@ private static AnswerEvaluator loadEvaluator(ReadableRawMap config, AnswerProces\n                 .loadFromValueOrDefault(rawData.get(\"answer.evaluator.name\"), config)\r\n                 .create(StringUtils.map(rawAnswers, Answer::fromString), processor);\r\n     }\r\n+\r\n }\r"
+  },
+  {
+    "sha": "553efe2b6364f0cb4cb4ccd9a94e5fa89f7a9619",
+    "filename": "api/src/main/java/net/starype/quiz/api/parser/ReadableConfig.java",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/Tran-Antoine/sphinx/blob/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/ReadableConfig.java",
+    "raw_url": "https://github.com/Tran-Antoine/sphinx/raw/c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208/api/src/main/java/net/starype/quiz/api/parser/ReadableConfig.java",
+    "contents_url": "https://api.github.com/repos/Tran-Antoine/sphinx/contents/api/src/main/java/net/starype/quiz/api/parser/ReadableConfig.java?ref=c42792a34d5cfd81b23e0c0bfd7058fd8cbc3208",
+    "patch": "@@ -0,0 +1,39 @@\n+package net.starype.quiz.api.parser;\n+\n+import com.electronwill.nightconfig.core.CommentedConfig;\n+import net.starype.quiz.api.database.ReadableRawMap;\n+\n+import java.util.Optional;\n+\n+public class ReadableConfig implements ReadableRawMap {\n+\n+    private final CommentedConfig config;\n+\n+    private ReadableConfig(CommentedConfig config) {\n+        this.config = config;\n+    }\n+\n+    public static ReadableRawMap of(CommentedConfig config) {\n+        return new ReadableConfig(config);\n+    }\n+\n+    @Override\n+    public Optional<String> get(String key) {\n+        return config.getOptional(key);\n+    }\n+\n+    @Override\n+    public Optional<Integer> getInt(String key) {\n+        return config.getOptional(key);\n+    }\n+\n+    @Override\n+    public Optional<Float> getFloat(String key) {\n+        return config.getOptional(key);\n+    }\n+\n+    @Override\n+    public Optional<Double> getDouble(String key) {\n+        return config.getOptional(key);\n+    }\n+}"
+  }
+]

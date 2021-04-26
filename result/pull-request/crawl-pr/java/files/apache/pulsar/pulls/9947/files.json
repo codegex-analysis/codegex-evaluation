@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "6752189bce40274cec3d6dcc7219b821bb3869a1",
+    "filename": "pulsar-functions/api-java/src/main/java/org/apache/pulsar/functions/api/Record.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/apache/pulsar/blob/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-functions/api-java/src/main/java/org/apache/pulsar/functions/api/Record.java",
+    "raw_url": "https://github.com/apache/pulsar/raw/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-functions/api-java/src/main/java/org/apache/pulsar/functions/api/Record.java",
+    "contents_url": "https://api.github.com/repos/apache/pulsar/contents/pulsar-functions/api-java/src/main/java/org/apache/pulsar/functions/api/Record.java?ref=0471d077e29aa9dbb5becb354229b39dac561b0b",
+    "patch": "@@ -77,6 +77,15 @@\n         return Optional.empty();\n     }\n \n+    /**\n+     * Retrieves the partition number if any of the record.\n+     *\n+     * @return The partition number\n+     */\n+    default Optional<Integer> getPartitionNumber() {\n+        return Optional.empty();\n+    }\n+\n     /**\n      * Retrieves the sequence of the record from a source partition.\n      *"
+  },
+  {
+    "sha": "98013449b301d50974f4c80aea8a45dacc7d0beb",
+    "filename": "pulsar-functions/instance/src/main/java/org/apache/pulsar/functions/instance/SinkRecord.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/pulsar/blob/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-functions/instance/src/main/java/org/apache/pulsar/functions/instance/SinkRecord.java",
+    "raw_url": "https://github.com/apache/pulsar/raw/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-functions/instance/src/main/java/org/apache/pulsar/functions/instance/SinkRecord.java",
+    "contents_url": "https://api.github.com/repos/apache/pulsar/contents/pulsar-functions/instance/src/main/java/org/apache/pulsar/functions/instance/SinkRecord.java?ref=0471d077e29aa9dbb5becb354229b39dac561b0b",
+    "patch": "@@ -63,6 +63,11 @@ public T getValue() {\n         return sourceRecord.getPartitionId();\n     }\n \n+    @Override\n+    public Optional<Integer> getPartitionNumber() {\n+        return sourceRecord.getPartitionNumber();\n+    }\n+\n     @Override\n     public Optional<Long> getRecordSequence() {\n         return sourceRecord.getRecordSequence();"
+  },
+  {
+    "sha": "9c8fd885edcf0b046e57a5252153db7462f6e565",
+    "filename": "pulsar-functions/instance/src/main/java/org/apache/pulsar/functions/source/PulsarRecord.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/pulsar/blob/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-functions/instance/src/main/java/org/apache/pulsar/functions/source/PulsarRecord.java",
+    "raw_url": "https://github.com/apache/pulsar/raw/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-functions/instance/src/main/java/org/apache/pulsar/functions/source/PulsarRecord.java",
+    "contents_url": "https://api.github.com/repos/apache/pulsar/contents/pulsar-functions/instance/src/main/java/org/apache/pulsar/functions/source/PulsarRecord.java?ref=0471d077e29aa9dbb5becb354229b39dac561b0b",
+    "patch": "@@ -61,6 +61,11 @@\n         return Optional.of(topicName);\n     }\n \n+    @Override\n+    public Optional<Integer> getPartitionNumber() {\n+        return Optional.of(partition);\n+    }\n+\n     @Override\n     public Optional<String> getPartitionId() {\n         return Optional.of(String.format(\"%s-%s\", topicName, partition));"
+  },
+  {
+    "sha": "6ac595caef728ac57640bad78128245b807c0a15",
+    "filename": "pulsar-io/kafka-connect-adaptor/src/main/java/org/apache/pulsar/io/kafka/connect/AbstractKafkaConnectSource.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/apache/pulsar/blob/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-io/kafka-connect-adaptor/src/main/java/org/apache/pulsar/io/kafka/connect/AbstractKafkaConnectSource.java",
+    "raw_url": "https://github.com/apache/pulsar/raw/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-io/kafka-connect-adaptor/src/main/java/org/apache/pulsar/io/kafka/connect/AbstractKafkaConnectSource.java",
+    "contents_url": "https://api.github.com/repos/apache/pulsar/contents/pulsar-io/kafka-connect-adaptor/src/main/java/org/apache/pulsar/io/kafka/connect/AbstractKafkaConnectSource.java?ref=0471d077e29aa9dbb5becb354229b39dac561b0b",
+    "patch": "@@ -183,13 +183,16 @@ public void close() {\n         Optional<String> partitionId;\n         @Getter\n         Optional<String> destinationTopic;\n+        @Getter\n+        Optional<Integer> partitionNumber;\n \n         KafkaSchemaWrappedSchema keySchema;\n \n         KafkaSchemaWrappedSchema valueSchema;\n \n         AbstractKafkaSourceRecord(SourceRecord srcRecord) {\n             this.destinationTopic = Optional.of(\"persistent://\"+topicNamespace + \"/\" + srcRecord.topic());\n+            this.partitionNumber = Optional.ofNullable(srcRecord.kafkaPartition());\n         }\n \n         @Override"
+  },
+  {
+    "sha": "57b2a64a438fcca8df6e7a7edb409090801db0fe",
+    "filename": "pulsar-io/kafka/src/main/java/org/apache/pulsar/io/kafka/KafkaAbstractSource.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/pulsar/blob/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-io/kafka/src/main/java/org/apache/pulsar/io/kafka/KafkaAbstractSource.java",
+    "raw_url": "https://github.com/apache/pulsar/raw/0471d077e29aa9dbb5becb354229b39dac561b0b/pulsar-io/kafka/src/main/java/org/apache/pulsar/io/kafka/KafkaAbstractSource.java",
+    "contents_url": "https://api.github.com/repos/apache/pulsar/contents/pulsar-io/kafka/src/main/java/org/apache/pulsar/io/kafka/KafkaAbstractSource.java?ref=0471d077e29aa9dbb5becb354229b39dac561b0b",
+    "patch": "@@ -178,6 +178,11 @@ public KafkaRecord(ConsumerRecord<String,?> record, V value, Schema<V> schema) {\n             return Optional.of(Integer.toString(record.partition()));\n         }\n \n+        @Override\n+        public Optional<Integer> getPartitionNumber() {\n+            return Optional.of(record.partition());\n+        }\n+\n         @Override\n         public Optional<Long> getRecordSequence() {\n             return Optional.of(record.offset());"
+  }
+]

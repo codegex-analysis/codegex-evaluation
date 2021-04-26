@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "94d07d5b4080e7bfb55af5908a83eeecfe0af950",
+    "filename": "ruta-core/src/main/java/org/apache/uima/ruta/rule/WildCardRuleElement.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/uima-ruta/blob/accfec3dd26536788940d0d49935d9ef4b627062/ruta-core/src/main/java/org/apache/uima/ruta/rule/WildCardRuleElement.java",
+    "raw_url": "https://github.com/apache/uima-ruta/raw/accfec3dd26536788940d0d49935d9ef4b627062/ruta-core/src/main/java/org/apache/uima/ruta/rule/WildCardRuleElement.java",
+    "contents_url": "https://api.github.com/repos/apache/uima-ruta/contents/ruta-core/src/main/java/org/apache/uima/ruta/rule/WildCardRuleElement.java?ref=accfec3dd26536788940d0d49935d9ef4b627062",
+    "patch": "@@ -588,6 +588,7 @@ private ComposedRuleElementMatch getContainerMatchOfNextElement(\n             }\r\n           }\r\n         } else {\r\n+          // uimaj-core 3.2.0\r\n           if (!after) {\r\n             result.moveToPrevious();\r\n           }\r"
+  },
+  {
+    "sha": "17756039bc21abf0285d45a274a301bea2a3f0fb",
+    "filename": "ruta-core/src/test/java/org/apache/uima/ruta/rule/WildCardInWindowTest.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 2,
+    "changes": 26,
+    "blob_url": "https://github.com/apache/uima-ruta/blob/accfec3dd26536788940d0d49935d9ef4b627062/ruta-core/src/test/java/org/apache/uima/ruta/rule/WildCardInWindowTest.java",
+    "raw_url": "https://github.com/apache/uima-ruta/raw/accfec3dd26536788940d0d49935d9ef4b627062/ruta-core/src/test/java/org/apache/uima/ruta/rule/WildCardInWindowTest.java",
+    "contents_url": "https://api.github.com/repos/apache/uima-ruta/contents/ruta-core/src/test/java/org/apache/uima/ruta/rule/WildCardInWindowTest.java?ref=accfec3dd26536788940d0d49935d9ef4b627062",
+    "patch": "@@ -46,14 +46,16 @@ public void testSingleBothDirections() throws Exception {\n   public void testMultiMidOut() throws Exception {\n     String document = \". A x 1 1 : x 2 % 3 x ; . A x B 1 C 1 : x 4 % 5 x ; .\";\n     String script = \"\";\n-    script += \"PERIOD #{-> T1} PERIOD;\";\n-    script += \"T1 -> {CW{-> T4} # @COLON # NUM{-> T2} SPECIAL NUM{-> T3} # SEMICOLON;};\";\n+    script += \"PERIOD ANY+{-PARTOF(PERIOD) -> T1} PERIOD;\";\n+    script += \"T1 -> {CW{-> T4} # @COLON;};\";\n+    script += \"T1 -> {CW{-> T5} # @COLON # NUM{-> T2} SPECIAL NUM{-> T3} # SEMICOLON;};\";\n     CAS cas = RutaTestUtils.getCAS(document);\n     Ruta.apply(cas, script);\n \n     RutaTestUtils.assertAnnotationsEquals(cas, 2, 2, \"2\", \"4\");\n     RutaTestUtils.assertAnnotationsEquals(cas, 3, 2, \"3\", \"5\");\n     RutaTestUtils.assertAnnotationsEquals(cas, 4, 2, \"A\", \"C\");\n+    RutaTestUtils.assertAnnotationsEquals(cas, 5, 2, \"A\", \"C\");\n \n   }\n \n@@ -106,4 +108,24 @@ public void testCoveredRightToLeftNoWindow() throws Exception {\n     RutaTestUtils.assertAnnotationsEquals(cas, 3, 1, \"some text\");\n   }\n \n+  @Test\n+  public void testRightToLeftCombination() throws Exception {\n+    String document = \"bla . x x x A x x 1 : x x x 2 x x . bla\";\n+\n+    // Both NUM/T3 should be removed\n+    String script = \"\";\n+    script += \"PERIOD ANY+{-PARTOF(PERIOD) -> T1} PERIOD;\";\n+    script += \"CW{->T2};\";\n+    script += \"NUM{->T3};\";\n+    script += \"T1->{\";\n+    script += \"T2 # n1:T3 ANY[0,5]{-PARTOF(T3)} COLON # n2:@T3{-> UNMARK(n2)};\";\n+    script += \"T2 # n:T3{ -> UNMARK(n)} COLON;\";\n+    script += \"};\";\n+\n+    CAS cas = RutaTestUtils.getCAS(document);\n+    Ruta.apply(cas, script);\n+\n+    RutaTestUtils.assertAnnotationsEquals(cas, 3, 0);\n+  }\n+\n }"
+  },
+  {
+    "sha": "d9e1765551ec024ea14b32706c2f77edf89b146d",
+    "filename": "ruta-parent/pom.xml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 11,
+    "changes": 16,
+    "blob_url": "https://github.com/apache/uima-ruta/blob/accfec3dd26536788940d0d49935d9ef4b627062/ruta-parent/pom.xml",
+    "raw_url": "https://github.com/apache/uima-ruta/raw/accfec3dd26536788940d0d49935d9ef4b627062/ruta-parent/pom.xml",
+    "contents_url": "https://api.github.com/repos/apache/uima-ruta/contents/ruta-parent/pom.xml?ref=accfec3dd26536788940d0d49935d9ef4b627062",
+    "patch": "@@ -114,20 +114,14 @@\n       (http://www.famfamfam.com/lab/icons/silk/), licensed under the\r\n       Creative Commons Attribution 3.0 License.\r\n     </postNoticeText>\r\n-    <uimaVersion>3.1.1</uimaVersion>\r\n-    <uimafit-version>3.1.0</uimafit-version>\r\n-    <spring-version>4.3.22.RELEASE</spring-version>\r\n-    <!--\r\n-      BACKWARD_COMPATIBLE_IMPLEMENTER - patch version (=.=.+)\r\n-      BACKWARD_COMPATIBLE_USER - minor version (=.+.0)\r\n-      NON_BACKWARD_COMPATIBLE - major version (+.0.0)\r\n-    -->\r\n-\r\n-    <compat.level>NON_BACKWARD_COMPATIBLE</compat.level>\r\n-    <compat.previous.version>2.6.0</compat.previous.version>\r\n+    <uimaVersion>3.2.0-SNAPSHOT</uimaVersion>\r\n+    <uimafit-version>3.2.0-SNAPSHOT</uimafit-version>\r\n+    <spring-version>4.3.30.RELEASE</spring-version>\r\n+    \r\n     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\r\n     <maven.compiler.target>1.8</maven.compiler.target>\r\n     <maven.compiler.source>1.8</maven.compiler.source>\r\n+    \r\n     <api_check_oldVersion>2.6.1</api_check_oldVersion>\r\n   </properties>\r\n \r"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "67e15d4602e758498401e8c92e7a8d911d69c156",
+    "filename": "nab-telemetry/src/main/java/ru/hh/nab/telemetry/NabTelemetryConfig.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 6,
+    "changes": 14,
+    "blob_url": "https://github.com/hhru/nuts-and-bolts/blob/dfdd2a249725e70b2b2c19e57c7cd7e8d9123393/nab-telemetry/src/main/java/ru/hh/nab/telemetry/NabTelemetryConfig.java",
+    "raw_url": "https://github.com/hhru/nuts-and-bolts/raw/dfdd2a249725e70b2b2c19e57c7cd7e8d9123393/nab-telemetry/src/main/java/ru/hh/nab/telemetry/NabTelemetryConfig.java",
+    "contents_url": "https://api.github.com/repos/hhru/nuts-and-bolts/contents/nab-telemetry/src/main/java/ru/hh/nab/telemetry/NabTelemetryConfig.java?ref=dfdd2a249725e70b2b2c19e57c7cd7e8d9123393",
+    "patch": "@@ -30,8 +30,7 @@ public OpenTelemetry telemetry(FileSettings fileSettings, SdkTracerProvider trac\n     if (fileSettings.getBoolean(\"opentelemetry.enabled\", false)) {\n       openTelemetrySdkBuilder.setTracerProvider(tracerProvider);\n     }\n-//    OpenTelemetrySdk openTelemetrySdk = openTelemetrySdkBuilder.buildAndRegisterGlobal(); //todo\n-    return openTelemetrySdkBuilder.build();\n+    return openTelemetrySdkBuilder.buildAndRegisterGlobal();\n   }\n \n   @Bean(destroyMethod = \"shutdown\")\n@@ -61,9 +60,9 @@ TelemetryPropagator telemetryPropagator(OpenTelemetry openTelemetry) {\n   }\n \n   @Bean\n-  TelemetryFilter telemetryFilter(OpenTelemetry openTelemetry, TelemetryPropagator telemetryPropagator) {\n+  TelemetryFilter telemetryFilter(OpenTelemetry openTelemetry, TelemetryPropagator telemetryPropagator, FileSettings fileSettings) {\n     Tracer tracer = openTelemetry.getTracer(\"nab\");\n-    return new TelemetryFilter(tracer, telemetryPropagator);\n+    return new TelemetryFilter(tracer, telemetryPropagator, fileSettings.getBoolean(\"opentelemetry.enabled\", false));\n   }\n \n   @Bean\n@@ -72,10 +71,13 @@ IdGenerator idGenerator(HttpClientContextThreadLocalSupplier httpClientContextSu\n   }\n \n   @Bean\n-  TelemetryProcessorFactory telemetryProcessorFactory(OpenTelemetry openTelemetry, HttpClientContextThreadLocalSupplier contextSupplier) {\n+  TelemetryProcessorFactory telemetryProcessorFactory(OpenTelemetry openTelemetry, HttpClientContextThreadLocalSupplier contextSupplier,\n+                                                      FileSettings fileSettings) {\n     TelemetryProcessorFactory telemetryRequestDebug = new TelemetryProcessorFactory(openTelemetry.getTracer(\"jclient\"),\n         openTelemetry.getPropagators().getTextMapPropagator());\n-    contextSupplier.registerRequestDebugSupplier(telemetryRequestDebug::createRequestDebug);\n+    if (fileSettings.getBoolean(\"opentelemetry.enabled\", false)) {\n+      contextSupplier.registerRequestDebugSupplier(telemetryRequestDebug::createRequestDebug);\n+    }\n     return telemetryRequestDebug;\n   }\n "
+  },
+  {
+    "sha": "6daf54cb242924885ed7ca14468a804be2db6ba2",
+    "filename": "nab-telemetry/src/main/java/ru/hh/nab/telemetry/TelemetryFilter.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/hhru/nuts-and-bolts/blob/dfdd2a249725e70b2b2c19e57c7cd7e8d9123393/nab-telemetry/src/main/java/ru/hh/nab/telemetry/TelemetryFilter.java",
+    "raw_url": "https://github.com/hhru/nuts-and-bolts/raw/dfdd2a249725e70b2b2c19e57c7cd7e8d9123393/nab-telemetry/src/main/java/ru/hh/nab/telemetry/TelemetryFilter.java",
+    "contents_url": "https://api.github.com/repos/hhru/nuts-and-bolts/contents/nab-telemetry/src/main/java/ru/hh/nab/telemetry/TelemetryFilter.java?ref=dfdd2a249725e70b2b2c19e57c7cd7e8d9123393",
+    "patch": "@@ -30,15 +30,20 @@\n   private static final String SERVER_URL = \"Server-url\";\n   private final TelemetryPropagator telemetryPropagator;\n   private final Tracer tracer;\n+  private final boolean enabled;\n \n \n-  public TelemetryFilter(Tracer tracer, TelemetryPropagator telemetryPropagator) {\n+  public TelemetryFilter(Tracer tracer, TelemetryPropagator telemetryPropagator, boolean enabled) {\n     this.telemetryPropagator = telemetryPropagator;\n     this.tracer = tracer;\n+    this.enabled = enabled;\n   }\n \n   @Override\n   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {\n+    if (!enabled) {\n+      return;\n+    }\n     Map<String, List<String>> requestHeadersMap = getRequestHeadersMap(request);\n     Context telemetryContext = telemetryPropagator.getTelemetryContext(Context.current(), requestHeadersMap);\n     Span span = tracer.spanBuilder(request.getServerName())"
+  }
+]

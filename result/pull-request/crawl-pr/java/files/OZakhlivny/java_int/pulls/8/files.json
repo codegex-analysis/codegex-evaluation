@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "18322e2acb2fb22cc39a3bf3b0586bbf7850b06a",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/OZakhlivny/java_int/blob/1b4dcb748ca298875db0c831483f40566b1a58b0/pom.xml",
+    "raw_url": "https://github.com/OZakhlivny/java_int/raw/1b4dcb748ca298875db0c831483f40566b1a58b0/pom.xml",
+    "contents_url": "https://api.github.com/repos/OZakhlivny/java_int/contents/pom.xml?ref=1b4dcb748ca298875db0c831483f40566b1a58b0",
+    "patch": "@@ -58,6 +58,11 @@\n             <groupId>org.flywaydb</groupId>\n             <artifactId>flyway-core</artifactId>\n         </dependency>\n+        <dependency>\n+            <groupId>org.springframework.security</groupId>\n+            <artifactId>spring-security-core</artifactId>\n+            <version>5.3.4.RELEASE</version>\n+        </dependency>\n     </dependencies>\n \n     <properties>"
+  },
+  {
+    "sha": "6b9fe4ddb1b98d73a59616b5bed847e7c3e60f08",
+    "filename": "src/main/java/lesson8/entities/Authority.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/OZakhlivny/java_int/blob/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/entities/Authority.java",
+    "raw_url": "https://github.com/OZakhlivny/java_int/raw/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/entities/Authority.java",
+    "contents_url": "https://api.github.com/repos/OZakhlivny/java_int/contents/src/main/java/lesson8/entities/Authority.java?ref=1b4dcb748ca298875db0c831483f40566b1a58b0",
+    "patch": "@@ -0,0 +1,25 @@\n+package lesson8.entities;\n+\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+\n+import javax.persistence.*;\n+import java.util.Collection;\n+\n+@Entity\n+@Data\n+@NoArgsConstructor\n+@Table(name = \"authorities\")\n+public class Authority {\n+\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    @Column(name = \"id\")\n+    private Long id;\n+\n+    @Column(name = \"name\")\n+    private String name;\n+\n+    @ManyToMany(mappedBy = \"authorities\")\n+    private Collection<Role> roles;\n+}"
+  },
+  {
+    "sha": "a3ed81ffd67438067def3d9dc6b916f64c6704bd",
+    "filename": "src/main/java/lesson8/entities/Role.java",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/OZakhlivny/java_int/blob/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/entities/Role.java",
+    "raw_url": "https://github.com/OZakhlivny/java_int/raw/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/entities/Role.java",
+    "contents_url": "https://api.github.com/repos/OZakhlivny/java_int/contents/src/main/java/lesson8/entities/Role.java?ref=1b4dcb748ca298875db0c831483f40566b1a58b0",
+    "patch": "@@ -0,0 +1,37 @@\n+package lesson8.entities;\n+\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+\n+import javax.persistence.*;\n+import java.util.Collection;\n+\n+@Entity\n+@Data\n+@NoArgsConstructor\n+@Table(name = \"roles\")\n+public class Role {\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    @Column(name = \"id\")\n+    private Long id;\n+\n+    @Column(name = \"name\")\n+    private String name;\n+\n+    @ManyToMany(mappedBy = \"roles\")\n+    private Collection<User> users;\n+\n+    @ManyToMany\n+    @JoinTable(\n+            name = \"roles_authorities\",\n+            joinColumns = @JoinColumn(\n+                    name = \"role_id\"),\n+            inverseJoinColumns = @JoinColumn(\n+                    name = \"authority_id\"))\n+    private Collection<Authority> authorities;\n+\n+    public Role(String name) {\n+        this.name = name;\n+    }\n+}"
+  },
+  {
+    "sha": "34f0c9331e80d9efe8ec3667a1a18fdaae5d5cf8",
+    "filename": "src/main/java/lesson8/entities/User.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/OZakhlivny/java_int/blob/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/entities/User.java",
+    "raw_url": "https://github.com/OZakhlivny/java_int/raw/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/entities/User.java",
+    "contents_url": "https://api.github.com/repos/OZakhlivny/java_int/contents/src/main/java/lesson8/entities/User.java?ref=1b4dcb748ca298875db0c831483f40566b1a58b0",
+    "patch": "@@ -0,0 +1,44 @@\n+package lesson8.entities;\n+\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+\n+import javax.persistence.*;\n+import java.util.Collection;\n+\n+@Entity\n+@Data\n+@NoArgsConstructor\n+@Table(name = \"users\")\n+public class User {\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    @Column(name = \"id\")\n+    private Long id;\n+\n+    @Column(name = \"username\")\n+    private String username;\n+\n+    @Column(name = \"password\")\n+    private String password;\n+\n+    @Column(name = \"name\")\n+    private String name;\n+\n+    @Column(name = \"email\")\n+    private String email;\n+\n+    @ManyToMany(fetch = FetchType.LAZY)\n+    @JoinTable(name = \"users_roles\",\n+            joinColumns = @JoinColumn(name = \"user_id\"),\n+            inverseJoinColumns = @JoinColumn(name = \"role_id\"))\n+    private Collection<Role> roles;\n+\n+    public User(String username, String password, String name, String email, Collection<Role> roles) {\n+        this.username = username;\n+        this.password = password;\n+        this.name = name;\n+        this.email = email;\n+        this.roles = roles;\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "a8055edd89be6d34c360d8e7312942164fe3a68d",
+    "filename": "src/main/java/lesson8/repositories/AuthorityRepository.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/OZakhlivny/java_int/blob/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/repositories/AuthorityRepository.java",
+    "raw_url": "https://github.com/OZakhlivny/java_int/raw/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/repositories/AuthorityRepository.java",
+    "contents_url": "https://api.github.com/repos/OZakhlivny/java_int/contents/src/main/java/lesson8/repositories/AuthorityRepository.java?ref=1b4dcb748ca298875db0c831483f40566b1a58b0",
+    "patch": "@@ -0,0 +1,11 @@\n+package lesson8.repositories;\n+\n+import lesson8.entities.Authority;\n+import org.springframework.data.repository.CrudRepository;\n+import org.springframework.stereotype.Repository;\n+\n+\n+@Repository\n+public interface AuthorityRepository extends CrudRepository<Authority, Long> {\n+    Authority findOneByName(String name);\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "91759803b7fd4e57f89f3114faceb2e5190e4ee4",
+    "filename": "src/main/java/lesson8/repositories/RoleRepository.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/OZakhlivny/java_int/blob/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/repositories/RoleRepository.java",
+    "raw_url": "https://github.com/OZakhlivny/java_int/raw/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/repositories/RoleRepository.java",
+    "contents_url": "https://api.github.com/repos/OZakhlivny/java_int/contents/src/main/java/lesson8/repositories/RoleRepository.java?ref=1b4dcb748ca298875db0c831483f40566b1a58b0",
+    "patch": "@@ -0,0 +1,11 @@\n+package lesson8.repositories;\n+\n+import org.springframework.data.repository.CrudRepository;\n+import org.springframework.stereotype.Repository;\n+\n+import javax.management.relation.Role;\n+\n+@Repository\n+public interface RoleRepository extends CrudRepository<Role, Long> {\n+    Role findOneByName(String name);\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "c25b3b8299c904245df8bd5feea42a8818c72d8d",
+    "filename": "src/main/java/lesson8/repositories/UserRepository.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/OZakhlivny/java_int/blob/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/repositories/UserRepository.java",
+    "raw_url": "https://github.com/OZakhlivny/java_int/raw/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/repositories/UserRepository.java",
+    "contents_url": "https://api.github.com/repos/OZakhlivny/java_int/contents/src/main/java/lesson8/repositories/UserRepository.java?ref=1b4dcb748ca298875db0c831483f40566b1a58b0",
+    "patch": "@@ -0,0 +1,10 @@\n+package lesson8.repositories;\n+\n+import lesson8.entities.User;\n+import org.springframework.data.repository.CrudRepository;\n+import org.springframework.stereotype.Repository;\n+\n+@Repository\n+public interface UserRepository extends CrudRepository<User, Long> {\n+    User findByUsername(String username);\n+}"
+  },
+  {
+    "sha": "9f98ac506b49dc9c38333fd46f29a36a3cef982c",
+    "filename": "src/main/java/lesson8/services/UserService.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/OZakhlivny/java_int/blob/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/services/UserService.java",
+    "raw_url": "https://github.com/OZakhlivny/java_int/raw/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/services/UserService.java",
+    "contents_url": "https://api.github.com/repos/OZakhlivny/java_int/contents/src/main/java/lesson8/services/UserService.java?ref=1b4dcb748ca298875db0c831483f40566b1a58b0",
+    "patch": "@@ -0,0 +1,8 @@\n+package lesson8.services;\n+\n+import lesson8.entities.User;\n+import org.springframework.security.core.userdetails.UserDetailsService;\n+\n+public interface UserService extends UserDetailsService {\n+    User findByUsername(String username);\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "de9c96a9281e7536bacd2c429efa9fea02f203b4",
+    "filename": "src/main/java/lesson8/services/UserServiceImp.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/OZakhlivny/java_int/blob/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/services/UserServiceImp.java",
+    "raw_url": "https://github.com/OZakhlivny/java_int/raw/1b4dcb748ca298875db0c831483f40566b1a58b0/src/main/java/lesson8/services/UserServiceImp.java",
+    "contents_url": "https://api.github.com/repos/OZakhlivny/java_int/contents/src/main/java/lesson8/services/UserServiceImp.java?ref=1b4dcb748ca298875db0c831483f40566b1a58b0",
+    "patch": "@@ -0,0 +1,34 @@\n+package lesson8.services;\n+\n+import lesson8.entities.Role;\n+import lesson8.entities.User;\n+import lesson8.repositories.UserRepository;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.security.core.GrantedAuthority;\n+import org.springframework.security.core.userdetails.UserDetails;\n+import org.springframework.security.core.userdetails.UsernameNotFoundException;\n+\n+import java.util.Collection;\n+\n+public class UserServiceImp implements UserService{\n+    @Autowired\n+    private UserRepository userRepository;\n+\n+    @Override\n+    public User findByUsername(String username) {\n+        return userRepository.findByUsername(username);\n+    }\n+\n+    @Override\n+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {\n+        User user = userRepository.findByUsername(username);\n+        if (user == null) {\n+            throw new UsernameNotFoundException(\"Invalid username.\");\n+        }\n+        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),\n+                getUserAuthorities(user.getRoles()));\n+    }\n+\n+    private Collection<? extends GrantedAuthority> getUserAuthorities(Collection<Role> roles) {\n+    }\n+}"
+  }
+]

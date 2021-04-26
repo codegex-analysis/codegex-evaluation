@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "3ac8fb227ab5f2ae137d06ded8e2efa6776c8133",
+    "filename": "src/main/java/core/basesyntax/PasswordValidator.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 2,
+    "changes": 12,
+    "blob_url": "https://github.com/mate-academy/jv-checked-exception/blob/fa44344a0ee24cc64ba02a1d8da6fe6d5872dae6/src/main/java/core/basesyntax/PasswordValidator.java",
+    "raw_url": "https://github.com/mate-academy/jv-checked-exception/raw/fa44344a0ee24cc64ba02a1d8da6fe6d5872dae6/src/main/java/core/basesyntax/PasswordValidator.java",
+    "contents_url": "https://api.github.com/repos/mate-academy/jv-checked-exception/contents/src/main/java/core/basesyntax/PasswordValidator.java?ref=fa44344a0ee24cc64ba02a1d8da6fe6d5872dae6",
+    "patch": "@@ -1,7 +1,15 @@\n package core.basesyntax;\n \n+import core.basesyntax.exception.PasswordValidationException;\n+\n public class PasswordValidator {\n-    public boolean validate(String password, String repeatPassword) {\n-        return false;\n+    protected static boolean validate(String password, String repeatPassword)\n+            throws PasswordValidationException {\n+        if (password != null && repeatPassword != null) {\n+            if (password.equals(repeatPassword) && password.length() >= 10) {\n+                return true;\n+            }\n+        }\n+        throw new PasswordValidationException(\"Wrong passwords\");\n     }\n }"
+  },
+  {
+    "sha": "a17bb8775ab41153dd5a66dc146e29013130467b",
+    "filename": "src/main/java/core/basesyntax/UserService.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/mate-academy/jv-checked-exception/blob/fa44344a0ee24cc64ba02a1d8da6fe6d5872dae6/src/main/java/core/basesyntax/UserService.java",
+    "raw_url": "https://github.com/mate-academy/jv-checked-exception/raw/fa44344a0ee24cc64ba02a1d8da6fe6d5872dae6/src/main/java/core/basesyntax/UserService.java",
+    "contents_url": "https://api.github.com/repos/mate-academy/jv-checked-exception/contents/src/main/java/core/basesyntax/UserService.java?ref=fa44344a0ee24cc64ba02a1d8da6fe6d5872dae6",
+    "patch": "@@ -1,8 +1,16 @@\n package core.basesyntax;\n \n+import core.basesyntax.exception.PasswordValidationException;\n+\n public class UserService {\n     public void registerUser(User user) {\n-\n+        try {\n+            if (PasswordValidator.validate(user.getPassword(), user.getRepeatPassword())) {\n+                saveUser(user);\n+            }\n+        } catch (PasswordValidationException e) {\n+            System.out.println(\"Your passwords are incorrect. Try again.\");\n+        }\n     }\n \n     public void saveUser(User user) {"
+  },
+  {
+    "sha": "eccb1a00d3e77435e44cda80375b658de4926c75",
+    "filename": "src/main/java/core/basesyntax/exception/PasswordValidationException.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/mate-academy/jv-checked-exception/blob/fa44344a0ee24cc64ba02a1d8da6fe6d5872dae6/src/main/java/core/basesyntax/exception/PasswordValidationException.java",
+    "raw_url": "https://github.com/mate-academy/jv-checked-exception/raw/fa44344a0ee24cc64ba02a1d8da6fe6d5872dae6/src/main/java/core/basesyntax/exception/PasswordValidationException.java",
+    "contents_url": "https://api.github.com/repos/mate-academy/jv-checked-exception/contents/src/main/java/core/basesyntax/exception/PasswordValidationException.java?ref=fa44344a0ee24cc64ba02a1d8da6fe6d5872dae6",
+    "patch": "@@ -0,0 +1,7 @@\n+package core.basesyntax.exception;\n+\n+public class PasswordValidationException extends Exception {\n+    public PasswordValidationException(String message) {\n+        super(message);\n+    }\n+}"
+  }
+]

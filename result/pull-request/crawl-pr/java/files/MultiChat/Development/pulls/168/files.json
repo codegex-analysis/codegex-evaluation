@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "aa7abc09cf419e2e333e361fef7936d8c50f12bd",
+    "filename": "multichat/src/main/java/xyz/olivermartin/multichat/bungee/Events.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/MultiChat/Development/blob/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/java/xyz/olivermartin/multichat/bungee/Events.java",
+    "raw_url": "https://github.com/MultiChat/Development/raw/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/java/xyz/olivermartin/multichat/bungee/Events.java",
+    "contents_url": "https://api.github.com/repos/MultiChat/Development/contents/multichat/src/main/java/xyz/olivermartin/multichat/bungee/Events.java?ref=a3360edc9a2483c358a284ff9656b32804fd8ed8",
+    "patch": "@@ -605,6 +605,11 @@ public void onLogout(PlayerDisconnectEvent event) {\n \r\n \t\tif ( ConfigManager.getInstance().getHandler(\"joinmessages.yml\").getConfig().getBoolean(\"showquit\") == true ) {\r\n \r\n+\t\t\t// PremiumVanish support, return as early as possible to avoid loading unnecessary resources\r\n+\t\t\tif (MultiChat.premiumVanish && MultiChat.hideVanishedStaffInLeave && BungeeVanishAPI.isInvisible(player)) {\r\n+\t\t\t\treturn;\r\n+\t\t\t}\r\n+\r\n \t\t\tString joinformat = ConfigManager.getInstance().getHandler(\"joinmessages.yml\").getConfig().getString(\"networkquit\");\r\n \t\t\tString silentformat = ConfigManager.getInstance().getHandler(\"joinmessages.yml\").getConfig().getString(\"silentquit\");\r\n \r"
+  },
+  {
+    "sha": "10597d6e6478b0b27ba10f9dfa2767f962f2a364",
+    "filename": "multichat/src/main/java/xyz/olivermartin/multichat/bungee/MultiChat.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/MultiChat/Development/blob/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/java/xyz/olivermartin/multichat/bungee/MultiChat.java",
+    "raw_url": "https://github.com/MultiChat/Development/raw/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/java/xyz/olivermartin/multichat/bungee/MultiChat.java",
+    "contents_url": "https://api.github.com/repos/MultiChat/Development/contents/multichat/src/main/java/xyz/olivermartin/multichat/bungee/MultiChat.java?ref=a3360edc9a2483c358a284ff9656b32804fd8ed8",
+    "patch": "@@ -101,6 +101,7 @@\n \tpublic static boolean hideVanishedStaffInMsg = true;\r\n \tpublic static boolean hideVanishedStaffInStaffList = true;\r\n \tpublic static boolean hideVanishedStaffInJoin = true;\r\n+\tpublic static boolean hideVanishedStaffInLeave = true;\r\n \r\n \tpublic static List<String> legacyServers = new ArrayList<String>();\r\n \r\n@@ -383,6 +384,7 @@ public void onEnable() {\n \t\t\t\t\thideVanishedStaffInMsg = configYML.getBoolean(\"premium_vanish.prevent_message\");\r\n \t\t\t\t\thideVanishedStaffInStaffList = configYML.getBoolean(\"premium_vanish.prevent_staff_list\");\r\n \t\t\t\t\thideVanishedStaffInJoin = configYML.getBoolean(\"premium_vanish.silence_join\");\r\n+\t\t\t\t\thideVanishedStaffInLeave = configYML.getBoolean(\"premium_vanish.silence_leave\");\r\n \t\t\t\t}\r\n \r\n \t\t\t}\r"
+  },
+  {
+    "sha": "d88519a393f44408e8136cf1efd8ba6f1a9e7992",
+    "filename": "multichat/src/main/java/xyz/olivermartin/multichat/bungee/commands/MultiChatCommand.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/MultiChat/Development/blob/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/java/xyz/olivermartin/multichat/bungee/commands/MultiChatCommand.java",
+    "raw_url": "https://github.com/MultiChat/Development/raw/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/java/xyz/olivermartin/multichat/bungee/commands/MultiChatCommand.java",
+    "contents_url": "https://api.github.com/repos/MultiChat/Development/contents/multichat/src/main/java/xyz/olivermartin/multichat/bungee/commands/MultiChatCommand.java?ref=a3360edc9a2483c358a284ff9656b32804fd8ed8",
+    "patch": "@@ -157,6 +157,7 @@ public void execute(CommandSender sender, String[] args) {\n \t\t\t\t\t\t\tMultiChat.hideVanishedStaffInMsg = ConfigManager.getInstance().getHandler(\"config.yml\").getConfig().getSection(\"premium_vanish\").getBoolean(\"prevent_message\");\r\n \t\t\t\t\t\t\tMultiChat.hideVanishedStaffInStaffList = ConfigManager.getInstance().getHandler(\"config.yml\").getConfig().getSection(\"premium_vanish\").getBoolean(\"prevent_staff_list\");\r\n \t\t\t\t\t\t\tMultiChat.hideVanishedStaffInJoin = ConfigManager.getInstance().getHandler(\"config.yml\").getConfig().getSection(\"premium_vanish\").getBoolean(\"silence_join\");\r\n+\t\t\t\t\t\t\tMultiChat.hideVanishedStaffInLeave = ConfigManager.getInstance().getHandler(\"config.yml\").getConfig().getSection(\"premium_vanish\").getBoolean(\"silence_leave\");\r\n \t\t\t\t\t\t}\r\n \r\n \t\t\t\t\t} else {\r"
+  },
+  {
+    "sha": "59a2dc0e0b5c087ba3f7ae20b0d8a07b19a889f2",
+    "filename": "multichat/src/main/resources/config.yml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/MultiChat/Development/blob/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/resources/config.yml",
+    "raw_url": "https://github.com/MultiChat/Development/raw/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/resources/config.yml",
+    "contents_url": "https://api.github.com/repos/MultiChat/Development/contents/multichat/src/main/resources/config.yml?ref=a3360edc9a2483c358a284ff9656b32804fd8ed8",
+    "patch": "@@ -271,6 +271,7 @@ premium_vanish:\n     prevent_message: true # Prevent players being able to /msg vanished staff\r\n     prevent_staff_list: true # Prevent vanished staff showing up in /staff\r\n     silence_join: true # Prevent vanished players sending a join message\r\n+    silence_leave: true # Prevent vanished players sending a leave message    \r\n \r\n # Legacy (PRE-1.16) Servers\r\n # Listing servers here will mark them as 'LEGACY' servers\r"
+  },
+  {
+    "sha": "30b5f5a7eba2ad2d896ccce691d9b72ec4ea429a",
+    "filename": "multichat/src/main/resources/config_fr.yml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/MultiChat/Development/blob/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/resources/config_fr.yml",
+    "raw_url": "https://github.com/MultiChat/Development/raw/a3360edc9a2483c358a284ff9656b32804fd8ed8/multichat/src/main/resources/config_fr.yml",
+    "contents_url": "https://api.github.com/repos/MultiChat/Development/contents/multichat/src/main/resources/config_fr.yml?ref=a3360edc9a2483c358a284ff9656b32804fd8ed8",
+    "patch": "@@ -276,6 +276,7 @@ premium_vanish:\n     prevent_message: true # Bloquer l'utilisation de la commande /msg\r\n     prevent_staff_list: true # Masquer de la liste /staff\r\n     silence_join: true # Prevent vanished players sending a join message\r\n+    silence_leave: true # Prevent vanished players sending a leave message\r\n \r\n # Legacy (PRE-1.16) Servers\r\n # Listing servers here will mark them as 'LEGACY' servers\r"
+  }
+]

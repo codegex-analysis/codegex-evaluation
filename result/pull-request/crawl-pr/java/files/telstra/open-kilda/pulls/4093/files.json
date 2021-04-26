@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "50d2e7850c2948f124111240fc66f15170db10ba",
+    "filename": "src-java/testing/functional-tests/build.gradle",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/6a9b03b07730a267d65164fdb9eae20dcedcdf7a/src-java/testing/functional-tests/build.gradle",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/6a9b03b07730a267d65164fdb9eae20dcedcdf7a/src-java/testing/functional-tests/build.gradle",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/src-java/testing/functional-tests/build.gradle?ref=6a9b03b07730a267d65164fdb9eae20dcedcdf7a",
+    "patch": "@@ -30,6 +30,10 @@ dependencies {\n     implementation 'com.athaydes:spock-reports:1.7.1'\n     implementation 'net.jodah:failsafe'\n     implementation 'org.hamcrest:hamcrest-all:1.3'\n+    implementation ('org.apache.zookeeper:zookeeper:3.4.0') {\n+        exclude(group: 'org.slf4j', module: 'slf4j-log4j12')\n+        exclude(group: 'log4j', module: 'log4j')\n+    }\n }\n \n test {"
+  },
+  {
+    "sha": "2a682a8f89ca8e6fb292031e1c232da5b3b84923",
+    "filename": "src-java/testing/functional-tests/src/test/groovy/org/openkilda/functionaltests/BaseSpecification.groovy",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/6a9b03b07730a267d65164fdb9eae20dcedcdf7a/src-java/testing/functional-tests/src/test/groovy/org/openkilda/functionaltests/BaseSpecification.groovy",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/6a9b03b07730a267d65164fdb9eae20dcedcdf7a/src-java/testing/functional-tests/src/test/groovy/org/openkilda/functionaltests/BaseSpecification.groovy",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/src-java/testing/functional-tests/src/test/groovy/org/openkilda/functionaltests/BaseSpecification.groovy?ref=6a9b03b07730a267d65164fdb9eae20dcedcdf7a",
+    "patch": "@@ -78,6 +78,8 @@ class BaseSpecification extends Specification implements SetupOnce {\n     int antiflapMin\n     @Value('${use.multitable}')\n     boolean useMultitable\n+    @Value('${zookeeper.connect_string}')\n+    String zkConnectString\n \n     /**\n      * Use this instead of setupSpec in order to have access to Spring Context and do actions BeforeClass."
+  },
+  {
+    "sha": "8f04c20ddabbca37e699d6cc4e6868199b9adefe",
+    "filename": "src-java/testing/functional-tests/src/test/groovy/org/openkilda/functionaltests/HealthCheckSpecification.groovy",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 1,
+    "changes": 33,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/6a9b03b07730a267d65164fdb9eae20dcedcdf7a/src-java/testing/functional-tests/src/test/groovy/org/openkilda/functionaltests/HealthCheckSpecification.groovy",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/6a9b03b07730a267d65164fdb9eae20dcedcdf7a/src-java/testing/functional-tests/src/test/groovy/org/openkilda/functionaltests/HealthCheckSpecification.groovy",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/src-java/testing/functional-tests/src/test/groovy/org/openkilda/functionaltests/HealthCheckSpecification.groovy?ref=6a9b03b07730a267d65164fdb9eae20dcedcdf7a",
+    "patch": "@@ -1,8 +1,11 @@\n package org.openkilda.functionaltests\n \n+import static org.openkilda.bluegreen.Signal.SHUTDOWN\n+import static org.openkilda.bluegreen.Signal.START\n import static org.openkilda.model.MeterId.MAX_SYSTEM_RULE_METER_ID\n import static org.openkilda.testing.Constants.WAIT_OFFSET\n \n+import org.openkilda.bluegreen.Signal\n import org.openkilda.functionaltests.exception.IslNotFoundException\n import org.openkilda.functionaltests.extension.healthcheck.HealthCheck\n import org.openkilda.functionaltests.helpers.Wrappers\n@@ -11,7 +14,7 @@ import org.openkilda.model.SwitchFeature\n import org.openkilda.testing.model.topology.TopologyDefinition.Status\n import org.openkilda.testing.tools.SoftAssertions\n \n-import org.springframework.beans.factory.annotation.Value\n+import org.apache.zookeeper.ZooKeeper\n \n class HealthCheckSpecification extends BaseSpecification {\n \n@@ -20,6 +23,23 @@ class HealthCheckSpecification extends BaseSpecification {\n         expect: \"Kilda's health check request is successful\"\n         northbound.getHealthCheck().components[\"kafka\"] == \"operational\"\n \n+        and: \"All zookeeper nodes are in expected state\"\n+        def zk = new ZooKeeper(zkConnectString, 5000, {})\n+        def activeColor = getActiveNetworkColor(zk)\n+        def zkAssertions = new SoftAssertions()\n+        [\"connecteddevices\", \"floodlightrouter\", \"flowhs\", \"isllatency\", \"nbworker\", \"network\", \"flowmonitoring\",\n+         \"opentsdb\", \"ping\", \"portstate\", \"reroute\", \"server42-control\", \"stats\", \"swmanager\"].each { component ->\n+            def expected = new String(zk.getData(\"/$component/$activeColor/expected_state\", null, null))\n+            def actual = new String(zk.getData(\"/$component/$activeColor/state\", null, null))\n+            zkAssertions.checkSucceeds { assert actual == expected, component }\n+        }\n+        flHelper.getFls()*.region.each { region ->\n+            def expected = new String(zk.getData(\"/floodlight/$region/expected_state\", null, null))\n+            def actual = new String(zk.getData(\"/floodlight/$region/state\", null, null))\n+            zkAssertions.checkSucceeds { assert actual == expected, region }\n+        }\n+        zkAssertions.verify()\n+\n         and: \"All switches and links are active. No flows and link props are present\"\n         def links = null\n         verifyAll {\n@@ -90,4 +110,15 @@ class HealthCheckSpecification extends BaseSpecification {\n             }\n         }\n     }\n+\n+    String getActiveNetworkColor(ZooKeeper zk) {\n+        def blue = zk.exists(\"/network/blue/signal\", false)\n+                ? Signal.valueOf(new String(zk.getData(\"/network/blue/signal\", null, null)))\n+                : SHUTDOWN\n+        def green = zk.exists(\"/network/green/signal\", false)\n+                ? Signal.valueOf(new String(zk.getData(\"/network/green/signal\", null, null)))\n+                : SHUTDOWN\n+        assert [blue, green].count { it == START } == 1\n+        return blue == START ? \"blue\" : \"green\"\n+    }\n }"
+  }
+]

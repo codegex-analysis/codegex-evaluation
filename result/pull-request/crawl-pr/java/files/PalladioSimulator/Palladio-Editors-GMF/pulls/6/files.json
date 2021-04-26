@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "09f5408da1a36a5c22e322f29bf57c632581bc6e",
+    "filename": "bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/InfrastructureCallEditHelperAdvice.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/PalladioSimulator/Palladio-Editors-GMF/blob/4f05681df73f302ce6756ebcb3d390adb0874c5d/bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/InfrastructureCallEditHelperAdvice.java",
+    "raw_url": "https://github.com/PalladioSimulator/Palladio-Editors-GMF/raw/4f05681df73f302ce6756ebcb3d390adb0874c5d/bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/InfrastructureCallEditHelperAdvice.java",
+    "contents_url": "https://api.github.com/repos/PalladioSimulator/Palladio-Editors-GMF/contents/bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/InfrastructureCallEditHelperAdvice.java?ref=4f05681df73f302ce6756ebcb3d390adb0874c5d",
+    "patch": "@@ -4,6 +4,7 @@\n package de.uka.ipd.sdq.pcm.gmf.seff.helper;\r\n \r\n import java.util.ArrayList;\r\n+import java.util.Optional;\r\n \r\n import org.eclipse.emf.ecore.EObject;\r\n import org.eclipse.emf.ecore.EReference;\r\n@@ -21,6 +22,7 @@\n import org.palladiosimulator.pcm.repository.InfrastructureSignature;\r\n import org.palladiosimulator.pcm.repository.RepositoryPackage;\r\n \r\n+import de.uka.ipd.sdq.stoex.RandomVariable;\r\n import de.uka.ipd.sdq.stoex.analyser.visitors.TypeEnum;\r\n \r\n /**\r\n@@ -81,7 +83,10 @@ protected ICommand getAfterConfigureCommand(final ConfigureRequest request) {\n \r\n         // create the number of calls dialog\r\n         final StochasticExpressionEditDialog dialogNoC = new StochasticExpressionEditDialog(PlatformUI.getWorkbench()\r\n-                .getActiveWorkbenchWindow().getShell(), TypeEnum.INT, request.getElementToConfigure());\r\n+                .getActiveWorkbenchWindow().getShell(), TypeEnum.INT, Optional.ofNullable(request.getElementToConfigure())\r\n+                .filter(RandomVariable.class::isInstance)\r\n+                .map(RandomVariable.class::cast)\r\n+                .orElse(null));\r\n         dialogNoC.open();\r\n         if (dialogNoC.getReturnCode() == Window.CANCEL) {\r\n             return new CanceledCommand();\r"
+  },
+  {
+    "sha": "4efb370b74d7be8dbd117d950af8a1304b3f40a5",
+    "filename": "bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/ParametricResourceDemandConfigureCommand.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/PalladioSimulator/Palladio-Editors-GMF/blob/4f05681df73f302ce6756ebcb3d390adb0874c5d/bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/ParametricResourceDemandConfigureCommand.java",
+    "raw_url": "https://github.com/PalladioSimulator/Palladio-Editors-GMF/raw/4f05681df73f302ce6756ebcb3d390adb0874c5d/bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/ParametricResourceDemandConfigureCommand.java",
+    "contents_url": "https://api.github.com/repos/PalladioSimulator/Palladio-Editors-GMF/contents/bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/ParametricResourceDemandConfigureCommand.java?ref=4f05681df73f302ce6756ebcb3d390adb0874c5d",
+    "patch": "@@ -1,6 +1,7 @@\n package de.uka.ipd.sdq.pcm.gmf.seff.helper;\r\n \r\n import java.util.ArrayList;\r\n+import java.util.Optional;\r\n \r\n import org.eclipse.core.commands.ExecutionException;\r\n import org.eclipse.core.runtime.IAdaptable;\r\n@@ -21,6 +22,8 @@\n import org.palladiosimulator.pcm.resourcetype.ResourceRepository;\r\n import org.palladiosimulator.pcm.seff.seff_performance.ParametricResourceDemand;\r\n import org.palladiosimulator.pcm.seff.seff_performance.SeffPerformancePackage;\r\n+\r\n+import de.uka.ipd.sdq.stoex.RandomVariable;\r\n import de.uka.ipd.sdq.stoex.StoexPackage;\r\n import de.uka.ipd.sdq.stoex.analyser.visitors.TypeEnum;\r\n \r\n@@ -137,7 +140,10 @@ private CommandResult setSpecification_ParametricResourceDemand(final IProgressM\n             final IAdaptable info) throws ExecutionException {\r\n \r\n         final StochasticExpressionEditDialog dialog = new StochasticExpressionEditDialog(PlatformUI.getWorkbench()\r\n-                .getActiveWorkbenchWindow().getShell(), TypeEnum.DOUBLE, this.request.getElementToConfigure());\r\n+                .getActiveWorkbenchWindow().getShell(), TypeEnum.DOUBLE, Optional.ofNullable(this.request.getElementToConfigure())\r\n+                .filter(RandomVariable.class::isInstance)\r\n+                .map(RandomVariable.class::cast)\r\n+                .orElse(null));\r\n         dialog.open();\r\n \r\n         if (dialog.getReturnCode() == Window.CANCEL) {\r"
+  },
+  {
+    "sha": "6c317ea438583534df4f35244de7772020d8dce1",
+    "filename": "bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/VariableCharacterisationConfigureCommand.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/PalladioSimulator/Palladio-Editors-GMF/blob/4f05681df73f302ce6756ebcb3d390adb0874c5d/bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/VariableCharacterisationConfigureCommand.java",
+    "raw_url": "https://github.com/PalladioSimulator/Palladio-Editors-GMF/raw/4f05681df73f302ce6756ebcb3d390adb0874c5d/bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/VariableCharacterisationConfigureCommand.java",
+    "contents_url": "https://api.github.com/repos/PalladioSimulator/Palladio-Editors-GMF/contents/bundles/de.uka.ipd.sdq.pcm.gmf.seff.helper/src/de/uka/ipd/sdq/pcm/gmf/seff/helper/VariableCharacterisationConfigureCommand.java?ref=4f05681df73f302ce6756ebcb3d390adb0874c5d",
+    "patch": "@@ -1,5 +1,7 @@\n package de.uka.ipd.sdq.pcm.gmf.seff.helper;\r\n \r\n+import java.util.Optional;\r\n+\r\n import org.eclipse.core.commands.ExecutionException;\r\n import org.eclipse.core.runtime.IAdaptable;\r\n import org.eclipse.core.runtime.IProgressMonitor;\r\n@@ -16,6 +18,7 @@\n import org.palladiosimulator.pcm.parameter.ParameterPackage;\r\n import org.palladiosimulator.pcm.parameter.VariableCharacterisation;\r\n \r\n+import de.uka.ipd.sdq.stoex.RandomVariable;\r\n import de.uka.ipd.sdq.stoex.StoexPackage;\r\n import de.uka.ipd.sdq.stoex.analyser.visitors.TypeEnum;\r\n \r\n@@ -86,7 +89,12 @@ private CommandResult setSpecification_ParametricResourceDemand(final IProgressM\n             final IAdaptable info) throws ExecutionException {\r\n \r\n         final StochasticExpressionEditDialog dialog = new StochasticExpressionEditDialog(PlatformUI.getWorkbench()\r\n-                .getActiveWorkbenchWindow().getShell(), TypeEnum.DOUBLE, this.request.getElementToConfigure());\r\n+            .getActiveWorkbenchWindow()\r\n+            .getShell(), TypeEnum.DOUBLE,\r\n+                Optional.ofNullable(this.request.getElementToConfigure())\r\n+                    .filter(RandomVariable.class::isInstance)\r\n+                    .map(RandomVariable.class::cast)\r\n+                    .orElse(null));\r\n         dialog.open();\r\n \r\n         if (dialog.getReturnCode() == Window.CANCEL) {\r"
+  }
+]

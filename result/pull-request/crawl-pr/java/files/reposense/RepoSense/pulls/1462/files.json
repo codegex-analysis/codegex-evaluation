@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "d1a148d9c920f25dcad467ae9509fa67861a1d63",
+    "filename": "frontend/src/index.pug",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/reposense/RepoSense/blob/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/index.pug",
+    "raw_url": "https://github.com/reposense/RepoSense/raw/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/index.pug",
+    "contents_url": "https://api.github.com/repos/reposense/RepoSense/contents/frontend/src/index.pug?ref=8d40ec9fabcb87a6bfb94e1845d36584408c3804",
+    "patch": "@@ -122,6 +122,9 @@ html\n     vuetemplate#v_ramp\n       include ramp.pug\n \n+    vuetemplate#v_zoom_commit\n+      include zoom_commit.pug\n+\n     vuetemplate#v_zoom\n       include tabs/zoom.pug\n \n@@ -136,6 +139,7 @@ html\n     script(src=\"static/js/safari_date.js\")\n     script(src=\"static/js/v_resizer.js\")\n     script(src=\"static/js/v_ramp.js\")\n+    script(src=\"static/js/v_zoom_commit.js\")\n     script(src=\"static/js/v_zoom.js\")\n     script(src=\"static/js/v_summary_charts.js\")\n     script(src=\"static/js/v_segment.js\")"
+  },
+  {
+    "sha": "25d626fe8814d64594a9dd1fefb7530b24c0486f",
+    "filename": "frontend/src/static/js/api.js",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 17,
+    "changes": 17,
+    "blob_url": "https://github.com/reposense/RepoSense/blob/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/static/js/api.js",
+    "raw_url": "https://github.com/reposense/RepoSense/raw/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/static/js/api.js",
+    "contents_url": "https://api.github.com/repos/reposense/RepoSense/contents/frontend/src/static/js/api.js?ref=8d40ec9fabcb87a6bfb94e1845d36584408c3804",
+    "patch": "@@ -103,23 +103,6 @@ window.comparator = (fn, sortingOption = '') => function compare(a, b) {\n   return 1;\n };\n \n-window.toggleNext = function toggleNext(ele) {\n-  // function for toggling unopened code\n-  const targetClass = 'active';\n-\n-  const parent = ele.parentNode;\n-  const classes = parent.className.split(' ');\n-  const idx = classes.indexOf(targetClass);\n-\n-  if (idx === -1) {\n-    classes.push(targetClass);\n-  } else {\n-    classes.splice(idx, 1);\n-  }\n-\n-  parent.className = classes.join(' ');\n-};\n-\n window.getBaseLink = function getBaseLink(repoId) {\n   return `${window.BASE_URL}/${\n     window.REPOS[repoId].location.organization}/${"
+  },
+  {
+    "sha": "befbb6950d70c102a74c287c5f89504d27ea5d6b",
+    "filename": "frontend/src/static/js/v_zoom.js",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 33,
+    "changes": 41,
+    "blob_url": "https://github.com/reposense/RepoSense/blob/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/static/js/v_zoom.js",
+    "raw_url": "https://github.com/reposense/RepoSense/raw/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/static/js/v_zoom.js",
+    "contents_url": "https://api.github.com/repos/reposense/RepoSense/contents/frontend/src/static/js/v_zoom.js?ref=8d40ec9fabcb87a6bfb94e1845d36584408c3804",
+    "patch": "@@ -3,7 +3,7 @@\n function initialState() {\n   return {\n     showAllCommitMessageBody: true,\n-    expandedCommitMessagesCount: this.totalCommitMessageBodyCount,\n+    // expandedCommitMessagesCount: 0,\n     commitsSortType: 'time',\n     toReverseSortedCommits: true,\n     isCommitsFinalized: false,\n@@ -15,7 +15,11 @@ function initialState() {\n window.vZoom = {\n   template: window.$('v_zoom').innerHTML,\n   data() {\n-    return initialState();\n+    return {\n+      defaultExpansionStateSignal: false,\n+      expandedCommitMessagesCount: 0,\n+      ...initialState(),\n+    };\n   },\n \n   computed: {\n@@ -100,12 +104,6 @@ window.vZoom = {\n       this.initiate();\n       this.setInfoHash();\n     },\n-\n-    selectedFileTypes() {\n-      this.$nextTick(() => {\n-        this.updateExpandedCommitMessagesCount();\n-      });\n-    },\n     commitsSortType() {\n       window.addHash('zCST', this.commitsSortType);\n       window.encodeHash();\n@@ -133,13 +131,6 @@ window.vZoom = {\n       this.$store.commit('updateSummaryDates', info);\n     },\n \n-    getSliceLink(slice) {\n-      if (this.info.zIsMerge) {\n-        return `${window.getBaseLink(slice.repoId)}/commit/${slice.hash}`;\n-      }\n-      return `${window.getBaseLink(this.info.zUser.repoId)}/commit/${slice.hash}`;\n-    },\n-\n     scrollToCommit(tag, commit) {\n       const el = this.$el.getElementsByClassName(`${commit} ${tag}`)[0];\n       if (el) {\n@@ -217,20 +208,7 @@ window.vZoom = {\n \n     toggleAllCommitMessagesBody(isActive) {\n       this.showAllCommitMessageBody = isActive;\n-\n-      const toRename = this.showAllCommitMessageBody ? 'commit-message message-body active' : 'commit-message message-body';\n-\n-      const commitMessageClasses = document.getElementsByClassName('commit-message message-body');\n-      Array.from(commitMessageClasses).forEach((commitMessageClass) => {\n-        commitMessageClass.className = toRename;\n-      });\n-\n-      this.expandedCommitMessagesCount = isActive ? this.totalCommitMessageBodyCount : 0;\n-    },\n-\n-    updateExpandedCommitMessagesCount() {\n-      this.expandedCommitMessagesCount = document.getElementsByClassName('commit-message message-body active')\n-          .length;\n+      this.defaultExpansionStateSignal = !this.defaultExpansionStateSignal;\n     },\n \n     removeZoomHashes() {\n@@ -248,10 +226,6 @@ window.vZoom = {\n       window.removeHash('zRSC');\n       window.encodeHash();\n     },\n-\n-    filterSelectedFileTypes(fileTypes) {\n-      return fileTypes.filter((fileType) => this.selectedFileTypes.includes(fileType));\n-    },\n   },\n   created() {\n     this.initiate();\n@@ -263,5 +237,6 @@ window.vZoom = {\n   },\n   components: {\n     vRamp: window.vRamp,\n+    vZoomCommit: window.vZoomCommit,\n   },\n };"
+  },
+  {
+    "sha": "8f17df77490368370d06086a1bbb521e1c755726",
+    "filename": "frontend/src/static/js/v_zoom_commit.js",
+    "status": "added",
+    "additions": 71,
+    "deletions": 0,
+    "changes": 71,
+    "blob_url": "https://github.com/reposense/RepoSense/blob/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/static/js/v_zoom_commit.js",
+    "raw_url": "https://github.com/reposense/RepoSense/raw/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/static/js/v_zoom_commit.js",
+    "contents_url": "https://api.github.com/repos/reposense/RepoSense/contents/frontend/src/static/js/v_zoom_commit.js?ref=8d40ec9fabcb87a6bfb94e1845d36584408c3804",
+    "patch": "@@ -0,0 +1,71 @@\n+/* global Vuex */\n+\n+window.vZoomCommit = {\n+  props: [\n+      'defaultExpansionState',\n+      'defaultExpansionStateSignal',\n+      'slice',\n+      'selectedFileTypes',\n+  ],\n+  emits: [\n+      'increment-expanded-count',\n+      'decrement-expanded-count',\n+  ],\n+  data() {\n+    return {\n+      isExpanded: false,\n+    };\n+  },\n+  template: window.$('v_zoom_commit').innerHTML,\n+\n+  computed: {\n+    filteredSelectedFileTypes() {\n+      const fileTypes = Object.keys(this.slice.fileTypesAndContributionMap);\n+      return fileTypes.filter((fileType) => this.selectedFileTypes.includes(fileType));\n+    },\n+\n+    sliceLink() {\n+      let baseLink;\n+      if (this.tabZoomInfo.zIsMerge) {\n+        baseLink = window.getBaseLink(this.slice.repoId);\n+      } else {\n+        baseLink = this.tabZoomInfo.zUser.repoId;\n+      }\n+      return `${baseLink}/commit/${this.slice.hash}`;\n+    },\n+\n+    ...Vuex.mapState(['fileTypeColors', 'tabZoomInfo']),\n+  },\n+\n+  watch: {\n+    defaultExpansionStateSignal() {\n+      if (this.isExpanded !== this.defaultExpansionState) {\n+        this.toggleExpansion();\n+      }\n+    },\n+  },\n+\n+  methods: {\n+    toggleExpansion() {\n+      if (this.slice.messageBody === '') {\n+        return;\n+      }\n+      this.isExpanded = !this.isExpanded;\n+      if (this.isExpanded) {\n+        this.$emit('increment-expanded-count');\n+      } else {\n+        this.$emit('decrement-expanded-count');\n+      }\n+    },\n+  },\n+  created() {\n+    if (this.defaultExpansionState) {\n+      this.toggleExpansion();\n+    }\n+  },\n+  beforeDestroy() {\n+    if (this.isExpanded) {\n+      this.$emit('decrement-expanded-count');\n+    }\n+  },\n+};"
+  },
+  {
+    "sha": "8d40bb44f6dc95b4500e8ad8af3a1b672c676968",
+    "filename": "frontend/src/tabs/zoom.pug",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 33,
+    "changes": 41,
+    "blob_url": "https://github.com/reposense/RepoSense/blob/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/tabs/zoom.pug",
+    "raw_url": "https://github.com/reposense/RepoSense/raw/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/tabs/zoom.pug",
+    "contents_url": "https://api.github.com/repos/reposense/RepoSense/contents/frontend/src/tabs/zoom.pug?ref=8d40ec9fabcb87a6bfb94e1845d36584408c3804",
+    "patch": "@@ -85,38 +85,13 @@\n   .zoom__day(v-for=\"day in selectedCommits\", v-bind:key=\"day.date\")\n     h3(v-if=\"info.zTimeFrame === 'week'\") Week of {{ day.date }}\n     h3(v-else) {{ day.date }}\n-    template\n-      //- use tabindex to enable focus property on div\n-      .commit-message(\n-        tabindex=\"-1\",\n-        v-for=\"slice in day.commitResults\",\n+    template(v-for=\"slice in day.commitResults\")\n+      v-zoom-commit(\n         v-bind:key=\"slice.hash\",\n-        v-bind:class=\"{ 'message-body active': slice.messageBody !== '' }\"\n+        v-bind:default-expansion-state='showAllCommitMessageBody',\n+        v-bind:default-expansion-state-signal='defaultExpansionStateSignal',\n+        v-bind:slice='slice',\n+        v-bind:selected-file-types='selectedFileTypes',\n+        v-on:increment-expanded-count='expandedCommitMessagesCount += 1',\n+        v-on:decrement-expanded-count='expandedCommitMessagesCount -= 1'\n       )\n-        a.message-title(v-bind:href=\"getSliceLink(slice)\", target=\"_blank\")\n-          .within-border {{ slice.messageTitle.substr(0, 50) }}\n-          .not-within-border(v-if=\"slice.messageTitle.length > 50\") {{ slice.messageTitle.substr(50) }}\n-        span &nbsp; ({{ slice.insertions }} lines) &nbsp;\n-        template\n-          span.fileTypeLabel(\n-            v-for=\"fileType in filterSelectedFileTypes(Object.keys(slice.fileTypesAndContributionMap))\",\n-            v-bind:style=\"{\\\n-              'background-color': fileTypeColors[fileType],\\\n-              'color': this.getFontColor(fileTypeColors[fileType])\\\n-              }\"\n-          ) {{ fileType }}\n-        template(v-if=\"slice.tags\", v-for=\"tag in slice.tags\")\n-          .tag(tabindex=\"-1\", v-bind:class=\"[`${slice.hash}`, tag]\")\n-            font-awesome-icon(icon=\"tags\")\n-            span &nbsp;{{ tag }}\n-        a(\n-          v-if=\"slice.messageBody !== ''\",\n-          v-on:click=\"updateExpandedCommitMessagesCount\",\n-          onclick=\"toggleNext(this)\"\n-        )\n-          .tooltip\n-            font-awesome-icon.commit-message--button(icon=\"ellipsis-h\")\n-            span.tooltip-text Click to show/hide the commit message body\n-        .body(v-if=\"slice.messageBody !== ''\")\n-          pre {{ slice.messageBody }}\n-            .dashed-border"
+  },
+  {
+    "sha": "5e8f7783919597fc1db20b26ffa664c0d3e2e134",
+    "filename": "frontend/src/zoom_commit.pug",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/reposense/RepoSense/blob/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/zoom_commit.pug",
+    "raw_url": "https://github.com/reposense/RepoSense/raw/8d40ec9fabcb87a6bfb94e1845d36584408c3804/frontend/src/zoom_commit.pug",
+    "contents_url": "https://api.github.com/repos/reposense/RepoSense/contents/frontend/src/zoom_commit.pug?ref=8d40ec9fabcb87a6bfb94e1845d36584408c3804",
+    "patch": "@@ -0,0 +1,34 @@\n+//- use tabindex to enable focus property on div\n+.commit-message(\n+  tabindex=\"-1\",\n+  v-bind:class=\"{\\\n+    'message-body': slice.messageBody !== '',\\\n+    'active': isExpanded\\\n+  }\"\n+)\n+  a.message-title(v-bind:href=\"sliceLink\", target=\"_blank\")\n+    .within-border {{ slice.messageTitle.substr(0, 50) }}\n+    .not-within-border(v-if=\"slice.messageTitle.length > 50\") {{ slice.messageTitle.substr(50) }}\n+  span &nbsp; ({{ slice.insertions }} lines) &nbsp;\n+  template\n+    span.fileTypeLabel(\n+      v-for=\"fileType in filteredSelectedFileTypes\",\n+      v-bind:style=\"{\\\n+        'background-color': fileTypeColors[fileType],\\\n+        'color': this.getFontColor(fileTypeColors[fileType])\\\n+        }\"\n+    ) {{ fileType }}\n+  template(v-if=\"slice.tags\", v-for=\"tag in slice.tags\")\n+    .tag(tabindex=\"-1\", v-bind:class=\"[`${slice.hash}`, tag]\")\n+      font-awesome-icon(icon=\"tags\")\n+      span &nbsp;{{ tag }}\n+  a(\n+    v-if=\"slice.messageBody !== ''\",\n+    v-on:click=\"toggleExpansion\"\n+  )\n+    .tooltip\n+      font-awesome-icon.commit-message--button(icon=\"ellipsis-h\")\n+      span.tooltip-text Click to show/hide the commit message body\n+  .body(v-if=\"isExpanded\")\n+    pre {{ slice.messageBody }}\n+      .dashed-border"
+  },
+  {
+    "sha": "f819392e8651d9cd2f19b2f66b72414e3a19104d",
+    "filename": "package.json",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/reposense/RepoSense/blob/8d40ec9fabcb87a6bfb94e1845d36584408c3804/package.json",
+    "raw_url": "https://github.com/reposense/RepoSense/raw/8d40ec9fabcb87a6bfb94e1845d36584408c3804/package.json",
+    "contents_url": "https://api.github.com/repos/reposense/RepoSense/contents/package.json?ref=8d40ec9fabcb87a6bfb94e1845d36584408c3804",
+    "patch": "@@ -8,7 +8,7 @@\n   },\n   \"scripts\": {\n     \"lint\": \"eslint frontend/src/**/*js frontend/cypress/**.js && stylelint frontend/src/**/*.scss && npm run puglint\",\n-    \"puglint\": \"pug-lint frontend/src/index.pug frontend/src/ramp.pug frontend/src/summary.pug frontend/src/summary_charts.pug frontend/src/resizer.pug frontend/src/tabs/authorship.pug frontend/src/tabs/segment.pug frontend/src/tabs/zoom.pug\",\n+    \"puglint\": \"pug-lint frontend/src/index.pug frontend/src/ramp.pug frontend/src/summary.pug frontend/src/summary_charts.pug frontend/src/resizer.pug frontend/src/tabs/authorship.pug frontend/src/tabs/segment.pug frontend/src/tabs/zoom.pug frontend/src/zoom_commit.pug\",\n     \"lintfix\": \"eslint --fix frontend/src/**/*js frontend/cypress/**.js && stylelint --fix frontend/src/**/*.scss\",\n     \"browserify\": \"browserify -t vueify -e frontend/src/static/js/v_authorship.js -o frontend/build/static/js/v_authorship.js\",\n     \"spuild\": \"spuild frontend\""
+  }
+]

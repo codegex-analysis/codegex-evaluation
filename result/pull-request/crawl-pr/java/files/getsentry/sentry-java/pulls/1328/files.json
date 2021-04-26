@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "85bcd91c916ea2886bc8961715de2d44d7e45567",
+    "filename": "CHANGELOG.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/getsentry/sentry-java/blob/ac5226cca86d9c92211d84cc06486d6ae7a4dea6/CHANGELOG.md",
+    "raw_url": "https://github.com/getsentry/sentry-java/raw/ac5226cca86d9c92211d84cc06486d6ae7a4dea6/CHANGELOG.md",
+    "contents_url": "https://api.github.com/repos/getsentry/sentry-java/contents/CHANGELOG.md?ref=ac5226cca86d9c92211d84cc06486d6ae7a4dea6",
+    "patch": "@@ -6,6 +6,7 @@\n * Feat: Set SDK version on Transactions (#1307)\n * Fix: Use logger set on SentryOptions in GsonSerializer (#1308)\n * Fix: Use the bindToScope correctly\n+* Fix: Allow 0.0 to be set on tracesSampleRate (#1328)\n * Fix: set \"java\" platform to transactions #1332\n * Feat: Add OkHttp client application interceptor (#1330)\n "
+  },
+  {
+    "sha": "6db3804afc9cc6870193219a28508dce55b56b32",
+    "filename": "sentry/src/main/java/io/sentry/SentryOptions.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 13,
+    "changes": 26,
+    "blob_url": "https://github.com/getsentry/sentry-java/blob/ac5226cca86d9c92211d84cc06486d6ae7a4dea6/sentry/src/main/java/io/sentry/SentryOptions.java",
+    "raw_url": "https://github.com/getsentry/sentry-java/raw/ac5226cca86d9c92211d84cc06486d6ae7a4dea6/sentry/src/main/java/io/sentry/SentryOptions.java",
+    "contents_url": "https://api.github.com/repos/getsentry/sentry-java/contents/sentry/src/main/java/io/sentry/SentryOptions.java?ref=ac5226cca86d9c92211d84cc06486d6ae7a4dea6",
+    "patch": "@@ -671,7 +671,12 @@ public void setProxy(@Nullable Proxy proxy) {\n    * @param sampleRate the sample rate\n    */\n   public void setSampleRate(Double sampleRate) {\n-    this.validateRate(sampleRate);\n+    if (sampleRate != null && (sampleRate > 1.0 || sampleRate <= 0.0)) {\n+      throw new IllegalArgumentException(\n+          \"The value \"\n+              + sampleRate\n+              + \" is not valid. Use null to disable or values > 0.0 and <= 1.0.\");\n+    }\n     this.sampleRate = sampleRate;\n   }\n \n@@ -685,13 +690,17 @@ public void setSampleRate(Double sampleRate) {\n   }\n \n   /**\n-   * Sets the tracesSampleRate Can be anything between 0.01 and 1.0 or null (default), to disable\n-   * it.\n+   * Sets the tracesSampleRate Can be anything between 0.0 and 1.0 or null (default), to disable it.\n    *\n    * @param tracesSampleRate the sample rate\n    */\n   public void setTracesSampleRate(Double tracesSampleRate) {\n-    this.validateRate(tracesSampleRate);\n+    if (tracesSampleRate != null && (tracesSampleRate > 1.0 || tracesSampleRate < 0.0)) {\n+      throw new IllegalArgumentException(\n+          \"The value \"\n+              + tracesSampleRate\n+              + \" is not valid. Use null to disable or values between 0.0 and 1.0.\");\n+    }\n     this.tracesSampleRate = tracesSampleRate;\n   }\n \n@@ -1403,15 +1412,6 @@ void merge(final @NotNull SentryOptions options) {\n     return sdkVersion;\n   }\n \n-  private void validateRate(@Nullable Double rate) {\n-    if (rate != null && (rate > 1.0 || rate <= 0.0)) {\n-      throw new IllegalArgumentException(\n-          \"The value \"\n-              + rate\n-              + \" is not valid. Use null to disable or values between 0.01 (inclusive) and 1.0 (exclusive).\");\n-    }\n-  }\n-\n   public static final class Proxy {\n     private @Nullable String host;\n     private @Nullable String port;"
+  },
+  {
+    "sha": "e094e24f670b836681557c9031d6edb53ca83d77",
+    "filename": "sentry/src/test/java/io/sentry/SentryOptionsTest.kt",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/getsentry/sentry-java/blob/ac5226cca86d9c92211d84cc06486d6ae7a4dea6/sentry/src/test/java/io/sentry/SentryOptionsTest.kt",
+    "raw_url": "https://github.com/getsentry/sentry-java/raw/ac5226cca86d9c92211d84cc06486d6ae7a4dea6/sentry/src/test/java/io/sentry/SentryOptionsTest.kt",
+    "contents_url": "https://api.github.com/repos/getsentry/sentry-java/contents/sentry/src/test/java/io/sentry/SentryOptionsTest.kt?ref=ac5226cca86d9c92211d84cc06486d6ae7a4dea6",
+    "patch": "@@ -96,6 +96,24 @@ class SentryOptionsTest {\n         assertFailsWith<IllegalArgumentException> { SentryOptions().sampleRate = 0.0 }\n     }\n \n+    @Test\n+    fun `when setTracesSampleRate is set to exactly 0, value is set`() {\n+        val options = SentryOptions().apply {\n+            this.tracesSampleRate = 0.0\n+        }\n+        assertEquals(0.0, options.tracesSampleRate)\n+    }\n+\n+    @Test\n+    fun `when setTracesSampleRate is set to higher than 1_0, setter throws`() {\n+        assertFailsWith<IllegalArgumentException> { SentryOptions().tracesSampleRate = 1.0000000000001 }\n+    }\n+\n+    @Test\n+    fun `when setTracesSampleRate is set to lower than 0, setter throws`() {\n+        assertFailsWith<IllegalArgumentException> { SentryOptions().tracesSampleRate = -0.0000000000001 }\n+    }\n+\n     @Test\n     fun `when there's no cacheDirPath, outboxPath returns null`() {\n         val options = SentryOptions()"
+  }
+]

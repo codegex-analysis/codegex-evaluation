@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "a7b90277c8f6649f887c3d27cfe8f30435046345",
+    "filename": "jersey/pom.xml",
+    "status": "modified",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/pom.xml",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/pom.xml",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/jersey/pom.xml?ref=2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35",
+    "patch": "@@ -14,6 +14,45 @@\n         <maven.compiler.source>11</maven.compiler.source>\n     </properties>\n \n+    <dependencies>\n+        <dependency>\n+            <groupId>javax.servlet</groupId>\n+            <artifactId>javax.servlet-api</artifactId>\n+            <version>3.1.0</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.eclipse.jetty</groupId>\n+            <artifactId>jetty-server</artifactId>\n+            <version>${jettyVersion}</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.eclipse.jetty</groupId>\n+            <artifactId>jetty-servlet</artifactId>\n+            <version>${jettyVersion}</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.glassfish.jersey.core</groupId>\n+            <artifactId>jersey-server</artifactId>\n+            <version>2.30</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.glassfish.jersey.containers</groupId>\n+            <artifactId>jersey-container-servlet-core</artifactId>\n+            <version>2.30</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.glassfish.jersey.inject</groupId>\n+            <artifactId>jersey-hk2</artifactId>\n+            <version>2.30</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.glassfish.jersey.media</groupId>\n+            <artifactId>jersey-media-json-jackson</artifactId>\n+            <version>2.29</version>\n+        </dependency>\n+\n+    </dependencies>\n+\n     <build>\n         <plugins>\n             <plugin>"
+  },
+  {
+    "sha": "c65663990cbacc4d7a33366705042de10338ecb5",
+    "filename": "jersey/src/main/java/JerseyApplication.java",
+    "status": "modified",
+    "additions": 56,
+    "deletions": 2,
+    "changes": 58,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/src/main/java/JerseyApplication.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/src/main/java/JerseyApplication.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/jersey/src/main/java/JerseyApplication.java?ref=2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35",
+    "patch": "@@ -1,6 +1,60 @@\n-public class JerseyApplication {\n+import java.util.HashSet;\n+import java.util.Set;\n+import javax.ws.rs.ApplicationPath;\n+import javax.ws.rs.core.Application;\n+import org.eclipse.jetty.server.Server;\n+import org.eclipse.jetty.servlet.ServletContextHandler;\n+import org.eclipse.jetty.servlet.ServletHolder;\n+import org.glassfish.jersey.servlet.ServletContainer;\n \n-  public static void main(String[] args) {\n+//  Использует Jersey и JAX-RS аннотации, в т.ч для чтения cookie и заголовков.\n+//\n+//  Делает то же самое, что приложение 1, изменен только формат ответа для запроса\n+//  GET: /counter:\n+//  {\n+//    \"date\": \"текущая дата-время в формате ISO\",\n+//      \"value\": \"значение счетчика\"\n+//  }\n+//  Для сериализации должен использоваться Jackson\n+//  В лекции в примере с Jersey для конфигурирования ресурсов\n+//  мы использовали способ не из стандарта jax-rs\n+//  (мы использовали параметр jersey.config.server.provider.packages)\n+//  В домашке jersey-приложение должно использовать класс javax.ws.rs.core.Application\n+\n+\n+@ApplicationPath(\"/*\")\n+public class JerseyApplication extends Application {\n+\n+  final private static int PORT = 8081;\n+\n+  @Override\n+  public Set<Class<?>> getClasses() {\n+    final Set<Class<?>> classes = new HashSet<>();\n+    // register root resource\n+    classes.add(api.CounterResource.class);\n+    return classes;\n+  }\n+\n+  private static Server createServer(int port) {\n+    Server server = new Server(port);\n+\n+\n+\n+    ServletContextHandler ctx = new ServletContextHandler();\n+    server.setHandler(ctx);\n+\n+    ServletHolder servletHolder = ctx.addServlet(ServletContainer.class, \"/*\");\n+    servletHolder.setInitOrder(0);\n+    servletHolder.setInitParameter(\"javax.ws.rs.Application\", \"JerseyApplication\");\n+    return server;\n+  }\n+\n+  public static void main(String[] args) throws Exception {\n     // run, Jetty, run!\n+    Server server = createServer(PORT);\n+    server.start();\n+    server.join();\n+\n+\n   }\n }"
+  },
+  {
+    "sha": "68ed9434b60cdda644328e7513bcd05547b7fc4a",
+    "filename": "jersey/src/main/java/api/CounterResource.java",
+    "status": "added",
+    "additions": 55,
+    "deletions": 0,
+    "changes": 55,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/src/main/java/api/CounterResource.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/src/main/java/api/CounterResource.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/jersey/src/main/java/api/CounterResource.java?ref=2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35",
+    "patch": "@@ -0,0 +1,55 @@\n+package api;\n+\n+import domain.Counter;\n+import dto.CounterDTO;\n+import javax.ws.rs.CookieParam;\n+import javax.ws.rs.DELETE;\n+import javax.ws.rs.GET;\n+import javax.ws.rs.HeaderParam;\n+import javax.ws.rs.POST;\n+import javax.ws.rs.Path;\n+import javax.ws.rs.Produces;\n+import javax.ws.rs.core.Response;\n+\n+@Path(\"/counter\")\n+public class CounterResource {\n+\n+  boolean isAuthCookieValid(String authCookie) {\n+    return authCookie.length() > 10;\n+  }\n+\n+  @GET\n+  @Path(\"/\")\n+  @Produces(\"application/json\")\n+  public Response getCounter() {\n+    return Response.ok(new CounterDTO()).build();\n+  }\n+\n+  @POST\n+  @Path(\"/\")\n+  @Produces(\"application/json\")\n+  public Response incrementCounter() {\n+    Counter.getInstance().incrementCounter();\n+    return Response.ok().build();\n+  }\n+\n+  @DELETE\n+  @Path(\"/\")\n+  @Produces(\"application/json\")\n+  public Response decrementCounter(@HeaderParam(\"Subtraction-Value\") int decrement) {\n+    Counter.getInstance().decrementCounter(decrement);\n+    return Response.ok().build();\n+  }\n+\n+  @POST\n+  @Path(\"/clear\")\n+  @Produces(\"application/json\")\n+  public Response clearCounter(@CookieParam(\"hh-auth\") String hhAuth) {\n+    if (hhAuth == null || !isAuthCookieValid(hhAuth)) {\n+      return Response.status(400).build();\n+    }\n+\n+    Counter.getInstance().clearCounter();\n+    return Response.ok().build();\n+  }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "61fcde07b985ac2f8eb61268be075fd4897b1f33",
+    "filename": "jersey/src/main/java/domain/Counter.java",
+    "status": "added",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/src/main/java/domain/Counter.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/src/main/java/domain/Counter.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/jersey/src/main/java/domain/Counter.java?ref=2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35",
+    "patch": "@@ -0,0 +1,33 @@\n+package domain;\n+\n+public class Counter {\n+\n+  private static Counter instance;\n+\n+  private Counter(){}\n+\n+  private int counter = 10;\n+\n+  public static Counter getInstance(){ // #3\n+    if(instance == null){\n+      instance = new Counter();\n+    }\n+    return instance;\n+  }\n+\n+  public int getCounter() {\n+    return counter;\n+  }\n+\n+  public void incrementCounter() {\n+    counter++;\n+  }\n+\n+  public void decrementCounter(int decrement) {\n+    counter -= decrement;\n+  }\n+\n+  public void clearCounter() {\n+    counter = 0;\n+  }\n+}"
+  },
+  {
+    "sha": "b00a8ea72bad448acc64fd0444cfb4db616f257c",
+    "filename": "jersey/src/main/java/dto/CounterDTO.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/src/main/java/dto/CounterDTO.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/jersey/src/main/java/dto/CounterDTO.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/jersey/src/main/java/dto/CounterDTO.java?ref=2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35",
+    "patch": "@@ -0,0 +1,25 @@\n+package dto;\n+\n+import com.fasterxml.jackson.annotation.JsonFormat;\n+import domain.Counter;\n+import java.util.Date;\n+\n+public class CounterDTO {\n+\n+  int value;\n+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\")\n+  Date date;\n+\n+  public CounterDTO() {\n+    this.value = Counter.getInstance().getCounter();\n+    this.date = new Date(System.currentTimeMillis());\n+  }\n+\n+  public int getValue() {\n+    return value;\n+  }\n+\n+  public Date getDate() {\n+    return date;\n+  }\n+}"
+  },
+  {
+    "sha": "9190ae3deed861b4b133e308025a86591ef28f73",
+    "filename": "servlet/pom.xml",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/servlet/pom.xml",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/servlet/pom.xml",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/servlet/pom.xml?ref=2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35",
+    "patch": "@@ -14,6 +14,24 @@\n         <maven.compiler.source>11</maven.compiler.source>\n     </properties>\n \n+    <dependencies>\n+        <dependency>\n+            <groupId>javax.servlet</groupId>\n+            <artifactId>javax.servlet-api</artifactId>\n+            <version>3.1.0</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.eclipse.jetty</groupId>\n+            <artifactId>jetty-server</artifactId>\n+            <version>${jettyVersion}</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.eclipse.jetty</groupId>\n+            <artifactId>jetty-servlet</artifactId>\n+            <version>${jettyVersion}</version>\n+        </dependency>\n+    </dependencies>\n+\n     <build>\n         <plugins>\n             <plugin>"
+  },
+  {
+    "sha": "2a7088f575cb488d6d641372f6e7c06277f4b09a",
+    "filename": "servlet/src/main/java/AuthFilter.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/servlet/src/main/java/AuthFilter.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/servlet/src/main/java/AuthFilter.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/servlet/src/main/java/AuthFilter.java?ref=2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35",
+    "patch": "@@ -0,0 +1,32 @@\n+import java.io.IOException;\n+import javax.servlet.Filter;\n+import javax.servlet.FilterChain;\n+import javax.servlet.FilterConfig;\n+import javax.servlet.ServletException;\n+import javax.servlet.ServletRequest;\n+import javax.servlet.ServletResponse;\n+import javax.servlet.http.Cookie;\n+import javax.servlet.http.HttpServletRequest;\n+\n+public class AuthFilter implements Filter {\n+\n+  @Override\n+  public void init(FilterConfig filterConfig) throws ServletException {\n+  }\n+\n+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {\n+    HttpServletRequest req = (HttpServletRequest) request;\n+    Cookie[] cookies = req.getCookies();\n+    if (cookies != null) {\n+      for (Cookie cookie : cookies) {\n+        if (cookie.getName().equals(\"hh-auth\") && cookie.getValue().length() > 10) {\n+          chain.doFilter(request, response);\n+        }\n+      }\n+    }\n+  }\n+\n+  @Override\n+  public void destroy() {\n+  }\n+}"
+  },
+  {
+    "sha": "239999646950011fd07520a50bb741700156fc5b",
+    "filename": "servlet/src/main/java/CounterServlet.java",
+    "status": "added",
+    "additions": 91,
+    "deletions": 0,
+    "changes": 91,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/servlet/src/main/java/CounterServlet.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/servlet/src/main/java/CounterServlet.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/servlet/src/main/java/CounterServlet.java?ref=2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35",
+    "patch": "@@ -0,0 +1,91 @@\n+import java.io.IOException;\n+import java.io.PrintWriter;\n+import javax.servlet.ServletException;\n+import javax.servlet.annotation.WebServlet;\n+import javax.servlet.http.HttpServlet;\n+import javax.servlet.http.HttpServletRequest;\n+import javax.servlet.http.HttpServletResponse;\n+\n+//  Использует только сервлеты. Нужно написать приложение-счетчик – хранить в памяти состояние,\n+//  котороое изменяется через HTTP походы.\n+//  Используйте подходящие коды HTTP ответов из лекции по HTTP\n+//\n+//  GET: /counter - возвращает счетчик\n+//\n+//  POST: /counter - увеличивает счетчик на 1\n+//\n+//  DELETE: /counter - уменьшает счетчик на значение,\n+//  которое передается в заголовке «Subtraction-Value»\n+//\n+//  POST: /counter/clear - сбрасывает счетчик. Для выполнения этого запроса должна\n+//  быть cookie - «hh-auth», единственное условие - она должна быть длиннее 10 символов.\n+\n+@WebServlet(urlPatterns = \"/counter\")\n+public class CounterServlet extends HttpServlet {\n+\n+  private static final String SERLVET_COUNTER = \"/counter\";\n+  private static final String SERVLET_COUNTER_CLEAR = \"/counter/clear\";\n+\n+  private static int counter = 0;\n+\n+  public void incrementCounter() {\n+    counter++;\n+  }\n+\n+  public void decrementCounter(int decrement) {\n+    counter -= decrement;\n+  }\n+\n+  public void clearCounter() {\n+    counter = 0;\n+  }\n+\n+  public static boolean isNumeric(String str) {\n+    try {\n+      Integer.parseInt(str);\n+      return true;\n+    } catch (NumberFormatException e) {\n+      return false;\n+    }\n+  }\n+\n+  @Override\n+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n+    resp.setStatus(200);\n+    PrintWriter writer = resp.getWriter();\n+    writer.print(counter);\n+    writer.flush();\n+  }\n+\n+  @Override\n+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n+    processRequest(req, resp);\n+  }\n+\n+  protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n+    String path = req.getServletPath();\n+\n+    switch (path) {\n+      case SERLVET_COUNTER:\n+        this.incrementCounter();\n+        resp.setStatus(200);\n+        break;\n+      case SERVLET_COUNTER_CLEAR:\n+        this.clearCounter();\n+        resp.setStatus(200);\n+        break;\n+      default:\n+        break;\n+    }\n+  }\n+\n+  @Override\n+  protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n+    if (req.getHeader(\"Subtraction-Value\") != null && isNumeric(req.getHeader(\"Subtraction-Value\"))) {\n+      this.decrementCounter(req.getIntHeader(\"Subtraction-Value\"));\n+      resp.setStatus(200);\n+    } else {\n+      resp.sendError(400);\n+    }\n+  }\n+}"
+  },
+  {
+    "sha": "202850c8452032260926f15ca5964e7a6eda9600",
+    "filename": "servlet/src/main/java/ServletApplication.java",
+    "status": "modified",
+    "additions": 34,
+    "deletions": 1,
+    "changes": 35,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/servlet/src/main/java/ServletApplication.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35/servlet/src/main/java/ServletApplication.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/servlet/src/main/java/ServletApplication.java?ref=2b03035ebc5764b27cf6fb0fad35a43a3c8f3e35",
+    "patch": "@@ -1,6 +1,39 @@\n+import java.util.EnumSet;\n+import javax.servlet.DispatcherType;\n+import org.eclipse.jetty.server.Server;\n+import org.eclipse.jetty.servlet.ServletHandler;\n+\n public class ServletApplication {\n \n-  public static void main(String[] args) {\n+  //  Использует только сервлеты. Нужно написать приложение-счетчик – хранить в памяти состояние,\n+//  котороое изменяется через HTTP походы.\n+//  Используйте подходящие коды HTTP ответов из лекции по HTTP\n+//\n+//  GET: /counter - возвращает счетчик\n+//\n+//  POST: /counter - увеличивает счетчик на 1\n+//\n+//  DELETE: /counter - уменьшает счетчик на значение,\n+//  которое передается в заголовке «Subtraction-Value»\n+//\n+//  POST: /counter/clear - сбрасывает счетчик. Для выполнения этого запроса должна\n+//  быть cookie - «hh-auth», единственное условие - она должна быть длиннее 10 символов.\n+  final private static int PORT = 8081;\n+\n+  private static Server createServer(int port) {\n+    Server server = new Server(port);\n+    ServletHandler servletHandler = new ServletHandler();\n+    servletHandler.addServletWithMapping(CounterServlet.class, \"/\");\n+    servletHandler.addFilterWithMapping(AuthFilter.class, \"/counter/clear\", EnumSet.of(DispatcherType.REQUEST));\n+    server.setHandler(servletHandler);\n+    return server;\n+  }\n+\n+\n+  public static void main(String[] args) throws Exception {\n     // run, Jetty, run!\n+    Server server = createServer(PORT);\n+    server.start();\n+    server.join();\n   }\n }"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "d040aaa2b917d2cd890fe97487e73bb9263fe02f",
+    "filename": "extensions-contrib/influx-extensions/src/main/antlr4/org/apache/druid/data/input/influx/InfluxLineProtocol.g4",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/druid/blob/e3565308135bab2086d698332ded274370bf4aa8/extensions-contrib/influx-extensions/src/main/antlr4/org/apache/druid/data/input/influx/InfluxLineProtocol.g4",
+    "raw_url": "https://github.com/apache/druid/raw/e3565308135bab2086d698332ded274370bf4aa8/extensions-contrib/influx-extensions/src/main/antlr4/org/apache/druid/data/input/influx/InfluxLineProtocol.g4",
+    "contents_url": "https://api.github.com/repos/apache/druid/contents/extensions-contrib/influx-extensions/src/main/antlr4/org/apache/druid/data/input/influx/InfluxLineProtocol.g4?ref=e3565308135bab2086d698332ded274370bf4aa8",
+    "patch": "@@ -67,7 +67,7 @@ NEWLINE\n ;\n \n NUMBER\n-    : '-'? INT ('.' [0-9] +) ? 'i'?\n+    : '-'? INT ('.' [0-9] +)? ([eE][+-]?[0-9] +)? 'i'? 'u'?\n ;\n \n BOOLEAN"
+  },
+  {
+    "sha": "1b7f3624c3b53bf847e0c2077f8269e949c0828c",
+    "filename": "extensions-contrib/influx-extensions/src/main/java/org/apache/druid/data/input/influx/InfluxParser.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 10,
+    "changes": 18,
+    "blob_url": "https://github.com/apache/druid/blob/e3565308135bab2086d698332ded274370bf4aa8/extensions-contrib/influx-extensions/src/main/java/org/apache/druid/data/input/influx/InfluxParser.java",
+    "raw_url": "https://github.com/apache/druid/raw/e3565308135bab2086d698332ded274370bf4aa8/extensions-contrib/influx-extensions/src/main/java/org/apache/druid/data/input/influx/InfluxParser.java",
+    "contents_url": "https://api.github.com/repos/apache/druid/contents/extensions-contrib/influx-extensions/src/main/java/org/apache/druid/data/input/influx/InfluxParser.java?ref=e3565308135bab2086d698332ded274370bf4aa8",
+    "patch": "@@ -121,23 +121,21 @@ private Object parseQuotedString(String text)\n     return BACKSLASH_PATTERN.matcher(text.substring(1, text.length() - 1)).replaceAll(\"\\\"\");\n   }\n \n-  private Object parseNumber(String raw)\n+  private Number parseNumber(String raw)\n   {\n     if (raw.endsWith(\"i\")) {\n       return Long.valueOf(raw.substring(0, raw.length() - 1));\n+    } else if (raw.endsWith(\"u\")) {\n+      return Math.abs(Long.parseLong(raw.substring(0, raw.length() - 1)));\n     }\n \n-    return new Double(raw);\n+    return Double.valueOf(raw);\n   }\n \n-  private Object parseBool(String raw)\n+  private Boolean parseBool(String raw)\n   {\n-    char first = raw.charAt(0);\n-    if (first == 't' || first == 'T') {\n-      return \"true\";\n-    } else {\n-      return \"false\";\n-    }\n+    final char first = raw.charAt(0);\n+    return (first == 't' || first == 'T');\n   }\n \n   private String parseIdentifier(InfluxLineProtocolParser.IdentifierContext ctx)\n@@ -161,7 +159,7 @@ private void parseTimestamp(String timestamp, Map<String, Object> dest)\n       dest.put(TIMESTAMP_KEY, 0L);\n     } else {\n       timestamp = timestamp.substring(0, timestamp.length() - 6);\n-      final long timestampMillis = Long.valueOf(timestamp);\n+      final long timestampMillis = Long.parseLong(timestamp);\n       dest.put(TIMESTAMP_KEY, timestampMillis);\n     }\n   }"
+  },
+  {
+    "sha": "bc08a5e5d06a7c76b0be44c884198ba5b98d3ff7",
+    "filename": "extensions-contrib/influx-extensions/src/test/java/org/apache/druid/data/input/influx/InfluxParserTest.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 4,
+    "changes": 29,
+    "blob_url": "https://github.com/apache/druid/blob/e3565308135bab2086d698332ded274370bf4aa8/extensions-contrib/influx-extensions/src/test/java/org/apache/druid/data/input/influx/InfluxParserTest.java",
+    "raw_url": "https://github.com/apache/druid/raw/e3565308135bab2086d698332ded274370bf4aa8/extensions-contrib/influx-extensions/src/test/java/org/apache/druid/data/input/influx/InfluxParserTest.java",
+    "contents_url": "https://api.github.com/repos/apache/druid/contents/extensions-contrib/influx-extensions/src/test/java/org/apache/druid/data/input/influx/InfluxParserTest.java?ref=e3565308135bab2086d698332ded274370bf4aa8",
+    "patch": "@@ -132,6 +132,26 @@\n                   .with(\"bar\", \"baz\")\n                   .with(\"m\", 1.0)\n                   .with(\"n\", 3.0)\n+        ),\n+        testCase(\"Unsigned integer in field value\",\n+                \"foo,region=us-east-1,host=127.0.0.1 m=1.0,n=3.0,o=500i,u=123u 123456789\",\n+            Parsed.row(\"foo\", 123L)\n+                  .with(\"region\", \"us-east-1\")\n+                  .with(\"host\", \"127.0.0.1\")\n+                  .with(\"m\", 1.0)\n+                  .with(\"n\", 3.0)\n+                  .with(\"o\", 500L)\n+                  .with(\"u\", 123L)\n+        ),\n+        testCase(\"Float with E notation in field value\",\n+                \"foo,region=us-east-1,host=127.0.0.1 m=1.0,n=3.0,o=500i,f=-1.234456e+78 123456789\",\n+            Parsed.row(\"foo\", 123L)\n+                  .with(\"region\", \"us-east-1\")\n+                  .with(\"host\", \"127.0.0.1\")\n+                  .with(\"m\", 1.0)\n+                  .with(\"n\", 3.0)\n+                  .with(\"o\", 500L)\n+                  .with(\"f\", -1.234456e+78)\n         )\n     ).toArray();\n   }\n@@ -164,6 +184,7 @@ public void testParseWhitelistPass()\n     Parser<String, Object> parser = new InfluxParser(Sets.newHashSet(\"cpu\"));\n     String input = \"cpu,host=foo.bar.baz,region=us-east,application=echo pct_idle=99.3,pct_user=88.8,m1_load=2 1465839830100400200\";\n     Map<String, Object> parsed = parser.parseToMap(input);\n+    assert parsed != null;\n     MatcherAssert.assertThat(parsed.get(\"measurement\"), Matchers.equalTo(\"cpu\"));\n   }\n \n@@ -216,10 +237,10 @@ public void testParseFailures(Pair<String, String> testCase)\n \n     static Parsed row(String measurement, Long timestamp)\n     {\n-      Parsed e = new Parsed();\n-      e.measurement = measurement;\n-      e.timestamp = timestamp;\n-      return e;\n+      Parsed parsed = new Parsed();\n+      parsed.measurement = measurement;\n+      parsed.timestamp = timestamp;\n+      return parsed;\n     }\n \n     Parsed with(String k, Object v)"
+  }
+]

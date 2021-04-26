@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "9c0824a4c617cfcafa060ae2d15789ad914dd6c4",
+    "filename": "app/src/main/java/org/apache/fineract/ui/online/accounting/accounts/AccountsFragment.kt",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/fineract-cn-mobile/blob/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/accounting/accounts/AccountsFragment.kt",
+    "raw_url": "https://github.com/apache/fineract-cn-mobile/raw/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/accounting/accounts/AccountsFragment.kt",
+    "contents_url": "https://api.github.com/repos/apache/fineract-cn-mobile/contents/app/src/main/java/org/apache/fineract/ui/online/accounting/accounts/AccountsFragment.kt?ref=cc107ca85251c858c69b8d2bdc7703d68e4e19e1",
+    "patch": "@@ -110,8 +110,12 @@ class AccountsFragment : FineractBaseFragment(), AccountContract.View, SwipeRefr\n     }\n \n     override fun searchedAccount(accounts: List<Account>) {\n-        showRecyclerView(true)\n-        accountsAdapter.setAccountsList(accounts)\n+        if (accounts.isEmpty()) {\n+            showEmptyAccounts()\n+        } else {\n+            showRecyclerView(true)\n+            accountsAdapter.setAccountsList(accounts)\n+        }\n     }\n \n     override fun onRefresh() {"
+  },
+  {
+    "sha": "f9594e82e475f24e8bfbf9db50711abedbe1ab20",
+    "filename": "app/src/main/java/org/apache/fineract/ui/online/accounting/ledgers/LedgerFragment.kt",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/fineract-cn-mobile/blob/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/accounting/ledgers/LedgerFragment.kt",
+    "raw_url": "https://github.com/apache/fineract-cn-mobile/raw/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/accounting/ledgers/LedgerFragment.kt",
+    "contents_url": "https://api.github.com/repos/apache/fineract-cn-mobile/contents/app/src/main/java/org/apache/fineract/ui/online/accounting/ledgers/LedgerFragment.kt?ref=cc107ca85251c858c69b8d2bdc7703d68e4e19e1",
+    "patch": "@@ -129,8 +129,12 @@ class LedgerFragment : FineractBaseFragment(), LedgerContract.View,\n     }\n \n     override fun searchedLedger(ledgers: List<Ledger>) {\n-        showRecyclerView(true)\n-        ledgerAdapter.setLedgerList(ledgers)\n+        if (ledgers.isEmpty()) {\n+            showEmptyLedgers()\n+        } else {\n+            showRecyclerView(true)\n+            ledgerAdapter.setLedgerList(ledgers)\n+        }\n     }\n \n     override fun showRecyclerView(status: Boolean) {"
+  },
+  {
+    "sha": "55a0685b27cf586079961da9b76229ae9f2ff05a",
+    "filename": "app/src/main/java/org/apache/fineract/ui/online/groups/grouplist/GroupListFragment.kt",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 1,
+    "changes": 29,
+    "blob_url": "https://github.com/apache/fineract-cn-mobile/blob/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/groups/grouplist/GroupListFragment.kt",
+    "raw_url": "https://github.com/apache/fineract-cn-mobile/raw/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/groups/grouplist/GroupListFragment.kt",
+    "contents_url": "https://api.github.com/repos/apache/fineract-cn-mobile/contents/app/src/main/java/org/apache/fineract/ui/online/groups/grouplist/GroupListFragment.kt?ref=cc107ca85251c858c69b8d2bdc7703d68e4e19e1",
+    "patch": "@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager\n import butterknife.ButterKnife\n import butterknife.OnClick\n import kotlinx.android.synthetic.main.fragment_group_list.*\n+import kotlinx.android.synthetic.main.fragment_group_list.layoutError\n import org.apache.fineract.R\n import org.apache.fineract.data.models.Group\n import org.apache.fineract.ui.adapters.GroupsAdapter\n@@ -65,6 +66,7 @@ class GroupListFragment : FineractBaseFragment(), OnItemClickListener {\n         (activity as FineractBaseActivity).activityComponent.inject(this)\n         viewModel = ViewModelProviders.of(this,\n                 groupViewModelFactory).get(GroupViewModel::class.java)\n+        initializeFineractUIErrorHandler(activity, rootView)\n         return rootView\n     }\n \n@@ -99,6 +101,7 @@ class GroupListFragment : FineractBaseFragment(), OnItemClickListener {\n         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {\n             override fun onQueryTextSubmit(query: String): Boolean {\n                 viewModel.searchGroup(groupList, query, searchedGroup)\n+                searchedGroups(adapter.groups)\n                 return false\n             }\n \n@@ -107,7 +110,8 @@ class GroupListFragment : FineractBaseFragment(), OnItemClickListener {\n                     adapter.setGroupList(groupList)\n                 }\n                 viewModel.searchGroup(groupList, newText, searchedGroup)\n-                return true\n+                searchedGroups(adapter.groups)\n+                return false\n             }\n         })\n     }\n@@ -130,4 +134,27 @@ class GroupListFragment : FineractBaseFragment(), OnItemClickListener {\n         startActivity(intent)\n     }\n \n+    private fun showRecyclerView(status: Boolean) {\n+        if (status) {\n+            rvGroups.visibility = View.VISIBLE\n+            layoutError.visibility = View.GONE\n+        } else {\n+            rvGroups.visibility = View.GONE\n+            layoutError.visibility = View.VISIBLE\n+        }\n+    }\n+\n+    private fun showEmptyProduct() {\n+        showRecyclerView(false)\n+        showFineractEmptyUI(getString(R.string.groups), getString(R.string.groups),\n+                R.drawable.ic_people_black_24dp)\n+    }\n+\n+    private fun searchedGroups(groups: List<Group>) {\n+        if (groups.isEmpty()) {\n+            showEmptyProduct()\n+        } else {\n+            showRecyclerView(true)\n+        }\n+    }\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "8245f67270fedb797d53eb819549f5be50a8509b",
+    "filename": "app/src/main/java/org/apache/fineract/ui/online/identification/identificationlist/IdentificationsFragment.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/apache/fineract-cn-mobile/blob/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/identification/identificationlist/IdentificationsFragment.java",
+    "raw_url": "https://github.com/apache/fineract-cn-mobile/raw/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/identification/identificationlist/IdentificationsFragment.java",
+    "contents_url": "https://api.github.com/repos/apache/fineract-cn-mobile/contents/app/src/main/java/org/apache/fineract/ui/online/identification/identificationlist/IdentificationsFragment.java?ref=cc107ca85251c858c69b8d2bdc7703d68e4e19e1",
+    "patch": "@@ -175,7 +175,12 @@ public void showMessage(String message) {\n \n     @Override\n     public void searchedIdentifications(List<Identification> identification) {\n-        identificationAdapter.setIdentifications(identification);\n+        if (identification.isEmpty()) {\n+            showEmptyIdentifications();\n+        } else {\n+            showRecyclerView(true);\n+            identificationAdapter.setIdentifications(identification);\n+        }\n     }\n \n     @Override"
+  },
+  {
+    "sha": "15db183e5ae34b6e3ff0b3c2960af37bee65be06",
+    "filename": "app/src/main/java/org/apache/fineract/ui/online/loanaccounts/loanaccountlist/LoanAccountsFragment.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/apache/fineract-cn-mobile/blob/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/loanaccounts/loanaccountlist/LoanAccountsFragment.java",
+    "raw_url": "https://github.com/apache/fineract-cn-mobile/raw/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/loanaccounts/loanaccountlist/LoanAccountsFragment.java",
+    "contents_url": "https://api.github.com/repos/apache/fineract-cn-mobile/contents/app/src/main/java/org/apache/fineract/ui/online/loanaccounts/loanaccountlist/LoanAccountsFragment.java?ref=cc107ca85251c858c69b8d2bdc7703d68e4e19e1",
+    "patch": "@@ -258,6 +258,11 @@ public boolean onQueryTextChange(String newText) {\n \n     @Override\n     public void searchedLoanAccounts(List<LoanAccount> loanAccountList) {\n-        customerLoanAdapter.setCustomerLoanAccounts(loanAccountList);\n+        if (loanAccountList.isEmpty()) {\n+            showEmptyLoanAccounts(String.valueOf(R.string.empty_customer_loans));\n+        } else {\n+            showRecyclerView(true);\n+            customerLoanAdapter.setCustomerLoanAccounts(loanAccountList);\n+        }\n     }\n }"
+  },
+  {
+    "sha": "dcec9331befa4c28952013502c8b58743e703fee",
+    "filename": "app/src/main/java/org/apache/fineract/ui/online/teller/TellerFragment.kt",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 5,
+    "changes": 14,
+    "blob_url": "https://github.com/apache/fineract-cn-mobile/blob/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/teller/TellerFragment.kt",
+    "raw_url": "https://github.com/apache/fineract-cn-mobile/raw/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/online/teller/TellerFragment.kt",
+    "contents_url": "https://api.github.com/repos/apache/fineract-cn-mobile/contents/app/src/main/java/org/apache/fineract/ui/online/teller/TellerFragment.kt?ref=cc107ca85251c858c69b8d2bdc7703d68e4e19e1",
+    "patch": "@@ -3,12 +3,12 @@ package org.apache.fineract.ui.online.teller\n import android.app.SearchManager\n import android.content.Context\n import android.os.Bundle\n-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout\n-import androidx.recyclerview.widget.LinearLayoutManager\n-import androidx.appcompat.widget.SearchView\n import android.text.TextUtils\n import android.view.*\n+import androidx.appcompat.widget.SearchView\n+import androidx.recyclerview.widget.LinearLayoutManager\n import androidx.recyclerview.widget.RecyclerView\n+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout\n import kotlinx.android.synthetic.main.fragment_teller.*\n import kotlinx.android.synthetic.main.layout_exception_handler.*\n import org.apache.fineract.R\n@@ -129,8 +129,12 @@ class TellerFragment : FineractBaseFragment(), TellerContract.View, SwipeRefresh\n     }\n \n     override fun searchedTeller(tellers: List<Teller>) {\n-        showRecyclerView(true)\n-        tellerAdapter.setTellerList(tellers)\n+        if (tellers.isEmpty()) {\n+            showEmptyTellers()\n+        } else {\n+            tellerAdapter.setTellerList(tellers)\n+            showRecyclerView(true)\n+        }\n     }\n \n     override fun showRecyclerView(status: Boolean) {"
+  },
+  {
+    "sha": "01ef5baba9049b98e0c87f3f0c632e86c9c572aa",
+    "filename": "app/src/main/java/org/apache/fineract/ui/product/ProductFragment.kt",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/fineract-cn-mobile/blob/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/product/ProductFragment.kt",
+    "raw_url": "https://github.com/apache/fineract-cn-mobile/raw/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/java/org/apache/fineract/ui/product/ProductFragment.kt",
+    "contents_url": "https://api.github.com/repos/apache/fineract-cn-mobile/contents/app/src/main/java/org/apache/fineract/ui/product/ProductFragment.kt?ref=cc107ca85251c858c69b8d2bdc7703d68e4e19e1",
+    "patch": "@@ -152,8 +152,12 @@ class ProductFragment : FineractBaseFragment(), ProductContract.View,\n     }\n \n     override fun searchedProduct(products: List<Product>) {\n-        //showRecyclerView(true)\n-        productAdapter.setProductsList(products)\n+        if (products.isEmpty()) {\n+            showEmptyProduct()\n+        } else {\n+            showRecyclerView(true)\n+            productAdapter.setProductsList(products)\n+        }\n     }\n \n     override fun showNoInternetConnection() {"
+  },
+  {
+    "sha": "fc0ef2cda16002327270ccdef53e0ee591c326b9",
+    "filename": "app/src/main/res/layout/fragment_group_list.xml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/fineract-cn-mobile/blob/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/res/layout/fragment_group_list.xml",
+    "raw_url": "https://github.com/apache/fineract-cn-mobile/raw/cc107ca85251c858c69b8d2bdc7703d68e4e19e1/app/src/main/res/layout/fragment_group_list.xml",
+    "contents_url": "https://api.github.com/repos/apache/fineract-cn-mobile/contents/app/src/main/res/layout/fragment_group_list.xml?ref=cc107ca85251c858c69b8d2bdc7703d68e4e19e1",
+    "patch": "@@ -10,6 +10,11 @@\n         android:layout_width=\"match_parent\"\n         android:layout_height=\"match_parent\" />\n \n+    <include\n+        layout=\"@layout/layout_exception_handler\"\n+        android:id=\"@+id/layoutError\"\n+        android:visibility=\"gone\"/>\n+\n     <com.google.android.material.floatingactionbutton.FloatingActionButton\n         android:id=\"@+id/fabAddGroup\"\n         android:layout_width=\"wrap_content\""
+  }
+]

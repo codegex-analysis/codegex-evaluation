@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "82aa934a0bf149cf170bd5625c76184adcfac7e8",
+    "filename": "src/main/java/com/diffbot/wikistatsextractor/extractors/ExtractContextualToken.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/dbpedia-spotlight/wikistatsextractor/blob/a52e2f6fa1a4a71e5e65c3b8c14ef707ff90e9df/src/main/java/com/diffbot/wikistatsextractor/extractors/ExtractContextualToken.java",
+    "raw_url": "https://github.com/dbpedia-spotlight/wikistatsextractor/raw/a52e2f6fa1a4a71e5e65c3b8c14ef707ff90e9df/src/main/java/com/diffbot/wikistatsextractor/extractors/ExtractContextualToken.java",
+    "contents_url": "https://api.github.com/repos/dbpedia-spotlight/wikistatsextractor/contents/src/main/java/com/diffbot/wikistatsextractor/extractors/ExtractContextualToken.java?ref=a52e2f6fa1a4a71e5e65c3b8c14ef707ff90e9df",
+    "patch": "@@ -455,7 +455,9 @@ public static void extractContextualToken(String path_to_dump, String tmp_folder\n \t\t\tString line = br.readLine();\n \t\t\twhile (line != null) {\n \t\t\t\tString[] split = Util.fastSplit(line);\n-\t\t\t\tredirections.put(split[0], split[1]);\n+\t\t\t\t//old: redirections.put(split[0], split[1]), sometimes length was 0\n+\t\t\t\tif(split.length > 1)\n+\t\t\t\t\tredirections.put(split[0], split[1]);\n \t\t\t\tline = br.readLine();\n \t\t\t}\n \t\t\tbr.close();"
+  },
+  {
+    "sha": "8ead554968d8c813bea1b7ac0dba06a04944a5c5",
+    "filename": "src/main/java/com/diffbot/wikistatsextractor/util/Util.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 2,
+    "changes": 17,
+    "blob_url": "https://github.com/dbpedia-spotlight/wikistatsextractor/blob/a52e2f6fa1a4a71e5e65c3b8c14ef707ff90e9df/src/main/java/com/diffbot/wikistatsextractor/util/Util.java",
+    "raw_url": "https://github.com/dbpedia-spotlight/wikistatsextractor/raw/a52e2f6fa1a4a71e5e65c3b8c14ef707ff90e9df/src/main/java/com/diffbot/wikistatsextractor/util/Util.java",
+    "contents_url": "https://api.github.com/repos/dbpedia-spotlight/wikistatsextractor/contents/src/main/java/com/diffbot/wikistatsextractor/util/Util.java?ref=a52e2f6fa1a4a71e5e65c3b8c14ef707ff90e9df",
+    "patch": "@@ -6,6 +6,8 @@\n import java.net.URLDecoder;\n import java.net.URLEncoder;\n import java.util.*;\n+import java.util.regex.Matcher;\n+import java.util.regex.Pattern;\n \n  /** some Utils methods */\n public class Util {\n@@ -44,10 +46,21 @@\n \t\t}\n \n \t\t/** go to the index of the text */\n-\t\tint index_text = page.indexOf(\"<text xml:space=\\\"preserve\\\">\");\n+\t\tString patternStr = \"<text.*xml:space=\\\"preserve\\\">\";\n+\t\tPattern patternIndex = Pattern.compile(patternStr);\n+\t\tMatcher matcherIndex = patternIndex.matcher(page);\n+\t\t//old pattern version: int index_text = page.indexOf(\"<text xml:space=\\\"preserve\\\">\");\n+\t\tint index_text = -1;\n+\t\tString preserve = \"\";\n+\t\tif(matcherIndex.find()) {\n+\t\t\tindex_text = matcherIndex.start();\n+\t\t\tpreserve = page.substring(index_text,matcherIndex.end());\n+\t\t\t//System.out.println(preserve + \"...\");\n+\t\t}\n \t\tif (index_text == -1)\n \t\t\treturn null;\n-\t\tindex_text += \"<text xml:space=\\\"preserve\\\">\".length();\n+\t\t//index_text += \"<text xml:space=\\\"preserve\\\">\".length();\n+\t\tindex_text += preserve.length();\n \n \t\t/** locate the end */\n \t\tint end_text = page.indexOf(\"</text>\");"
+  }
+]

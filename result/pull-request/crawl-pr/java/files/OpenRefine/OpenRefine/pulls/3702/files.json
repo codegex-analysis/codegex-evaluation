@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "bb722ed573088b0cb010db91dfc5d87cf78ee797",
+    "filename": "extensions/wikidata/module/scripts/dialogs/manage-account-dialog.js",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/scripts/dialogs/manage-account-dialog.js",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/scripts/dialogs/manage-account-dialog.js",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/module/scripts/dialogs/manage-account-dialog.js?ref=184022d922b47cab64eb909748b2d2c184b00246",
+    "patch": "@@ -79,6 +79,10 @@ ManageAccountDialog.displayPasswordLogin = function (onSuccess) {\n   const frame = $(DOM.loadHTML(\"wikidata\", \"scripts/dialogs/password-login-dialog.html\"));\n   const elmts = DOM.bind(frame);\n   ManageAccountDialog.initCommon(elmts);\n+  WikibaseManager.getSelectedWikibaseLogoURL(function(data) {\n+\telmts.wikibaseLogoImg.attr(\"src\", data);\n+  });\n+  elmts.wikibaseMainPage.attr(\"href\", WikibaseManager.getSelectedWikibaseMainPage());\n   elmts.explainBotPasswords.html($.i18n('wikibase-account/explain-bot-passwords', WikibaseManager.getSelectedWikibaseRoot() + 'Special:BotPasswords'));\n   elmts.explainOwnerOnlyConsumerLogin.html($.i18n('wikibase-account/explain-owner-only-consumer-login'));\n   elmts.invalidCredentials.text($.i18n('wikibase-account/invalid-credentials'));"
+  },
+  {
+    "sha": "962791d9312e3321508fbcd38942a8bbff6d8811",
+    "filename": "extensions/wikidata/module/scripts/dialogs/password-login-dialog.html",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/scripts/dialogs/password-login-dialog.html",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/scripts/dialogs/password-login-dialog.html",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/module/scripts/dialogs/password-login-dialog.html?ref=184022d922b47cab64eb909748b2d2c184b00246",
+    "patch": "@@ -2,8 +2,8 @@\n   <div class=\"dialog-header\" bind=\"dialogHeader\"></div>\n   <div class=\"dialog-body\" bind=\"dialogBody\" style=\"position: relative; height: 140px\">\n     <div class=\"wikidata-logo\">\n-      <a href=\"https://www.wikidata.org/\" target=\"_blank\">\n-        <img src=\"extension/wikidata/images/Wikibase_logo.png\" alt=\"Wikidata logo\"/>\n+      <a bind=\"wikibaseMainPage\" target=\"_blank\">\n+        <img bind=\"wikibaseLogoImg\" alt=\"Wikidata logo\"/>\n       </a>\n     </div>\n     <div class=\"right-of-logo\">"
+  },
+  {
+    "sha": "7a7cc4d7b5fc5089dbf09bb19c29bf5f083491e9",
+    "filename": "extensions/wikidata/module/scripts/dialogs/wikibase-dialog.js",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 10,
+    "changes": 23,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/scripts/dialogs/wikibase-dialog.js",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/scripts/dialogs/wikibase-dialog.js",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/module/scripts/dialogs/wikibase-dialog.js?ref=184022d922b47cab64eb909748b2d2c184b00246",
+    "patch": "@@ -28,17 +28,20 @@ WikibaseDialog.populateDialog = function () {\n \n   WikibaseDialog.elmts.wikibaseList.empty();\n   for (let wikibaseName in wikibases) {\n-    if (wikibases.hasOwnProperty(wikibaseName)) {\n-      let item = \"<tr onclick=\\\"WikibaseDialog.selectWikibase('\" + wikibaseName + \"')\\\">\";\n-      item += \"<td>\" + wikibaseName + \"</td>\";\n-      if (wikibaseName.toLowerCase() === WikibaseManager.getSelectedWikibaseName().toLowerCase()) {\n-        item += \"<td><a class=\\\"wikibase-dialog-selector-remove wikibase-selected\\\" onclick=\\\"void(0)\\\"></a></td>\";\n-      } else {\n-        item += \"<td><a class=\\\"wikibase-dialog-selector-remove\\\" onclick=\\\"WikibaseDialog.removeWikibase(event, '\" + wikibaseName + \"')\\\"></a></td>\";\n+    WikibaseManager.getSelectedWikibaseLogoURL(function(data) {\n+      if (wikibases.hasOwnProperty(wikibaseName)) {\n+        let item = \"<tr onclick=\\\"WikibaseDialog.selectWikibase('\" + wikibaseName + \"')\\\">\";\n+        item += \"<td class=\\\"wikibase-dialog-wikibase-logo\\\">\" + \"<img src=\\\"\"+ data + \"\\\" alt=\\\"Wikidata logo\\\"/>\" + \"</td>\";\n+        item += \"<td>\" + wikibaseName + \"</td>\";\n+        if (wikibaseName.toLowerCase() === WikibaseManager.getSelectedWikibaseName().toLowerCase()) {\n+          item += \"<td><a class=\\\"wikibase-dialog-selector-remove wikibase-selected\\\" onclick=\\\"void(0)\\\"></a></td>\";\n+        } else {\n+\t      item += \"<td><a class=\\\"wikibase-dialog-selector-remove\\\" onclick=\\\"WikibaseDialog.removeWikibase(event, '\" + wikibaseName + \"')\\\"></a></td>\";\n+        }\n+        item += \"</tr>\";\n+        WikibaseDialog.elmts.wikibaseList.append(item);\n       }\n-      item += \"</tr>\";\n-      WikibaseDialog.elmts.wikibaseList.append(item);\n-    }\n+\t}, wikibaseName);\n   }\n };\n "
+  },
+  {
+    "sha": "94d450dc0123ef3eb8005654c37e253ce4d52464",
+    "filename": "extensions/wikidata/module/scripts/wikibase-manager.js",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/scripts/wikibase-manager.js",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/scripts/wikibase-manager.js",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/module/scripts/wikibase-manager.js?ref=184022d922b47cab64eb909748b2d2c184b00246",
+    "patch": "@@ -188,3 +188,34 @@ WikibaseManager.fetchManifestFromURL = function (manifestURL, onSuccess, onError\n   });\n };\n \n+// Retrives the wikibaseName instance site info, if wikibaseName is empty returns the selected wikibase site info\n+WikibaseManager.getSelectedWikibaseSiteInfo = function(onSuccess, onError, wikibaseName) {\n+  var params = {\n+    action: 'query',\n+    meta: 'siteinfo',\n+    format: 'json'\n+  };\n+  let wikibase = (wikibaseName) ? WikibaseManager.wikibases[wikibaseName] : WikibaseManager.getSelectedWikibase();\n+  return $.ajax({\n+    url: wikibase.mediawiki.api,\n+    data: params,\n+    dataType: \"jsonp\",\n+    timeout: 750,\n+    success: function(response) {\n+      onSuccess(response.query);\n+    },\n+    error: function(xhr, status, error) {\n+      onError(xhr, status, error);\n+\t},\n+  });\n+};\n+\n+// Retrives the logo url of wikibaseName, if wikibaseName is empty returns the selected wikibase logo url\n+WikibaseManager.getSelectedWikibaseLogoURL = function(onDone, wikibaseName) {\n+  WikibaseManager.getSelectedWikibaseSiteInfo(function(data) {\n+    onDone(data.general.logo);\n+  }, function(xhr, status, error) {\n+    onDone(\"extension/wikidata/images/Wikibase_logo.png\");\n+  }, wikibaseName);\n+};\n+"
+  },
+  {
+    "sha": "6495aa5a0e1869362aeb878a776b67cc8d79ec0d",
+    "filename": "extensions/wikidata/module/styles/dialogs/wikibase-dialog.less",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/styles/dialogs/wikibase-dialog.less",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/184022d922b47cab64eb909748b2d2c184b00246/extensions/wikidata/module/styles/dialogs/wikibase-dialog.less",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/module/styles/dialogs/wikibase-dialog.less?ref=184022d922b47cab64eb909748b2d2c184b00246",
+    "patch": "@@ -42,3 +42,12 @@\n .wikibase-dialog-selector-remove.wikibase-selected:hover {\n   cursor: not-allowed;\n }\n+\n+.wikibase-dialog-wikibase-logo {\n+  width: 12%;\n+}\n+\n+.wikibase-dialog-wikibase-logo img{\n+  max-height: 60px;\n+  max-width: 60px;\n+}\n\\ No newline at end of file"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "05b969ca7b1b577b68265db48daca56302649a2c",
+    "filename": "dev/com.ibm.ws.security.social/resources/OSGI-INF/l10n/metatype.properties",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/1f6e0ee57549bf199aabc5b9fe02bb2a40c342bc/dev/com.ibm.ws.security.social/resources/OSGI-INF/l10n/metatype.properties",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/1f6e0ee57549bf199aabc5b9fe02bb2a40c342bc/dev/com.ibm.ws.security.social/resources/OSGI-INF/l10n/metatype.properties",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.security.social/resources/OSGI-INF/l10n/metatype.properties?ref=1f6e0ee57549bf199aabc5b9fe02bb2a40c342bc",
+    "patch": "@@ -1,5 +1,5 @@\n ###############################################################################\n-# Copyright (c) 2016, 2018 IBM Corporation and others.\n+# Copyright (c) 2016, 2021 IBM Corporation and others.\n # All rights reserved. This program and the accompanying materials\n # are made available under the terms of the Eclipse Public License v1.0\n # which accompanies this distribution, and is available at\n@@ -267,3 +267,6 @@ userValidationApi.desc=URL that is used to retrieve information about a user fro\n \n apiResponseCacheTime=User API response cache time\n apiResponseCacheTime.desc=The length of time for which the social login feature caches the response from the user validation API. If a response is cached and the length of time that is specified by this attribute has passed, a new request to the user validation API is sent.\n+\n+createSession=Create session\n+createSession.desc=Specifies whether to create an HttpSession if the current HttpSession does not exist."
+  },
+  {
+    "sha": "2b9ca902546f32041d75622afafdc1edb33d5af3",
+    "filename": "dev/com.ibm.ws.security.social/resources/OSGI-INF/metatype/metatype.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/1f6e0ee57549bf199aabc5b9fe02bb2a40c342bc/dev/com.ibm.ws.security.social/resources/OSGI-INF/metatype/metatype.xml",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/1f6e0ee57549bf199aabc5b9fe02bb2a40c342bc/dev/com.ibm.ws.security.social/resources/OSGI-INF/metatype/metatype.xml",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.security.social/resources/OSGI-INF/metatype/metatype.xml?ref=1f6e0ee57549bf199aabc5b9fe02bb2a40c342bc",
+    "patch": "@@ -1,6 +1,6 @@\n <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n <!--\n-    Copyright (c) 2016, 2020 IBM Corporation and others.\n+    Copyright (c) 2016, 2021 IBM Corporation and others.\n     All rights reserved. This program and the accompanying materials\n     are made available under the terms of the Eclipse Public License v1.0\n     which accompanies this distribution, and is available at\n@@ -446,6 +446,7 @@\n         <AD id=\"userinfoParameter\" name=\"internal\" description=\"internal use only\" required=\"false\" type=\"String\" ibm:type=\"pid\" ibm:reference=\"com.ibm.ws.security.social.client.param\" cardinality=\"20\" />\n         <AD id=\"jwkParameter\" name=\"internal\" description=\"internal use only\" required=\"false\" type=\"String\" ibm:type=\"pid\" ibm:reference=\"com.ibm.ws.security.social.client.param\" cardinality=\"20\" />\n         <AD id=\"forwardLoginParameter\" name=\"internal\" description=\"internal use only\" required=\"false\" type=\"String\" cardinality=\"2147483647\" />\n+        <AD id=\"createSession\" name=\"%createSession\" description=\"%createSession.desc\" required=\"false\" type=\"Boolean\" default=\"false\" ibm:beta=\"true\" />\n     </OCD>\n     \n      <OCD id=\"com.ibm.ws.security.social.client.param.metatype\" name=\"%oidcClientCustomRequestParam\" description=\"%oidcClientCustomRequestParam.desc\" "
+  },
+  {
+    "sha": "f83757fc32cac76803e023f19f1852b2c7859613",
+    "filename": "dev/com.ibm.ws.security.social/src/com/ibm/ws/security/social/internal/OidcLoginConfigImpl.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/1f6e0ee57549bf199aabc5b9fe02bb2a40c342bc/dev/com.ibm.ws.security.social/src/com/ibm/ws/security/social/internal/OidcLoginConfigImpl.java",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/1f6e0ee57549bf199aabc5b9fe02bb2a40c342bc/dev/com.ibm.ws.security.social/src/com/ibm/ws/security/social/internal/OidcLoginConfigImpl.java",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.security.social/src/com/ibm/ws/security/social/internal/OidcLoginConfigImpl.java?ref=1f6e0ee57549bf199aabc5b9fe02bb2a40c342bc",
+    "patch": "@@ -1,5 +1,5 @@\n /*******************************************************************************\n- * Copyright (c) 2016, 2020 IBM Corporation and others.\n+ * Copyright (c) 2016, 2021 IBM Corporation and others.\n  * All rights reserved. This program and the accompanying materials\n  * are made available under the terms of the Eclipse Public License v1.0\n  * which accompanies this distribution, and is available at\n@@ -108,6 +108,8 @@\n \n     public static final String KEY_INCLUDE_CUSTOM_CACHE_KEY_IN_SUBJECT = \"includeCustomCacheKeyInSubject\";\n     private boolean includeCustomCacheKeyInSubject = true;\n+    public static final String KEY_CREATE_SESSION = \"createSession\";\n+    private boolean createSession = false;\n \n     public static final String KEY_AUTHZ_PARAM = \"authzParameter\";\n     public static final String KEY_TOKEN_PARAM = \"tokenParameter\";\n@@ -187,6 +189,7 @@ protected void setAllConfigAttributes(Map<String, Object> props) throws SocialLo\n         this.realmName = configUtils.getConfigAttribute(props, KEY_realmName);\n         this.includeCustomCacheKeyInSubject = configUtils.getBooleanConfigAttribute(props, KEY_INCLUDE_CUSTOM_CACHE_KEY_IN_SUBJECT, this.includeCustomCacheKeyInSubject);\n         this.resource = configUtils.getConfigAttribute(props, KEY_resource);\n+        this.createSession = configUtils.getBooleanConfigAttribute(props, KEY_CREATE_SESSION, this.createSession);\n \n         authzRequestParamMap = populateCustomRequestParameterMap(props, KEY_AUTHZ_PARAM);\n         tokenRequestParamMap = populateCustomRequestParameterMap(props, KEY_TOKEN_PARAM);\n@@ -643,7 +646,7 @@ public String getAuthorizationEndpointUrl() {\n     /** {@inheritDoc} */\n     @Override\n     public boolean createSession() {\n-        return false;\n+        return createSession;\n     }\n \n     /** {@inheritDoc} */"
+  }
+]

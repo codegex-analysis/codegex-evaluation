@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "1435f73d3b8e6786ff3154fd5d0fb768e6d6937b",
+    "filename": "Lesson5/src/main/java/Car.java",
+    "status": "added",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/Evengarr/TasksForLesson3/blob/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Car.java",
+    "raw_url": "https://github.com/Evengarr/TasksForLesson3/raw/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Car.java",
+    "contents_url": "https://api.github.com/repos/Evengarr/TasksForLesson3/contents/Lesson5/src/main/java/Car.java?ref=23c56d8e6507f0a0822220c4adf690a6936e716c",
+    "patch": "@@ -0,0 +1,58 @@\n+import java.util.concurrent.CyclicBarrier;\n+\n+public class Car implements Runnable {\n+    private static int CARS_COUNT;\n+    private static boolean winnerFound;\n+\n+    static {\n+        CARS_COUNT = 0;\n+    }\n+\n+    private final Race race;\n+    private final int speed;\n+    private final String name;\n+    private final CyclicBarrier cb;\n+\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public int getSpeed() {\n+        return speed;\n+    }\n+\n+    public Car(Race race, int speed, CyclicBarrier cb) {\n+        this.race = race;\n+        this.speed = speed;\n+        CARS_COUNT++;\n+        this.name = \"Участник #\" + CARS_COUNT;\n+        this.cb = cb;\n+    }\n+\n+    @Override\n+    public void run() {\n+        try {\n+            System.out.println(this.name + \" готовится\");\n+            Thread.sleep(500 + (int) (Math.random() * 800));\n+            System.out.println(this.name + \" готов\");\n+            cb.await();\n+            cb.await();\n+            for (int i = 0; i < race.getStages().size(); i++) {\n+                race.getStages().get(i).go(this);\n+            }\n+            checkWinner(this);\n+\n+            cb.await();\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+    private static synchronized void checkWinner(Car c) {\n+        if (!winnerFound) {\n+            System.err.println(c.name + \" - Победил!!!\");\n+            winnerFound = true;\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "f9274fb87cd88b63ed953f7f551bab0437b07f18",
+    "filename": "Lesson5/src/main/java/Race.java",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/Evengarr/TasksForLesson3/blob/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Race.java",
+    "raw_url": "https://github.com/Evengarr/TasksForLesson3/raw/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Race.java",
+    "contents_url": "https://api.github.com/repos/Evengarr/TasksForLesson3/contents/Lesson5/src/main/java/Race.java?ref=23c56d8e6507f0a0822220c4adf690a6936e716c",
+    "patch": "@@ -0,0 +1,14 @@\n+import java.util.ArrayList;\n+import java.util.Arrays;\n+\n+public class Race {\n+    private final ArrayList<Stage> stages;\n+\n+    public ArrayList<Stage> getStages() {\n+        return stages;\n+    }\n+\n+    public Race(Stage... stages) {\n+        this.stages = new ArrayList<>(Arrays.asList(stages));\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "02642572980f10675fe3f2a5e2bdb238dd882736",
+    "filename": "Lesson5/src/main/java/Road.java",
+    "status": "added",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/Evengarr/TasksForLesson3/blob/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Road.java",
+    "raw_url": "https://github.com/Evengarr/TasksForLesson3/raw/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Road.java",
+    "contents_url": "https://api.github.com/repos/Evengarr/TasksForLesson3/contents/Lesson5/src/main/java/Road.java?ref=23c56d8e6507f0a0822220c4adf690a6936e716c",
+    "patch": "@@ -0,0 +1,17 @@\n+public class Road extends Stage {\n+    public Road(int length) {\n+        this.length = length;\n+        this.description = \"Дорога \" + length + \" метров\";\n+    }\n+\n+    @Override\n+    public void go(Car c) {\n+        try {\n+            System.out.println(c.getName() + \" начал этап: \" + description);\n+            Thread.sleep(length / c.getSpeed() * 1000L);\n+            System.out.println(c.getName() + \" закончил этап: \" + description);\n+        } catch (InterruptedException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "6743bd0935af269dbf4fa1705bdc090d90eea1c3",
+    "filename": "Lesson5/src/main/java/Stage.java",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/Evengarr/TasksForLesson3/blob/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Stage.java",
+    "raw_url": "https://github.com/Evengarr/TasksForLesson3/raw/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Stage.java",
+    "contents_url": "https://api.github.com/repos/Evengarr/TasksForLesson3/contents/Lesson5/src/main/java/Stage.java?ref=23c56d8e6507f0a0822220c4adf690a6936e716c",
+    "patch": "@@ -0,0 +1,6 @@\n+public abstract class Stage {\n+    protected int length;\n+    protected String description;\n+\n+    public abstract void go(Car c);\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "917dd1ab0e9e39a2e5c56d0ad7ab1cfaf3d0b565",
+    "filename": "Lesson5/src/main/java/TaskForLesson5.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/Evengarr/TasksForLesson3/blob/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/TaskForLesson5.java",
+    "raw_url": "https://github.com/Evengarr/TasksForLesson3/raw/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/TaskForLesson5.java",
+    "contents_url": "https://api.github.com/repos/Evengarr/TasksForLesson3/contents/Lesson5/src/main/java/TaskForLesson5.java?ref=23c56d8e6507f0a0822220c4adf690a6936e716c",
+    "patch": "@@ -0,0 +1,29 @@\n+import java.util.concurrent.CyclicBarrier;\n+\n+public class TaskForLesson5 {\n+\n+    public static final int CARS_COUNT = 4;\n+    public static final int HALF_CARS_COUNT = CARS_COUNT / 2;\n+\n+    public static void main(String[] args) {\n+        System.err.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Подготовка!!!\");\n+        CyclicBarrier cb = new CyclicBarrier(5);\n+        Race race = new Race(new Road(60), new Tunnel(), new Road(40));\n+        Car[] cars = new Car[CARS_COUNT];\n+        for (int i = 0; i < cars.length; i++) {\n+            cars[i] = new Car(race, 20 + (int) (Math.random() * 10), cb);\n+        }\n+        for (Car car : cars) {\n+            new Thread(car).start();\n+        }\n+        try {\n+            cb.await();\n+            System.err.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка началась!!!\");\n+            cb.await();\n+            cb.await();\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        }\n+        System.err.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка закончилась!!!\");\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "520ad45a8d21676f1984bde73572377b580fc1a3",
+    "filename": "Lesson5/src/main/java/Tunnel.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/Evengarr/TasksForLesson3/blob/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Tunnel.java",
+    "raw_url": "https://github.com/Evengarr/TasksForLesson3/raw/23c56d8e6507f0a0822220c4adf690a6936e716c/Lesson5/src/main/java/Tunnel.java",
+    "contents_url": "https://api.github.com/repos/Evengarr/TasksForLesson3/contents/Lesson5/src/main/java/Tunnel.java?ref=23c56d8e6507f0a0822220c4adf690a6936e716c",
+    "patch": "@@ -0,0 +1,29 @@\n+import java.util.concurrent.Semaphore;\n+\n+public class Tunnel extends Stage {\n+    Semaphore smp = new Semaphore(TaskForLesson5.HALF_CARS_COUNT);\n+\n+    public Tunnel() {\n+        this.length = 80;\n+        this.description = \"Тоннель \" + length + \" метров\";\n+    }\n+\n+    @Override\n+    public void go(Car c) {\n+        try {\n+            try {\n+                System.out.println(c.getName() + \" готовится к этапу(ждет): \" + description);\n+                smp.acquire();\n+                System.out.println(c.getName() + \" начал этап: \" + description);\n+                Thread.sleep(length / c.getSpeed() * 1000L);\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            } finally {\n+                System.out.println(c.getName() + \" закончил этап: \" + description);\n+                smp.release();\n+            }\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}"
+  }
+]

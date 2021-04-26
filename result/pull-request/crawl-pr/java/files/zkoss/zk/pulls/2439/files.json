@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "9a4a9e08f073c1a20f6868d2ecceb31aa105f70f",
+    "filename": "zkdoc/release-note",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/zkoss/zk/blob/c6dcdbb7e00c549c422822eff493cb7ac191a414/zkdoc/release-note",
+    "raw_url": "https://github.com/zkoss/zk/raw/c6dcdbb7e00c549c422822eff493cb7ac191a414/zkdoc/release-note",
+    "contents_url": "https://api.github.com/repos/zkoss/zk/contents/zkdoc/release-note?ref=c6dcdbb7e00c549c422822eff493cb7ac191a414",
+    "patch": "@@ -23,6 +23,7 @@ ZK 9.6.0\n   ZK-4636: Slider curpos might be larger then maxpos while dragging\n   ZK-4784: detached Radio(Group) memory leak\n   ZK-4778: Memory Leak: DesktopEventQueue$ListenerInfo\n+  ZK-4809: race condition with comet server push (servlet 3) on Tomcat\n \n * Upgrade Notes\n   + The default desktop ID generator was replaced by a more secured one."
+  },
+  {
+    "sha": "67e3148ade7d3c4cbd008cb6eeffbbd2d24b5065",
+    "filename": "zktest/src/archive/test2/B96-ZK-4809.zul",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/zkoss/zk/blob/c6dcdbb7e00c549c422822eff493cb7ac191a414/zktest/src/archive/test2/B96-ZK-4809.zul",
+    "raw_url": "https://github.com/zkoss/zk/raw/c6dcdbb7e00c549c422822eff493cb7ac191a414/zktest/src/archive/test2/B96-ZK-4809.zul",
+    "contents_url": "https://api.github.com/repos/zkoss/zk/contents/zktest/src/archive/test2/B96-ZK-4809.zul?ref=c6dcdbb7e00c549c422822eff493cb7ac191a414",
+    "patch": "@@ -0,0 +1,30 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<!--\n+B96-ZK-4809.zul\n+\n+\tPurpose:\n+\t\t\n+\tDescription:\n+\t\t\n+\tHistory:\n+\t\tThu Mar 18 12:46:37 CST 2021, Created by rudyhuang\n+\n+Copyright (C) 2021 Potix Corporation. All Rights Reserved.\n+\n+-->\n+<zk xmlns:w=\"client\">\n+    <label multiline=\"true\">\n+        Only found on Tomcat.\n+        1. Add a breakpoint at org.zkoss.zkex.ui.comet.CometServerPush#activate (_active = info;)\n+        2. Click \"start long-op\"\n+        3. Click \"stop long-op\" (reaches the breakpoint)\n+        4. Click \"simulate comet re-connect\"\n+        5. Continue the code from the breakpoint\n+        6. No exception in console log\n+    </label>\n+    <div id=\"main\" apply=\"org.zkoss.zktest.test2.B96_ZK_4809Composer\">\n+        <button id=\"start\" label=\"start long-op\"/>\n+        <button id=\"stop\" label=\"stop long-op\"/>\n+        <button label=\"simulate comet re-connect\" w:onClick=\"zkmax.cmsp.stop();zkmax.cmsp.start();\"/>\n+    </div>\n+</zk>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "82c79ade2fc0d5dda80d49cc16964329163419db",
+    "filename": "zktest/src/archive/test2/config.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/zkoss/zk/blob/c6dcdbb7e00c549c422822eff493cb7ac191a414/zktest/src/archive/test2/config.properties",
+    "raw_url": "https://github.com/zkoss/zk/raw/c6dcdbb7e00c549c422822eff493cb7ac191a414/zktest/src/archive/test2/config.properties",
+    "contents_url": "https://api.github.com/repos/zkoss/zk/contents/zktest/src/archive/test2/config.properties?ref=c6dcdbb7e00c549c422822eff493cb7ac191a414",
+    "patch": "@@ -2938,6 +2938,7 @@ B90-ZK-4431.zul=A,E,Multislider\n ##zats##B96-ZK-4636.zul=A,E,Slider,drag,curpos\r\n ##manually##B96-ZK-4784.zul=A,E,Radio,Radiogroup,MemoryLeak,detach\r\n ##zats##B96-ZK-4778.zul=A,E,MVVM,detach,EventQueue,Listener,MemoryLeak\r\n+##manually##B96-ZK-4809.zul=A,M,Comet,ServerPush,activate,retry,RaceCondition,Tomcat\r\n \r\n ##\r\n # Features - 3.0.x version\r"
+  },
+  {
+    "sha": "5804e5a1e55d3e714cd59109a295e9e5c5bd0a09",
+    "filename": "zktest/src/org/zkoss/zktest/test2/B96_ZK_4809Composer.java",
+    "status": "added",
+    "additions": 94,
+    "deletions": 0,
+    "changes": 94,
+    "blob_url": "https://github.com/zkoss/zk/blob/c6dcdbb7e00c549c422822eff493cb7ac191a414/zktest/src/org/zkoss/zktest/test2/B96_ZK_4809Composer.java",
+    "raw_url": "https://github.com/zkoss/zk/raw/c6dcdbb7e00c549c422822eff493cb7ac191a414/zktest/src/org/zkoss/zktest/test2/B96_ZK_4809Composer.java",
+    "contents_url": "https://api.github.com/repos/zkoss/zk/contents/zktest/src/org/zkoss/zktest/test2/B96_ZK_4809Composer.java?ref=c6dcdbb7e00c549c422822eff493cb7ac191a414",
+    "patch": "@@ -0,0 +1,94 @@\n+/* B96_ZK_4809Composer.java\n+\n+\tPurpose:\n+\t\t\n+\tDescription:\n+\t\t\n+\tHistory:\n+\t\tThu Mar 18 12:47:43 CST 2021, Created by rudyhuang\n+\n+Copyright (C) 2021 Potix Corporation. All Rights Reserved.\n+*/\n+package org.zkoss.zktest.test2;\n+\n+import java.util.concurrent.CompletableFuture;\n+import java.util.concurrent.atomic.AtomicBoolean;\n+\n+import org.zkoss.zk.ui.Component;\n+import org.zkoss.zk.ui.Desktop;\n+import org.zkoss.zk.ui.Execution;\n+import org.zkoss.zk.ui.Executions;\n+import org.zkoss.zk.ui.event.Events;\n+import org.zkoss.zk.ui.select.SelectorComposer;\n+import org.zkoss.zk.ui.select.annotation.Listen;\n+\n+/**\n+ * @author rudyhuang\n+ */\n+public class B96_ZK_4809Composer extends SelectorComposer<Component> {\n+\tprivate final AtomicBoolean _running = new AtomicBoolean(false);\n+\n+\t@Override\n+\tpublic void doAfterCompose(Component comp) throws Exception {\n+\t\tsuper.doAfterCompose(comp);\n+\t\tExecutions.getCurrent().getDesktop().enableServerPush(true);\n+\t}\n+\n+\t@Listen(\"onClick=#start\")\n+\tpublic void startLongOp() {\n+\t\t_running.set(true);\n+\t\tlogThread(\"Start\");\n+\n+\t\tfinal Desktop desktop = Executions.getCurrent().getDesktop();\n+\t\tCompletableFuture.runAsync(() -> {\n+\t\t\tlogThread(\"started\");\n+\t\t\twhile (_running.get()) {\n+\t\t\t\ttry {\n+\t\t\t\t\tThread.sleep(1000);\n+\t\t\t\t} catch (InterruptedException e) {\n+\t\t\t\t\te.printStackTrace();\n+\t\t\t\t\treturn;\n+\t\t\t\t}\n+\t\t\t}\n+\t\t\tlogThread(\"stopped\");\n+\t\t\ttry {\n+\t\t\t\tExecutions.activate(desktop);\n+\t\t\t\tlogThread(\"activated\");\n+\t\t\t\t// set an attribute to the current Request object\n+\t\t\t\tExecutions.getCurrent().setAttribute(\"test\", \"1234\");\n+\t\t\t} catch (Exception e) {\n+\t\t\t\te.printStackTrace();\n+\t\t\t} finally {\n+\t\t\t\tlogThread(\"deactivate\");\n+\t\t\t\t//comment this out, and comment in the next line for another Exception (not shown in the UI)\n+\t\t\t\tEvents.postEvent(\"onCustom\", this.getSelf(), null);\n+\t\t\t\t// removing the request attribute here, causes a different kind of exception\n+//\t\t\t\tString test = (String) Executions.getCurrent().removeAttribute(\"test\");\n+\t\t\t\tExecutions.deactivate(desktop);\n+\t\t\t}\n+\t\t});\n+\t}\n+\n+\t@Listen(\"onClick=#stop\")\n+\tpublic void stopLongOp() {\n+\t\t_running.set(false);\n+\t}\n+\n+\t@Listen(\"onCustom=#main\")\n+\tpublic void handleCustomEvent() {\n+\t\tlogThread(\"onCustom\");\n+\t\t// ERROR happens here when removing the request attribute\n+\t\tString test = (String) Executions.getCurrent().removeAttribute(\"test\");\n+\t\tlogThread(\"removed attribute 'test'=\" + test);\n+\t}\n+\n+\tprivate void logThread(String msg) {\n+\t\tExecution exec = Executions.getCurrent();\n+\t\tObject req = null;\n+\t\tif (exec != null) {\n+\t\t\treq = exec.getNativeRequest();\n+\t\t}\n+\t\tSystem.out.println(String.format(\"[%s] %s %s %s\",\n+\t\t\t\tThread.currentThread().getName(), msg, exec, req));\n+\t}\n+}"
+  }
+]

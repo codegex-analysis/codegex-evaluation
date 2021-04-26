@@ -1,0 +1,87 @@
+[
+  {
+    "sha": "923ac7041094e05dfa955a7e220396ab1f3b303a",
+    "filename": "self-magritte/self.example.json",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/Chrisbattarbee/self/blob/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-magritte/self.example.json",
+    "raw_url": "https://github.com/Chrisbattarbee/self/raw/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-magritte/self.example.json",
+    "contents_url": "https://api.github.com/repos/Chrisbattarbee/self/contents/self-magritte/self.example.json?ref=15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c",
+    "patch": "@@ -3,6 +3,8 @@\n   \"calories\": {\n     \"when\": \"schedule.every(10).seconds.do(job, config=config)\",\n     \"mfp_username\": \"X\",\n-    \"mfp_password\": \"Y\"\n+    \"mfp_password\": \"Y\",\n+    \"should_run_historical_job\": false,\n+    \"historical_job_from_date\": \"2015-01-01\"\n   }\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "75882daa2a03ab5d75931cf45421d8702cd61c2f",
+    "filename": "self-magritte/src/__init__.py",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/Chrisbattarbee/self/blob/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-magritte/src/__init__.py",
+    "raw_url": "https://github.com/Chrisbattarbee/self/raw/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-magritte/src/__init__.py",
+    "contents_url": "https://api.github.com/repos/Chrisbattarbee/self/contents/self-magritte/src/__init__.py?ref=15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c",
+    "patch": "@@ -1,4 +1,4 @@\n-from .calories import run_job as calories_run_job\n+from ingesters.calories import CalorieIngest\n import json\n import schedule\n import time\n@@ -10,7 +10,8 @@ def main():\n     with open(sys.argv[1]) as json_config:\n         config = json.load(json_config)\n \n-    job = calories_run_job\n+    job = CalorieIngest.run_job\n+    calorie_ingest = CalorieIngest(config)\n     eval(config['calories']['when'])\n \n     schedule.run_all()"
+  },
+  {
+    "sha": "1d17f87ff8a6877d9dc3e62626c6893522cae2ae",
+    "filename": "self-magritte/src/calories/__init__.py",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 69,
+    "changes": 69,
+    "blob_url": "https://github.com/Chrisbattarbee/self/blob/3d0a6928a3c5cbe2c2bdfdfc49045ad01b25b266/self-magritte/src/calories/__init__.py",
+    "raw_url": "https://github.com/Chrisbattarbee/self/raw/3d0a6928a3c5cbe2c2bdfdfc49045ad01b25b266/self-magritte/src/calories/__init__.py",
+    "contents_url": "https://api.github.com/repos/Chrisbattarbee/self/contents/self-magritte/src/calories/__init__.py?ref=3d0a6928a3c5cbe2c2bdfdfc49045ad01b25b266",
+    "patch": "@@ -1,69 +0,0 @@\n-import myfitnesspal\n-from self_api.self_calories import CalorieService, FoodEntry, Meal, MacroGoals, MealsForDay\n-from conjure_python_client import RequestsClient, ServiceConfiguration\n-import datetime\n-\n-\n-def run_job(config):\n-    logs = get_logs_for_date(current_iso_date(), config['calories']['mfp_username'], config['calories']['mfp_password'])\n-    meals_for_day, macro_goals = convert_mfp_day_logs_to_self_api_format(current_iso_date().isoformat(),logs)\n-    self_api_client = get_self_api_calories_client(config['server_location'])\n-\n-    self_api_client.update_daily_calories(meals_for_day)\n-    self_api_client.update_daily_macro_goals(macro_goals)\n-    print(\"Updated calories.\")\n-\n-\n-def current_iso_date():\n-    return datetime.datetime.now().date()\n-\n-\n-def get_self_api_calories_client(server_location):\n-    config = ServiceConfiguration()\n-    config.uris = [server_location]\n-    client = RequestsClient.create(CalorieService, user_agent=\"self-magritte\", service_config=config)\n-    return client\n-\n-\n-def get_logs_for_date(date, mfp_username, mfp_password):\n-    client = myfitnesspal.Client(username=mfp_username, password=mfp_password)\n-    log = client.get_date(date)\n-    return log\n-\n-\n-def convert_mfp_day_logs_to_self_api_format(date, day_logs):\n-    macro_goals = MacroGoals(\n-        calories=day_logs.goals['calories'],\n-        carbohydrates=day_logs.goals['carbohydrates'],\n-        fat=day_logs.goals['fat'],\n-        protein=day_logs.goals['protein'],\n-        sodium=day_logs.goals['sodium'],\n-        sugar=day_logs.goals['sugar'],\n-        date=date,\n-    )\n-\n-    meals = []\n-    for meal in day_logs.meals:\n-        food_entries = []\n-        for food_entry in meal.entries:\n-            food_entries.append(\n-                FoodEntry(\n-                    name=food_entry.name,\n-                    quantity=float(food_entry.quantity),\n-                    unit=food_entry.unit,\n-                    calories=food_entry.totals['calories'],\n-                    carbohydrates=food_entry.totals['carbohydrates'],\n-                    fat=food_entry.totals['fat'],\n-                    protein=food_entry.totals['protein'],\n-                    sodium=food_entry.totals['sodium'],\n-                    sugar=food_entry.totals['sugar'],\n-                )\n-            )\n-        meals.append(\n-            Meal(\n-                name=meal.name,\n-                entries=food_entries,\n-            )\n-        )\n-\n-    return MealsForDay(date=date,meals=meals), macro_goals"
+  },
+  {
+    "sha": "87dea31a7145ecafe92e73533c60d63a4db8f16c",
+    "filename": "self-magritte/src/ingesters/calories/__init__.py",
+    "status": "added",
+    "additions": 109,
+    "deletions": 0,
+    "changes": 109,
+    "blob_url": "https://github.com/Chrisbattarbee/self/blob/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-magritte/src/ingesters/calories/__init__.py",
+    "raw_url": "https://github.com/Chrisbattarbee/self/raw/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-magritte/src/ingesters/calories/__init__.py",
+    "contents_url": "https://api.github.com/repos/Chrisbattarbee/self/contents/self-magritte/src/ingesters/calories/__init__.py?ref=15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c",
+    "patch": "@@ -0,0 +1,109 @@\n+import time\n+\n+import myfitnesspal\n+from ingesters.ingest import IngestInterface\n+from self_api.self_calories import CalorieService, FoodEntry, Meal, MacroGoals, MealsForDay\n+from conjure_python_client import RequestsClient, ServiceConfiguration\n+import datetime\n+\n+\n+class CalorieIngest(IngestInterface):\n+    def __init__(self, config):\n+        super().__init__(config)\n+        try:\n+            self.should_run_historical_job = config['calories']['should_run_historical_job']\n+        except:\n+            self.should_run_historical_job = False\n+            print(\"Could not find config for should_run_historical_job, setting to default of {}\".format(self.should_run_historical_job))\n+        try:\n+            self.historical_job_from_date = datetime.date.fromisoformat(config['calories']['historical_job_from_date'])\n+        except:\n+            self.historical_job_from_date = datetime.date.fromisoformat(\"2015-01-01\")\n+            print(\"Could not find config for should_run_historical_job, setting to default of {}\".format(self.historical_job_from_date))\n+\n+        # Without these parameters, we can't do anything so we should just crash out\n+        self.self_api_client = self.get_self_api_calories_client(config['server_location'])\n+        self.mfp_client = myfitnesspal.Client(username=config['calories']['mfp_username'], password=config['calories']['mfp_password'])\n+\n+    def run_job(self):\n+        if self.should_run_historical_job:\n+            self.run_historical_job()\n+        self.run_job_for_date(self.current_iso_date())\n+\n+    def run_historical_job(self):\n+        date_to_run = self.historical_job_from_date\n+        while date_to_run != self.current_iso_date():\n+            try:\n+                self.run_job_for_date(date_to_run)\n+                date_to_run += datetime.timedelta(days=1)\n+                time.sleep(1)\n+            except Exception as e:\n+                # Could have ratelimit issues, wait a minute then try to continue\n+                print(e)\n+                time.sleep(60)\n+\n+    def get_logs_for_date(self, date):\n+        log = self.mfp_client.get_date(date)\n+        return log\n+\n+    def run_job_for_date(self, iso_date):\n+        logs = self.get_logs_for_date(iso_date)\n+        meals_for_day, macro_goals = self.convert_mfp_day_logs_to_self_api_format(iso_date.isoformat(), logs)\n+\n+        self.self_api_client.update_daily_calories(meals_for_day)\n+        print(\"Updated calories for date {} with value {}.\".format(iso_date.isoformat(), meals_for_day))\n+        self.self_api_client.update_daily_macro_goals(macro_goals)\n+        print(\"Updated calories for date {} with value {}.\".format(iso_date.isoformat(), macro_goals))\n+\n+    @staticmethod\n+    def current_iso_date():\n+        return datetime.datetime.now().date()\n+\n+    @staticmethod\n+    def convert_mfp_day_logs_to_self_api_format(date, day_logs):\n+        macro_goals = MacroGoals(\n+            calories=day_logs.goals['calories'],\n+            carbohydrates=day_logs.goals['carbohydrates'],\n+            fat=day_logs.goals['fat'],\n+            protein=day_logs.goals['protein'],\n+            sodium=day_logs.goals['sodium'],\n+            sugar=day_logs.goals['sugar'],\n+            date=date,\n+        )\n+\n+        meals = []\n+        for meal in day_logs.meals:\n+            food_entries = []\n+            for food_entry in meal.entries:\n+                # The mfp api is sometimes odd about quantities and units, allowing them to be null\n+                # Our strongly typed api will reject this so we convert them to defaults here\n+                quantity = 1.0 if food_entry.quantity is None else float(food_entry.quantity)\n+                unit = \"\" if food_entry.unit is None else food_entry.unit\n+                food_entries.append(\n+                    FoodEntry(\n+                        name=food_entry.name,\n+                        quantity=quantity,\n+                        unit=unit,\n+                        calories=food_entry.totals['calories'],\n+                        carbohydrates=food_entry.totals['carbohydrates'],\n+                        fat=food_entry.totals['fat'],\n+                        protein=food_entry.totals['protein'],\n+                        sodium=food_entry.totals['sodium'],\n+                        sugar=food_entry.totals['sugar'],\n+                    )\n+                )\n+            meals.append(\n+                Meal(\n+                    name=meal.name,\n+                    entries=food_entries,\n+                )\n+            )\n+\n+        return MealsForDay(date=date,meals=meals), macro_goals\n+\n+    @staticmethod\n+    def get_self_api_calories_client(server_location):\n+        config = ServiceConfiguration()\n+        config.uris = [server_location]\n+        client = RequestsClient.create(CalorieService, user_agent=\"self-magritte\", service_config=config)\n+        return client"
+  },
+  {
+    "sha": "cdf75afda19cb7fc308ad4ad98550e0d0abfd28a",
+    "filename": "self-magritte/src/ingesters/ingest.py",
+    "status": "renamed",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/Chrisbattarbee/self/blob/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-magritte/src/ingesters/ingest.py",
+    "raw_url": "https://github.com/Chrisbattarbee/self/raw/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-magritte/src/ingesters/ingest.py",
+    "contents_url": "https://api.github.com/repos/Chrisbattarbee/self/contents/self-magritte/src/ingesters/ingest.py?ref=15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c",
+    "patch": "@@ -7,6 +7,6 @@ def run_job(self):\n         \"\"\"Ingest the data for a time period.\"\"\"\n         pass\n \n-    def run_historical_job(self):\n+    def run_historical_job(self, from_date):\n         \"\"\"Should gather all historical data for the ingested service.\"\"\"\n-        pass\n\\ No newline at end of file\n+        pass",
+    "previous_filename": "self-magritte/src/ingest.py"
+  },
+  {
+    "sha": "0a3416af7ffdd7bd3bfe14309e7deb90420a45c3",
+    "filename": "self-server/src/main/java/com/chrisbattarbee/self/resources/CalorieServiceResource.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 5,
+    "changes": 9,
+    "blob_url": "https://github.com/Chrisbattarbee/self/blob/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-server/src/main/java/com/chrisbattarbee/self/resources/CalorieServiceResource.java",
+    "raw_url": "https://github.com/Chrisbattarbee/self/raw/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-server/src/main/java/com/chrisbattarbee/self/resources/CalorieServiceResource.java",
+    "contents_url": "https://api.github.com/repos/Chrisbattarbee/self/contents/self-server/src/main/java/com/chrisbattarbee/self/resources/CalorieServiceResource.java?ref=15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c",
+    "patch": "@@ -25,7 +25,7 @@\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n \n-public final class CalorieServiceResource implements CalorieService {\n+public final class CalorieServiceResource extends SelfResource implements CalorieService {\n     private static final String CALORIES_DYNAMO_TABLE = \"self_api_calories\";\n     private static final String MACRO_GOALS_DYNAMO_TABLE = \"self_api_macro_goals\";\n     private static final String TABLE_KEY = \"date\";\n@@ -37,14 +37,13 @@\n     private final DynamoManager dyanamoManager = DynamoManager.getInstance();\n     private final Logger logger = LoggerFactory.getLogger(this.getClass());\n \n-    private void createDynamoTablesIfTheyDontExist() {\n+    @Override\n+    void createDynamoTablesIfTheyDontExist() {\n         dyanamoManager.createDynamoTableIfItDoesntExist(CALORIES_DYNAMO_TABLE, TABLE_KEY, PROVISIONED_THROUGHPUT);\n         dyanamoManager.createDynamoTableIfItDoesntExist(MACRO_GOALS_DYNAMO_TABLE, TABLE_KEY, PROVISIONED_THROUGHPUT);\n     }\n \n-    public CalorieServiceResource() {\n-        createDynamoTablesIfTheyDontExist();\n-    }\n+    public CalorieServiceResource() {}\n \n     @Override\n     public void updateDailyCalories(MealsForDay updateDayRequest) {"
+  },
+  {
+    "sha": "e41eafb15c06d844044fe73efe3d6f8b88c985dc",
+    "filename": "self-server/src/main/java/com/chrisbattarbee/self/resources/SelfResource.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/Chrisbattarbee/self/blob/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-server/src/main/java/com/chrisbattarbee/self/resources/SelfResource.java",
+    "raw_url": "https://github.com/Chrisbattarbee/self/raw/15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c/self-server/src/main/java/com/chrisbattarbee/self/resources/SelfResource.java",
+    "contents_url": "https://api.github.com/repos/Chrisbattarbee/self/contents/self-server/src/main/java/com/chrisbattarbee/self/resources/SelfResource.java?ref=15f96fa4cec6ce6d54e2bfd64152b876ac11ee9c",
+    "patch": "@@ -0,0 +1,9 @@\n+package com.chrisbattarbee.self.resources;\n+\n+public abstract class SelfResource {\n+    abstract void createDynamoTablesIfTheyDontExist();\n+\n+    public SelfResource() {\n+        createDynamoTablesIfTheyDontExist();\n+    }\n+}"
+  }
+]

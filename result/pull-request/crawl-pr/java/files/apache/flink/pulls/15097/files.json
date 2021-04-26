@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "5d0ebb1cf3e13b0be27e5345e18ae7c0b0614b02",
+    "filename": "docs/layouts/shortcodes/generated/mesos_task_manager_configuration.html",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/flink/blob/0b21a13558fa9c2e9bb66137dfab9919e980f89f/docs/layouts/shortcodes/generated/mesos_task_manager_configuration.html",
+    "raw_url": "https://github.com/apache/flink/raw/0b21a13558fa9c2e9bb66137dfab9919e980f89f/docs/layouts/shortcodes/generated/mesos_task_manager_configuration.html",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/docs/layouts/shortcodes/generated/mesos_task_manager_configuration.html?ref=0b21a13558fa9c2e9bb66137dfab9919e980f89f",
+    "patch": "@@ -104,5 +104,11 @@\n             <td>String</td>\n             <td>A comma separated list of URIs of custom artifacts to be downloaded into the sandbox of Mesos workers.</td>\n         </tr>\n+        <tr>\n+            <td><h5>mesos.resourcemenager.tasks.user</h5></td>\n+            <td style=\"word-wrap: break-word;\">\"q.xu\"</td>\n+            <td>String</td>\n+            <td>Unix user which mesos tasks should run as.</td>\n+        </tr>\n     </tbody>\n </table>"
+  },
+  {
+    "sha": "b0b5c959af2447678674795b5f866e8a94462dd7",
+    "filename": "flink-mesos/src/main/java/org/apache/flink/mesos/runtime/clusterframework/LaunchableMesosWorker.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/flink/blob/0b21a13558fa9c2e9bb66137dfab9919e980f89f/flink-mesos/src/main/java/org/apache/flink/mesos/runtime/clusterframework/LaunchableMesosWorker.java",
+    "raw_url": "https://github.com/apache/flink/raw/0b21a13558fa9c2e9bb66137dfab9919e980f89f/flink-mesos/src/main/java/org/apache/flink/mesos/runtime/clusterframework/LaunchableMesosWorker.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-mesos/src/main/java/org/apache/flink/mesos/runtime/clusterframework/LaunchableMesosWorker.java?ref=0b21a13558fa9c2e9bb66137dfab9919e980f89f",
+    "patch": "@@ -293,6 +293,11 @@ public String toString() {\n             cmd.addUris(CommandInfo.URI.newBuilder().setValue(uri));\n         }\n \n+        // set unix user for mesos tasks\n+        if (params.user().isDefined()) {\n+            cmd.setUser(params.user().get());\n+        }\n+\n         // propagate environment variables\n         for (Map.Entry<String, String> entry :\n                 params.containeredParameters().taskManagerEnv().entrySet()) {"
+  },
+  {
+    "sha": "7dd0a4cf74da07a406df947018b760e9bb7a7235",
+    "filename": "flink-mesos/src/main/java/org/apache/flink/mesos/runtime/clusterframework/MesosTaskManagerParameters.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/apache/flink/blob/0b21a13558fa9c2e9bb66137dfab9919e980f89f/flink-mesos/src/main/java/org/apache/flink/mesos/runtime/clusterframework/MesosTaskManagerParameters.java",
+    "raw_url": "https://github.com/apache/flink/raw/0b21a13558fa9c2e9bb66137dfab9919e980f89f/flink-mesos/src/main/java/org/apache/flink/mesos/runtime/clusterframework/MesosTaskManagerParameters.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-mesos/src/main/java/org/apache/flink/mesos/runtime/clusterframework/MesosTaskManagerParameters.java?ref=0b21a13558fa9c2e9bb66137dfab9919e980f89f",
+    "patch": "@@ -135,6 +135,13 @@\n                             \"A comma separated list of URIs of custom artifacts to be downloaded into the sandbox\"\n                                     + \" of Mesos workers.\");\n \n+    public static final ConfigOption<String> MESOS_TM_USER =\n+            key(\"mesos.resourcemenager.tasks.user\")\n+                    .stringType()\n+                    .noDefaultValue()\n+                    .withDescription(\n+                            \"Unix user which mesos tasks should run as.\");\n+\n     public static final ConfigOption<Map<String, String>> MESOS_TM_LABELS =\n             key(\"mesos.resourcemanager.tasks.labels\")\n                     .mapType()\n@@ -214,6 +221,8 @@\n \n     private final List<String> uris;\n \n+    private final Option<String> user;\n+\n     private final Map<String, String> mesosLabels;\n \n     public MesosTaskManagerParameters(\n@@ -231,6 +240,7 @@ public MesosTaskManagerParameters(\n             Option<String> bootstrapCommand,\n             Option<String> taskManagerHostname,\n             List<String> uris,\n+            Option<String> user,\n             Map<String, String> mesosLabels) {\n \n         this.gpus = gpus;\n@@ -247,6 +257,7 @@ public MesosTaskManagerParameters(\n         this.bootstrapCommand = Preconditions.checkNotNull(bootstrapCommand);\n         this.taskManagerHostname = Preconditions.checkNotNull(taskManagerHostname);\n         this.uris = Preconditions.checkNotNull(uris);\n+        this.user = Preconditions.checkNotNull(user);\n         this.mesosLabels = Preconditions.checkNotNull(mesosLabels);\n     }\n \n@@ -333,6 +344,11 @@ public String command() {\n         return uris;\n     }\n \n+    /** Get the unix user as which mesos tasks run. */\n+    public Option<String> user() {\n+        return user;\n+    }\n+\n     /** Get mesos task labels. */\n     public Map<String, String> mesosLabels() {\n         return mesosLabels;\n@@ -442,6 +458,9 @@ public static MesosTaskManagerParameters create(Configuration flinkConfig) {\n         Option<String> tmBootstrapCommand =\n                 Option.apply(flinkConfig.getString(MESOS_TM_BOOTSTRAP_CMD));\n \n+        // obtain unix user that's running mesos tasks\n+        Option<String> user = Option.apply(flinkConfig.getString(MESOS_TM_USER));\n+\n         // obtain mesos task labels from configuration\n         Map<String, String> mesosLabels =\n                 flinkConfig.getOptional(MESOS_TM_LABELS).orElse(Collections.emptyMap());\n@@ -461,6 +480,7 @@ public static MesosTaskManagerParameters create(Configuration flinkConfig) {\n                 tmBootstrapCommand,\n                 taskManagerHostname,\n                 uris,\n+                user,\n                 mesosLabels);\n     }\n "
+  },
+  {
+    "sha": "c8f5c347d2f286af22484eb1efdbab4c90b43e5f",
+    "filename": "flink-mesos/src/test/java/org/apache/flink/mesos/runtime/clusterframework/MesosResourceManagerDriverTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/flink/blob/0b21a13558fa9c2e9bb66137dfab9919e980f89f/flink-mesos/src/test/java/org/apache/flink/mesos/runtime/clusterframework/MesosResourceManagerDriverTest.java",
+    "raw_url": "https://github.com/apache/flink/raw/0b21a13558fa9c2e9bb66137dfab9919e980f89f/flink-mesos/src/test/java/org/apache/flink/mesos/runtime/clusterframework/MesosResourceManagerDriverTest.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-mesos/src/test/java/org/apache/flink/mesos/runtime/clusterframework/MesosResourceManagerDriverTest.java?ref=0b21a13558fa9c2e9bb66137dfab9919e980f89f",
+    "patch": "@@ -437,6 +437,7 @@ private MesosTaskManagerParameters generateMesosTaskManagerParameters() {\n                     Option.empty(),\n                     Option.empty(),\n                     Collections.emptyList(),\n+                    Option.empty(),\n                     Collections.emptyMap());\n         }\n "
+  },
+  {
+    "sha": "a5d5dda0a3077bc453c63c25e99a7584963a1fb4",
+    "filename": "flink-mesos/src/test/java/org/apache/flink/mesos/runtime/clusterframework/MesosTaskManagerParametersTest.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/flink/blob/0b21a13558fa9c2e9bb66137dfab9919e980f89f/flink-mesos/src/test/java/org/apache/flink/mesos/runtime/clusterframework/MesosTaskManagerParametersTest.java",
+    "raw_url": "https://github.com/apache/flink/raw/0b21a13558fa9c2e9bb66137dfab9919e980f89f/flink-mesos/src/test/java/org/apache/flink/mesos/runtime/clusterframework/MesosTaskManagerParametersTest.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-mesos/src/test/java/org/apache/flink/mesos/runtime/clusterframework/MesosTaskManagerParametersTest.java?ref=0b21a13558fa9c2e9bb66137dfab9919e980f89f",
+    "patch": "@@ -314,6 +314,14 @@ public void testMesosLabelsConfiguration() {\n         assertEquals(expectedLabels, params.mesosLabels());\n     }\n \n+    @Test\n+    public void testTaskUserConfiguration() {\n+        Configuration conf = getConfiguration();\n+        conf.setString(MesosTaskManagerParameters.MESOS_TM_USER, \"flink\");\n+        MesosTaskManagerParameters params = MesosTaskManagerParameters.create(conf);\n+        assertEquals(\"flink\", params.user().get());\n+    }\n+\n     private static Configuration getConfiguration() {\n         Configuration config = new Configuration();\n         config.set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, TOTAL_PROCESS_MEMORY_SIZE);"
+  }
+]

@@ -1,0 +1,73 @@
+[
+  {
+    "sha": "a91babff9fc22b4962d1dd4eb809d1ce58ba9aa9",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/gleonmen/drones/blob/99d7762390cfbd610d72f9807e47760db6dba7d6/pom.xml",
+    "raw_url": "https://github.com/gleonmen/drones/raw/99d7762390cfbd610d72f9807e47760db6dba7d6/pom.xml",
+    "contents_url": "https://api.github.com/repos/gleonmen/drones/contents/pom.xml?ref=99d7762390cfbd610d72f9807e47760db6dba7d6",
+    "patch": "@@ -22,7 +22,6 @@\n             <groupId>org.projectlombok</groupId>\n             <artifactId>lombok</artifactId>\n             <version>1.18.10</version>\n-            <scope>provided</scope>\n         </dependency>\n \n         <dependency>"
+  },
+  {
+    "sha": "8f4f0ab057d2fd2842069be922f5b974011eff66",
+    "filename": "src/main/java/com/restaurant/controllers/DeliveryController.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 6,
+    "changes": 6,
+    "blob_url": "https://github.com/gleonmen/drones/blob/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/java/com/restaurant/controllers/DeliveryController.java",
+    "raw_url": "https://github.com/gleonmen/drones/raw/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/java/com/restaurant/controllers/DeliveryController.java",
+    "contents_url": "https://api.github.com/repos/gleonmen/drones/contents/src/main/java/com/restaurant/controllers/DeliveryController.java?ref=99d7762390cfbd610d72f9807e47760db6dba7d6",
+    "patch": "@@ -1,18 +1,13 @@\n package com.restaurant.controllers;\n \n-\n-\n import com.restaurant.interfaces.DeliveryService;\n import com.restaurant.interfaces.ReportService;\n-import lombok.extern.java.Log;\n-\n import java.io.File;\n import java.io.IOException;\n import java.util.Arrays;\n import java.util.List;\n import java.util.Map;\n \n-@Log\n public class DeliveryController {\n \n     private ReportService reportService;\n@@ -31,7 +26,6 @@ public void distributeDeliveries(File routes, String fileOutputPath) {\n                 reportService.generateReport(reports, fileOutputPath);\n             } catch (IOException e) {\n                 e.printStackTrace();\n-                log.info(\"Error trying to deliver product\");\n             }\n         }\n     }"
+  },
+  {
+    "sha": "0dd0486ad4ca286ba9fd8fb691f6883759af5c2d",
+    "filename": "src/main/java/com/restaurant/model/Drone.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 2,
+    "changes": 13,
+    "blob_url": "https://github.com/gleonmen/drones/blob/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/java/com/restaurant/model/Drone.java",
+    "raw_url": "https://github.com/gleonmen/drones/raw/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/java/com/restaurant/model/Drone.java",
+    "contents_url": "https://api.github.com/repos/gleonmen/drones/contents/src/main/java/com/restaurant/model/Drone.java?ref=99d7762390cfbd610d72f9807e47760db6dba7d6",
+    "patch": "@@ -1,5 +1,6 @@\n package com.restaurant.model;\n \n+import com.restaurant.enums.CardinalPoint;\n import com.restaurant.interfaces.CompassService;\n import lombok.Getter;\n \n@@ -30,7 +31,7 @@ public Drone(String id, Properties config, CompassService compass) {\n         compassService = compass;\n     }\n \n-    public List<String> deliver(Path routeFile)  {\n+    public List<String> deliver(Path routeFile) {\n         List<String> report = new ArrayList<>();\n         List<String> routes = null;\n         try {\n@@ -54,7 +55,15 @@ private String deliverProduct(String sequence) {\n             if (sequence.charAt(i) == 'A') {\n                 newPosition = compassService.moveForward(this.position, maxRange);\n             } else {\n-                newPosition = compassService.changeDirection(this.position, sequence.charAt(i));\n+                if (this.getPosition().getCardinal() == CardinalPoint.SOUTH) {\n+                    if (sequence.charAt(i) == 'D') {\n+                        newPosition = compassService.changeDirection(this.position, 'I');\n+                    } else {\n+                        newPosition = compassService.changeDirection(this.position, 'D');\n+                    }\n+                } else {\n+                    newPosition = compassService.changeDirection(this.position, sequence.charAt(i));\n+                }\n             }\n             this.setPosition(newPosition);\n         }"
+  },
+  {
+    "sha": "f1db7c6616255e99717f942ffe340546ecd4ae6c",
+    "filename": "src/main/resources/input/in01.txt",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/gleonmen/drones/blob/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/resources/input/in01.txt",
+    "raw_url": "https://github.com/gleonmen/drones/raw/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/resources/input/in01.txt",
+    "contents_url": "https://api.github.com/repos/gleonmen/drones/contents/src/main/resources/input/in01.txt?ref=99d7762390cfbd610d72f9807e47760db6dba7d6",
+    "patch": "@@ -0,0 +1,3 @@\n+AAAAIAA\n+DDDAIAI\n+AAIADAD\n\\ No newline at end of file"
+  },
+  {
+    "sha": "abbf98306e79844590c39a188668f7819c20d6aa",
+    "filename": "src/main/resources/input/in02.txt",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/gleonmen/drones/blob/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/resources/input/in02.txt",
+    "raw_url": "https://github.com/gleonmen/drones/raw/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/resources/input/in02.txt",
+    "contents_url": "https://api.github.com/repos/gleonmen/drones/contents/src/main/resources/input/in02.txt?ref=99d7762390cfbd610d72f9807e47760db6dba7d6",
+    "patch": "@@ -0,0 +1,3 @@\n+AAAAAAAAAI\n+AAAAAAAAAI\n+AAAAAAAAAI\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "filename": "src/main/resources/input/in03.txt",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/gleonmen/drones/blob/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/resources/input/in03.txt",
+    "raw_url": "https://github.com/gleonmen/drones/raw/99d7762390cfbd610d72f9807e47760db6dba7d6/src/main/resources/input/in03.txt",
+    "contents_url": "https://api.github.com/repos/gleonmen/drones/contents/src/main/resources/input/in03.txt?ref=99d7762390cfbd610d72f9807e47760db6dba7d6"
+  }
+]

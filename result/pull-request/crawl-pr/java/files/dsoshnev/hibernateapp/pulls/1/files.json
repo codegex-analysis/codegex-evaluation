@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "94a25f7f4cb416c083d265558da75d457237d671",
+    "filename": ".idea/vcs.xml",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/dsoshnev/hibernateapp/blob/9d6de10c4c051fdd0474135202bf145d19532979/.idea/vcs.xml",
+    "raw_url": "https://github.com/dsoshnev/hibernateapp/raw/9d6de10c4c051fdd0474135202bf145d19532979/.idea/vcs.xml",
+    "contents_url": "https://api.github.com/repos/dsoshnev/hibernateapp/contents/.idea/vcs.xml?ref=9d6de10c4c051fdd0474135202bf145d19532979",
+    "patch": "@@ -0,0 +1,6 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<project version=\"4\">\n+  <component name=\"VcsDirectoryMappings\">\n+    <mapping directory=\"$PROJECT_DIR$\" vcs=\"Git\" />\n+  </component>\n+</project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "6d09eba6e862c618783da48663fa6367233d228c",
+    "filename": "hibernateapp.sql",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 3,
+    "changes": 9,
+    "blob_url": "https://github.com/dsoshnev/hibernateapp/blob/9d6de10c4c051fdd0474135202bf145d19532979/hibernateapp.sql",
+    "raw_url": "https://github.com/dsoshnev/hibernateapp/raw/9d6de10c4c051fdd0474135202bf145d19532979/hibernateapp.sql",
+    "contents_url": "https://api.github.com/repos/dsoshnev/hibernateapp/contents/hibernateapp.sql?ref=9d6de10c4c051fdd0474135202bf145d19532979",
+    "patch": "@@ -1,6 +1,9 @@\n DROP TABLE IF EXISTS products CASCADE;\n CREATE TABLE products (id bigserial PRIMARY KEY, title VARCHAR(255), cost numeric(6, 2));\n INSERT INTO products (title, cost) VALUES\n-('Product1', 10),\n-('Product2', 20),\n-('Product3', 30);\n\\ No newline at end of file\n+('Product1', 10.10),\n+('Product2', 20.20),\n+('Product3', 30.30),\n+('Product4', 40.40),\n+('Product5', 50.50),\n+('Product6', 60.60);\n\\ No newline at end of file"
+  },
+  {
+    "sha": "9ef73774438cd07027a546155284fb2919792c83",
+    "filename": "src/main/java/ru/dsoshnev/hibernateapp/HibernateApp.java",
+    "status": "modified",
+    "additions": 57,
+    "deletions": 6,
+    "changes": 63,
+    "blob_url": "https://github.com/dsoshnev/hibernateapp/blob/9d6de10c4c051fdd0474135202bf145d19532979/src/main/java/ru/dsoshnev/hibernateapp/HibernateApp.java",
+    "raw_url": "https://github.com/dsoshnev/hibernateapp/raw/9d6de10c4c051fdd0474135202bf145d19532979/src/main/java/ru/dsoshnev/hibernateapp/HibernateApp.java",
+    "contents_url": "https://api.github.com/repos/dsoshnev/hibernateapp/contents/src/main/java/ru/dsoshnev/hibernateapp/HibernateApp.java?ref=9d6de10c4c051fdd0474135202bf145d19532979",
+    "patch": "@@ -4,21 +4,72 @@\n import org.hibernate.SessionFactory;\n import org.hibernate.cfg.Configuration;\n \n+import java.io.IOException;\n+import java.nio.file.Files;\n+import java.nio.file.Paths;\n+import java.util.stream.Collectors;\n+\n public class HibernateApp {\n-    public static void main(String[] args) {\n-        PrepareData.forcePrepareData();\n \n-        SessionFactory factory = new Configuration()\n-                .configure(\"configs/hibernatecfg.xml\")\n-                .buildSessionFactory();\n+    public static void forcePrepareData(SessionFactory factory) {\n+        try (Session session = factory.getCurrentSession()) {\n+            String sql = Files.lines(Paths.get(\"hibernateapp.sql\")).collect(Collectors.joining(\" \"));\n+            session.beginTransaction();\n+            session.createNativeQuery(sql).executeUpdate();\n+            session.getTransaction().commit();\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+    public static void insert(SessionFactory factory) {\n+        try (Session session = factory.getCurrentSession()) {;\n+            session.beginTransaction();\n+            Product  product = new Product(\"Product 7\", 70.70D);\n+            session.save(product);\n+            System.out.println(product);\n+            session.getTransaction().commit();\n+        }\n+    }\n \n+    public static void select(SessionFactory factory) {\n         try (Session session = factory.getCurrentSession()) {;\n             session.beginTransaction();\n             Product product = session.get(Product.class, 1L);\n             System.out.println(product);\n             session.getTransaction().commit();\n         }\n+    }\n+\n+    public static void update(SessionFactory factory) {\n+        try (Session session = factory.getCurrentSession()) {;\n+            session.beginTransaction();\n+            Product product = session.get(Product.class, 2L);\n+            product.setCost(100.20);\n+            System.out.println(product);\n+            session.getTransaction().commit();\n+        }\n+    }\n+\n+    public static void delete(SessionFactory factory) {\n+        try (Session session = factory.getCurrentSession()) {;\n+            session.beginTransaction();\n+            Product product = session.get(Product.class, 3L);\n+            session.delete(product);\n+            System.out.println(product);\n+            session.getTransaction().commit();\n+        }\n+    }\n \n-        factory.close();\n+    public static void main(String[] args) {\n+\n+        try(SessionFactory factory = new Configuration()\n+                .configure(\"configs/hibernatecfg.xml\")\n+                .buildSessionFactory()) {\n+            forcePrepareData(factory);\n+            insert(factory);\n+            select(factory);\n+            update(factory);\n+            delete(factory);\n+        }\n     }\n }"
+  },
+  {
+    "sha": "87f7b01bff8a30e70196731f2e367e07da4c924e",
+    "filename": "src/main/java/ru/dsoshnev/hibernateapp/PrepareData.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 28,
+    "changes": 28,
+    "blob_url": "https://github.com/dsoshnev/hibernateapp/blob/66ff72cbc76d1e949d66f3ac4c6e25110035d065/src/main/java/ru/dsoshnev/hibernateapp/PrepareData.java",
+    "raw_url": "https://github.com/dsoshnev/hibernateapp/raw/66ff72cbc76d1e949d66f3ac4c6e25110035d065/src/main/java/ru/dsoshnev/hibernateapp/PrepareData.java",
+    "contents_url": "https://api.github.com/repos/dsoshnev/hibernateapp/contents/src/main/java/ru/dsoshnev/hibernateapp/PrepareData.java?ref=66ff72cbc76d1e949d66f3ac4c6e25110035d065",
+    "patch": "@@ -1,28 +0,0 @@\n-package ru.dsoshnev.hibernateapp;\n-\n-import org.hibernate.Session;\n-import org.hibernate.SessionFactory;\n-import org.hibernate.cfg.Configuration;\n-\n-import java.io.IOException;\n-import java.nio.file.Files;\n-import java.nio.file.Paths;\n-import java.util.stream.Collectors;\n-\n-public class PrepareData {\n-    public static void forcePrepareData() {\n-        SessionFactory factory = new Configuration()\n-                .configure(\"configs/hibernatecfg.xml\")\n-                .buildSessionFactory();\n-        try (Session session = factory.getCurrentSession()) {\n-            String sql = Files.lines(Paths.get(\"hibernateapp.sql\")).collect(Collectors.joining(\" \"));\n-            session.beginTransaction();\n-            session.createNativeQuery(sql).executeUpdate();\n-            session.getTransaction().commit();\n-        } catch (IOException e) {\n-            e.printStackTrace();\n-        }\n-\n-        factory.close();\n-    }\n-}"
+  },
+  {
+    "sha": "2f07d54ad353f61a25c9c495c9631cbfc93311f8",
+    "filename": "src/main/java/ru/dsoshnev/hibernateapp/Product.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/dsoshnev/hibernateapp/blob/9d6de10c4c051fdd0474135202bf145d19532979/src/main/java/ru/dsoshnev/hibernateapp/Product.java",
+    "raw_url": "https://github.com/dsoshnev/hibernateapp/raw/9d6de10c4c051fdd0474135202bf145d19532979/src/main/java/ru/dsoshnev/hibernateapp/Product.java",
+    "contents_url": "https://api.github.com/repos/dsoshnev/hibernateapp/contents/src/main/java/ru/dsoshnev/hibernateapp/Product.java?ref=9d6de10c4c051fdd0474135202bf145d19532979",
+    "patch": "@@ -25,6 +25,11 @@ public Product(Long id, String title, Double cost) {\n         this.cost = cost;\n     }\n \n+    public Product(String title, Double cost) {\n+        this.title = title;\n+        this.cost = cost;\n+    }\n+\n     public Long getId() {\n         return id;\n     }"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "0a867d0ee151c3276eb0aa9d34debe145ea0a122",
+    "filename": "nessie/src/main/java/org/apache/iceberg/nessie/NessieTableOperations.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/iceberg/blob/101308f19466a3c1b57cef037ea2797aab4d247b/nessie/src/main/java/org/apache/iceberg/nessie/NessieTableOperations.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/101308f19466a3c1b57cef037ea2797aab4d247b/nessie/src/main/java/org/apache/iceberg/nessie/NessieTableOperations.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/nessie/src/main/java/org/apache/iceberg/nessie/NessieTableOperations.java?ref=101308f19466a3c1b57cef037ea2797aab4d247b",
+    "patch": "@@ -89,6 +89,7 @@ protected void doCommit(TableMetadata base, TableMetadata metadata) {\n     String newMetadataLocation = writeNewMetadata(metadata, currentVersion() + 1);\n \n     boolean threw = true;\n+    boolean delete = false;\n     try {\n       IcebergTable newTable = ImmutableIcebergTable.builder().metadataLocation(newMetadataLocation).build();\n       client.getContentsApi().setContents(key,\n@@ -98,12 +99,14 @@ protected void doCommit(TableMetadata base, TableMetadata metadata) {\n                                           newTable);\n       threw = false;\n     } catch (NessieConflictException ex) {\n+      delete = true;\n       throw new CommitFailedException(ex, \"Commit failed: Reference hash is out of date. \" +\n           \"Update the reference %s and try again\", reference.getName());\n     } catch (NessieNotFoundException ex) {\n+      delete = true;\n       throw new RuntimeException(String.format(\"Commit failed: Reference %s no longer exist\", reference.getName()), ex);\n     } finally {\n-      if (threw) {\n+      if (threw && delete) {\n         io().deleteFile(newMetadataLocation);\n       }\n     }"
+  }
+]

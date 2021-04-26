@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "67d6b4e5c80be6538b33b3b1aa1834f69757b3f4",
+    "filename": "sdks/java/extensions/sql/zetasql/src/main/java/org/apache/beam/sdk/extensions/sql/zetasql/ZetaSQLQueryPlanner.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 6,
+    "changes": 23,
+    "blob_url": "https://github.com/apache/beam/blob/6e0421c04cafa70b8dff874a6c815c2741a33045/sdks/java/extensions/sql/zetasql/src/main/java/org/apache/beam/sdk/extensions/sql/zetasql/ZetaSQLQueryPlanner.java",
+    "raw_url": "https://github.com/apache/beam/raw/6e0421c04cafa70b8dff874a6c815c2741a33045/sdks/java/extensions/sql/zetasql/src/main/java/org/apache/beam/sdk/extensions/sql/zetasql/ZetaSQLQueryPlanner.java",
+    "contents_url": "https://api.github.com/repos/apache/beam/contents/sdks/java/extensions/sql/zetasql/src/main/java/org/apache/beam/sdk/extensions/sql/zetasql/ZetaSQLQueryPlanner.java?ref=6e0421c04cafa70b8dff874a6c815c2741a33045",
+    "patch": "@@ -174,28 +174,39 @@ static boolean hasOnlyJavaUdfInProjects(RelOptRuleCall x) {\n           } else if (rexNode instanceof RexLiteral) {\n             SqlTypeName typeName = ((RexLiteral) rexNode).getTypeName();\n             switch (typeName) {\n-              case NULL:\n+              case DOUBLE:\n               case BOOLEAN:\n-              case CHAR:\n-              case BINARY:\n+              case VARCHAR:\n+              case VARBINARY:\n               case DECIMAL:\n+              case TIME:\n+              case TIMESTAMP_WITH_LOCAL_TIME_ZONE:\n+              case TIMESTAMP:\n+              case ARRAY:\n+              case ROW:\n                 break;\n+              case BIGINT: // BEAM-11989\n+              case DATE: // BEAM-11990\n               default:\n-                // Reject unsupported literals\n                 return false;\n             }\n           } else if (rexNode instanceof RexInputRef) {\n             SqlTypeName typeName = ((RexInputRef) rexNode).getType().getSqlTypeName();\n             switch (typeName) {\n-              case BIGINT:\n               case DOUBLE:\n               case BOOLEAN:\n               case VARCHAR:\n               case VARBINARY:\n               case DECIMAL:\n+              case TIME:\n+              case TIMESTAMP_WITH_LOCAL_TIME_ZONE:\n+              case TIMESTAMP:\n+              case ARRAY:\n+              case ROW:\n                 break;\n+              case BIGINT: // BEAM-11989\n+              case DATE: // BEAM-11990\n               default:\n-                // Reject unsupported input ref\n                 return false;\n             }\n           } else {"
+  }
+]

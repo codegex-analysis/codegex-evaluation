@@ -1,0 +1,84 @@
+[
+  {
+    "sha": "d606037cb232bfda7788a8322492312d55b2ae9d",
+    "filename": "client/2.txt",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/vershininvv/CloudStorage/blob/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/client/2.txt",
+    "raw_url": "https://github.com/vershininvv/CloudStorage/raw/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/client/2.txt",
+    "contents_url": "https://api.github.com/repos/vershininvv/CloudStorage/contents/client/2.txt?ref=0e1a033d1ecfbf09e078cc3226d6642fe1bc1032",
+    "patch": "@@ -0,0 +1 @@\n+test2\n\\ No newline at end of file"
+  },
+  {
+    "sha": "29f446afe24c4dba42a3aa2c9d4ba3ccba9d51bf",
+    "filename": "client/3.txt",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/vershininvv/CloudStorage/blob/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/client/3.txt",
+    "raw_url": "https://github.com/vershininvv/CloudStorage/raw/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/client/3.txt",
+    "contents_url": "https://api.github.com/repos/vershininvv/CloudStorage/contents/client/3.txt?ref=0e1a033d1ecfbf09e078cc3226d6642fe1bc1032",
+    "patch": "@@ -0,0 +1 @@\n+test3\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d606037cb232bfda7788a8322492312d55b2ae9d",
+    "filename": "server/2.txt",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/vershininvv/CloudStorage/blob/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/server/2.txt",
+    "raw_url": "https://github.com/vershininvv/CloudStorage/raw/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/server/2.txt",
+    "contents_url": "https://api.github.com/repos/vershininvv/CloudStorage/contents/server/2.txt?ref=0e1a033d1ecfbf09e078cc3226d6642fe1bc1032",
+    "patch": "@@ -0,0 +1 @@\n+test2\n\\ No newline at end of file"
+  },
+  {
+    "sha": "842de02ff2f7fb7a05abd865cb28de0d712af3ce",
+    "filename": "src/main/java/client/Client.java",
+    "status": "modified",
+    "additions": 78,
+    "deletions": 4,
+    "changes": 82,
+    "blob_url": "https://github.com/vershininvv/CloudStorage/blob/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/src/main/java/client/Client.java",
+    "raw_url": "https://github.com/vershininvv/CloudStorage/raw/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/src/main/java/client/Client.java",
+    "contents_url": "https://api.github.com/repos/vershininvv/CloudStorage/contents/src/main/java/client/Client.java?ref=0e1a033d1ecfbf09e078cc3226d6642fe1bc1032",
+    "patch": "@@ -5,6 +5,7 @@\n import java.io.*;\n import java.net.Socket;\n \n+\n public class Client {\n \tprivate final Socket socket;\n \tprivate final DataInputStream in;\n@@ -17,7 +18,7 @@ public Client() throws IOException {\n \t\trunClient();\n \t}\n \n-\tprivate void runClient() {\n+\tprivate void runClient() throws IOException {\n \t\tJFrame frame = new JFrame(\"Cloud Storage\");\n \t\tframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n \t\tframe.setSize(400, 300);\n@@ -26,15 +27,88 @@ private void runClient() {\n \t\t// TODO: 02.03.2021\n \t\t// list file - JList\n \t\tJButton uploadButton = new JButton(\"Upload\");\n+\t\tJButton downloadButton = new JButton(\"Download\");\n+\t\tJButton removeButton = new JButton(\"Remove\");\n+\n+\n+\t\tJList list = new JList();\n+\t\tDefaultListModel listModel = new DefaultListModel ();\n+\t\tlist.setModel(listModel);\n+\n+\n+\t\tFile dir = new File(\"client\");\n+\t\tfor ( File file : dir.listFiles() ){\n+\t\t\tif ( file.isFile()) {\n+\t\t\t\tlistModel.addElement(file.getName());\n+\t\t\t}\n+\t\t}\n \n-\t\tframe.getContentPane().add(BorderLayout.CENTER, ta);\n-\t\tframe.getContentPane().add(BorderLayout.SOUTH, uploadButton);\n+\n+\t\tJPanel buttonPanel = new JPanel();\n+\n+\t\tbuttonPanel.add(uploadButton);\n+\t\tbuttonPanel.add(downloadButton);\n+\t\tbuttonPanel.add(removeButton);\n+\n+\t\tframe.getContentPane().add(BorderLayout.CENTER, list);\n+\t\tframe.getContentPane().add(BorderLayout.SOUTH, buttonPanel);\n \n \t\tframe.setVisible(true);\n \n \t\tuploadButton.addActionListener(a -> {\n-\t\t\tSystem.out.println(sendFile(ta.getText()));\n+\t\t\tSystem.out.println(sendFile(list.getSelectedValue().toString()));\n \t\t});\n+\n+\t\tdownloadButton.addActionListener(a->{\n+\t\t\tSystem.out.println(takeFile(list.getSelectedValue().toString()));\n+\t\t});\n+\n+\t\tremoveButton.addActionListener(a->{\n+\t\t\tSystem.out.println(removeFile(list.getSelectedValue().toString()));\n+\t\t});\n+\t}\n+\n+\tprivate String removeFile(String filename) {\n+\t\ttry {\n+\t\t\tFile file = new File(\"server\" + File.separator + filename);\n+\t\t\tif (file.exists()) {\n+\t\t\t\tout.writeUTF(\"remove\");\n+\t\t\t\tout.writeUTF(filename);\n+\t\t\t\tout.flush();\n+\t\t\t\treturn in.readUTF();\n+\t\t\t} else {\n+\t\t\t\treturn \"File is not exists\";\n+\t\t\t}\n+\t\t} catch (IOException e) {\n+\t\t\te.printStackTrace();\n+\t\t}\n+\t\treturn \"Something error\";\n+\t}\n+\n+\tprivate String takeFile(String filename) {\n+\t\ttry {\n+\t\t\tFile file = new File(\"server\" + File.separator + filename);\n+\t\t\tif (file.exists()) {\n+\t\t\t\tout.writeUTF(\"download\");\n+\t\t\t\tout.writeUTF(filename);\n+\t\t\t\tlong length = file.length();\n+\t\t\t\tout.writeLong(length);\n+\t\t\t\tFileInputStream fis = new FileInputStream(file);\n+\t\t\t\tint read = 0;\n+\t\t\t\tbyte[] buffer = new byte[256];\n+\t\t\t\twhile ((read = fis.read(buffer)) != -1) {\n+\t\t\t\t\tout.write(buffer, 0, read);\n+\t\t\t\t}\n+\t\t\t\tout.flush();\n+\t\t\t\tString status = in.readUTF();\n+\t\t\t\treturn status;\n+\t\t\t} else {\n+\t\t\t\treturn \"File is not exists\";\n+\t\t\t}\n+\t\t} catch (IOException e) {\n+\t\t\te.printStackTrace();\n+\t\t}\n+\t\treturn \"Something error\";\n \t}\n \n \tprivate String sendFile(String filename) {"
+  },
+  {
+    "sha": "8f073ba31929b4b5c945c2d7ac4fd03b7488806e",
+    "filename": "src/main/java/server/ClientHandler.java",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 1,
+    "changes": 30,
+    "blob_url": "https://github.com/vershininvv/CloudStorage/blob/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/src/main/java/server/ClientHandler.java",
+    "raw_url": "https://github.com/vershininvv/CloudStorage/raw/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/src/main/java/server/ClientHandler.java",
+    "contents_url": "https://api.github.com/repos/vershininvv/CloudStorage/contents/src/main/java/server/ClientHandler.java?ref=0e1a033d1ecfbf09e078cc3226d6642fe1bc1032",
+    "patch": "@@ -16,7 +16,7 @@ public ClientHandler(Socket socket) {\n \t@Override\n \tpublic void run() {\n \t\ttry (DataOutputStream out = new DataOutputStream(socket.getOutputStream());\n-\t\t     DataInputStream in = new DataInputStream(socket.getInputStream())){\n+\t\t\t DataInputStream in = new DataInputStream(socket.getInputStream())){\n \t\t\twhile (true) {\n \t\t\t\tString command = in.readUTF();\n \t\t\t\tif (\"upload\".equals(command)) {\n@@ -40,9 +40,37 @@ public void run() {\n \t\t\t\t} else if (\"download\".equals(command)) {\n \t\t\t\t\t// TODO: 02.03.2021\n \t\t\t\t\t// realize download\n+\n+\t\t\t\t\ttry {\n+\t\t\t\t\t\tFile file = new File(\"client\" + File.separator + in.readUTF());\n+\t\t\t\t\t\tif (!file.exists()) {\n+\t\t\t\t\t\t\tfile.createNewFile();\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tlong size = in.readLong();\n+\t\t\t\t\t\tFileOutputStream fos = new FileOutputStream(file);\n+\t\t\t\t\t\tbyte[] buffer = new byte[256];\n+\t\t\t\t\t\tfor (int i = 0; i < (size + 255) / 256; i++) { // FIXME\n+\t\t\t\t\t\t\tint read = in.read(buffer);\n+\t\t\t\t\t\t\tfos.write(buffer, 0, read);\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tfos.close();\n+\t\t\t\t\t\tout.writeUTF(\"DONE\");\n+\t\t\t\t\t} catch (Exception e) {\n+\t\t\t\t\t\tout.writeUTF(\"ERROR\");\n+\t\t\t\t\t}\n+\n \t\t\t\t} else if (\"remove\".equals(command)) {\n \t\t\t\t\t// TODO: 02.03.2021\n \t\t\t\t\t// realize remove\n+\n+\t\t\t\t\ttry {\n+\t\t\t\t\t\tFile file = new File(\"server\" + File.separator + in.readUTF());\n+\t\t\t\t\t\tfile.delete();\n+\t\t\t\t\t\tout.writeUTF(\"DONE\");\n+\t\t\t\t\t} catch (Exception e) {\n+\t\t\t\t\t\tout.writeUTF(\"ERROR\");\n+\t\t\t\t\t}\n+\n \t\t\t\t}\n \t\t\t}\n \t\t} catch (IOException e) {"
+  },
+  {
+    "sha": "af870e207e81d8aaeb01980502406cd216da13e3",
+    "filename": "target/classes/client/Client.class",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/vershininvv/CloudStorage/blob/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/target/classes/client/Client.class",
+    "raw_url": "https://github.com/vershininvv/CloudStorage/raw/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/target/classes/client/Client.class",
+    "contents_url": "https://api.github.com/repos/vershininvv/CloudStorage/contents/target/classes/client/Client.class?ref=0e1a033d1ecfbf09e078cc3226d6642fe1bc1032"
+  },
+  {
+    "sha": "c8d1aedcc667708c7e3e2eb5743d046524328f11",
+    "filename": "target/classes/server/ClientHandler.class",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/vershininvv/CloudStorage/blob/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/target/classes/server/ClientHandler.class",
+    "raw_url": "https://github.com/vershininvv/CloudStorage/raw/0e1a033d1ecfbf09e078cc3226d6642fe1bc1032/target/classes/server/ClientHandler.class",
+    "contents_url": "https://api.github.com/repos/vershininvv/CloudStorage/contents/target/classes/server/ClientHandler.class?ref=0e1a033d1ecfbf09e078cc3226d6642fe1bc1032"
+  }
+]

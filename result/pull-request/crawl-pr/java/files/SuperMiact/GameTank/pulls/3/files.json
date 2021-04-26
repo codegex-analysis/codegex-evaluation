@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "07827cc266272dc0eada35d88dbd000ef75d8eba",
+    "filename": ".gitignore",
+    "status": "added",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/SuperMiact/GameTank/blob/adee4cc92b3c5013e7381171fb65550d8bebcb72/.gitignore",
+    "raw_url": "https://github.com/SuperMiact/GameTank/raw/adee4cc92b3c5013e7381171fb65550d8bebcb72/.gitignore",
+    "contents_url": "https://api.github.com/repos/SuperMiact/GameTank/contents/.gitignore?ref=adee4cc92b3c5013e7381171fb65550d8bebcb72",
+    "patch": "@@ -0,0 +1,2 @@\n+target/\n+.idea/\n\\ No newline at end of file"
+  },
+  {
+    "sha": "5e8ec9615cb00508c6f3be08ff302977efad0fd9",
+    "filename": "src/main/java/com/gametank/Bullet.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/SuperMiact/GameTank/blob/adee4cc92b3c5013e7381171fb65550d8bebcb72/src/main/java/com/gametank/Bullet.java",
+    "raw_url": "https://github.com/SuperMiact/GameTank/raw/adee4cc92b3c5013e7381171fb65550d8bebcb72/src/main/java/com/gametank/Bullet.java",
+    "contents_url": "https://api.github.com/repos/SuperMiact/GameTank/contents/src/main/java/com/gametank/Bullet.java?ref=adee4cc92b3c5013e7381171fb65550d8bebcb72",
+    "patch": "@@ -71,8 +71,8 @@ private void move(){\n         if (x < 0 || y < 0 || x > TankFrame.GAME_WIDTH || y > TankFrame.GAME_HEIGHT) living = false;\n     }\n \n-    public void collideWith(Tank tank) {\n-        if (this.group==tank.getGroup()) return;\n+    public boolean collideWith(Tank tank) {\n+        if (this.group==tank.getGroup()) return false   ;\n \n         //TODO:用一个rect来记录子弹的位置\n         Rectangle rect1 = new Rectangle(this.x,this.y,WIDTH,HEIGHT);\n@@ -81,7 +81,9 @@ public void collideWith(Tank tank) {\n         if (rect1.intersects(rect2)){\n             tank.die();\n             this.die();\n+            return true;\n         }\n+        return false;\n     }\n \n     private void die() {"
+  },
+  {
+    "sha": "f531f8e9faa26e1e1face0318421b4ca64720c28",
+    "filename": "src/main/java/com/gametank/Main.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/SuperMiact/GameTank/blob/adee4cc92b3c5013e7381171fb65550d8bebcb72/src/main/java/com/gametank/Main.java",
+    "raw_url": "https://github.com/SuperMiact/GameTank/raw/adee4cc92b3c5013e7381171fb65550d8bebcb72/src/main/java/com/gametank/Main.java",
+    "contents_url": "https://api.github.com/repos/SuperMiact/GameTank/contents/src/main/java/com/gametank/Main.java?ref=adee4cc92b3c5013e7381171fb65550d8bebcb72",
+    "patch": "@@ -3,10 +3,11 @@\n public class Main {\n     public static void main(String[] args) throws InterruptedException {\n         TankFrame tankFrame = new TankFrame();\n-\n+        tankFrame.myTank= new Tank(200,500,Dir.DOWN,Group.GOOD,tankFrame);\n         //初始化敌方\n         for (int i = 0; i < 5; i++) {\n             tankFrame.tanks.add(new Tank(50+i*80,200,Dir.DOWN,Group.BAD,tankFrame));\n+//            tankFrame.tanks.get(tankFrame.tanks.size()-1).setMoving(true);\n         }\n \n         while (true){"
+  },
+  {
+    "sha": "d81afb8e13b1cc5404941ddb3de461fec94602f5",
+    "filename": "src/main/java/com/gametank/Tank.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/SuperMiact/GameTank/blob/adee4cc92b3c5013e7381171fb65550d8bebcb72/src/main/java/com/gametank/Tank.java",
+    "raw_url": "https://github.com/SuperMiact/GameTank/raw/adee4cc92b3c5013e7381171fb65550d8bebcb72/src/main/java/com/gametank/Tank.java",
+    "contents_url": "https://api.github.com/repos/SuperMiact/GameTank/contents/src/main/java/com/gametank/Tank.java?ref=adee4cc92b3c5013e7381171fb65550d8bebcb72",
+    "patch": "@@ -12,7 +12,7 @@\n     public static int WIDTH = ResourceMgr.tankD.getWidth();\n     public static int HEIGHT = ResourceMgr.tankD.getHeight();\n \n-    private boolean moving = true;\n+    private boolean moving = false      ;\n     private TankFrame tf = null;\n     private boolean living = true;\n     private Group group = Group.BAD;\n@@ -66,9 +66,10 @@ public void setGroup(Group group) {\n         this.group = group;\n     }\n \n-    public void paint(Graphics g){\n+    public boolean paint(Graphics g){\n         if (!living){\n             tf.tanks.remove(this);\n+            return false;\n         }\n         switch (dir){\n             case LEFT:\n@@ -85,6 +86,7 @@ public void paint(Graphics g){\n                 break;\n         }\n         move();\n+        return true;\n     }\n \n     private void move(){"
+  },
+  {
+    "sha": "ffb5e505c5195128cbcb4fe5b4933e79872f4219",
+    "filename": "src/main/java/com/gametank/TankFrame.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 4,
+    "changes": 12,
+    "blob_url": "https://github.com/SuperMiact/GameTank/blob/adee4cc92b3c5013e7381171fb65550d8bebcb72/src/main/java/com/gametank/TankFrame.java",
+    "raw_url": "https://github.com/SuperMiact/GameTank/raw/adee4cc92b3c5013e7381171fb65550d8bebcb72/src/main/java/com/gametank/TankFrame.java",
+    "contents_url": "https://api.github.com/repos/SuperMiact/GameTank/contents/src/main/java/com/gametank/TankFrame.java?ref=adee4cc92b3c5013e7381171fb65550d8bebcb72",
+    "patch": "@@ -63,13 +63,17 @@ public void paint(Graphics g) {\n             bullets.get(i).paint(g);\n         }\n         for (int i = 0 ;i<tanks.size();i++){\n-            tanks.get(i).paint(g);\n+            if(!tanks.get(i).paint(g)){\n+                i--;\n+            }\n         }\n \n         //每颗子弹都尝试去和每辆坦克相撞，如果是队友，那就撞下一个去\n-        for (int i = 0; i < bullets.size(); i++) {\n-            for (int j = 0; j < tanks.size(); j++) {\n-                bullets.get(i).collideWith(tanks.get(j));\n+        for (Bullet bullet : bullets) {\n+            for (Tank tank : tanks) {\n+                if (bullet.collideWith(tank)) {\n+                    break;\n+                }\n             }\n         }\n "
+  }
+]

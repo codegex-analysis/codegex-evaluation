@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "1b608b64f4a5b176fb510e04af7255e22e3e230e",
+    "filename": "src/main/java/com/glencoesoftware/bioformats2raw/Converter.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 7,
+    "changes": 22,
+    "blob_url": "https://github.com/glencoesoftware/bioformats2raw/blob/3be1a8572a8a051e46c5043fb19b7135f6d07bb3/src/main/java/com/glencoesoftware/bioformats2raw/Converter.java",
+    "raw_url": "https://github.com/glencoesoftware/bioformats2raw/raw/3be1a8572a8a051e46c5043fb19b7135f6d07bb3/src/main/java/com/glencoesoftware/bioformats2raw/Converter.java",
+    "contents_url": "https://api.github.com/repos/glencoesoftware/bioformats2raw/contents/src/main/java/com/glencoesoftware/bioformats2raw/Converter.java?ref=3be1a8572a8a051e46c5043fb19b7135f6d07bb3",
+    "patch": "@@ -305,6 +305,12 @@\n   )\n   private volatile boolean noHCS = false;\n \n+  @Option(\n+          names = \"--no-ome-meta-export\",\n+          description = \"Turn off OME metadata exporting\"\n+  )\n+  private volatile boolean noOMEMeta = false;\n+\n   /** Scaling implementation that will be used during downsampling. */\n   private volatile IImageScaler scaler = new SimpleImageScaler();\n \n@@ -508,15 +514,17 @@ public void convert()\n           }\n         }\n \n-        String xml = getService().getOMEXML(meta);\n+        if (!noOMEMeta) {\n+          String xml = getService().getOMEXML(meta);\n \n-        // write the original OME-XML to a file\n-        Path metadataPath = outputPath.resolve(pyramidName);\n-        if (!Files.exists(metadataPath)) {\n-          Files.createDirectories(metadataPath);\n+          // write the original OME-XML to a file\n+          Path metadataPath = outputPath.resolve(pyramidName);\n+          if (!Files.exists(metadataPath)) {\n+            Files.createDirectories(metadataPath);\n+          }\n+          Path omexmlFile = metadataPath.resolve(METADATA_FILE);\n+          Files.write(omexmlFile, xml.getBytes(Constants.ENCODING));\n         }\n-        Path omexmlFile = metadataPath.resolve(METADATA_FILE);\n-        Files.write(omexmlFile, xml.getBytes(Constants.ENCODING));\n       }\n       catch (ServiceException se) {\n         LOGGER.error(\"Could not retrieve OME-XML\", se);"
+  }
+]

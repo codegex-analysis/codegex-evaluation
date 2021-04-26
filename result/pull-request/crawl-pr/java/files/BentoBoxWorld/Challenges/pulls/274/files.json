@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "b9dc812fc54edf4faa7f8e062a21123c56aa0874",
+    "filename": "src/main/java/world/bentobox/challenges/panel/admin/ListUsersGUI.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 1,
+    "changes": 13,
+    "blob_url": "https://github.com/BentoBoxWorld/Challenges/blob/ab7ca9d245981906a3ea82dad4b69a0b9b64e53e/src/main/java/world/bentobox/challenges/panel/admin/ListUsersGUI.java",
+    "raw_url": "https://github.com/BentoBoxWorld/Challenges/raw/ab7ca9d245981906a3ea82dad4b69a0b9b64e53e/src/main/java/world/bentobox/challenges/panel/admin/ListUsersGUI.java",
+    "contents_url": "https://api.github.com/repos/BentoBoxWorld/Challenges/contents/src/main/java/world/bentobox/challenges/panel/admin/ListUsersGUI.java?ref=ab7ca9d245981906a3ea82dad4b69a0b9b64e53e",
+    "patch": "@@ -17,6 +17,7 @@\n import world.bentobox.bentobox.api.panels.builders.PanelItemBuilder;\n import world.bentobox.bentobox.api.user.User;\n import world.bentobox.bentobox.database.objects.Players;\n+import world.bentobox.bentobox.managers.IslandsManager;\n import world.bentobox.challenges.ChallengesAddon;\n import world.bentobox.challenges.ChallengesManager;\n import world.bentobox.challenges.database.object.Challenge;\n@@ -274,7 +275,17 @@ private PanelItem createPlayerIcon(Player player)\n         else if (mode.equals(ViewMode.WITH_ISLAND))\n         {\n             return this.addon.getPlayers().getPlayers().stream().\n-                    filter(player -> this.addon.getIslands().getIsland(this.world, player.getPlayerUUID()) != null).\n+                    filter(p -> {\n+                        // When I reached this position during the test, the user\n+                        // UUID string was empty. Although I don't know the specific\n+                        // reason, it is wise to add judgment here.\n+                        String uidStr = p.getUniqueId();\n+                        if (uidStr == null) {\n+                            return false;\n+                        }\n+                        IslandsManager im = ListUsersGUI.this.addon.getIslands();\n+                        return im.getIsland(ListUsersGUI.this.world, p.getPlayerUUID()) != null;\n+                    }).\n                     map(Players::getPlayer).\n                     collect(Collectors.toList());\n         }"
+  }
+]

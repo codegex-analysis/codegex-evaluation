@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "a2166ec014e5c67635247d35225e4cbb8e570625",
+    "filename": "rome-modules/src/main/java/com/rometools/modules/georss/SimpleGenerator.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/rometools/rome/blob/ebc5bdbaf20f2fba47b597c280399ed34f058fe4/rome-modules/src/main/java/com/rometools/modules/georss/SimpleGenerator.java",
+    "raw_url": "https://github.com/rometools/rome/raw/ebc5bdbaf20f2fba47b597c280399ed34f058fe4/rome-modules/src/main/java/com/rometools/modules/georss/SimpleGenerator.java",
+    "contents_url": "https://api.github.com/repos/rometools/rome/contents/rome-modules/src/main/java/com/rometools/modules/georss/SimpleGenerator.java?ref=ebc5bdbaf20f2fba47b597c280399ed34f058fe4",
+    "patch": "@@ -134,6 +134,12 @@ public void generate(final Module module, final Element element) {\n         } else {\n             LOG.error(\"GeoRSS simple format can't handle geometries of type: \" + geometry.getClass().getName());\n         }\n+\n+        if (geoRSSModule.getFeatureNameTag() != null) {\n+            Element featureNameElement = new Element(\"featurename\", GeoRSSModule.SIMPLE_NS);\n+            featureNameElement.addContent(geoRSSModule.getFeatureNameTag());\n+            element.addContent(featureNameElement);\n+        }\n     }\n \n }"
+  },
+  {
+    "sha": "5b32fc7b6aebd8bc9f7096fd8935ad22b6369000",
+    "filename": "rome-modules/src/test/java/com/rometools/modules/georss/GeoRSSModuleTest.java",
+    "status": "modified",
+    "additions": 35,
+    "deletions": 6,
+    "changes": 41,
+    "blob_url": "https://github.com/rometools/rome/blob/ebc5bdbaf20f2fba47b597c280399ed34f058fe4/rome-modules/src/test/java/com/rometools/modules/georss/GeoRSSModuleTest.java",
+    "raw_url": "https://github.com/rometools/rome/raw/ebc5bdbaf20f2fba47b597c280399ed34f058fe4/rome-modules/src/test/java/com/rometools/modules/georss/GeoRSSModuleTest.java",
+    "contents_url": "https://api.github.com/repos/rometools/rome/contents/rome-modules/src/test/java/com/rometools/modules/georss/GeoRSSModuleTest.java?ref=ebc5bdbaf20f2fba47b597c280399ed34f058fe4",
+    "patch": "@@ -25,6 +25,7 @@\n import com.rometools.rome.io.SyndFeedInput;\n import com.rometools.rome.io.SyndFeedOutput;\n import com.rometools.rome.io.XmlReader;\n+\n import java.io.*;\n import java.util.ArrayList;\n import java.util.Date;\n@@ -240,12 +241,14 @@ public void testProduceAndReadSimpleLine() throws Exception {\n         feed = input.build(new XmlReader(in));\n \n         final List<SyndEntry> entries = feed.getEntries();\n-        for (int i = 0; i < entries.size(); i++) {\n-            entry = entries.get(i);\n-            geoRSSModule = (SimpleModuleImpl) GeoRSSUtils.getGeoRSS(entry);\n-            final LineString lineString = (LineString) geoRSSModule.getGeometry();\n-            positionList = lineString.getPositionList();\n-\n+        assertEquals(1, entries.size());\n+\n+        // Check line points\n+        entry = entries.get(0);\n+        geoRSSModule = (SimpleModuleImpl) GeoRSSUtils.getGeoRSS(entry);\n+        final LineString lineString = (LineString) geoRSSModule.getGeometry();\n+        positionList = lineString.getPositionList();\n+        for (int i = 0; i < positionList.size(); i++) {\n             assertEquals(latitudes[i], positionList.getLatitude(i), DELTA);\n             assertEquals(longitudes[i], positionList.getLongitude(i), DELTA);\n         }\n@@ -295,6 +298,32 @@ public void testParseElevValue() throws IOException, FeedException {\n         }\n     }\n \n+    public void testFeatureNameTag() throws Exception {\n+        SyndFeed feed = createFeed();\n+\n+        SimpleModuleImpl geoRSSModule = new SimpleModuleImpl();\n+        geoRSSModule.setPosition(new Position(50.714, -1.876));\n+        geoRSSModule.setFeatureNameTag(\"Bournemouth Pier\");\n+        SyndEntry entry = feed.getEntries().get(0);\n+        entry.getModules().add(geoRSSModule);\n+\n+        final SyndFeedOutput output = new SyndFeedOutput();\n+\n+        final StringWriter stringWriter = new StringWriter();\n+        output.output(feed, stringWriter);\n+\n+        final InputStream in = new ByteArrayInputStream(stringWriter.toString().getBytes(\"UTF8\"));\n+        final SyndFeedInput input = new SyndFeedInput();\n+\n+        feed = input.build(new XmlReader(in));\n+\n+        final List<SyndEntry> entries = feed.getEntries();\n+        entry = entries.get(0);\n+        geoRSSModule = (SimpleModuleImpl) GeoRSSUtils.getGeoRSS(entry);\n+\n+        assertEquals(\"Bournemouth Pier\", geoRSSModule.getFeatureNameTag());\n+    }\n+\n     private SyndFeed getSyndFeed(final String filePath) throws IOException, FeedException {\n         final String fullPath = getTestFile(filePath);\n         final File file = new File(fullPath);"
+  }
+]

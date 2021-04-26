@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "f73493df33396ff1298bf5bd20fb39265e96f006",
+    "filename": "Assignment20-DBMS-Best practices/Assignment 20 DBMS 4.sql",
+    "status": "added",
+    "additions": 91,
+    "deletions": 0,
+    "changes": 91,
+    "blob_url": "https://github.com/meta-ameet-khemani/GET2021/blob/046dc908453f67f52ef576d623ca9f15ec3380da/Assignment20-DBMS-Best%20practices/Assignment%2020%20DBMS%204.sql",
+    "raw_url": "https://github.com/meta-ameet-khemani/GET2021/raw/046dc908453f67f52ef576d623ca9f15ec3380da/Assignment20-DBMS-Best%20practices/Assignment%2020%20DBMS%204.sql",
+    "contents_url": "https://api.github.com/repos/meta-ameet-khemani/GET2021/contents/Assignment20-DBMS-Best%20practices/Assignment%2020%20DBMS%204.sql?ref=046dc908453f67f52ef576d623ca9f15ec3380da",
+    "patch": "@@ -0,0 +1,91 @@\n+Assignment 1\n+=============\n+\n+Question 1\n+=============\n+\n+drop function if exists calculateOrders;\n+\n+DELIMITER $$\n+\n+CREATE function calculateOrders(month int, year int) returns int deterministic\n+BEGIN\n+    declare result int;\n+    set result = 0;\n+    select count(id) into result from orders where extract(Month from dateOfOrder) = month and\n+    extract(Year from dateOfOrder) = year;\n+    return result;\n+END$$\n+\n+DELIMITER ;\n+\n+select calculateOrders(03, 2021);\n+\n+\n+Question 2\n+=============\n+\n+drop function if exists getOrders;\n+\n+DELIMITER $$\n+\n+CREATE function getOrders(year int) returns int deterministic\n+BEGIN\n+    declare month int;\n+    \n+    select max.maxMonth into month from (\n+    select count(dateOfOrder) as count, month(dateOfOrder) as maxMonth from orders where\n+    extract(Year from dateOfOrder) = year\n+    group by month(dateOfOrder))max\n+    order by max.count desc limit 1;\n+    \n+    return month;\n+END$$\n+\n+DELIMITER ;\n+\n+select getOrders(2021);\n+\n+Assignment 2\n+=============\n+\n+Question 1\n+=============\n+\n+drop procedure if exists avgMonthSales;\n+\n+DELIMITER $$\n+\n+CREATE procedure avgMonthSales(month int, year int)\n+BEGIN\n+    \n+    select p.id, p.name, o.dateOfOrder, sum(o.amount), avg(o.amount) from orders o join orderitems \n+    oi join product p on oi.orderNumber = o.id and oi.productId = p.id where month(o.dateOfOrder) = \n+    03 and year(o.dateOfOrder) = 2021 group by p.id;\n+    \n+END$$\n+\n+DELIMITER ;\n+\n+call avgMonthSales(03, 2021);\n+\n+\n+\n+Question 2 \n+=============\n+\n+drop procedure if exists orderDetails;\n+\n+DELIMITER $$\n+\n+CREATE procedure orderDetails(startDate date, endDate date)\n+BEGIN\n+    \n+    select p.name, oi.status from orders o join orderItems oi join product p where o.id = oi.orderNumber\n+    and oi.productId = p.id and o.dateOfOrder between startDate and endDate;\n+    \n+END$$\n+\n+DELIMITER ;\n+\n+call orderDetails('2021-03-01', '2021-12-31');"
+  }
+]

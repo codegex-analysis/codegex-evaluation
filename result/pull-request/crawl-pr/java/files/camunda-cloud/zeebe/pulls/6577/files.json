@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "0a376bfc6edc1e4ebbedc31672a1cf2503d23974",
+    "filename": "broker/src/main/java/io/zeebe/broker/transport/backpressure/CommandRateLimiter.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 1,
+    "changes": 12,
+    "blob_url": "https://github.com/camunda-cloud/zeebe/blob/fef4779956c4525a503cebb04a1276c48aa41021/broker/src/main/java/io/zeebe/broker/transport/backpressure/CommandRateLimiter.java",
+    "raw_url": "https://github.com/camunda-cloud/zeebe/raw/fef4779956c4525a503cebb04a1276c48aa41021/broker/src/main/java/io/zeebe/broker/transport/backpressure/CommandRateLimiter.java",
+    "contents_url": "https://api.github.com/repos/camunda-cloud/zeebe/contents/broker/src/main/java/io/zeebe/broker/transport/backpressure/CommandRateLimiter.java?ref=fef4779956c4525a503cebb04a1276c48aa41021",
+    "patch": "@@ -17,10 +17,14 @@\n import java.util.Optional;\n import java.util.Set;\n import java.util.concurrent.ConcurrentHashMap;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n \n public final class CommandRateLimiter extends AbstractLimiter<Intent>\n     implements RequestLimiter<Intent> {\n \n+  private static final Logger LOG =\n+      LoggerFactory.getLogger(\"io.zeebe.broker.transport.backpressure\");\n   private static final Set<? extends Intent> WHITE_LISTED_COMMANDS =\n       EnumSet.of(JobIntent.COMPLETE, JobIntent.FAIL);\n   private final Map<ListenerId, Listener> responseListeners = new ConcurrentHashMap<>();\n@@ -65,7 +69,13 @@ public boolean tryAcquire(final int streamId, final long requestId, final Intent\n   public void onResponse(final int streamId, final long requestId) {\n     final Listener listener = responseListeners.remove(new ListenerId(streamId, requestId));\n     if (listener != null) {\n-      listener.onSuccess();\n+      try {\n+        listener.onSuccess();\n+      } catch (final IllegalArgumentException e) {\n+        LOG.warn(\"Ignoring request in command rate limiter due to: \", e);\n+        listener.onIgnore();\n+      }\n+\n       metrics.decInflight(partitionId);\n     } else {\n       // Ignore this message, if it happens immediately after failover. It can happen when a request"
+  },
+  {
+    "sha": "b3ade4b9af49ed785e02e4a53461f7779e18c909",
+    "filename": "broker/src/main/java/io/zeebe/broker/transport/backpressure/PartitionAwareRequestLimiter.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 3,
+    "changes": 12,
+    "blob_url": "https://github.com/camunda-cloud/zeebe/blob/fef4779956c4525a503cebb04a1276c48aa41021/broker/src/main/java/io/zeebe/broker/transport/backpressure/PartitionAwareRequestLimiter.java",
+    "raw_url": "https://github.com/camunda-cloud/zeebe/raw/fef4779956c4525a503cebb04a1276c48aa41021/broker/src/main/java/io/zeebe/broker/transport/backpressure/PartitionAwareRequestLimiter.java",
+    "contents_url": "https://api.github.com/repos/camunda-cloud/zeebe/contents/broker/src/main/java/io/zeebe/broker/transport/backpressure/PartitionAwareRequestLimiter.java?ref=fef4779956c4525a503cebb04a1276c48aa41021",
+    "patch": "@@ -23,6 +23,7 @@\n import io.zeebe.broker.system.configuration.backpressure.Gradient2Cfg;\n import io.zeebe.broker.system.configuration.backpressure.GradientCfg;\n import io.zeebe.broker.system.configuration.backpressure.VegasCfg;\n+import io.zeebe.logstreams.impl.backpressure.IncreasingClock;\n import io.zeebe.protocol.record.intent.Intent;\n import java.util.Map;\n import java.util.concurrent.ConcurrentHashMap;\n@@ -42,7 +43,12 @@ private PartitionAwareRequestLimiter() {\n   }\n \n   private PartitionAwareRequestLimiter(final Supplier<Limit> limitSupplier) {\n-    limiterSupplier = i -> CommandRateLimiter.builder().limit(limitSupplier.get()).build(i);\n+    limiterSupplier =\n+        i ->\n+            CommandRateLimiter.builder()\n+                .clock(new IncreasingClock())\n+                .limit(limitSupplier.get())\n+                .build(i);\n   }\n \n   public static PartitionAwareRequestLimiter newNoopLimiter() {\n@@ -130,7 +136,7 @@ public boolean tryAcquire(\n   }\n \n   public void onResponse(final int partitionId, final int streamId, final long requestId) {\n-    final RequestLimiter limiter = partitionLimiters.get(partitionId);\n+    final RequestLimiter<Intent> limiter = partitionLimiters.get(partitionId);\n     if (limiter != null) {\n       limiter.onResponse(streamId, requestId);\n     }\n@@ -149,6 +155,6 @@ public void removePartition(final int partitionId) {\n   }\n \n   private RequestLimiter<Intent> getOrCreateLimiter(final int partitionId) {\n-    return partitionLimiters.computeIfAbsent(partitionId, limiterSupplier::apply);\n+    return partitionLimiters.computeIfAbsent(partitionId, limiterSupplier);\n   }\n }"
+  },
+  {
+    "sha": "ff821c5c4ba0876c2923811957a99501f874bbcc",
+    "filename": "logstreams/src/main/java/io/zeebe/logstreams/impl/backpressure/AppendEntryLimiter.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 1,
+    "changes": 11,
+    "blob_url": "https://github.com/camunda-cloud/zeebe/blob/fef4779956c4525a503cebb04a1276c48aa41021/logstreams/src/main/java/io/zeebe/logstreams/impl/backpressure/AppendEntryLimiter.java",
+    "raw_url": "https://github.com/camunda-cloud/zeebe/raw/fef4779956c4525a503cebb04a1276c48aa41021/logstreams/src/main/java/io/zeebe/logstreams/impl/backpressure/AppendEntryLimiter.java",
+    "contents_url": "https://api.github.com/repos/camunda-cloud/zeebe/contents/logstreams/src/main/java/io/zeebe/logstreams/impl/backpressure/AppendEntryLimiter.java?ref=fef4779956c4525a503cebb04a1276c48aa41021",
+    "patch": "@@ -11,9 +11,13 @@\n import io.zeebe.logstreams.impl.Loggers;\n import java.util.Optional;\n import org.agrona.collections.Long2ObjectHashMap;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n \n public final class AppendEntryLimiter extends AbstractLimiter<Long> implements AppendLimiter {\n \n+  private static final Logger LOG =\n+      LoggerFactory.getLogger(\"io.zeebe.logstreams.impl.backpressure\");\n   private final Long2ObjectHashMap<Listener> appendedListeners = new Long2ObjectHashMap<>();\n   private final AppendBackpressureMetrics metrics;\n \n@@ -51,7 +55,12 @@ public boolean tryAcquire(final Long position) {\n   public void onCommit(final long position) {\n     final Listener listener = appendedListeners.remove(position);\n     if (listener != null) {\n-      listener.onSuccess();\n+      try {\n+        listener.onSuccess();\n+      } catch (final IllegalArgumentException e) {\n+        listener.onIgnore();\n+        LOG.warn(\"Ignoring request in append entry rate limiter due to: \", e);\n+      }\n       metrics.decInflight();\n     } else {\n       Loggers.LOGSTREAMS_LOGGER.warn("
+  },
+  {
+    "sha": "ba43b17a3d4825b3f5df1728eecefd51ebec787c",
+    "filename": "logstreams/src/main/java/io/zeebe/logstreams/impl/backpressure/IncreasingClock.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/camunda-cloud/zeebe/blob/fef4779956c4525a503cebb04a1276c48aa41021/logstreams/src/main/java/io/zeebe/logstreams/impl/backpressure/IncreasingClock.java",
+    "raw_url": "https://github.com/camunda-cloud/zeebe/raw/fef4779956c4525a503cebb04a1276c48aa41021/logstreams/src/main/java/io/zeebe/logstreams/impl/backpressure/IncreasingClock.java",
+    "contents_url": "https://api.github.com/repos/camunda-cloud/zeebe/contents/logstreams/src/main/java/io/zeebe/logstreams/impl/backpressure/IncreasingClock.java?ref=fef4779956c4525a503cebb04a1276c48aa41021",
+    "patch": "@@ -0,0 +1,32 @@\n+/*\n+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH under\n+ * one or more contributor license agreements. See the NOTICE file distributed\n+ * with this work for additional information regarding copyright ownership.\n+ * Licensed under the Zeebe Community License 1.1. You may not use this file\n+ * except in compliance with the Zeebe Community License 1.1.\n+ */\n+package io.zeebe.logstreams.impl.backpressure;\n+\n+import java.util.function.Supplier;\n+\n+/**\n+ * Supplies value of System.nanoTime() but ensures that values are always larger than previous ones.\n+ * This ensure that measurements round-trip times in are always positive despite with potential\n+ * concurrency or resolution issues in System.nanoTime() measurements.\n+ */\n+@SuppressWarnings(\"java:S4276\")\n+public class IncreasingClock implements Supplier<Long> {\n+\n+  private Long lastTime = null;\n+\n+  @Override\n+  public synchronized Long get() {\n+    long time = System.nanoTime();\n+    if (lastTime != null && time <= lastTime) {\n+      time = lastTime + 1;\n+    }\n+\n+    lastTime = time;\n+    return time;\n+  }\n+}"
+  },
+  {
+    "sha": "e03ed4cc5c6dccbbdbf6114e6162b9a6d662d05c",
+    "filename": "logstreams/src/main/java/io/zeebe/logstreams/impl/log/LogStorageAppender.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/camunda-cloud/zeebe/blob/fef4779956c4525a503cebb04a1276c48aa41021/logstreams/src/main/java/io/zeebe/logstreams/impl/log/LogStorageAppender.java",
+    "raw_url": "https://github.com/camunda-cloud/zeebe/raw/fef4779956c4525a503cebb04a1276c48aa41021/logstreams/src/main/java/io/zeebe/logstreams/impl/log/LogStorageAppender.java",
+    "contents_url": "https://api.github.com/repos/camunda-cloud/zeebe/contents/logstreams/src/main/java/io/zeebe/logstreams/impl/log/LogStorageAppender.java?ref=fef4779956c4525a503cebb04a1276c48aa41021",
+    "patch": "@@ -19,6 +19,7 @@\n import io.zeebe.logstreams.impl.backpressure.AppenderGradient2Cfg;\n import io.zeebe.logstreams.impl.backpressure.AppenderVegasCfg;\n import io.zeebe.logstreams.impl.backpressure.BackpressureConstants;\n+import io.zeebe.logstreams.impl.backpressure.IncreasingClock;\n import io.zeebe.logstreams.impl.backpressure.NoopAppendLimiter;\n import io.zeebe.logstreams.storage.LogStorage;\n import io.zeebe.util.Environment;\n@@ -98,6 +99,7 @@ private AppendLimiter initBackpressure(final int partitionId) {\n     return AppendEntryLimiter.builder()\n         .limit(windowedLimiter ? WindowedLimit.newBuilder().build(abstractLimit) : abstractLimit)\n         .partitionId(partitionId)\n+        .clock(new IncreasingClock())\n         .build();\n   }\n "
+  },
+  {
+    "sha": "cb0ac43083ba5d13a9c95d46aeb72a9dbfff4294",
+    "filename": "logstreams/src/test/java/io/zeebe/logstreams/impl/backpressure/IncreasingClockTest.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/camunda-cloud/zeebe/blob/fef4779956c4525a503cebb04a1276c48aa41021/logstreams/src/test/java/io/zeebe/logstreams/impl/backpressure/IncreasingClockTest.java",
+    "raw_url": "https://github.com/camunda-cloud/zeebe/raw/fef4779956c4525a503cebb04a1276c48aa41021/logstreams/src/test/java/io/zeebe/logstreams/impl/backpressure/IncreasingClockTest.java",
+    "contents_url": "https://api.github.com/repos/camunda-cloud/zeebe/contents/logstreams/src/test/java/io/zeebe/logstreams/impl/backpressure/IncreasingClockTest.java?ref=fef4779956c4525a503cebb04a1276c48aa41021",
+    "patch": "@@ -0,0 +1,29 @@\n+/*\n+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH under\n+ * one or more contributor license agreements. See the NOTICE file distributed\n+ * with this work for additional information regarding copyright ownership.\n+ * Licensed under the Zeebe Community License 1.1. You may not use this file\n+ * except in compliance with the Zeebe Community License 1.1.\n+ */\n+package io.zeebe.logstreams.impl.backpressure;\n+\n+import static org.assertj.core.api.Assertions.assertThat;\n+\n+import org.junit.jupiter.api.Test;\n+\n+public class IncreasingClockTest {\n+  private static final int TRIES = 100_000;\n+\n+  @Test\n+  public void shouldReturnStrictlyIncreasingValues() {\n+    // given\n+    final IncreasingClock clock = new IncreasingClock();\n+\n+    // when/then\n+    for (int i = 0; i < TRIES; i++) {\n+      final long last = clock.get();\n+      final long cur = clock.get();\n+      assertThat(last).isLessThan(cur);\n+    }\n+  }\n+}"
+  }
+]

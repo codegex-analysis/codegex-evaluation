@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "ab33ff459f37e59c110c1425ab5bbab28183bde3",
+    "filename": ".github/workflows/maven.yml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/jitsi/jicoco/blob/7f41bf36e249d208110eea7795923f9579181a2d/.github/workflows/maven.yml",
+    "raw_url": "https://github.com/jitsi/jicoco/raw/7f41bf36e249d208110eea7795923f9579181a2d/.github/workflows/maven.yml",
+    "contents_url": "https://api.github.com/repos/jitsi/jicoco/contents/.github/workflows/maven.yml?ref=7f41bf36e249d208110eea7795923f9579181a2d",
+    "patch": "@@ -41,7 +41,11 @@ jobs:\n             ${{ runner.os }}-maven-\n \n       - name: Build and test with Maven\n-        run: mvn -B -Pcentral-modules,noncentral-modules,release verify\n+        run: mvn -B -Pcoverage,central-modules,noncentral-modules,release verify\n+\n+      - name: Upload coverage report\n+        if: matrix.java == env.RELEASE_JAVA_VERSION\n+        uses: codecov/codecov-action@v1\n \n   release:\n     if: github.ref == 'refs/heads/master'"
+  },
+  {
+    "sha": "6abb3d576547f0ef73d85c9699617947ad80d087",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/jitsi/jicoco/blob/7f41bf36e249d208110eea7795923f9579181a2d/pom.xml",
+    "raw_url": "https://github.com/jitsi/jicoco/raw/7f41bf36e249d208110eea7795923f9579181a2d/pom.xml",
+    "contents_url": "https://api.github.com/repos/jitsi/jicoco/contents/pom.xml?ref=7f41bf36e249d208110eea7795923f9579181a2d",
+    "patch": "@@ -347,5 +347,36 @@\n                 </plugins>\n             </build>\n         </profile>\n+\n+        <profile>\n+            <id>coverage</id>\n+            <properties>\n+                <jacoco.version>0.8.6</jacoco.version>\n+            </properties>\n+            <build>\n+                <plugins>\n+                    <plugin>\n+                        <groupId>org.jacoco</groupId>\n+                        <artifactId>jacoco-maven-plugin</artifactId>\n+                        <version>${jacoco.version}</version>\n+                        <executions>\n+                            <execution>\n+                                <goals>\n+                                    <goal>prepare-agent</goal>\n+                                </goals>\n+                            </execution>\n+                            <!-- attached to Maven test phase -->\n+                            <execution>\n+                                <id>report</id>\n+                                <phase>test</phase>\n+                                <goals>\n+                                    <goal>report</goal>\n+                                </goals>\n+                            </execution>\n+                        </executions>\n+                    </plugin>\n+                </plugins>\n+            </build>\n+        </profile>\n     </profiles>\n </project>"
+  }
+]

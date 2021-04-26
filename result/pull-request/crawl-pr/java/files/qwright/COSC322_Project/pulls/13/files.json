@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "9a68c984cf92a25a860f8105e0f6128170fa0b7c",
+    "filename": "team-00/src/main/java/ubc/cosc322/Agent.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/qwright/COSC322_Project/blob/843d4f27563ddb3e9c2f5aab2ce87490bc8050d6/team-00/src/main/java/ubc/cosc322/Agent.java",
+    "raw_url": "https://github.com/qwright/COSC322_Project/raw/843d4f27563ddb3e9c2f5aab2ce87490bc8050d6/team-00/src/main/java/ubc/cosc322/Agent.java",
+    "contents_url": "https://api.github.com/repos/qwright/COSC322_Project/contents/team-00/src/main/java/ubc/cosc322/Agent.java?ref=843d4f27563ddb3e9c2f5aab2ce87490bc8050d6",
+    "patch": "@@ -52,7 +52,7 @@ public void onLogin() {\n \t\t\te.printStackTrace();\n \t\t}\n \t\t*/\n-\t\tthis.gameClient.joinRoom(\"Lambly Lake\");\n+\t\tthis.gameClient.joinRoom(\"Kentucky Lake\");\n \t\t\n \t}\n \t\n@@ -156,8 +156,10 @@ private void generateMove()\n \t\t}else {\n \t\t\tArrayList<Integer> qmove = new ArrayList<>(nextMove.subList(0, 2));\n \t\t\tArrayList<Integer> amove = new ArrayList<>(nextMove.subList(2, 4));\n-\t\t\tSystem.out.println(qcur);\n+\t\t\tSystem.out.println(qcur + \"queen current\");\n \t\t\tSystem.out.println(nextMove);\n+\t\t\tSystem.out.println(qmove);\n+\t\t\tSystem.out.println(amove);\n \t\t\tboard.updateBoard(qcur, qmove, amove);\n \t\t\tgameClient.sendMoveMessage(qcur, qmove,amove);\n \t\t}"
+  },
+  {
+    "sha": "c4ad9363a2eec7f8cacd6b71a75ae3e1ea9ac37b",
+    "filename": "team-00/src/main/java/ubc/cosc322/COSC322Test.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 4,
+    "changes": 12,
+    "blob_url": "https://github.com/qwright/COSC322_Project/blob/843d4f27563ddb3e9c2f5aab2ce87490bc8050d6/team-00/src/main/java/ubc/cosc322/COSC322Test.java",
+    "raw_url": "https://github.com/qwright/COSC322_Project/raw/843d4f27563ddb3e9c2f5aab2ce87490bc8050d6/team-00/src/main/java/ubc/cosc322/COSC322Test.java",
+    "contents_url": "https://api.github.com/repos/qwright/COSC322_Project/contents/team-00/src/main/java/ubc/cosc322/COSC322Test.java?ref=843d4f27563ddb3e9c2f5aab2ce87490bc8050d6",
+    "patch": "@@ -41,12 +41,16 @@\n      */\n     public static void main(String[] args) {\t\t\t\t \n     \t//COSC322Test player = new COSC322Test(args[0], args[1]);\n-    \tHumanPlayer player = new HumanPlayer();\n-    \t//Spectator spec = new Spectator();\n+//    \tHumanPlayer player = new HumanPlayer();\n+    \tSpectator player = new Spectator();\n     \tAgent agent = new Agent(\"test\",\"123\");\n-    \t//Agent agent2 = new Agent(\"tester\", \"345\");\n+    \tAgent agent2 = new Agent(\"tester\", \"345\");\n     \tagent.Go();\n-    \t//agent2.Go();\n+    \tint delay = 200; // number of milliseconds to sleep\n+        long start = System.currentTimeMillis();\n+        while(start >= System.currentTimeMillis() - delay); // do nothing\n+    \tagent2.Go();\n+    \twhile(start >= System.currentTimeMillis() - delay); // do nothing\n     \tif(player.getGameGUI() == null) {\n     \t\tplayer.Go();\n     \t}"
+  },
+  {
+    "sha": "c28da5724f85a7d4d8a8ac45ec332364c36a0eca",
+    "filename": "team-00/src/main/java/ubc/cosc322/MCTS.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 32,
+    "changes": 41,
+    "blob_url": "https://github.com/qwright/COSC322_Project/blob/843d4f27563ddb3e9c2f5aab2ce87490bc8050d6/team-00/src/main/java/ubc/cosc322/MCTS.java",
+    "raw_url": "https://github.com/qwright/COSC322_Project/raw/843d4f27563ddb3e9c2f5aab2ce87490bc8050d6/team-00/src/main/java/ubc/cosc322/MCTS.java",
+    "contents_url": "https://api.github.com/repos/qwright/COSC322_Project/contents/team-00/src/main/java/ubc/cosc322/MCTS.java?ref=843d4f27563ddb3e9c2f5aab2ce87490bc8050d6",
+    "patch": "@@ -33,42 +33,14 @@ public void run() {\n \t\n \tArrayList<ArrayList<Integer>> queenmoves = board.getMoves(board.getBoard(), queenPos);\n \t\n-//\t//getting first layer of the tree\n-//\tfor(ArrayList<Integer> queenmove: queenmoves) {\n-//\t\t\n-//\t\t\n-//\t\t\tboard.updateBoard(queenPos, queenmove);\n-//\t\t\n-//\t\t\tArrayList<ArrayList<Integer>> arrowshots = board.getMoves(board.getBoard(), queenmove);\n-//\t\t\t\n-//\t\t\n-//\t\t\tfor(int i =0; i<= arrowshots.size();i++) {\n-//\t\t\t\tif(i==arrowshots.size()) {\n-//\t\t\t\t\t//revert back\n-//\t\t\t\t\tboard.updateBoard(queenmove, queenPos);\n-//\t\t\t\t\tcontinue;\n-//\t\t\t\t}\n-//\t\t\t\t\t\n-//\t\t\t\tList<Integer> move = Stream.of(queenmove,arrowshots.get(i))\n-//\t\t\t\t\t\t.flatMap(x -> x.stream())\n-//\t\t\t\t\t\t.collect(Collectors.toList());\n-//\t\t\t\tmoves.add((ArrayList)move);\n-//\t\n-//\t\t\t}\n-//\t}\n-//\t\n+\t\n \tNode treeRootNode = new Node(null,queenPos);\n-//\t\n-//\t\n-//\t//adding first layer of moves for root node\n-//\tfor(ArrayList<Integer> move: moves) {\n-//\t\taddChild(treeRootNode,move);\n-//\t}\n+\n \t\n \t\n \tNode current = treeRootNode;\n \tlong startTime = System.currentTimeMillis();\n-\twhile(System.currentTimeMillis()-startTime<2000) {\n+\twhile(System.currentTimeMillis()-startTime<15000) {\n \t\t//System.out.println(current.getPosition());\n \t\t//System.out.println(\"checking isLeaf\");\n \t\t\n@@ -98,9 +70,12 @@ public void run() {\n \tint best =0;\n \tfor(Node child: treeRootNode.getChildren()) {\n \t\tpotentialMove = child.getPosition(); // this is a workaround to unknown bug where child ends up with illegal position\n+\t\t\n \t\tif(child.getScore()>best && !b.getBoard()[potentialMove.get(0)][potentialMove.get(1)].containsArrow()) {\n \t\t\tbest = child.getScore();\n+\t\t\tSystem.out.println(best);\n \t\t\tpotentialMove = child.getPosition();\n+\t\t\tSystem.out.println(child.getPosition());\n \t\t}\n \t\t\t\n \t}\n@@ -164,9 +139,11 @@ private void expandNode(GameBoard board, Node nodeToMove, Node treeRootNode) {\n \t\t\t\n \t\t\tArrayList<ArrayList<Integer>> arrowShots = board.getMoves(board.getBoard(), queenMove);\n \t\t\t//handle arrowshot where queen WAS here as getMoves is overloaded for both and we don't want queen to stay still\n-\t\t\tarrowShots.add(queenMove);\n+\t\t\tarrowShots.add(queenPosCur);\n \t\t\tfor(ArrayList<Integer> arrowShot: arrowShots) {\n+\t\t\t\t//cant shoot an arrow where the queen wants to move\n \t\t\t\tif(!queenMove.equals(arrowShot)) {\n+\t\t\t\t//builds a list of both the queenMove and arrowShot\n \t\t\t\tList<Integer> move = Stream.of(queenMove,arrowShot)\n \t\t\t\t\t\t.flatMap(x -> x.stream())\n \t\t\t\t\t\t.collect(Collectors.toList());"
+  },
+  {
+    "sha": "c3e9a91b3145adbe42febb7ede14d994ae20ca02",
+    "filename": "team-00/src/main/java/ubc/cosc322/Queen.java",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/qwright/COSC322_Project/blob/843d4f27563ddb3e9c2f5aab2ce87490bc8050d6/team-00/src/main/java/ubc/cosc322/Queen.java",
+    "raw_url": "https://github.com/qwright/COSC322_Project/raw/843d4f27563ddb3e9c2f5aab2ce87490bc8050d6/team-00/src/main/java/ubc/cosc322/Queen.java",
+    "contents_url": "https://api.github.com/repos/qwright/COSC322_Project/contents/team-00/src/main/java/ubc/cosc322/Queen.java?ref=843d4f27563ddb3e9c2f5aab2ce87490bc8050d6",
+    "patch": "@@ -50,6 +50,35 @@ public boolean isWhite()\n \t{\n \t\treturn isWhite;\n \t}\n+\t@Override\n+\tpublic int hashCode() {\n+\t\tfinal int prime = 31;\n+\t\tint result = 1;\n+\t\tresult = prime * result + ((currentPos == null) ? 0 : currentPos.hashCode());\n+\t\tresult = prime * result + id;\n+\t\tresult = prime * result + (isWhite ? 1231 : 1237);\n+\t\treturn result;\n+\t}\n+\t@Override\n+\tpublic boolean equals(Object obj) {\n+\t\tif (this == obj)\n+\t\t\treturn true;\n+\t\tif (obj == null)\n+\t\t\treturn false;\n+\t\tif (getClass() != obj.getClass())\n+\t\t\treturn false;\n+\t\tQueen other = (Queen) obj;\n+\t\tif (currentPos == null) {\n+\t\t\tif (other.currentPos != null)\n+\t\t\t\treturn false;\n+\t\t} else if (!currentPos.equals(other.currentPos))\n+\t\t\treturn false;\n+\t\tif (id != other.id)\n+\t\t\treturn false;\n+\t\tif (isWhite != other.isWhite)\n+\t\t\treturn false;\n+\t\treturn true;\n+\t}\n \t\n \t//returns a list of current tiles that the queen may move to given the current board state\n \t//Possible moves are calculated from queens current position and if there is a queen or arrow in the path"
+  }
+]

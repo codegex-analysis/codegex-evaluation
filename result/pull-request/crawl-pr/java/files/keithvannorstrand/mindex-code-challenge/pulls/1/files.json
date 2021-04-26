@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "5ea6a495298f635c504274433a2f9c760c943748",
+    "filename": "src/main/java/com/mindex/challenge/controller/CompensationController.java",
+    "status": "added",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/controller/CompensationController.java",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/controller/CompensationController.java",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/main/java/com/mindex/challenge/controller/CompensationController.java?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -0,0 +1,20 @@\n+package com.mindex.challenge.controller;\n+\n+import com.mindex.challenge.data.Compensation;\n+import com.mindex.challenge.service.CompensationService;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.web.bind.annotation.PostMapping;\n+import org.springframework.web.bind.annotation.RequestBody;\n+import org.springframework.web.bind.annotation.RestController;\n+\n+@RestController\n+public class CompensationController {\n+\n+    @Autowired\n+    private CompensationService compensationService;\n+\n+    @PostMapping(\"/compensation\")\n+    public Compensation create(@RequestBody Compensation comp){\n+        return compensationService.createCompensation(comp);\n+    }\n+}"
+  },
+  {
+    "sha": "55c96f6d5db1f59623c4c85e34afacad04b852d1",
+    "filename": "src/main/java/com/mindex/challenge/controller/EmployeeController.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 10,
+    "changes": 20,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/controller/EmployeeController.java",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/controller/EmployeeController.java",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/main/java/com/mindex/challenge/controller/EmployeeController.java?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -3,6 +3,7 @@\n import com.mindex.challenge.data.Compensation;\r\n import com.mindex.challenge.data.Employee;\r\n import com.mindex.challenge.data.ReportingStructure;\r\n+import com.mindex.challenge.service.CompensationService;\r\n import com.mindex.challenge.service.EmployeeService;\r\n import org.slf4j.Logger;\r\n import org.slf4j.LoggerFactory;\r\n@@ -16,6 +17,9 @@\n     @Autowired\r\n     private EmployeeService employeeService;\r\n \r\n+    @Autowired\r\n+    private CompensationService compensationService;\r\n+\r\n     @PostMapping(\"/employee\")\r\n     public Employee create(@RequestBody Employee employee) {\r\n         LOG.debug(\"Received employee create request for [{}]\", employee);\r\n@@ -38,18 +42,14 @@ public Employee update(@PathVariable String id, @RequestBody Employee employee)\n         return employeeService.update(employee);\r\n     }\r\n \r\n-    @GetMapping(\"/employee/reportingStructure/{id}\")\r\n-    public ReportingStructure fetchReportingStructure(@PathVariable String id) {\r\n-        return employeeService.fetchReportingStructure(id);\r\n+    @GetMapping(\"/employee/{id}/reportingStructure\")\r\n+    public ReportingStructure readReportingStructure(@PathVariable String id) {\r\n+        return employeeService.readReportingStructure(id);\r\n     }\r\n \r\n-    @GetMapping(\"/employee/compensation/{id}\")\r\n-    public Compensation fetchEmployeeCompensation(@PathVariable String id) {\r\n-        return employeeService.fetchEmployeeCompensation(id);\r\n+    @GetMapping(\"/employee/{id}/compensation\")\r\n+    public Compensation readEmployeeCompensation(@PathVariable String id) {\r\n+        return compensationService.readCompensationByEmployeeId(id);\r\n     }\r\n \r\n-    @PostMapping(\"/employee/compensation\")\r\n-    public Compensation createCompensation(@RequestBody Compensation comp){\r\n-        return employeeService.createCompensation(comp);\r\n-    }\r\n }\r"
+  },
+  {
+    "sha": "1ea9756d0011861fccde19f9e61dd709f67efd9a",
+    "filename": "src/main/java/com/mindex/challenge/data/Compensation.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 4,
+    "changes": 7,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/data/Compensation.java",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/data/Compensation.java",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/main/java/com/mindex/challenge/data/Compensation.java?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -7,8 +7,7 @@\n     private String employeeId;\n     private Employee employee;\n     private double salary;\n-    // this should be a Date object\n-    private String effectiveDate;\n+    private Date effectiveDate;\n \n     public Compensation () { }\n \n@@ -28,11 +27,11 @@ public Employee getEmployee() {\n         return employee;\n     }\n \n-    public void setEffectiveDate(String effectiveDate) {\n+    public void setEffectiveDate(Date effectiveDate) {\n         this.effectiveDate = effectiveDate;\n     }\n \n-    public String getEffectiveDate() {\n+    public Date getEffectiveDate() {\n         return effectiveDate;\n     }\n "
+  },
+  {
+    "sha": "82e8afd3dd747561904d4c49812f4c99c6268cb7",
+    "filename": "src/main/java/com/mindex/challenge/service/CompensationService.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/service/CompensationService.java",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/service/CompensationService.java",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/main/java/com/mindex/challenge/service/CompensationService.java?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -0,0 +1,8 @@\n+package com.mindex.challenge.service;\n+\n+import com.mindex.challenge.data.Compensation;\n+\n+public interface CompensationService {\n+    Compensation createCompensation(Compensation comp);\n+    Compensation readCompensationByEmployeeId(String id);\n+}"
+  },
+  {
+    "sha": "c3d5b8e613e3f8ac50136e9ce4f379bd8c79f1da",
+    "filename": "src/main/java/com/mindex/challenge/service/EmployeeService.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 3,
+    "changes": 4,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/service/EmployeeService.java",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/service/EmployeeService.java",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/main/java/com/mindex/challenge/service/EmployeeService.java?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -8,7 +8,5 @@\n     Employee create(Employee employee);\r\n     Employee read(String id);\r\n     Employee update(Employee employee);\r\n-    ReportingStructure fetchReportingStructure(String id);\r\n-    Compensation fetchEmployeeCompensation(String id);\r\n-    Compensation createCompensation(Compensation comp);\r\n+    ReportingStructure readReportingStructure(String id);\r\n }\r"
+  },
+  {
+    "sha": "5cce05acc6f25ecb3f29942e6e98e2e1fd81790b",
+    "filename": "src/main/java/com/mindex/challenge/service/impl/CompensationServiceImpl.java",
+    "status": "added",
+    "additions": 47,
+    "deletions": 0,
+    "changes": 47,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/service/impl/CompensationServiceImpl.java",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/service/impl/CompensationServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/main/java/com/mindex/challenge/service/impl/CompensationServiceImpl.java?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -0,0 +1,47 @@\n+package com.mindex.challenge.service.impl;\n+\n+import com.mindex.challenge.dao.CompensationRepository;\n+import com.mindex.challenge.data.Compensation;\n+import com.mindex.challenge.service.CompensationService;\n+import com.mindex.challenge.service.EmployeeService;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.stereotype.Service;\n+\n+import java.util.UUID;\n+\n+@Service\n+public class CompensationServiceImpl implements CompensationService {\n+\n+    private static final Logger LOG = LoggerFactory.getLogger(CompensationServiceImpl.class);\n+\n+    @Autowired\n+    private CompensationRepository compensationRepository;\n+\n+    @Autowired\n+    private EmployeeService employeeService;\n+\n+    @Override\n+    public Compensation createCompensation(Compensation comp) {\n+        LOG.debug(\"Creating compensation [{}]\", comp);\n+\n+        comp.setCompensationId(UUID.randomUUID().toString());\n+        compensationRepository.insert(comp);\n+\n+        return comp;\n+    }\n+\n+    @Override\n+    public Compensation readCompensationByEmployeeId(String id) {\n+        Compensation comp = compensationRepository.findByEmployeeId(id);\n+\n+        if (comp == null) {\n+            throw new RuntimeException(\"Invalid employeeId: \" + id);\n+        }\n+\n+        comp.setEmployee(employeeService.read(id));\n+\n+        return comp;\n+    }\n+}"
+  },
+  {
+    "sha": "b74eec56dbfe8db1009d108bef5c4039c892c2f1",
+    "filename": "src/main/java/com/mindex/challenge/service/impl/EmployeeServiceImpl.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 31,
+    "changes": 33,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/service/impl/EmployeeServiceImpl.java",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/java/com/mindex/challenge/service/impl/EmployeeServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/main/java/com/mindex/challenge/service/impl/EmployeeServiceImpl.java?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -1,8 +1,6 @@\n package com.mindex.challenge.service.impl;\r\n \r\n-import com.mindex.challenge.dao.CompensationRepository;\r\n import com.mindex.challenge.dao.EmployeeRepository;\r\n-import com.mindex.challenge.data.Compensation;\r\n import com.mindex.challenge.data.Employee;\r\n import com.mindex.challenge.data.ReportingStructure;\r\n import com.mindex.challenge.service.EmployeeService;\r\n@@ -23,9 +21,6 @@\n     @Autowired\r\n     private EmployeeRepository employeeRepository;\r\n \r\n-    @Autowired\r\n-    private CompensationRepository compensationRepository;\r\n-\r\n     @Override\r\n     public Employee create(Employee employee) {\r\n         LOG.debug(\"Creating employee [{}]\", employee);\r\n@@ -57,7 +52,7 @@ public Employee update(Employee employee) {\n     }\r\n \r\n     @Override\r\n-    public ReportingStructure fetchReportingStructure(String id) {\r\n+    public ReportingStructure readReportingStructure(String id) {\r\n         Employee employee = employeeRepository.findByEmployeeId(id);\r\n         LOG.info(\"ReportingStructure for [{}]\", employee);\r\n \r\n@@ -73,39 +68,15 @@ public ReportingStructure fetchReportingStructure(String id) {\n \r\n     private HashSet<String> createReportsSet(HashSet<String> employeeIds, List<Employee> directReports) {\r\n         for (int i=0; i<directReports.size(); i++) {\r\n-            Employee employee = employeeRepository.findByEmployeeId(directReports.get(i).getEmployeeId());\r\n+            Employee employee = read(directReports.get(i).getEmployeeId());\r\n             LOG.info(\"createReportsSet: [{}]\", employee);\r\n             directReports.set(i, employee);\r\n             employeeIds.add(employee.getEmployeeId());\r\n             if (employee.getDirectReports() != null && employee.getDirectReports().size() > 0) {\r\n                 createReportsSet(employeeIds,employee.getDirectReports());\r\n             }\r\n         }\r\n-        LOG.info(\"employeeIds.size [{}]\", employeeIds.size());\r\n         return employeeIds;\r\n     }\r\n \r\n-    @Override\r\n-    public Compensation fetchEmployeeCompensation(String id) {\r\n-        Compensation comp = compensationRepository.findByEmployeeId(id);\r\n-\r\n-        if (comp == null) {\r\n-            throw new RuntimeException(\"Invalid employeeId: \" + id);\r\n-        }\r\n-\r\n-        comp.setEmployee(read(id));\r\n-\r\n-        return comp;\r\n-    }\r\n-\r\n-    @Override\r\n-    public Compensation createCompensation(Compensation comp) {\r\n-        LOG.debug(\"Creating compensation [{}]\", comp);\r\n-\r\n-        comp.setCompensationId(UUID.randomUUID().toString());\r\n-        compensationRepository.insert(comp);\r\n-\r\n-        return comp;\r\n-    }\r\n-\r\n }\r"
+  },
+  {
+    "sha": "f62d69f91085d66a45c6faec0564668eaebbeba9",
+    "filename": "src/main/resources/static/compensation_database.json",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/resources/static/compensation_database.json",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/main/resources/static/compensation_database.json",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/main/resources/static/compensation_database.json?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -3,13 +3,13 @@\n     \"compensationId\": \"27f934bd-acc3-9347-66fe-c8237e22c36f\",\r\n     \"employeeId\": \"16a596ae-edd3-4847-99fe-c4518e82c86f\",\r\n     \"salary\": 50000.00,\r\n-    \"date\": \"04-APR-20\"\r\n+    \"date\": \"1614450793\"\r\n   },\r\n   {\r\n     \"compensationId\": \"62c1084e-6e34-4630-93fd-9153afb65309\",\r\n     \"employeeId\": \"b7839309-3348-463b-a7e3-5de1c168beb3\",\r\n     \"salary\": 77777.00,\r\n-    \"date\": \"14-JAN-18\"\r\n+    \"date\": \"1614360793\"\r\n   }\r\n \r\n ]\n\\ No newline at end of file"
+  },
+  {
+    "sha": "9c840f2b479d66ec9627aa00f3c80b6b1c260de9",
+    "filename": "src/test/java/com/mindex/challenge/service/impl/CompensationServiceImplTest.java",
+    "status": "added",
+    "additions": 91,
+    "deletions": 0,
+    "changes": 91,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/test/java/com/mindex/challenge/service/impl/CompensationServiceImplTest.java",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/test/java/com/mindex/challenge/service/impl/CompensationServiceImplTest.java",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/test/java/com/mindex/challenge/service/impl/CompensationServiceImplTest.java?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -0,0 +1,91 @@\n+package com.mindex.challenge.service.impl;\n+\n+import com.mindex.challenge.data.Compensation;\n+import com.mindex.challenge.data.Employee;\n+import com.mindex.challenge.service.EmployeeService;\n+import org.junit.Before;\n+import org.junit.Test;\n+import org.junit.runner.RunWith;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.boot.test.context.SpringBootTest;\n+import org.springframework.boot.test.web.client.TestRestTemplate;\n+import org.springframework.boot.web.server.LocalServerPort;\n+import org.springframework.test.context.junit4.SpringRunner;\n+\n+import java.util.Date;\n+\n+import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertNotNull;\n+\n+@RunWith(SpringRunner.class)\n+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)\n+public class CompensationServiceImplTest {\n+    private String employeeUrl;\n+    private String employeeIdUrl;\n+    private String reportingStructureUrl;\n+    private String employeeCompUrl;\n+    private String employeeCompIdUrl;\n+\n+    @LocalServerPort\n+    private int port;\n+\n+    @Autowired\n+    private TestRestTemplate restTemplate;\n+\n+    @Before\n+    public void setup() {\n+        employeeUrl = \"http://localhost:\" + port + \"/employee\";\n+        employeeIdUrl = \"http://localhost:\" + port + \"/employee/{id}\";\n+        reportingStructureUrl = \"http://localhost:\" + port + \"/employee/{id}/reportingStructure\";\n+        employeeCompUrl = \"http://localhost:\" + port + \"/compensation\";\n+        employeeCompIdUrl = \"http://localhost:\" + port + \"/employee/{id}/compensation\";\n+    }\n+\n+    @Test\n+    public void testCreateReadCompensation() {\n+        Employee testEmployee = new Employee();\n+        testEmployee.setFirstName(\"John\");\n+        testEmployee.setLastName(\"Doe\");\n+        testEmployee.setDepartment(\"Engineering\");\n+        testEmployee.setPosition(\"Developer\");\n+\n+        // Create checks\n+        Employee createdEmployee = restTemplate.postForEntity(employeeUrl, testEmployee, Employee.class).getBody();\n+\n+        assertNotNull(createdEmployee.getEmployeeId());\n+        assertEmployeeEquivalence(testEmployee, createdEmployee);\n+\n+        // Create a compensation for our new employee\n+        Compensation testComp = new Compensation();\n+        testComp.setEmployeeId(createdEmployee.getEmployeeId());\n+        testComp.setEffectiveDate(new Date());\n+        testComp.setSalary(300000);\n+\n+        Compensation createdComp = restTemplate.postForEntity(employeeCompUrl, testComp, Compensation.class).getBody();\n+\n+        assertNotNull(createdComp.getCompensationId());\n+        assertCompensationEquivalence(testComp, createdComp);\n+\n+        // Read check\n+\n+        Compensation readComp = restTemplate.getForEntity(employeeCompIdUrl, Compensation.class, createdComp.getEmployeeId()).getBody();\n+        assertNotNull(readComp);\n+        assertEmployeeEquivalence(testEmployee, readComp.getEmployee());\n+        assertCompensationEquivalence(createdComp, readComp);\n+\n+    }\n+\n+    private static void assertEmployeeEquivalence(Employee expected, Employee actual) {\n+        assertEquals(expected.getFirstName(), actual.getFirstName());\n+        assertEquals(expected.getLastName(), actual.getLastName());\n+        assertEquals(expected.getDepartment(), actual.getDepartment());\n+        assertEquals(expected.getPosition(), actual.getPosition());\n+    }\n+\n+    private static void assertCompensationEquivalence(Compensation expected, Compensation actual) {\n+        assertEquals(expected.getEmployeeId(), actual.getEmployeeId());\n+        assertEquals(expected.getEffectiveDate(), actual.getEffectiveDate());\n+        assertEquals(expected.getSalary(), actual.getSalary(), 0.01);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "44ee0c0a536f2234f442fac9128135330b9c2c07",
+    "filename": "src/test/java/com/mindex/challenge/service/impl/EmployeeServiceImplTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 37,
+    "changes": 40,
+    "blob_url": "https://github.com/keithvannorstrand/mindex-code-challenge/blob/f3a362264f612f97c5c1e427c24eabda7d619cca/src/test/java/com/mindex/challenge/service/impl/EmployeeServiceImplTest.java",
+    "raw_url": "https://github.com/keithvannorstrand/mindex-code-challenge/raw/f3a362264f612f97c5c1e427c24eabda7d619cca/src/test/java/com/mindex/challenge/service/impl/EmployeeServiceImplTest.java",
+    "contents_url": "https://api.github.com/repos/keithvannorstrand/mindex-code-challenge/contents/src/test/java/com/mindex/challenge/service/impl/EmployeeServiceImplTest.java?ref=f3a362264f612f97c5c1e427c24eabda7d619cca",
+    "patch": "@@ -46,9 +46,9 @@\n     public void setup() {\r\n         employeeUrl = \"http://localhost:\" + port + \"/employee\";\r\n         employeeIdUrl = \"http://localhost:\" + port + \"/employee/{id}\";\r\n-        reportingStructureUrl = \"http://localhost:\" + port + \"/employee/reportingStructure/{id}\";\r\n-        employeeCompUrl = \"http://localhost:\" + port + \"/employee/compensation\";\r\n-        employeeCompIdUrl = \"http://localhost:\" + port + \"/employee/compensation/{id}\";\r\n+        reportingStructureUrl = \"http://localhost:\" + port + \"/employee/{id}/reportingStructure\";\r\n+        employeeCompUrl = \"http://localhost:\" + port + \"/compensation\";\r\n+        employeeCompIdUrl = \"http://localhost:\" + port + \"/employee/{id}/compensation\";\r\n     }\r\n \r\n     @Test\r\n@@ -193,40 +193,6 @@ public void testFetchReportingStructureLongBranch() {\n         assertEquals(tier4.size() + tier3.size() + tier2.size() + tier1.size(), reportingStructure.getNumberOfReports());\r\n     }\r\n \r\n-    @Test\r\n-    public void testCreateReadCompensation() {\r\n-        Employee testEmployee = new Employee();\r\n-        testEmployee.setFirstName(\"John\");\r\n-        testEmployee.setLastName(\"Doe\");\r\n-        testEmployee.setDepartment(\"Engineering\");\r\n-        testEmployee.setPosition(\"Developer\");\r\n-\r\n-        // Create checks\r\n-        Employee createdEmployee = restTemplate.postForEntity(employeeUrl, testEmployee, Employee.class).getBody();\r\n-\r\n-        assertNotNull(createdEmployee.getEmployeeId());\r\n-        assertEmployeeEquivalence(testEmployee, createdEmployee);\r\n-\r\n-        // Create a compensation for our new employee\r\n-        Compensation testComp = new Compensation();\r\n-        testComp.setEmployeeId(createdEmployee.getEmployeeId());\r\n-        testComp.setEffectiveDate(\"04-APR-20\");\r\n-        testComp.setSalary(300000);\r\n-\r\n-        Compensation createdComp = restTemplate.postForEntity(employeeCompUrl, testComp, Compensation.class).getBody();\r\n-\r\n-        assertNotNull(createdComp.getCompensationId());\r\n-        assertCompensationEquivalence(testComp, createdComp);\r\n-\r\n-        // Read check\r\n-\r\n-        Compensation readComp = restTemplate.getForEntity(employeeCompIdUrl, Compensation.class, createdComp.getEmployeeId()).getBody();\r\n-        assertNotNull(readComp);\r\n-        assertEmployeeEquivalence(testEmployee, readComp.getEmployee());\r\n-        assertCompensationEquivalence(createdComp, readComp);\r\n-\r\n-    }\r\n-\r\n     private static void assertEmployeeEquivalence(Employee expected, Employee actual) {\r\n         assertEquals(expected.getFirstName(), actual.getFirstName());\r\n         assertEquals(expected.getLastName(), actual.getLastName());\r"
+  }
+]

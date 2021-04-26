@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "9e2045850d5183d1fd448dfa56864187dbeb6fd6",
+    "filename": "src/main/java/ru/elena/CheckInterface.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/LassiRepo/GeekBrainsHomework/blob/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/CheckInterface.java",
+    "raw_url": "https://github.com/LassiRepo/GeekBrainsHomework/raw/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/CheckInterface.java",
+    "contents_url": "https://api.github.com/repos/LassiRepo/GeekBrainsHomework/contents/src/main/java/ru/elena/CheckInterface.java?ref=5069dc1b90750067e5a6361129fb0dce68e208ea",
+    "patch": "@@ -0,0 +1,8 @@\n+package ru.elena;\n+\n+import java.util.List;\n+\n+@FunctionalInterface\n+public interface CheckInterface<T, S> {\n+   S check(List<T> list);\n+}"
+  },
+  {
+    "sha": "757ef68983f124df878d30154412b324d8173794",
+    "filename": "src/main/java/ru/elena/LambdaClass.java",
+    "status": "added",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/LassiRepo/GeekBrainsHomework/blob/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/LambdaClass.java",
+    "raw_url": "https://github.com/LassiRepo/GeekBrainsHomework/raw/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/LambdaClass.java",
+    "contents_url": "https://api.github.com/repos/LassiRepo/GeekBrainsHomework/contents/src/main/java/ru/elena/LambdaClass.java?ref=5069dc1b90750067e5a6361129fb0dce68e208ea",
+    "patch": "@@ -0,0 +1,27 @@\n+package ru.elena;\n+\n+import java.util.List;\n+\n+public class LambdaClass {\n+\n+    public int search(Integer n, List<Integer> list, SearchInterface<Integer> myInter) {\n+        return myInter.foo(n, list);\n+    }\n+\n+    public String reverse(String s, ReverseInterface reverseInterface) {\n+        return reverseInterface.reverse(s);\n+    }\n+\n+    public Integer maximum(List<Integer> list, CheckInterface<Integer, Integer> checkInterface) {\n+        return checkInterface.check(list);\n+    }\n+\n+    public Double average(List<Integer> list, CheckInterface<Integer, Double> checkInterface) {\n+        return checkInterface.check(list);\n+    }\n+\n+    public  List<String> search(List<String> list,SearchListInterface<String> searchListInterface) {\n+        return searchListInterface.search(list);\n+    }\n+}\n+"
+  },
+  {
+    "sha": "9a443a88e1d3b12853cddcb7476a246ca1f7dcdf",
+    "filename": "src/main/java/ru/elena/MainClass.java",
+    "status": "modified",
+    "additions": 61,
+    "deletions": 1,
+    "changes": 62,
+    "blob_url": "https://github.com/LassiRepo/GeekBrainsHomework/blob/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/MainClass.java",
+    "raw_url": "https://github.com/LassiRepo/GeekBrainsHomework/raw/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/MainClass.java",
+    "contents_url": "https://api.github.com/repos/LassiRepo/GeekBrainsHomework/contents/src/main/java/ru/elena/MainClass.java?ref=5069dc1b90750067e5a6361129fb0dce68e208ea",
+    "patch": "@@ -1,7 +1,67 @@\n package ru.elena;\n \n+\n+import java.util.Arrays;\n+import java.util.List;\n+import java.util.stream.Collectors;\n+import java.util.stream.Stream;\n+\n public class MainClass {\n     public static void main(String[] args) {\n-        \n+        LambdaClass myClass = new LambdaClass();\n+\n+        // Задание 2\n+        Integer n = 507;\n+        List<Integer> list = Arrays.asList(0, 9, 66, 507, 1, 63);\n+\n+        int index = myClass.search(n, list, (a, b) -> list.stream()\n+                .filter(n::equals)\n+                .findFirst()\n+                .map(list::indexOf).orElse(-1));\n+        System.out.println(index);\n+\n+        // Задание 3\n+        String s = \"java interview\";\n+        String reversedString = myClass.reverse(s, (string) -> Stream.of(string)\n+                .map(word -> new StringBuilder(word).reverse())\n+                .collect(Collectors.joining(\" \")));\n+        System.out.println(reversedString);\n+\n+        // Задание 4\n+        Integer maximumInteger = myClass.maximum(list, (newList) -> {\n+            Integer number = newList.get(0);\n+            for (Integer el : newList) {\n+                if (number < el) {\n+                    number = el;\n+                }\n+            }\n+            return number;\n+        });\n+        System.out.println(maximumInteger);\n+\n+        // Задание 5\n+        Double averageInteger = myClass.average(list, (newList) -> {\n+            Double summ = 0.0;\n+            for (Integer el : newList) {\n+                summ = summ + el;\n+\n+            }\n+            return summ / newList.size();\n+        });\n+        System.out.println(averageInteger);\n+\n+        // Задание 6\n+        List<String> stringList = Arrays.asList(\"abc\", \"mmmlk\", \"aaaaaaaaa\", \"am\", \"roro\", \"ghjhgj\", \"amn\", \"Agygyg\");\n+        List<String> newStringList = myClass.search(stringList,\n+                (l) -> l.stream()\n+                .filter(word -> word.length() == 3 && word.substring(0, 1).equals(\"a\"))\n+                .collect(Collectors.toList()));\n+        System.out.println(newStringList);\n+\n+\n+\n     }\n+\n+\n+\n }"
+  },
+  {
+    "sha": "301f2996f41dd5ea8b3d040d4d1d6c989bb1d96b",
+    "filename": "src/main/java/ru/elena/ReverseInterface.java",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/LassiRepo/GeekBrainsHomework/blob/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/ReverseInterface.java",
+    "raw_url": "https://github.com/LassiRepo/GeekBrainsHomework/raw/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/ReverseInterface.java",
+    "contents_url": "https://api.github.com/repos/LassiRepo/GeekBrainsHomework/contents/src/main/java/ru/elena/ReverseInterface.java?ref=5069dc1b90750067e5a6361129fb0dce68e208ea",
+    "patch": "@@ -0,0 +1,6 @@\n+package ru.elena;\n+\n+@FunctionalInterface\n+public interface ReverseInterface {\n+    String reverse(String s);\n+}"
+  },
+  {
+    "sha": "6f8fb7ead84239bd351e5dd9fb144770983bf3ff",
+    "filename": "src/main/java/ru/elena/SearchInterface.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/LassiRepo/GeekBrainsHomework/blob/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/SearchInterface.java",
+    "raw_url": "https://github.com/LassiRepo/GeekBrainsHomework/raw/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/SearchInterface.java",
+    "contents_url": "https://api.github.com/repos/LassiRepo/GeekBrainsHomework/contents/src/main/java/ru/elena/SearchInterface.java?ref=5069dc1b90750067e5a6361129fb0dce68e208ea",
+    "patch": "@@ -0,0 +1,8 @@\n+package ru.elena;\n+\n+import java.util.List;\n+\n+@FunctionalInterface\n+public interface SearchInterface<T> {\n+    int foo(T number, List<T> list);\n+}"
+  },
+  {
+    "sha": "28f71384da1f001170b7a2c1401dcd4b6105536e",
+    "filename": "src/main/java/ru/elena/SearchListInterface.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/LassiRepo/GeekBrainsHomework/blob/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/SearchListInterface.java",
+    "raw_url": "https://github.com/LassiRepo/GeekBrainsHomework/raw/5069dc1b90750067e5a6361129fb0dce68e208ea/src/main/java/ru/elena/SearchListInterface.java",
+    "contents_url": "https://api.github.com/repos/LassiRepo/GeekBrainsHomework/contents/src/main/java/ru/elena/SearchListInterface.java?ref=5069dc1b90750067e5a6361129fb0dce68e208ea",
+    "patch": "@@ -0,0 +1,8 @@\n+package ru.elena;\n+\n+import java.util.List;\n+\n+@FunctionalInterface\n+public interface SearchListInterface<T> {\n+   List<T> search(List<T> list);\n+}"
+  }
+]

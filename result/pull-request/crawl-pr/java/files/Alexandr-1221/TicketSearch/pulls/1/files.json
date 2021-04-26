@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "687b0f351339a6e19f8a12c1d2f408965ef0d439",
+    "filename": "src/main/java/ru/netology/domain/TicketByTimeAscComparator.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/Alexandr-1221/TicketSearch/blob/1a3f572c212f49a1eca2afcb0247300dd0cdba16/src/main/java/ru/netology/domain/TicketByTimeAscComparator.java",
+    "raw_url": "https://github.com/Alexandr-1221/TicketSearch/raw/1a3f572c212f49a1eca2afcb0247300dd0cdba16/src/main/java/ru/netology/domain/TicketByTimeAscComparator.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/TicketSearch/contents/src/main/java/ru/netology/domain/TicketByTimeAscComparator.java?ref=1a3f572c212f49a1eca2afcb0247300dd0cdba16",
+    "patch": "@@ -0,0 +1,9 @@\n+package ru.netology.domain;\n+\n+import java.util.Comparator;\n+\n+public class TicketByTimeAscComparator implements Comparator<TicketPrices> {\n+    public int compare(TicketPrices o1, TicketPrices o2) {\n+        return o1.getTravelTime() - o2.getTravelTime();\n+    }\n+}"
+  },
+  {
+    "sha": "e6de972857cf39e99637bbb3bc755f8ef3d492a3",
+    "filename": "src/main/java/ru/netology/manager/TicketPricesManager.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/Alexandr-1221/TicketSearch/blob/1a3f572c212f49a1eca2afcb0247300dd0cdba16/src/main/java/ru/netology/manager/TicketPricesManager.java",
+    "raw_url": "https://github.com/Alexandr-1221/TicketSearch/raw/1a3f572c212f49a1eca2afcb0247300dd0cdba16/src/main/java/ru/netology/manager/TicketPricesManager.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/TicketSearch/contents/src/main/java/ru/netology/manager/TicketPricesManager.java?ref=1a3f572c212f49a1eca2afcb0247300dd0cdba16",
+    "patch": "@@ -4,6 +4,7 @@\n import ru.netology.repository.TicketPricesRepository;\n \n import java.util.Arrays;\n+import java.util.Comparator;\n \n public class TicketPricesManager {\n     private TicketPricesRepository repository;\n@@ -12,7 +13,7 @@ public TicketPricesManager(TicketPricesRepository repository)  {\n         this.repository = repository;\n     }\n \n-    public TicketPrices[] search(String departure, String arrival) {\n+    public TicketPrices[] search(String departure, String arrival, Comparator<TicketPrices> comparator) {\n         TicketPrices[] offers = new TicketPrices[0];\n         for (TicketPrices offer : repository.findAll()) {\n             if (offer.matches(departure, arrival)) {\n@@ -22,7 +23,7 @@ public TicketPricesManager(TicketPricesRepository repository)  {\n                 offers = tmp;\n             }\n         }\n-        Arrays.sort(offers);\n+        Arrays.sort(offers, comparator);\n         return offers;\n     }\n }"
+  },
+  {
+    "sha": "27c846914aa1ad5023aaf32a8269953867016495",
+    "filename": "src/test/java/ru/netology/manager/TicketPricesManagerTest.java",
+    "status": "modified",
+    "additions": 39,
+    "deletions": 5,
+    "changes": 44,
+    "blob_url": "https://github.com/Alexandr-1221/TicketSearch/blob/1a3f572c212f49a1eca2afcb0247300dd0cdba16/src/test/java/ru/netology/manager/TicketPricesManagerTest.java",
+    "raw_url": "https://github.com/Alexandr-1221/TicketSearch/raw/1a3f572c212f49a1eca2afcb0247300dd0cdba16/src/test/java/ru/netology/manager/TicketPricesManagerTest.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/TicketSearch/contents/src/test/java/ru/netology/manager/TicketPricesManagerTest.java?ref=1a3f572c212f49a1eca2afcb0247300dd0cdba16",
+    "patch": "@@ -4,18 +4,22 @@\n import org.junit.jupiter.api.Test;\n import ru.netology.domain.TicketPrices;\n import ru.netology.repository.TicketPricesRepository;\n+import ru.netology.domain.TicketByTimeAscComparator;\n \n import static org.junit.jupiter.api.Assertions.*;\n \n class TicketPricesManagerTest {\n \n     private TicketPricesRepository repository = new TicketPricesRepository();\n+    private TicketByTimeAscComparator comparator = new TicketByTimeAscComparator();\n     private TicketPricesManager manager = new TicketPricesManager(repository);\n     private TicketPrices first = new TicketPrices(1, 15000, \"AAK\", \"DAB\", 240);\n-    private TicketPrices second = new TicketPrices(2, 20000, \"AAK\", \"LAC\", 120);\n+    private TicketPrices second = new TicketPrices(2, 20000, \"AAK\", \"DAB\", 120);\n     private TicketPrices third = new TicketPrices(3, 10000, \"AAK\", \"DAB\", 180);\n-    private TicketPrices fourth = new TicketPrices(4, 11000, \"VAR\", \"DAB\", 400);\n+    private TicketPrices fourth = new TicketPrices(4, 11000, \"AAK\", \"DAB\", 400);\n     private TicketPrices fifth = new TicketPrices(5, 30000, \"VAR\", \"LAC\", 200);\n+    private TicketPrices sixth = new TicketPrices(6, 15000, \"AAK\", \"DAB\", 210);\n+    private TicketPrices seventh = new TicketPrices(7, 13000, \"AAK\", \"DAB\", 230);\n \n     @BeforeEach\n     public void setUp(){\n@@ -24,20 +28,50 @@ public void setUp(){\n         repository.save(third);\n         repository.save(fourth);\n         repository.save(fifth);\n+        repository.save(sixth);\n+        repository.save(seventh);\n     }\n \n     @Test\n     void shouldSearchDepartureArrival(){\n-        TicketPrices[] actual = manager.search(\"AAK\", \"DAB\");\n-        TicketPrices[] expected = new TicketPrices[]{third, first};\n+        TicketPrices[] actual = manager.search(\"AAK\", \"DAB\", comparator);\n+        TicketPrices[] expected = new TicketPrices[]{second, third, sixth, seventh, first, fourth};\n         assertArrayEquals(expected, actual);\n     }\n \n     @Test\n     void shouldNotFound(){\n-        TicketPrices[] actual = manager.search(\"ABK\", \"DBB\");\n+        TicketPrices[] actual = manager.search(\"ABK\", \"DBB\", comparator);\n         TicketPrices[] expected = new TicketPrices[0];\n         assertArrayEquals(expected, actual);\n     }\n \n+    @Test\n+    void shouldSearchIfEmpty(){\n+        repository.removeById(1);\n+        repository.removeById(2);\n+        repository.removeById(3);\n+        repository.removeById(4);\n+        repository.removeById(5);\n+        repository.removeById(6);\n+        repository.removeById(7);\n+\n+        TicketPrices[] actual = manager.search(\"AAK\", \"DAB\", comparator);\n+        TicketPrices[] expected = new TicketPrices[]{};\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void shouldSearchIfOneItem(){\n+        repository.removeById(1);\n+        repository.removeById(2);\n+        repository.removeById(3);\n+        repository.removeById(4);\n+        repository.removeById(5);\n+        repository.removeById(7);\n+\n+        TicketPrices[] actual = manager.search(\"AAK\", \"DAB\", comparator);\n+        TicketPrices[] expected = new TicketPrices[]{sixth};\n+        assertArrayEquals(expected, actual);\n+    }\n }\n\\ No newline at end of file"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "efd54a96d28a0a4349b4a3d3a251f812117a3042",
+    "filename": "core/src/ru/geekbrains/screen/GameScreen.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Tohanos/StarGame/blob/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/screen/GameScreen.java",
+    "raw_url": "https://github.com/Tohanos/StarGame/raw/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/screen/GameScreen.java",
+    "contents_url": "https://api.github.com/repos/Tohanos/StarGame/contents/core/src/ru/geekbrains/screen/GameScreen.java?ref=817331c2449bf3dd26aed1c60b7579e83cb7510b",
+    "patch": "@@ -95,7 +95,7 @@ public void show() {\n \n         enemyEmitter = new EnemyEmitter(atlas, worldBounds, enemyPool);\n \n-        music = Gdx.audio.newMusic(Gdx.files.internal(\"sounds/music.mp3\"));\n+        music = Gdx.audio.newMusic(Gdx.files.internal(\"sounds/gameTheme.mp3\"));\n         music.setLooping(true);\n         music.play();\n         state = State.PLAYING;"
+  },
+  {
+    "sha": "712f92e2959fb2cfeaf912253b39ba3280da6daf",
+    "filename": "core/src/ru/geekbrains/screen/MenuScreen.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/Tohanos/StarGame/blob/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/screen/MenuScreen.java",
+    "raw_url": "https://github.com/Tohanos/StarGame/raw/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/screen/MenuScreen.java",
+    "contents_url": "https://api.github.com/repos/Tohanos/StarGame/contents/core/src/ru/geekbrains/screen/MenuScreen.java?ref=817331c2449bf3dd26aed1c60b7579e83cb7510b",
+    "patch": "@@ -2,6 +2,7 @@\n \n import com.badlogic.gdx.Game;\n import com.badlogic.gdx.Gdx;\n+import com.badlogic.gdx.audio.Music;\n import com.badlogic.gdx.graphics.GL20;\n import com.badlogic.gdx.graphics.Texture;\n import com.badlogic.gdx.graphics.g2d.TextureAtlas;\n@@ -29,6 +30,8 @@\n     private ButtonExit buttonExit;\n     private ButtonPlay buttonPlay;\n \n+    private Music music;\n+\n     public MenuScreen(Game game) {\n         this.game = game;\n     }\n@@ -45,6 +48,10 @@ public void show() {\n         }\n         buttonExit = new ButtonExit(atlas);\n         buttonPlay = new ButtonPlay(atlas, game);\n+\n+        music = Gdx.audio.newMusic(Gdx.files.internal(\"sounds/menuTheme.mp3\"));\n+        music.setLooping(true);\n+        music.play();\n     }\n \n     @Override\n@@ -57,6 +64,7 @@ public void render(float delta) {\n     public void dispose() {\n         bg.dispose();\n         atlas.dispose();\n+        music.dispose();\n         super.dispose();\n     }\n "
+  },
+  {
+    "sha": "e99f2e0ed72e53678b94fab63349e971ae7168fc",
+    "filename": "core/src/ru/geekbrains/sprite/EnemyShip.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 8,
+    "changes": 30,
+    "blob_url": "https://github.com/Tohanos/StarGame/blob/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/sprite/EnemyShip.java",
+    "raw_url": "https://github.com/Tohanos/StarGame/raw/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/sprite/EnemyShip.java",
+    "contents_url": "https://api.github.com/repos/Tohanos/StarGame/contents/core/src/ru/geekbrains/sprite/EnemyShip.java?ref=817331c2449bf3dd26aed1c60b7579e83cb7510b",
+    "patch": "@@ -1,64 +1,78 @@\n package ru.geekbrains.sprite;\n \n import com.badlogic.gdx.audio.Sound;\n+import com.badlogic.gdx.graphics.g2d.NinePatch;\n import com.badlogic.gdx.graphics.g2d.TextureRegion;\n import com.badlogic.gdx.math.Vector2;\n \n import ru.geekbrains.base.Ship;\n import ru.geekbrains.math.Rect;\n import ru.geekbrains.pool.BulletPool;\n import ru.geekbrains.pool.ExplosionPool;\n+import ru.geekbrains.utils.EnemyMovement;\n+import ru.geekbrains.utils.EnemyMovementType;\n \n public class EnemyShip extends Ship {\n \n-    private static final float START_V_Y = -0.3f;\n+    private EnemyMovement movement;\n+    private Vector2 vMod;\n \n     public EnemyShip(BulletPool bulletPool, ExplosionPool explosionPool, Rect worldBounds, Sound sound) {\n         this.bulletPool = bulletPool;\n         this.explosionPool = explosionPool;\n         this.worldBounds = worldBounds;\n         this.sound = sound;\n+\n         v = new Vector2();\n         v0 = new Vector2();\n+        vMod = new Vector2();\n         bulletPos = new Vector2();\n         bulletV = new Vector2();\n+        movement = new EnemyMovement(v0, v, pos, worldBounds, vMod);\n     }\n \n     @Override\n     public void update(float delta) {\n-        if (getTop() > worldBounds.getTop()) {\n-            reloadTimer = reloadInterval * 0.8f;\n-        } else if (!v.equals(v0)) {\n-            v.set(v0);\n-        }\n+//        if (getTop() > worldBounds.getTop()) {\n+//            reloadTimer = reloadInterval * 0.8f;\n+//        } else if (!v.equals(v0)) {\n+//            v.set(v0);\n+//        }\n+        movement.next(delta);\n         super.update(delta);\n         bulletPos.set(pos.x, pos.y - getHalfHeight());\n         if (getBottom() < worldBounds.getBottom()) {\n             destroy();\n         }\n+        if (isDestroyed()) {\n+            movement.setMovementType(EnemyMovementType.DYING);\n+        }\n     }\n \n     public void set(\n             TextureRegion[] regions,\n             Vector2 v0,\n+            Vector2 vMod,\n             TextureRegion bulletRegion,\n             float bulletHeight,\n             Vector2 bulletV,\n             int damage,\n             float reloadInterval,\n             float height,\n-            int hp\n+            int hp,\n+            EnemyMovementType movementType\n     ) {\n         this.regions = regions;\n         this.v0.set(v0);\n+        this.vMod.set(vMod);\n         this.bulletRegion = bulletRegion;\n         this.bulletHeight = bulletHeight;\n         this.bulletV.set(bulletV);\n         this.damage = damage;\n         this.reloadInterval = reloadInterval;\n         setHeightProportion(height);\n         this.hp = hp;\n-        v.set(0, START_V_Y);\n+        movement.setMovementType(movementType);\n     }\n \n     public boolean isBulletCollision(Rect bullet) {"
+  },
+  {
+    "sha": "81e8442988614d27eccf5753bd07743257ccc263",
+    "filename": "core/src/ru/geekbrains/sprite/TrackingStar.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/Tohanos/StarGame/blob/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/sprite/TrackingStar.java",
+    "raw_url": "https://github.com/Tohanos/StarGame/raw/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/sprite/TrackingStar.java",
+    "contents_url": "https://api.github.com/repos/Tohanos/StarGame/contents/core/src/ru/geekbrains/sprite/TrackingStar.java?ref=817331c2449bf3dd26aed1c60b7579e83cb7510b",
+    "patch": "@@ -7,17 +7,25 @@\n \n     private final Vector2 sumV;\n     private final Vector2 trackingV;\n+    private float scaleFactor;\n+    private final float SCALE_LIMIT = 1.5f;\n \n     public TrackingStar(TextureAtlas atlas) {\n         super(atlas);\n         sumV = new Vector2();\n         trackingV = new Vector2();\n+        scale = 1f - 0.5f * (float)Math.random();\n+        scaleFactor = 0.01f * (1f - 0.5f * (float)Math.random());\n     }\n \n     public void update(float delta, float xv) {\n         trackingV.set(xv, 0);\n         sumV.setZero().mulAdd(trackingV, 0.2f).rotate(180).add(v);\n         pos.mulAdd(sumV, delta);\n         checkBounds();\n+        scale += scaleFactor;\n+        if ((scale > SCALE_LIMIT) || (scale < 0)) {\n+            scaleFactor = - scaleFactor;\n+        }\n     }\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "63351d27a6bb501864a7aed49921b2c81479cd18",
+    "filename": "core/src/ru/geekbrains/utils/EnemyEmitter.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 3,
+    "changes": 15,
+    "blob_url": "https://github.com/Tohanos/StarGame/blob/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/utils/EnemyEmitter.java",
+    "raw_url": "https://github.com/Tohanos/StarGame/raw/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/utils/EnemyEmitter.java",
+    "contents_url": "https://api.github.com/repos/Tohanos/StarGame/contents/core/src/ru/geekbrains/utils/EnemyEmitter.java?ref=817331c2449bf3dd26aed1c60b7579e83cb7510b",
+    "patch": "@@ -35,6 +35,9 @@\n     private final Vector2 enemySmallV = new Vector2(0, -0.2f);\n     private final Vector2 enemyMediumV = new Vector2(0, -0.03f);\n     private final Vector2 enemyBigV = new Vector2(0, -0.005f);\n+    private final Vector2 enemySmallVMod = new Vector2(0.06f, 0);\n+    private final Vector2 enemyMediumVMod = new Vector2(0.04f, 0);\n+    private final Vector2 enemyBigVMod = new Vector2(-0.03f, 0);\n \n     private TextureRegion[] enemySmallRegions;\n     private TextureRegion[] enemyMediumRegions;\n@@ -71,37 +74,43 @@ public void generate(float delta, int frags) {\n                 enemyShip.set(\n                         enemySmallRegions,\n                         enemySmallV,\n+                        enemySmallVMod,\n                         bulletRegion,\n                         ENEMY_SMALL_BULLET_HEIGHT,\n                         enemySmallBulletV,\n                         ENEMY_SMALL_BULLET_DAMAGE * level,\n                         ENEMY_SMALL_RELOAD_INTERVAL,\n                         ENEMY_SMALL_HEIGHT,\n-                        ENEMY_SMALL_HP\n+                        ENEMY_SMALL_HP,\n+                        EnemyMovementType.APPEARING\n                 );\n             } else if (enemyType < 0.8f) {\n                 enemyShip.set(\n                         enemyMediumRegions,\n                         enemyMediumV,\n+                        enemyMediumVMod,\n                         bulletRegion,\n                         ENEMY_MEDIUM_BULLET_HEIGHT,\n                         enemyMediumBulletV,\n                         ENEMY_MEDIUM_BULLET_DAMAGE * level,\n                         ENEMY_MEDIUM_RELOAD_INTERVAL,\n                         ENEMY_MEDIUM_HEIGHT,\n-                        ENEMY_MEDIUM_HP\n+                        ENEMY_MEDIUM_HP,\n+                        EnemyMovementType.APPEARING\n                 );\n             } else {\n                 enemyShip.set(\n                         enemyBigRegions,\n                         enemyBigV,\n+                        enemyBigVMod,\n                         bulletRegion,\n                         ENEMY_BIG_BULLET_HEIGHT,\n                         enemyBigBulletV,\n                         ENEMY_BIG_BULLET_DAMAGE * level,\n                         ENEMY_BIG_RELOAD_INTERVAL,\n                         ENEMY_BIG_HEIGHT,\n-                        ENEMY_BIG_HP\n+                        ENEMY_BIG_HP,\n+                        EnemyMovementType.APPEARING\n                 );\n             }\n             enemyShip.pos.x = Rnd.nextFloat("
+  },
+  {
+    "sha": "fb53ff8e57618448065a34dc55996f15d81f604d",
+    "filename": "core/src/ru/geekbrains/utils/EnemyMovement.java",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 9,
+    "changes": 38,
+    "blob_url": "https://github.com/Tohanos/StarGame/blob/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/utils/EnemyMovement.java",
+    "raw_url": "https://github.com/Tohanos/StarGame/raw/817331c2449bf3dd26aed1c60b7579e83cb7510b/core/src/ru/geekbrains/utils/EnemyMovement.java",
+    "contents_url": "https://api.github.com/repos/Tohanos/StarGame/contents/core/src/ru/geekbrains/utils/EnemyMovement.java?ref=817331c2449bf3dd26aed1c60b7579e83cb7510b",
+    "patch": "@@ -8,37 +8,49 @@\n     private EnemyMovementType movementType;\n     private Vector2 v;\n     private Vector2 v0;\n+    private Vector2 vMod;\n     private Vector2 pos;\n     private Rect worldBounds;\n-    private float upLimit;\n \n-    public EnemyMovement (Vector2 v0, Vector2 v, Vector2 pos, float upLimit, Rect worldBounds) {\n+    private final float UP_LIMIT = 0.1f;\n+\n+    public EnemyMovement (Vector2 v0, Vector2 v, Vector2 pos, Rect worldBounds, Vector2 vMod) {\n         movementType = EnemyMovementType.APPEARING;\n         this.v0 = v0;\n         this.v = v;\n+        this.vMod = vMod;\n         this.pos = pos;\n-        this.upLimit = upLimit;\n         this.worldBounds = worldBounds;\n \n \n     }\n \n-    public void next() {\n+    public void next(float delta) {\n         switch (movementType) {\n             case APPEARING:\n                 v.set(0, -0.2f);\n-                if (pos.y <= upLimit) {\n+                if (pos.y <= worldBounds.getTop() - UP_LIMIT) {\n                     movementType = EnemyMovementType.FIGHTING;\n+                    v.set(v0);\n                 }\n                 break;\n             case FIGHTING:\n-                v.set(this.v0);\n-                //TODO add some logic for fighting movement\n+                v.mulAdd(vMod, delta);\n+                if(pos.x > worldBounds.getRight()) {\n+                    pos.x = worldBounds.getRight();\n+                    v.x = - v.x;\n+                    vMod.x = - vMod.x;\n+                }\n+\n+                if(pos.x < worldBounds.getLeft()) {\n+                    pos.x = worldBounds.getLeft();\n+                    v.x = - v.x;\n+                    vMod.x = - vMod.x;\n+                }\n \n-                //movementType = EnemyMovementType.DYING;\n                 break;\n             case DYING:\n-                //TODO add some loogic for dying movement\n+\n                 v.set(0, 0);\n                 break;\n         }\n@@ -47,4 +59,12 @@ public void next() {\n     public void setV0(Vector2 v) {\n         this.v = v;\n     }\n+\n+    public EnemyMovementType getMovementType() {\n+        return movementType;\n+    }\n+\n+    public void setMovementType(EnemyMovementType movementType) {\n+        this.movementType = movementType;\n+    }\n }"
+  }
+]

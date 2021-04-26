@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "8154a7fc625bb37a0115247e74cc1c35ebce6296",
+    "filename": "hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieBootstrapRDD.scala",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/apache/hudi/blob/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieBootstrapRDD.scala",
+    "raw_url": "https://github.com/apache/hudi/raw/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieBootstrapRDD.scala",
+    "contents_url": "https://api.github.com/repos/apache/hudi/contents/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieBootstrapRDD.scala?ref=2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6",
+    "patch": "@@ -26,6 +26,8 @@ import org.apache.spark.sql.execution.datasources.PartitionedFile\n import org.apache.spark.sql.types.StructType\n import org.apache.spark.sql.vectorized.ColumnarBatch\n \n+import scala.collection.mutable.ArrayBuffer\n+\n class HoodieBootstrapRDD(@transient spark: SparkSession,\n                         dataReadFunction: PartitionedFile => Iterator[Any],\n                         skeletonReadFunction: PartitionedFile => Iterator[Any],\n@@ -126,6 +128,17 @@ class HoodieBootstrapRDD(@transient spark: SparkSession,\n       }\n     }).toArray\n   }\n+\n+  override protected def getPreferredLocations(split: Partition): Seq[String] = {\n+    val partitionSplit = split.asInstanceOf[HoodieBootstrapPartition].split\n+    val files = new ArrayBuffer[PartitionedFile]\n+\n+    if (partitionSplit.skeletonFile.isDefined) {\n+      files += partitionSplit.skeletonFile.get\n+    }\n+    files += partitionSplit.dataFile\n+    HoodieSparkUtils.computeHostsWithMostData(files)\n+  }\n }\n \n case class HoodieBootstrapPartition(index: Int, split: HoodieBootstrapSplit) extends Partition"
+  },
+  {
+    "sha": "298e06350c1c37b002de6c194ee159104513af84",
+    "filename": "hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieBootstrapRelation.scala",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/hudi/blob/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieBootstrapRelation.scala",
+    "raw_url": "https://github.com/apache/hudi/raw/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieBootstrapRelation.scala",
+    "contents_url": "https://api.github.com/repos/apache/hudi/contents/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieBootstrapRelation.scala?ref=2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6",
+    "patch": "@@ -78,11 +78,11 @@ class HoodieBootstrapRelation(@transient val _sqlContext: SQLContext,\n       var dataFile: PartitionedFile = null\n \n       if (hoodieBaseFile.getBootstrapBaseFile.isPresent) {\n-        skeletonFile = Option(PartitionedFile(InternalRow.empty, hoodieBaseFile.getPath, 0, hoodieBaseFile.getFileLen))\n-        dataFile = PartitionedFile(InternalRow.empty, hoodieBaseFile.getBootstrapBaseFile.get().getPath, 0,\n-          hoodieBaseFile.getBootstrapBaseFile.get().getFileLen)\n+        skeletonFile = Option(HoodieSparkUtils.getPartitionedFile(hoodieBaseFile.getFileStatus, hoodieBaseFile.getPath, InternalRow.empty))\n+        dataFile = HoodieSparkUtils.getPartitionedFile(hoodieBaseFile.getBootstrapBaseFile.get().getFileStatus,\n+          hoodieBaseFile.getBootstrapBaseFile.get().getPath, InternalRow.empty)\n       } else {\n-        dataFile = PartitionedFile(InternalRow.empty, hoodieBaseFile.getPath, 0, hoodieBaseFile.getFileLen)\n+        dataFile = HoodieSparkUtils.getPartitionedFile(hoodieBaseFile.getFileStatus, hoodieBaseFile.getPath, InternalRow.empty)\n       }\n       HoodieBootstrapSplit(dataFile, skeletonFile)\n     })"
+  },
+  {
+    "sha": "9efeb343179726c4810815f0f68a2c2908ff0577",
+    "filename": "hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieMergeOnReadRDD.scala",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/apache/hudi/blob/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieMergeOnReadRDD.scala",
+    "raw_url": "https://github.com/apache/hudi/raw/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieMergeOnReadRDD.scala",
+    "contents_url": "https://api.github.com/repos/apache/hudi/contents/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieMergeOnReadRDD.scala?ref=2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6",
+    "patch": "@@ -21,6 +21,7 @@ package org.apache.hudi\n import org.apache.avro.Schema\n import org.apache.avro.generic.{GenericRecord, GenericRecordBuilder}\n import org.apache.hadoop.conf.Configuration\n+import org.apache.hadoop.fs.Path\n import org.apache.hudi.common.fs.FSUtils\n import org.apache.hudi.common.table.log.HoodieMergedLogRecordScanner\n import org.apache.hudi.config.HoodiePayloadConfig\n@@ -37,6 +38,7 @@ import org.apache.spark.{Partition, SerializableWritable, SparkContext, TaskCont\n \n import scala.collection.JavaConverters._\n import scala.collection.mutable\n+import scala.collection.mutable.ArrayBuffer\n import scala.util.Try\n \n case class HoodieMergeOnReadPartition(index: Int, split: HoodieMergeOnReadFileSplit) extends Partition\n@@ -299,6 +301,23 @@ class HoodieMergeOnReadRDD(@transient sc: SparkContext,\n         }\n       }\n     }\n+\n+  override protected def getPreferredLocations(split: Partition): Seq[String] = {\n+    val partitionSplit = split.asInstanceOf[HoodieMergeOnReadPartition].split\n+    val files = new ArrayBuffer[PartitionedFile]\n+    val fs = FSUtils.getFs(partitionSplit.tablePath, config)\n+    if (partitionSplit.dataFile.isDefined) {\n+      files += partitionSplit.dataFile.get\n+    }\n+    val logFilePaths = partitionSplit.logPaths\n+    if (logFilePaths.isDefined) {\n+      logFilePaths.get.foreach(path => {\n+        val partitionedFile = HoodieSparkUtils.getPartitionedFile(fs.getFileStatus(new Path(path)), path, InternalRow.empty)\n+        files += partitionedFile\n+      })\n+    }\n+    HoodieSparkUtils.computeHostsWithMostData(files)\n+  }\n }\n \n private object HoodieMergeOnReadRDD {"
+  },
+  {
+    "sha": "9156c94bf2928bd9952e5a1ecdddd2e8272b5d1e",
+    "filename": "hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieSparkUtils.scala",
+    "status": "modified",
+    "additions": 66,
+    "deletions": 2,
+    "changes": 68,
+    "blob_url": "https://github.com/apache/hudi/blob/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieSparkUtils.scala",
+    "raw_url": "https://github.com/apache/hudi/raw/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieSparkUtils.scala",
+    "contents_url": "https://api.github.com/repos/apache/hudi/contents/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/HoodieSparkUtils.scala?ref=2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6",
+    "patch": "@@ -20,18 +20,21 @@ package org.apache.hudi\n \n import org.apache.avro.Schema\n import org.apache.avro.generic.GenericRecord\n-import org.apache.hadoop.fs.{FileSystem, Path}\n+import org.apache.hadoop.fs.{BlockLocation, FileStatus, FileSystem, LocatedFileStatus, Path}\n import org.apache.hudi.client.utils.SparkRowSerDe\n import org.apache.hudi.common.model.HoodieRecord\n import org.apache.spark.SPARK_VERSION\n import org.apache.spark.rdd.RDD\n import org.apache.spark.sql.{DataFrame, Row, SparkSession}\n import org.apache.spark.sql.avro.SchemaConverters\n+import org.apache.spark.sql.catalyst.InternalRow\n import org.apache.spark.sql.catalyst.encoders.{ExpressionEncoder, RowEncoder}\n-import org.apache.spark.sql.execution.datasources.{FileStatusCache, InMemoryFileIndex}\n+import org.apache.spark.sql.execution.datasources.{FileStatusCache, InMemoryFileIndex, PartitionedFile}\n import org.apache.spark.sql.types.{StringType, StructField, StructType}\n \n import scala.collection.JavaConverters._\n+import scala.collection.mutable\n+import scala.collection.mutable.ArrayBuffer\n \n \n object HoodieSparkUtils {\n@@ -118,4 +121,65 @@ object HoodieSparkUtils {\n       new Spark3RowSerDe(encoder)\n     }\n   }\n+\n+  def getPartitionedFile(file: FileStatus, filePath: String, partitionValues: InternalRow): PartitionedFile = {\n+    val hosts = getBlockHosts(getBlockLocations(file), 0, file.getLen)\n+    PartitionedFile(partitionValues, filePath, 0, file.getLen, hosts)\n+  }\n+\n+  private def getBlockLocations(file: FileStatus): Array[BlockLocation] = file match {\n+    case f: LocatedFileStatus => f.getBlockLocations\n+    case f => Array.empty[BlockLocation]\n+  }\n+\n+  // Given locations of all blocks of a single file, `blockLocations`, and an `(offset, length)`\n+  // pair that represents a segment of the same file, find out the block that contains the largest\n+  // fraction the segment, and returns location hosts of that block. If no such block can be found,\n+  // returns an empty array.\n+  private def getBlockHosts(blockLocations: Array[BlockLocation], offset: Long, length: Long): Array[String] = {\n+    val candidates = blockLocations.map {\n+      // The fragment starts from a position within this block. It handles the case where the\n+      // fragment is fully contained in the block.\n+      case b if b.getOffset <= offset && offset < b.getOffset + b.getLength =>\n+        b.getHosts -> (b.getOffset + b.getLength - offset).min(length)\n+\n+      // The fragment ends at a position within this block\n+      case b if b.getOffset < offset + length && offset + length < b.getOffset + b.getLength =>\n+        b.getHosts -> (offset + length - b.getOffset)\n+\n+      // The fragment fully contains this block\n+      case b if offset <= b.getOffset && b.getOffset + b.getLength <= offset + length =>\n+        b.getHosts -> b.getLength\n+\n+      // The fragment doesn't intersect with this block\n+      case b =>\n+        b.getHosts -> 0L\n+    }.filter { case (hosts, size) =>\n+      size > 0L\n+    }\n+\n+    if (candidates.isEmpty) {\n+      Array.empty[String]\n+    } else {\n+      val (hosts, _) = candidates.maxBy { case (_, size) => size }\n+      hosts\n+    }\n+  }\n+\n+  // compute the hosts with the most data to be retrieved\n+  def computeHostsWithMostData(partitionedFiles: ArrayBuffer[PartitionedFile]): Seq[String] = {\n+    // Computes total number of bytes can be retrieved from each host.\n+    val hostToNumBytes = mutable.HashMap.empty[String, Long]\n+    partitionedFiles.foreach { file =>\n+      file.locations.filter(_ != \"localhost\").foreach { host =>\n+        hostToNumBytes(host) = hostToNumBytes.getOrElse(host, 0L) + file.length\n+      }\n+    }\n+    // Takes the first 3 hosts with the most data to be retrieved\n+    hostToNumBytes.toSeq.sortBy {\n+      case (host, numBytes) => numBytes\n+    }.reverse.take(3).map {\n+      case (host, numBytes) => host\n+    }\n+  }\n }"
+  },
+  {
+    "sha": "edd2e8626a0d198e81a2a4f55887f6e44d89e1d0",
+    "filename": "hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/MergeOnReadIncrementalRelation.scala",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/hudi/blob/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/MergeOnReadIncrementalRelation.scala",
+    "raw_url": "https://github.com/apache/hudi/raw/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/MergeOnReadIncrementalRelation.scala",
+    "contents_url": "https://api.github.com/repos/apache/hudi/contents/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/MergeOnReadIncrementalRelation.scala?ref=2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6",
+    "patch": "@@ -201,7 +201,7 @@ class MergeOnReadIncrementalRelation(val sqlContext: SQLContext,\n       val baseFiles = f.getAllFileSlices.iterator().filter(slice => slice.getBaseFile.isPresent).toList\n       val partitionedFile = if (baseFiles.nonEmpty) {\n         val baseFile = baseFiles.head.getBaseFile\n-        Option(PartitionedFile(InternalRow.empty, baseFile.get.getPath, 0, baseFile.get.getFileLen))\n+        Option(HoodieSparkUtils.getPartitionedFile(baseFile.get.getFileStatus, baseFile.get.getPath, InternalRow.empty))\n       }\n       else {\n         Option.empty"
+  },
+  {
+    "sha": "07dfdd5b0b4f9138a80dccdcfd734fd1a587d021",
+    "filename": "hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/MergeOnReadSnapshotRelation.scala",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/hudi/blob/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/MergeOnReadSnapshotRelation.scala",
+    "raw_url": "https://github.com/apache/hudi/raw/2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/MergeOnReadSnapshotRelation.scala",
+    "contents_url": "https://api.github.com/repos/apache/hudi/contents/hudi-spark-datasource/hudi-spark/src/main/scala/org/apache/hudi/MergeOnReadSnapshotRelation.scala?ref=2d4ed9cd5478c81df3a4381b571ca53d3e0e93a6",
+    "patch": "@@ -148,7 +148,7 @@ class MergeOnReadSnapshotRelation(val sqlContext: SQLContext,\n     val fileSplits = fileGroup.map(kv => {\n       val baseFile = kv._1\n       val logPaths = if (kv._2.isEmpty) Option.empty else Option(kv._2.asScala.toList)\n-      val partitionedFile = PartitionedFile(InternalRow.empty, baseFile.getPath, 0, baseFile.getFileLen)\n+      val partitionedFile = HoodieSparkUtils.getPartitionedFile(baseFile.getFileStatus, baseFile.getPath, InternalRow.empty)\n       HoodieMergeOnReadFileSplit(Option(partitionedFile), logPaths, latestCommit,\n         metaClient.getBasePath, maxCompactionMemoryInBytes, mergeType)\n     }).toList"
+  }
+]

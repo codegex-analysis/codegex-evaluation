@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "ee77f93b87ebe0e35e37bb0806e8b5865f3bb22e",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/auth0/jwks-rsa-java/blob/02abedf8e1f548952b1b92d4a814808b96da2e64/build.gradle",
+    "raw_url": "https://github.com/auth0/jwks-rsa-java/raw/02abedf8e1f548952b1b92d4a814808b96da2e64/build.gradle",
+    "contents_url": "https://api.github.com/repos/auth0/jwks-rsa-java/contents/build.gradle?ref=02abedf8e1f548952b1b92d4a814808b96da2e64",
+    "patch": "@@ -61,7 +61,6 @@ repositories {\n }\n \n dependencies {\n-    implementation group: 'commons-codec', name: 'commons-codec', version:'1.15'\n     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version:'2.11.3'\n     implementation group: 'com.google.guava', name: 'guava', version:'30.0-jre'\n     testImplementation group: 'junit', name: 'junit', version:'4.13.1'"
+  },
+  {
+    "sha": "49abc5e04fde0bc6a1196cda39a7a725b462005f",
+    "filename": "src/main/java/com/auth0/jwk/Jwk.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 5,
+    "changes": 10,
+    "blob_url": "https://github.com/auth0/jwks-rsa-java/blob/02abedf8e1f548952b1b92d4a814808b96da2e64/src/main/java/com/auth0/jwk/Jwk.java",
+    "raw_url": "https://github.com/auth0/jwks-rsa-java/raw/02abedf8e1f548952b1b92d4a814808b96da2e64/src/main/java/com/auth0/jwk/Jwk.java",
+    "contents_url": "https://api.github.com/repos/auth0/jwks-rsa-java/contents/src/main/java/com/auth0/jwk/Jwk.java?ref=02abedf8e1f548952b1b92d4a814808b96da2e64",
+    "patch": "@@ -2,7 +2,6 @@\n \n import com.google.common.base.MoreObjects;\n import com.google.common.collect.Maps;\n-import org.apache.commons.codec.binary.Base64;\n \n import java.math.BigInteger;\n import java.security.AlgorithmParameters;\n@@ -16,6 +15,7 @@\n import java.security.spec.InvalidKeySpecException;\n import java.security.spec.InvalidParameterSpecException;\n import java.security.spec.RSAPublicKeySpec;\n+import java.util.Base64;\n import java.util.Collections;\n import java.util.List;\n import java.util.Map;\n@@ -182,8 +182,8 @@ public PublicKey getPublicKey() throws InvalidPublicKeyException {\n             case ALGORITHM_RSA:\n                 try {\n                     KeyFactory kf = KeyFactory.getInstance(ALGORITHM_RSA);\n-                    BigInteger modulus = new BigInteger(1, Base64.decodeBase64(stringValue(\"n\")));\n-                    BigInteger exponent = new BigInteger(1, Base64.decodeBase64(stringValue(\"e\")));\n+                    BigInteger modulus = new BigInteger(1, Base64.getUrlDecoder().decode(stringValue(\"n\")));\n+                    BigInteger exponent = new BigInteger(1, Base64.getUrlDecoder().decode(stringValue(\"e\")));\n                     publicKey = kf.generatePublic(new RSAPublicKeySpec(modulus, exponent));\n                 } catch (InvalidKeySpecException e) {\n                     throw new InvalidPublicKeyException(\"Invalid public key\", e);\n@@ -195,8 +195,8 @@ public PublicKey getPublicKey() throws InvalidPublicKeyException {\n             case ALGORITHM_ELLIPTIC_CURVE:\n                 try {\n                     KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM_ELLIPTIC_CURVE);\n-                    ECPoint ecPoint = new ECPoint(new BigInteger(Base64.decodeBase64(stringValue(\"x\"))),\n-                            new BigInteger(Base64.decodeBase64(stringValue(\"y\"))));\n+                    ECPoint ecPoint = new ECPoint(new BigInteger(Base64.getUrlDecoder().decode(stringValue(\"x\"))),\n+                            new BigInteger(Base64.getUrlDecoder().decode(stringValue(\"y\"))));\n                     AlgorithmParameters algorithmParameters = AlgorithmParameters.getInstance(ALGORITHM_ELLIPTIC_CURVE);\n \n                     String curve = stringValue(\"crv\");"
+  },
+  {
+    "sha": "5d24f6de26ca260ed4e853573caaf7cad26732b3",
+    "filename": "src/test/java/com/auth0/jwk/JwkTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/auth0/jwks-rsa-java/blob/02abedf8e1f548952b1b92d4a814808b96da2e64/src/test/java/com/auth0/jwk/JwkTest.java",
+    "raw_url": "https://github.com/auth0/jwks-rsa-java/raw/02abedf8e1f548952b1b92d4a814808b96da2e64/src/test/java/com/auth0/jwk/JwkTest.java",
+    "contents_url": "https://api.github.com/repos/auth0/jwks-rsa-java/contents/src/test/java/com/auth0/jwk/JwkTest.java?ref=02abedf8e1f548952b1b92d4a814808b96da2e64",
+    "patch": "@@ -2,14 +2,14 @@\n \n import com.google.common.collect.Lists;\n import com.google.common.collect.Maps;\n-import org.apache.commons.codec.binary.Base64;\n import org.junit.Rule;\n import org.junit.Test;\n import org.junit.rules.ExpectedException;\n \n import java.security.SecureRandom;\n import java.security.interfaces.ECPublicKey;\n import java.security.interfaces.RSAPublicKey;\n+import java.util.Base64;\n import java.util.List;\n import java.util.Map;\n \n@@ -213,7 +213,7 @@ public void shouldReturnKeyWithMissingAlgParam() throws Exception {\n     private static String randomKeyId() {\n         byte[] bytes = new byte[50];\n         new SecureRandom().nextBytes(bytes);\n-        return Base64.encodeBase64String(bytes);\n+        return Base64.getEncoder().encodeToString(bytes);\n     }\n \n     private static Map<String, Object> unsupportedValues(String kid) {"
+  }
+]

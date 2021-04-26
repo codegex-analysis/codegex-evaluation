@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "d0262011f4e3af407b6ca60532bfc46746f377fd",
+    "filename": "src/main/java/ru/geekbrains/spring/university/controller/ProductController.java",
+    "status": "added",
+    "additions": 38,
+    "deletions": 0,
+    "changes": 38,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L7/blob/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/java/ru/geekbrains/spring/university/controller/ProductController.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L7/raw/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/java/ru/geekbrains/spring/university/controller/ProductController.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L7/contents/src/main/java/ru/geekbrains/spring/university/controller/ProductController.java?ref=29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce",
+    "patch": "@@ -0,0 +1,38 @@\n+package ru.geekbrains.spring.university.controller;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.web.bind.annotation.*;\n+import ru.geekbrains.spring.university.model.Product;\n+import ru.geekbrains.spring.university.services.ProductService;\n+\n+import java.util.List;\n+\n+\n+@RestController\n+@RequestMapping(\"/products\")\n+public class ProductController {\n+\n+    @Autowired\n+    private ProductService productService;\n+\n+    @GetMapping\n+    public List<Product> getAllByCostBetween(@RequestParam(required = false, name = \"minCost\") Double minCost,\n+                                        @RequestParam(required = false, name = \"maxCost\") Double maxCost)\n+    { if (minCost==null && maxCost == null) {return productService.getAll();}\n+      if (minCost==null) {return productService.getAllByCostLessThan(maxCost);}\n+      if (maxCost==null) {return productService.getAllByCostGreaterThan(minCost);}\n+\n+      return productService.getAllByCostBetween(minCost, maxCost);}\n+\n+    @GetMapping(\"/id:{id}\")\n+    public Product getById(@PathVariable long id){return productService.getById(id);}\n+\n+    @GetMapping(\"/title:{title}\")\n+    public List<Product> getProductByTitleContains(@PathVariable String title){return productService.getAllByTitleContains(title);}\n+\n+    @PostMapping\n+    public Product save(@RequestBody Product product){return productService.save(product);}\n+\n+    @GetMapping(\"/delete/{id}\")\n+    public void deleteById(@PathVariable long id){productService.deleteById(id);}\n+}"
+  },
+  {
+    "sha": "0c4f959efae64d8d55849eea5d5b2ed88849b518",
+    "filename": "src/main/java/ru/geekbrains/spring/university/controller/StudentController.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 55,
+    "changes": 55,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L7/blob/dec8d56ea22eeb8194ad7047d0487b5cfb64b338/src/main/java/ru/geekbrains/spring/university/controller/StudentController.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L7/raw/dec8d56ea22eeb8194ad7047d0487b5cfb64b338/src/main/java/ru/geekbrains/spring/university/controller/StudentController.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L7/contents/src/main/java/ru/geekbrains/spring/university/controller/StudentController.java?ref=dec8d56ea22eeb8194ad7047d0487b5cfb64b338",
+    "patch": "@@ -1,55 +0,0 @@\n-package ru.geekbrains.spring.university.controller;\n-\n-import org.springframework.beans.factory.annotation.Autowired;\n-import org.springframework.web.bind.annotation.DeleteMapping;\n-import org.springframework.web.bind.annotation.GetMapping;\n-import org.springframework.web.bind.annotation.PathVariable;\n-import org.springframework.web.bind.annotation.PostMapping;\n-import org.springframework.web.bind.annotation.RequestBody;\n-import org.springframework.web.bind.annotation.RequestMapping;\n-import org.springframework.web.bind.annotation.RequestParam;\n-import org.springframework.web.bind.annotation.RestController;\n-import ru.geekbrains.spring.university.model.Student;\n-import ru.geekbrains.spring.university.services.StudentService;\n-\n-import java.util.List;\n-\n-@RestController\n-@RequestMapping(\"/students\")\n-public class StudentController {\n-\n-    @Autowired\n-    private StudentService studentService;\n-\n-    @GetMapping\n-    public List<Student> getAll() {\n-        return studentService.getAll();\n-    }\n-\n-    @GetMapping(\"/score\")\n-    public List<Student> getAll(@RequestParam Integer first, @RequestParam Integer second) {\n-        return studentService.getAllByScore(first, second);\n-    }\n-\n-    @GetMapping(\"/{id}\")\n-    public Student getById(@PathVariable Long id) {\n-        return studentService.getById(id);\n-    }\n-\n-    @GetMapping(\"/name\")\n-    public Student getByName(@RequestParam String name) {\n-        return studentService.getByName(name);\n-    }\n-\n-    @PostMapping\n-        public Student add(@RequestBody Student student) {\n-        return studentService.add(student);\n-    }\n-\n-    @DeleteMapping(\"/{id}\")\n-    public void delete(@PathVariable Long id) {\n-        studentService.delete(id);\n-    }\n-\n-\n-}"
+  },
+  {
+    "sha": "2e82f3f9459f7750cc752aa924e3b180c083164d",
+    "filename": "src/main/java/ru/geekbrains/spring/university/model/Product.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L7/blob/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/java/ru/geekbrains/spring/university/model/Product.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L7/raw/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/java/ru/geekbrains/spring/university/model/Product.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L7/contents/src/main/java/ru/geekbrains/spring/university/model/Product.java?ref=29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce",
+    "patch": "@@ -0,0 +1,25 @@\n+package ru.geekbrains.spring.university.model;\n+\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+import net.bytebuddy.dynamic.loading.InjectionClassLoader;\n+import org.springframework.boot.autoconfigure.web.WebProperties;\n+\n+import javax.persistence.*;\n+\n+@Data\n+@NoArgsConstructor\n+@Entity\n+@Table(name = \"products\")\n+public class Product {\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    @Column\n+    private long id;\n+\n+    @Column\n+    private String title;\n+\n+    @Column\n+    private double cost;\n+}"
+  },
+  {
+    "sha": "45fd6bad2cf2d1f830e950ba40c75a876698d905",
+    "filename": "src/main/java/ru/geekbrains/spring/university/repository/ProductRepository.java",
+    "status": "added",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L7/blob/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/java/ru/geekbrains/spring/university/repository/ProductRepository.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L7/raw/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/java/ru/geekbrains/spring/university/repository/ProductRepository.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L7/contents/src/main/java/ru/geekbrains/spring/university/repository/ProductRepository.java?ref=29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce",
+    "patch": "@@ -0,0 +1,17 @@\n+package ru.geekbrains.spring.university.repository;\n+\n+import org.springframework.data.jpa.repository.JpaRepository;\n+import org.springframework.stereotype.Repository;\n+import ru.geekbrains.spring.university.model.Product;\n+\n+import java.util.List;\n+\n+@Repository\n+public interface ProductRepository extends JpaRepository<Product, Long> {\n+\n+    public List<Product> findAllByCostGreaterThan(double minCost);\n+    public List<Product> findAllByCostLessThan(double maxCost);\n+    public List<Product> findAllByCostBetween(double minCost, double maxCost);\n+\n+    public List<Product> findAllByTitleContains(String title);\n+}"
+  },
+  {
+    "sha": "9d1a1d57aa3f1b28d6038895ea4a99b33ac70dba",
+    "filename": "src/main/java/ru/geekbrains/spring/university/repository/StudentRepository.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 17,
+    "changes": 17,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L7/blob/dec8d56ea22eeb8194ad7047d0487b5cfb64b338/src/main/java/ru/geekbrains/spring/university/repository/StudentRepository.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L7/raw/dec8d56ea22eeb8194ad7047d0487b5cfb64b338/src/main/java/ru/geekbrains/spring/university/repository/StudentRepository.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L7/contents/src/main/java/ru/geekbrains/spring/university/repository/StudentRepository.java?ref=dec8d56ea22eeb8194ad7047d0487b5cfb64b338",
+    "patch": "@@ -1,17 +0,0 @@\n-package ru.geekbrains.spring.university.repository;\n-\n-import org.springframework.data.jpa.repository.JpaRepository;\n-import org.springframework.data.jpa.repository.Query;\n-import org.springframework.stereotype.Repository;\n-import ru.geekbrains.spring.university.model.Student;\n-\n-import java.util.List;\n-\n-@Repository\n-public interface StudentRepository extends JpaRepository<Student, Long> {\n-\n-    Student findStudentByName(String name);\n-\n-    @Query(\"select s from Student s where s.id = :id\")\n-    List<Student> customStudentsQuery(int id);\n-}"
+  },
+  {
+    "sha": "13e86a4c7601e2fc04a7ebebc53bc0e409b9225a",
+    "filename": "src/main/java/ru/geekbrains/spring/university/services/ProductService.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L7/blob/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/java/ru/geekbrains/spring/university/services/ProductService.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L7/raw/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/java/ru/geekbrains/spring/university/services/ProductService.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L7/contents/src/main/java/ru/geekbrains/spring/university/services/ProductService.java?ref=29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce",
+    "patch": "@@ -0,0 +1,28 @@\n+package ru.geekbrains.spring.university.services;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.stereotype.Service;\n+import ru.geekbrains.spring.university.model.Product;\n+import ru.geekbrains.spring.university.repository.ProductRepository;\n+\n+import java.util.List;\n+\n+@Service\n+public class ProductService {\n+\n+    @Autowired\n+    private ProductRepository productRepository;\n+\n+    public List<Product> getAll() {return productRepository.findAll();}\n+    public List<Product> getAllByCostGreaterThan(double minCost){return productRepository.findAllByCostGreaterThan(minCost);}\n+    public List<Product> getAllByCostLessThan(double maxCost){return productRepository.findAllByCostLessThan(maxCost);}\n+    public List<Product> getAllByCostBetween(double minCost, double maxCost){return productRepository.findAllByCostBetween(minCost, maxCost);}\n+\n+    public List<Product> getAllByTitleContains(String title){return productRepository.findAllByTitleContains(title);}\n+\n+    public Product getById(long id){return productRepository.getOne(id);}\n+\n+    public Product save(Product product){return productRepository.save(product);}\n+\n+    public void deleteById(long id){productRepository.deleteById(id);}\n+}"
+  },
+  {
+    "sha": "231c62bbfb4e59d91d1d232adcee49ddd3c3f994",
+    "filename": "src/main/java/ru/geekbrains/spring/university/services/StudentService.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 41,
+    "changes": 41,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L7/blob/dec8d56ea22eeb8194ad7047d0487b5cfb64b338/src/main/java/ru/geekbrains/spring/university/services/StudentService.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L7/raw/dec8d56ea22eeb8194ad7047d0487b5cfb64b338/src/main/java/ru/geekbrains/spring/university/services/StudentService.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L7/contents/src/main/java/ru/geekbrains/spring/university/services/StudentService.java?ref=dec8d56ea22eeb8194ad7047d0487b5cfb64b338",
+    "patch": "@@ -1,41 +0,0 @@\n-package ru.geekbrains.spring.university.services;\n-\n-import org.springframework.beans.factory.annotation.Autowired;\n-import org.springframework.stereotype.Service;\n-import org.springframework.transaction.annotation.Transactional;\n-import ru.geekbrains.spring.university.model.Student;\n-import ru.geekbrains.spring.university.repository.StudentRepository;\n-\n-import java.util.List;\n-\n-@Service\n-public class StudentService {\n-\n-    @Autowired\n-    private StudentRepository studentRepository;\n-\n-    public List<Student> getAll() {\n-        return studentRepository.findAll();\n-    }\n-\n-    public List<Student> getAllByScore(Integer first, Integer second) {\n-\n-        return studentRepository.findStudentsByScoreBetween(first, second);\n-    }\n-\n-    public Student getById(Long id) {\n-        return studentRepository.findById(id).get();\n-    }\n-\n-    public Student getByName(String name) {\n-        return studentRepository.findStudentByName(name);\n-    }\n-\n-    public Student add(Student student) {\n-        return studentRepository.save(student);\n-    }\n-\n-    public void delete(Long id) {\n-        studentRepository.deleteById(id);\n-    }\n-}"
+  },
+  {
+    "sha": "1e31f083ab8e93760c43474a0fea16a1444c1f7f",
+    "filename": "src/main/resources/db/migration/V1__init.sql",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 5,
+    "changes": 15,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L7/blob/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/resources/db/migration/V1__init.sql",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L7/raw/29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce/src/main/resources/db/migration/V1__init.sql",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L7/contents/src/main/resources/db/migration/V1__init.sql?ref=29ff5f5ef453313dd85e3dc952b7d4ab9c2f62ce",
+    "patch": "@@ -1,5 +1,10 @@\n-create table students (id bigserial primary key, name varchar(255), score int);\n-insert into students (name, score) values\n-('Bob', 80),\n-('John', 70),\n-('Jack', 90);\n\\ No newline at end of file\n+create table products (id bigserial primary key , title varchar(255), cost double);\n+insert into products (title, cost) values\n+('Milk', 39.90),\n+('Bread', 28.20),\n+('Orange', 119.50),\n+('Apples', 87.60),\n+('Makaroni', 49.90),\n+('Sugar', 54.10),\n+('Chocolate', 43.30),\n+('Water', 19.60);\n\\ No newline at end of file"
+  }
+]

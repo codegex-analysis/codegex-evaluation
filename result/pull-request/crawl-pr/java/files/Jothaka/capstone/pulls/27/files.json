@@ -1,0 +1,96 @@
+[
+  {
+    "sha": "9fd4f30a259e0921928ece046aa40c23712cbcea",
+    "filename": "backend/pom.xml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/Jothaka/capstone/blob/f95519647fa16d707163758c016237371481f5a3/backend/pom.xml",
+    "raw_url": "https://github.com/Jothaka/capstone/raw/f95519647fa16d707163758c016237371481f5a3/backend/pom.xml",
+    "contents_url": "https://api.github.com/repos/Jothaka/capstone/contents/backend/pom.xml?ref=f95519647fa16d707163758c016237371481f5a3",
+    "patch": "@@ -17,10 +17,13 @@\n         <java.version>15</java.version>\n     </properties>\n     <dependencies>\n+\n         <dependency>\n-            <groupId>org.springframework.boot</groupId>\n-            <artifactId>spring-boot-starter-thymeleaf</artifactId>\n+            <groupId>net.sourceforge.tess4j</groupId>\n+            <artifactId>tess4j</artifactId>\n+            <version>4.5.2</version>\n         </dependency>\n+\n         <dependency>\n             <groupId>org.springframework.boot</groupId>\n             <artifactId>spring-boot-starter-web</artifactId>"
+  },
+  {
+    "sha": "21ddbd935371efa69ff3131160531a6798c1d0b9",
+    "filename": "backend/src/main/java/de/jankahle/capstone/controller/FileUploadController.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 7,
+    "changes": 35,
+    "blob_url": "https://github.com/Jothaka/capstone/blob/f95519647fa16d707163758c016237371481f5a3/backend/src/main/java/de/jankahle/capstone/controller/FileUploadController.java",
+    "raw_url": "https://github.com/Jothaka/capstone/raw/f95519647fa16d707163758c016237371481f5a3/backend/src/main/java/de/jankahle/capstone/controller/FileUploadController.java",
+    "contents_url": "https://api.github.com/repos/Jothaka/capstone/contents/backend/src/main/java/de/jankahle/capstone/controller/FileUploadController.java?ref=f95519647fa16d707163758c016237371481f5a3",
+    "patch": "@@ -1,6 +1,9 @@\n package de.jankahle.capstone.controller;\n \n+import de.jankahle.capstone.service.ImageReaderService;\n+import de.jankahle.capstone.utility.FileUtility;\n import de.jankahle.capstone.utility.ImageUtility;\n+\n import org.springframework.beans.factory.annotation.Autowired;\n import org.springframework.http.HttpStatus;\n import org.springframework.web.bind.annotation.PostMapping;\n@@ -10,20 +13,38 @@\n import org.springframework.web.multipart.MultipartFile;\n import org.springframework.web.server.ResponseStatusException;\n \n+import java.io.File;\n+import java.io.IOException;\n+\n+\n @RestController\n @RequestMapping(\"api/upload\")\n public class FileUploadController {\n \n+    private final ImageReaderService imageReaderService;\n+\n+    @Autowired\n+    public FileUploadController(ImageReaderService imageReaderService) {\n+        this.imageReaderService = imageReaderService;\n+    }\n+\n     @PostMapping\n-    public  String handleFileUpload(@RequestParam(\"file\")MultipartFile file) {\n+    public String handleFileUpload(@RequestParam(\"file\") MultipartFile file) {\n+        String result = \"Wrong filetype\";\n \n-        if(file.isEmpty()) {\n-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST ,\"File is empty\");\n+        if (file.isEmpty()) {\n+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, \"File is empty\");\n         }\n \n-        if(ImageUtility.IsContentTypeValid(file.getContentType())) {\n-            return  \"Upload successful\";\n+        if (ImageUtility.IsContentTypeValid(file.getContentType())) {\n+            try {\n+                File temporaryFile = FileUtility.convertMultipartFileToFile(file);\n+                result = imageReaderService.getTextFromImage(temporaryFile);\n+                temporaryFile.delete();\n+            } catch (IOException e) {\n+                e.printStackTrace();\n+            }\n         }\n-        return \"Wrong filetype\";\n+        return result;\n     }\n-}\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d4027e69b979fc5f5816d7e5edf5aba8e530fa30",
+    "filename": "backend/src/main/java/de/jankahle/capstone/service/ImageReaderService.java",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/Jothaka/capstone/blob/f95519647fa16d707163758c016237371481f5a3/backend/src/main/java/de/jankahle/capstone/service/ImageReaderService.java",
+    "raw_url": "https://github.com/Jothaka/capstone/raw/f95519647fa16d707163758c016237371481f5a3/backend/src/main/java/de/jankahle/capstone/service/ImageReaderService.java",
+    "contents_url": "https://api.github.com/repos/Jothaka/capstone/contents/backend/src/main/java/de/jankahle/capstone/service/ImageReaderService.java?ref=f95519647fa16d707163758c016237371481f5a3",
+    "patch": "@@ -0,0 +1,42 @@\n+package de.jankahle.capstone.service;\n+\n+import net.sourceforge.tess4j.Tesseract;\n+import net.sourceforge.tess4j.TesseractException;\n+\n+import org.springframework.stereotype.Service;\n+\n+import java.io.File;\n+import java.net.URISyntaxException;\n+import java.nio.file.Path;\n+import java.nio.file.Paths;\n+\n+@Service\n+public class ImageReaderService {\n+\n+    private Tesseract tesseract;\n+\n+    public ImageReaderService() {\n+        initTesseract();\n+    }\n+\n+    private void initTesseract() {\n+        tesseract = new Tesseract();\n+        tesseract.setLanguage(\"deu\");\n+        tesseract.setOcrEngineMode(1);\n+\n+        try {\n+            Path tessDataDirectory = Paths.get(ClassLoader.getSystemResource(\"tessdata\").toURI());\n+            tesseract.setDatapath(tessDataDirectory.toString());\n+        } catch (URISyntaxException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+    public String getTextFromImage(File image) {\n+        try {\n+            return tesseract.doOCR(image);\n+        } catch (TesseractException e) {\n+            return String.format(\"Error while reading image %s\", e.getMessage());\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "6a9d6c70f5cce120c579e054c5e6993a541258c7",
+    "filename": "backend/src/main/java/de/jankahle/capstone/utility/FileUtility.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/Jothaka/capstone/blob/f95519647fa16d707163758c016237371481f5a3/backend/src/main/java/de/jankahle/capstone/utility/FileUtility.java",
+    "raw_url": "https://github.com/Jothaka/capstone/raw/f95519647fa16d707163758c016237371481f5a3/backend/src/main/java/de/jankahle/capstone/utility/FileUtility.java",
+    "contents_url": "https://api.github.com/repos/Jothaka/capstone/contents/backend/src/main/java/de/jankahle/capstone/utility/FileUtility.java?ref=f95519647fa16d707163758c016237371481f5a3",
+    "patch": "@@ -0,0 +1,29 @@\n+package de.jankahle.capstone.utility;\n+\n+import org.springframework.web.multipart.MultipartFile;\n+\n+import java.io.File;\n+import java.io.FileOutputStream;\n+import java.io.IOException;\n+import java.io.InputStream;\n+\n+public class FileUtility {\n+    private static final int DEFAULT_BUFFER_SIZE = 8192;\n+\n+    public static File convertMultipartFileToFile(MultipartFile file) throws IOException {\n+        InputStream stream = file.getInputStream();\n+        File temporaryFile = new File(\"temp.png\");\n+        FileUtility.copyInputStreamToFile(stream, temporaryFile);\n+        return temporaryFile;\n+    }\n+\n+    public static void copyInputStreamToFile(InputStream inputStream, File temporaryFile) throws IOException {\n+        try(FileOutputStream outputStream = new FileOutputStream(temporaryFile, false)){\n+            int read;\n+            byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];\n+            while ((read = inputStream.read(bytes)) != -1){\n+                outputStream.write(bytes,0,read);\n+            }\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "4dd18b60af32cf5b26ecb68fad51a4613c6207d8",
+    "filename": "backend/src/main/java/de/jankahle/capstone/utility/ImageUtility.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Jothaka/capstone/blob/f95519647fa16d707163758c016237371481f5a3/backend/src/main/java/de/jankahle/capstone/utility/ImageUtility.java",
+    "raw_url": "https://github.com/Jothaka/capstone/raw/f95519647fa16d707163758c016237371481f5a3/backend/src/main/java/de/jankahle/capstone/utility/ImageUtility.java",
+    "contents_url": "https://api.github.com/repos/Jothaka/capstone/contents/backend/src/main/java/de/jankahle/capstone/utility/ImageUtility.java?ref=f95519647fa16d707163758c016237371481f5a3",
+    "patch": "@@ -12,6 +12,6 @@\n     );\n \n     public static boolean IsContentTypeValid(String contentType) {\n-        return !contentType.isEmpty() && validTypes.contains(validTypes);\n+        return !contentType.isEmpty() && validTypes.contains(contentType);\n     }\n }"
+  },
+  {
+    "sha": "36f623a0b724d546ba831e7eeead33bf4c6cb24f",
+    "filename": "backend/src/main/resources/tessdata/deu.traineddata",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/Jothaka/capstone/blob/f95519647fa16d707163758c016237371481f5a3/backend/src/main/resources/tessdata/deu.traineddata",
+    "raw_url": "https://github.com/Jothaka/capstone/raw/f95519647fa16d707163758c016237371481f5a3/backend/src/main/resources/tessdata/deu.traineddata",
+    "contents_url": "https://api.github.com/repos/Jothaka/capstone/contents/backend/src/main/resources/tessdata/deu.traineddata?ref=f95519647fa16d707163758c016237371481f5a3"
+  },
+  {
+    "sha": "101fde7b907cfe0b72a162aa6c4a15d1cd4e7f57",
+    "filename": "backend/src/test/java/de/jankahle/capstone/service/ImageReaderServiceTest.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/Jothaka/capstone/blob/f95519647fa16d707163758c016237371481f5a3/backend/src/test/java/de/jankahle/capstone/service/ImageReaderServiceTest.java",
+    "raw_url": "https://github.com/Jothaka/capstone/raw/f95519647fa16d707163758c016237371481f5a3/backend/src/test/java/de/jankahle/capstone/service/ImageReaderServiceTest.java",
+    "contents_url": "https://api.github.com/repos/Jothaka/capstone/contents/backend/src/test/java/de/jankahle/capstone/service/ImageReaderServiceTest.java?ref=f95519647fa16d707163758c016237371481f5a3",
+    "patch": "@@ -0,0 +1,32 @@\n+package de.jankahle.capstone.service;\n+\n+import org.hamcrest.Matchers;\n+import org.junit.jupiter.api.DisplayName;\n+import org.junit.jupiter.api.Test;\n+\n+import java.io.File;\n+\n+import static org.hamcrest.MatcherAssert.assertThat;\n+\n+class ImageReaderServiceTest {\n+\n+    @DisplayName(\"The reading of the example.png should provide the correct String\")\n+    @Test\n+    void getTextFromImage() {\n+        //Given\n+        ClassLoader classLoader = this.getClass().getClassLoader();\n+        File file = new File(classLoader.getResource(\"example.png\").getFile());\n+\n+        ImageReaderService imageReaderService = new ImageReaderService();\n+\n+        //When\n+\n+        String actual = imageReaderService.getTextFromImage(file);\n+\n+        //Then\n+\n+        String expected = \"Dies ist ein Beispieltext.\\n\";\n+\n+        assertThat(actual, Matchers.is(expected));\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "02940e15ad5c490e5e3025927e34e58f4d403908",
+    "filename": "backend/src/test/resources/example.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/Jothaka/capstone/blob/f95519647fa16d707163758c016237371481f5a3/backend/src/test/resources/example.png",
+    "raw_url": "https://github.com/Jothaka/capstone/raw/f95519647fa16d707163758c016237371481f5a3/backend/src/test/resources/example.png",
+    "contents_url": "https://api.github.com/repos/Jothaka/capstone/contents/backend/src/test/resources/example.png?ref=f95519647fa16d707163758c016237371481f5a3"
+  }
+]

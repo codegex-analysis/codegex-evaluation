@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "bfb4b7d4317f7aa22c30f50730acc2e73e52f648",
+    "filename": ".github/workflows/build.yml",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/matheusviegas/gerador-folha-ponto-aws-lambda/blob/d9ff6433eb30dc19acc1864e553e6e47e681faf2/.github/workflows/build.yml",
+    "raw_url": "https://github.com/matheusviegas/gerador-folha-ponto-aws-lambda/raw/d9ff6433eb30dc19acc1864e553e6e47e681faf2/.github/workflows/build.yml",
+    "contents_url": "https://api.github.com/repos/matheusviegas/gerador-folha-ponto-aws-lambda/contents/.github/workflows/build.yml?ref=d9ff6433eb30dc19acc1864e553e6e47e681faf2",
+    "patch": "@@ -0,0 +1,36 @@\n+name: Build\n+on:\n+  push:\n+    branches:\n+      - master\n+  pull_request:\n+    types: [opened, synchronize, reopened]\n+jobs:\n+  build:\n+    name: Build\n+    runs-on: ubuntu-latest\n+    steps:\n+      - uses: actions/checkout@v2\n+        with:\n+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis\n+      - name: Set up JDK 11\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: 11\n+      - name: Cache SonarCloud packages\n+        uses: actions/cache@v1\n+        with:\n+          path: ~/.sonar/cache\n+          key: ${{ runner.os }}-sonar\n+          restore-keys: ${{ runner.os }}-sonar\n+      - name: Cache Maven packages\n+        uses: actions/cache@v1\n+        with:\n+          path: ~/.m2\n+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}\n+          restore-keys: ${{ runner.os }}-m2\n+      - name: Build and analyze\n+        env:\n+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any\n+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}\n+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar\n\\ No newline at end of file"
+  },
+  {
+    "sha": "bbb56a81255aac5629f212265a9c116493e51408",
+    "filename": ".travis.yml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/matheusviegas/gerador-folha-ponto-aws-lambda/blob/d9ff6433eb30dc19acc1864e553e6e47e681faf2/.travis.yml",
+    "raw_url": "https://github.com/matheusviegas/gerador-folha-ponto-aws-lambda/raw/d9ff6433eb30dc19acc1864e553e6e47e681faf2/.travis.yml",
+    "contents_url": "https://api.github.com/repos/matheusviegas/gerador-folha-ponto-aws-lambda/contents/.travis.yml?ref=d9ff6433eb30dc19acc1864e553e6e47e681faf2",
+    "patch": "@@ -1,6 +1,6 @@\n language: java\n jdk:\n-  - openjdk8\n+  - openjdk11\n sudo: false\n script: \"mvn clean package\"\n "
+  },
+  {
+    "sha": "95fdb41bad9fde0239d6d396f80966d89220e2b6",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 4,
+    "changes": 14,
+    "blob_url": "https://github.com/matheusviegas/gerador-folha-ponto-aws-lambda/blob/d9ff6433eb30dc19acc1864e553e6e47e681faf2/pom.xml",
+    "raw_url": "https://github.com/matheusviegas/gerador-folha-ponto-aws-lambda/raw/d9ff6433eb30dc19acc1864e553e6e47e681faf2/pom.xml",
+    "contents_url": "https://api.github.com/repos/matheusviegas/gerador-folha-ponto-aws-lambda/contents/pom.xml?ref=d9ff6433eb30dc19acc1864e553e6e47e681faf2",
+    "patch": "@@ -11,8 +11,9 @@\n \n     <properties>\n         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n-        <maven.compiler.source>1.8</maven.compiler.source>\n-        <maven.compiler.target>1.8</maven.compiler.target>\n+        <maven.compiler.source>11</maven.compiler.source>\n+        <maven.compiler.target>11</maven.compiler.target>\n+        <java.version>11</java.version>\n         <sonar.projectKey>matheusviegas_gerador-folha-ponto-aws-lambda</sonar.projectKey>\n         <sonar.organization>matheusviegas</sonar.organization>\n         <sonar.host.url>https://sonarcloud.io</sonar.host.url>\n@@ -32,7 +33,7 @@\n         <dependency>\n             <groupId>org.projectlombok</groupId>\n             <artifactId>lombok</artifactId>\n-            <version>1.16.6</version>\n+            <version>1.18.18</version>\n         </dependency>\n         <dependency>\n             <groupId>org.apache.poi</groupId>\n@@ -81,10 +82,15 @@\n     <build>\n         <finalName>GeraFolhaPontoABSGP</finalName>\n         <plugins>\n+            <plugin>\n+                <groupId>org.apache.maven.plugins</groupId>\n+                <artifactId>maven-compiler-plugin</artifactId>\n+                <version>3.8.1</version>\n+            </plugin>\n             <plugin>\n                 <groupId>org.apache.maven.plugins</groupId>\n                 <artifactId>maven-shade-plugin</artifactId>\n-                <version>2.3</version>\n+                <version>3.2.4</version>\n                 <executions>\n                     <execution>\n                         <phase>package</phase>"
+  }
+]

@@ -1,0 +1,84 @@
+[
+  {
+    "sha": "20b3cd370c9998fad652cfdf9636083afa48f456",
+    "filename": "src/main/java/muramasa/antimatter/fluid/AntimatterFluid.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/blob/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/java/muramasa/antimatter/fluid/AntimatterFluid.java",
+    "raw_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/raw/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/java/muramasa/antimatter/fluid/AntimatterFluid.java",
+    "contents_url": "https://api.github.com/repos/GregTech-Intergalactical/AntimatterAPI/contents/src/main/java/muramasa/antimatter/fluid/AntimatterFluid.java?ref=87e29b6236932326d9b2841faa5f67b0dd0c3df3",
+    "patch": "@@ -32,6 +32,8 @@\n     public static final ResourceLocation OVERLAY_TEXTURE = new ResourceLocation(\"block/water_overlay\");\n     public static final ResourceLocation LIQUID_STILL_TEXTURE = new ResourceLocation(Ref.ID, \"block/liquid/still\");\n     public static final ResourceLocation LIQUID_FLOW_TEXTURE = new ResourceLocation(Ref.ID, \"block/liquid/flow\");\n+    public static final ResourceLocation LIQUID_HOT_STILL_TEXTURE = new ResourceLocation(Ref.ID, \"block/liquid/hot_still\");\n+    public static final ResourceLocation LIQUID_HOT_FLOW_TEXTURE = new ResourceLocation(Ref.ID, \"block/liquid/hot_flow\");\n     public static final ResourceLocation GAS_TEXTURE = new ResourceLocation(Ref.ID, \"block/liquid/gas\");\n     public static final ResourceLocation GAS_FLOW_TEXTURE = new ResourceLocation(Ref.ID, \"block/liquid/gas\"); // _flow\n     public static final ResourceLocation PLASMA_TEXTURE = new ResourceLocation(Ref.ID, \"block/liquid/plasma\");\n@@ -150,6 +152,13 @@ public Item getContainerItem() {\n     }\n \n     protected static FluidAttributes.Builder getDefaultAttributesBuilder() {\n+        return getDefaultAttributesBuilder(false);\n+    }\n+\n+    protected static FluidAttributes.Builder getDefaultAttributesBuilder(boolean hot) {\n+        if (hot) {\n+            return FluidAttributes.builder(LIQUID_HOT_STILL_TEXTURE, LIQUID_HOT_FLOW_TEXTURE).overlay(OVERLAY_TEXTURE);\n+        }\n         return FluidAttributes.builder(LIQUID_STILL_TEXTURE, LIQUID_FLOW_TEXTURE).overlay(OVERLAY_TEXTURE);\n     }\n }"
+  },
+  {
+    "sha": "4376a24a258191db52ba9c9fc6e0f7784735a0e2",
+    "filename": "src/main/java/muramasa/antimatter/fluid/AntimatterMaterialFluid.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/blob/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/java/muramasa/antimatter/fluid/AntimatterMaterialFluid.java",
+    "raw_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/raw/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/java/muramasa/antimatter/fluid/AntimatterMaterialFluid.java",
+    "contents_url": "https://api.github.com/repos/GregTech-Intergalactical/AntimatterAPI/contents/src/main/java/muramasa/antimatter/fluid/AntimatterMaterialFluid.java?ref=87e29b6236932326d9b2841faa5f67b0dd0c3df3",
+    "patch": "@@ -53,7 +53,7 @@ else if (type == Data.PLASMA) {\n                     .viscosity(10).density(-55536).luminosity(15).gaseous().temperature(10000);\n         }\n         else {\n-            return getDefaultAttributesBuilder().color((155 << 24) | (material.getRGB() & 0x00ffffff))\n+            return getDefaultAttributesBuilder(material.getLiquidTemperature() >= 400).color((155 << 24) | (material.getRGB() & 0x00ffffff))\n                     .translationKey(String.join(\"\", \"block.\", domain, type.getId(), \".\", material.getId()))\n                     .viscosity(1000).density(1000).temperature(material.getLiquidTemperature());\n         }"
+  },
+  {
+    "sha": "6952a1eb8983799aa31dac2e04ef58263cf8565b",
+    "filename": "src/main/java/muramasa/antimatter/material/Material.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 3,
+    "changes": 14,
+    "blob_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/blob/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/java/muramasa/antimatter/material/Material.java",
+    "raw_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/raw/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/java/muramasa/antimatter/material/Material.java",
+    "contents_url": "https://api.github.com/repos/GregTech-Intergalactical/AntimatterAPI/contents/src/main/java/muramasa/antimatter/material/Material.java?ref=87e29b6236932326d9b2841faa5f67b0dd0c3df3",
+    "patch": "@@ -129,7 +129,7 @@ public Material asSolid(IMaterialTag... tags) {\n \n     public Material asSolid(int meltingPoint, int blastFurnaceTemp, IMaterialTag... tags) {\n         asDust(meltingPoint, tags);\n-        flags(INGOT, NUGGET, BLOCK, LIQUID); //TODO: Shall we generate blocks for every solid?\n+        flags(INGOT, NUGGET, BLOCK).asFluid(); //TODO: Shall we generate blocks for every solid?\n         this.blastFurnaceTemp = blastFurnaceTemp;\n         this.needsBlastFurnace = blastFurnaceTemp >= 1000;\n         if (blastFurnaceTemp > 1750) {\n@@ -169,9 +169,13 @@ public Material asFluid() {\n     }\n \n     public Material asFluid(int fuelPower) {\n+        return asFluid(fuelPower, Math.max(meltingPoint, 295));\n+    }\n+\n+    public Material asFluid(int fuelPower, int temp) {\n         flags(LIQUID);\n         this.fuelPower = fuelPower;\n-        this.liquidTemperature = Math.max(meltingPoint, 295);\n+        this.liquidTemperature = temp;\n         return this;\n     }\n \n@@ -180,8 +184,12 @@ public Material asGas() {\n     }\n \n     public Material asGas(int fuelPower) {\n+        return asGas(fuelPower,  Math.max(meltingPoint, 295));\n+    }\n+\n+    public Material asGas(int fuelPower, int temp) {\n         flags(GAS);\n-        this.gasTemperature = Math.max(meltingPoint, 295);\n+        this.gasTemperature = temp;\n         this.fuelPower = fuelPower;\n         return this;\n     }"
+  },
+  {
+    "sha": "e152c27f379b0ba29fffb72b84d0506cd9164783",
+    "filename": "src/main/resources/assets/antimatter/textures/block/liquid/hot_flow.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/blob/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/resources/assets/antimatter/textures/block/liquid/hot_flow.png",
+    "raw_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/raw/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/resources/assets/antimatter/textures/block/liquid/hot_flow.png",
+    "contents_url": "https://api.github.com/repos/GregTech-Intergalactical/AntimatterAPI/contents/src/main/resources/assets/antimatter/textures/block/liquid/hot_flow.png?ref=87e29b6236932326d9b2841faa5f67b0dd0c3df3"
+  },
+  {
+    "sha": "0e495f85268aa9bcfae7238685eed253cfe0b1a5",
+    "filename": "src/main/resources/assets/antimatter/textures/block/liquid/hot_flow.png.mcmeta",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/blob/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/resources/assets/antimatter/textures/block/liquid/hot_flow.png.mcmeta",
+    "raw_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/raw/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/resources/assets/antimatter/textures/block/liquid/hot_flow.png.mcmeta",
+    "contents_url": "https://api.github.com/repos/GregTech-Intergalactical/AntimatterAPI/contents/src/main/resources/assets/antimatter/textures/block/liquid/hot_flow.png.mcmeta?ref=87e29b6236932326d9b2841faa5f67b0dd0c3df3",
+    "patch": "@@ -0,0 +1,5 @@\n+{\n+  \"animation\": {\n+  \"frametime\":6\n+  }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "441ff729bea1df77099eb2150c3850c3e2d7911b",
+    "filename": "src/main/resources/assets/antimatter/textures/block/liquid/hot_still.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/blob/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/resources/assets/antimatter/textures/block/liquid/hot_still.png",
+    "raw_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/raw/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/resources/assets/antimatter/textures/block/liquid/hot_still.png",
+    "contents_url": "https://api.github.com/repos/GregTech-Intergalactical/AntimatterAPI/contents/src/main/resources/assets/antimatter/textures/block/liquid/hot_still.png?ref=87e29b6236932326d9b2841faa5f67b0dd0c3df3"
+  },
+  {
+    "sha": "0df7234a79281c4d77303fee87b146aed6935cca",
+    "filename": "src/main/resources/assets/antimatter/textures/block/liquid/hot_still.png.mcmeta",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/blob/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/resources/assets/antimatter/textures/block/liquid/hot_still.png.mcmeta",
+    "raw_url": "https://github.com/GregTech-Intergalactical/AntimatterAPI/raw/87e29b6236932326d9b2841faa5f67b0dd0c3df3/src/main/resources/assets/antimatter/textures/block/liquid/hot_still.png.mcmeta",
+    "contents_url": "https://api.github.com/repos/GregTech-Intergalactical/AntimatterAPI/contents/src/main/resources/assets/antimatter/textures/block/liquid/hot_still.png.mcmeta?ref=87e29b6236932326d9b2841faa5f67b0dd0c3df3",
+    "patch": "@@ -0,0 +1,5 @@\n+{ \n+   \"animation\":{\n+      \"frametime\":2\n+   }\n+}\n\\ No newline at end of file"
+  }
+]

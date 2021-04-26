@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "14c23ba1b031c3bec23e1b3e61692da4291fef13",
+    "filename": "Jenkinsfile",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/stephanieDG/pet-clinic/blob/e5ce58762e47ed73c6d73445081b3505b9095b28/Jenkinsfile",
+    "raw_url": "https://github.com/stephanieDG/pet-clinic/raw/e5ce58762e47ed73c6d73445081b3505b9095b28/Jenkinsfile",
+    "contents_url": "https://api.github.com/repos/stephanieDG/pet-clinic/contents/Jenkinsfile?ref=e5ce58762e47ed73c6d73445081b3505b9095b28",
+    "patch": "@@ -3,6 +3,24 @@ pipeline {\n     agent any\n     \n     stages {\n+        \n+              stage('Dependency check') {\n+          steps {\n+              sh \"mvn --batch-mode dependency-check:check\"\n+          }\n+          post {\n+              always {\n+                  publishHTML(target:[\n+                      allowMissing: true,\n+                      alwaysLinkToLastBuild: true,\n+                      keepAll: true,\n+                      reportDir: 'target',\n+                      reportFiles: 'dependency-check-report.html',\n+                      reportName: \"OWASP Dependency Check Report\"\n+                  ])\n+              }\n+          }\n+      }\n \n         stage('Build') {\n             steps {"
+  },
+  {
+    "sha": "364a0b3e80009d7f6393707ee7cb79a2c37ea013",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/stephanieDG/pet-clinic/blob/e5ce58762e47ed73c6d73445081b3505b9095b28/pom.xml",
+    "raw_url": "https://github.com/stephanieDG/pet-clinic/raw/e5ce58762e47ed73c6d73445081b3505b9095b28/pom.xml",
+    "contents_url": "https://api.github.com/repos/stephanieDG/pet-clinic/contents/pom.xml?ref=e5ce58762e47ed73c6d73445081b3505b9095b28",
+    "patch": "@@ -301,6 +301,24 @@\n \t\t\t\t\t</dependency>\n \t\t\t\t</dependencies>\n \t\t\t</plugin>\n+\t\t\t             <plugin>\n+                <groupId>org.owasp</groupId>\n+                <artifactId>dependency-check-maven</artifactId>\n+                <version>5.3.0</version>\n+                <configuration>\n+                    <format>ALL</format>\n+                    <failBuildOnCVSS>7</failBuildOnCVSS>\n+                    <cveValidForHours>168</cveValidForHours>\n+                </configuration>\n+                <executions>\n+                    <execution>\n+                        <goals>\n+                            <goal>check</goal>\n+                        </goals>\n+                    </execution>\n+                </executions>\n+            </plugin>\n+\n \t\t</plugins>\n \t</build>\n "
+  }
+]

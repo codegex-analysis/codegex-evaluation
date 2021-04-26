@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "04055cc9eb5320769c03b661f034b7ecc73ca2d0",
+    "filename": "programmingDiary.md",
+    "status": "modified",
+    "additions": 44,
+    "deletions": 18,
+    "changes": 62,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/programmingDiary.md",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/programmingDiary.md",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/programmingDiary.md?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -13,7 +13,7 @@\n   - 버그가 발생할 확률이 높음, 타입 안정성\n   - 여러가지 작업을 한다고 좋은 것이 아님. API는 그 역할에 맞게 최대한 안전하게\n   - 어떠한 작업을 했을때 무엇을 잃는지 생각해야함\n-\n+  - 참고 https://en.wikipedia.org/wiki/ISO_8601\n \n ### Shortcut\n \n@@ -106,16 +106,18 @@ select memberteam0_.tid as tid1_1_, memberteam0_.uid as uid2_1_ from member_team\n  - 내용 : Schema \"TEST\" not found; SQL statement: SELECT * FROM test.member m WHERE m.uid in (SELECT mt.uid FROM test.member_team_list mt where mt.tid = ?) [90079-197]\n  - 해결방안 : \n  \n-## 생년월일 나이 표현 (before) #1\n+## 생년월일 나이 표현 (solved)\n \n-- 내용 : 멤버를 등록할때 생년월일을 받게되는데 멤버 조회시에 생년월일, 나이를 모두 보여주고싶음 생년으로 나이를 뽑을 수 있는데 이거는 back/front 누가 해야하는지?\n-        back이 해야한다면 Member에 age 컬럼을 추가하여 return 해야할듯함 \n+ - 내용 : 멤버를 등록할때 생년월일을 받게되는데 멤버 조회시에 생년월일, 나이를 모두 보여주고싶음 생년으로 나이를 뽑을 수 있는데 이거는 back/front 누가 해야하는지?\n+        back이 해야한다면 Member에 age 컬럼을 추가하여 return 해야할듯함\n+ - 해결방안 : back에서는 정해진 type에 대해서만 받고 처리해야함 타입안정성 문제\n+    - 참고 https://en.wikipedia.org/wiki/ISO_8601\n \n-## 회원 정보수정 SpecialCharacterNotAllowException, LengthOverException, PatternSyntaxException (before) #2\n+## 회원 정보수정 SpecialCharacterNotAllowException, LengthOverException, PatternSyntaxException (solved)\n  - 내용 : 3가지 케이스를 에러처리 해야하는데 patternSyntaxException으로 통일 할지 아니면 3가지로 나눌지\n  - 해결방안 : patternSyntaxException으로 통일, 재사용성에 초점을 두고 정규표현식으로 표현, 메세지로 각 케이스에 대한 표현을 해주자.\n  \n-## 회원 정보수정 API method (before) #3\n+## 회원 정보수정 API method (solved)\n \n  - 내용 : 정보수정을 할떄에 password, 주소, 포지션 등 을 수정할 수 있도록 할것인데 이러한 것들을 어떻게 처리할 것인지\n         방법 1. requestbody로 전부 받은다음 각각의 속성에 대해 모두 처리해주는 api 생성\n@@ -124,24 +126,48 @@ select memberteam0_.tid as tid1_1_, memberteam0_.uid as uid2_1_ from member_team\n         방법 2. 각각의 속성에 대해 각각의 메소드를 만든다.\n             장점 : 변경된 속성만 업데이트함\n             단점 : 메소드를 여러번 호출해야함\n-        Q : 정보를 수정할때에 MemberEntity를 사용 할 것인지, 아니면 변경된 정보만 담을 수 있는 Entity를 추가적으로 생성해야하는지? \n-\n+        Q : 정보를 수정할때에 MemberEntity를 사용 할 것인지, 아니면 변경된 정보만 담을 수 있는 Entity를 추가적으로 생성해야하는지?\n+ - 해결방안 : 수정할 수 있는 모든 정보를 받고 바뀐것만 update하도록 수정 \n \n- \n-## Json Date format (before) #4\n+## Json Date format (solved)\n  - reference : https://en.wikipedia.org/wiki/ISO_8601\n  \n-## Date Type (before) #5\n+## Date Type (solved)\n \n  - 내용 : LocalDateTime을 날짜형태로 통합했더니 다음과 같은 Exception 발생\n   -> @Temporal should only be set on a java.util.Date or java.util.Calendar property\n  - 방법 1 : Date or Calendar Type으로 날짜 자료형을 맞추되 다른 타입과 매핑을 통해 사용 (굳이 필요한가? 확인필요)\n+ - 해결방안 : 필요없음 그냥 Date 타입으로 받으면 됨\n  \n+## member-put. Can not issue data manipulation statements with executeQuery(). (solved)\n+ - 내용 : 정부수정을 할때 다음과 같은 Error 발생\n+ - 해결방안 : DML을 할때에는 @Modify, @Transactional 어노테이션을 사용해 줘야함, 이러한 어노테이션이 없으면 기본으로 executeQuery()를 사용하게\n+            되는데 따로 결과값이 없어 오류가 발생함 DML은 void 함수\n+ - 추가정보 : 해당 어노테이션에는 @Transactional이 포함되어 있다고 하는데, 제외하고 실행하니 해당 어노테이션이 필요하다는 에러가 남\n  \n-        \n-            \n-\n-     \n-     \n-   \n- \n+## Incompatible types: expected void but the lambda body is neither a statement expression nor a void-compatible block #6\n+- 내용 : 람다식으로 다음과 같이 했을때 에러가 남\n+- 해결방안? 임시방편? : while, Iterator 사용 \n+```\n+teamEntityList.forEach(teamEntity -> {\n+            if(teamEntity.getTeamLeadMember().getUid().equals(saveTeam.getTeamLeadMember().getUid())) {\n+                return ResponseEntity.status(HttpStatus.CONFLICT).build();\n+            }\n+        });\n+``` \n+\n+## team의 inner class member #7\n+\n+- 내용 :  \n+- 해결방안 : \n+    1. 팀의 TeamEntity의 필드를 MemberEntity -> leadMemberUid로 바꾸고 TeamRepository의 findById를 override해서 @Query로 사용 \n+        <br> team을 get 할때 teamLeadMember가 다 나오지 않을 것으로 예상됨.\n+    2. 팀은 팀대로 하고 TeamLeaderEntity를 새로 생성하여 매핑을 통해 사용\n+    3. 어차피 uid만 사용하니 member에서 uid만 있는 생성자를 만들어서 MemberEntity로 변환 (가능한지 해봐야함)\n+- 참고사항 \n+    - 팀등록시 teamLeadMember의 모든 정보를 받아야하는지 고려\n+    - 이미 등록된 팀은 팀의 이름, teamLeadMember의 uid로 체크\n+    \n+- 진행사항\n+    - 3번으로 우선 진행중, 약간 억지로 끼워 맞추는 느낌이 있긴 하지만 되긴 됨.\n+    - team 을 post 할때는 teamLeadMember의 uid만 받음.\n\\ No newline at end of file"
+  },
+  {
+    "sha": "55233fb06566db9dc59ed9c346f0c6d383436b2b",
+    "filename": "src/main/java/com/example/pfairplayservice/common/exception/EntityExceptionHandler.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/common/exception/EntityExceptionHandler.java",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/common/exception/EntityExceptionHandler.java",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/src/main/java/com/example/pfairplayservice/common/exception/EntityExceptionHandler.java?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -1,6 +1,7 @@\n package com.example.pfairplayservice.common.exception;\n \n import com.example.pfairplayservice.model.Member;\n+import com.example.pfairplayservice.model.Team;\n import io.micrometer.core.instrument.util.StringUtils;\n \n import java.util.regex.Pattern;\n@@ -38,4 +39,21 @@ public static void MemberPostExceptionHandler(Member member) {\n             throw new PatternSyntaxNotMatchedException(\"핸드폰번호는 11 자리 숫자만 입력할 수 있습니다.\");\n     }\n \n+    public static void teamPostExceptionHandler(Team team) {\n+\n+        // null, empty string check\n+        if (StringUtils.isEmpty(team.getTeamName())) throw new RequiredParamNotFoundException(\"팀이름을 입력해주세요.\");\n+        if (StringUtils.isEmpty(team.getActivityAreaAddress())) throw new RequiredParamNotFoundException(\"활동지역을 입력해주세요.\");\n+        if (StringUtils.isEmpty(team.getRegistrationDate().toString())) throw new RequiredParamNotFoundException(\"둥록일자를 입력해주세요.\");\n+\n+        // teamName\n+        if (!Pattern.matches(\"^[A-Za-z0-9가-힣]{2,10}\", team.getTeamName()))\n+            throw new PatternSyntaxNotMatchedException(\"이름은 2 ~ 10 자리 특수문자를 제외하고 입력 가능 합니다.\");\n+\n+        // address\n+        if (!Pattern.matches(\"^[가-힣]{2,20}\", team.getActivityAreaAddress()))\n+            throw new PatternSyntaxNotMatchedException(\"활동지역은 2 ~ 20 자리 한글만 입력 가능 합니다.\");\n+\n+    }\n+\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "6e7314e0f03a9874cc26e74ec6a628079fae4f95",
+    "filename": "src/main/java/com/example/pfairplayservice/controller/MemberController.java",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 4,
+    "changes": 27,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/controller/MemberController.java",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/controller/MemberController.java",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/src/main/java/com/example/pfairplayservice/controller/MemberController.java?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -11,7 +11,15 @@\n import org.springframework.beans.factory.annotation.Autowired;\n import org.springframework.http.HttpStatus;\n import org.springframework.http.ResponseEntity;\n-import org.springframework.web.bind.annotation.*;\n+\n+import org.springframework.web.bind.annotation.DeleteMapping;\n+import org.springframework.web.bind.annotation.GetMapping;\n+import org.springframework.web.bind.annotation.PathVariable;\n+import org.springframework.web.bind.annotation.PostMapping;\n+import org.springframework.web.bind.annotation.PutMapping;\n+import org.springframework.web.bind.annotation.RequestBody;\n+import org.springframework.web.bind.annotation.RestController;\n+\n \n import java.util.List;\n import java.util.Optional;\n@@ -46,13 +54,24 @@\n     }\n \n     @PutMapping(\"/member/{uid}\")\n-    public ResponseEntity<Void> updatePasswordByUid(@PathVariable String uid, @RequestParam String password) {\n+    public ResponseEntity<Void> updatePasswordByUid(@PathVariable String uid, @RequestBody Member updateMember) {\n         Optional<MemberEntity> member = memberRepository.findById(uid);\n         if (!member.isPresent()) {\n             throw new SourceNotFoundException(String.format(\"uid{%s} not found\", uid));\n         }\n-        member.get().setPassword(password);\n-        memberRepository.save(member.get());\n+\n+        if (member.get().getPassword() != updateMember.getPassword())\n+            memberRepository.updatePasswordByUid(uid, updateMember.getPassword());\n+        if (member.get().getAddress() != updateMember.getAddress())\n+            memberRepository.updateAddressByUid(uid, updateMember.getAddress());\n+        if (member.get().getPhoneNumber() != updateMember.getAddress())\n+            memberRepository.updatePhoneNumberByUid(uid, updateMember.getPhoneNumber());\n+        if (member.get().getPreferPosition() !=updateMember.getPreferPosition().getPosition())\n+            memberRepository.updatePreferPositionByUid(uid, updateMember.getPreferPosition().getPosition());\n+        if (member.get().getLevel() != updateMember.getLevel())\n+            memberRepository.updateLevelByUid(uid, updateMember.getLevel());\n+        if (member.get().getPhoneNumberDisclosureOption() != updateMember.getPhoneNumberDisclosureOption())\n+            memberRepository.updatePhoneNumberDisclosureOptionByUid(uid, updateMember.getPhoneNumberDisclosureOption());\n \n         return ResponseEntity.status(HttpStatus.OK).build();\n     }"
+  },
+  {
+    "sha": "234ae3bce0f41abcf81a2d39d2c3f2c2742d62f0",
+    "filename": "src/main/java/com/example/pfairplayservice/controller/TeamController.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 3,
+    "changes": 22,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/controller/TeamController.java",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/controller/TeamController.java",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/src/main/java/com/example/pfairplayservice/controller/TeamController.java?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -1,17 +1,20 @@\n package com.example.pfairplayservice.controller;\n \n+import com.example.pfairplayservice.common.exception.EntityExceptionHandler;\n import com.example.pfairplayservice.common.exception.SourceNotFoundException;\n import com.example.pfairplayservice.common.filter.FilterManager;\n+import com.example.pfairplayservice.jpa.model.MemberEntity;\n import com.example.pfairplayservice.jpa.model.TeamEntity;\n import com.example.pfairplayservice.jpa.repository.TeamRepository;\n+import com.example.pfairplayservice.model.Member;\n import com.example.pfairplayservice.model.Team;\n import org.springframework.beans.factory.annotation.Autowired;\n import org.springframework.http.HttpStatus;\n import org.springframework.http.ResponseEntity;\n-import org.springframework.web.bind.annotation.GetMapping;\n-import org.springframework.web.bind.annotation.PathVariable;\n-import org.springframework.web.bind.annotation.RestController;\n+import org.springframework.web.bind.annotation.*;\n \n+import java.util.Date;\n+import java.util.Iterator;\n import java.util.List;\n import java.util.Optional;\n import java.util.stream.Collectors;\n@@ -34,6 +37,19 @@\n         return ResponseEntity.status(HttpStatus.OK).body(Team.from(team.get()));\n     }\n \n+    @PostMapping(\"/team\")\n+    public ResponseEntity<Void> createMember(@RequestBody Team saveTeam) {\n+        EntityExceptionHandler.teamPostExceptionHandler(saveTeam);\n+        Iterator<TeamEntity> teamEntityIterator = teamRepository.findByTeamName(saveTeam.getTeamName()).iterator();\n+        while(teamEntityIterator.hasNext()) {\n+            if(saveTeam.getTeamLeadMember().getUid().equals(teamEntityIterator.next().getTeamLeadMember().getUid())) {\n+                return ResponseEntity.status(HttpStatus.CONFLICT).build();\n+            }\n+        }\n+        teamRepository.save(saveTeam.toTeamEntity());\n+        return ResponseEntity.status(HttpStatus.CREATED).build();\n+    }\n+\n     @GetMapping(\"/team/member/{uid}\")\n     public ResponseEntity<List<Team>> findTeamListByUid(@PathVariable String uid) {\n         List<TeamEntity> teamEntityList = teamRepository.findByMemberTeamIdUid(uid);"
+  },
+  {
+    "sha": "8bc2e007baa478f608314ffa12f9242aabefa237",
+    "filename": "src/main/java/com/example/pfairplayservice/jpa/model/MemberEntity.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 3,
+    "changes": 3,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/jpa/model/MemberEntity.java",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/jpa/model/MemberEntity.java",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/src/main/java/com/example/pfairplayservice/jpa/model/MemberEntity.java?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -5,9 +5,7 @@\n import lombok.Data;\n import lombok.NoArgsConstructor;\n import org.hibernate.annotations.ColumnDefault;\n-import org.hibernate.annotations.CreationTimestamp;\n import org.hibernate.annotations.GenericGenerator;\n-import org.hibernate.annotations.UpdateTimestamp;\n import org.hibernate.validator.constraints.Length;\n \n import javax.persistence.Column;\n@@ -28,7 +26,6 @@\n @Table(name = \"member\")\n public class MemberEntity {\n \n-    // TODO : implement registerdTeamNames\n     @Id\n     @GeneratedValue(generator = \"member-uid\", strategy = GenerationType.AUTO)\n     @GenericGenerator(name = \"member-uid\", strategy = \"uuid\")"
+  },
+  {
+    "sha": "fffbf4e84fbdbe0232afac68d4b7ec35e307c936",
+    "filename": "src/main/java/com/example/pfairplayservice/jpa/model/TeamEntity.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 5,
+    "changes": 16,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/jpa/model/TeamEntity.java",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/jpa/model/TeamEntity.java",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/src/main/java/com/example/pfairplayservice/jpa/model/TeamEntity.java?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -4,13 +4,18 @@\n import lombok.Builder;\n import lombok.Data;\n import lombok.NoArgsConstructor;\n-import org.hibernate.annotations.CreationTimestamp;\n import org.hibernate.annotations.GenericGenerator;\n \n-import javax.persistence.*;\n-import java.util.ArrayList;\n+import javax.persistence.Column;\n+import javax.persistence.Entity;\n+import javax.persistence.GeneratedValue;\n+import javax.persistence.GenerationType;\n+import javax.persistence.Id;\n+import javax.persistence.OneToOne;\n+import javax.persistence.Table;\n+import javax.persistence.Temporal;\n+import javax.persistence.TemporalType;\n import java.util.Date;\n-import java.util.List;\n \n \n \n@@ -36,11 +41,12 @@\n     @Column(nullable = false)\n     private String activityAreaAddress;\n \n-    @CreationTimestamp\n     @Column(nullable = false)\n+    @Temporal(TemporalType.DATE)\n     private Date registrationDate;\n \n     @Column\n+    @Temporal(TemporalType.DATE)\n     private Date foundDate;\n \n     // TODO 매치 생성 후 적용"
+  },
+  {
+    "sha": "34070b7ddce6e556b35eb046abf3fe4cfb515f78",
+    "filename": "src/main/java/com/example/pfairplayservice/jpa/repository/MemberRepository.java",
+    "status": "modified",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/jpa/repository/MemberRepository.java",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/jpa/repository/MemberRepository.java",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/src/main/java/com/example/pfairplayservice/jpa/repository/MemberRepository.java?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -1,11 +1,14 @@\n package com.example.pfairplayservice.jpa.repository;\n \n import com.example.pfairplayservice.jpa.model.MemberEntity;\n+import com.example.pfairplayservice.model.Position;\n import org.springframework.data.jpa.repository.JpaRepository;\n+import org.springframework.data.jpa.repository.Modifying;\n import org.springframework.data.jpa.repository.Query;\n import org.springframework.data.repository.query.Param;\n import org.springframework.stereotype.Repository;\n \n+import javax.transaction.Transactional;\n import java.util.List;\n import java.util.Optional;\n \n@@ -18,4 +21,34 @@\n     @Query(value = \"SELECT * FROM member m where m.id = :memberId\", nativeQuery = true)\n     Optional<MemberEntity> findByMemberId(@Param(\"memberId\") String memberId);\n \n+    @Modifying\n+    @Transactional\n+    @Query(value = \"UPDATE member m set m.password = :password where m.uid = :uid\", nativeQuery = true)\n+    void updatePasswordByUid(@Param(\"uid\")String uid, @Param(\"password\")String password);\n+\n+    @Modifying\n+    @Transactional\n+    @Query(value = \"UPDATE member m set m.address = :address where m.uid = :uid\", nativeQuery = true)\n+    void updateAddressByUid(@Param(\"uid\")String uid, @Param(\"address\")String address);\n+\n+    @Modifying\n+    @Transactional\n+    @Query(value = \"UPDATE member m set m.phone_number = :phoneNumber where m.uid = :uid\", nativeQuery = true)\n+    void updatePhoneNumberByUid(@Param(\"uid\")String uid, @Param(\"phoneNumber\")String phoneNumber);\n+\n+    @Modifying\n+    @Transactional\n+    @Query(value = \"UPDATE member m set m.prefer_position = :preferPosition where m.uid = :uid\", nativeQuery = true)\n+    void updatePreferPositionByUid(@Param(\"uid\")String uid, @Param(\"preferPosition\")Integer preferPosition);\n+\n+    @Modifying\n+    @Transactional\n+    @Query(value = \"UPDATE member m set m.level = :level where m.uid = :uid\", nativeQuery = true)\n+    void updateLevelByUid(@Param(\"uid\")String uid, @Param(\"level\")Integer level);\n+\n+    @Modifying\n+    @Transactional\n+    @Query(value = \"UPDATE member m set m.phone_number_disclosure_option = :phoneNumberDisclosureOption where m.uid = :uid\", nativeQuery = true)\n+    void updatePhoneNumberDisclosureOptionByUid(@Param(\"uid\")String uid, @Param(\"phoneNumberDisclosureOption\")Integer phoneNumberDisclosureOption);\n+\n }"
+  },
+  {
+    "sha": "14eb8ed137a8be6791336d5045ab35899b90177a",
+    "filename": "src/main/java/com/example/pfairplayservice/jpa/repository/TeamRepository.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/jpa/repository/TeamRepository.java",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/jpa/repository/TeamRepository.java",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/src/main/java/com/example/pfairplayservice/jpa/repository/TeamRepository.java?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -14,4 +14,6 @@\n     @Query(value = \"SELECT * FROM team t join member m on t.team_lead_member_uid = m.uid where t.tid in (SELECT mt.tid FROM member_team_list mt where mt.uid = :uid)\", nativeQuery = true)\n     List<TeamEntity> findByMemberTeamIdUid(@Param(\"uid\") String uid);\n \n+    @Query(value = \"SELECT * FROM team t where t.team_name = :teamName\", nativeQuery = true)\n+    List<TeamEntity> findByTeamName(@Param(\"teamName\") String teamName);\n }"
+  },
+  {
+    "sha": "93f39a915e5a5c213fa7f1cefb11fceeca138286",
+    "filename": "src/main/java/com/example/pfairplayservice/model/Position.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/model/Position.java",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/model/Position.java",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/src/main/java/com/example/pfairplayservice/model/Position.java?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -31,4 +31,5 @@ public static Position from(Integer position) {\n         }\n         return null;\n     }\n+\n }"
+  },
+  {
+    "sha": "b3800d7c1b04deb9407738a0eccdced281aeea94",
+    "filename": "src/main/java/com/example/pfairplayservice/model/Team.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/dgryoo/pfairplayService/blob/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/model/Team.java",
+    "raw_url": "https://github.com/dgryoo/pfairplayService/raw/9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7/src/main/java/com/example/pfairplayservice/model/Team.java",
+    "contents_url": "https://api.github.com/repos/dgryoo/pfairplayService/contents/src/main/java/com/example/pfairplayservice/model/Team.java?ref=9036e5cfa0fc94c4bffee80a10d3da8a8cfe0df7",
+    "patch": "@@ -1,5 +1,6 @@\n package com.example.pfairplayservice.model;\n \n+import com.example.pfairplayservice.jpa.model.MemberEntity;\n import com.example.pfairplayservice.jpa.model.TeamEntity;\n import com.fasterxml.jackson.annotation.JsonInclude;\n import com.fasterxml.jackson.annotation.JsonProperty;\n@@ -51,7 +52,7 @@ public TeamEntity toTeamEntity() {\n         return TeamEntity.builder()\n                 .tid(getTid())\n                 .teamName(getTeamName())\n-                .teamLeadMember(getTeamLeadMember().toMemberEntity())\n+                .teamLeadMember(MemberEntity.builder().uid(getTeamLeadMember().getUid()).build())\n                 .activityAreaAddress(getActivityAreaAddress())\n                 .registrationDate(getRegistrationDate())\n                 .foundDate(getFoundDate())"
+  }
+]

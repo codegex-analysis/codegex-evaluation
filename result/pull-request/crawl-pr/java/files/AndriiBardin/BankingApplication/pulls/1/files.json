@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "584f27de56d834a453d8494e56642a73ae29fa6d",
+    "filename": "src/main/java/com/banking/application/entity/Role.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/AndriiBardin/BankingApplication/blob/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/entity/Role.java",
+    "raw_url": "https://github.com/AndriiBardin/BankingApplication/raw/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/entity/Role.java",
+    "contents_url": "https://api.github.com/repos/AndriiBardin/BankingApplication/contents/src/main/java/com/banking/application/entity/Role.java?ref=4621d8e2432bfc94e629a992a6e79106472692c9",
+    "patch": "@@ -0,0 +1,25 @@\n+package com.banking.application.entity;\n+\n+import javax.persistence.Column;\n+import javax.persistence.Entity;\n+import javax.persistence.EnumType;\n+import javax.persistence.Enumerated;\n+import javax.persistence.GeneratedValue;\n+import javax.persistence.GenerationType;\n+import javax.persistence.Id;\n+import lombok.Data;\n+\n+@Entity(name = \"roles\")\n+@Data\n+public class Role {\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    private Long id;\n+    @Enumerated(EnumType.STRING)\n+    @Column(name = \"role_name\", unique = true)\n+    private RoleName roleName;\n+\n+    public enum RoleName {\n+        USER, ADMIN;\n+    }\n+}"
+  },
+  {
+    "sha": "0a2664bfc058eb4ac22dc1f1b1732b1cde4e1282",
+    "filename": "src/main/java/com/banking/application/entity/User.java",
+    "status": "added",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/AndriiBardin/BankingApplication/blob/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/entity/User.java",
+    "raw_url": "https://github.com/AndriiBardin/BankingApplication/raw/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/entity/User.java",
+    "contents_url": "https://api.github.com/repos/AndriiBardin/BankingApplication/contents/src/main/java/com/banking/application/entity/User.java?ref=4621d8e2432bfc94e629a992a6e79106472692c9",
+    "patch": "@@ -0,0 +1,27 @@\n+package com.banking.application.entity;\n+\n+import java.time.LocalDate;\n+import java.util.Set;\n+import javax.persistence.Column;\n+import javax.persistence.Entity;\n+import javax.persistence.GeneratedValue;\n+import javax.persistence.GenerationType;\n+import javax.persistence.Id;\n+import javax.persistence.ManyToMany;\n+import lombok.Data;\n+\n+@Entity(name = \"users\")\n+@Data\n+public class User {\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    private Long id;\n+    private String name;\n+    @Column(name = \"date_of_birth\")\n+    private LocalDate dateOfBirth;\n+    @Column(name = \"phone_number\", unique = true)\n+    private String phoneNumber;\n+    private String password;\n+    @ManyToMany\n+    private Set<Role> roles;\n+}"
+  },
+  {
+    "sha": "f08185687c1c81a44ebd06d503d33a7dfe856b78",
+    "filename": "src/main/java/com/banking/application/repository/RoleRepository.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/AndriiBardin/BankingApplication/blob/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/repository/RoleRepository.java",
+    "raw_url": "https://github.com/AndriiBardin/BankingApplication/raw/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/repository/RoleRepository.java",
+    "contents_url": "https://api.github.com/repos/AndriiBardin/BankingApplication/contents/src/main/java/com/banking/application/repository/RoleRepository.java?ref=4621d8e2432bfc94e629a992a6e79106472692c9",
+    "patch": "@@ -0,0 +1,10 @@\n+package com.banking.application.repository;\n+\n+import com.banking.application.entity.Role;\n+import java.util.Optional;\n+import org.springframework.data.jpa.repository.JpaRepository;\n+import org.springframework.data.jpa.repository.Query;\n+\n+public interface RoleRepository extends JpaRepository<Role, Long> {\n+    Optional<Role> getByRoleName(Role.RoleName name);\n+}"
+  },
+  {
+    "sha": "c933f4a02f1fb3589873de9d73837272efb65184",
+    "filename": "src/main/java/com/banking/application/repository/UserRepository.java",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/AndriiBardin/BankingApplication/blob/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/repository/UserRepository.java",
+    "raw_url": "https://github.com/AndriiBardin/BankingApplication/raw/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/repository/UserRepository.java",
+    "contents_url": "https://api.github.com/repos/AndriiBardin/BankingApplication/contents/src/main/java/com/banking/application/repository/UserRepository.java?ref=4621d8e2432bfc94e629a992a6e79106472692c9",
+    "patch": "@@ -0,0 +1,14 @@\n+package com.banking.application.repository;\n+\n+import com.banking.application.entity.User;\n+import java.util.Optional;\n+import org.springframework.data.jpa.repository.JpaRepository;\n+import org.springframework.data.jpa.repository.Query;\n+\n+public interface UserRepository extends JpaRepository<User, Long> {\n+    @Query(\"from users u left join fetch u.roles where u.id = ?1\")\n+    Optional<User> getById(Long id);\n+\n+    @Query(\"from users u left join fetch u.roles where u.phoneNumber = ?1\")\n+    Optional<User> getByPhoneNumber(String phoneNumber);\n+}"
+  },
+  {
+    "sha": "a2326ba59e223d54123d28366c818a409b90e055",
+    "filename": "src/main/java/com/banking/application/services/RoleService.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/AndriiBardin/BankingApplication/blob/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/services/RoleService.java",
+    "raw_url": "https://github.com/AndriiBardin/BankingApplication/raw/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/services/RoleService.java",
+    "contents_url": "https://api.github.com/repos/AndriiBardin/BankingApplication/contents/src/main/java/com/banking/application/services/RoleService.java?ref=4621d8e2432bfc94e629a992a6e79106472692c9",
+    "patch": "@@ -0,0 +1,9 @@\n+package com.banking.application.services;\n+\n+import com.banking.application.entity.Role;\n+\n+public interface RoleService {\n+    Role save(Role role);\n+\n+    Role getByRoleName(String name);\n+}"
+  },
+  {
+    "sha": "319ca2412636a0cd530b01c568b65ae2081f3db1",
+    "filename": "src/main/java/com/banking/application/services/UserService.java",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/AndriiBardin/BankingApplication/blob/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/services/UserService.java",
+    "raw_url": "https://github.com/AndriiBardin/BankingApplication/raw/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/services/UserService.java",
+    "contents_url": "https://api.github.com/repos/AndriiBardin/BankingApplication/contents/src/main/java/com/banking/application/services/UserService.java?ref=4621d8e2432bfc94e629a992a6e79106472692c9",
+    "patch": "@@ -0,0 +1,13 @@\n+package com.banking.application.services;\n+\n+import com.banking.application.entity.User;\n+\n+public interface UserService {\n+    User save(User user);\n+\n+    User getById(Long id);\n+\n+    User getByPhoneNumber(String phoneNumber);\n+\n+    void remove(Long id);\n+}"
+  },
+  {
+    "sha": "395ac49d5d9df49919b2c30836e2a4b9fecc9d80",
+    "filename": "src/main/java/com/banking/application/services/impl/RoleServiceImpl.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/AndriiBardin/BankingApplication/blob/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/services/impl/RoleServiceImpl.java",
+    "raw_url": "https://github.com/AndriiBardin/BankingApplication/raw/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/services/impl/RoleServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/AndriiBardin/BankingApplication/contents/src/main/java/com/banking/application/services/impl/RoleServiceImpl.java?ref=4621d8e2432bfc94e629a992a6e79106472692c9",
+    "patch": "@@ -0,0 +1,24 @@\n+package com.banking.application.services.impl;\n+\n+import com.banking.application.entity.Role;\n+import com.banking.application.repository.RoleRepository;\n+import com.banking.application.services.RoleService;\n+import lombok.AllArgsConstructor;\n+import org.springframework.stereotype.Service;\n+\n+@Service\n+@AllArgsConstructor\n+public class RoleServiceImpl implements RoleService {\n+    private final RoleRepository roleRepository;\n+\n+    @Override\n+    public Role save(Role role) {\n+        return roleRepository.save(role);\n+    }\n+\n+    @Override\n+    public Role getByRoleName(String name) {\n+        return roleRepository.getByRoleName(Role.RoleName.valueOf(name))\n+                .orElseThrow(() -> new RuntimeException(\"This role does not exist\" + name));\n+    }\n+}"
+  },
+  {
+    "sha": "c3298f98c0755ad4f2c808e2fdfa74c1f5a3fc21",
+    "filename": "src/main/java/com/banking/application/services/impl/UserServiceImpl.java",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/AndriiBardin/BankingApplication/blob/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/services/impl/UserServiceImpl.java",
+    "raw_url": "https://github.com/AndriiBardin/BankingApplication/raw/4621d8e2432bfc94e629a992a6e79106472692c9/src/main/java/com/banking/application/services/impl/UserServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/AndriiBardin/BankingApplication/contents/src/main/java/com/banking/application/services/impl/UserServiceImpl.java?ref=4621d8e2432bfc94e629a992a6e79106472692c9",
+    "patch": "@@ -0,0 +1,36 @@\n+package com.banking.application.services.impl;\n+\n+import com.banking.application.entity.User;\n+import com.banking.application.repository.UserRepository;\n+import com.banking.application.services.UserService;\n+import lombok.AllArgsConstructor;\n+import org.springframework.stereotype.Service;\n+\n+@Service\n+@AllArgsConstructor\n+public class UserServiceImpl implements UserService {\n+    private final UserRepository userRepository;\n+\n+    @Override\n+    public User save(User user) {\n+        return userRepository.save(user);\n+    }\n+\n+    @Override\n+    public User getById(Long id) {\n+        return userRepository.findById(id)\n+                .orElseThrow(() -> new RuntimeException(\"No user with ID \" + id));\n+    }\n+\n+    @Override\n+    public User getByPhoneNumber(String phoneNumber) {\n+        return userRepository.getByPhoneNumber(phoneNumber)\n+                .orElseThrow(() -> new RuntimeException(\n+                        \"No user with phone number \" + phoneNumber));\n+    }\n+\n+    @Override\n+    public void remove(Long id) {\n+        userRepository.deleteById(id);\n+    }\n+}"
+  }
+]

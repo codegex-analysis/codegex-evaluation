@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "ef6c9496fcd13cc8eaa213d9d70bdedff4bce09d",
+    "filename": "src/main/java/io/lettuce/core/KillArgs.java",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/lettuce-io/lettuce-core/blob/b08b3565684c10bb31124b002eca9d888372d261/src/main/java/io/lettuce/core/KillArgs.java",
+    "raw_url": "https://github.com/lettuce-io/lettuce-core/raw/b08b3565684c10bb31124b002eca9d888372d261/src/main/java/io/lettuce/core/KillArgs.java",
+    "contents_url": "https://api.github.com/repos/lettuce-io/lettuce-core/contents/src/main/java/io/lettuce/core/KillArgs.java?ref=b08b3565684c10bb31124b002eca9d888372d261",
+    "patch": "@@ -29,6 +29,7 @@\n  * {@link KillArgs} is a mutable object and instances should be used only once to avoid shared mutable state.\n  *\n  * @author Mark Paluch\n+ * @author dengliming\n  * @since 3.0\n  */\n public class KillArgs implements CompositeArgument {\n@@ -47,6 +48,8 @@\n \n     private Type type;\n \n+    private String username;\n+\n     /**\n      * Builder entry points for {@link KillArgs}.\n      */\n@@ -142,6 +145,16 @@ public static KillArgs typeSlave() {\n             return new KillArgs().type(Type.SLAVE);\n         }\n \n+        /**\n+         * Creates new {@link KillArgs} setting {@literal USER}.\n+         *\n+         * @return new {@link KillArgs} with {@literal USER} set.\n+         * @see KillArgs#user(String)\n+         * @since 6.1\n+         */\n+        public static KillArgs user(String username) {\n+            return new KillArgs().user(username);\n+        }\n     }\n \n     /**\n@@ -223,6 +236,21 @@ public KillArgs type(Type type) {\n         return this;\n     }\n \n+    /**\n+     * Closes all the connections that are authenticated with the specified ACL {@code username}.\n+     *\n+     * @param username must not be {@code null}.\n+     * @return {@code this} {@link KillArgs}.\n+     * @since 6.1\n+     */\n+    public KillArgs user(String username) {\n+\n+        LettuceAssert.notNull(username, \"UserName must not be null\");\n+\n+        this.username = username;\n+        return this;\n+    }\n+\n     @Override\n     public <K, V> void build(CommandArgs<K, V> args) {\n \n@@ -245,6 +273,10 @@ public KillArgs type(Type type) {\n         if (type != null) {\n             args.add(CommandType.TYPE).add(type.name().toLowerCase());\n         }\n+\n+        if (username != null) {\n+            args.add(\"USER\").add(username);\n+        }\n     }\n \n }"
+  },
+  {
+    "sha": "ae500a679fdd27dac0bf620d8f35f86b9b344c34",
+    "filename": "src/test/java/io/lettuce/core/commands/ServerCommandIntegrationTests.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/lettuce-io/lettuce-core/blob/b08b3565684c10bb31124b002eca9d888372d261/src/test/java/io/lettuce/core/commands/ServerCommandIntegrationTests.java",
+    "raw_url": "https://github.com/lettuce-io/lettuce-core/raw/b08b3565684c10bb31124b002eca9d888372d261/src/test/java/io/lettuce/core/commands/ServerCommandIntegrationTests.java",
+    "contents_url": "https://api.github.com/repos/lettuce-io/lettuce-core/contents/src/test/java/io/lettuce/core/commands/ServerCommandIntegrationTests.java?ref=b08b3565684c10bb31124b002eca9d888372d261",
+    "patch": "@@ -33,6 +33,7 @@\n import org.junit.jupiter.api.TestInstance;\n import org.junit.jupiter.api.extension.ExtendWith;\n \n+import io.lettuce.core.AclSetuserArgs;\n import io.lettuce.core.FlushMode;\n import io.lettuce.core.KeyValue;\n import io.lettuce.core.KillArgs;\n@@ -176,6 +177,16 @@ void clientKillExtended() {\n         connection2.getStatefulConnection().close();\n     }\n \n+    @Test\n+    @EnabledOnCommand(\"XAUTOCLAIM\") // Redis 6.2\n+    void clientKillUser() {\n+        RedisCommands<String, String> connection2 = client.connect().sync();\n+        redis.aclSetuser(\"test_kill\", AclSetuserArgs.Builder.addPassword(\"password1\").on().addCommand(CommandType.ACL));\n+        connection2.auth(\"test_kill\", \"password1\");\n+        assertThat(redis.clientKill(KillArgs.Builder.user(\"test_kill\"))).isGreaterThan(0);\n+        redis.aclDeluser(\"test_kill\");\n+    }\n+\n     @Test\n     void clientId() {\n         assertThat(redis.clientId()).isNotNull();"
+  }
+]

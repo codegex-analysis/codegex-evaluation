@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "a09eec6ce565760476eff9963f740f434d4c7628",
+    "filename": "scripts/RequestHandler.py",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/scripts/RequestHandler.py",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/scripts/RequestHandler.py",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/scripts/RequestHandler.py?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -0,0 +1,45 @@\n+import urllib.request as rq\r\n+import sys\r\n+\r\n+def journal_url(year):\r\n+    # Search view: https://www.scimagojr.com/journalrank.php?year=2019\r\n+    baseURL = 'https://www.scimagojr.com/journalrank.php?year='\r\n+    # '&out=xls' returns a .csv-file with the journal rankings of the specified year\r\n+    downloadQuery = '&out=xls'\r\n+    return baseURL + str(year) + downloadQuery\r\n+\r\n+def get_year_stats(year, issn):\r\n+    response = rq.urlopen(journal_url(year))\r\n+    # Response Status 200 OK\r\n+    if response.status == 200:\r\n+        lines = response.read().splitlines()\r\n+        for l in lines:\r\n+            decoded = l.decode('utf-8')\r\n+            cells = decoded.split(';')\r\n+            if len(cells) < 5:\r\n+                continue # incomplete data\r\n+            # cells[4] should contain a list of ISSNs for the journal, separated by ', '\r\n+            # e.g. \"12345678, 98765432\"\r\n+            if issn in cells[4].split(', '):\r\n+                return str(year) + \";\" + decoded # prepend the year\r\n+\r\n+        return [] # TODO: handle case where ISSN is not found\r\n+    else:\r\n+        return [] # TODO: revise potential HTTP error handling\r\n+        \r\n+# which journal the data is fetched for\r\n+journal_issn = '15458601' # default for testing\r\n+issn = sys.argv[1] if len(sys.argv) > 1 else journal_issn\r\n+\r\n+# range of available years as of 2021-03-08\r\n+start_year = 1999\r\n+end_year = 2019\r\n+years = range(start_year, end_year+1)\r\n+\r\n+journal_stats = []\r\n+\r\n+for y in years:\r\n+    journal_stats.append(get_year_stats(y, issn))\r\n+\r\n+# TODO:\r\n+# write aggregated stats to .json-file\n\\ No newline at end of file"
+  },
+  {
+    "sha": "dbe3a54d6c8d3bfbd7b7b1cc3136579126f6cfae",
+    "filename": "src/main/java/org/jabref/gui/fieldeditors/JournalEditor.fxml",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/fieldeditors/JournalEditor.fxml",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/fieldeditors/JournalEditor.fxml",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/main/java/org/jabref/gui/fieldeditors/JournalEditor.fxml?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -17,4 +17,14 @@\n             <Tooltip text=\"%Switches between full and abbreviated journal name if the journal name is known.\"/>\n         </tooltip>\n     </Button>\n+    <Button fx:id=\"journalStatisticsButton\"\n+            onAction=\"#getJournalStatistics\"\n+            styleClass=\"icon-button\">\n+        <graphic>\n+            <JabRefIconView glyph=\"VIEW_JOURNAL_STATISTICS\"/>\n+        </graphic>\n+        <tooltip>\n+            <Tooltip text=\"%View statistics about the journal.\"/>\n+        </tooltip>\n+    </Button>\n </fx:root>"
+  },
+  {
+    "sha": "3d34743f1459155de1744e0409c3a92851cfbe02",
+    "filename": "src/main/java/org/jabref/gui/fieldeditors/JournalEditor.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/fieldeditors/JournalEditor.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/fieldeditors/JournalEditor.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/main/java/org/jabref/gui/fieldeditors/JournalEditor.java?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -2,6 +2,7 @@\n \n import javafx.fxml.FXML;\n import javafx.scene.Parent;\n+import javafx.scene.control.Button;\n import javafx.scene.layout.HBox;\n \n import org.jabref.gui.autocompleter.AutoCompletionTextInputBinding;\n@@ -19,6 +20,7 @@\n \n     @FXML private JournalEditorViewModel viewModel;\n     @FXML private EditorTextField textField;\n+    @FXML private Button journalStatisticsButton;\n \n     public JournalEditor(Field field,\n                          JournalAbbreviationRepository journalAbbreviationRepository,\n@@ -57,4 +59,9 @@ public Parent getNode() {\n     private void toggleAbbreviation() {\n         viewModel.toggleAbbreviation();\n     }\n+\n+    @FXML\n+    private void getJournalStatistics() {\n+        viewModel.getJournalStatistics(journalStatisticsButton);\n+    }\n }"
+  },
+  {
+    "sha": "7819d9e88d4040e94c5006a29557675e6c0b7f4d",
+    "filename": "src/main/java/org/jabref/gui/fieldeditors/JournalEditorPopOver.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/fieldeditors/JournalEditorPopOver.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/fieldeditors/JournalEditorPopOver.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/main/java/org/jabref/gui/fieldeditors/JournalEditorPopOver.java?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -0,0 +1,24 @@\n+package org.jabref.gui.fieldeditors;\n+\n+import javafx.scene.control.Button;\n+import javafx.scene.control.Label;\n+import javafx.scene.layout.VBox;\n+\n+import org.controlsfx.control.PopOver;\n+\n+public class JournalEditorPopOver {\n+\n+    public void openPopOver(Button journalStatisticsButton) {\n+\n+        Label text1 = new Label(\"This is a text field\");\n+        Label text2 = new Label(\"This is another textfield\");\n+        Label text3 = new Label(\"Lorem ipsum dolor sit amet\");\n+        VBox vBox = new VBox(text1, text2, text3);\n+        PopOver popOver = new PopOver(vBox);\n+\n+        popOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_CENTER);\n+\n+        popOver.show(journalStatisticsButton, 0);\n+\n+    }\n+}"
+  },
+  {
+    "sha": "b591340271ada260cf351815c676d71b1c6506b4",
+    "filename": "src/main/java/org/jabref/gui/fieldeditors/JournalEditorViewModel.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/fieldeditors/JournalEditorViewModel.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/fieldeditors/JournalEditorViewModel.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/main/java/org/jabref/gui/fieldeditors/JournalEditorViewModel.java?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -2,6 +2,8 @@\n \n import java.util.Optional;\n \n+import javafx.scene.control.Button;\n+\n import org.jabref.gui.autocompleter.SuggestionProvider;\n import org.jabref.logic.integrity.FieldCheckers;\n import org.jabref.logic.journals.JournalAbbreviationRepository;\n@@ -32,4 +34,10 @@ public void toggleAbbreviation() {\n             }\n         }\n     }\n+\n+    public void getJournalStatistics(Button journalStatisticsButton) {\n+        JournalEditorPopOver popOver = new JournalEditorPopOver();\n+        popOver.openPopOver(journalStatisticsButton);\n+\n+    }\n }"
+  },
+  {
+    "sha": "359cc7c9208374f27df0ccbb9110ccac3cf8334b",
+    "filename": "src/main/java/org/jabref/gui/icon/IconTheme.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/icon/IconTheme.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/gui/icon/IconTheme.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/main/java/org/jabref/gui/icon/IconTheme.java?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -309,6 +309,7 @@ public static URL getIconUrl(String name) {\n         FETCH_FULLTEXT(MaterialDesignS.SEARCH_WEB),\n         FETCH_BY_IDENTIFIER(MaterialDesignC.CLIPBOARD_ARROW_DOWN),\n         TOGGLE_ABBREVIATION(MaterialDesignF.FORMAT_ALIGN_CENTER),\n+        VIEW_JOURNAL_STATISTICS(MaterialDesignC.CHART_BAR),\n         NEW_FILE(MaterialDesignP.PLUS),\n         DOWNLOAD(MaterialDesignD.DOWNLOAD),\n         OWNER(MaterialDesignA.ACCOUNT),"
+  },
+  {
+    "sha": "d0cb20ad73755dc60b75e3d97e3a095e6d0db3af",
+    "filename": "src/main/java/org/jabref/logic/journals/JournalStatistics.java",
+    "status": "added",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/logic/journals/JournalStatistics.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/java/org/jabref/logic/journals/JournalStatistics.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/main/java/org/jabref/logic/journals/JournalStatistics.java?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -0,0 +1,26 @@\n+package org.jabref.logic.journals;\n+\n+import java.io.IOException;\n+import java.nio.file.Files;\n+import java.nio.file.Path;\n+\n+public class JournalStatistics  {\n+    private Path pathToCSV;\n+\n+    public JournalStatistics(Path path) {\n+        this.pathToCSV = path;\n+    }\n+\n+    public boolean getTitleByISSN(int ISSN) throws IOException {\n+        String readString = Files.readString(pathToCSV);\n+        String[] strings = readString.split(\";\");\n+\n+        for (String s:\n+             strings) {\n+            if (s.contains(String.valueOf(ISSN))) {\n+                return true;\n+            }\n+        }\n+        return false;\n+    }\n+}"
+  },
+  {
+    "sha": "d22aae7ed6eeaf356ddac0b51040b2a3dd98c3cd",
+    "filename": "src/main/resources/l10n/JabRef_en.properties",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/resources/l10n/JabRef_en.properties",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/resources/l10n/JabRef_en.properties",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/main/resources/l10n/JabRef_en.properties?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -810,6 +810,8 @@ Sublibrary\\ from\\ AUX\\ to\\ BibTeX=Sublibrary from AUX to BibTeX\n \n Switches\\ between\\ full\\ and\\ abbreviated\\ journal\\ name\\ if\\ the\\ journal\\ name\\ is\\ known.=Switches between full and abbreviated journal name if the journal name is known.\n \n+View\\ statistics\\ about\\ the\\ journal.=View statistics about the journal.\n+\n Tertiary\\ sort\\ criterion=Tertiary sort criterion\n \n The\\ chosen\\ encoding\\ '%0'\\ could\\ not\\ encode\\ the\\ following\\ characters\\:=The chosen encoding '%0' could not encode the following characters:"
+  },
+  {
+    "sha": "3081fec80c620639d2f373d932a64728d4e81c1b",
+    "filename": "src/main/resources/l10n/JabRef_sv.properties",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/resources/l10n/JabRef_sv.properties",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/src/main/resources/l10n/JabRef_sv.properties",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/main/resources/l10n/JabRef_sv.properties?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -734,6 +734,8 @@ Strings\\ for\\ library=Strängar för libraryn\n \n Switches\\ between\\ full\\ and\\ abbreviated\\ journal\\ name\\ if\\ the\\ journal\\ name\\ is\\ known.=Växlar mellan fullt och förkortat tidskiftsnamn om tidskriften är känd.\n \n+View\\ statistics\\ about\\ the\\ journal.=Visa statistik om journalen.\n+\n Tertiary\\ sort\\ criterion=Tredje sorteringskriteriet\n \n The\\ chosen\\ encoding\\ '%0'\\ could\\ not\\ encode\\ the\\ following\\ characters\\:=Den valde teckenkodningen '%0' kan inte representera följande tecken"
+  },
+  {
+    "sha": "4c718bb1c17568d14e18d6de88af67551239af33",
+    "filename": "src/test/java/org/jabref/gui/fieldeditors/JournalEditorPopOverTest.java",
+    "status": "added",
+    "additions": 73,
+    "deletions": 0,
+    "changes": 73,
+    "blob_url": "https://github.com/JabRef/jabref/blob/f3a9be973c5d9d846595026943d5365014af1e2a/src/test/java/org/jabref/gui/fieldeditors/JournalEditorPopOverTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/f3a9be973c5d9d846595026943d5365014af1e2a/src/test/java/org/jabref/gui/fieldeditors/JournalEditorPopOverTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/gui/fieldeditors/JournalEditorPopOverTest.java?ref=f3a9be973c5d9d846595026943d5365014af1e2a",
+    "patch": "@@ -0,0 +1,73 @@\n+package org.jabref.gui.fieldeditors;\n+\n+import java.io.IOException;\n+import java.nio.file.Files;\n+import java.nio.file.Path;\n+import java.nio.file.StandardOpenOption;\n+\n+import org.jabref.logic.journals.JournalStatistics;\n+\n+import org.junit.jupiter.api.BeforeEach;\n+import org.junit.jupiter.api.Test;\n+import org.junit.jupiter.api.io.TempDir;\n+\n+import static org.junit.jupiter.api.Assertions.assertFalse;\n+import static org.junit.jupiter.api.Assertions.assertTrue;\n+\n+class JournalEditorPopOverTest {\n+\n+    private Path tempFolder;\n+    private final String testEntry = \"1;28773;CA - A Cancer Journal for Clinicians;journal;15424863, 00079235;88,192;Q1;156;36;129;2924;22644;89;255,73;81,22;United States;Northern America;Wiley-Blackwell;1950-2020;Hematology (Q1), Oncology (Q1)\";\n+    private JournalStatistics jsReader;\n+\n+    /**\n+     * Each test should begin with assigning a temp folder to find the generated files\n+     * from the download. Then we have to create our object that loads in the file\n+     * and stores it temporarily.\n+     * @param tempFolder\n+     * @throws Exception\n+     */\n+    @BeforeEach\n+    void setUp(@TempDir Path tempFolder) throws Exception {\n+        this.tempFolder = tempFolder; // Set up the temp folder\n+        // Instantiate object that is used to read in data from file\n+    }\n+\n+    /**\n+     * Given a valid ISSN this test should be able to find the file and return the correct\n+     * title for the journal corresponding to the valid ISSN.\n+     */\n+    @Test\n+    void validISSNreturnsCorrectData() throws IOException {\n+        Path file = tempFolder.resolve(\"test.csv\"); // Load in the file\n+        Files.writeString(file,\n+                testEntry, StandardOpenOption.CREATE); // Write the test entry to temp file\n+\n+        int ISSN = 15424863;\n+\n+        jsReader = new JournalStatistics(file);\n+        // Call method with valid ISSN with the object created during setup\n+        boolean found = jsReader.getTitleByISSN(ISSN);\n+\n+        assertTrue(found);\n+    }\n+\n+    /**\n+     * Given an invalid ISSN this test should be able to find the file and\n+     * return an empty title for the given ISSN because the ISSN is non-existent.\n+     */\n+    @Test\n+    void invalidISSNreturnsEmptyData() throws IOException {\n+        Path file = tempFolder.resolve(\"test.csv\"); // Load in the file\n+        Files.writeString(file,\n+                testEntry, StandardOpenOption.CREATE); // Write test entry to temp file\n+\n+        int ISSN = 12300000;\n+        jsReader = new JournalStatistics(file);\n+\n+        // Call method with invalid ISSN with the object created during setup\n+        boolean found = jsReader.getTitleByISSN(ISSN);\n+\n+        assertFalse(found);\n+    }\n+}"
+  }
+]

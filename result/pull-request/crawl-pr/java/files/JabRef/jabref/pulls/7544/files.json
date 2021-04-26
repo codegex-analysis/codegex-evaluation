@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "5fa896948998dd1e61d028ddfc768d8dffcb7a44",
+    "filename": "src/test/java/org/jabref/logic/bibtex/comparator/FieldComparatorTest.java",
+    "status": "modified",
+    "additions": 93,
+    "deletions": 0,
+    "changes": 93,
+    "blob_url": "https://github.com/JabRef/jabref/blob/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/bibtex/comparator/FieldComparatorTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/bibtex/comparator/FieldComparatorTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/logic/bibtex/comparator/FieldComparatorTest.java?ref=4f27432ecf59c1f13b478c684808a64b489e3882",
+    "patch": "@@ -173,4 +173,97 @@ public void compareStringFieldsBiggerDescending() throws Exception {\n \n         assertEquals(1, comparator.compare(bigger, smaller));\n     }\n+\n+    @Test\n+    public void compareNumericFieldsIdentity() throws Exception {\n+        FieldComparator comparator = new FieldComparator(StandardField.PMID);\n+        BibEntry equal = new BibEntry();\n+        equal.setField(StandardField.PMID, \"123456\");\n+\n+        assertEquals(0, comparator.compare(equal, equal));\n+    }\n+\n+    @Test\n+    public void compareNumericFieldsEquality() throws Exception {\n+        FieldComparator comparator = new FieldComparator(StandardField.PMID);\n+        BibEntry equal = new BibEntry();\n+        equal.setField(StandardField.PMID, \"123456\");\n+        BibEntry equal2 = new BibEntry();\n+        equal2.setField(StandardField.PMID, \"123456\");\n+\n+        assertEquals(0, comparator.compare(equal, equal2));\n+    }\n+\n+    @Test\n+    public void compareNumericFieldsBiggerAscending() throws Exception {\n+        FieldComparator comparator = new FieldComparator(StandardField.PMID);\n+        BibEntry bigger = new BibEntry();\n+        bigger.setField(StandardField.PMID, \"234567\");\n+        BibEntry smaller = new BibEntry();\n+        smaller.setField(StandardField.PMID, \"123456\");\n+\n+        assertEquals(1, comparator.compare(bigger, smaller));\n+    }\n+\n+    @Test\n+    public void compareNumericFieldsBiggerDescending() throws Exception {\n+        FieldComparator comparator = new FieldComparator(new OrFields(StandardField.PMID), true);\n+        BibEntry smaller = new BibEntry();\n+        smaller.setField(StandardField.PMID, \"234567\");\n+        BibEntry bigger = new BibEntry();\n+        bigger.setField(StandardField.PMID, \"123456\");\n+\n+        assertEquals(1, comparator.compare(bigger, smaller));\n+    }\n+\n+    @Test\n+    public void compareParsableWithNonParsableNumericFieldDescending() throws Exception {\n+        FieldComparator comparator = new FieldComparator(new OrFields(StandardField.PMID), true);\n+        BibEntry parsable = new BibEntry();\n+        parsable.setField(StandardField.PMID, \"123456\");\n+        BibEntry unparsable = new BibEntry();\n+        unparsable.setField(StandardField.PMID, \"abc##z\");\n+\n+        assertEquals(1, comparator.compare(parsable, unparsable));\n+    }\n+\n+    @Test\n+    public void compareNonParsableWithParsableFieldAscending() throws Exception {\n+        FieldComparator comparator = new FieldComparator(StandardField.PMID);\n+        BibEntry nonparsable = new BibEntry();\n+        nonparsable.setField(StandardField.PMID, \"abc##z\");\n+        BibEntry parsable = new BibEntry();\n+        parsable.setField(StandardField.PMID, \"123456\");\n+\n+        assertEquals(1, comparator.compare(nonparsable, parsable));\n+    }\n+\n+    @Test\n+    public void compareEmptyFieldsAscending() throws Exception {\n+        FieldComparator comparator = new FieldComparator(StandardField.PMID);\n+        BibEntry empty1 = new BibEntry();\n+        BibEntry empty2 = new BibEntry();\n+\n+        assertEquals(0, comparator.compare(empty1, empty2));\n+    }\n+\n+    @Test\n+    public void compareEmptyWithAssignedFieldAscending() throws Exception {\n+        FieldComparator comparator = new FieldComparator(StandardField.PMID);\n+        BibEntry empty1 = new BibEntry();\n+        BibEntry assigned = new BibEntry();\n+        assigned.setField(StandardField.PMID, \"123456\");\n+\n+        assertEquals(1, comparator.compare(empty1, assigned));\n+    }\n+\n+    @Test\n+    public void compareAssignedWithEmptyFieldAscending() throws Exception {\n+        FieldComparator comparator = new FieldComparator(StandardField.PMID);\n+        BibEntry assigned = new BibEntry();\n+        assigned.setField(StandardField.PMID, \"123456\");\n+        BibEntry empty = new BibEntry();\n+\n+        assertEquals(-1, comparator.compare(assigned, empty));\n+    }\n }"
+  },
+  {
+    "sha": "739432e385a2b8e2c7aa6d63f5c0b7c6ff0f6b25",
+    "filename": "src/test/java/org/jabref/logic/formatter/bibtexfields/EscapeAmpersandsFormatterTest.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/JabRef/jabref/blob/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/formatter/bibtexfields/EscapeAmpersandsFormatterTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/formatter/bibtexfields/EscapeAmpersandsFormatterTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/logic/formatter/bibtexfields/EscapeAmpersandsFormatterTest.java?ref=4f27432ecf59c1f13b478c684808a64b489e3882",
+    "patch": "@@ -28,4 +28,14 @@ void formatEscapesAmpersandsIfPresent() throws Exception {\n     void formatExample() {\n         assertEquals(\"Text \\\\& with \\\\&ampersands\", formatter.format(formatter.getExampleInput()));\n     }\n+\n+    @Test\n+    void formatReturnsSameTextInNewUserDefinedLatexCommandIfNoAmpersandsPresent() throws Exception {\n+        assertEquals(\"\\\\newcommand[1]{Lorem ipsum}\", formatter.format(\"\\\\newcommand[1]{Lorem ipsum}\"));\n+    }\n+\n+    @Test\n+    void formatReturnsSameTextInLatexCommandIfPresent() throws Exception {\n+        assertEquals(\"\\\\textbf{Lorem\\\\&ipsum}\", formatter.format(\"\\\\textbf{Lorem\\\\&ipsum}\"));\n+    }\n }"
+  },
+  {
+    "sha": "f021a93e3f1c2ab21046ca7474cf1b87b0ae2419",
+    "filename": "src/test/java/org/jabref/logic/integrity/BooktitleCheckerTest.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/JabRef/jabref/blob/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/integrity/BooktitleCheckerTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/integrity/BooktitleCheckerTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/logic/integrity/BooktitleCheckerTest.java?ref=4f27432ecf59c1f13b478c684808a64b489e3882",
+    "patch": "@@ -21,4 +21,9 @@ void booktitleDoesNotAcceptsIfItEndsWithConferenceOn() {\n         assertNotEquals(Optional.empty(), checker.checkValue(\"Digital Information and Communication Technology and it's Applications (DICTAP), 2014 Fourth International Conference on\"));\n     }\n \n+    @Test\n+    void booktitleIsBlank() {\n+        assertEquals(Optional.empty(), checker.checkValue(\" \"));\n+    }\n+\n }"
+  },
+  {
+    "sha": "466bff79167cae4700587c2e327c1fbc4625d63c",
+    "filename": "src/test/java/org/jabref/logic/integrity/EditionCheckerTest.java",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/JabRef/jabref/blob/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/integrity/EditionCheckerTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/integrity/EditionCheckerTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/logic/integrity/EditionCheckerTest.java?ref=4f27432ecf59c1f13b478c684808a64b489e3882",
+    "patch": "@@ -2,6 +2,7 @@\n \n import java.util.Optional;\n \n+import org.jabref.logic.l10n.Localization;\n import org.jabref.model.database.BibDatabaseContext;\n import org.jabref.model.database.BibDatabaseMode;\n \n@@ -80,6 +81,28 @@ void bibTexAcceptsOrdinalNumberInNumbers() {\n         assertEquals(Optional.empty(), checker.checkValue(\"2nd\"));\n     }\n \n+    @Test\n+    void bibTexEmptyValueAsInput() {\n+        assertEquals(Optional.empty(), checker.checkValue(\"\"));\n+    }\n+\n+    @Test\n+    void bibTexNullValueAsInput() {\n+        assertEquals(Optional.empty(), checker.checkValue(null));\n+    }\n+\n+    @Test\n+    void bibTexDoesNotAcceptIntegerOnly() {\n+        var editionChecker = new EditionChecker(bibtex, false);\n+        assertEquals(Optional.of(Localization.lang(\"no integer as values for edition allowed\")), editionChecker.checkValue(\"3\"));\n+    }\n+\n+    @Test\n+    void bibTexAcceptsFirstEditionAlsoIfIntegerEditionDisallowed() {\n+        var editionChecker = new EditionChecker(bibtex, false);\n+        assertEquals(Optional.of(Localization.lang(\"edition of book reported as just 1\")), editionChecker.checkValue(\"1\"));\n+    }\n+\n     @Test\n     void bibLaTexAcceptsEditionWithCapitalFirstLetter() {\n         assertEquals(Optional.empty(), checkerb.checkValue(\"Edition 2000\"));"
+  },
+  {
+    "sha": "f1e534dd2a5ae518d99cf2d3edbbb3e790ec7f88",
+    "filename": "src/test/java/org/jabref/logic/integrity/ISBNCheckerTest.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/JabRef/jabref/blob/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/integrity/ISBNCheckerTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/integrity/ISBNCheckerTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/logic/integrity/ISBNCheckerTest.java?ref=4f27432ecf59c1f13b478c684808a64b489e3882",
+    "patch": "@@ -2,6 +2,8 @@\n \n import java.util.Optional;\n \n+import org.jabref.logic.l10n.Localization;\n+\n import org.junit.jupiter.api.Test;\n \n import static org.junit.jupiter.api.Assertions.assertEquals;\n@@ -31,4 +33,18 @@ void isbnDoesNotAcceptInvalidInput() {\n         assertNotEquals(Optional.empty(), checker.checkValue(\"0-201-53082-2\"));\n     }\n \n+    @Test\n+    void isbnAcceptsCorrectControlDigitForIsbn13() {\n+        assertEquals(Optional.empty(), checker.checkValue(\"978-0-306-40615-7\"));\n+    }\n+\n+    @Test\n+    void isbnDoesNotAcceptIncorrectControlDigitForIsbn13() {\n+        assertEquals(Optional.of(Localization.lang(\"incorrect control digit\")), checker.checkValue(\"978-0-306-40615-2\"));\n+    }\n+\n+    @Test\n+    void isbnDoesNotAcceptInvalidFormatForIsbn13() {\n+        assertEquals(Optional.of(Localization.lang(\"incorrect format\")), checker.checkValue(\"978_0_306_40615_7\"));\n+    }\n }"
+  },
+  {
+    "sha": "1a38818a7c5a25c88cc9c6be4b9a10a8af8fe895",
+    "filename": "src/test/java/org/jabref/logic/integrity/ISSNCheckerTest.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/JabRef/jabref/blob/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/integrity/ISSNCheckerTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/integrity/ISSNCheckerTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/logic/integrity/ISSNCheckerTest.java?ref=4f27432ecf59c1f13b478c684808a64b489e3882",
+    "patch": "@@ -2,6 +2,8 @@\n \n import java.util.Optional;\n \n+import org.jabref.logic.l10n.Localization;\n+\n import org.junit.jupiter.api.Test;\n \n import static org.junit.jupiter.api.Assertions.assertEquals;\n@@ -31,4 +33,24 @@ void issnDoesNotAcceptInvalidInput() {\n         assertNotEquals(Optional.empty(), checker.checkValue(\"0020-7218\"));\n     }\n \n+    @Test\n+    void lessThanEightDigitCode() {\n+        assertEquals(Optional.of(Localization.lang(\"incorrect format\")), checker.checkValue(\"020-721\"));\n+    }\n+\n+    @Test\n+    void moreThanEightDigitCode() {\n+        assertEquals(Optional.of(Localization.lang(\"incorrect format\")), checker.checkValue(\"0020-72109\"));\n+    }\n+\n+    @Test\n+    void issnDividedByWrongCharacter() {\n+        assertEquals(Optional.of(Localization.lang(\"incorrect format\")), checker.checkValue(\"0020~72109\"));\n+    }\n+\n+    @Test\n+    void emptyIssnValue() {\n+        assertEquals(Optional.empty(), checker.checkValue(\"\"));\n+    }\n+\n }"
+  },
+  {
+    "sha": "550bbc1f7b339aeb854c14fddc199205bc4d1a9a",
+    "filename": "src/test/java/org/jabref/logic/layout/format/ShortMonthFormatterTest.java",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 2,
+    "changes": 33,
+    "blob_url": "https://github.com/JabRef/jabref/blob/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/layout/format/ShortMonthFormatterTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/layout/format/ShortMonthFormatterTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/logic/layout/format/ShortMonthFormatterTest.java?ref=4f27432ecf59c1f13b478c684808a64b489e3882",
+    "patch": "@@ -17,8 +17,37 @@ public void setUp() {\n     }\n \n     @Test\n-    public void testFormat() {\n-        assertEquals(\"jan\", formatter.format(\"01\"));\n+    public void formatShortName() {\n+        assertEquals(\"jan\", formatter.format(\"jan\"));\n+    }\n+\n+    @Test\n+    public void formatFullName() {\n+        assertEquals(\"jan\", formatter.format(\"January\"));\n+    }\n+\n+    @Test\n+    public void formatGermanFullName() {\n         assertEquals(\"jan\", formatter.format(\"Januar\"));\n     }\n+\n+    @Test\n+    public void formatMonthNumber() {\n+        assertEquals(\"jan\", formatter.format(\"01\"));\n+    }\n+\n+    @Test\n+    public void formatRandomInput() {\n+        assertEquals(\"\", formatter.format(\"Invented Month\"));\n+    }\n+\n+    @Test\n+    public void formatNullInput() {\n+        assertEquals(\"\", formatter.format(null));\n+    }\n+\n+    @Test\n+    public void formatEmptyInput() {\n+        assertEquals(\"\", formatter.format(\"\"));\n+    }\n }"
+  },
+  {
+    "sha": "595c00647210856999547c8fc8d032a895e1b06e",
+    "filename": "src/test/java/org/jabref/logic/layout/format/ToLowerCaseTest.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/JabRef/jabref/blob/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/layout/format/ToLowerCaseTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/logic/layout/format/ToLowerCaseTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/logic/layout/format/ToLowerCaseTest.java?ref=4f27432ecf59c1f13b478c684808a64b489e3882",
+    "patch": "@@ -31,4 +31,19 @@ public void testUpperCase() {\n     public void testMixedCase() {\n         assertEquals(\"abcd efg\", new ToLowerCase().format(\"abCD eFg\"));\n     }\n+\n+    @Test\n+    public void includeNumbersInString() {\n+        assertEquals(\"abcd123efg\", new ToLowerCase().format(\"abCD123eFg\"));\n+    }\n+\n+    @Test\n+    public void includeSpecialCharactersInString() {\n+        assertEquals(\"hello!*#\", new ToLowerCase().format(\"Hello!*#\"));\n+    }\n+\n+    @Test\n+    public void includeOnlyNumbersAndSpecialCharacters() {\n+        assertEquals(\"123*%&456\", new ToLowerCase().format(\"123*%&456\"));\n+    }\n }"
+  },
+  {
+    "sha": "296c914dcf5cc0e2d73cc9e016036fcc7cebb5cc",
+    "filename": "src/test/java/org/jabref/model/entry/DateTest.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/JabRef/jabref/blob/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/model/entry/DateTest.java",
+    "raw_url": "https://github.com/JabRef/jabref/raw/4f27432ecf59c1f13b478c684808a64b489e3882/src/test/java/org/jabref/model/entry/DateTest.java",
+    "contents_url": "https://api.github.com/repos/JabRef/jabref/contents/src/test/java/org/jabref/model/entry/DateTest.java?ref=4f27432ecf59c1f13b478c684808a64b489e3882",
+    "patch": "@@ -40,4 +40,29 @@ void parseCorrectlyYearDate() throws Exception {\n     void parseDateNull() {\n         assertThrows(NullPointerException.class, () -> Date.parse(null));\n     }\n+\n+    @Test\n+    void emptyInputValue() {\n+        assertEquals(Optional.empty(), Date.parse(\"\"));\n+    }\n+\n+    @Test\n+    void nonExistentDayOfMonthUpperOffPoint() {\n+        assertEquals(Optional.empty(), Date.parse(\"32-06-2014\"));\n+    }\n+\n+    @Test\n+    void nonExistentDayOfMonthLowerOffPoint() {\n+        assertEquals(Optional.empty(), Date.parse(\"00-06-2014\"));\n+    }\n+\n+    @Test\n+    void nonExistentMonthUpperOffPoint() {\n+        assertEquals(Optional.empty(), Date.parse(\"30-13-2014\"));\n+    }\n+\n+    @Test\n+    void nonExistentMonthLowerOffPoint() {\n+        assertEquals(Optional.empty(), Date.parse(\"30-00-2014\"));\n+    }\n }"
+  }
+]

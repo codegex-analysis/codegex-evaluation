@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "2d9c2c053c92ec17dff0158216c23d2b644972f2",
+    "filename": "core/src/com/google/inject/internal/ConstructorInjectorStore.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 5,
+    "changes": 10,
+    "blob_url": "https://github.com/google/guice/blob/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/ConstructorInjectorStore.java",
+    "raw_url": "https://github.com/google/guice/raw/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/ConstructorInjectorStore.java",
+    "contents_url": "https://api.github.com/repos/google/guice/contents/core/src/com/google/inject/internal/ConstructorInjectorStore.java?ref=e5f532b9a5aa95387594c287dffb821c03912e66",
+    "patch": "@@ -20,6 +20,7 @@\n \n import com.google.common.collect.ImmutableList;\n import com.google.inject.spi.InjectionPoint;\n+import com.google.inject.spi.InterceptorBinding;\n import java.util.stream.Stream;\n \n /**\n@@ -75,12 +76,11 @@ boolean remove(InjectionPoint ip) {\n             injector.membersInjectorStore.get(injectionPoint.getDeclaringType(), errors);\n     ConstructionProxyFactory<T> factory = null;\n     if (InternalFlags.isBytecodeGenEnabled()) {\n-      ImmutableList<MethodAspect> injectorAspects = injector.getBindingData().getMethodAspects();\n+      ImmutableList<InterceptorBinding> injectorBindings = injector.getBindingData().getInterceptorBindings();\n       ImmutableList<MethodAspect> methodAspects =\n-          membersInjector.getAddedAspects().isEmpty()\n-              ? injectorAspects\n-              : Stream.concat(injectorAspects.stream(), membersInjector.getAddedAspects().stream())\n-                  .collect(toImmutableList());\n+          Stream.concat(injectorBindings.stream().map(MethodAspect::fromBinding),\n+            membersInjector.getAddedAspects().stream())\n+              .collect(toImmutableList());\n       factory = new ProxyFactory<>(injectionPoint, methodAspects);\n     } else {\n       factory = new DefaultConstructionProxyFactory<>(injectionPoint);"
+  },
+  {
+    "sha": "dc1253718ff1021a11afbf36b101bce41485c2dd",
+    "filename": "core/src/com/google/inject/internal/InjectorBindingData.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 8,
+    "changes": 21,
+    "blob_url": "https://github.com/google/guice/blob/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/InjectorBindingData.java",
+    "raw_url": "https://github.com/google/guice/raw/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/InjectorBindingData.java",
+    "contents_url": "https://api.github.com/repos/google/guice/contents/core/src/com/google/inject/internal/InjectorBindingData.java?ref=e5f532b9a5aa95387594c287dffb821c03912e66",
+    "patch": "@@ -28,6 +28,7 @@\n import com.google.inject.Scope;\n import com.google.inject.TypeLiteral;\n import com.google.inject.spi.InjectionRequest;\n+import com.google.inject.spi.InterceptorBinding;\n import com.google.inject.spi.MembersInjectorLookup;\n import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;\n import com.google.inject.spi.ProviderLookup;\n@@ -65,7 +66,7 @@\n   private final Set<MembersInjectorLookup<?>> membersInjectorLookups = Sets.newLinkedHashSet();\n   private final Set<InjectionRequest<?>> injectionRequests = Sets.newLinkedHashSet();\n   private final List<TypeConverterBinding> converters = Lists.newArrayList();\n-  private final List<MethodAspect> methodAspects = Lists.newArrayList();\n+  private final List<InterceptorBinding> interceptorBindings = Lists.newArrayList();\n   private final List<TypeListenerBinding> typeListenerBindings = Lists.newArrayList();\n   private final List<ProvisionListenerBinding> provisionListenerBindings = Lists.newArrayList();\n   private final List<ModuleAnnotatedMethodScannerBinding> scannerBindings = Lists.newArrayList();\n@@ -172,18 +173,22 @@ public TypeConverterBinding getConverter(\n     return matchingConverter;\n   }\n \n-  public void addMethodAspect(MethodAspect methodAspect) {\n-    methodAspects.add(methodAspect);\n+  public void addInterceptorBinding(InterceptorBinding interceptorBinding) {\n+    interceptorBindings.add(interceptorBinding);\n   }\n \n-  public ImmutableList<MethodAspect> getMethodAspects() {\n+  public ImmutableList<InterceptorBinding> getInterceptorBindings() {\n     if (parent.isPresent()) {\n-      return new ImmutableList.Builder<MethodAspect>()\n-          .addAll(parent.get().getMethodAspects())\n-          .addAll(methodAspects)\n+      return new ImmutableList.Builder<InterceptorBinding>()\n+          .addAll(parent.get().getInterceptorBindings())\n+          .addAll(interceptorBindings)\n           .build();\n     }\n-    return ImmutableList.copyOf(methodAspects);\n+    return ImmutableList.copyOf(interceptorBindings);\n+  }\n+\n+  public ImmutableList<InterceptorBinding> getInterceptorBindingsThisLevel() {\n+    return ImmutableList.copyOf(interceptorBindings);\n   }\n \n   public void addTypeListener(TypeListenerBinding listenerBinding) {"
+  },
+  {
+    "sha": "f01ab15a724108088b6118d4eee6fb9208b80d23",
+    "filename": "core/src/com/google/inject/internal/InjectorImpl.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/google/guice/blob/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/InjectorImpl.java",
+    "raw_url": "https://github.com/google/guice/raw/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/InjectorImpl.java",
+    "contents_url": "https://api.github.com/repos/google/guice/contents/core/src/com/google/inject/internal/InjectorImpl.java?ref=e5f532b9a5aa95387594c287dffb821c03912e66",
+    "patch": "@@ -987,6 +987,7 @@ private void removeFailedJitBinding(Binding<?> binding, InjectionPoint ip) {\n     elements.addAll(bindingData.getStaticInjectionRequestsThisLevel());\n     elements.addAll(bindingData.getMembersInjectorLookupsThisLevel());\n     elements.addAll(bindingData.getInjectionRequestsThisLevel());\n+    elements.addAll(bindingData.getInterceptorBindingsThisLevel());\n \n     return elements.build();\n   }"
+  },
+  {
+    "sha": "082333ded1c01cf372ff902f3d7188e9acd15057",
+    "filename": "core/src/com/google/inject/internal/InterceptorBindingProcessor.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 5,
+    "changes": 6,
+    "blob_url": "https://github.com/google/guice/blob/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/InterceptorBindingProcessor.java",
+    "raw_url": "https://github.com/google/guice/raw/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/InterceptorBindingProcessor.java",
+    "contents_url": "https://api.github.com/repos/google/guice/contents/core/src/com/google/inject/internal/InterceptorBindingProcessor.java?ref=e5f532b9a5aa95387594c287dffb821c03912e66",
+    "patch": "@@ -35,11 +35,7 @@ public Boolean visit(InterceptorBinding command) {\n     if (InternalFlags.isBytecodeGenEnabled()) {\n       injector\n           .getBindingData()\n-          .addMethodAspect(\n-              new MethodAspect(\n-                  command.getClassMatcher(),\n-                  command.getMethodMatcher(),\n-                  command.getInterceptors()));\n+          .addInterceptorBinding(command);\n     } else {\n       errors.aopDisabled(command);\n     }"
+  },
+  {
+    "sha": "945703126a4a5c4bab1e625a4c33c1dac4f17253",
+    "filename": "core/src/com/google/inject/internal/MethodAspect.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/google/guice/blob/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/MethodAspect.java",
+    "raw_url": "https://github.com/google/guice/raw/e5f532b9a5aa95387594c287dffb821c03912e66/core/src/com/google/inject/internal/MethodAspect.java",
+    "contents_url": "https://api.github.com/repos/google/guice/contents/core/src/com/google/inject/internal/MethodAspect.java?ref=e5f532b9a5aa95387594c287dffb821c03912e66",
+    "patch": "@@ -19,6 +19,7 @@\n import static com.google.common.base.Preconditions.checkNotNull;\n \n import com.google.inject.matcher.Matcher;\n+import com.google.inject.spi.InterceptorBinding;\n import java.lang.reflect.Method;\n import java.util.Arrays;\n import java.util.List;\n@@ -35,6 +36,10 @@\n   private final Matcher<? super Method> methodMatcher;\n   private final List<MethodInterceptor> interceptors;\n \n+  static MethodAspect fromBinding(InterceptorBinding binding) {\n+    return new MethodAspect(binding.getClassMatcher(), binding.getMethodMatcher(), binding.getInterceptors());\n+  }\n+\n   /**\n    * @param classMatcher matches classes the interceptor should apply to. For example: {@code\n    *     only(Runnable.class)}."
+  },
+  {
+    "sha": "6369e19a087f0031d0ef97254a0668ccb04f7292",
+    "filename": "core/test/com/google/inject/MethodInterceptionTest.java",
+    "status": "modified",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/google/guice/blob/e5f532b9a5aa95387594c287dffb821c03912e66/core/test/com/google/inject/MethodInterceptionTest.java",
+    "raw_url": "https://github.com/google/guice/raw/e5f532b9a5aa95387594c287dffb821c03912e66/core/test/com/google/inject/MethodInterceptionTest.java",
+    "contents_url": "https://api.github.com/repos/google/guice/contents/core/test/com/google/inject/MethodInterceptionTest.java?ref=e5f532b9a5aa95387594c287dffb821c03912e66",
+    "patch": "@@ -33,17 +33,23 @@\n import com.google.common.collect.Lists;\n import com.google.inject.internal.InternalFlags;\n import com.google.inject.matcher.AbstractMatcher;\n+import com.google.inject.matcher.Matcher;\n import com.google.inject.matcher.Matchers;\n import com.google.inject.name.Names;\n import com.google.inject.spi.ConstructorBinding;\n import java.lang.annotation.Retention;\n import java.lang.reflect.Method;\n+import java.util.ArrayList;\n import java.util.Arrays;\n import java.util.List;\n import java.util.Queue;\n import java.util.concurrent.atomic.AtomicInteger;\n import java.util.concurrent.atomic.AtomicReference;\n import javax.inject.Named;\n+\n+import com.google.inject.spi.DefaultElementVisitor;\n+import com.google.inject.spi.Element;\n+import com.google.inject.spi.InterceptorBinding;\n import org.aopalliance.intercept.MethodInterceptor;\n import org.aopalliance.intercept.MethodInvocation;\n import org.junit.Before;\n@@ -239,6 +245,42 @@ protected void configure() {\n     assertEquals(\"expected counting interceptor to be invoked first\", 1, count.get());\n   }\n \n+  public void testGetElements_interceptorBindings() throws Exception {\n+    @SuppressWarnings(\"rawtypes\")\n+    Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);\n+    Matcher<Method> methodMatcher = Matchers.returns(Matchers.identicalTo(int.class));\n+    MethodInterceptor interceptor = new MethodInterceptor() {\n+        @Override\n+        public Object invoke(MethodInvocation methodInvocation) throws Throwable {\n+            return null;\n+        }\n+    };\n+    Injector injector =\n+        Guice.createInjector(\n+            new AbstractModule() {\n+                @Override\n+                protected void configure() {\n+                    bindInterceptor(classMatcher, methodMatcher, interceptor);\n+                }\n+            });\n+    final List<InterceptorBinding> interceptorBindings = new ArrayList<>();\n+    for (Element element : injector.getElements()) {\n+        element.acceptVisitor(\n+            new DefaultElementVisitor<Void>() {\n+                @Override\n+                public Void visit(InterceptorBinding interceptorBinding) {\n+                    interceptorBindings.add(interceptorBinding);\n+                    return null;\n+                }\n+            });\n+    }\n+    assertEquals(1, interceptorBindings.size());\n+    InterceptorBinding extractedBinding = interceptorBindings.get(0);\n+    assertSame(classMatcher, extractedBinding.getClassMatcher());\n+    assertSame(methodMatcher, extractedBinding.getMethodMatcher());\n+    assertSame(interceptor, extractedBinding.getInterceptors().get(1));\n+  }\n+\n   @Test\n   public void testInterceptedMethodThrows() throws Exception {\n     Injector injector ="
+  },
+  {
+    "sha": "fc6f3c27b0ab4fea79e95abee21715131b1b8e94",
+    "filename": "core/test/com/google/inject/internal/WeakKeySetTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/google/guice/blob/e5f532b9a5aa95387594c287dffb821c03912e66/core/test/com/google/inject/internal/WeakKeySetTest.java",
+    "raw_url": "https://github.com/google/guice/raw/e5f532b9a5aa95387594c287dffb821c03912e66/core/test/com/google/inject/internal/WeakKeySetTest.java",
+    "contents_url": "https://api.github.com/repos/google/guice/contents/core/test/com/google/inject/internal/WeakKeySetTest.java?ref=e5f532b9a5aa95387594c287dffb821c03912e66",
+    "patch": "@@ -35,6 +35,7 @@\n import com.google.inject.Scope;\n import com.google.inject.TypeLiteral;\n import com.google.inject.spi.InjectionRequest;\n+import com.google.inject.spi.InterceptorBinding;\n import com.google.inject.spi.MembersInjectorLookup;\n import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;\n import com.google.inject.spi.ProviderLookup;\n@@ -551,12 +552,12 @@ public TypeConverterBinding getConverter(\n     }\n \n     @Override\n-    public void addMethodAspect(MethodAspect methodAspect) {\n+    public void addInterceptorBinding(InterceptorBinding interceptorBinding) {\n       throw new UnsupportedOperationException();\n     }\n \n     @Override\n-    public ImmutableList<MethodAspect> getMethodAspects() {\n+    public ImmutableList<InterceptorBinding> getInterceptorBindings() {\n       return ImmutableList.of();\n     }\n "
+  }
+]

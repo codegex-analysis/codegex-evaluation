@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "0b8545adb399e4152c8933dc1ea1a484806a7346",
+    "filename": "pom.xml",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/salyan4u/hw5/blob/df75352ae1e85979ff6169a48781f655c7389053/pom.xml",
+    "raw_url": "https://github.com/salyan4u/hw5/raw/df75352ae1e85979ff6169a48781f655c7389053/pom.xml",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw5/contents/pom.xml?ref=df75352ae1e85979ff6169a48781f655c7389053",
+    "patch": "@@ -0,0 +1,31 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n+         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n+         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n+    <modelVersion>4.0.0</modelVersion>\n+\n+    <groupId>ru.solyanin</groupId>\n+    <artifactId>hw5</artifactId>\n+    <version>1.0-SNAPSHOT</version>\n+\n+    <properties>\n+        <maven.compiler.source>11</maven.compiler.source>\n+        <maven.compiler.target>11</maven.compiler.target>\n+    </properties>\n+    <dependencies>\n+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->\n+        <dependency>\n+            <groupId>mysql</groupId>\n+            <artifactId>mysql-connector-java</artifactId>\n+            <version>8.0.23</version>\n+        </dependency>\n+        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->\n+        <dependency>\n+            <groupId>org.hibernate</groupId>\n+            <artifactId>hibernate-core</artifactId>\n+            <version>5.4.29.Final</version>\n+        </dependency>\n+\n+    </dependencies>\n+\n+</project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "610c9d1a4b4f1ecff397e87cf3dd23456599de93",
+    "filename": "src/main/java/application/Application.java",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/salyan4u/hw5/blob/df75352ae1e85979ff6169a48781f655c7389053/src/main/java/application/Application.java",
+    "raw_url": "https://github.com/salyan4u/hw5/raw/df75352ae1e85979ff6169a48781f655c7389053/src/main/java/application/Application.java",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw5/contents/src/main/java/application/Application.java?ref=df75352ae1e85979ff6169a48781f655c7389053",
+    "patch": "@@ -0,0 +1,22 @@\n+package application;\n+\n+import product.Product;\n+import product.ProductDAO;\n+\n+public class Application {\n+    public static void main(String[] args) {\n+        ProductDAO productDAO = new ProductDAO();\n+        productDAO.findAll();\n+        System.out.println();\n+        productDAO.findById(1L);\n+        //Product product = new Product(\"choc22\", 250);\n+        //Product productDel = new Product(\"deleteValue\", 250);\n+        //productDAO.addProduct(product);\n+        //productDAO.addProduct(productDel);\n+        //productDAO.findAll();\n+        //productDAO.deleteById(7L);\n+        //productDAO.findAll();\n+        Product product = new Product(\"Cola\", 150);\n+        productDAO.saveOrUpdate(product);\n+    }\n+}"
+  },
+  {
+    "sha": "9fed61166e8ba15d8784fd13eaeb691c350ae9af",
+    "filename": "src/main/java/product/Product.java",
+    "status": "added",
+    "additions": 65,
+    "deletions": 0,
+    "changes": 65,
+    "blob_url": "https://github.com/salyan4u/hw5/blob/df75352ae1e85979ff6169a48781f655c7389053/src/main/java/product/Product.java",
+    "raw_url": "https://github.com/salyan4u/hw5/raw/df75352ae1e85979ff6169a48781f655c7389053/src/main/java/product/Product.java",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw5/contents/src/main/java/product/Product.java?ref=df75352ae1e85979ff6169a48781f655c7389053",
+    "patch": "@@ -0,0 +1,65 @@\n+package product;\n+\n+import javax.persistence.*;\n+\n+@Entity\n+@Table(name = \"prodrep\")\n+@NamedQueries({\n+        @NamedQuery(name = \"Product.findAll\", query = \"SELECT a FROM Product a\"),\n+        @NamedQuery(name = \"Product.findById\", query = \"SELECT a FROM Product a WHERE a.id = :id\"),\n+        @NamedQuery(name = \"Product.deleteById\", query = \"DELETE FROM Product a where a.id=:id\")\n+})\n+public class Product {\n+    @Id\n+    @Column(name = \"idprodrep\")\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    private Long id;\n+\n+    @Column(name = \"name\")\n+    private String name;\n+\n+    @Column(name = \"cost\")\n+    private int cost;\n+\n+    public Product(String name, int cost) {\n+        this.name = name;\n+        this.cost = cost;\n+    }\n+\n+    public Product() {\n+\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public void setName(String name) {\n+        this.name = name;\n+    }\n+\n+    public int getCost() {\n+        return cost;\n+    }\n+\n+    public void setCost(int cost) {\n+        this.cost = cost;\n+    }\n+\n+    public void setId(Long id) {\n+        this.id = id;\n+    }\n+\n+    public Long getId() {\n+        return id;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return \"Product{\" +\n+                \"id=\" + id +\n+                \", name='\" + name + '\\'' +\n+                \", cost=\" + cost +\n+                '}';\n+    }\n+}"
+  },
+  {
+    "sha": "ce010c4f6e8b5d4c0b73adcf32cf39de9a5e78b5",
+    "filename": "src/main/java/product/ProductDAO.java",
+    "status": "added",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/salyan4u/hw5/blob/df75352ae1e85979ff6169a48781f655c7389053/src/main/java/product/ProductDAO.java",
+    "raw_url": "https://github.com/salyan4u/hw5/raw/df75352ae1e85979ff6169a48781f655c7389053/src/main/java/product/ProductDAO.java",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw5/contents/src/main/java/product/ProductDAO.java?ref=df75352ae1e85979ff6169a48781f655c7389053",
+    "patch": "@@ -0,0 +1,58 @@\n+package product;\n+\n+import org.hibernate.cfg.Configuration;\n+\n+import javax.persistence.EntityManager;\n+import javax.persistence.EntityManagerFactory;\n+import java.util.List;\n+\n+public class ProductDAO {\n+\n+    EntityManagerFactory factory = new Configuration()\n+            .configure(\"hibernate.cfg.xml\")\n+            .buildSessionFactory();\n+    EntityManager entityManager = factory.createEntityManager();\n+\n+\n+    public Product findById(Long id) {\n+        Product product = entityManager.createNamedQuery(\"Product.findById\", Product.class).\n+                setParameter(\"id\", id).\n+                getSingleResult();\n+        System.out.println(product.toString());\n+        return product;\n+    }\n+\n+    public List<Product> findAll() {\n+        List<Product> products = entityManager.createNamedQuery(\"Product.findAll\", Product.class).\n+                getResultList();\n+        for (Product product : products) {\n+            System.out.println(product.toString());\n+        }\n+        return products;\n+    }\n+\n+    public void addProduct(Product product) {\n+        entityManager.getTransaction().begin();\n+        entityManager.persist(product);\n+        entityManager.getTransaction().commit();\n+    }\n+\n+    public void deleteById(Long id) {\n+        entityManager.getTransaction().begin();\n+        entityManager.createNamedQuery(\"Product.deleteById\").\n+                setParameter(\"id\", id).executeUpdate();\n+        entityManager.getTransaction().commit();\n+    }\n+\n+    public Product saveOrUpdate(Product product) {\n+        entityManager.getTransaction().begin();\n+        Product oldOne = entityManager.createNamedQuery(\"Product.findById\", Product.class).\n+                setParameter(\"id\", 6L).\n+                getSingleResult();\n+        oldOne.setCost((product.getCost()));\n+        oldOne.setName((product.getName()));\n+        entityManager.getTransaction().commit();\n+        return oldOne;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "55bc9aec8cbd054e8329dc5876c5062424bd9250",
+    "filename": "src/main/resources/hibernate.cfg.xml",
+    "status": "added",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/salyan4u/hw5/blob/df75352ae1e85979ff6169a48781f655c7389053/src/main/resources/hibernate.cfg.xml",
+    "raw_url": "https://github.com/salyan4u/hw5/raw/df75352ae1e85979ff6169a48781f655c7389053/src/main/resources/hibernate.cfg.xml",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw5/contents/src/main/resources/hibernate.cfg.xml?ref=df75352ae1e85979ff6169a48781f655c7389053",
+    "patch": "@@ -0,0 +1,18 @@\n+<!DOCTYPE hibernate-configuration PUBLIC\n+        \"-//Hibernate/Hibernate Configuration DTD 3.0//EN\"\n+        \"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd\">\n+\n+<hibernate-configuration>\n+    <session-factory>\n+        <property name=\"connection.driver_class\">com.mysql.jdbc.Driver</property>\n+        <property name=\"connection.url\">jdbc:mysql://localhost:3306/products</property>\n+        <property name=\"connection.username\">root</property>\n+        <property name=\"connection.password\">96nupama</property>\n+        <property name=\"connection.pool_size\">10</property>\n+        <property name=\"dialect\">org.hibernate.dialect.MySQLDialect</property>\n+        <property name=\"show_sql\">true</property>\n+        <property name=\"hbm2ddl.auto\">none</property>\n+        <property name=\"current_session_context_class\">thread</property>\n+        <mapping class=\"product.Product\"/>\n+    </session-factory>\n+</hibernate-configuration>"
+  }
+]

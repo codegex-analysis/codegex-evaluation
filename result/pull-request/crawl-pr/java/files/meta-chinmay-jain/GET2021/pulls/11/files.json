@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "2fed0836abe9c4b20491b9dbcca883627096346a",
+    "filename": "DBMS - GET/Assignment 3/Question1.sql",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/meta-chinmay-jain/GET2021/blob/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question1.sql",
+    "raw_url": "https://github.com/meta-chinmay-jain/GET2021/raw/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question1.sql",
+    "contents_url": "https://api.github.com/repos/meta-chinmay-jain/GET2021/contents/DBMS%20-%20GET/Assignment%203/Question1.sql?ref=871e5879147397d85f9480a237a63fee8475902b",
+    "patch": "@@ -0,0 +1,44 @@\n+# With respect to StoreFront application identify, apply and list the\n+# constraints you would apply on the columns for the tables created.\n+\n+# address\n+ALTER TABLE Address\n+MODIFY Street VARCHAR(50) NOT NULL,\n+MODIFY Area VARCHAR(50) NOT NULL,\n+MODIFY District VARCHAR(50) NOT NULL,\n+MODIFY State VARCHAR(50) NOT NULL,\n+MODIFY Pincode VARCHAR(10) NOT NULL,\n+MODIFY Country VARCHAR(50) NOT NULL;\n+\n+# category\n+ALTER TABLE category \n+MODIFY Title VARCHAR(20) NOT NULL,\n+ADD UNIQUE (Title);\n+\n+# user\n+ALTER TABLE user \n+MODIFY FirstName VARCHAR(20) NOT NULL,\n+MODIFY LastName VARCHAR(20) NOT NULL,\n+MODIFY Email VARCHAR(50) NOT NULL,\n+ADD UNIQUE (Email);\n+\n+# order_detail\n+ALTER TABLE order_detail \n+MODIFY ProductQuantity INT NOT NULL,\n+MODIFY ProductPrice DOUBLE NOT NULL,\n+ADD CONSTRAINT VALCHECK CHECK ( ProductQuantity > 0 AND ProductPrice > 0);\n+\n+# city\n+ALTER TABLE city\n+MODIFY Name VARCHAR(50) NOT NULL;\n+\n+# state\n+ALTER TABLE state\n+MODIFY Name VARCHAR(50) NOT NULL;\n+\n+# product\n+ALTER TABLE product \n+MODIFY Title VARCHAR(50) NOT NULL,\n+MODIFY Price DOUBLE NOT NULL,\n+MODIFY Stock INT NOT NULL,\n+ADD CHECK ( Price > 0 AND Stock >= 0);\n\\ No newline at end of file"
+  },
+  {
+    "sha": "ddc51ed2eb1f1c27079679dbd5d975a32d58caa4",
+    "filename": "DBMS - GET/Assignment 3/Question2.sql",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/meta-chinmay-jain/GET2021/blob/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question2.sql",
+    "raw_url": "https://github.com/meta-chinmay-jain/GET2021/raw/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question2.sql",
+    "contents_url": "https://api.github.com/repos/meta-chinmay-jain/GET2021/contents/DBMS%20-%20GET/Assignment%203/Question2.sql?ref=871e5879147397d85f9480a237a63fee8475902b",
+    "patch": "@@ -0,0 +1,39 @@\n+# Display the list of products (Id, Title, Count of Categories)\n+# which fall in more than one Categories.\n+# (recursion needed here)\n+SELECT \n+    Product.ID as 'ProductID', product.Title\n+FROM\n+    category\n+        JOIN\n+    product ON product.CategoryID = category.ID\n+WHERE\n+    category.ID != Category.ParentID;\n+\n+# Display Count of products as per below price range:\n+# (0 - 100, 101 - 500, Above 500)\n+SELECT \n+    `Price Range`, COUNT(ID) as 'Count'\n+FROM\n+    (SELECT \n+        ID,\n+            CASE\n+                WHEN Price BETWEEN 0 AND 5000 THEN '0 - 5000'\n+                WHEN Price BETWEEN 5001 AND 10000 THEN '5001 - 10000'\n+                WHEN Price > 10000 THEN '> 10000'\n+            END AS `Price Range`\n+    FROM\n+        product) a\n+GROUP BY `Price Range`;\n+\n+# Display the Categories along with number of products under each category.\n+# (recursion needed here)\n+SELECT \n+    category.ID,\n+    category.Title as 'Category Title',\n+    COUNT(Product.ID) AS 'Number of Products'\n+FROM\n+    category\n+        JOIN\n+    product ON product.CAtegoryID = category.ID\n+GROUP BY category.ID;\n\\ No newline at end of file"
+  },
+  {
+    "sha": "23b87c5dce81cce514def28742890a519781e08a",
+    "filename": "DBMS - GET/Assignment 3/Question3.sql",
+    "status": "added",
+    "additions": 114,
+    "deletions": 0,
+    "changes": 114,
+    "blob_url": "https://github.com/meta-chinmay-jain/GET2021/blob/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question3.sql",
+    "raw_url": "https://github.com/meta-chinmay-jain/GET2021/raw/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question3.sql",
+    "contents_url": "https://api.github.com/repos/meta-chinmay-jain/GET2021/contents/DBMS%20-%20GET/Assignment%203/Question3.sql?ref=871e5879147397d85f9480a237a63fee8475902b",
+    "patch": "@@ -0,0 +1,114 @@\n+# Display Shopper’s information along with number of orders he/she placed during last 30 days.\n+SELECT \n+    user.ID AS 'UserID',\n+    FirstName,\n+    LastName,\n+    COUNT(orders.ID) AS 'Number of Orders'\n+FROM\n+    user\n+        JOIN\n+    orders ON orders.UserID = user.ID\n+WHERE\n+    DATEDIFF(NOW(), orders.OrderTime) <= 30\n+GROUP BY user.ID;\n+\n+# Display the top 10 Shoppers who generated maximum number of revenue in last 30 days.\n+SELECT \n+    user.ID AS 'UserID',\n+    FirstName,\n+    LastName,\n+    SUM(ProductQuantity * ProductPrice) AS 'Revenue'\n+FROM\n+    user\n+        JOIN\n+    orders ON user.ID = orders.UserID\n+        JOIN\n+    order_detail ON order_detail.OrderID = orders.ID\n+WHERE\n+    DATEDIFF(NOW(), orders.OrderTime) <= 30 AND order_detail.Status = 'SHIPPED'\n+GROUP BY user.ID\n+ORDER BY Revenue DESC\n+LIMIT 10;\n+\n+# Display top 20 Products which are ordered most in last 60 days along with numbers.\n+SELECT \n+    product.ID AS 'ProductID',\n+    Title,\n+    SUM(ProductQuantity) AS 'Number of Orders'\n+FROM\n+    orders\n+        JOIN\n+    order_detail ON order_detail.OrderID = orders.ID\n+        JOIN\n+    product ON order_detail.ProductID = product.ID\n+WHERE\n+    DATEDIFF(NOW(), orders.OrderTime) <= 60\n+GROUP BY product.ID\n+ORDER BY `Number of Orders` DESC\n+LIMIT 20;\n+\n+# Display Monthly sales revenue of the StoreFront for last 6 months. It should display each month’s sale.\n+SELECT \n+    MONTHNAME(orders.OrderTime) as 'Month',\n+    SUM(ProductQuantity * ProductPrice) AS 'Monthly Sales Revenue'\n+FROM\n+    orders\n+        JOIN\n+    order_detail ON order_detail.OrderID = orders.ID\n+WHERE\n+    orders.OrderTime >= CURDATE() - INTERVAL 6 MONTH AND order_detail.Status = 'SHIPPED'\n+GROUP BY MONTH(orders.OrderTime);   \n+\n+# Mark the products as Inactive which are not ordered in last 90 days.\n+SET SQL_SAFE_UPDATES=0;\n+UPDATE product \n+SET product.Status = 'INACTIVE' \n+WHERE \n+    product.ID NOT IN \n+    (\n+        SELECT product.ID \n+        FROM( \n+            SELECT product.ID\n+            FROM product JOIN order_detail \n+            ON order_detail.ProductID = product.ID\n+            JOIN orders \n+            ON order_detail.OrderId = orders.ID\n+            WHERE \n+            DATEDIFF(NOW(), OrderTime) <= 90 )\n+        AS C\n+    );\n+SET SQL_SAFE_UPDATES=1;\n+\n+# Given a category search keyword, display all the Products present in this category/categories. \n+# (recursion needed here)\n+SELECT \n+    product.ID AS 'ProductID', product.Title\n+FROM\n+    product\n+WHERE\n+    product.CategoryID IN (SELECT \n+        category.ID\n+    FROM\n+        category\n+    WHERE\n+        category.parentID = (SELECT \n+            category.ID\n+        FROM\n+            category\n+        WHERE\n+            category.Title = 'Mobile Phones'));\n+\n+# Display top 10 Items which were cancelled most.\n+SELECT \n+    product.ID,\n+    Title,\n+    SUM(ProductQuantity) AS 'Cancellation Count'\n+FROM\n+    order_detail\n+        JOIN\n+    product ON order_detail.ProductID = product.ID\n+WHERE\n+    order_detail.Status = 'CANCELLED'\n+GROUP BY product.ID\n+ORDER BY `Cancellation Count` DESC\n+LIMIT 10;\n\\ No newline at end of file"
+  },
+  {
+    "sha": "81623983c65b5ffe10cf52429279d53e0ca55ac2",
+    "filename": "DBMS - GET/Assignment 3/Question4.sql",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/meta-chinmay-jain/GET2021/blob/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question4.sql",
+    "raw_url": "https://github.com/meta-chinmay-jain/GET2021/raw/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question4.sql",
+    "contents_url": "https://api.github.com/repos/meta-chinmay-jain/GET2021/contents/DBMS%20-%20GET/Assignment%203/Question4.sql?ref=871e5879147397d85f9480a237a63fee8475902b",
+    "patch": "@@ -0,0 +1,40 @@\n+# Consider a form where providing a Zip Code populates associated City and State.\n+# Create appropriate tables and relationships for the same.\n+CREATE TABLE City(\n+    ZipCode VARCHAR(10) PRIMARY KEY,\n+    Name VARCHAR(50)\n+);\n+\n+CREATE TABLE State(\n+    Name VARCHAR(50),\n+    CityZipCode VARCHAR(50),\n+    FOREIGN KEY (CityZipCode)\n+        REFERENCES City (ZipCode)\n+);\n+\n+INSERT INTO City(ZipCode, Name)\n+VALUES  ('313001', 'Udaipur'),\n+        ('313002', 'Jaipur'),\n+        ('313003', 'Raipur'),\n+        ('313004', 'Ahmedabad'),\n+        ('313005', 'Indore');\n+\n+\n+INSERT INTO State(Name, CityZipCode)\n+VALUES  ('Rajasthan', '313001'),\n+        ('Rajasthan', '313002'),\n+        ('Chhattisgarh', '313003'),\n+        ('Gujarat', '313004'),\n+        ('Madhya Pradesh', '313005');\n+        \n+# Write a SQL query for that returns a Resultset containing Zip Code, City Names and\n+# States ordered by State Name and City Name.\n+SELECT \n+    ZipCode,\n+    City.Name AS 'City Name',\n+    State.Name AS 'State Name'\n+FROM\n+    City\n+        JOIN\n+    State ON City.ZipCode = State.CityZipCode\n+ORDER BY `State Name`,`City Name`;\n\\ No newline at end of file"
+  },
+  {
+    "sha": "471a60fac788d8b24e18b811a3973baa6f82aa6d",
+    "filename": "DBMS - GET/Assignment 3/Question5.sql",
+    "status": "added",
+    "additions": 47,
+    "deletions": 0,
+    "changes": 47,
+    "blob_url": "https://github.com/meta-chinmay-jain/GET2021/blob/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question5.sql",
+    "raw_url": "https://github.com/meta-chinmay-jain/GET2021/raw/871e5879147397d85f9480a237a63fee8475902b/DBMS%20-%20GET/Assignment%203/Question5.sql",
+    "contents_url": "https://api.github.com/repos/meta-chinmay-jain/GET2021/contents/DBMS%20-%20GET/Assignment%203/Question5.sql?ref=871e5879147397d85f9480a237a63fee8475902b",
+    "patch": "@@ -0,0 +1,47 @@\n+# Create a view displaying the order information \n+# (Id, Title, Price, Shopper’s name, Email, Orderdate, Status) \n+# with latest ordered items should be displayed first for last 60 days.\n+\n+-- ALTER TABLE `storefront`.`user` ADD COLUMN `Email` VARCHAR(45) NULL  AFTER `Role` ;\n+\n+-- UPDATE `storefront`.`user` SET `Email`='chinmay.jain@metacube.com' WHERE `ID`='1';\n+-- UPDATE `storefront`.`user` SET `Email`='lovely.jain@metacube.com' WHERE `ID`='2';\n+-- UPDATE `storefront`.`user` SET `Email`='love.gupta@metacube.com' WHERE `ID`='3';\n+-- UPDATE `storefront`.`user` SET `Email`='anushree.jain@metacube.com' WHERE `ID`='4';\n+CREATE VIEW Information AS \n+    SELECT \n+        product.ID AS 'ProductID',\n+        product.Title AS 'Title',\n+        product.Price,\n+        CONCAT(FirstName, ' ', Lastname) as 'Shopper\\'s Name',\n+        user.Email,\n+        DATE(orders.OrderTime) as 'Order Date',\n+        order_detail.Status\n+FROM \n+    user \n+        JOIN \n+    orders ON orders.UserID = user.ID \n+        JOIN \n+    order_detail ON orders.ID = order_detail.OrderID \n+        JOIN\n+    product ON order_detail.ProductID = product.ID\n+WHERE \n+    DATEDIFF(NOW(), orders.OrderTime) <= 60 \n+ORDER BY orders.OrderTime DESC;\n+\n+# Use the above view to display the Products(Items) which are in ‘shipped’ state.\n+SELECT \n+    *\n+FROM\n+    Information\n+WHERE\n+    Status = 'SHIPPED';\n+\n+# Use the above view to display the top 5 most selling products.\n+SELECT \n+    `ProductID`, Title, COUNT(*) AS 'Sale Count'\n+FROM\n+    Information\n+GROUP BY `ProductID`\n+ORDER BY `Sale Count` DESC\n+LIMIT 5;\n\\ No newline at end of file"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "0515125bce6ada18c01d9c1fde683b563d3d2198",
+    "filename": "core/src/main/java/org/bitcoinj/crypto/DeterministicKey.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/bitcoinj/bitcoinj/blob/4f0037880ce49c230041c693689b9e99ba39ea97/core/src/main/java/org/bitcoinj/crypto/DeterministicKey.java",
+    "raw_url": "https://github.com/bitcoinj/bitcoinj/raw/4f0037880ce49c230041c693689b9e99ba39ea97/core/src/main/java/org/bitcoinj/crypto/DeterministicKey.java",
+    "contents_url": "https://api.github.com/repos/bitcoinj/bitcoinj/contents/core/src/main/java/org/bitcoinj/crypto/DeterministicKey.java?ref=4f0037880ce49c230041c693689b9e99ba39ea97",
+    "patch": "@@ -73,6 +73,7 @@ public DeterministicKey(List<ChildNumber> childNumberPath,\n         this.childNumberPath = HDPath.M(checkNotNull(childNumberPath));\n         this.chainCode = Arrays.copyOf(chainCode, chainCode.length);\n         this.depth = parent == null ? 0 : parent.depth + 1;\n+        checkArgument(this.depth < 256);\n         this.parentFingerprint = (parent != null) ? parent.getFingerprint() : 0;\n     }\n \n@@ -96,6 +97,7 @@ public DeterministicKey(HDPath hdPath,\n         this.childNumberPath = checkNotNull(hdPath);\n         this.chainCode = Arrays.copyOf(chainCode, chainCode.length);\n         this.depth = parent == null ? 0 : parent.depth + 1;\n+        checkArgument(this.depth < 256);\n         this.parentFingerprint = (parent != null) ? parent.getFingerprint() : 0;\n     }\n "
+  },
+  {
+    "sha": "767c7ab5377fd66c59d7456870f12c8ceebf62a9",
+    "filename": "core/src/test/java/org/bitcoinj/crypto/HDKeyDerivationTest.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 4,
+    "changes": 30,
+    "blob_url": "https://github.com/bitcoinj/bitcoinj/blob/4f0037880ce49c230041c693689b9e99ba39ea97/core/src/test/java/org/bitcoinj/crypto/HDKeyDerivationTest.java",
+    "raw_url": "https://github.com/bitcoinj/bitcoinj/raw/4f0037880ce49c230041c693689b9e99ba39ea97/core/src/test/java/org/bitcoinj/crypto/HDKeyDerivationTest.java",
+    "contents_url": "https://api.github.com/repos/bitcoinj/bitcoinj/contents/core/src/test/java/org/bitcoinj/crypto/HDKeyDerivationTest.java?ref=4f0037880ce49c230041c693689b9e99ba39ea97",
+    "patch": "@@ -16,20 +16,19 @@\n \n package org.bitcoinj.crypto;\n \n+import java.math.BigInteger;\n import static org.junit.Assert.assertEquals;\n import static org.junit.Assert.assertFalse;\n import static org.junit.Assert.assertTrue;\n import static org.junit.Assert.fail;\n \n-import java.math.BigInteger;\n-\n+import org.bitcoinj.core.NetworkParameters;\n import org.bitcoinj.core.Utils;\n import org.bitcoinj.crypto.HDKeyDerivation.PublicDeriveMode;\n+import org.bitcoinj.params.TestNet3Params;\n import org.bouncycastle.crypto.params.KeyParameter;\n import org.junit.Test;\n \n-import com.google.common.collect.ImmutableList;\n-\n /**\n  * @author Andreas Schildbach\n  */\n@@ -100,7 +99,30 @@ public void testDeriveFromPublicParent() {\n         assertTrue(fromPublicWithInversion.isPubKeyOnly());\n         assertFalse(fromPublicWithInversion.isEncrypted());\n     }\n+    @Test (expected = java.lang.IllegalArgumentException.class)\n+    public void testDoesNotDeriveTooManyLevelsPrivate() {\n+        NetworkParameters params = TestNet3Params.get();\n+        String xprv = \"tprv8ZgxMBicQKsPdAoL5dkkJ2rLrYcYssH1UXBtY7N6zJQA99CuwR3t817dmKHNP3RqRsLVE2p1HAyTdXK1xjLBj9vr3xsN2p8sMoRUu4yBQzP\";\n+        DeterministicKey child = DeterministicKey.deserializeB58(xprv, params);\n+        for (int i = 0; i < 255; i++) {\n+            child = HDKeyDerivation.deriveChildKey(child, new ChildNumber(i, true));\n+        }\n+        assertEquals(255, child.getDepth());\n \n+        HDKeyDerivation.deriveChildKey(child, new ChildNumber(0, true));\n+    }\n+    @Test (expected = java.lang.IllegalArgumentException.class)\n+    public void testDoesNotDeriveTooManyLevelsPublic() {\n+        NetworkParameters params = TestNet3Params.get();\n+        String xprv = \"tpubD6NzVbkrYhZ4Wdq7yHRLhSWTRa8V3CTv3pnfpdQQQaCYydTgZosUJVjVwRpJqzyFWgSW3KuviHY1MpJkKAPhMZbWF145c7Zt1CrjJ83LdGv\";\n+        DeterministicKey child = DeterministicKey.deserializeB58(xprv, params);\n+        for (int i = 0; i < 255; i++) {\n+            child = HDKeyDerivation.deriveChildKey(child, new ChildNumber(i, true));\n+        }\n+        assertEquals(255, child.getDepth());\n+\n+        HDKeyDerivation.deriveChildKey(child, new ChildNumber(0, true));\n+    }\n     @Test\n     public void testDeriveFromEncryptedParent() {\n         DeterministicKey parent = new DeterministicKey(HDPath.M(), new byte[32], BigInteger.TEN,"
+  }
+]

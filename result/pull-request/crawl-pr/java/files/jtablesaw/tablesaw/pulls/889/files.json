@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "136543626e19cfeb697a5bd398a14a4c00fdb5f8",
+    "filename": "core/src/main/java/tech/tablesaw/columns/Column.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/jtablesaw/tablesaw/blob/33f3a655625e8ea06efe5795ea5ac6fc58b6bde1/core/src/main/java/tech/tablesaw/columns/Column.java",
+    "raw_url": "https://github.com/jtablesaw/tablesaw/raw/33f3a655625e8ea06efe5795ea5ac6fc58b6bde1/core/src/main/java/tech/tablesaw/columns/Column.java",
+    "contents_url": "https://api.github.com/repos/jtablesaw/tablesaw/contents/core/src/main/java/tech/tablesaw/columns/Column.java?ref=33f3a655625e8ea06efe5795ea5ac6fc58b6bde1",
+    "patch": "@@ -164,6 +164,14 @@ default RollingColumn rolling(final int windowSize) {\n     return new RollingColumn(this, windowSize);\n   }\n \n+  /**\n+   * @param windowSize size of the rolling window to use\n+   * @param center set the operation result at the center of the window or at the end of it\n+   */\n+  default RollingColumn rolling(final int windowSize, final boolean center) {\n+    return new RollingColumn(this, windowSize, center);\n+  }\n+\n   String getUnformattedString(int r);\n \n   boolean isMissing(int rowNumber);"
+  },
+  {
+    "sha": "0dfb16bde235e963aa73e0dfa272768c8e6232d7",
+    "filename": "core/src/main/java/tech/tablesaw/table/RollingColumn.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 2,
+    "changes": 17,
+    "blob_url": "https://github.com/jtablesaw/tablesaw/blob/33f3a655625e8ea06efe5795ea5ac6fc58b6bde1/core/src/main/java/tech/tablesaw/table/RollingColumn.java",
+    "raw_url": "https://github.com/jtablesaw/tablesaw/raw/33f3a655625e8ea06efe5795ea5ac6fc58b6bde1/core/src/main/java/tech/tablesaw/table/RollingColumn.java",
+    "contents_url": "https://api.github.com/repos/jtablesaw/tablesaw/contents/core/src/main/java/tech/tablesaw/table/RollingColumn.java?ref=33f3a655625e8ea06efe5795ea5ac6fc58b6bde1",
+    "patch": "@@ -11,10 +11,16 @@\n \n   protected final Column<?> column;\n   protected final int window;\n+  protected final boolean center;\n \n-  public RollingColumn(Column<?> column, int window) {\n+  public RollingColumn(Column<?> column, int window, boolean center) {\n     this.column = column;\n     this.window = window;\n+    this.center = center;\n+  }\n+\n+  public RollingColumn(Column<?> column, int window) {\n+    this(column, window, false);\n   }\n \n   protected String generateNewColumnName(AggregateFunction<?, ?> function) {\n@@ -31,7 +37,9 @@ protected String generateNewColumnName(AggregateFunction<?, ?> function) {\n   public <INCOL extends Column<?>, OUT> Column<?> calc(AggregateFunction<INCOL, OUT> function) {\n     // TODO: the subset operation copies the array. creating a view would likely be more efficient\n     Column<?> result = function.returnType().create(generateNewColumnName(function));\n-    for (int i = 0; i < window - 1; i++) {\n+    int bound = center ? (window - 1) / 2 : window - 1;\n+\n+    for (int i = 0; i < bound; i++) {\n       result.appendMissing();\n     }\n     for (int origColIndex = 0; origColIndex < column.size() - window + 1; origColIndex++) {\n@@ -46,6 +54,11 @@ protected String generateNewColumnName(AggregateFunction<?, ?> function) {\n         result.appendObj(answer);\n       }\n     }\n+    if (center) {\n+      for (int i = 0; i < bound; i++) {\n+        result.appendMissing();\n+      }\n+    }\n     return result;\n   }\n }"
+  },
+  {
+    "sha": "85e38230fa43ad143295230529beb79cf2452de9",
+    "filename": "core/src/test/java/tech/tablesaw/table/RollingColumnTest.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 4,
+    "changes": 20,
+    "blob_url": "https://github.com/jtablesaw/tablesaw/blob/33f3a655625e8ea06efe5795ea5ac6fc58b6bde1/core/src/test/java/tech/tablesaw/table/RollingColumnTest.java",
+    "raw_url": "https://github.com/jtablesaw/tablesaw/raw/33f3a655625e8ea06efe5795ea5ac6fc58b6bde1/core/src/test/java/tech/tablesaw/table/RollingColumnTest.java",
+    "contents_url": "https://api.github.com/repos/jtablesaw/tablesaw/contents/core/src/test/java/tech/tablesaw/table/RollingColumnTest.java?ref=33f3a655625e8ea06efe5795ea5ac6fc58b6bde1",
+    "patch": "@@ -1,9 +1,7 @@\n package tech.tablesaw.table;\n \n-import static org.junit.jupiter.api.Assertions.assertArrayEquals;\n-import static org.junit.jupiter.api.Assertions.assertEquals;\n-import static tech.tablesaw.aggregate.AggregateFunctions.countTrue;\n-import static tech.tablesaw.aggregate.AggregateFunctions.latestDateTime;\n+import static org.junit.jupiter.api.Assertions.*;\n+import static tech.tablesaw.aggregate.AggregateFunctions.*;\n \n import java.time.LocalDate;\n import java.time.LocalDateTime;\n@@ -52,4 +50,18 @@ public void testRollingCountTrue() {\n     assertEquals(1, result.getDouble(3), 0.0);\n     assertEquals(2, result.getDouble(4), 0.0);\n   }\n+\n+  @Test\n+  public void testCenter() {\n+    double[] data = new double[] {1, 2, 3, 4, 5};\n+    DoubleColumn doubleColumn = DoubleColumn.create(\"data\", data);\n+\n+    DoubleColumn result = (DoubleColumn) doubleColumn.rolling(3, true).calc(mean);\n+\n+    assertEquals(Double.NaN, result.getDouble(0), 0.0);\n+    assertNotEquals(Double.NaN, result.getDouble(1), 0.0);\n+    assertNotEquals(Double.NaN, result.getDouble(2), 0.0);\n+    assertNotEquals(Double.NaN, result.getDouble(3), 0.0);\n+    assertEquals(Double.NaN, result.getDouble(4), 0.0);\n+  }\n }"
+  }
+]

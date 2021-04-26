@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "9330ecbfb2a696d3b963425def643cc4adc44634",
+    "filename": "vitals/LiionBattery.java",
+    "status": "added",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-AdarshKulkarni54/blob/d576b82d7a53ddabc6dd9e7a1bca6cd521f3175c/vitals/LiionBattery.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-AdarshKulkarni54/raw/d576b82d7a53ddabc6dd9e7a1bca6cd521f3175c/vitals/LiionBattery.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-AdarshKulkarni54/contents/vitals/LiionBattery.java?ref=d576b82d7a53ddabc6dd9e7a1bca6cd521f3175c",
+    "patch": "@@ -0,0 +1,27 @@\n+package vitals;\r\n+\r\n+import java.util.function.Predicate;\r\n+\r\n+public class LiionBattery\r\n+{\r\n+  private float temperature;\r\n+  private float stateOfCharge;\r\n+  private float chargeRate;\r\n+\r\n+  public LiionBattery(final float temperature, final float stateOfCharge, final float chargeRate)\r\n+  {\r\n+    this.temperature = temperature;\r\n+    this.stateOfCharge = stateOfCharge;\r\n+    this.chargeRate = chargeRate;\r\n+  }\r\n+\r\n+  public Predicate<Float> isRangeGreaterThan(final float currentRange)\r\n+  {\r\n+    return range -> range > currentRange;\r\n+  }\r\n+\r\n+  public Predicate<Float> isLessThan(final float currentRange)\r\n+  {\r\n+    return range -> range < currentRange;\r\n+  }\r\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "57f550dde7f8db631e51be3884e2c6fb986fb222",
+    "filename": "vitals/LiionBatteryValidation.java",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-AdarshKulkarni54/blob/d576b82d7a53ddabc6dd9e7a1bca6cd521f3175c/vitals/LiionBatteryValidation.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-AdarshKulkarni54/raw/d576b82d7a53ddabc6dd9e7a1bca6cd521f3175c/vitals/LiionBatteryValidation.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-AdarshKulkarni54/contents/vitals/LiionBatteryValidation.java?ref=d576b82d7a53ddabc6dd9e7a1bca6cd521f3175c",
+    "patch": "@@ -0,0 +1,30 @@\n+package vitals;\r\n+\r\n+public class LiionBatteryValidation\r\n+{\r\n+  static boolean batteryIsOk(final float temperature, final float soc, final float chargeRate)\r\n+  {\r\n+    LiionBattery liionBattery = new LiionBattery(temperature, soc, chargeRate);\r\n+    if (liionBattery.isRangeGreaterThan(45).or(liionBattery.isLessThan(0)).test(temperature))\r\n+    {\r\n+      displayMessage(\"Temperature is out of range!\");\r\n+      return false;\r\n+    }\r\n+    else if (liionBattery.isRangeGreaterThan(80).or(liionBattery.isLessThan(20)).test(soc))\r\n+    {\r\n+      displayMessage(\"State of Charge is out of range!\");\r\n+      return false;\r\n+    }\r\n+    else if (liionBattery.isRangeGreaterThan(0.8f).test(chargeRate))\r\n+    {\r\n+      displayMessage(\"Charge Rate is out of range!\");\r\n+      return false;\r\n+    }\r\n+    return true;\r\n+  }\r\n+\r\n+  private static void displayMessage(final String outOfRangeMessage)\r\n+  {\r\n+    System.out.println(outOfRangeMessage);\r\n+  }\r\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e11b2cecb6a8badd6c223e0efe7a57f02df12f5b",
+    "filename": "vitals/Main.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 18,
+    "changes": 39,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-AdarshKulkarni54/blob/d576b82d7a53ddabc6dd9e7a1bca6cd521f3175c/vitals/Main.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-AdarshKulkarni54/raw/d576b82d7a53ddabc6dd9e7a1bca6cd521f3175c/vitals/Main.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-AdarshKulkarni54/contents/vitals/Main.java?ref=d576b82d7a53ddabc6dd9e7a1bca6cd521f3175c",
+    "patch": "@@ -1,23 +1,26 @@\n package vitals;\n \n+import static org.junit.Assert.assertFalse;\n+import static org.junit.Assert.assertTrue;\n+\n+import org.junit.Test;\n+\n public class Main {\n-    static boolean batteryIsOk(float temperature, float soc, float chargeRate) {\n-        if(temperature < 0 || temperature > 45) {\n-            System.out.println(\"Temperature is out of range!\");\n-            return false;\n-        } else if(soc < 20 || soc > 80) {\n-            System.out.println(\"State of Charge is out of range!\");\n-            return false;\n-        } else if(chargeRate > 0.8) {\n-            System.out.println(\"Charge Rate is out of range!\");\n-            return false;\n-        }\n-        return true;\n-    }\n \n-    public static void main(String[] args) {\n-        assert(batteryIsOk(25, 70, 0.7f) == true);\n-        assert(batteryIsOk(50, 85, 0.0f) == false);\n-        System.out.println(\"Some more tests needed\");\n-    }\n+  @Test\n+  public void testBatteryStatus()\n+  {\n+    assertTrue(LiionBatteryValidation.batteryIsOk(25, 70, 0.7f));\n+    assertFalse(LiionBatteryValidation.batteryIsOk(50, 85, 0.0f));\n+    assertFalse(LiionBatteryValidation.batteryIsOk(25, 15, 0.0f));\n+    assertFalse(LiionBatteryValidation.batteryIsOk(25, 70, 0.9f));\n+    assertFalse(LiionBatteryValidation.batteryIsOk(-10, 85, 0.0f));\n+    assertFalse(LiionBatteryValidation.batteryIsOk(25, 10, 0.0f));\n+    assertFalse(LiionBatteryValidation.batteryIsOk(25, 60, 1.0f));\n+  }\n+\n+  public static void main(final String[] args)\n+  {\n+    //\n+  }\n }"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "4559bb9ce6ba5b92d7dc517502c8554fb36ac822",
+    "filename": "lib/src/main/java/com/lsjwzh/widget/recyclerviewpager/LoopRecyclerViewPager.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 12,
+    "changes": 28,
+    "blob_url": "https://github.com/sequenia/RecyclerViewPager/blob/14cdab5a7c7c2cec42e896616f7a6227c4abe3cf/lib/src/main/java/com/lsjwzh/widget/recyclerviewpager/LoopRecyclerViewPager.java",
+    "raw_url": "https://github.com/sequenia/RecyclerViewPager/raw/14cdab5a7c7c2cec42e896616f7a6227c4abe3cf/lib/src/main/java/com/lsjwzh/widget/recyclerviewpager/LoopRecyclerViewPager.java",
+    "contents_url": "https://api.github.com/repos/sequenia/RecyclerViewPager/contents/lib/src/main/java/com/lsjwzh/widget/recyclerviewpager/LoopRecyclerViewPager.java?ref=14cdab5a7c7c2cec42e896616f7a6227c4abe3cf",
+    "patch": "@@ -21,8 +21,12 @@ public LoopRecyclerViewPager(Context context, AttributeSet attrs, int defStyle)\n \n     @Override\n     public void setAdapter(Adapter adapter) {\n+        setAdapter(adapter, false);\n+    }\n+\n+    public void setAdapter(Adapter adapter, boolean skipOnPageChangedListener) {\n         super.setAdapter(adapter);\n-        super.scrollToPosition(getMiddlePosition());\n+        super.scrollToPosition(getMiddlePosition(), skipOnPageChangedListener);\n     }\n \n     @Override\n@@ -61,8 +65,8 @@ public void smoothScrollToPosition(int position) {\n      * @param position target position\n      */\n     @Override\n-    public void scrollToPosition(int position) {\n-        super.scrollToPosition(transformInnerPositionIfNeed(position));\n+    public void scrollToPosition(int position, boolean skipOnPageChangedListener) {\n+        super.scrollToPosition(transformInnerPositionIfNeed(position), skipOnPageChangedListener);\n     }\n \n     /**\n@@ -85,6 +89,15 @@ public int transformToActualPosition(int position) {\n         return position % getActualItemCountFromAdapter();\n     }\n \n+    public int getMiddlePosition() {\n+        int middlePosition = Integer.MAX_VALUE / 2;\n+        final int actualItemCount = getActualItemCountFromAdapter();\n+        if (actualItemCount > 0 && middlePosition % actualItemCount != 0) {\n+            middlePosition = middlePosition - middlePosition % actualItemCount;\n+        }\n+        return middlePosition;\n+    }\n+\n     private int getActualItemCountFromAdapter() {\n         return ((LoopRecyclerViewPagerAdapter) getWrapperAdapter()).getActualItemCount();\n     }\n@@ -144,13 +157,4 @@ private int transformInnerPositionIfNeed(int position) {\n \n         return currentChunkPosition;\n     }\n-\n-    private int getMiddlePosition() {\n-        int middlePosition = Integer.MAX_VALUE / 2;\n-        final int actualItemCount = getActualItemCountFromAdapter();\n-        if (actualItemCount > 0 && middlePosition % actualItemCount != 0) {\n-            middlePosition = middlePosition - middlePosition % actualItemCount;\n-        }\n-        return middlePosition;\n-    }\n }"
+  },
+  {
+    "sha": "d55ac97bbdd16aec9bc9afa5318ff674b09e63da",
+    "filename": "lib/src/main/java/com/lsjwzh/widget/recyclerviewpager/RecyclerViewPager.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/sequenia/RecyclerViewPager/blob/14cdab5a7c7c2cec42e896616f7a6227c4abe3cf/lib/src/main/java/com/lsjwzh/widget/recyclerviewpager/RecyclerViewPager.java",
+    "raw_url": "https://github.com/sequenia/RecyclerViewPager/raw/14cdab5a7c7c2cec42e896616f7a6227c4abe3cf/lib/src/main/java/com/lsjwzh/widget/recyclerviewpager/RecyclerViewPager.java",
+    "contents_url": "https://api.github.com/repos/sequenia/RecyclerViewPager/contents/lib/src/main/java/com/lsjwzh/widget/recyclerviewpager/RecyclerViewPager.java?ref=14cdab5a7c7c2cec42e896616f7a6227c4abe3cf",
+    "patch": "@@ -277,13 +277,21 @@ protected void onStop() {\n \n     @Override\n     public void scrollToPosition(int position) {\n+        scrollToPosition(position, false);\n+    }\n+\n+    public void scrollToPosition(int position, boolean skipOnPageChangedListener) {\n         if (DEBUG) {\n             Log.d(\"@\", \"scrollToPosition:\" + position);\n         }\n         mPositionBeforeScroll = getCurrentPosition();\n         mSmoothScrollTargetPosition = position;\n         super.scrollToPosition(position);\n \n+        if (skipOnPageChangedListener) {\n+            return;\n+        }\n+\n         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {\n             @SuppressWarnings(\"deprecation\")\n             @Override"
+  }
+]

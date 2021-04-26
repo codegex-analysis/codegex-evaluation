@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "9873424dda4080c0fd5277edd9f1715918b9932b",
+    "filename": "src/test/java/ru/devray/restassureddemo/NasdaqTest.java",
+    "status": "added",
+    "additions": 61,
+    "deletions": 0,
+    "changes": 61,
+    "blob_url": "https://github.com/devrayone/restassureddemo/blob/517788b9a7bf6fb99202e61a80ff7e15d02c6c0b/src/test/java/ru/devray/restassureddemo/NasdaqTest.java",
+    "raw_url": "https://github.com/devrayone/restassureddemo/raw/517788b9a7bf6fb99202e61a80ff7e15d02c6c0b/src/test/java/ru/devray/restassureddemo/NasdaqTest.java",
+    "contents_url": "https://api.github.com/repos/devrayone/restassureddemo/contents/src/test/java/ru/devray/restassureddemo/NasdaqTest.java?ref=517788b9a7bf6fb99202e61a80ff7e15d02c6c0b",
+    "patch": "@@ -0,0 +1,61 @@\n+package ru.devray.restassureddemo;\n+\n+import io.restassured.builder.RequestSpecBuilder;\n+import io.restassured.filter.log.LogDetail;\n+import io.restassured.http.ContentType;\n+import io.restassured.specification.RequestSpecification;\n+import org.hamcrest.Matchers;\n+import org.junit.jupiter.api.BeforeAll;\n+import org.junit.jupiter.api.DisplayName;\n+import org.junit.jupiter.api.Test;\n+import org.junit.jupiter.api.Timeout;\n+import ru.devray.restassureddemo.entities.NasdaqHeads;\n+\n+import static io.restassured.RestAssured.given;\n+\n+public class NasdaqTest {\n+\n+    public static final String API_KEY = \"c6e1fa742483d9e9664e2ffb85c582c3\";\n+    public static final String BASE_URI = \"https://financialmodelingprep.com/\";\n+    public static final String endPointNasdaq = \"api/v3/nasdaq_constituent?apikey=\";\n+\n+    public static RequestSpecification spec; //переменная для подготовки первоначального состояния запросов\n+\n+    @BeforeAll\n+    static void setUp() {\n+        spec = new RequestSpecBuilder()\n+                .setBaseUri(BASE_URI)\n+                .log(LogDetail.ALL)\n+                .setAccept(ContentType.JSON)\n+                .build();\n+    }\n+\n+    @DisplayName(\"Проверка на корректность подключения к ресурсу (запрос должен вернуть код 200)\")\n+    @Test\n+    void getNasdaqTestc() {\n+        given().spec(spec)\n+                .when().get(endPointNasdaq + API_KEY)\n+                .then().statusCode(200);\n+    }\n+\n+    @DisplayName(\"Проверка на наличие конкретной структуры данных документа и быстродействия запроса (должен выполниться за 2 секунды)\")\n+    @Test\n+    @Timeout(2)\n+    void getNasdaqTest() {\n+        NasdaqHeads[] stockPrice =\n+                given().baseUri(BASE_URI)\n+                        .when().get(endPointNasdaq + API_KEY)\n+                        .then().extract().body().as(NasdaqHeads[].class);\n+        System.out.println(stockPrice);\n+    }\n+\n+    @DisplayName(\"Проверка на наличие у всех элементов имени, CIK длиной 10 симовлов и сокращения длиной 4 символа\")\n+    @Test\n+    void getFirstElementParameters() {\n+        given().spec(spec)\n+                .when().get(endPointNasdaq + API_KEY)\n+                .then().body(\"[0].name\", Matchers.notNullValue())\n+                .and().body(\"[0].cik\", Matchers.hasLength(10))\n+                .and().body(\"[0].symbol\", Matchers.hasLength(4));\n+    }\n+}"
+  },
+  {
+    "sha": "996879fbb8ccbf5c1731ba02b8f3f703f77ad2ba",
+    "filename": "src/test/java/ru/devray/restassureddemo/SimpleTest.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 3,
+    "changes": 3,
+    "blob_url": "https://github.com/devrayone/restassureddemo/blob/517788b9a7bf6fb99202e61a80ff7e15d02c6c0b/src/test/java/ru/devray/restassureddemo/SimpleTest.java",
+    "raw_url": "https://github.com/devrayone/restassureddemo/raw/517788b9a7bf6fb99202e61a80ff7e15d02c6c0b/src/test/java/ru/devray/restassureddemo/SimpleTest.java",
+    "contents_url": "https://api.github.com/repos/devrayone/restassureddemo/contents/src/test/java/ru/devray/restassureddemo/SimpleTest.java?ref=517788b9a7bf6fb99202e61a80ff7e15d02c6c0b",
+    "patch": "@@ -44,7 +44,4 @@ void simpleTest(){\n         String symbol = ((ArrayList<String>)response.jsonPath().get(\"symbol\")).get(0);\n         Assertions.assertEquals(symbol, \"AAPL\");\n     }\n-\n-\n-\n }"
+  },
+  {
+    "sha": "ea977f5ea3cd680f1f98f5d258ebc53e2ffc1a32",
+    "filename": "src/test/java/ru/devray/restassureddemo/StockTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/devrayone/restassureddemo/blob/517788b9a7bf6fb99202e61a80ff7e15d02c6c0b/src/test/java/ru/devray/restassureddemo/StockTest.java",
+    "raw_url": "https://github.com/devrayone/restassureddemo/raw/517788b9a7bf6fb99202e61a80ff7e15d02c6c0b/src/test/java/ru/devray/restassureddemo/StockTest.java",
+    "contents_url": "https://api.github.com/repos/devrayone/restassureddemo/contents/src/test/java/ru/devray/restassureddemo/StockTest.java?ref=517788b9a7bf6fb99202e61a80ff7e15d02c6c0b",
+    "patch": "@@ -17,10 +17,11 @@\n \n public class StockTest {\n \n-    public static final String API_KEY = \"53ef908ec640538fc602f353f474534a\";\n+    public static final String API_KEY = \"c6e1fa742483d9e9664e2ffb85c582c3\";\n     public static final String BASE_URI = \"https://financialmodelingprep.com/\";\n     public static final String endPointStockData = \"api/v3/quote-short/AAPL?apikey=\";\n     public static final String endPointCommodities = \"api/v3/symbol/available-commodities?apikey=\";\n+\n     public static RequestSpecification spec; //переменная для подготовки первоначального состояния запросов\n \n     @BeforeAll"
+  },
+  {
+    "sha": "6250750f6c6c8443122ada2bb542bec662bea617",
+    "filename": "src/test/java/ru/devray/restassureddemo/entities/NasdaqHeads.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/devrayone/restassureddemo/blob/517788b9a7bf6fb99202e61a80ff7e15d02c6c0b/src/test/java/ru/devray/restassureddemo/entities/NasdaqHeads.java",
+    "raw_url": "https://github.com/devrayone/restassureddemo/raw/517788b9a7bf6fb99202e61a80ff7e15d02c6c0b/src/test/java/ru/devray/restassureddemo/entities/NasdaqHeads.java",
+    "contents_url": "https://api.github.com/repos/devrayone/restassureddemo/contents/src/test/java/ru/devray/restassureddemo/entities/NasdaqHeads.java?ref=517788b9a7bf6fb99202e61a80ff7e15d02c6c0b",
+    "patch": "@@ -0,0 +1,44 @@\n+package ru.devray.restassureddemo.entities;\n+\n+import com.fasterxml.jackson.annotation.JsonProperty;\n+\n+public class NasdaqHeads {\n+\n+    @JsonProperty(\"symbol\")\n+    String symbol;\n+\n+    @JsonProperty(\"name\")\n+    String name;\n+\n+    @JsonProperty(\"sector\")\n+    String sector;\n+\n+    @JsonProperty(\"subSector\")\n+    String subSector;\n+\n+    @JsonProperty(\"headQuarter\")\n+    String headQuarter;\n+\n+    @JsonProperty(\"dateFirstAdded\")\n+    String dateFirstAdded;\n+\n+    @JsonProperty(\"cik\")\n+    String cik;\n+\n+    @JsonProperty(\"founded\")\n+    String founded;\n+\n+    @Override\n+    public String toString() {\n+        return \"NasdaqHeads{\" +\n+                \"symbol='\" + symbol + '\\'' +\n+                \", name='\" + name + '\\'' +\n+                \", sector='\" + sector + '\\'' +\n+                \", subSector='\" + subSector + '\\'' +\n+                \", headQuarter='\" + headQuarter + '\\'' +\n+                \", dateFirstAdded='\" + dateFirstAdded + '\\'' +\n+                \", cik='\" + cik + '\\'' +\n+                \", founded='\" + founded + '\\'' +\n+                '}';\n+    }\n+}"
+  }
+]

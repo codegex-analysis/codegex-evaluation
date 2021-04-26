@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "42a8af2dbb47f2314c4ffd7595db3cdd4021b979",
+    "filename": "src/main/java/kg/akoikelov/springmvcapp/rest/controllers/superadmin/EmployeesController.java",
+    "status": "added",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/akoikelov/fast-credit/blob/6d8d39ced2d94d830141af404fd22acf5194923f/src/main/java/kg/akoikelov/springmvcapp/rest/controllers/superadmin/EmployeesController.java",
+    "raw_url": "https://github.com/akoikelov/fast-credit/raw/6d8d39ced2d94d830141af404fd22acf5194923f/src/main/java/kg/akoikelov/springmvcapp/rest/controllers/superadmin/EmployeesController.java",
+    "contents_url": "https://api.github.com/repos/akoikelov/fast-credit/contents/src/main/java/kg/akoikelov/springmvcapp/rest/controllers/superadmin/EmployeesController.java?ref=6d8d39ced2d94d830141af404fd22acf5194923f",
+    "patch": "@@ -0,0 +1,33 @@\n+package kg.akoikelov.springmvcapp.rest.controllers.superadmin;\n+\n+\n+import io.swagger.annotations.Api;\n+import kg.akoikelov.springmvcapp.models.Employee;\n+import kg.akoikelov.springmvcapp.services.EmployeeService;\n+import kg.akoikelov.springmvcapp.utils.ControllerHelper;\n+import kg.akoikelov.springmvcapp.utils.PaginationData;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.web.bind.annotation.*;\n+\n+@Api(tags = \"superadmin\", value = \"employees\")\n+@RestController\n+@RequestMapping(\"/api/superadmin/employees\")\n+public class EmployeesController {\n+    @Autowired\n+    EmployeeService employeeService;\n+\n+    @GetMapping\n+    public PaginationData<Employee> list(@RequestParam(value = \"pagination\", defaultValue = \"10\") String pagination,\n+                                         @RequestParam(value = \"page\", defaultValue = \"1\") String page) {\n+        int paginationPage = ControllerHelper.parseInt(pagination);\n+        int pageCount = ControllerHelper.parseInt(page);\n+\n+        return employeeService.getEmployees(pageCount, paginationPage);\n+\n+    }\n+    @GetMapping (\"/{id}\")\n+    public Employee getById(@PathVariable int id){\n+        return employeeService.getEmployee(id);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "564f030b7b91b7c28e61ced9ec0a25f1e2215c00",
+    "filename": "src/main/java/kg/akoikelov/springmvcapp/security/AppSecurityConfig.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 2,
+    "changes": 10,
+    "blob_url": "https://github.com/akoikelov/fast-credit/blob/6d8d39ced2d94d830141af404fd22acf5194923f/src/main/java/kg/akoikelov/springmvcapp/security/AppSecurityConfig.java",
+    "raw_url": "https://github.com/akoikelov/fast-credit/raw/6d8d39ced2d94d830141af404fd22acf5194923f/src/main/java/kg/akoikelov/springmvcapp/security/AppSecurityConfig.java",
+    "contents_url": "https://api.github.com/repos/akoikelov/fast-credit/contents/src/main/java/kg/akoikelov/springmvcapp/security/AppSecurityConfig.java?ref=6d8d39ced2d94d830141af404fd22acf5194923f",
+    "patch": "@@ -101,16 +101,22 @@ protected void configure(HttpSecurity http) throws Exception {\n             http.csrf()\n                     .disable()\n                     .authorizeRequests()\n+                    .antMatchers(\"/api/login\")\n+                    .permitAll()\n                     .antMatchers(\"/api/*\")\n                     .hasAnyRole(Employee.USER, Employee.SUPERADMIN, Employee.ADMIN)\n                     .antMatchers(\"/api/superadmin/*\")\n                     .hasRole(Employee.SUPERADMIN)\n                     .antMatchers(\"/api/admin/*\")\n                     .hasAnyRole(Employee.SUPERADMIN, Employee.ADMIN)\n-                    .antMatchers(\"/api/login\")\n+                    .and()\n+                    .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)\n+                    .formLogin()\n                     .permitAll()\n                     .and()\n-                    .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);\n+                    .logout()\n+                    .and()\n+                    ;\n         }\n     }\n }"
+  }
+]

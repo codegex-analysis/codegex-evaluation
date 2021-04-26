@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "7b882bfaa496956af0cc615fa88ef26d44c6a7cb",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/pikaju/flutter-braintree/blob/668406752b63ad7c16eaa6a1a47388dda9b2afa3/README.md",
+    "raw_url": "https://github.com/pikaju/flutter-braintree/raw/668406752b63ad7c16eaa6a1a47388dda9b2afa3/README.md",
+    "contents_url": "https://api.github.com/repos/pikaju/flutter-braintree/contents/README.md?ref=668406752b63ad7c16eaa6a1a47388dda9b2afa3",
+    "patch": "@@ -109,6 +109,7 @@ final request = BraintreeCreditCardRequest(\n   cardNumber: '4111111111111111',\n   expirationMonth: '12',\n   expirationYear: '2021',\n+  cvv: '367'\n );\n ```\n "
+  },
+  {
+    "sha": "490a153881af7a094a843354aeb9250e4366b719",
+    "filename": "android/src/main/java/com/example/flutter_braintree/FlutterBraintreeCustom.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/pikaju/flutter-braintree/blob/668406752b63ad7c16eaa6a1a47388dda9b2afa3/android/src/main/java/com/example/flutter_braintree/FlutterBraintreeCustom.java",
+    "raw_url": "https://github.com/pikaju/flutter-braintree/raw/668406752b63ad7c16eaa6a1a47388dda9b2afa3/android/src/main/java/com/example/flutter_braintree/FlutterBraintreeCustom.java",
+    "contents_url": "https://api.github.com/repos/pikaju/flutter-braintree/contents/android/src/main/java/com/example/flutter_braintree/FlutterBraintreeCustom.java?ref=668406752b63ad7c16eaa6a1a47388dda9b2afa3",
+    "patch": "@@ -50,7 +50,8 @@ protected void tokenizeCreditCard() {\n         CardBuilder builder = new CardBuilder()\n                 .cardNumber(intent.getStringExtra(\"cardNumber\"))\n                 .expirationMonth(intent.getStringExtra(\"expirationMonth\"))\n-                .expirationYear(intent.getStringExtra(\"expirationYear\"));\n+                .expirationYear(intent.getStringExtra(\"expirationYear\"))\n+                .cvv(intent.getStringExtra(\"cvv\"));\n         Card.tokenize(braintreeFragment, builder);\n     }\n "
+  },
+  {
+    "sha": "e49b3e315657b29e6ed35d2049104c602d8d3d23",
+    "filename": "android/src/main/java/com/example/flutter_braintree/FlutterBraintreePlugin.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/pikaju/flutter-braintree/blob/668406752b63ad7c16eaa6a1a47388dda9b2afa3/android/src/main/java/com/example/flutter_braintree/FlutterBraintreePlugin.java",
+    "raw_url": "https://github.com/pikaju/flutter-braintree/raw/668406752b63ad7c16eaa6a1a47388dda9b2afa3/android/src/main/java/com/example/flutter_braintree/FlutterBraintreePlugin.java",
+    "contents_url": "https://api.github.com/repos/pikaju/flutter-braintree/contents/android/src/main/java/com/example/flutter_braintree/FlutterBraintreePlugin.java?ref=668406752b63ad7c16eaa6a1a47388dda9b2afa3",
+    "patch": "@@ -97,6 +97,7 @@ public void onMethodCall(MethodCall call, Result result) {\n       intent.putExtra(\"cardNumber\", (String) request.get(\"cardNumber\"));\n       intent.putExtra(\"expirationMonth\", (String) request.get(\"expirationMonth\"));\n       intent.putExtra(\"expirationYear\", (String) request.get(\"expirationYear\"));\n+      intent.putExtra(\"cvv\", (String) request.get(\"cvv\"));\n       activity.startActivityForResult(intent, CUSTOM_ACTIVITY_REQUEST_CODE);\n     } else if (call.method.equals(\"requestPaypalNonce\")) {\n       String authorization = call.argument(\"authorization\");"
+  },
+  {
+    "sha": "8d88cdbdcc2013d53c193f4df9b6314cc585d369",
+    "filename": "ios/Classes/FlutterBraintreeCustomPlugin.swift",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/pikaju/flutter-braintree/blob/668406752b63ad7c16eaa6a1a47388dda9b2afa3/ios/Classes/FlutterBraintreeCustomPlugin.swift",
+    "raw_url": "https://github.com/pikaju/flutter-braintree/raw/668406752b63ad7c16eaa6a1a47388dda9b2afa3/ios/Classes/FlutterBraintreeCustomPlugin.swift",
+    "contents_url": "https://api.github.com/repos/pikaju/flutter-braintree/contents/ios/Classes/FlutterBraintreeCustomPlugin.swift?ref=668406752b63ad7c16eaa6a1a47388dda9b2afa3",
+    "patch": "@@ -59,10 +59,11 @@ public class FlutterBraintreeCustomPlugin: BaseFlutterBraintreePlugin, FlutterPl\n             let cardClient = BTCardClient(apiClient: client!)\n             \n             guard let cardRequestInfo = dict(for: \"request\", in: call) else {return}\n-            \n+\n             let card = BTCard(number: (cardRequestInfo[\"cardNumber\"] as? String)!,\n                    expirationMonth: (cardRequestInfo[\"expirationMonth\"] as? String)!,\n-                   expirationYear: (cardRequestInfo[\"expirationYear\"] as? String)!, cvv: nil)\n+                   expirationYear: (cardRequestInfo[\"expirationYear\"] as? String)!,\n+                   cvv: (cardRequestInfo[\"cvv\"] as? String)!)\n             \n             cardClient.tokenizeCard(card) { (nonce, error) in\n                 self.handleResult(nonce: nonce, error: error, flutterResult: result)"
+  },
+  {
+    "sha": "6c8ab3a3fe0f7f9805770b19cf3b214b7efbc511",
+    "filename": "lib/src/request.dart",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/pikaju/flutter-braintree/blob/668406752b63ad7c16eaa6a1a47388dda9b2afa3/lib/src/request.dart",
+    "raw_url": "https://github.com/pikaju/flutter-braintree/raw/668406752b63ad7c16eaa6a1a47388dda9b2afa3/lib/src/request.dart",
+    "contents_url": "https://api.github.com/repos/pikaju/flutter-braintree/contents/lib/src/request.dart?ref=668406752b63ad7c16eaa6a1a47388dda9b2afa3",
+    "patch": "@@ -86,6 +86,7 @@ class BraintreeCreditCardRequest {\n     this.cardNumber,\n     this.expirationMonth,\n     this.expirationYear,\n+    this.cvv,\n   });\n \n   /// Number shown on the credit card.\n@@ -97,11 +98,15 @@ class BraintreeCreditCardRequest {\n   /// Four didgit expiration year, e.g. `'2021'`.\n   String expirationYear;\n \n+  /// A 3 or 4 digit card verification value assigned to credit cards.\n+  String cvv;\n+\n   Map<String, dynamic> toJson() => {\n         if (cardNumber != null) 'cardNumber': cardNumber,\n         if (expirationMonth != null) 'expirationMonth': expirationMonth,\n         if (expirationYear != null) 'expirationYear': expirationYear,\n-      };\n+        if (cvv != null) 'cvv': cvv,\n+  };\n }\n \n class BraintreeGooglePaymentRequest {"
+  }
+]

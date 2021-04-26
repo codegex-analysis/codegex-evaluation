@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "f05ee7c4801c51de7f02984f8c7ab2119677b20e",
+    "filename": "spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8HealthIndicator.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 7,
+    "changes": 24,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/blob/acae2df5715d5d37e45dba58a9b3a0d808d1dc1f/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8HealthIndicator.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/raw/acae2df5715d5d37e45dba58a9b3a0d808d1dc1f/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8HealthIndicator.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-kubernetes/contents/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8HealthIndicator.java?ref=acae2df5715d5d37e45dba58a9b3a0d808d1dc1f",
+    "patch": "@@ -19,7 +19,10 @@\n import java.util.Collections;\n import java.util.Map;\n \n+import io.fabric8.kubernetes.api.model.ObjectMeta;\n import io.fabric8.kubernetes.api.model.Pod;\n+import io.fabric8.kubernetes.api.model.PodSpec;\n+import io.fabric8.kubernetes.api.model.PodStatus;\n \n import org.springframework.boot.actuate.health.AbstractHealthIndicator;\n import org.springframework.cloud.kubernetes.commons.AbstractKubernetesHealthIndicator;\n@@ -46,13 +49,20 @@ public Fabric8HealthIndicator(PodUtils<Pod> utils) {\n \t\tif (current != null) {\n \t\t\tMap<String, Object> details = CollectionUtils.newHashMap(8);\n \t\t\tdetails.put(INSIDE, true);\n-\t\t\tdetails.put(NAMESPACE, current.getMetadata().getNamespace());\n-\t\t\tdetails.put(POD_NAME, current.getMetadata().getName());\n-\t\t\tdetails.put(LABELS, current.getMetadata().getLabels());\n-\t\t\tdetails.put(POD_IP, current.getStatus().getPodIP());\n-\t\t\tdetails.put(HOST_IP, current.getStatus().getHostIP());\n-\t\t\tdetails.put(SERVICE_ACCOUNT, current.getSpec().getServiceAccountName());\n-\t\t\tdetails.put(NODE_NAME, current.getSpec().getNodeName());\n+\n+\t\t\tObjectMeta metadata = current.getMetadata();\n+\t\t\tdetails.put(NAMESPACE, metadata.getNamespace());\n+\t\t\tdetails.put(POD_NAME, metadata.getName());\n+\t\t\tdetails.put(LABELS, metadata.getLabels());\n+\n+\t\t\tPodStatus status = current.getStatus();\n+\t\t\tdetails.put(POD_IP, status.getPodIP());\n+\t\t\tdetails.put(HOST_IP, status.getHostIP());\n+\n+\t\t\tPodSpec spec = current.getSpec();\n+\t\t\tdetails.put(SERVICE_ACCOUNT, spec.getServiceAccountName());\n+\t\t\tdetails.put(NODE_NAME, spec.getNodeName());\n+\n \t\t\treturn details;\n \t\t}\n "
+  },
+  {
+    "sha": "9a0ae7e0a95d8e32a6db32fde7a80d8bd45bde9b",
+    "filename": "spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8InfoContributor.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 6,
+    "changes": 22,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/blob/acae2df5715d5d37e45dba58a9b3a0d808d1dc1f/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8InfoContributor.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/raw/acae2df5715d5d37e45dba58a9b3a0d808d1dc1f/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8InfoContributor.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-kubernetes/contents/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8InfoContributor.java?ref=acae2df5715d5d37e45dba58a9b3a0d808d1dc1f",
+    "patch": "@@ -19,7 +19,10 @@\n import java.util.Collections;\n import java.util.Map;\n \n+import io.fabric8.kubernetes.api.model.ObjectMeta;\n import io.fabric8.kubernetes.api.model.Pod;\n+import io.fabric8.kubernetes.api.model.PodSpec;\n+import io.fabric8.kubernetes.api.model.PodStatus;\n \n import org.springframework.boot.actuate.info.InfoContributor;\n import org.springframework.cloud.kubernetes.commons.AbstractKubernetesInfoContributor;\n@@ -46,12 +49,19 @@ public Fabric8InfoContributor(PodUtils<Pod> utils) {\n \t\tif (current != null) {\n \t\t\tMap<String, Object> details = CollectionUtils.newHashMap(7);\n \t\t\tdetails.put(INSIDE, true);\n-\t\t\tdetails.put(NAMESPACE, current.getMetadata().getNamespace());\n-\t\t\tdetails.put(POD_NAME, current.getMetadata().getName());\n-\t\t\tdetails.put(POD_IP, current.getStatus().getPodIP());\n-\t\t\tdetails.put(SERVICE_ACCOUNT, current.getSpec().getServiceAccountName());\n-\t\t\tdetails.put(NODE_NAME, current.getSpec().getNodeName());\n-\t\t\tdetails.put(HOST_IP, current.getStatus().getHostIP());\n+\n+\t\t\tObjectMeta metadata = current.getMetadata();\n+\t\t\tdetails.put(NAMESPACE, metadata.getNamespace());\n+\t\t\tdetails.put(POD_NAME, metadata.getName());\n+\n+\t\t\tPodStatus status = current.getStatus();\n+\t\t\tdetails.put(POD_IP, status.getPodIP());\n+\t\t\tdetails.put(HOST_IP, status.getHostIP());\n+\n+\t\t\tPodSpec spec = current.getSpec();\n+\t\t\tdetails.put(SERVICE_ACCOUNT, spec.getServiceAccountName());\n+\t\t\tdetails.put(NODE_NAME, spec.getNodeName());\n+\n \t\t\treturn details;\n \t\t}\n \t\treturn Collections.singletonMap(INSIDE, false);"
+  },
+  {
+    "sha": "4f8882349ee29cff1ccc8e94dad82446e7d1184e",
+    "filename": "spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8PodUtils.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/blob/acae2df5715d5d37e45dba58a9b3a0d808d1dc1f/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8PodUtils.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/raw/acae2df5715d5d37e45dba58a9b3a0d808d1dc1f/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8PodUtils.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-kubernetes/contents/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/Fabric8PodUtils.java?ref=acae2df5715d5d37e45dba58a9b3a0d808d1dc1f",
+    "patch": "@@ -28,6 +28,7 @@\n import org.springframework.cloud.kubernetes.commons.EnvReader;\n import org.springframework.cloud.kubernetes.commons.LazilyInstantiate;\n import org.springframework.cloud.kubernetes.commons.PodUtils;\n+import org.springframework.util.StringUtils;\n \n /**\n  * Utility class to work with pods.\n@@ -91,11 +92,11 @@ private Pod internalGetPod() {\n \t}\n \n \tprivate boolean isServiceHostEnvVarPresent() {\n-\t\treturn this.serviceHost != null && !this.serviceHost.isEmpty();\n+\t\treturn StringUtils.hasLength(serviceHost);\n \t}\n \n \tprivate boolean isHostNameEnvVarPresent() {\n-\t\treturn this.hostName != null && !this.hostName.isEmpty();\n+\t\treturn StringUtils.hasLength(hostName);\n \t}\n \n \tprivate boolean isServiceAccountFound() {"
+  },
+  {
+    "sha": "acfbd5145b37e88dad936fc235ef5b8ef0f53639",
+    "filename": "spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/profile/Fabric8ProfileEnvironmentPostProcessor.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 4,
+    "changes": 6,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/blob/acae2df5715d5d37e45dba58a9b3a0d808d1dc1f/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/profile/Fabric8ProfileEnvironmentPostProcessor.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/raw/acae2df5715d5d37e45dba58a9b3a0d808d1dc1f/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/profile/Fabric8ProfileEnvironmentPostProcessor.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-kubernetes/contents/spring-cloud-kubernetes-fabric8-autoconfig/src/main/java/org/springframework/cloud/kubernetes/fabric8/profile/Fabric8ProfileEnvironmentPostProcessor.java?ref=acae2df5715d5d37e45dba58a9b3a0d808d1dc1f",
+    "patch": "@@ -24,13 +24,11 @@\n \n public class Fabric8ProfileEnvironmentPostProcessor extends AbstractKubernetesProfileEnvironmentPostProcessor {\n \n-\tprotected static final String KUBERNETES_SERVICE_ENV_VAR = \"KUBERNETES_SERVICE_HOST\";\n-\n \t@Override\n \tprotected boolean isInsideKubernetes(Environment environment) {\n \t\ttry (DefaultKubernetesClient client = new DefaultKubernetesClient()) {\n-\t\t\tfinal Fabric8PodUtils podUtils = new Fabric8PodUtils(client);\n-\t\t\treturn environment.containsProperty(KUBERNETES_SERVICE_ENV_VAR) || podUtils.isInsideKubernetes();\n+\t\t\tFabric8PodUtils podUtils = new Fabric8PodUtils(client);\n+\t\t\treturn environment.containsProperty(Fabric8PodUtils.KUBERNETES_SERVICE_HOST) || podUtils.isInsideKubernetes();\n \t\t}\n \t}\n "
+  }
+]

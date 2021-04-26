@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "71eceabea2e015aa4aba6a9e658c69d25bc47578",
+    "filename": "src/docker/start.sh",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/samply/share-client/blob/9d7797cb4d14ba12faa0520aa13ccef22027827e/src/docker/start.sh",
+    "raw_url": "https://github.com/samply/share-client/raw/9d7797cb4d14ba12faa0520aa13ccef22027827e/src/docker/start.sh",
+    "contents_url": "https://api.github.com/repos/samply/share-client/contents/src/docker/start.sh?ref=9d7797cb4d14ba12faa0520aa13ccef22027827e",
+    "patch": "@@ -70,5 +70,15 @@ sed -i \"s|{nngm-mainzelliste-url}|${NNGM_MAINZELLISTE_URL}|\"                \"$fi\n \n export CATALINA_OPTS=\"${CATALINA_OPTS} -javaagent:/docker/jmx_prometheus_javaagent-0.3.1.jar=9100:/docker/jmx-exporter.yml\"\n \n+# SSL Certs\n+if [ -d \"/custom-certs\" ]; then\n+\techo \"Found custom-certs. Starting import of certs:\"\n+\tfor file in /custom-certs/*; do\n+\t\tcp -v $file /usr/local/share/ca-certificates/$(basename $file).crt\n+\tdone\n+\tupdate-ca-certificates || (echo -e \"\\nThe system has REJECTED one of the certificates:\"; ls -l /custom-certs/*; echo \"Make sure that ALL of the certificates are valid.\"; exit 1)\n+\techo \"Successfully imported custom-certs.\"\n+fi\n+\n # Replace start.sh with catalina.sh\n exec /usr/local/tomcat/bin/catalina.sh run"
+  }
+]

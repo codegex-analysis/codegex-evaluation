@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "7728625eec58f8783d32e7f77834ff8d9ab9c435",
+    "filename": "dubbo-common/src/main/java/org/apache/dubbo/common/constants/CommonConstants.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/dubbo/blob/64b3771fd73b848d1ad697982476d730f26c1e59/dubbo-common/src/main/java/org/apache/dubbo/common/constants/CommonConstants.java",
+    "raw_url": "https://github.com/apache/dubbo/raw/64b3771fd73b848d1ad697982476d730f26c1e59/dubbo-common/src/main/java/org/apache/dubbo/common/constants/CommonConstants.java",
+    "contents_url": "https://api.github.com/repos/apache/dubbo/contents/dubbo-common/src/main/java/org/apache/dubbo/common/constants/CommonConstants.java?ref=64b3771fd73b848d1ad697982476d730f26c1e59",
+    "patch": "@@ -236,6 +236,11 @@\n     String PORT_KEY = \"port\";\n     String DUBBO_IP_TO_BIND = \"DUBBO_IP_TO_BIND\";\n \n+    /**\n+     * broadcast cluster.\n+     */\n+    String BROADCAST_CLUSTER = \"broadcast\";\n+\n     /**\n      * The property name for {@link NetworkInterface#getDisplayName() the name of network interface} that\n      * the Dubbo application prefers"
+  },
+  {
+    "sha": "668e05ccc2d21fdff0b8b0fb9b4f0c3e071d8ff6",
+    "filename": "dubbo-rpc/dubbo-rpc-injvm/src/main/java/org/apache/dubbo/rpc/protocol/injvm/InjvmProtocol.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/apache/dubbo/blob/64b3771fd73b848d1ad697982476d730f26c1e59/dubbo-rpc/dubbo-rpc-injvm/src/main/java/org/apache/dubbo/rpc/protocol/injvm/InjvmProtocol.java",
+    "raw_url": "https://github.com/apache/dubbo/raw/64b3771fd73b848d1ad697982476d730f26c1e59/dubbo-rpc/dubbo-rpc-injvm/src/main/java/org/apache/dubbo/rpc/protocol/injvm/InjvmProtocol.java",
+    "contents_url": "https://api.github.com/repos/apache/dubbo/contents/dubbo-rpc/dubbo-rpc-injvm/src/main/java/org/apache/dubbo/rpc/protocol/injvm/InjvmProtocol.java?ref=64b3771fd73b848d1ad697982476d730f26c1e59",
+    "patch": "@@ -29,6 +29,8 @@\n \n import java.util.Map;\n \n+import static org.apache.dubbo.common.constants.CommonConstants.BROADCAST_CLUSTER;\n+import static org.apache.dubbo.common.constants.CommonConstants.CLUSTER_KEY;\n import static org.apache.dubbo.rpc.Constants.SCOPE_KEY;\n import static org.apache.dubbo.rpc.Constants.SCOPE_LOCAL;\n import static org.apache.dubbo.rpc.Constants.SCOPE_REMOTE;\n@@ -111,6 +113,11 @@ public boolean isInjvmRefer(URL url) {\n             // generic invocation is not local reference\n             return false;\n         } else if (getExporter(exporterMap, url) != null) {\n+            // Broadcast cluster means that multiple machines will be called,\n+            // which is not converted to injvm protocol at this time.\n+            if (BROADCAST_CLUSTER.equalsIgnoreCase(url.getParameter(CLUSTER_KEY))) {\n+                return false;\n+            }\n             // by default, go through local reference if there's the service exposed locally\n             return true;\n         } else {"
+  },
+  {
+    "sha": "c1eaee834a7d17bb2c1d00c7fce69a3e3e5f5e0d",
+    "filename": "dubbo-rpc/dubbo-rpc-injvm/src/test/java/org/apache/dubbo/rpc/protocol/injvm/InjvmProtocolTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/dubbo/blob/64b3771fd73b848d1ad697982476d730f26c1e59/dubbo-rpc/dubbo-rpc-injvm/src/test/java/org/apache/dubbo/rpc/protocol/injvm/InjvmProtocolTest.java",
+    "raw_url": "https://github.com/apache/dubbo/raw/64b3771fd73b848d1ad697982476d730f26c1e59/dubbo-rpc/dubbo-rpc-injvm/src/test/java/org/apache/dubbo/rpc/protocol/injvm/InjvmProtocolTest.java",
+    "contents_url": "https://api.github.com/repos/apache/dubbo/contents/dubbo-rpc/dubbo-rpc-injvm/src/test/java/org/apache/dubbo/rpc/protocol/injvm/InjvmProtocolTest.java?ref=64b3771fd73b848d1ad697982476d730f26c1e59",
+    "patch": "@@ -119,6 +119,8 @@ public void testIsInjvmRefer() throws Exception {\n         url = URL.valueOf(\"fake://127.0.0.1/TestService\").addParameter(GENERIC_KEY, true);\n         assertFalse(InjvmProtocol.getInjvmProtocol().isInjvmRefer(url));\n \n+        url = URL.valueOf(\"fake://127.0.0.1/TestService\").addParameter(\"cluster\", \"broadcast\");\n+        assertFalse(InjvmProtocol.getInjvmProtocol().isInjvmRefer(url));\n     }\n \n "
+  }
+]

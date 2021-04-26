@@ -1,0 +1,109 @@
+[
+  {
+    "sha": "26d33521af10bcc7fd8cea344038eaaeb78d0ef5",
+    "filename": ".idea/.gitignore",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/kriian/JavaChatMaven/blob/2fd40ce9c01918897e1b5342c24622c2a41bc835/.idea/.gitignore",
+    "raw_url": "https://github.com/kriian/JavaChatMaven/raw/2fd40ce9c01918897e1b5342c24622c2a41bc835/.idea/.gitignore",
+    "contents_url": "https://api.github.com/repos/kriian/JavaChatMaven/contents/.idea/.gitignore?ref=2fd40ce9c01918897e1b5342c24622c2a41bc835",
+    "patch": "@@ -0,0 +1,3 @@\n+# Default ignored files\n+/shelf/\n+/workspace.xml"
+  },
+  {
+    "sha": "514b436580451ac75ee1942ce6e8595a04450a36",
+    "filename": "client/pom.xml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/kriian/JavaChatMaven/blob/2fd40ce9c01918897e1b5342c24622c2a41bc835/client/pom.xml",
+    "raw_url": "https://github.com/kriian/JavaChatMaven/raw/2fd40ce9c01918897e1b5342c24622c2a41bc835/client/pom.xml",
+    "contents_url": "https://api.github.com/repos/kriian/JavaChatMaven/contents/client/pom.xml?ref=2fd40ce9c01918897e1b5342c24622c2a41bc835",
+    "patch": "@@ -4,16 +4,16 @@\n          xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n     <parent>\n         <artifactId>JavaChatMaven</artifactId>\n-        <groupId>ru.geekbrains</groupId>\n+        <groupId>ru.gb.lesson6</groupId>\n         <version>1.0-SNAPSHOT</version>\n     </parent>\n     <modelVersion>4.0.0</modelVersion>\n \n     <artifactId>client</artifactId>\n \n     <properties>\n-        <maven.compiler.source>11</maven.compiler.source>\n-        <maven.compiler.target>11</maven.compiler.target>\n+        <maven.compiler.source>14</maven.compiler.source>\n+        <maven.compiler.target>14</maven.compiler.target>\n     </properties>\n \n </project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "590863fafa919bbccb41a22d3ef4d6bf9cefeecd",
+    "filename": "client/src/main/java/ru/gb/lesson6/client/Controller.java",
+    "status": "modified",
+    "additions": 30,
+    "deletions": 3,
+    "changes": 33,
+    "blob_url": "https://github.com/kriian/JavaChatMaven/blob/2fd40ce9c01918897e1b5342c24622c2a41bc835/client/src/main/java/ru/gb/lesson6/client/Controller.java",
+    "raw_url": "https://github.com/kriian/JavaChatMaven/raw/2fd40ce9c01918897e1b5342c24622c2a41bc835/client/src/main/java/ru/gb/lesson6/client/Controller.java",
+    "contents_url": "https://api.github.com/repos/kriian/JavaChatMaven/contents/client/src/main/java/ru/gb/lesson6/client/Controller.java?ref=2fd40ce9c01918897e1b5342c24622c2a41bc835",
+    "patch": "@@ -16,12 +16,13 @@\n import javafx.stage.Modality;\n import javafx.stage.Stage;\n \n-import java.io.DataInputStream;\n-import java.io.DataOutputStream;\n-import java.io.IOException;\n+import java.io.*;\n import java.net.Socket;\n import java.net.URL;\n+import java.util.ArrayList;\n+import java.util.List;\n import java.util.ResourceBundle;\n+import java.util.stream.Stream;\n \n public class Controller implements Initializable {\n \n@@ -49,6 +50,7 @@\n     private Socket socket;\n     private DataInputStream in;\n     private DataOutputStream out;\n+    private BufferedReader bufferedReader;\n     private String nickname;\n     private ObservableList<String> clients;\n     private boolean authorized;\n@@ -135,6 +137,7 @@ private void connect() {\n                 socket = new Socket(\"localhost\", 8189);\n                 in = new DataInputStream(socket.getInputStream());\n                 out = new DataOutputStream(socket.getOutputStream());\n+                bufferedReader = new BufferedReader(new FileReader(\"demo.txt\"));\n                 new Thread(() -> {\n                     try {\n                         while (true) {\n@@ -146,6 +149,7 @@ private void connect() {\n                                 break;\n                             }\n                         }\n+                        last100LinesOfTheChat();\n                         while (true) {\n                             String str = in.readUTF();\n                             if (!str.startsWith(\"/\")) {\n@@ -201,4 +205,27 @@ public void registerBtn() {\n         }\n \n     }\n+\n+    private void last100LinesOfTheChat() {\n+        String line;\n+        List<String> list = new ArrayList<>();\n+        try {\n+            while ((line = bufferedReader.readLine()) != null) {\n+                list.add(line);\n+            }\n+            int startWith = list.size() - 100;\n+            for (int i = startWith; i < list.size(); i++) {\n+                textArea.appendText(list.get(i));\n+                textArea.appendText(System.lineSeparator());\n+            }\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        } finally {\n+            try {\n+                bufferedReader.close();\n+            } catch (IOException e) {\n+                e.printStackTrace();\n+            }\n+        }\n+    }\n }"
+  },
+  {
+    "sha": "84c40e35f4a3ec8327fe31261b47e67f6701f0fd",
+    "filename": "demo.txt",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/kriian/JavaChatMaven/blob/2fd40ce9c01918897e1b5342c24622c2a41bc835/demo.txt",
+    "raw_url": "https://github.com/kriian/JavaChatMaven/raw/2fd40ce9c01918897e1b5342c24622c2a41bc835/demo.txt",
+    "contents_url": "https://api.github.com/repos/kriian/JavaChatMaven/contents/demo.txt?ref=2fd40ce9c01918897e1b5342c24622c2a41bc835",
+    "patch": "@@ -0,0 +1,40 @@\n+\n+555: priver\n+killer: hai\n+555: /end\n+killer: /end\n+nick1: ffffff\n+nick1: ooooo\n+nick1: /end\n+555: ppp\n+killer: tttt\n+killer: /end\n+555: rrrr\n+555: /end\n+555: dsf\n+555: /end\n+555: rt\n+555: rtrtrt\n+555: rtrtrtrtr\n+555: ertertert\n+555: 555\n+555: /end\n+555: tttt\n+555: /end\n+555: ffdfd\n+555: dfdfd\n+555: dfdfdd\n+555: 555\n+555: /end\n+555: rrrr\n+555: rrr\n+555: /end\n+555: /end\n+555: dfgd\n+555: 333\n+555: /end\n+555: /end\n+555: /end\n+555: /end\n+555: /end\n+555: /end"
+  },
+  {
+    "sha": "428e32c2e87ef4b18e925d2148891c108295614f",
+    "filename": "server/database.db",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/kriian/JavaChatMaven/blob/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/database.db",
+    "raw_url": "https://github.com/kriian/JavaChatMaven/raw/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/database.db",
+    "contents_url": "https://api.github.com/repos/kriian/JavaChatMaven/contents/server/database.db?ref=2fd40ce9c01918897e1b5342c24622c2a41bc835"
+  },
+  {
+    "sha": "c5183a0fe44376165dcff31899142e29149080c7",
+    "filename": "server/pom.xml",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 7,
+    "changes": 16,
+    "blob_url": "https://github.com/kriian/JavaChatMaven/blob/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/pom.xml",
+    "raw_url": "https://github.com/kriian/JavaChatMaven/raw/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/pom.xml",
+    "contents_url": "https://api.github.com/repos/kriian/JavaChatMaven/contents/server/pom.xml?ref=2fd40ce9c01918897e1b5342c24622c2a41bc835",
+    "patch": "@@ -4,23 +4,25 @@\n          xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n     <parent>\n         <artifactId>JavaChatMaven</artifactId>\n-        <groupId>ru.geekbrains</groupId>\n+        <groupId>ru.gb.lesson6</groupId>\n         <version>1.0-SNAPSHOT</version>\n     </parent>\n     <modelVersion>4.0.0</modelVersion>\n \n     <artifactId>server</artifactId>\n \n     <properties>\n-        <maven.compiler.source>11</maven.compiler.source>\n-        <maven.compiler.target>11</maven.compiler.target>\n+        <maven.compiler.source>14</maven.compiler.source>\n+        <maven.compiler.target>14</maven.compiler.target>\n     </properties>\n-\n     <dependencies>\n+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->\n         <dependency>\n-            <groupId>org.xerial</groupId>\n-            <artifactId>sqlite-jdbc</artifactId>\n-            <version>3.32.3.2</version>\n+            <groupId>mysql</groupId>\n+            <artifactId>mysql-connector-java</artifactId>\n+            <version>8.0.21</version>\n         </dependency>\n+\n     </dependencies>\n+\n </project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "0eca8b53768e3203a2654bf64f988ba55d53e833",
+    "filename": "server/src/main/java/ru/gb/lesson6/server/ClientHandler.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 4,
+    "changes": 19,
+    "blob_url": "https://github.com/kriian/JavaChatMaven/blob/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/src/main/java/ru/gb/lesson6/server/ClientHandler.java",
+    "raw_url": "https://github.com/kriian/JavaChatMaven/raw/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/src/main/java/ru/gb/lesson6/server/ClientHandler.java",
+    "contents_url": "https://api.github.com/repos/kriian/JavaChatMaven/contents/server/src/main/java/ru/gb/lesson6/server/ClientHandler.java?ref=2fd40ce9c01918897e1b5342c24622c2a41bc835",
+    "patch": "@@ -1,15 +1,14 @@\n package ru.gb.lesson6.server;\n \n-import java.io.DataInputStream;\n-import java.io.DataOutputStream;\n-import java.io.IOException;\n+import java.io.*;\n import java.net.Socket;\n \n public class ClientHandler {\n     private Server server;\n     private Socket socket;\n     private DataInputStream in;\n     private DataOutputStream out;\n+    private BufferedWriter bufferedWriter;\n     private String nickname;\n \n     public ClientHandler(Server server, Socket socket) {\n@@ -18,6 +17,7 @@ public ClientHandler(Server server, Socket socket) {\n             this.socket = socket;\n             this.in = new DataInputStream(socket.getInputStream());\n             this.out = new DataOutputStream(socket.getOutputStream());\n+            bufferedWriter = new BufferedWriter(new FileWriter(\"demo.txt\", true));\n             new Thread(() -> {\n                 try {\n                     while (true) {\n@@ -59,8 +59,12 @@ public ClientHandler(Server server, Socket socket) {\n                     while (true) {\n                         String str = in.readUTF();\n                         System.out.println(\"Сообщение от клиента: \" + str);\n+                        bufferedWriter.append(nickname).append(\": \").append(str);\n+                        bufferedWriter.newLine();\n+                        bufferedWriter.flush();\n                         if (str.startsWith(\"/\")) {\n                             if (str.equals(\"/end\")) {\n+                                server.unsubscribe(this);\n                                 break;\n                             } else if (str.startsWith(\"/w\")) {\n                                 // /w nick hello m8! hi\n@@ -81,6 +85,8 @@ public ClientHandler(Server server, Socket socket) {\n                                 String[] subStr = str.split(\" \");\n                                 if (!SQLHandler.isSuchNickname(subStr[1])) {\n                                     SQLHandler.updateNickname(subStr[1], subStr[2]);\n+                                    server.updateList(subStr[2], subStr[1]);\n+                                    nickname = subStr[1];\n                                 }\n                             }\n                         } else {\n@@ -100,12 +106,17 @@ public ClientHandler(Server server, Socket socket) {\n                     } catch (IOException e) {\n                         e.printStackTrace();\n                     }\n+                    try {\n+                        bufferedWriter.close();\n+                    } catch (IOException e) {\n+                        e.printStackTrace();\n+                    }\n                     try {\n                         socket.close();\n                     } catch (IOException e) {\n                         e.printStackTrace();\n                     }\n-                    server.unsubscribe(this);\n+\n                 }\n             }).start();\n         } catch (IOException e) {"
+  },
+  {
+    "sha": "bcb8b3363cb8a0031abcd360e4d5666beb998cba",
+    "filename": "server/src/main/java/ru/gb/lesson6/server/SQLHandler.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/kriian/JavaChatMaven/blob/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/src/main/java/ru/gb/lesson6/server/SQLHandler.java",
+    "raw_url": "https://github.com/kriian/JavaChatMaven/raw/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/src/main/java/ru/gb/lesson6/server/SQLHandler.java",
+    "contents_url": "https://api.github.com/repos/kriian/JavaChatMaven/contents/server/src/main/java/ru/gb/lesson6/server/SQLHandler.java?ref=2fd40ce9c01918897e1b5342c24622c2a41bc835",
+    "patch": "@@ -3,13 +3,17 @@\n import java.sql.*;\n \n public class SQLHandler {\n+    private static final String DRIVER = \"com.mysql.cj.jdbc.Driver\";\n+    private static final String DB = \"jdbc:mysql://localhost/lesson?useUnicode=true&serverTimezone=UTC\";\n+    private static final String USER = \"root\";\n+    private static final String PASSWORD = \"Telefon290787\";\n     private static Connection connection;\n     private static Statement statement;\n \n     public static void connect() {\n         try {\n-            Class.forName(\"org.sqlite.JDBC\");\n-            connection = DriverManager.getConnection(\"jdbc:sqlite:server/database.db\");\n+            Class.forName(DRIVER);\n+            connection = DriverManager.getConnection(DB, USER, PASSWORD);\n             statement = connection.createStatement();\n         } catch (Exception e) {\n             e.printStackTrace();"
+  },
+  {
+    "sha": "6fcc3de4270b20e4d0a3d79c7fbcc3cd6975a007",
+    "filename": "server/src/main/java/ru/gb/lesson6/server/Server.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/kriian/JavaChatMaven/blob/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/src/main/java/ru/gb/lesson6/server/Server.java",
+    "raw_url": "https://github.com/kriian/JavaChatMaven/raw/2fd40ce9c01918897e1b5342c24622c2a41bc835/server/src/main/java/ru/gb/lesson6/server/Server.java",
+    "contents_url": "https://api.github.com/repos/kriian/JavaChatMaven/contents/server/src/main/java/ru/gb/lesson6/server/Server.java?ref=2fd40ce9c01918897e1b5342c24622c2a41bc835",
+    "patch": "@@ -65,4 +65,10 @@ public void broadcastClientList() {\n         }\n         broadcastMsg(sb.toString());\n     }\n+\n+    public void updateList(String oldNick, String newNick) {\n+        clients.put(newNick, clients.get(oldNick));\n+        clients.remove(oldNick);\n+        broadcastClientList();\n+    }\n }"
+  }
+]

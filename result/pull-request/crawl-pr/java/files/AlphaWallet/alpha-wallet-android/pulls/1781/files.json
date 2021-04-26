@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "b97b33aa3912f77b4cc871b996f01ba57ba17111",
+    "filename": "app/src/main/java/com/alphawallet/app/ui/widget/entity/ENSHandler.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 4,
+    "changes": 16,
+    "blob_url": "https://github.com/AlphaWallet/alpha-wallet-android/blob/27568fc309607eded46a51ff0bf2e73c5b1f3872/app/src/main/java/com/alphawallet/app/ui/widget/entity/ENSHandler.java",
+    "raw_url": "https://github.com/AlphaWallet/alpha-wallet-android/raw/27568fc309607eded46a51ff0bf2e73c5b1f3872/app/src/main/java/com/alphawallet/app/ui/widget/entity/ENSHandler.java",
+    "contents_url": "https://api.github.com/repos/AlphaWallet/alpha-wallet-android/contents/app/src/main/java/com/alphawallet/app/ui/widget/entity/ENSHandler.java?ref=27568fc309607eded46a51ff0bf2e73c5b1f3872",
+    "patch": "@@ -34,6 +34,7 @@\n import io.reactivex.disposables.Disposable;\n import io.reactivex.schedulers.Schedulers;\n \n+import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;\n import static org.web3j.crypto.WalletUtils.isValidAddress;\n \n /**\n@@ -114,11 +115,18 @@ public void afterTextChanged(Editable s)\n \n     private void checkAddress()\n     {\n-        waitingForENS = true;\n         handler.removeCallbacks(this);\n-        handler.postDelayed(this, ENS_RESOLVE_DELAY);\n-        if (disposable != null && !disposable.isDisposed()) disposable.dispose();\n-        host.setWaitingSpinner(false);\n+        if (couldBeENS(toAddressEditText.getText().toString().trim()))\n+        {\n+            waitingForENS = true;\n+            handler.postDelayed(this, ENS_RESOLVE_DELAY);\n+            if (disposable != null && !disposable.isDisposed()) disposable.dispose();\n+            host.setWaitingSpinner(false);\n+        }\n+        else\n+        {\n+            waitingForENS = false;\n+        }\n     }\n \n     public void getAddress()"
+  },
+  {
+    "sha": "1a4ca650f02fc716b4de28edf43ae62841959d6b",
+    "filename": "app/src/main/java/com/alphawallet/app/util/AWEnsResolver.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/AlphaWallet/alpha-wallet-android/blob/27568fc309607eded46a51ff0bf2e73c5b1f3872/app/src/main/java/com/alphawallet/app/util/AWEnsResolver.java",
+    "raw_url": "https://github.com/AlphaWallet/alpha-wallet-android/raw/27568fc309607eded46a51ff0bf2e73c5b1f3872/app/src/main/java/com/alphawallet/app/util/AWEnsResolver.java",
+    "contents_url": "https://api.github.com/repos/AlphaWallet/alpha-wallet-android/contents/app/src/main/java/com/alphawallet/app/util/AWEnsResolver.java?ref=27568fc309607eded46a51ff0bf2e73c5b1f3872",
+    "patch": "@@ -128,4 +128,26 @@ private String checkResolvedAddressMatches(String resolvedAddress, String addres\n             return address;\n         });\n     }\n+\n+    public static boolean couldBeENS(String address)\n+    {\n+        if (address == null || address.length() == 0) return false;\n+\n+        String[] split = address.split(\"[.]\");\n+        if (split.length > 1)\n+        {\n+            String extension = split[split.length - 1];\n+            switch (extension)\n+            {\n+                case \"eth\":\n+                case \"xyz\":\n+                case \"crypto\":\n+                    return true;\n+                default:\n+                    break;\n+            }\n+        }\n+\n+        return false;\n+    }\n }"
+  },
+  {
+    "sha": "dfa33390ab4e98d9fdfc19521b67e0ce656c2c4c",
+    "filename": "app/src/main/java/com/alphawallet/app/util/BalanceUtils.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 7,
+    "changes": 20,
+    "blob_url": "https://github.com/AlphaWallet/alpha-wallet-android/blob/27568fc309607eded46a51ff0bf2e73c5b1f3872/app/src/main/java/com/alphawallet/app/util/BalanceUtils.java",
+    "raw_url": "https://github.com/AlphaWallet/alpha-wallet-android/raw/27568fc309607eded46a51ff0bf2e73c5b1f3872/app/src/main/java/com/alphawallet/app/util/BalanceUtils.java",
+    "contents_url": "https://api.github.com/repos/AlphaWallet/alpha-wallet-android/contents/app/src/main/java/com/alphawallet/app/util/BalanceUtils.java?ref=27568fc309607eded46a51ff0bf2e73c5b1f3872",
+    "patch": "@@ -10,6 +10,10 @@\n import java.text.DecimalFormat;\n import java.text.DecimalFormatSymbols;\n import java.text.NumberFormat;\n+import java.text.ParseException;\n+import java.util.Locale;\n+\n+import wallet.core.jni.proto.Harmony;\n \n public class BalanceUtils\n {\n@@ -52,16 +56,18 @@ private static String convertToLocale(String value)\n \n     public static String convertFromLocale(String value)\n     {\n-        CharSequence separator = \",\";// + (DecimalFormatSymbols.getInstance().getGroupingSeparator());\n-        value = value.replace(separator, \"\");\n-\n-        char decimal = '.';//DecimalFormatSymbols.getInstance().getDecimalSeparator();\n-        if (decimal != '.')\n+        try\n         {\n-            value = value.replace(decimal, '.');\n+            NumberFormat nf = DecimalFormat.getInstance(Locale.getDefault());\n+            Number n = nf.parse(value.trim());\n+            return String.valueOf(n.doubleValue());\n+        }\n+        catch (Exception e)\n+        {\n+            // no action - number unparsable - drop through to return 0\n         }\n \n-        return value;\n+        return \"0\";\n     }\n \n     public static BigDecimal weiToEth(BigDecimal wei) {"
+  },
+  {
+    "sha": "61cfe0e0746062861448f17a4ea303dfcd00e4a4",
+    "filename": "app/src/main/java/com/alphawallet/app/util/QRParser.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 20,
+    "changes": 21,
+    "blob_url": "https://github.com/AlphaWallet/alpha-wallet-android/blob/27568fc309607eded46a51ff0bf2e73c5b1f3872/app/src/main/java/com/alphawallet/app/util/QRParser.java",
+    "raw_url": "https://github.com/AlphaWallet/alpha-wallet-android/raw/27568fc309607eded46a51ff0bf2e73c5b1f3872/app/src/main/java/com/alphawallet/app/util/QRParser.java",
+    "contents_url": "https://api.github.com/repos/AlphaWallet/alpha-wallet-android/contents/app/src/main/java/com/alphawallet/app/util/QRParser.java?ref=27568fc309607eded46a51ff0bf2e73c5b1f3872",
+    "patch": "@@ -12,6 +12,7 @@\n import java.util.List;\n import java.util.regex.Pattern;\n \n+import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;\n import static org.web3j.crypto.WalletUtils.isValidAddress;\n \n /**\n@@ -144,26 +145,6 @@ public String extractAddressFromQrString(String url) {\n         return result.getAddress();\n     }\n \n-    private static boolean couldBeENS(String address)\n-    {\n-        String[] split = address.split(\"[.]\");\n-        if (split.length > 1)\n-        {\n-            String extension = split[split.length - 1];\n-            switch (extension)\n-            {\n-                case \"eth\":\n-                case \"xyz\":\n-                case \"crypto\":\n-                    return true;\n-                default:\n-                    break;\n-            }\n-        }\n-\n-        return false;\n-    }\n-\n     /**\n      * This method checks for Magic/Import token kind of URL which can be redirected to\n      * import token screen later."
+  }
+]

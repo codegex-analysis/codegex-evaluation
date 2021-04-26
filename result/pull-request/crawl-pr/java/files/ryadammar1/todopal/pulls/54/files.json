@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "358e2e7b7877bf0f8c5bfc812d28f0eaafc26478",
+    "filename": "todopal-backend/src/main/java/todopal/controller/Converter.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/ryadammar1/todopal/blob/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/main/java/todopal/controller/Converter.java",
+    "raw_url": "https://github.com/ryadammar1/todopal/raw/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/main/java/todopal/controller/Converter.java",
+    "contents_url": "https://api.github.com/repos/ryadammar1/todopal/contents/todopal-backend/src/main/java/todopal/controller/Converter.java?ref=cd7d98ee90d318def81e618a2a90f4a2acb0af8d",
+    "patch": "@@ -1,5 +1,7 @@\n package todopal.controller;\n \n+import java.util.stream.Collectors;\n+\n import todopal.dto.ClassroomDto;\n import todopal.dto.StudentDto;\n import todopal.dto.TaskContainerDto;\n@@ -20,6 +22,18 @@ protected static TeacherDto convertToDto(Teacher teacher) {\n         return new TeacherDto(teacher.getName());\n     }\n \n+    protected static TeacherDto convertToDtoWithPersonalInfo(Teacher teacher) {\n+        if (teacher == null) {\n+            throw new IllegalArgumentException(\"There is no such Teacher!\");\n+        }\n+\n+        TeacherDto dto = new TeacherDto(teacher.getName(), teacher.getEmail(), teacher.getPassword(), teacher.getBio());\n+        dto.setClassroom(\n+                teacher.getClassroom().stream().map((c) -> new ClassroomDto(c.getName())).collect(Collectors.toSet()));\n+\n+        return dto;\n+    }\n+\n     protected static TaskDto convertToDto(Task task) {\n         if (task == null) {\n             throw new IllegalArgumentException(\"There is no such Task!\");"
+  },
+  {
+    "sha": "3ae77b22626b2d84460a199a3cd63ea3597cbb1c",
+    "filename": "todopal-backend/src/main/java/todopal/controller/TodopalRestController.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/ryadammar1/todopal/blob/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/main/java/todopal/controller/TodopalRestController.java",
+    "raw_url": "https://github.com/ryadammar1/todopal/raw/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/main/java/todopal/controller/TodopalRestController.java",
+    "contents_url": "https://api.github.com/repos/ryadammar1/todopal/contents/todopal-backend/src/main/java/todopal/controller/TodopalRestController.java?ref=cd7d98ee90d318def81e618a2a90f4a2acb0af8d",
+    "patch": "@@ -173,10 +173,16 @@ public TaskContainerDto approveTask(@PathVariable(\"email\") String email, @PathVa\n \t}\n \n \t@GetMapping(value = { \"/teachers/{email}\", \"/teachers/{email}/\" })\n-\tpublic TeacherDto getTeacherByName(@PathVariable(\"email\") String email) throws IllegalArgumentException {\n+\tpublic TeacherDto getTeacherByEmail(@PathVariable(\"email\") String email) throws IllegalArgumentException {\n \t\treturn Converter.convertToDto(teacherService.getTeacher(email));\n \t}\n \n+\t@GetMapping(value = { \"/teachers/personal/{email}\", \"/teachers/personal/{email}/\" })\n+\tpublic TeacherDto getTeacherPersonalInfromationByEmail(@PathVariable(\"email\") String email)\n+\t\t\tthrows IllegalArgumentException {\n+\t\treturn Converter.convertToDtoWithPersonalInfo(teacherService.getTeacher(email));\n+\t}\n+\n \t@GetMapping(value = { \"/teachers\", \"/teachers/\" })\n \tpublic List<TeacherDto> getAllTeachers() {\n \t\tList<TeacherDto> teachers = new ArrayList<>();"
+  },
+  {
+    "sha": "c3817670e9d563871d1cfcd1104207e22f4e64be",
+    "filename": "todopal-backend/src/main/java/todopal/model/Teacher.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/ryadammar1/todopal/blob/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/main/java/todopal/model/Teacher.java",
+    "raw_url": "https://github.com/ryadammar1/todopal/raw/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/main/java/todopal/model/Teacher.java",
+    "contents_url": "https://api.github.com/repos/ryadammar1/todopal/contents/todopal-backend/src/main/java/todopal/model/Teacher.java?ref=cd7d98ee90d318def81e618a2a90f4a2acb0af8d",
+    "patch": "@@ -22,7 +22,7 @@ public String getApprovalCode() {\n       return this.approvalCode;\n    }\n \n-   @OneToMany(fetch = FetchType.EAGER)\n+   @OneToMany(mappedBy = \"teacher\", fetch = FetchType.EAGER)\n    public Set<Classroom> getClassroom() {\n       return this.classroom;\n    }"
+  },
+  {
+    "sha": "2f7205f192675307f05b0caf641a534982385bee",
+    "filename": "todopal-backend/src/test/java/todopal/features/TestViewPersonalProfileTeacher.java",
+    "status": "added",
+    "additions": 79,
+    "deletions": 0,
+    "changes": 79,
+    "blob_url": "https://github.com/ryadammar1/todopal/blob/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/test/java/todopal/features/TestViewPersonalProfileTeacher.java",
+    "raw_url": "https://github.com/ryadammar1/todopal/raw/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/test/java/todopal/features/TestViewPersonalProfileTeacher.java",
+    "contents_url": "https://api.github.com/repos/ryadammar1/todopal/contents/todopal-backend/src/test/java/todopal/features/TestViewPersonalProfileTeacher.java?ref=cd7d98ee90d318def81e618a2a90f4a2acb0af8d",
+    "patch": "@@ -0,0 +1,79 @@\n+package todopal.features;\n+\n+import static org.junit.jupiter.api.Assertions.assertEquals;\n+import static org.junit.jupiter.api.Assertions.assertTrue;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+\n+import io.cucumber.java.en.Given;\n+import io.cucumber.java.en.Then;\n+import io.cucumber.java.en.When;\n+import todopal.service.ClassroomService;\n+import todopal.service.TeacherService;\n+import todopal.controller.TodopalRestController;\n+import todopal.dto.TeacherDto;\n+import todopal.dto.ClassroomDto;\n+import todopal.model.Teacher;\n+\n+public class TestViewPersonalProfileTeacher {\n+    @Autowired\n+    TodopalRestController todopalRestController;\n+\n+    @Autowired\n+    TeacherService teacherService;\n+\n+    @Autowired\n+    ClassroomService classroomService;\n+\n+    Teacher teacher;\n+    TeacherDto response;\n+\n+    @Given(\"teacher {string} is logged in with name {string} email {string}, password {string} and bio {string}\")\n+    public void teacher_is_logged_in_with_name_email_and_password(String fullname, String username, String email,\n+            String password, String bio) {\n+        teacher = teacherService.createTeacher(\"approvalCode\", username, email, password, bio);\n+    }\n+\n+    @Given(\"{string} has classrooms: {string} and {string}\")\n+    public void has_classrooms_and(String username, String classroom1, String classroom2) {\n+        classroomService.createClassroom(teacher, classroom1, \"image\", \"math\");\n+        classroomService.createClassroom(teacher, classroom2, \"image\", \"math\");\n+    }\n+\n+    @When(\"teacher {string} is accessing his personal profile\")\n+    public void teacher_is_accessing_his_personal_profile(String email) {\n+        response = todopalRestController.getTeacherPersonalInfromationByEmail(email);\n+    }\n+\n+    @Then(\"the name of {string} will be displayed\")\n+    public void the_name_of_will_be_displayed(String name) {\n+        assertEquals(name, response.getName());\n+    }\n+\n+    @Then(\"the email {string} associated with {string} will be displayed\")\n+    public void the_email_associated_with_will_be_displayed(String email, String fullname) {\n+        assertEquals(email, response.getEmail());\n+    }\n+\n+    @Then(\"the classrooms {string} and {string} are displayed\")\n+    public void the_classrooms_and_are_displayed(String classroom1, String classroom2) {\n+        assertEquals(2, response.getClassroom().size());\n+\n+        boolean foundClassroom1 = false;\n+        boolean foundClassroom2 = false;\n+        for (ClassroomDto dto : response.getClassroom()) {\n+            if (dto.getClassroomName().equals(classroom1))\n+                foundClassroom1 = true;\n+            if (dto.getClassroomName().equals(classroom2))\n+                foundClassroom2 = true;\n+        }\n+        assertTrue(foundClassroom1, \"Teacher is registered with \" + classroom1);\n+        assertTrue(foundClassroom2, \"Teacher is registered with \" + classroom2);\n+    }\n+\n+    @Then(\"the bio displays: {string}\")\n+    public void the_bio_displays(String bio) {\n+        assertEquals(bio, response.getBio());\n+    }\n+\n+}"
+  },
+  {
+    "sha": "8f194c6ec059aa617267192537014727dcee97da",
+    "filename": "todopal-backend/src/test/resources/ID024_View_Personal_Profile.feature",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 12,
+    "changes": 12,
+    "blob_url": "https://github.com/ryadammar1/todopal/blob/ec660f1cda5a56572a9db0784d887e58fc674c2c/todopal-backend/src/test/resources/ID024_View_Personal_Profile.feature",
+    "raw_url": "https://github.com/ryadammar1/todopal/raw/ec660f1cda5a56572a9db0784d887e58fc674c2c/todopal-backend/src/test/resources/ID024_View_Personal_Profile.feature",
+    "contents_url": "https://api.github.com/repos/ryadammar1/todopal/contents/todopal-backend/src/test/resources/ID024_View_Personal_Profile.feature?ref=ec660f1cda5a56572a9db0784d887e58fc674c2c",
+    "patch": "@@ -1,12 +0,0 @@\n-Feature: View Personal Profile\n-\n-    As a registered TodoPal teacher\n-    I would like to view my personal profile\n-    So that I can confirm and visit my personal information\n-\n-    Scenario Outline: Teacher views his/her personal profile (Normal Flow)\n-\n-        Given teacher \"Michael Scott\" is logged in with name \"Michael_S\" email \"michael.scott@gmail.com\" and password \"aa001\"\n-        When teacher \"Michael Scott\" is accessing his personal profile\n-        Then the name of \"Michael_S\" will be displayed\n-        And the email \"mic***@gmail.com\" associated with \"Michael Scott\" will be displayed\n\\ No newline at end of file"
+  },
+  {
+    "sha": "487882facc1921a6fb64bdeea2750670e0040359",
+    "filename": "todopal-backend/src/test/resources/done features/ID024_View_Personal_Profile.feature",
+    "status": "added",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/ryadammar1/todopal/blob/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/test/resources/done%20features/ID024_View_Personal_Profile.feature",
+    "raw_url": "https://github.com/ryadammar1/todopal/raw/cd7d98ee90d318def81e618a2a90f4a2acb0af8d/todopal-backend/src/test/resources/done%20features/ID024_View_Personal_Profile.feature",
+    "contents_url": "https://api.github.com/repos/ryadammar1/todopal/contents/todopal-backend/src/test/resources/done%20features/ID024_View_Personal_Profile.feature?ref=cd7d98ee90d318def81e618a2a90f4a2acb0af8d",
+    "patch": "@@ -0,0 +1,16 @@\n+Feature: View Personal Profile\n+\n+    As a registered TodoPal teacher\n+    I would like to view my personal profile\n+    So that I can confirm and visit my personal information\n+\n+    Scenario Outline: Teacher views his/her personal profile (Normal Flow)\n+\n+        Given teacher \"Michael Scott\" is logged in with name \"Michael_S\" email \"michael.scott@gmail.com\", password \"aa001\" and bio \"I hate my life\"\n+        And \"Micheal_S\" has classrooms: \"Classroom 1\" and \"Classroom 2\"\n+        When teacher \"michael.scott@gmail.com\" is accessing his personal profile\n+        Then the name of \"Michael_S\" will be displayed\n+        And the email \"michael.scott@gmail.com\" associated with \"Michael Scott\" will be displayed\n+        And the classrooms \"Classroom 1\" and \"Classroom 2\" are displayed\n+        And the bio displays: \"I hate my life\"\n+"
+  }
+]

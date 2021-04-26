@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "9cd3c28a600b62cb15cc8fdec43d943144550da4",
+    "filename": "CHANGELOG.md",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/yahoo/fili/blob/018464a03ccddbeb44b354b2c549853dcfc4063b/CHANGELOG.md",
+    "raw_url": "https://github.com/yahoo/fili/raw/018464a03ccddbeb44b354b2c549853dcfc4063b/CHANGELOG.md",
+    "contents_url": "https://api.github.com/repos/yahoo/fili/contents/CHANGELOG.md?ref=018464a03ccddbeb44b354b2c549853dcfc4063b",
+    "patch": "@@ -7,7 +7,10 @@ pull request if there was one.\n \n Current\n -------\n+\n ### Fixed:\n+- [Fix: Caching wrong object in screwdriver config]\n+\n - [Fix: Fili-sql druid all time grain query support](https://github.com/yahoo/fili/issues/1140)\n \n - [Fix: Install python to support build tagging on new screwdriver image](https://github.com/yahoo/fili/issues/1132)\n@@ -210,6 +213,11 @@ Current\n    * Fili can now translate requests that include sketch metrics to the correct presto sql statements.\n \n ### Changed:\n+- [Break OWASP plugin descent into dependent projects, move to screwdriver step](https://github.com/yahoo/fili/issues/1145)\n+   * Remove plugin from main pom\n+   * Add pluginmanagement with settings\n+   * Add build job step to run owasp security checks.\n+   \n - [Support for embedded java client usage: made uri builder an optional contract](https://github.com/yahoo/fili/issues/1137)\n \n - [Added support for druid timeouts to be cumulatively linked to request start time](https://github.com/yahoo/fili/issues/1119)"
+  },
+  {
+    "sha": "4d3b7ec83a05f55a9c9f13b3e73cf630c8dc48e3",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 14,
+    "changes": 27,
+    "blob_url": "https://github.com/yahoo/fili/blob/018464a03ccddbeb44b354b2c549853dcfc4063b/pom.xml",
+    "raw_url": "https://github.com/yahoo/fili/raw/018464a03ccddbeb44b354b2c549853dcfc4063b/pom.xml",
+    "contents_url": "https://api.github.com/repos/yahoo/fili/contents/pom.xml?ref=018464a03ccddbeb44b354b2c549853dcfc4063b",
+    "patch": "@@ -149,7 +149,7 @@\n         <maven-project-info-reports-plugin-version>3.0.0</maven-project-info-reports-plugin-version>\n         <maven-surefire-report-plugin-version>${maven-surefire-plugin-version}</maven-surefire-report-plugin-version>\n \n-        <!-- empty property used as placeholder for args injected by jacoco coverage plugin -->\n+        <version.owasp>6.1.0</version.owasp>\n     </properties>\n \n     <dependencyManagement>\n@@ -762,23 +762,22 @@\n                     <artifactId>jacoco-maven-plugin</artifactId>\n                     <version>0.8.3</version>\n                 </plugin>\n+                <plugin>\n+                    <groupId>org.owasp</groupId>\n+                    <artifactId>dependency-check-maven</artifactId>\n+                    <version>${version.owasp}</version>\n+                    <configuration>\n+                        <failBuildOnCVSS>8</failBuildOnCVSS>\n+                        <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>\n+                        <suppressionFile>owasp-suppressions.xml</suppressionFile>\n+                        <skipRuntimeScope>true</skipRuntimeScope>\n+                        <skipDependencyManagement>false</skipDependencyManagement>\n+                    </configuration>\n+                </plugin>\n             </plugins>\n         </pluginManagement>\n \n         <plugins>\n-            <plugin>\n-                <groupId>org.owasp</groupId>\n-                <artifactId>dependency-check-maven</artifactId>\n-                <version>6.0.5</version>\n-                <configuration>\n-                    <failBuildOnCVSS>8</failBuildOnCVSS>\n-                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>\n-                    <suppressionFile>owasp-suppressions.xml</suppressionFile>\n-                    <skipRuntimeScope>true</skipRuntimeScope>\n-                    <skipDependencyManagement>false</skipDependencyManagement>\n-                </configuration>\n-            </plugin>\n-\n             <plugin>\n                 <groupId>org.apache.maven.plugins</groupId>\n                 <artifactId>maven-enforcer-plugin</artifactId>"
+  },
+  {
+    "sha": "96e9914ec5b76d3d7fc226909c903883d79709da",
+    "filename": "screwdriver.yaml",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/yahoo/fili/blob/018464a03ccddbeb44b354b2c549853dcfc4063b/screwdriver.yaml",
+    "raw_url": "https://github.com/yahoo/fili/raw/018464a03ccddbeb44b354b2c549853dcfc4063b/screwdriver.yaml",
+    "contents_url": "https://api.github.com/repos/yahoo/fili/contents/screwdriver.yaml?ref=018464a03ccddbeb44b354b2c549853dcfc4063b",
+    "patch": "@@ -1,5 +1,7 @@\n cache:\n-  event: [\"~/.m2\"]\n+  job:\n+    pull-commit: [\"~/.m2\"]\n+    master-commit: [\"~/.m2\"]\n \n shared:\n   annotations:\n@@ -22,6 +24,7 @@ jobs:\n       - debug: |\n           echo \"Master Commit : ${SD_EVENT_ID} ${SD_JOB_NAME} ${SD_PARENT_BUILD_ID}\"\n       - lua-install: apt-get update -qy && apt-get install -y lua5.2\n+      - owasp-check: mvn -B org.owasp:dependency-check-maven:check\n       - build: ./screwdriver/mvn-build.bash\n       - prep-release: apt-get update -y && apt-get install -y python\n       - release: ./screwdriver/is_whitelisted.bash && ./screwdriver/tag-for-release.bash"
+  },
+  {
+    "sha": "06915427d51206a056467d0565f5f0ed11ad024b",
+    "filename": "screwdriver/mvn-build.bash",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/yahoo/fili/blob/018464a03ccddbeb44b354b2c549853dcfc4063b/screwdriver/mvn-build.bash",
+    "raw_url": "https://github.com/yahoo/fili/raw/018464a03ccddbeb44b354b2c549853dcfc4063b/screwdriver/mvn-build.bash",
+    "contents_url": "https://api.github.com/repos/yahoo/fili/contents/screwdriver/mvn-build.bash?ref=018464a03ccddbeb44b354b2c549853dcfc4063b",
+    "patch": "@@ -15,7 +15,6 @@ if [[ ${MAVEN_RETURN_CODE} -ne 0 ]]; then\n fi\n \n echo \"INFO dependency check\"\n-mvn -B org.owasp:dependency-check-maven:check\n #capture the maven return code\n MAVEN_RETURN_CODE=$?\n if [[ ${MAVEN_RETURN_CODE} -ne 0 ]]; then"
+  }
+]

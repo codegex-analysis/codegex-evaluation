@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "1d8c19fb8b8dd76d0c97f46847bbdaadb92b92b0",
+    "filename": ".bazelci/static_analysis_checks.xml",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/4eff0f231193359ec03de881e67758a8353b67bd/.bazelci/static_analysis_checks.xml",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/4eff0f231193359ec03de881e67758a8353b67bd/.bazelci/static_analysis_checks.xml",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/.bazelci/static_analysis_checks.xml?ref=4eff0f231193359ec03de881e67758a8353b67bd",
+    "patch": "@@ -85,7 +85,6 @@\n     <exclude name=\"ForLoopsMustUseBraces\"/>\n     <exclude name=\"FormalParameterNamingConventions\"/>\n     <exclude name=\"GenericsNaming\"/>\n-    <exclude name=\"IdenticalCatchBranches\"/>\n     <exclude name=\"IfElseStmtsMustUseBraces\"/>\n     <exclude name=\"IfStmtsMustUseBraces\"/>\n     <exclude name=\"LinguisticNaming\"/>"
+  },
+  {
+    "sha": "051449689f270f271a4db43e77d80e17c4ef61e9",
+    "filename": "src/main/java/build/buildfarm/common/redis/RedisClient.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 3,
+    "changes": 5,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/4eff0f231193359ec03de881e67758a8353b67bd/src/main/java/build/buildfarm/common/redis/RedisClient.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/4eff0f231193359ec03de881e67758a8353b67bd/src/main/java/build/buildfarm/common/redis/RedisClient.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/common/redis/RedisClient.java?ref=4eff0f231193359ec03de881e67758a8353b67bd",
+    "patch": "@@ -122,7 +122,8 @@ public Void run(JedisCluster jedis) throws JedisException {\n         }\n         throw e;\n       }\n-    } catch (JedisMisconfigurationException e) {\n+    } catch (JedisMisconfigurationException | JedisNoReachableClusterNodeException e) {\n+      // In regards to a Jedis misconfiguration,\n       // the backplane is configured not to accept writes currently\n       // as a result of an error. The error is meant to indicate\n       // that substantial resources were unavailable.\n@@ -131,8 +132,6 @@ public Void run(JedisCluster jedis) throws JedisException {\n       // we are technically not at RESOURCE_EXHAUSTED, this is a\n       // persistent state which can exist long past the error\n       throw new IOException(Status.UNAVAILABLE.withCause(e).asRuntimeException());\n-    } catch (JedisNoReachableClusterNodeException e) {\n-      throw new IOException(Status.UNAVAILABLE.withCause(e).asRuntimeException());\n     } catch (JedisConnectionException e) {\n       if ((e.getMessage() != null && e.getMessage().equals(\"Unexpected end of stream.\"))\n           || e.getCause() instanceof ConnectException) {"
+  }
+]

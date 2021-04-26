@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "a6dafb0f77abd3db08f9cff5103c4a3f84269a61",
+    "filename": "full.sql",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 1,
+    "changes": 24,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/full.sql",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/full.sql",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/full.sql?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -10,4 +10,26 @@ INSERT INTO product_table (title, price) VALUES\n ('Jemeson', 2000),\n ('Pork', 65),\n ('Sausages', 71),\n-('Beef', 800);\n\\ No newline at end of file\n+('Beef', 800);\n+\n+DROP TABLE IF EXISTS user_table CASCADE;\n+CREATE TABLE user_table (id bigserial PRIMARY KEY, name VARCHAR(255));\n+INSERT INTO user_table (name) VALUES\n+('USER1'),\n+('USER2');\n+\n+DROP TABLE IF EXISTS user_product CASCADE;\n+CREATE TABLE user_product (product_id bigint, user_id bigint, FOREIGN KEY (product_id) REFERENCES product_table (id), FOREIGN KEY (user_id) REFERENCES user_table (id));\n+INSERT INTO user_product (product_id, user_id) VALUES\n+(1, 1),\n+(2, 1),\n+(3, 1),\n+(4, 1),\n+(5, 1),\n+(6, 1),\n+(7, 1),\n+(8, 1),\n+(9, 1),\n+(10, 1),\n+(1, 2),\n+(2, 2);\n\\ No newline at end of file"
+  },
+  {
+    "sha": "8ddb41818a3c01e1905c6eb222401ddf83e8736a",
+    "filename": "src/main/java/ru/geekbrains/springboot/controllers/ProductController.java",
+    "status": "modified",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/java/ru/geekbrains/springboot/controllers/ProductController.java",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/java/ru/geekbrains/springboot/controllers/ProductController.java",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/src/main/java/ru/geekbrains/springboot/controllers/ProductController.java?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -8,11 +8,14 @@\n import org.springframework.stereotype.Controller;\n import org.springframework.ui.Model;\n import org.springframework.web.bind.annotation.*;\n+import ru.geekbrains.springboot.model.Product;\n import ru.geekbrains.springboot.sevices.ProductService;\n \n import java.io.IOException;\n import java.nio.file.Files;\n import java.nio.file.Paths;\n+import java.util.ArrayList;\n+import java.util.List;\n import java.util.stream.Collectors;\n \n @Controller\n@@ -22,6 +25,8 @@\n \n     private ProductService productService;\n \n+    private List<Product> basketList = new ArrayList<>();\n+\n     public ProductController(ProductService productService){\n         this.productService = productService;\n     }\n@@ -66,4 +71,39 @@ public String updateProductCoast(@PathVariable Integer id,@RequestParam int newC\n         System.out.println(\"Id = \" + id);\n         return \"redirect:/product/productAll\";\n     }\n+    @GetMapping(\"/addToBasket/{id}\")\n+    public String addToBasket(@PathVariable Integer id) {\n+        LOG.debug(\"Id = \" + id);\n+        System.out.println(\"Id = \" + id);\n+        basketList.add(productService.getOneProductById(id));\n+        System.out.println(\"Size basket : \");\n+        return \"redirect:/product/productAll\";\n+    }\n+    @GetMapping(\"/toBasket\")\n+    public String toBasket(Model model){\n+        model.addAttribute(\"toBasket\", basketList);\n+        return \"basket\";\n+    }\n+    @GetMapping(\"/backToMainPage\")\n+    public String backToMainPage(){\n+        return \"redirect:/product/productAll\";\n+    }\n+    @GetMapping(\"/removeFromBasket/{id}\")\n+    public String removeFromBasket(@PathVariable int id) {\n+        for (int i = 0; i < basketList.size(); i++){\n+            if(basketList.get(i).getId() == id){\n+                System.out.println(\"basketList.remove(i) = \" +  basketList.remove(i));\n+            }\n+        }\n+        return \"redirect:/product/toBasket\";\n+    }\n+    @GetMapping(\"/totalCoast\")\n+    public Integer totalCoast() {\n+        int totalCoast = 0;\n+        for (Product p : basketList){\n+            totalCoast += p.getCoast();\n+        }\n+        System.out.println(\"TOTAL COAST = \" + totalCoast);\n+        return totalCoast;\n+    }\n }"
+  },
+  {
+    "sha": "4b1352799b374e4d27b273fcf8d2c2e9c3701143",
+    "filename": "src/main/java/ru/geekbrains/springboot/model/Product.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 26,
+    "changes": 43,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/java/ru/geekbrains/springboot/model/Product.java",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/java/ru/geekbrains/springboot/model/Product.java",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/src/main/java/ru/geekbrains/springboot/model/Product.java?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -1,12 +1,15 @@\n package ru.geekbrains.springboot.model;\n \n import lombok.AllArgsConstructor;\n-import lombok.Data;\n import lombok.Getter;\n import lombok.Setter;\n \n import javax.persistence.*;\n+import java.util.List;\n \n+@Getter\n+@Setter\n+@AllArgsConstructor\n \n @Entity\n @Table(name = \"product_table\")\n@@ -22,6 +25,15 @@\n     @Column(name = \"price\")\n     private int coast;\n \n+    @ManyToMany\n+    @JoinTable (\n+            name = \"user_product\",\n+            joinColumns = @JoinColumn(name = \"product_id\"),\n+            inverseJoinColumns = @JoinColumn(name = \"user_id\")\n+    )\n+\n+    private List<User> user;\n+\n     @Override\n     public String toString() {\n         return \"id = \" + id +\n@@ -33,38 +45,17 @@ public String toString() {\n     public Product() {\n     }\n \n-    public Product(int id, String title, int coast) {\n-        this.id = id;\n-        this.title = title;\n-        this.coast = coast;\n-    }\n-\n     public Product(String title, int coast) {\n         this.title = title;\n         this.coast = coast;\n     }\n \n-    public int getId() {\n-        return id;\n-    }\n \n-    public void setId(int id) {\n-        this.id = id;\n+    public List<User> getUsers() {\n+        return user;\n     }\n \n-    public String getTitle() {\n-        return title;\n-    }\n-\n-    public void setTitle(String title) {\n-        this.title = title;\n-    }\n-\n-    public double getCoast() {\n-        return coast;\n-    }\n-\n-    public void setCoast(int coast) {\n-        this.coast = coast;\n+    public void setUsers(List<User> user) {\n+        this.user = user;\n     }\n }"
+  },
+  {
+    "sha": "c8cefa09d994806c6cacedd73753bb586649c916",
+    "filename": "src/main/java/ru/geekbrains/springboot/repositories/ProductRepository.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 12,
+    "changes": 12,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/java/ru/geekbrains/springboot/repositories/ProductRepository.java",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/java/ru/geekbrains/springboot/repositories/ProductRepository.java",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/src/main/java/ru/geekbrains/springboot/repositories/ProductRepository.java?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -39,18 +39,6 @@ public void init(){\n                 .configure(\"config/productController/hibernate.cfg.xml\")\n                 .buildSessionFactory();\n \n-\n-//        listProduct = new ArrayList<>();\n-//        listProduct.add(new Product(1,\"Potato\", 25));\n-//        listProduct.add(new Product(2,\"Cucumber\", 35));\n-//        listProduct.add(new Product(3,\"Tomato\", 125));\n-//        listProduct.add(new Product(4,\"Shampoo\", 367));\n-//        listProduct.add(new Product(5,\"Chicken\", 78));\n-//        listProduct.add(new Product(6,\"Soap\", 23));\n-//        listProduct.add(new Product(7,\"Jemeson\", 2000));\n-//        listProduct.add(new Product(8,\"Pork\", 65));\n-//        listProduct.add(new Product(9,\"Sausages\", 71));\n-//        listProduct.add(new Product(10,\"Beef\", 800));\n     }\n \n     public void add(Product product){"
+  },
+  {
+    "sha": "86d3c28ac9bc3c1b73c91fdc9ccb4d0068de2dfb",
+    "filename": "src/main/java/ru/geekbrains/springboot/sevices/ProductService.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 13,
+    "changes": 34,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/java/ru/geekbrains/springboot/sevices/ProductService.java",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/java/ru/geekbrains/springboot/sevices/ProductService.java",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/src/main/java/ru/geekbrains/springboot/sevices/ProductService.java?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -28,18 +28,18 @@ public int productCount(){\n         return product.size();\n \n     }\n-    public int calculateAverageProductCoast(){\n-        List<Product> product = getProductList();\n-        if(product.size() == 0){\n-            return 0;\n-        }\n-        int avg = 0;\n-        for (Product p : product){\n-            avg += p.getCoast();\n-        }\n-        avg /= product.size();\n-        return avg;\n-    }\n+//    public int calculateAverageProductCoast(){\n+//        List<Product> product = getProductList();\n+//        if(product.size() == 0){\n+//            return 0;\n+//        }\n+//        int avg = 0;\n+//        for (Product p : product){\n+//            avg += p.getCoast();\n+//        }\n+//        avg /= product.size();\n+//        return avg;\n+//    }\n \n     public void addProduct(String name, int coast){\n         int id = productCount() + 1;\n@@ -51,7 +51,7 @@ public void addProduct(String name, int coast){\n             }\n         }else{\n             System.out.println(\"Name : \" + name);\n-            productRepository.add(new Product(id, name, coast));\n+            productRepository.add(new Product(name, coast));\n             System.out.println(\"Продукт добавлен\");\n         }\n     }\n@@ -103,4 +103,12 @@ public void removeProductById(int id){\n         System.out.println(\"Продукт удален.\");\n     }\n \n+    public Product getOneProductById(int id){\n+        id--;\n+        List<Product> product = getProductList();\n+        Product oneProduct = product.get(id);\n+        return oneProduct;\n+\n+    }\n+\n }"
+  },
+  {
+    "sha": "60d6faee1727f883b4fa40d2290acebf76bb0873",
+    "filename": "src/main/resources/application.yaml",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/application.yaml",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/application.yaml",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/src/main/resources/application.yaml?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -19,5 +19,3 @@ hybernate:\n   show_sql: true\n   dialect: org.hibernate.dialect.PostgreSQL95Dialect\n   current_session_context_class: thread\n-#  mapping:\n-#    class: ru.geekbrains.springboot.model.Product\n\\ No newline at end of file"
+  },
+  {
+    "sha": "878c8f7d3447277499681a6e567fefcd5b71f582",
+    "filename": "src/main/resources/config/hibernate.cfg.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/config/hibernate.cfg.xml",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/config/hibernate.cfg.xml",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/src/main/resources/config/hibernate.cfg.xml?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -12,5 +12,5 @@\n         <property name=\"dialect\">org.hibernate.dialect.PostgreSQL94Dialect</property>\n         <property name=\"show_sql\">true</property>\n         <property name=\"current_session_context_class\">thread</property>\n-    </session-factory>\n+    </session-factory> \n </hibernate-configuration>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "cb62e5f902094473ebc5beef403f902904f41f28",
+    "filename": "src/main/resources/config/productController/hibernate.cfg.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/config/productController/hibernate.cfg.xml",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/config/productController/hibernate.cfg.xml",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/src/main/resources/config/productController/hibernate.cfg.xml?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -14,5 +14,6 @@\n         <property name=\"current_session_context_class\">thread</property>\n \n         <mapping class=\"ru.geekbrains.springboot.model.Product\"/>\n+        <mapping class=\"ru.geekbrains.springboot.model.User\"/>\n     </session-factory>\n </hibernate-configuration>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "a6286b9d60eb41ccc49f158ce6cc9d72801eeaf5",
+    "filename": "src/main/resources/templates/productAll.html",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/templates/productAll.html",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/templates/productAll.html",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/src/main/resources/templates/productAll.html?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -27,7 +27,8 @@ <h1>Product list:</h1>\n             <td th:text=\"${b.title}\"></td>\n             <td th:text=\"${'C: ' + b.coast}\"></td>\n             <td><a class=\"btn btn-danger\" th:href=\"@{'/product/update/'+ ${b.id}}\">Update</a>\n-            <a class=\"btn btn-danger\" th:href=\"@{'/product/remove/' + ${b.id}}\">Delete</a></td>\n+            <a class=\"btn btn-danger\" th:href=\"@{'/product/remove/' + ${b.id}}\">Delete</a>\n+            <a class=\"btn btn-danger\" th:href=\"@{'/product/addToBasket/' + ${b.id}}\">Buy</a></td>\n \n         </tr>\n         </tbody>\n@@ -42,6 +43,10 @@ <h1>Product list:</h1>\n         <input type=\"number\" step=\"0.01\" name=\"coast\">\n         <button class=\"btn btn-primary\" type=\"submit\">Create</button>\n     </form>\n+    <form>\n+        <a class=\"btn btn-primary\" th:href=\"@{'/product/toBasket/'}\">Basket</a>\n+    </form>\n+\n </div>\n </body>\n </html>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "49ceb03b842b1963f7739dff294555291b767fab",
+    "filename": "src/main/resources/templates/productUpdate.html",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/Sorrentovbg/Spring/blob/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/templates/productUpdate.html",
+    "raw_url": "https://github.com/Sorrentovbg/Spring/raw/11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf/src/main/resources/templates/productUpdate.html",
+    "contents_url": "https://api.github.com/repos/Sorrentovbg/Spring/contents/src/main/resources/templates/productUpdate.html?ref=11bff76e41e7cc62a790a46b5f5f036e5ef7fdaf",
+    "patch": "@@ -41,4 +41,6 @@ <h1>Product update:</h1>\n             </form></td>\n         </tr>\n         </tbody>\n-    </table>\n\\ No newline at end of file\n+    </table>\n+</div>\n+</body>\n\\ No newline at end of file"
+  }
+]

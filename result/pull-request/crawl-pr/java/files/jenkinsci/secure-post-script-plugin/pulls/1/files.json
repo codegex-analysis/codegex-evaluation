@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "266bf4a49624cdd76b366bf2c0d200fbf6df924d",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/jenkinsci/secure-post-script-plugin/blob/d4183884440ad9b4efc80f15e02e0abc757b4aab/pom.xml",
+    "raw_url": "https://github.com/jenkinsci/secure-post-script-plugin/raw/d4183884440ad9b4efc80f15e02e0abc757b4aab/pom.xml",
+    "contents_url": "https://api.github.com/repos/jenkinsci/secure-post-script-plugin/contents/pom.xml?ref=d4183884440ad9b4efc80f15e02e0abc757b4aab",
+    "patch": "@@ -71,7 +71,6 @@\n         <dependency>\n             <groupId>org.jenkins-ci.plugins</groupId>\n             <artifactId>script-security</artifactId>\n-            <version>1.63.1</version>\n         </dependency>\n     </dependencies>\n "
+  },
+  {
+    "sha": "2dcb9f727dea25dba0ffc869f18d2e7d57e3e248",
+    "filename": "src/main/java/io/jenkins/plugins/securepostscript/SecurePostScript.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 3,
+    "changes": 10,
+    "blob_url": "https://github.com/jenkinsci/secure-post-script-plugin/blob/d4183884440ad9b4efc80f15e02e0abc757b4aab/src/main/java/io/jenkins/plugins/securepostscript/SecurePostScript.java",
+    "raw_url": "https://github.com/jenkinsci/secure-post-script-plugin/raw/d4183884440ad9b4efc80f15e02e0abc757b4aab/src/main/java/io/jenkins/plugins/securepostscript/SecurePostScript.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/secure-post-script-plugin/contents/src/main/java/io/jenkins/plugins/securepostscript/SecurePostScript.java?ref=d4183884440ad9b4efc80f15e02e0abc757b4aab",
+    "patch": "@@ -14,7 +14,7 @@\n   public void onCompleted(final Run run, final TaskListener listener) {\n     final EnvVars envVars = getEnvVars(run, listener);\n     SecurePostScriptConfiguration cfg = SecurePostScriptConfiguration.get();\n-    System.out.println(\"result: \" + cfg.getRunCondition());\n+    listener.getLogger().println(\"result: \" + cfg.getRunCondition());\n     Result result = run.getResult();\n     if (result != null) {\n       if (result.isWorseThan(SecurePostScriptConfiguration.get().getResultCondition())) {\n@@ -23,7 +23,11 @@ public void onCompleted(final Run run, final TaskListener listener) {\n     }\n \n     final SecureGroovyScript script = SecurePostScriptConfiguration.get().getSecureGroovyScript();\n-    System.out.println(\"script to be executed: \" + script.getScript());\n+    if (script == null) {\n+      listener.getLogger().println(\"No script configured\");\n+      return;\n+    }\n+    listener.getLogger().println(\"script to be executed: \" + script.getScript());\n     try {\n       script.configuring(ApprovalContext.create().withCurrentUser());\n       new GroovyScriptRunner().run(script, envVars, listener);\n@@ -41,7 +45,7 @@ private EnvVars getEnvVars(final Run run, final TaskListener listener) {\n       }\n       return envVars;\n     } catch (final Throwable e) {\n-      e.printStackTrace();\n+      e.printStackTrace(listener.getLogger());\n       return null;\n     }\n   }"
+  },
+  {
+    "sha": "d3703b736a24463e667855ec3f5f8f008ba52e2b",
+    "filename": "src/main/java/io/jenkins/plugins/securepostscript/SecurePostScriptConfiguration.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/jenkinsci/secure-post-script-plugin/blob/d4183884440ad9b4efc80f15e02e0abc757b4aab/src/main/java/io/jenkins/plugins/securepostscript/SecurePostScriptConfiguration.java",
+    "raw_url": "https://github.com/jenkinsci/secure-post-script-plugin/raw/d4183884440ad9b4efc80f15e02e0abc757b4aab/src/main/java/io/jenkins/plugins/securepostscript/SecurePostScriptConfiguration.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/secure-post-script-plugin/contents/src/main/java/io/jenkins/plugins/securepostscript/SecurePostScriptConfiguration.java?ref=d4183884440ad9b4efc80f15e02e0abc757b4aab",
+    "patch": "@@ -11,6 +11,8 @@\n import org.kohsuke.stapler.QueryParameter;\r\n import org.kohsuke.stapler.StaplerRequest;\r\n \r\n+import javax.annotation.CheckForNull;\r\n+\r\n @Extension\r\n public class SecurePostScriptConfiguration extends GlobalConfiguration {\r\n \r\n@@ -26,6 +28,7 @@ public SecurePostScriptConfiguration() {\n     load();\r\n   }\r\n \r\n+  @CheckForNull\r\n   public SecureGroovyScript getSecureGroovyScript() {\r\n     return secureGroovyScript;\r\n   }\r"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "29d365c5d76cfba11a36cc9384c0da3bd6f12842",
+    "filename": ".github/workflows/sanity-tests.yaml",
+    "status": "added",
+    "additions": 60,
+    "deletions": 0,
+    "changes": 60,
+    "blob_url": "https://github.com/kruize/autotune/blob/695677badd8c3a3329b59d01a93afd27d3a1576f/.github/workflows/sanity-tests.yaml",
+    "raw_url": "https://github.com/kruize/autotune/raw/695677badd8c3a3329b59d01a93afd27d3a1576f/.github/workflows/sanity-tests.yaml",
+    "contents_url": "https://api.github.com/repos/kruize/autotune/contents/.github/workflows/sanity-tests.yaml?ref=695677badd8c3a3329b59d01a93afd27d3a1576f",
+    "patch": "@@ -0,0 +1,60 @@\n+name: Sanity tests \n+\n+on:\n+  schedule:\n+  - cron: \"0 0 * * *\"\n+\n+  # Allows you to run this workflow manually from the Actions tab\n+  workflow_dispatch:\n+\n+jobs:\n+  sanity_tests:\n+    # The type of runner that the job will run on\n+    runs-on: ubuntu-latest\n+\n+    steps:\n+      - name: Checkout autotune\n+        uses: actions/checkout@v2\n+        with:\n+          repository: kruize/autotune\n+          path: autotune\n+\n+      - name: Checkout benchmarks\n+        uses: actions/checkout@v2\n+        with:\n+          repository: kruize/benchmarks\n+          path: benchmarks\n+\n+      - name: Setup Minikube\n+        uses: manusa/actions-setup-minikube@v2.3.0\n+        with:\n+          minikube version: 'v1.16.0'\n+          kubernetes version: 'v1.19.2'\n+\n+      - name: Start minikube\n+        run: |\n+          kubectl cluster-info\n+          kubectl get pods -n kube-system      \n+\n+      - name: Install Prometheus on minikube\n+        run: |\n+          echo Install Prometheus on minikube  \n+          cd autotune/scripts\n+          ./prometheus_on_minikube.sh -as    \n+\n+      - name: Run Sanity tests\n+        run: |\n+          echo Running Sanity tests\n+          cd autotune/tests\n+          ./test_autotune.sh -c minikube -i kruize/autotune:test --tctype=functional --testsuite=sanity --resultsdir=${GITHUB_WORKSPACE} -r ${GITHUB_WORKSPACE}/benchmarks\n+          cd ${GITHUB_WORKSPACE}\n+          ls\n+          tar cvf autotune_test_results.tar autotune_test_results\n+          ls\n+\n+      - name: Upload results\n+        uses: actions/upload-artifact@v2\n+        with:\n+           name: autotune-results\n+           path: ./autotune_test_results.tar\n+           retention-days: 2"
+  }
+]

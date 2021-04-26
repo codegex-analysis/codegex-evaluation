@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "e7a4eb2400b55a17d523a3d43fad70e3c9bc9b95",
+    "filename": "Frameworks/BusinessLogic/ERAttachment/Sources/er/attachment/processors/ERAttachmentProcessor.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 3,
+    "changes": 11,
+    "blob_url": "https://github.com/wocommunity/wonder/blob/db44d682ecdedb82d666226a398d0193bf59aac6/Frameworks/BusinessLogic/ERAttachment/Sources/er/attachment/processors/ERAttachmentProcessor.java",
+    "raw_url": "https://github.com/wocommunity/wonder/raw/db44d682ecdedb82d666226a398d0193bf59aac6/Frameworks/BusinessLogic/ERAttachment/Sources/er/attachment/processors/ERAttachmentProcessor.java",
+    "contents_url": "https://api.github.com/repos/wocommunity/wonder/contents/Frameworks/BusinessLogic/ERAttachment/Sources/er/attachment/processors/ERAttachmentProcessor.java?ref=db44d682ecdedb82d666226a398d0193bf59aac6",
+    "patch": "@@ -161,13 +161,14 @@ protected static String _parsePathTemplate(ERAttachment attachment, String templ\n     hashPathBuffer.append(filenameHash.charAt(1));\n     hashPathBuffer.append('/');\n     hashPathBuffer.append(filenameHash.charAt(2));\n-    //hashPathBuffer.append('/');\n-    //hashPathBuffer.append(filenameHash.substring(3));\n+//    hashPathBuffer.append('/');\n+//    hashPathBuffer.append(filenameHash.substring(3));\n     parsedPath = parsedPath.replaceAll(ERAttachmentProcessor.HASH_VARIABLE, hashPathBuffer.toString());\n \n     parsedPath = parsedPath.replaceAll(ERAttachmentProcessor.UUID_VARIABLE, UUID.randomUUID().toString());\n \n-    parsedPath = parsedPath.replaceAll(ERAttachmentProcessor.FILE_NAME_VARIABLE, recommendedFileName);\n+    parsedPath = parsedPath.replaceAll(ERAttachmentProcessor.FILE_NAME_VARIABLE, escapeCurrencyOf(recommendedFileName));\n+    \n     parsedPath = parsedPath.replaceAll(ERAttachmentProcessor.PK_VARIABLE, attachment.primaryKeyInTransaction());\n     return parsedPath;\n   }\n@@ -462,4 +463,8 @@ public String getRecommendedFileName() {\n       return _recommendedFileName;\n     }\n   }\n+  \n+  static String escapeCurrencyOf(String text) {\n+\t  return text.replaceAll(\"\\\\$\", \"\\\\\\\\\\\\$\");\n+  }  \n }"
+  },
+  {
+    "sha": "29bfd6a6eeeb2d8685816e06b705ef412c090b52",
+    "filename": "Frameworks/BusinessLogic/ERAttachment/Sources/er/attachment/processors/ERFileAttachmentProcessor.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 3,
+    "changes": 9,
+    "blob_url": "https://github.com/wocommunity/wonder/blob/db44d682ecdedb82d666226a398d0193bf59aac6/Frameworks/BusinessLogic/ERAttachment/Sources/er/attachment/processors/ERFileAttachmentProcessor.java",
+    "raw_url": "https://github.com/wocommunity/wonder/raw/db44d682ecdedb82d666226a398d0193bf59aac6/Frameworks/BusinessLogic/ERAttachment/Sources/er/attachment/processors/ERFileAttachmentProcessor.java",
+    "contents_url": "https://api.github.com/repos/wocommunity/wonder/contents/Frameworks/BusinessLogic/ERAttachment/Sources/er/attachment/processors/ERFileAttachmentProcessor.java?ref=db44d682ecdedb82d666226a398d0193bf59aac6",
+    "patch": "@@ -1,5 +1,7 @@\n package er.attachment.processors;\n \n+import static java.util.regex.Pattern.quote;\n+\n import java.io.File;\n import java.io.FileInputStream;\n import java.io.IOException;\n@@ -88,11 +90,12 @@ else if (!webPath.startsWith(\"/\")) {\n       File actualFilesystemPath = ERXFileUtilities.reserveUniqueFile(desiredFilesystemPath, overwrite);\n \n       ERXFileUtilities.copyFileToFile(uploadedFile, actualFilesystemPath, pendingDelete, true);\n+      \n+      String desiredFileName = escapeCurrencyOf(desiredFilesystemPath.getName());\n+      String actualFileName = escapeCurrencyOf(actualFilesystemPath.getName());\n \n-      String desiredFileName = desiredFilesystemPath.getName();\n-      String actualFileName = actualFilesystemPath.getName();\n       // in case the name was not unique and changed, we need to update webPath ...\n-      webPath = webPath.replaceAll(\"\\\\Q\" + desiredFileName + \"\\\\E$\", actualFileName);\n+      webPath = webPath.replaceAll(quote(desiredFileName), actualFileName);\n \n       attachment.setWebPath(webPath);\n       attachment.setFilesystemPath(actualFilesystemPath.getAbsolutePath());"
+  }
+]

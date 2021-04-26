@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "7e1b1b8a8c9b0dcf6f635f5cd7dc364ea0d33642",
+    "filename": "checkstyle/suppressions.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/confluentinc/kafka-connect-storage-common/blob/11636ae94121badb97f64475585726912e201b33/checkstyle/suppressions.xml",
+    "raw_url": "https://github.com/confluentinc/kafka-connect-storage-common/raw/11636ae94121badb97f64475585726912e201b33/checkstyle/suppressions.xml",
+    "contents_url": "https://api.github.com/repos/confluentinc/kafka-connect-storage-common/contents/checkstyle/suppressions.xml?ref=11636ae94121badb97f64475585726912e201b33",
+    "patch": "@@ -13,7 +13,12 @@\n \n     <suppress\n             checks=\"(CyclomaticComplexity)\"\n-            files=\"(PartitionerConfig|StorageSchemaCompatibility).java\"\n+            files=\"(PartitionerConfig|StorageSchemaCompatibility|FieldPartitioner).java\"\n+    />\n+\n+    <suppress\n+            checks=\"(JavaNCSSCheck)\"\n+            files=\"FieldPartitioner.java\"\n     />\n \n     <suppress"
+  },
+  {
+    "sha": "d0deed00af858c8708d0488a7b013d7d977b1630",
+    "filename": "core/src/main/java/io/confluent/connect/storage/util/DateTimeUtils.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 10,
+    "changes": 19,
+    "blob_url": "https://github.com/confluentinc/kafka-connect-storage-common/blob/11636ae94121badb97f64475585726912e201b33/core/src/main/java/io/confluent/connect/storage/util/DateTimeUtils.java",
+    "raw_url": "https://github.com/confluentinc/kafka-connect-storage-common/raw/11636ae94121badb97f64475585726912e201b33/core/src/main/java/io/confluent/connect/storage/util/DateTimeUtils.java",
+    "contents_url": "https://api.github.com/repos/confluentinc/kafka-connect-storage-common/contents/core/src/main/java/io/confluent/connect/storage/util/DateTimeUtils.java?ref=11636ae94121badb97f64475585726912e201b33",
+    "patch": "@@ -15,12 +15,14 @@\n \n package io.confluent.connect.storage.util;\n \n-import org.joda.time.DateTime;\n import org.joda.time.DateTimeZone;\n-import org.joda.time.Duration;\n+\n+import java.util.concurrent.TimeUnit;\n \n public class DateTimeUtils {\n \n+  private static final long DAY_IN_MS = TimeUnit.DAYS.toMillis(1);\n+\n   /**\n    * Calculates next period of periodMs after currentTimeMs\n    * starting from midnight in given timeZone.\n@@ -37,15 +39,12 @@ public static long getNextTimeAdjustedByDay(\n       long periodMs,\n       DateTimeZone timeZone\n   ) {\n-    DateTime currentDT = new DateTime(currentTimeMs).withZone(timeZone);\n-    DateTime startOfDayDT = currentDT.withTimeAtStartOfDay();\n-    DateTime startOfNextDayDT = startOfDayDT.plusDays(1);\n-    Duration currentDayDuration = new Duration(startOfDayDT, startOfNextDayDT);\n-    long todayInMs = currentDayDuration.getMillis();\n-\n-    long startOfDay = startOfDayDT.getMillis();\n+    long startOfDay = timeZone.convertLocalToUTC(\n+        timeZone.convertUTCToLocal(currentTimeMs) / DAY_IN_MS * DAY_IN_MS,\n+        true\n+    );\n     long nextPeriodOffset = ((currentTimeMs - startOfDay) / periodMs + 1) * periodMs;\n-    long offset = Math.min(nextPeriodOffset, todayInMs);\n+    long offset = Math.min(nextPeriodOffset, DAY_IN_MS);\n     return startOfDay + offset;\n   }\n }"
+  },
+  {
+    "sha": "e14258ff509e1f131d55a5c610f0e82dcd598773",
+    "filename": "partitioner/src/main/java/io/confluent/connect/storage/partitioner/FieldPartitioner.java",
+    "status": "modified",
+    "additions": 36,
+    "deletions": 3,
+    "changes": 39,
+    "blob_url": "https://github.com/confluentinc/kafka-connect-storage-common/blob/11636ae94121badb97f64475585726912e201b33/partitioner/src/main/java/io/confluent/connect/storage/partitioner/FieldPartitioner.java",
+    "raw_url": "https://github.com/confluentinc/kafka-connect-storage-common/raw/11636ae94121badb97f64475585726912e201b33/partitioner/src/main/java/io/confluent/connect/storage/partitioner/FieldPartitioner.java",
+    "contents_url": "https://api.github.com/repos/confluentinc/kafka-connect-storage-common/contents/partitioner/src/main/java/io/confluent/connect/storage/partitioner/FieldPartitioner.java?ref=11636ae94121badb97f64475585726912e201b33",
+    "patch": "@@ -15,10 +15,12 @@\n \n package io.confluent.connect.storage.partitioner;\n \n+import io.confluent.connect.storage.util.DataUtils;\n import org.apache.kafka.common.utils.Utils;\n import org.apache.kafka.connect.data.Schema;\n import org.apache.kafka.connect.data.Schema.Type;\n import org.apache.kafka.connect.data.Struct;\n+import org.apache.kafka.connect.errors.DataException;\n import org.apache.kafka.connect.sink.SinkRecord;\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n@@ -44,16 +46,14 @@ public void configure(Map<String, Object> config) {\n   @Override\n   public String encodePartition(SinkRecord sinkRecord) {\n     Object value = sinkRecord.value();\n+    StringBuilder builder = new StringBuilder();\n     if (value instanceof Struct) {\n       final Schema valueSchema = sinkRecord.valueSchema();\n       final Struct struct = (Struct) value;\n-\n-      StringBuilder builder = new StringBuilder();\n       for (String fieldName : fieldNames) {\n         if (builder.length() > 0) {\n           builder.append(this.delim);\n         }\n-\n         Object partitionKey = struct.get(fieldName);\n         Type type = valueSchema.field(fieldName).schema().type();\n         switch (type) {\n@@ -77,6 +77,39 @@ public String encodePartition(SinkRecord sinkRecord) {\n         }\n       }\n       return builder.toString();\n+    } else if (value instanceof Map) {\n+      Map<?, ?> map = (Map<?, ?>) value;\n+      for (String fieldName : fieldNames) {\n+        if (builder.length() > 0) {\n+          builder.append(this.delim);\n+        }\n+        Object fieldValue = \"null\";\n+        try {\n+          fieldValue = DataUtils.getNestedFieldValue(map, fieldName);\n+        } catch (DataException e) {\n+          log.warn(\"{} is unable to parse field - {} from record - {}\",\n+                  this.getClass(), fieldName, sinkRecord.value());\n+        }\n+        String[] nestedFieldList = fieldName.split(\"\\\\.\");\n+        String partitionName = nestedFieldList[nestedFieldList.length - 1];\n+        if (fieldValue instanceof Number) {\n+          Number record = (Number) fieldValue;\n+          builder.append(partitionName + \"=\" + record.toString());\n+        } else if (fieldValue instanceof String) {\n+          builder.append(partitionName + \"=\" + (String) fieldValue);\n+        } else if (fieldValue instanceof Boolean) {\n+          boolean booleanRecord = (boolean) fieldValue;\n+          builder.append(partitionName + \"=\" + Boolean.toString(booleanRecord));\n+        } else {\n+          log.error(\n+                  \"Unsupported type '{}' for user-defined timestamp field.\", fieldValue.getClass()\n+          );\n+          throw new PartitionException(\n+                  \"Error extracting timestamp from record field: \" + fieldName\n+          );\n+        }\n+      }\n+      return builder.toString();\n     } else {\n       log.error(\"Value is not Struct type.\");\n       throw new PartitionException(\"Error encoding partition.\");"
+  },
+  {
+    "sha": "cc34ab516bab77a7f53d5a466ddd2d661de8ba93",
+    "filename": "partitioner/src/test/java/io/confluent/connect/storage/partitioner/FieldPartitionerTest.java",
+    "status": "modified",
+    "additions": 36,
+    "deletions": 2,
+    "changes": 38,
+    "blob_url": "https://github.com/confluentinc/kafka-connect-storage-common/blob/11636ae94121badb97f64475585726912e201b33/partitioner/src/test/java/io/confluent/connect/storage/partitioner/FieldPartitionerTest.java",
+    "raw_url": "https://github.com/confluentinc/kafka-connect-storage-common/raw/11636ae94121badb97f64475585726912e201b33/partitioner/src/test/java/io/confluent/connect/storage/partitioner/FieldPartitionerTest.java",
+    "contents_url": "https://api.github.com/repos/confluentinc/kafka-connect-storage-common/contents/partitioner/src/test/java/io/confluent/connect/storage/partitioner/FieldPartitionerTest.java?ref=11636ae94121badb97f64475585726912e201b33",
+    "patch": "@@ -20,9 +20,7 @@\n import io.confluent.connect.storage.errors.PartitionException;\n import org.apache.kafka.connect.data.Schema;\n import org.apache.kafka.connect.sink.SinkRecord;\n-import org.junit.Rule;\n import org.junit.Test;\n-import org.junit.rules.ExpectedException;\n \n import java.util.Arrays;\n import java.util.HashMap;\n@@ -127,6 +125,42 @@ public void testNotStructPartition() throws PartitionException {\n     assertEquals(\"Error encoding partition.\", e.getMessage());\n   }\n \n+  @Test\n+  public void testMapPartition() throws PartitionException {\n+    String fieldName = \"nested.string\";\n+\n+    Map<String, Object> expectedNestedMap = createMapWithTimestampField(TIMESTAMP);\n+    Map<String, Object> map = new HashMap<>();\n+    map.put(\"nested\", expectedNestedMap);\n+    FieldPartitioner<String> partitioner;\n+    SinkRecord sinkRecord = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null,\n+            Schema.STRING_SCHEMA, map, 0L);\n+    String path;\n+\n+\n+    Map<String, Object> m = new LinkedHashMap<>();\n+    m.put(\"string\", \"def\");\n+    partitioner = getFieldPartitioner(fieldName);\n+    path = partitioner.encodePartition(sinkRecord);\n+    assertThat(path, is(generateEncodedPartitionFromMap(m)));\n+\n+    fieldName = \"nested.int\";\n+    m = new LinkedHashMap<>();\n+    m.put(\"int\", \"12\");\n+    partitioner = getFieldPartitioner(fieldName);\n+    path = partitioner.encodePartition(sinkRecord);\n+    assertThat(path, is(generateEncodedPartitionFromMap(m)));\n+\n+    fieldName = \"nested.long\";\n+    String secondFieldName = \"nested.int\";\n+    m = new LinkedHashMap<>();\n+    m.put(\"long\", \"12\");\n+    m.put(\"int\", \"12\");\n+    partitioner = getFieldPartitioner(fieldName, secondFieldName);\n+    path = partitioner.encodePartition(sinkRecord);\n+    assertThat(path, is(generateEncodedPartitionFromMap(m)));\n+  }\n+\n   @Test\n   public void testMultiPartition() {\n     FieldPartitioner<String> partitioner = getFieldPartitioner(\"string\", \"int\");"
+  },
+  {
+    "sha": "a588f7465134aaddca36e39b07323d049a707cf1",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/confluentinc/kafka-connect-storage-common/blob/11636ae94121badb97f64475585726912e201b33/pom.xml",
+    "raw_url": "https://github.com/confluentinc/kafka-connect-storage-common/raw/11636ae94121badb97f64475585726912e201b33/pom.xml",
+    "contents_url": "https://api.github.com/repos/confluentinc/kafka-connect-storage-common/contents/pom.xml?ref=11636ae94121badb97f64475585726912e201b33",
+    "patch": "@@ -59,24 +59,21 @@\n         <module>partitioner</module>\n         <module>format</module>\n         <module>hive</module>\n-        <module>htrace-core4-shaded</module>\n-        <module>avatica-shaded</module>\n         <module>package-kafka-connect-storage-common</module>\n     </modules>\n \n     <properties>\n         <kafka.connect.storage.common.version>10.0.3-SNAPSHOT</kafka.connect.storage.common.version>\n         <commons-io.version>2.4</commons-io.version>\n         <confluent.maven.repo>http://packages.confluent.io/maven/</confluent.maven.repo>\n-        <hadoop.version>2.10.1</hadoop.version>\n-        <hive.version>2.3.7</hive.version>\n+        <hadoop.version>2.10.0</hadoop.version>\n+        <hive.version>2.3.6</hive.version>\n         <joda.version>2.9.6</joda.version>\n         <parquet.version>1.11.1</parquet.version>\n         <httpclient.version>4.5.13</httpclient.version>\n         <httpcore.version>4.4.4</httpcore.version>\n         <jline.version>2.12.1</jline.version>\n         <confluent-log4j.version>1.2.17-cp2</confluent-log4j.version>\n-        <commons.codec.version>1.15</commons.codec.version>\n         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>\n         <jackson.databind.version>2.10.5.1</jackson.databind.version>\n     </properties>"
+  }
+]

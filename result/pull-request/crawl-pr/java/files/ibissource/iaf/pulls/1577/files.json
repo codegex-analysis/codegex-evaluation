@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "1b55b6e6bf60aed546ef000aba6f42830bb7ed07",
+    "filename": "core/src/main/java/nl/nn/adapterframework/scheduler/JobDef.java",
+    "status": "modified",
+    "additions": 41,
+    "deletions": 34,
+    "changes": 75,
+    "blob_url": "https://github.com/ibissource/iaf/blob/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/java/nl/nn/adapterframework/scheduler/JobDef.java",
+    "raw_url": "https://github.com/ibissource/iaf/raw/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/java/nl/nn/adapterframework/scheduler/JobDef.java",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/java/nl/nn/adapterframework/scheduler/JobDef.java?ref=0fc2bf93e10739fc2535c150ac640b94e3586aea",
+    "patch": "@@ -572,6 +572,9 @@ protected void runJob(IbisManager ibisManager) {\n \t\tcase CLEANUPDB:\n \t\t\tcleanupDatabase(ibisManager);\n \t\t\tbreak;\n+\t\tcase CLEANUPLOCK:\n+\t\t\tcleanupLock(ibisManager);\n+\t\t\tbreak;\n \t\tcase CLEANUPFS:\n \t\t\tcleanupFileSystem(ibisManager);\n \t\t\tbreak;\n@@ -678,40 +681,6 @@ private void cleanupDatabase(IbisManager ibisManager) {\n \t\tDate date = new Date();\n \n \t\tint maxRows = AppConstants.getInstance().getInt(\"cleanup.database.maxrows\", 25000);\n-\t\t\n-\t\tList<String> datasourceNames = getAllLockerDatasourceNames(ibisManager);\n-\n-\t\tfor (Iterator<String> iter = datasourceNames.iterator(); iter.hasNext();) {\n-\t\t\tString datasourceName = iter.next();\n-\t\t\tFixedQuerySender qs = null;\n-\t\t\ttry {\n-\t\t\t\tqs = ibisManager.getIbisContext().createBeanAutowireByName(FixedQuerySender.class);\n-\t\t\t\tqs.setDatasourceName(datasourceName);\n-\t\t\t\tqs.setName(\"cleanupDatabase-IBISLOCK\");\n-\t\t\t\tqs.setQueryType(\"other\");\n-\t\t\t\tqs.setTimeout(getQueryTimeout());\n-\t\t\t\tString query = \"DELETE FROM IBISLOCK WHERE EXPIRYDATE < ?\";\n-\t\t\t\tqs.setQuery(query);\n-\t\t\t\tParameter param = new Parameter();\n-\t\t\t\tparam.setName(\"now\");\n-\t\t\t\tparam.setType(Parameter.TYPE_TIMESTAMP);\n-\t\t\t\tparam.setValue(DateUtils.format(date));\n-\t\t\t\tqs.addParameter(param);\n-\t\t\t\tqs.configure();\n-\t\t\t\tqs.open();\n-\n-\t\t\t\tMessage result = qs.sendMessage(Message.nullMessage(), null);\n-\t\t\t\tlog.info(\"result [\" + result + \"]\");\n-\t\t\t} catch (Exception e) {\n-\t\t\t\tString msg = \"error while cleaning IBISLOCK table (as part of scheduled job execution): \" + e.getMessage();\n-\t\t\t\tgetMessageKeeper().add(msg, MessageKeeperLevel.ERROR);\n-\t\t\t\tlog.error(getLogPrefix()+msg);\n-\t\t\t} finally {\n-\t\t\t\tif(qs != null) {\n-\t\t\t\t\tqs.close();\n-\t\t\t\t}\n-\t\t\t}\n-\t\t}\n \n \t\tList<MessageLogObject> messageLogs = getAllMessageLogs(ibisManager);\n \n@@ -759,6 +728,44 @@ private void cleanupDatabase(IbisManager ibisManager) {\n \t\t\t}\n \t\t}\n \t}\n+\t\n+\tprivate void cleanupLock(IbisManager ibisManager) {\n+\t\tDate date = new Date();\n+\t\t\n+\t\tList<String> datasourceNames = getAllLockerDatasourceNames(ibisManager);\n+\n+\t\tfor (Iterator<String> iter = datasourceNames.iterator(); iter.hasNext();) {\n+\t\t\tString datasourceName = iter.next();\n+\t\t\tFixedQuerySender qs = null;\n+\t\t\ttry {\n+\t\t\t\tqs = ibisManager.getIbisContext().createBeanAutowireByName(FixedQuerySender.class);\n+\t\t\t\tqs.setDatasourceName(datasourceName);\n+\t\t\t\tqs.setName(\"cleanupDatabase-IBISLOCK\");\n+\t\t\t\tqs.setQueryType(\"other\");\n+\t\t\t\tqs.setTimeout(getQueryTimeout());\n+\t\t\t\tString query = \"DELETE FROM IBISLOCK WHERE EXPIRYDATE < ?\";\n+\t\t\t\tqs.setQuery(query);\n+\t\t\t\tParameter param = new Parameter();\n+\t\t\t\tparam.setName(\"now\");\n+\t\t\t\tparam.setType(Parameter.TYPE_TIMESTAMP);\n+\t\t\t\tparam.setValue(DateUtils.format(date));\n+\t\t\t\tqs.addParameter(param);\n+\t\t\t\tqs.configure();\n+\t\t\t\tqs.open();\n+\n+\t\t\t\tMessage result = qs.sendMessage(Message.nullMessage(), null);\n+\t\t\t\tlog.info(\"result [\" + result + \"]\");\n+\t\t\t} catch (Exception e) {\n+\t\t\t\tString msg = \"error while cleaning IBISLOCK table (as part of scheduled job execution): \" + e.getMessage();\n+\t\t\t\tgetMessageKeeper().add(msg, MessageKeeperLevel.ERROR);\n+\t\t\t\tlog.error(getLogPrefix()+msg);\n+\t\t\t} finally {\n+\t\t\t\tif(qs != null) {\n+\t\t\t\t\tqs.close();\n+\t\t\t\t}\n+\t\t\t}\n+\t\t}\n+\t}\n \n \tprivate void cleanupFileSystem(IbisManager ibisManager) {\n \t\tfor (DirectoryCleaner directoryCleaner: directoryCleaners) {"
+  },
+  {
+    "sha": "a8243ff4144a523879bb76657a2f20b7f796273d",
+    "filename": "core/src/main/java/nl/nn/adapterframework/scheduler/JobDefFunctions.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/ibissource/iaf/blob/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/java/nl/nn/adapterframework/scheduler/JobDefFunctions.java",
+    "raw_url": "https://github.com/ibissource/iaf/raw/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/java/nl/nn/adapterframework/scheduler/JobDefFunctions.java",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/java/nl/nn/adapterframework/scheduler/JobDefFunctions.java?ref=0fc2bf93e10739fc2535c150ac640b94e3586aea",
+    "patch": "@@ -1,5 +1,5 @@\n /*\n-   Copyright 2019 Nationale-Nederlanden\n+   Copyright 2019 Nationale-Nederlanden, 2021 WeAreFrank!\n \n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n@@ -25,6 +25,7 @@\n \tDUMPSTATS(\"dumpStatistics\", true),\n \tDUMPSTATSFULL(\"dumpStatisticsFull\", true),\n \tCLEANUPDB(\"cleanupDatabase\", true),\n+\tCLEANUPLOCK(\"cleanupLock\", true),\n \tCLEANUPFS(\"cleanupFileSystem\", true),\n \tRECOVER_ADAPTERS(\"recoverAdapters\", true),\n \tCHECK_RELOAD(\"checkReload\", true), "
+  },
+  {
+    "sha": "8054df87cc1da43e738326d0217c36803d4e1107",
+    "filename": "core/src/main/resources/AppConstants.properties",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/ibissource/iaf/blob/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/resources/AppConstants.properties",
+    "raw_url": "https://github.com/ibissource/iaf/raw/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/resources/AppConstants.properties",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/resources/AppConstants.properties?ref=0fc2bf93e10739fc2535c150ac640b94e3586aea",
+    "patch": "@@ -154,6 +154,9 @@ cleanup.database.cron=0 45 1 * * ?\n # maximum number of rows to delete from ibisstore table in one execution of job. Set to 0 for unlimited.\n cleanup.database.maxrows=25000\n \n+# cron pattern to be used by cleanup the lock table\n+cleanup.lock.cron=0 0/10 * ? * * *\n+\n # cron pattern to be used by cleanup the file system\n cleanup.filesystem.cron=0 35 1 * * ?\n "
+  },
+  {
+    "sha": "60923fbb58763c79416feb471d732af5e1a12420",
+    "filename": "core/src/main/resources/IAF_Util/Configuration.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/ibissource/iaf/blob/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/resources/IAF_Util/Configuration.xml",
+    "raw_url": "https://github.com/ibissource/iaf/raw/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/resources/IAF_Util/Configuration.xml",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/resources/IAF_Util/Configuration.xml?ref=0fc2bf93e10739fc2535c150ac640b94e3586aea",
+    "patch": "@@ -5,6 +5,7 @@\n \t<!ENTITY StatScheduler SYSTEM \"./ConfigurationStatScheduler.xml\">\n \t<!ENTITY Monitoring SYSTEM \"./ConfigurationMonitoring.xml\">\n \t<!ENTITY CleanupDatabase SYSTEM \"./ConfigurationCleanupDatabase.xml\">\n+\t<!ENTITY CleanupLock SYSTEM \"./ConfigurationCleanupLock.xml\">\n \t<!ENTITY CleanupFileSystem SYSTEM \"./ConfigurationCleanupFileSystem.xml\">\n \t<!ENTITY RecoverAdapters SYSTEM \"./ConfigurationRecoverAdapters.xml\">\n \t<!ENTITY IbisDoc SYSTEM \"./ConfigurationIbisDoc.xml\">\n@@ -19,6 +20,7 @@\n \t&LoadDatabaseSchedules;\n \t&Monitoring;\n \t&CleanupDatabase;\n+\t&CleanupLock;\n \t&CleanupFileSystem;\n \t&RecoverAdapters;\n \t&IbisDoc;"
+  },
+  {
+    "sha": "0633da90bc2e67aef29d50baf262ebbee864e351",
+    "filename": "core/src/main/resources/IAF_Util/ConfigurationCleanupDatabase.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/ibissource/iaf/blob/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/resources/IAF_Util/ConfigurationCleanupDatabase.xml",
+    "raw_url": "https://github.com/ibissource/iaf/raw/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/resources/IAF_Util/ConfigurationCleanupDatabase.xml",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/resources/IAF_Util/ConfigurationCleanupDatabase.xml?ref=0fc2bf93e10739fc2535c150ac640b94e3586aea",
+    "patch": "@@ -1,9 +1,9 @@\n <module>\n \t<scheduler>\n \t\t<job\n-\t\t\tname=\"cleanup Database\"\n+\t\t\tname=\"cleanup Database (IbisStore)\"\n \t\t\tcronExpression=\"${cleanup.database.cron}\"\n-\t\t\tdescription=\"Cleanup the database (IbisLock and IbisStore)\"\n+\t\t\tdescription=\"Cleanup the database (IbisStore)\"\n \t\t\tfunction=\"cleanupDatabase\"\n \t\t>\n \t\t\t<locker"
+  },
+  {
+    "sha": "26946380755a9635ea3ac3af64c6831d87308b01",
+    "filename": "core/src/main/resources/IAF_Util/ConfigurationCleanupLock.xml",
+    "status": "added",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/ibissource/iaf/blob/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/resources/IAF_Util/ConfigurationCleanupLock.xml",
+    "raw_url": "https://github.com/ibissource/iaf/raw/0fc2bf93e10739fc2535c150ac640b94e3586aea/core/src/main/resources/IAF_Util/ConfigurationCleanupLock.xml",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/resources/IAF_Util/ConfigurationCleanupLock.xml?ref=0fc2bf93e10739fc2535c150ac640b94e3586aea",
+    "patch": "@@ -0,0 +1,16 @@\n+<module>\n+\t<scheduler>\n+\t\t<job\n+\t\t\tname=\"Cleanup the database (IbisLock)\"\n+\t\t\tcronExpression=\"${cleanup.lock.cron}\"\n+\t\t\tdescription=\"Cleanup the database (IbisLock)\"\n+\t\t\tfunction=\"cleanupLock\"\n+\t\t>\n+\t\t\t<locker\n+\t\t\t\tdatasourceName=\"${jdbc.datasource.default}\"\n+\t\t\t\tobjectId=\"CleanupLock\"\n+\t\t\t\tignoreTableNotExist=\"true\"\n+\t\t\t/>\n+\t\t</job>\n+\t</scheduler>\n+</module>\n\\ No newline at end of file"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "dba909cabb26be0db2b896ba284ea8f6f0deba6b",
+    "filename": "flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/OperatorIOMetricGroup.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/apache/flink/blob/cd4c5c934602f7c6b04bfe4657a27919341e0eec/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/OperatorIOMetricGroup.java",
+    "raw_url": "https://github.com/apache/flink/raw/cd4c5c934602f7c6b04bfe4657a27919341e0eec/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/OperatorIOMetricGroup.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/OperatorIOMetricGroup.java?ref=cd4c5c934602f7c6b04bfe4657a27919341e0eec",
+    "patch": "@@ -65,13 +65,13 @@ public Meter getNumRecordsOutRate() {\n \n     /** Causes the containing task to use this operators input record counter. */\n     public void reuseInputMetricsForTask() {\n-        TaskIOMetricGroup taskIO = parentMetricGroup.parent().getIOMetricGroup();\n+        TaskIOMetricGroup taskIO = parentMetricGroup.getTaskIOMetricGroup();\n         taskIO.reuseRecordsInputCounter(this.numRecordsIn);\n     }\n \n     /** Causes the containing task to use this operators output record counter. */\n     public void reuseOutputMetricsForTask() {\n-        TaskIOMetricGroup taskIO = parentMetricGroup.parent().getIOMetricGroup();\n+        TaskIOMetricGroup taskIO = parentMetricGroup.getTaskIOMetricGroup();\n         taskIO.reuseRecordsOutputCounter(this.numRecordsOut);\n     }\n }"
+  },
+  {
+    "sha": "0862e71ee40e11894c34094776bb2d99a6e59f88",
+    "filename": "flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/OperatorMetricGroup.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 2,
+    "changes": 9,
+    "blob_url": "https://github.com/apache/flink/blob/cd4c5c934602f7c6b04bfe4657a27919341e0eec/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/OperatorMetricGroup.java",
+    "raw_url": "https://github.com/apache/flink/raw/cd4c5c934602f7c6b04bfe4657a27919341e0eec/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/OperatorMetricGroup.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/OperatorMetricGroup.java?ref=cd4c5c934602f7c6b04bfe4657a27919341e0eec",
+    "patch": "@@ -20,6 +20,7 @@\n \n import org.apache.flink.annotation.Internal;\n import org.apache.flink.metrics.CharacterFilter;\n+import org.apache.flink.metrics.MetricGroup;\n import org.apache.flink.runtime.jobgraph.OperatorID;\n import org.apache.flink.runtime.metrics.MetricRegistry;\n import org.apache.flink.runtime.metrics.dump.QueryScopeInfo;\n@@ -57,8 +58,12 @@ public OperatorMetricGroup(\n \n     // ------------------------------------------------------------------------\n \n-    public final TaskMetricGroup parent() {\n-        return parent;\n+    public final TaskIOMetricGroup getTaskIOMetricGroup() {\n+        return parent.getIOMetricGroup();\n+    }\n+\n+    public final MetricGroup getJobMetricGroup() {\n+        return parent.parent;\n     }\n \n     @Override"
+  },
+  {
+    "sha": "eb4b6825e91ea4c42670a28c8ddb2f9817bd4bf3",
+    "filename": "flink-streaming-java/src/main/java/org/apache/flink/streaming/api/operators/AbstractStreamOperator.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/apache/flink/blob/cd4c5c934602f7c6b04bfe4657a27919341e0eec/flink-streaming-java/src/main/java/org/apache/flink/streaming/api/operators/AbstractStreamOperator.java",
+    "raw_url": "https://github.com/apache/flink/raw/cd4c5c934602f7c6b04bfe4657a27919341e0eec/flink-streaming-java/src/main/java/org/apache/flink/streaming/api/operators/AbstractStreamOperator.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-streaming-java/src/main/java/org/apache/flink/streaming/api/operators/AbstractStreamOperator.java?ref=cd4c5c934602f7c6b04bfe4657a27919341e0eec",
+    "patch": "@@ -36,7 +36,6 @@\n import org.apache.flink.runtime.execution.Environment;\n import org.apache.flink.runtime.jobgraph.OperatorID;\n import org.apache.flink.runtime.metrics.groups.OperatorMetricGroup;\n-import org.apache.flink.runtime.metrics.groups.TaskManagerJobMetricGroup;\n import org.apache.flink.runtime.metrics.groups.UnregisteredMetricGroups;\n import org.apache.flink.runtime.state.CheckpointStreamFactory;\n import org.apache.flink.runtime.state.KeyedStateBackend;\n@@ -209,7 +208,7 @@ public void setup(\n                         MetricOptions.LATENCY_SOURCE_GRANULARITY.key(),\n                         granularity);\n             }\n-            TaskManagerJobMetricGroup jobMetricGroup = this.metrics.parent().parent();\n+            MetricGroup jobMetricGroup = this.metrics.getJobMetricGroup();\n             this.latencyStats =\n                     new LatencyStats(\n                             jobMetricGroup.addGroup(\"latency\"),"
+  },
+  {
+    "sha": "83446a04d9e3a4394b96fa96242114ef200d6b88",
+    "filename": "flink-streaming-java/src/main/java/org/apache/flink/streaming/api/operators/AbstractStreamOperatorV2.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/apache/flink/blob/cd4c5c934602f7c6b04bfe4657a27919341e0eec/flink-streaming-java/src/main/java/org/apache/flink/streaming/api/operators/AbstractStreamOperatorV2.java",
+    "raw_url": "https://github.com/apache/flink/raw/cd4c5c934602f7c6b04bfe4657a27919341e0eec/flink-streaming-java/src/main/java/org/apache/flink/streaming/api/operators/AbstractStreamOperatorV2.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-streaming-java/src/main/java/org/apache/flink/streaming/api/operators/AbstractStreamOperatorV2.java?ref=cd4c5c934602f7c6b04bfe4657a27919341e0eec",
+    "patch": "@@ -36,7 +36,6 @@\n import org.apache.flink.runtime.execution.Environment;\n import org.apache.flink.runtime.jobgraph.OperatorID;\n import org.apache.flink.runtime.metrics.groups.OperatorMetricGroup;\n-import org.apache.flink.runtime.metrics.groups.TaskManagerJobMetricGroup;\n import org.apache.flink.runtime.metrics.groups.UnregisteredMetricGroups;\n import org.apache.flink.runtime.state.CheckpointStreamFactory;\n import org.apache.flink.runtime.state.KeyedStateBackend;\n@@ -185,7 +184,7 @@ private LatencyStats createLatencyStats(\n                         MetricOptions.LATENCY_SOURCE_GRANULARITY.key(),\n                         granularity);\n             }\n-            TaskManagerJobMetricGroup jobMetricGroup = this.metrics.parent().parent();\n+            MetricGroup jobMetricGroup = this.metrics.getJobMetricGroup();\n             return new LatencyStats(\n                     jobMetricGroup.addGroup(\"latency\"),\n                     historySize,"
+  }
+]

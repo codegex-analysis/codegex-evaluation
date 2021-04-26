@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "e0722e0082e28c078c1932371f1b82f062267e68",
+    "filename": "app/src/main/java/com/alphawallet/app/ui/DappBrowserFragment.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/AlphaWallet/alpha-wallet-android/blob/c5aeb7ddf3633d6aa421e9d003c6f498b3801c2c/app/src/main/java/com/alphawallet/app/ui/DappBrowserFragment.java",
+    "raw_url": "https://github.com/AlphaWallet/alpha-wallet-android/raw/c5aeb7ddf3633d6aa421e9d003c6f498b3801c2c/app/src/main/java/com/alphawallet/app/ui/DappBrowserFragment.java",
+    "contents_url": "https://api.github.com/repos/AlphaWallet/alpha-wallet-android/contents/app/src/main/java/com/alphawallet/app/ui/DappBrowserFragment.java?ref=c5aeb7ddf3633d6aa421e9d003c6f498b3801c2c",
+    "patch": "@@ -1455,6 +1455,8 @@ public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenge\n                 case QRScanningActivity.DENY_PERMISSION:\n                     showCameraDenied();\n                     break;\n+                case QRScanningActivity.WALLET_CONNECT:\n+                    return;\n                 default:\n                     break;\n             }"
+  },
+  {
+    "sha": "5e7461002eec1e3d12da925959ca9564982cbf4e",
+    "filename": "app/src/main/java/com/alphawallet/app/ui/zxing/FullScannerFragment.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 1,
+    "changes": 17,
+    "blob_url": "https://github.com/AlphaWallet/alpha-wallet-android/blob/c5aeb7ddf3633d6aa421e9d003c6f498b3801c2c/app/src/main/java/com/alphawallet/app/ui/zxing/FullScannerFragment.java",
+    "raw_url": "https://github.com/AlphaWallet/alpha-wallet-android/raw/c5aeb7ddf3633d6aa421e9d003c6f498b3801c2c/app/src/main/java/com/alphawallet/app/ui/zxing/FullScannerFragment.java",
+    "contents_url": "https://api.github.com/repos/AlphaWallet/alpha-wallet-android/contents/app/src/main/java/com/alphawallet/app/ui/zxing/FullScannerFragment.java?ref=c5aeb7ddf3633d6aa421e9d003c6f498b3801c2c",
+    "patch": "@@ -15,6 +15,7 @@\n \n import com.alphawallet.app.entity.QRResult;\n import com.alphawallet.app.repository.EthereumNetworkBase;\n+import com.alphawallet.app.ui.WalletConnectActivity;\n import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;\n import com.alphawallet.app.util.QRParser;\n import com.google.zxing.BarcodeFormat;\n@@ -23,12 +24,13 @@\n import java.util.ArrayList;\n import java.util.List;\n \n+import static android.app.Activity.RESULT_OK;\n import static com.alphawallet.app.entity.EIP681Type.OTHER;\n \n public class FullScannerFragment extends Fragment implements ZXingScannerView.ResultHandler\n {\n     public static final String BarcodeObject = \"Barcode\";\n-    public static final int SUCCESS = Activity.RESULT_OK; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu\n+    public static final int SUCCESS = RESULT_OK; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu\n                                             yes it does because there's also 'DENY_PERMISSION' I assume that wasn't coded at the time\n                                             of the comment - JB*/\n \n@@ -103,6 +105,10 @@ public void handleResult(Result rawResult)\n         {\n             listener.onReceive(rawResult.getText());\n         }\n+        else if (rawResult.getText().startsWith(\"wc:\"))\n+        {\n+            startWalletConnect(rawResult.getText());\n+        }\n         else\n         {\n             Intent intent = new Intent();\n@@ -112,6 +118,15 @@ public void handleResult(Result rawResult)\n         }\n     }\n \n+    private void startWalletConnect(String qrCode)\n+    {\n+        Intent intent = new Intent(getActivity(), WalletConnectActivity.class);\n+        intent.putExtra(\"qrCode\", qrCode);\n+        startActivity(intent);\n+        getActivity().setResult(QRScanningActivity.WALLET_CONNECT);\n+        getActivity().finish();\n+    }\n+\n     @Override\n     public boolean checkResultIsValid(Result rawResult)\n     {"
+  },
+  {
+    "sha": "aa1f1f7f3c7bf569bcbbb50942c3a3c01e0b5b34",
+    "filename": "app/src/main/java/com/alphawallet/app/ui/zxing/QRScanningActivity.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/AlphaWallet/alpha-wallet-android/blob/c5aeb7ddf3633d6aa421e9d003c6f498b3801c2c/app/src/main/java/com/alphawallet/app/ui/zxing/QRScanningActivity.java",
+    "raw_url": "https://github.com/AlphaWallet/alpha-wallet-android/raw/c5aeb7ddf3633d6aa421e9d003c6f498b3801c2c/app/src/main/java/com/alphawallet/app/ui/zxing/QRScanningActivity.java",
+    "contents_url": "https://api.github.com/repos/AlphaWallet/alpha-wallet-android/contents/app/src/main/java/com/alphawallet/app/ui/zxing/QRScanningActivity.java?ref=c5aeb7ddf3633d6aa421e9d003c6f498b3801c2c",
+    "patch": "@@ -45,6 +45,7 @@\n     public static final int RC_HANDLE_IMAGE_PICKUP = 3;\n \n     public static final int DENY_PERMISSION = 1;\n+    public static final int WALLET_CONNECT = 2;\n \n     private FullScannerFragment fullScannerFragment;\n \n@@ -211,7 +212,7 @@ private void startWalletConnect(String qrCode)\n         Intent intent = new Intent(this, WalletConnectActivity.class);\n         intent.putExtra(\"qrCode\", qrCode);\n         startActivity(intent);\n-        setResult(RESULT_OK);\n+        setResult(WALLET_CONNECT);\n         finish();\n     }\n "
+  }
+]

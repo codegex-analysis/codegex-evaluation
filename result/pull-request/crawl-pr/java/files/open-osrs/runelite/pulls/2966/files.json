@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "837aabeaab9c5873a189bb30324d7a78f0200e19",
+    "filename": "runelite-api/src/main/java/net/runelite/api/events/HealthBarUpdated.java",
+    "status": "added",
+    "additions": 49,
+    "deletions": 0,
+    "changes": 49,
+    "blob_url": "https://github.com/open-osrs/runelite/blob/9066b670d6438871ca5ec437b96d24ca70d3de1b/runelite-api/src/main/java/net/runelite/api/events/HealthBarUpdated.java",
+    "raw_url": "https://github.com/open-osrs/runelite/raw/9066b670d6438871ca5ec437b96d24ca70d3de1b/runelite-api/src/main/java/net/runelite/api/events/HealthBarUpdated.java",
+    "contents_url": "https://api.github.com/repos/open-osrs/runelite/contents/runelite-api/src/main/java/net/runelite/api/events/HealthBarUpdated.java?ref=9066b670d6438871ca5ec437b96d24ca70d3de1b",
+    "patch": "@@ -0,0 +1,49 @@\n+/*\n+ * Copyright (c) 2021, Satoshi Oda <https://github.com/rokahakor>\n+ * All rights reserved.\n+ *\n+ * Redistribution and use in source and binary forms, with or without\n+ * modification, are permitted provided that the following conditions are met:\n+ *\n+ * 1. Redistributions of source code must retain the above copyright notice, this\n+ *    list of conditions and the following disclaimer.\n+ * 2. Redistributions in binary form must reproduce the above copyright notice,\n+ *    this list of conditions and the following disclaimer in the documentation\n+ *    and/or other materials provided with the distribution.\n+ *\n+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND\n+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR\n+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS\n+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n+ */\n+package net.runelite.api.events;\n+\n+import lombok.Value;\n+import net.runelite.api.Actor;\n+import net.runelite.api.Hitsplat;\n+\n+/**\n+ * An event called when an {@link Actor} health bar is updated from a {@link Hitsplat}.\n+ * <p>\n+ * This event is called when the health bar first appears and when the client gets new information\n+ * about the health bar of the actor. It does not fire when the health bar disappears.\n+ * The event will still fire even if the health ratio did not change for example from a 0 hitsplat.\n+ */\n+@Value\n+public class HealthBarUpdated\n+{\n+\t/**\n+\t * The actor the hitsplat was applied to.\n+\t */\n+\tActor actor;\n+\t/**\n+\t * The updated health ratio.\n+\t */\n+\tint healthRatio;\n+}"
+  },
+  {
+    "sha": "4ae1b2853f702d9ba5dfdcb4b7d54804de69100b",
+    "filename": "runelite-mixins/src/main/java/net/runelite/mixins/RSActorMixin.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/open-osrs/runelite/blob/9066b670d6438871ca5ec437b96d24ca70d3de1b/runelite-mixins/src/main/java/net/runelite/mixins/RSActorMixin.java",
+    "raw_url": "https://github.com/open-osrs/runelite/raw/9066b670d6438871ca5ec437b96d24ca70d3de1b/runelite-mixins/src/main/java/net/runelite/mixins/RSActorMixin.java",
+    "contents_url": "https://api.github.com/repos/open-osrs/runelite/contents/runelite-mixins/src/main/java/net/runelite/mixins/RSActorMixin.java?ref=9066b670d6438871ca5ec437b96d24ca70d3de1b",
+    "patch": "@@ -38,6 +38,7 @@\n import net.runelite.api.events.ActorDeath;\n import net.runelite.api.events.AnimationChanged;\n import net.runelite.api.events.HitsplatApplied;\n+import net.runelite.api.events.HealthBarUpdated;\n import net.runelite.api.events.GraphicChanged;\n import net.runelite.api.events.InteractingChanged;\n import net.runelite.api.events.OverheadTextChanged;\n@@ -268,6 +269,9 @@ public void setCombatInfo(int combatInfoId, int gameCycle, int var3, int var4, i\n \n \t\t\tthis.setDead(true);\n \t\t}\n+\n+\t\tfinal HealthBarUpdated event = new HealthBarUpdated(this, healthRatio);\n+\t\tclient.getCallbacks().post(event);\n \t}\n \n \t/**"
+  }
+]

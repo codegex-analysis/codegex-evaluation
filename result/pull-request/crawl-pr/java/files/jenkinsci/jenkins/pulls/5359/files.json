@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "aa0965d673c82f6d600e825baaa6bbce21a52200",
+    "filename": "core/src/main/java/hudson/model/UpdateSite.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 9,
+    "changes": 14,
+    "blob_url": "https://github.com/jenkinsci/jenkins/blob/a244267356e7de3d3e2c3b23ce67392b6972df30/core/src/main/java/hudson/model/UpdateSite.java",
+    "raw_url": "https://github.com/jenkinsci/jenkins/raw/a244267356e7de3d3e2c3b23ce67392b6972df30/core/src/main/java/hudson/model/UpdateSite.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/jenkins/contents/core/src/main/java/hudson/model/UpdateSite.java?ref=a244267356e7de3d3e2c3b23ce67392b6972df30",
+    "patch": "@@ -47,7 +47,6 @@\n import java.util.ArrayList;\n import java.util.Arrays;\n import java.util.Collections;\n-import java.util.Comparator;\n import java.util.Date;\n import java.util.HashMap;\n import java.util.HashSet;\n@@ -391,15 +390,12 @@ public JSONObject getJSONObject() {\n             if(p.getInstalled()==null)\n                 r.add(p);\n         }\n-        r.sort(new Comparator<Plugin>() {\n-            @Override\n-            public int compare(Plugin plugin, Plugin t1) {\n-                final int pop = t1.popularity.compareTo(plugin.popularity);\n-                if (pop != 0) {\n-                    return pop; // highest popularity first\n-                }\n-                return plugin.getDisplayName().compareTo(plugin.getDisplayName());\n+        r.sort((plugin, t1) -> {\n+            final int pop = t1.popularity.compareTo(plugin.popularity);\n+            if (pop != 0) {\n+                return pop; // highest popularity first\n             }\n+            return plugin.getDisplayName().compareTo(t1.getDisplayName());\n         });\n         return r;\n     }"
+  },
+  {
+    "sha": "e31c344ddeb0f1914b766f24f395b2f90f390d2a",
+    "filename": "test/src/test/java/hudson/model/UpdateSiteTest.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/jenkinsci/jenkins/blob/a244267356e7de3d3e2c3b23ce67392b6972df30/test/src/test/java/hudson/model/UpdateSiteTest.java",
+    "raw_url": "https://github.com/jenkinsci/jenkins/raw/a244267356e7de3d3e2c3b23ce67392b6972df30/test/src/test/java/hudson/model/UpdateSiteTest.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/jenkins/contents/test/src/test/java/hudson/model/UpdateSiteTest.java?ref=a244267356e7de3d3e2c3b23ce67392b6972df30",
+    "patch": "@@ -37,6 +37,7 @@\n import java.util.Arrays;\n import java.util.Collections;\n import java.util.HashSet;\n+import java.util.List;\n import java.util.jar.Attributes;\n import java.util.jar.Manifest;\n \n@@ -216,6 +217,13 @@ public void isPluginUpdateCompatible() throws Exception {\n         assertFalse(\"isLegacyDefault should be false with null url\",new UpdateSite(null,null).isLegacyDefault());\n     }\n \n+    @Test public void getAvailables() throws Exception {\n+        UpdateSite site = getUpdateSite(\"/plugins/available-update-center.json\");\n+        List<UpdateSite.Plugin> available = site.getAvailables();\n+        assertEquals(\"ALowTitle\", available.get(0).getDisplayName());\n+        assertEquals(\"TheHighTitle\", available.get(1).getDisplayName());\n+    }\n+\n     private UpdateSite getUpdateSite(String path) throws Exception {\n         return getUpdateSite(path, UpdateCenter.ID_DEFAULT);\n     }"
+  },
+  {
+    "sha": "6acd7e1a40b286f863fc69da9590ababc17a6242",
+    "filename": "test/src/test/resources/plugins/available-update-center.json",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/jenkinsci/jenkins/blob/a244267356e7de3d3e2c3b23ce67392b6972df30/test/src/test/resources/plugins/available-update-center.json",
+    "raw_url": "https://github.com/jenkinsci/jenkins/raw/a244267356e7de3d3e2c3b23ce67392b6972df30/test/src/test/resources/plugins/available-update-center.json",
+    "contents_url": "https://api.github.com/repos/jenkinsci/jenkins/contents/test/src/test/resources/plugins/available-update-center.json?ref=a244267356e7de3d3e2c3b23ce67392b6972df30",
+    "patch": "@@ -0,0 +1,42 @@\n+updateCenter.post(\n+{\"connectionCheckUrl\":\"http://www.google.com/\", // has to be here because updateDirectly sniffs only very limited formats\n+    \"core\": {\n+        \"buildDate\": \"Dec 31, 1969\",\n+        \"name\": \"core\",\n+        \"url\": \"jenkins.war\",\n+        \"version\": \"23\"\n+    },\n+    \"id\": \"default\",\n+    \"plugins\": {\n+        \"dummy2\": {\n+            \"buildDate\": \"Dec 17, 2008\",\n+            \"dependencies\": [],\n+            \"developers\": [],\n+            \"excerpt\": \"…\",\n+            \"name\": \"dummy2\",\n+            \"wiki\": \"https://plugins.jenkins.io/dummy\",\n+            \"requiredCore\": \"1.100\",\n+            \"sha1\": \"wtzlcjUKiMcg90H5CTYkGX6+r8Y=\",\n+            \"title\": \"ALowTitle\",\n+            \"url\": \"http://nowhere.net/dummy2.hpi\",\n+            \"version\": \"1.0\",\n+            \"popularity\": \"1.0\"\n+        },\n+        \"dummy\": {\n+            \"buildDate\": \"Dec 17, 2008\",\n+            \"dependencies\": [],\n+            \"developers\": [],\n+            \"excerpt\": \"…\",\n+            \"name\": \"dummy\",\n+            \"wiki\": \"https://plugins.jenkins.io/dummy\",\n+            \"requiredCore\": \"1.100\",\n+            \"sha1\": \"wtzlcjUKiMcg90H5CTYkGX6+r8Y=\",\n+            \"title\": \"TheHighTitle\",\n+            \"url\": \"http://nowhere.net/dummy.hpi\",\n+            \"version\": \"1.0\",\n+            \"popularity\": \"1.0\"\n+        }\n+    },\n+    \"updateCenterVersion\": 1\n+}\n+);"
+  }
+]

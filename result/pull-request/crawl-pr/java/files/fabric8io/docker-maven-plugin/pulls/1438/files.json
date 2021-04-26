@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "82ea9f69762cbffbda56b538a27a5a4405f82e18",
+    "filename": ".circleci/config.yml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 9,
+    "changes": 12,
+    "blob_url": "https://github.com/fabric8io/docker-maven-plugin/blob/b8d0087f44f81ea384a01e0dd2aa8d24be17ba0d/.circleci/config.yml",
+    "raw_url": "https://github.com/fabric8io/docker-maven-plugin/raw/b8d0087f44f81ea384a01e0dd2aa8d24be17ba0d/.circleci/config.yml",
+    "contents_url": "https://api.github.com/repos/fabric8io/docker-maven-plugin/contents/.circleci/config.yml?ref=b8d0087f44f81ea384a01e0dd2aa8d24be17ba0d",
+    "patch": "@@ -59,16 +59,10 @@ jobs:\n         key: dmp-sonar-pr-{{ checksum \"pom.xml\" }}\n     - run: |\n         if [ -n \"${CIRCLE_PR_NUMBER}\" ]; then\n-          mvn clean -Pjacoco org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar \\\n-             -Dsonar.pullrequest.base=master \\\n-             -Dsonar.pullrequest.branch=${CIRCLE_BRANCH} \\\n+          MAVEN_OPTS=\"-Xmx3000m\" ./mvnw -B -Pjacoco,sonar clean install \\\n              -Dsonar.pullrequest.key=${CIRCLE_PR_NUMBER} \\\n-             -Dsonar.pullrequest.provider=GitHub \\\n-             -Dsonar.pullrequest.github.repository=fabric8io/docker-maven-plugin \\\n-             -Dsonar.github.oauth=${GITHUB_COMMENT_TOKEN} \\\n-             -Dsonar.host.url=https://sonarcloud.io \\\n-             -Dsonar.organization=default \\\n-             -Dsonar.login=${SONARQUBE_TOKEN}\n+             -Dsonar.pullrequest.branch=${CIRCLE_BRANCH} \\\n+             -Dsonar.pullrequest.base=master\n         else\n           echo \"No Sonar PR analysis as this is not a pull request\"\n         fi"
+  },
+  {
+    "sha": "b1f368d5721b73d64956e6555e7f1357bc997c81",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/fabric8io/docker-maven-plugin/blob/b8d0087f44f81ea384a01e0dd2aa8d24be17ba0d/pom.xml",
+    "raw_url": "https://github.com/fabric8io/docker-maven-plugin/raw/b8d0087f44f81ea384a01e0dd2aa8d24be17ba0d/pom.xml",
+    "contents_url": "https://api.github.com/repos/fabric8io/docker-maven-plugin/contents/pom.xml?ref=b8d0087f44f81ea384a01e0dd2aa8d24be17ba0d",
+    "patch": "@@ -617,6 +617,37 @@\n         <defaultGoal>generate-resources asciidoctor:process-asciidoc</defaultGoal>\n       </build>\n     </profile>\n+    <profile>\n+      <id>sonar</id>\n+      <properties>\n+        <sonar.projectKey>\"io.fabric8:docker-maven-plugin\"</sonar.projectKey>\n+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>\n+        <sonar.organization>fabric8io</sonar.organization>\n+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>\n+        <sonar.login>${env.SONARQUBE_TOKEN}</sonar.login>\n+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>\n+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>\n+        <sonar.coverage.exclusions>**/quickstarts/**/*</sonar.coverage.exclusions>\n+      </properties>\n+      <build>\n+        <plugins>\n+          <plugin>\n+            <groupId>org.sonarsource.scanner.maven</groupId>\n+            <artifactId>sonar-maven-plugin</artifactId>\n+            <executions>\n+              <execution>\n+                <id>sonar</id>\n+                <phase>install</phase>\n+                <goals>\n+                  <goal>sonar</goal>\n+                </goals>\n+              </execution>\n+            </executions>\n+          </plugin>\n+        </plugins>\n+      </build>\n+    </profile>\n+\n     <profile>\n       <id>doc-pdf</id>\n       <build>"
+  }
+]

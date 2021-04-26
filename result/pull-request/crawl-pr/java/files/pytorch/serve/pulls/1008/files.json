@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "9b60e1110236d95bfdd751cc6a813fcd48565b8e",
+    "filename": "model-archiver/model_archiver/arg_parser.py",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/pytorch/serve/blob/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/model-archiver/model_archiver/arg_parser.py",
+    "raw_url": "https://github.com/pytorch/serve/raw/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/model-archiver/model_archiver/arg_parser.py",
+    "contents_url": "https://api.github.com/repos/pytorch/serve/contents/model-archiver/model_archiver/arg_parser.py?ref=f4b7c06b3fe4bbf8a838926d422d446df4bff06c",
+    "patch": "@@ -34,7 +34,7 @@ def export_model_args_parser():\n                                         'specified, else it will be saved under the export path')\n \n         parser_export.add_argument('--serialized-file',\n-                                   required=True,\n+                                   required=False,\n                                    type=str,\n                                    default=None,\n                                    help='Path to .pt or .pth file containing state_dict in case of eager mode\\n'"
+  },
+  {
+    "sha": "49d887c5aa1a1c351bdf2a9ef7751564d1f1f53a",
+    "filename": "model-archiver/model_archiver/manifest_components/model.py",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/pytorch/serve/blob/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/model-archiver/model_archiver/manifest_components/model.py",
+    "raw_url": "https://github.com/pytorch/serve/raw/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/model-archiver/model_archiver/manifest_components/model.py",
+    "contents_url": "https://api.github.com/repos/pytorch/serve/contents/model-archiver/model_archiver/manifest_components/model.py?ref=f4b7c06b3fe4bbf8a838926d422d446df4bff06c",
+    "patch": "@@ -12,7 +12,9 @@ def __init__(self, model_name, serialized_file, handler, model_file=None, model_\n                  extensions=None, requirements_file=None):\n \n         self.model_name = model_name\n-        self.serialized_file = serialized_file.split(\"/\")[-1]\n+        self.serialized_file = None\n+        if serialized_file:\n+            self.serialized_file = serialized_file.split(\"/\")[-1]\n         self.model_file = model_file\n         self.model_version = model_version\n         self.extensions = extensions\n@@ -26,7 +28,8 @@ def __to_dict__(self):\n \n         model_dict['modelName'] = self.model_name\n \n-        model_dict['serializedFile'] = self.serialized_file\n+        if self.serialized_file:\n+            model_dict['serializedFile'] = self.serialized_file\n \n         model_dict['handler'] = self.handler\n "
+  },
+  {
+    "sha": "31fc85f9f58bc690f98c5cdc97b624911cb89929",
+    "filename": "model-archiver/model_archiver/model_packaging_utils.py",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 1,
+    "changes": 15,
+    "blob_url": "https://github.com/pytorch/serve/blob/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/model-archiver/model_archiver/model_packaging_utils.py",
+    "raw_url": "https://github.com/pytorch/serve/raw/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/model-archiver/model_archiver/model_packaging_utils.py",
+    "contents_url": "https://api.github.com/repos/pytorch/serve/contents/model-archiver/model_archiver/model_packaging_utils.py?ref=f4b7c06b3fe4bbf8a838926d422d446df4bff06c",
+    "patch": "@@ -3,6 +3,7 @@\n \"\"\"\n Helper utils for Model Export tool\n \"\"\"\n+# pylint: disable=R1702\n \n import logging\n import os\n@@ -147,7 +148,19 @@ def copy_artifacts(model_name, **kwargs):\n \n                 if file_type == \"extra_files\":\n                     for file in path.split(\",\"):\n-                        shutil.copy(file, model_path)\n+                        if os.path.isfile(file):\n+                            shutil.copy2(file, model_path)\n+                        elif os.path.isdir(file):\n+                            if file != model_path:\n+                                for item in os.listdir(file):\n+                                    src = os.path.join(file, item)\n+                                    dst = os.path.join(model_path, item)\n+                                    if os.path.isfile(src):\n+                                        shutil.copy2(src, dst)\n+                                    elif os.path.isdir(src):\n+                                        shutil.copytree(src, dst, False, None)\n+                        else:\n+                            raise ValueError(f\"Invalid extra file given {file}\")\n                 else:\n                     shutil.copy(path, model_path)\n "
+  },
+  {
+    "sha": "9e11b32fcaa96816319e5d0dcff9fb2873f04061",
+    "filename": "model-archiver/model_archiver/version.txt",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/pytorch/serve/blob/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/model-archiver/model_archiver/version.txt",
+    "raw_url": "https://github.com/pytorch/serve/raw/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/model-archiver/model_archiver/version.txt",
+    "contents_url": "https://api.github.com/repos/pytorch/serve/contents/model-archiver/model_archiver/version.txt?ref=f4b7c06b3fe4bbf8a838926d422d446df4bff06c",
+    "patch": "@@ -1 +1 @@\n-0.3.0\n+0.3.1"
+  },
+  {
+    "sha": "79857c98ce245e81a01fc9f3c24a903bb839e111",
+    "filename": "ts/torch_handler/base_handler.py",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 7,
+    "changes": 17,
+    "blob_url": "https://github.com/pytorch/serve/blob/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/ts/torch_handler/base_handler.py",
+    "raw_url": "https://github.com/pytorch/serve/raw/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/ts/torch_handler/base_handler.py",
+    "contents_url": "https://api.github.com/repos/pytorch/serve/contents/ts/torch_handler/base_handler.py?ref=f4b7c06b3fe4bbf8a838926d422d446df4bff06c",
+    "patch": "@@ -53,11 +53,10 @@ def initialize(self, context):\n         self.manifest = context.manifest\n \n         model_dir = properties.get(\"model_dir\")\n-        serialized_file = self.manifest[\"model\"][\"serializedFile\"]\n-        model_pt_path = os.path.join(model_dir, serialized_file)\n-\n-        if not os.path.isfile(model_pt_path):\n-            raise RuntimeError(\"Missing the model.pt file\")\n+        model_pt_path = None\n+        if \"serializedFile\" in self.manifest[\"model\"]:\n+            serialized_file = self.manifest[\"model\"][\"serializedFile\"]\n+            model_pt_path = os.path.join(model_dir, serialized_file)\n \n         # model def file\n         model_file = self.manifest[\"model\"].get(\"modelFile\", \"\")\n@@ -67,6 +66,9 @@ def initialize(self, context):\n             self.model = self._load_pickled_model(model_dir, model_file, model_pt_path)\n         else:\n             logger.debug(\"Loading torchscript model\")\n+            if not os.path.isfile(model_pt_path):\n+                raise RuntimeError(\"Missing the model.pt file\")\n+\n             self.model = self._load_torchscript_model(model_pt_path)\n \n         self.model.to(self.device)\n@@ -122,9 +124,10 @@ def _load_pickled_model(self, model_dir, model_file, model_pt_path):\n             )\n \n         model_class = model_class_definitions[0]\n-        state_dict = torch.load(model_pt_path, map_location=self.map_location)\n         model = model_class()\n-        model.load_state_dict(state_dict)\n+        if model_pt_path:\n+            state_dict = torch.load(model_pt_path, map_location=self.map_location)\n+            model.load_state_dict(state_dict)\n         return model\n \n     def preprocess(self, data):"
+  },
+  {
+    "sha": "9e11b32fcaa96816319e5d0dcff9fb2873f04061",
+    "filename": "ts/version.txt",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/pytorch/serve/blob/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/ts/version.txt",
+    "raw_url": "https://github.com/pytorch/serve/raw/f4b7c06b3fe4bbf8a838926d422d446df4bff06c/ts/version.txt",
+    "contents_url": "https://api.github.com/repos/pytorch/serve/contents/ts/version.txt?ref=f4b7c06b3fe4bbf8a838926d422d446df4bff06c",
+    "patch": "@@ -1 +1 @@\n-0.3.0\n+0.3.1"
+  }
+]

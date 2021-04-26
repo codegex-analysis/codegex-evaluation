@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "29e0bd9936a2f056c21d72fd00e7b844a4f782d8",
+    "filename": "dolphinscheduler-server/src/main/java/org/apache/dolphinscheduler/server/utils/DependentExecute.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/incubator-dolphinscheduler/blob/0923333b191d546caa631601aa1aaa8c183c3fe9/dolphinscheduler-server/src/main/java/org/apache/dolphinscheduler/server/utils/DependentExecute.java",
+    "raw_url": "https://github.com/apache/incubator-dolphinscheduler/raw/0923333b191d546caa631601aa1aaa8c183c3fe9/dolphinscheduler-server/src/main/java/org/apache/dolphinscheduler/server/utils/DependentExecute.java",
+    "contents_url": "https://api.github.com/repos/apache/incubator-dolphinscheduler/contents/dolphinscheduler-server/src/main/java/org/apache/dolphinscheduler/server/utils/DependentExecute.java?ref=0923333b191d546caa631601aa1aaa8c183c3fe9",
+    "patch": "@@ -20,11 +20,13 @@\n import org.apache.dolphinscheduler.common.enums.DependResult;\n import org.apache.dolphinscheduler.common.enums.DependentRelation;\n import org.apache.dolphinscheduler.common.enums.ExecutionStatus;\n+import org.apache.dolphinscheduler.common.enums.Flag;\n import org.apache.dolphinscheduler.common.model.DateInterval;\n import org.apache.dolphinscheduler.common.model.DependentItem;\n import org.apache.dolphinscheduler.common.model.TaskNode;\n import org.apache.dolphinscheduler.common.utils.CollectionUtils;\n import org.apache.dolphinscheduler.common.utils.DependentUtils;\n+import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;\n import org.apache.dolphinscheduler.dao.entity.ProcessInstance;\n import org.apache.dolphinscheduler.dao.entity.TaskInstance;\n import org.apache.dolphinscheduler.dao.utils.DagHelper;\n@@ -104,7 +106,11 @@ private DependResult calculateResultForTasks(DependentItem dependentItem,\n             ProcessInstance processInstance = findLastProcessInterval(dependentItem.getDefinitionId(),\n                                                     dateInterval);\n             if(processInstance == null){\n-                return DependResult.WAITING;\n+                ProcessDefinition processDefinition = processService.findProcessDefineById(dependentItem.getDefinitionId());\n+                if (null != processDefinition && processDefinition.getFlag().equals(Flag.YES)) {\n+                    logger.info(\"processDefinition is not run ,DependResult calculateResultForTasks wait processDefinition id:{} to run...\", dependentItem.getDefinitionId());\n+                    return DependResult.WAITING;\n+                }\n             }\n             // need to check workflow for updates, so get all task and check the task state\n             if(dependentItem.getDepTasks().equals(Constants.DEPENDENT_ALL)){"
+  }
+]

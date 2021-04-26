@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "bf15903ab8d1f373e69697777203ef14202cf2d2",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/siiritann/dn/blob/4af2db68117962ece360687730e1198397eb6e02/build.gradle",
+    "raw_url": "https://github.com/siiritann/dn/raw/4af2db68117962ece360687730e1198397eb6e02/build.gradle",
+    "contents_url": "https://api.github.com/repos/siiritann/dn/contents/build.gradle?ref=4af2db68117962ece360687730e1198397eb6e02",
+    "patch": "@@ -33,6 +33,9 @@ dependencies {\n     implementation \"io.springfox:springfox-boot-starter:3.0.0\"\n     implementation 'org.springframework.boot:spring-boot-starter-amqp'\n     implementation 'org.springframework.boot:spring-boot-starter-security'\n+    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'\n+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'\n+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'\n     runtimeOnly 'org.postgresql:postgresql:42.2.18'\n     def junitJupiterVersion = '5.7.0'\n     testCompile \"org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion\"\n@@ -66,4 +69,4 @@ tasks.withType(JavaCompile) {\n \n test {\n     useJUnitPlatform()\n-}\n\\ No newline at end of file\n+}"
+  },
+  {
+    "sha": "def902cdae9091e7c9af355b70e51b6732cc818b",
+    "filename": "src/main/java/com/example/datanor/repository/UserRepository.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/siiritann/dn/blob/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/repository/UserRepository.java",
+    "raw_url": "https://github.com/siiritann/dn/raw/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/repository/UserRepository.java",
+    "contents_url": "https://api.github.com/repos/siiritann/dn/contents/src/main/java/com/example/datanor/repository/UserRepository.java?ref=4af2db68117962ece360687730e1198397eb6e02",
+    "patch": "@@ -2,10 +2,16 @@\n \n import com.example.datanor.model.AppUser;\n import org.springframework.data.jpa.repository.JpaRepository;\n+import org.springframework.data.jpa.repository.Query;\n+import org.springframework.data.repository.query.Param;\n \n public interface UserRepository extends JpaRepository<AppUser, Long> {\n \n     AppUser getUserByUsername(String username);\n \n+    @Query(\"SELECT id FROM AppUser \" +\n+            \"where username = :username\")\n+    Long getIdByUsername(@Param(\"username\") String username);\n+\n }\n "
+  },
+  {
+    "sha": "6ba715feb419c9785d38167857c484b6fa66e3f8",
+    "filename": "src/main/java/com/example/datanor/security/JwtTokenFilter.java",
+    "status": "added",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/siiritann/dn/blob/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/security/JwtTokenFilter.java",
+    "raw_url": "https://github.com/siiritann/dn/raw/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/security/JwtTokenFilter.java",
+    "contents_url": "https://api.github.com/repos/siiritann/dn/contents/src/main/java/com/example/datanor/security/JwtTokenFilter.java?ref=4af2db68117962ece360687730e1198397eb6e02",
+    "patch": "@@ -0,0 +1,58 @@\n+package com.example.datanor.security;\n+\n+import io.jsonwebtoken.Claims;\n+import io.jsonwebtoken.Jwts;\n+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;\n+import org.springframework.security.core.Authentication;\n+import org.springframework.security.core.GrantedAuthority;\n+import org.springframework.security.core.authority.SimpleGrantedAuthority;\n+import org.springframework.security.core.context.SecurityContextHolder;\n+import org.springframework.security.core.userdetails.UserDetails;\n+import org.springframework.web.filter.GenericFilterBean;\n+\n+import javax.servlet.FilterChain;\n+import javax.servlet.ServletException;\n+import javax.servlet.ServletRequest;\n+import javax.servlet.ServletResponse;\n+import javax.servlet.http.HttpServletRequest;\n+import java.io.IOException;\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+public class JwtTokenFilter extends GenericFilterBean {\n+\n+    @Override\n+    public void doFilter(ServletRequest request,\n+            ServletResponse response,\n+            FilterChain filterChain) throws IOException, ServletException {\n+        String token = resolveToken((HttpServletRequest) request);\n+        if (token != null) {\n+            Authentication authentication = validateToken(token);\n+            SecurityContextHolder.getContext().setAuthentication(authentication);\n+        }\n+        filterChain.doFilter(request, response);\n+    }\n+\n+    String resolveToken(HttpServletRequest req) {\n+        String headerAttribute = req.getHeader(\"Authorization\");\n+        if (headerAttribute == null) {\n+            return null;\n+        }\n+        if (headerAttribute.startsWith(\"Bearer\")) {\n+            return headerAttribute.substring(7);\n+        }\n+        return headerAttribute;\n+    }\n+\n+    Authentication validateToken(String token) {\n+        Claims claims = (Claims) Jwts.parserBuilder()\n+                .setSigningKey(\"jsonwebtokenforsiiriweatherapisecretformoresecuritythanpreviously\")\n+                .build()\n+                .parse(token)\n+                .getBody();\n+        List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();\n+        grantedAuthorityList.add(new SimpleGrantedAuthority(\"ROLE_USER\"));\n+        UserDetails userDetails = new MyUser(claims.get(\"id\", Long.class), claims.get(\"username\", String.class), \"\", grantedAuthorityList);\n+        return new UsernamePasswordAuthenticationToken(userDetails, \"\", userDetails.getAuthorities());\n+    }\n+}"
+  },
+  {
+    "sha": "0953d1c75622f612b8f6a13cc10aadc4a62c169a",
+    "filename": "src/main/java/com/example/datanor/security/MyUser.java",
+    "status": "added",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/siiritann/dn/blob/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/security/MyUser.java",
+    "raw_url": "https://github.com/siiritann/dn/raw/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/security/MyUser.java",
+    "contents_url": "https://api.github.com/repos/siiritann/dn/contents/src/main/java/com/example/datanor/security/MyUser.java?ref=4af2db68117962ece360687730e1198397eb6e02",
+    "patch": "@@ -0,0 +1,23 @@\n+package com.example.datanor.security;\n+\n+import org.springframework.security.core.GrantedAuthority;\n+import org.springframework.security.core.userdetails.User;\n+\n+import java.util.Collection;\n+\n+public class MyUser extends User {\n+    private Long id;\n+\n+    public MyUser(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {\n+        super(username, password, authorities);\n+        this.id = id;\n+    }\n+\n+    public Long getId() {\n+        return id;\n+    }\n+\n+    public void setId(Long id) {\n+        this.id = id;\n+    }\n+}"
+  },
+  {
+    "sha": "128b14b9a3286a8b8f334b9d6d91ba09eb3a2964",
+    "filename": "src/main/java/com/example/datanor/security/SecurityConfig.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/siiritann/dn/blob/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/security/SecurityConfig.java",
+    "raw_url": "https://github.com/siiritann/dn/raw/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/security/SecurityConfig.java",
+    "contents_url": "https://api.github.com/repos/siiritann/dn/contents/src/main/java/com/example/datanor/security/SecurityConfig.java?ref=4af2db68117962ece360687730e1198397eb6e02",
+    "patch": "@@ -5,15 +5,24 @@\n import org.springframework.security.config.annotation.web.builders.HttpSecurity;\n import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;\n import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;\n+import org.springframework.security.config.http.SessionCreationPolicy;\n import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;\n import org.springframework.security.crypto.password.PasswordEncoder;\n+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;\n \n @Configuration\n @EnableWebSecurity\n public class SecurityConfig extends WebSecurityConfigurerAdapter {\n \n     @Override\n     protected void configure(HttpSecurity http) throws Exception {\n+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)\n+                .and()\n+                .authorizeRequests()\n+                .antMatchers(\"/\", \"/user/**\", \"/cities/**\", \"/login\", \"/h2-console/**\", \"/img/**\", \"/js/**\", \"/favicon.ico\", \"/main.js\", \"/style.css\").permitAll()\n+                .anyRequest().authenticated()\n+                .and()\n+                .addFilterBefore(new JwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);\n         http.cors();\n         http.csrf().disable();\n         http.headers().frameOptions().disable();    // NEEDED FOR H2 CONSOLE"
+  },
+  {
+    "sha": "630dcfa48b4f7aaea2a389e51e22c95d9d07ba98",
+    "filename": "src/main/java/com/example/datanor/service/Jwt.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/siiritann/dn/blob/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/service/Jwt.java",
+    "raw_url": "https://github.com/siiritann/dn/raw/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/service/Jwt.java",
+    "contents_url": "https://api.github.com/repos/siiritann/dn/contents/src/main/java/com/example/datanor/service/Jwt.java?ref=4af2db68117962ece360687730e1198397eb6e02",
+    "patch": "@@ -0,0 +1,34 @@\n+package com.example.datanor.service;\n+\n+import io.jsonwebtoken.JwtBuilder;\n+import io.jsonwebtoken.Jwts;\n+import io.jsonwebtoken.security.Keys;\n+import org.springframework.stereotype.Service;\n+\n+import java.security.Key;\n+import java.time.ZonedDateTime;\n+import java.util.Date;\n+import java.util.UUID;\n+\n+import static io.jsonwebtoken.io.Decoders.BASE64;\n+\n+@Service\n+public class Jwt {\n+\n+    public String getBearerToken(Long id, String username) {\n+        JwtBuilder builder = Jwts.builder()\n+                .setExpiration(Date.from(ZonedDateTime.now().plusDays(7).toInstant()))\n+                .setId(UUID.randomUUID().toString())\n+                .setIssuedAt(new Date())\n+                .setIssuer(\"weatherAPI\")\n+                .signWith(getSigningKey())\n+                .claim(\"id\", id)\n+                .claim(\"username\", username);\n+        return builder.compact();\n+    }\n+\n+    public Key getSigningKey() {\n+        byte[] keyBytes = BASE64.decode(\"jsonwebtokenforsiiriweatherapisecretformoresecuritythanpreviously\");\n+        return Keys.hmacShaKeyFor(keyBytes);\n+    }\n+}"
+  },
+  {
+    "sha": "edc27a170314d43ddd6bd08172d238c9467f42d9",
+    "filename": "src/main/java/com/example/datanor/service/UserService.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/siiritann/dn/blob/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/service/UserService.java",
+    "raw_url": "https://github.com/siiritann/dn/raw/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/service/UserService.java",
+    "contents_url": "https://api.github.com/repos/siiritann/dn/contents/src/main/java/com/example/datanor/service/UserService.java?ref=4af2db68117962ece360687730e1198397eb6e02",
+    "patch": "@@ -40,10 +40,14 @@ public String savePassword(String password) {\n     }\n \n     public String loginUser(AppUserDto user) {\n-        if (!validate(user.getUsername(), user.getPassword())){\n+        String username = user.getUsername();\n+        String password = user.getPassword();\n+        if (!validate(username, password)) {\n             throw new ObjectNotFoundException(\"Wrong password\");\n         }\n-        return \"Login successful!\";\n+        Long id = userRepository.getIdByUsername(username);\n+        Jwt jwt = new Jwt();\n+        return jwt.getBearerToken(id, username);\n     }\n \n     public boolean validate(String username, String rawPassword){"
+  },
+  {
+    "sha": "510c1cd2dd0b08f7b57c2c115f61e7d8aea31c6d",
+    "filename": "src/main/java/com/example/datanor/service/WeatherService.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/siiritann/dn/blob/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/service/WeatherService.java",
+    "raw_url": "https://github.com/siiritann/dn/raw/4af2db68117962ece360687730e1198397eb6e02/src/main/java/com/example/datanor/service/WeatherService.java",
+    "contents_url": "https://api.github.com/repos/siiritann/dn/contents/src/main/java/com/example/datanor/service/WeatherService.java?ref=4af2db68117962ece360687730e1198397eb6e02",
+    "patch": "@@ -31,10 +31,10 @@ public WeatherService(CityService cityService) {\n     @Autowired\n     private WeatherRepositoryHibernate weatherRepositoryHibernate;\n \n-    @Value(\"${datanor.weatherMap.url}\")\n+    @Value(\"${weatherMap.url}\")\n     private String url;\n \n-    @Value(\"${datanor.weatherMap.appid}\")\n+    @Value(\"${weatherMap.appid}\")\n     private String appid;\n \n     public URI getUriForCity(long id) throws URISyntaxException {"
+  },
+  {
+    "sha": "230b056a0aa5d136a18b933047084a53fe6d27ca",
+    "filename": "src/main/resources/application.properties",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/siiritann/dn/blob/4af2db68117962ece360687730e1198397eb6e02/src/main/resources/application.properties",
+    "raw_url": "https://github.com/siiritann/dn/raw/4af2db68117962ece360687730e1198397eb6e02/src/main/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/siiritann/dn/contents/src/main/resources/application.properties?ref=4af2db68117962ece360687730e1198397eb6e02",
+    "patch": "@@ -17,14 +17,11 @@ spring.datasource.driverClassName=org.h2.Driver\n spring.datasource.username=sa\n spring.datasource.password=sa\n spring.h2.console.enabled=true\n-\n # APPLIES TO BOTH\n spring.liquibase.change-log=classpath:/db/changelog/changelog-master.xml\n-\n # HIBERNATE\n spring.jpa.show-sql=true\n spring.jpa.properties.hibernate.format_sql=true\n-\n # VARIABLES\n-datanor.weatherMap.url=http://api.openweathermap.org/data/2.5/weather?units=metric\n-datanor.weatherMap.appid=0c78a76af15cc5843caa7b5f44e1623e\n\\ No newline at end of file\n+weatherMap.url=http://api.openweathermap.org/data/2.5/weather?units=metric\n+weatherMap.appid=0c78a76af15cc5843caa7b5f44e1623e"
+  }
+]

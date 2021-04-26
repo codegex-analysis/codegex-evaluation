@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "564b3d50bd3ae6e4e536c197d991b49c2a76c8a2",
+    "filename": "src/main/java/seedu/address/logic/Logic.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/blob/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/logic/Logic.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/raw/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/logic/Logic.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103-T14-4/tp/contents/src/main/java/seedu/address/logic/Logic.java?ref=d7b17c057ba2380264d879f638a39464b9d8c9f1",
+    "patch": "@@ -38,6 +38,11 @@\n      */\n     ObservableList<Task> getFilteredTaskList();\n \n+    /**\n+     * Returns an unmodifiable view of the list of finished tasks\n+     */\n+    ObservableList<Task> getFinishedTaskList();\n+\n     /**\n      * Returns the user prefs' address book file path.\n      */"
+  },
+  {
+    "sha": "416f1df7f1ca9f694c9090fc9604ac280c03440b",
+    "filename": "src/main/java/seedu/address/logic/LogicManager.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/blob/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/logic/LogicManager.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/raw/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/logic/LogicManager.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103-T14-4/tp/contents/src/main/java/seedu/address/logic/LogicManager.java?ref=d7b17c057ba2380264d879f638a39464b9d8c9f1",
+    "patch": "@@ -65,6 +65,11 @@ public ReadOnlyTaskTracker getTaskTracker() {\n         return model.getFilteredTaskList();\n     }\n \n+    @Override\n+    public ObservableList<Task> getFinishedTaskList() {\n+        return model.getFinishedTaskList();\n+    }\n+\n     @Override\n     public Path getTaskTrackerFilePath() {\n         return model.getTaskTrackerFilePath();"
+  },
+  {
+    "sha": "6c4c74730f96f097ea73d4aa6782b0e98db36432",
+    "filename": "src/main/java/seedu/address/model/Model.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 2,
+    "changes": 18,
+    "blob_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/blob/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/model/Model.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/raw/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/model/Model.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103-T14-4/tp/contents/src/main/java/seedu/address/model/Model.java?ref=d7b17c057ba2380264d879f638a39464b9d8c9f1",
+    "patch": "@@ -14,7 +14,17 @@\n     /**\n      * {@code Predicate} that always evaluate to true\n      */\n-    Predicate<Task> PREDICATE_SHOW_ALL_TASKS = unused -> true;\n+    Predicate<Task> PREDICATE_SHOW_ALL_TASKS = task -> true;\n+\n+    /**\n+     * {@code Predicate} that returns true if the task is unfinished\n+     */\n+    Predicate<Task> PREDICATE_SHOW_UNFINISHED_TASKS = task -> !task.hasFinished();\n+\n+    /**\n+     * {@code Predicate} that returns true if the task is finished\n+     */\n+    Predicate<Task> PREDICATE_SHOW_FINISHED_TASKS = task -> task.hasFinished();\n \n     /**\n      * Replaces user prefs data with the data in {@code userPrefs}.\n@@ -56,7 +66,6 @@\n      */\n     ReadOnlyTaskTracker getTaskTracker();\n \n-\n     /**\n      * Returns true if a task with the same identity as {@code task} exists in the task tracker.\n      */\n@@ -92,6 +101,11 @@\n      */\n     ObservableList<Task> getFilteredTaskList();\n \n+    /**\n+     * Returns an unmodifiable view of the finisehed task list\n+     */\n+    ObservableList<Task> getFinishedTaskList();\n+\n     /**\n      * Updates the filter of the filtered task list to filter by the given {@code predicate}.\n      *"
+  },
+  {
+    "sha": "681b63b7dc8b4c0b21f2d1a427a27bf49a463d2e",
+    "filename": "src/main/java/seedu/address/model/ModelManager.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 3,
+    "changes": 14,
+    "blob_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/blob/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/model/ModelManager.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/raw/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/model/ModelManager.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103-T14-4/tp/contents/src/main/java/seedu/address/model/ModelManager.java?ref=d7b17c057ba2380264d879f638a39464b9d8c9f1",
+    "patch": "@@ -22,6 +22,7 @@\n     private final TaskTracker taskTracker;\n     private final UserPrefs userPrefs;\n     private final FilteredList<Task> filteredTasks;\n+    private final FilteredList<Task> finishedTasks;\n \n     /**\n      * Initializes a ModelManager with the given taskTracker and userPrefs.\n@@ -36,6 +37,9 @@ public ModelManager(ReadOnlyTaskTracker taskTracker, ReadOnlyUserPrefs userPrefs\n         this.taskTracker = new TaskTracker(taskTracker);\n         this.userPrefs = new UserPrefs(userPrefs);\n         filteredTasks = new FilteredList<>(this.taskTracker.getTaskList());\n+        finishedTasks = new FilteredList<>(this.taskTracker.getTaskList());\n+        filteredTasks.setPredicate(PREDICATE_SHOW_UNFINISHED_TASKS);\n+        finishedTasks.setPredicate(PREDICATE_SHOW_FINISHED_TASKS);\n     }\n \n     public ModelManager() {\n@@ -87,7 +91,6 @@ public void setTaskTracker(ReadOnlyTaskTracker taskTracker) {\n     @Override\n     public ReadOnlyTaskTracker getTaskTracker() {\n         return taskTracker;\n-\n     }\n \n     @Override\n@@ -109,7 +112,7 @@ public void finishTask(Task target) {\n     @Override\n     public void addTask(Task task) {\n         taskTracker.addTask(task);\n-        updateFilteredTaskList(PREDICATE_SHOW_ALL_TASKS);\n+        updateFilteredTaskList(PREDICATE_SHOW_UNFINISHED_TASKS);\n     }\n \n     @Override\n@@ -130,10 +133,15 @@ public void setTask(Task target, Task editedTask) {\n         return filteredTasks;\n     }\n \n+    @Override\n+    public ObservableList<Task> getFinishedTaskList() {\n+        return finishedTasks;\n+    }\n+\n     @Override\n     public void updateFilteredTaskList(Predicate<Task> predicate) {\n         requireNonNull(predicate);\n-        filteredTasks.setPredicate(predicate);\n+        filteredTasks.setPredicate(predicate.and(PREDICATE_SHOW_UNFINISHED_TASKS));\n     }\n \n     @Override"
+  },
+  {
+    "sha": "1aab848289cfdd6a9c4057766953570548256daf",
+    "filename": "src/main/java/seedu/address/model/person/Task.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/blob/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/model/person/Task.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/raw/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/model/person/Task.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103-T14-4/tp/contents/src/main/java/seedu/address/model/person/Task.java?ref=d7b17c057ba2380264d879f638a39464b9d8c9f1",
+    "patch": "@@ -72,6 +72,10 @@ public Remark getRemark() {\n         return remark;\n     }\n \n+    public boolean hasFinished() {\n+        return status.hasFinished();\n+    }\n+\n     /**\n      * Finish a task and return a new Task with status finished\n      */"
+  },
+  {
+    "sha": "5e730ff9feebedba7178950f46d9e68b5c3f1141",
+    "filename": "src/main/java/seedu/address/model/util/SampleDataUtil.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/blob/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/model/util/SampleDataUtil.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/raw/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/model/util/SampleDataUtil.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103-T14-4/tp/contents/src/main/java/seedu/address/model/util/SampleDataUtil.java?ref=d7b17c057ba2380264d879f638a39464b9d8c9f1",
+    "patch": "@@ -35,7 +35,7 @@\n                     EMPTY_REMARK, getTagSet(\"core\", \"difficult\")),\n             new Task(new ModuleName(\"Programming Methodology I\"), new ModuleCode(\"CS1010\"),\n                     new DeadlineDate(\"04-10-2020\"), new DeadlineTime(\"10:10\"),\n-                    new Status(), new Weightage(20),\n+                    new Status(\"Finished\"), new Weightage(20),\n                     EMPTY_REMARK, getTagSet(\"core\")),\n             new Task(new ModuleName(\"Programming Methodology II\"), new ModuleCode(\"CS2030\"),\n                     new DeadlineDate(\"01-11-2020\"), new DeadlineTime(\"10:10\"),\n@@ -45,9 +45,9 @@\n                     new DeadlineDate(\"10-04-2020\"), new DeadlineTime(\"10:10\"),\n                     new Status(), new Weightage(20),\n                     EMPTY_REMARK, getTagSet(\"specialization\")),\n-            new Task(new ModuleName(\"MachineLearning\"), new ModuleCode(\"CS3244\"),\n+            new Task(new ModuleName(\"Machine Learning\"), new ModuleCode(\"CS3244\"),\n                     new DeadlineDate(\"05-05-2020\"), new DeadlineTime(\"10:10\"),\n-                    new Status(), new Weightage(15),\n+                    new Status(\"Finished\"), new Weightage(15),\n                     EMPTY_REMARK, getTagSet(\"specialization\"))\n         };\n     }"
+  },
+  {
+    "sha": "4f67d0298e1a23a27527766853dd34948b685d4a",
+    "filename": "src/main/java/seedu/address/ui/MainWindow.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/blob/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/ui/MainWindow.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/raw/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/java/seedu/address/ui/MainWindow.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103-T14-4/tp/contents/src/main/java/seedu/address/ui/MainWindow.java?ref=d7b17c057ba2380264d879f638a39464b9d8c9f1",
+    "patch": "@@ -32,6 +32,7 @@\n \n     // Independent Ui parts residing in this Ui container\n     private TaskListPanel taskListPanel;\n+    private TaskListPanel finishedTaskListPanel;\n     private ResultDisplay resultDisplay;\n     private HelpWindow helpWindow;\n \n@@ -44,6 +45,9 @@\n     @FXML\n     private StackPane taskListPanelPlaceholder;\n \n+    @FXML\n+    private StackPane finishedTaskListPanelPlaceholder;\n+\n     @FXML\n     private StackPane resultDisplayPlaceholder;\n \n@@ -113,6 +117,9 @@ void fillInnerParts() {\n         taskListPanel = new TaskListPanel(logic.getFilteredTaskList());\n         taskListPanelPlaceholder.getChildren().add(taskListPanel.getRoot());\n \n+        finishedTaskListPanel = new TaskListPanel(logic.getFinishedTaskList());\n+        finishedTaskListPanelPlaceholder.getChildren().add(finishedTaskListPanel.getRoot());\n+\n         resultDisplay = new ResultDisplay();\n         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());\n "
+  },
+  {
+    "sha": "a71c6376e7404c5eec3b6557ae57a7263eb3316f",
+    "filename": "src/main/resources/view/MainWindow.fxml",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 6,
+    "changes": 22,
+    "blob_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/blob/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/resources/view/MainWindow.fxml",
+    "raw_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/raw/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/main/resources/view/MainWindow.fxml",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103-T14-4/tp/contents/src/main/resources/view/MainWindow.fxml?ref=d7b17c057ba2380264d879f638a39464b9d8c9f1",
+    "patch": "@@ -11,6 +11,7 @@\n <?import javafx.scene.layout.StackPane?>\n <?import javafx.scene.layout.VBox?>\n \n+<?import javafx.scene.layout.HBox?>\n <fx:root type=\"javafx.stage.Stage\" xmlns=\"http://javafx.com/javafx/8\" xmlns:fx=\"http://javafx.com/fxml/1\"\n          title=\"semester.config\" minWidth=\"450\" minHeight=\"600\" onCloseRequest=\"#handleExit\">\n   <icons>\n@@ -46,12 +47,21 @@\n           </padding>\n         </StackPane>\n \n-        <VBox fx:id=\"taskList\" styleClass=\"pane-with-border\" minWidth=\"340\" prefWidth=\"340\" VBox.vgrow=\"ALWAYS\">\n-          <padding>\n-            <Insets top=\"10\" right=\"10\" bottom=\"10\" left=\"10\" />\n-          </padding>\n-          <StackPane fx:id=\"taskListPanelPlaceholder\" VBox.vgrow=\"ALWAYS\"/>\n-        </VBox>\n+        <SplitPane>\n+          <VBox fx:id=\"taskList\" styleClass=\"pane-with-border\" minWidth=\"340\" prefWidth=\"340\" VBox.vgrow=\"ALWAYS\">\n+            <padding>\n+              <Insets top=\"10\" right=\"10\" bottom=\"10\" left=\"10\" />\n+            </padding>\n+            <StackPane fx:id=\"taskListPanelPlaceholder\" VBox.vgrow=\"ALWAYS\"/>\n+          </VBox>\n+\n+          <VBox fx:id=\"taskList2\" styleClass=\"pane-with-border\" minWidth=\"340\" prefWidth=\"340\" VBox.vgrow=\"ALWAYS\">\n+            <padding>\n+              <Insets top=\"10\" right=\"10\" bottom=\"10\" left=\"10\" />\n+            </padding>\n+            <StackPane fx:id=\"finishedTaskListPanelPlaceholder\" VBox.vgrow=\"ALWAYS\"/>\n+          </VBox>\n+        </SplitPane>\n \n         <StackPane fx:id=\"statusbarPlaceholder\" VBox.vgrow=\"NEVER\" />\n       </VBox>"
+  },
+  {
+    "sha": "ad07e405016dec621234d2549cba855d7831af11",
+    "filename": "src/test/java/seedu/address/logic/commands/AddCommandTest.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/blob/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/test/java/seedu/address/logic/commands/AddCommandTest.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103-T14-4/tp/raw/d7b17c057ba2380264d879f638a39464b9d8c9f1/src/test/java/seedu/address/logic/commands/AddCommandTest.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103-T14-4/tp/contents/src/test/java/seedu/address/logic/commands/AddCommandTest.java?ref=d7b17c057ba2380264d879f638a39464b9d8c9f1",
+    "patch": "@@ -150,6 +150,11 @@ public void setTask(Task target, Task editedTask) {\n             throw new AssertionError(\"This method should not be called.\");\n         }\n \n+        @Override\n+        public ObservableList<Task> getFinishedTaskList() {\n+            throw new AssertionError(\"This method should not be called.\");\n+        }\n+\n         @Override\n         public void updateFilteredTaskList(Predicate<Task> predicate) {\n             throw new AssertionError(\"This method should not be called.\");"
+  }
+]

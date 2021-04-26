@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "6c2bb5f25806cc412deda1bf60a02d0d58928d30",
+    "filename": "Lesson9/src/Main.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/VitGames/tms2021Android/blob/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/src/Main.java",
+    "raw_url": "https://github.com/VitGames/tms2021Android/raw/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/src/Main.java",
+    "contents_url": "https://api.github.com/repos/VitGames/tms2021Android/contents/Lesson9/src/Main.java?ref=8fe3bc3aadf012a273b24daaf97869ee2278ce53",
+    "patch": "@@ -0,0 +1,28 @@\n+import java.io.FileOutputStream;\n+import java.io.IOException;\n+import java.nio.charset.StandardCharsets;\n+import java.util.Scanner;\n+\n+public class Main {\n+    public static void main(String[] args) {\n+        TextFormater textFormater = new TextFormater();\n+        try {\n+            System.out.println(\"Введите строку:\");\n+            Scanner scanner = new Scanner(System.in);\n+            String s = scanner.nextLine();\n+            FileOutputStream fos = new FileOutputStream(\"D://tms2021Android1//Lesson9//string.txt\");\n+            s = new StringBuilder(s).reverse().toString();\n+            byte[] bytes = s.getBytes();\n+            fos.write(bytes, 0, bytes.length);\n+\n+            textFormater.readFile();\n+            textFormater.splitText();\n+            textFormater.chooseFile();\n+\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+}\n+"
+  },
+  {
+    "sha": "3de9ec5b663cac7ea0ae326440af9722741d6896",
+    "filename": "Lesson9/src/Reader.java",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/VitGames/tms2021Android/blob/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/src/Reader.java",
+    "raw_url": "https://github.com/VitGames/tms2021Android/raw/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/src/Reader.java",
+    "contents_url": "https://api.github.com/repos/VitGames/tms2021Android/contents/Lesson9/src/Reader.java?ref=8fe3bc3aadf012a273b24daaf97869ee2278ce53",
+    "patch": "@@ -0,0 +1,4 @@\n+public interface Reader {\n+     void readFile();\n+     void splitText();\n+}"
+  },
+  {
+    "sha": "454b83a3c2e81421c86c7627360ce519913dbad0",
+    "filename": "Lesson9/src/TextFormater.java",
+    "status": "added",
+    "additions": 72,
+    "deletions": 0,
+    "changes": 72,
+    "blob_url": "https://github.com/VitGames/tms2021Android/blob/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/src/TextFormater.java",
+    "raw_url": "https://github.com/VitGames/tms2021Android/raw/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/src/TextFormater.java",
+    "contents_url": "https://api.github.com/repos/VitGames/tms2021Android/contents/Lesson9/src/TextFormater.java?ref=8fe3bc3aadf012a273b24daaf97869ee2278ce53",
+    "patch": "@@ -0,0 +1,72 @@\n+import java.io.*;\n+import java.util.Arrays;\n+import java.util.Scanner;\n+\n+public class TextFormater implements Reader {\n+    String str;\n+    String[] words;\n+    int count1 = 0;\n+    int count2 = 0;\n+    int count3 = 0;\n+\n+    @Override\n+    public void readFile() {\n+        try {\n+            String filename;\n+            Scanner scanner = new Scanner(System.in);\n+            System.out.println(\"Введите название файла (text.txt):\");\n+            filename = scanner.nextLine();\n+            FileReader fileReader = new FileReader(\"D://tms2021Android1//Lesson9//\" + filename);\n+            char[] buf = new char[256];\n+            int i;\n+            while ((i = fileReader.read(buf)) > 0) {\n+                if (i < 256) {\n+                    buf = Arrays.copyOf(buf, i);\n+                }\n+                str = new String(buf);\n+            }\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+    @Override\n+    public void splitText() {\n+        count1 = 0;\n+        count2 = 0;\n+        count3 = 0;\n+        int sumsentence = 0; // кол-во предложений\n+        words = str.split(\"\\\\.\");\n+        for (int i = 0; i < words.length; i++) {\n+            sumsentence++;\n+        }\n+        System.out.println(\"Кол-во предложений: \" + sumsentence);\n+        for (String subStr : words) {\n+            System.out.println(subStr);\n+        }\n+    }\n+\n+    public void chooseFile() throws IOException {\n+        try {\n+            System.out.println(\"Идет запись в файл нужных срок...\");\n+            String[] s;\n+            File newText = new File(\"D://tms2021Android1//Lesson9//newText.txt\");\n+            FileOutputStream fos = new FileOutputStream(newText);\n+            for (int b = 0; b < words.length; b++) {\n+                s = words[b].split(\" \");\n+                for (int c = 0; c < s.length; c++) {\n+                    if (s[c].equals(new StringBuilder((s[c])).reverse().toString())) {\n+                        byte[] bytes = words[b].getBytes();\n+                        fos.write(bytes, 0, bytes.length);\n+                    } else if (s.length > 2 && s.length < 6) {\n+                        byte[] bytes = words[b].getBytes();\n+                        fos.write(bytes, 0, bytes.length);\n+                        break;\n+                    }\n+                }\n+            }\n+        } catch (FileNotFoundException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "cdb270d88ac46bb643f2127a36849e11671db366",
+    "filename": "Lesson9/string.txt",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/VitGames/tms2021Android/blob/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/string.txt",
+    "raw_url": "https://github.com/VitGames/tms2021Android/raw/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/string.txt",
+    "contents_url": "https://api.github.com/repos/VitGames/tms2021Android/contents/Lesson9/string.txt?ref=8fe3bc3aadf012a273b24daaf97869ee2278ce53",
+    "patch": "@@ -0,0 +1 @@\n+sbsd\n\\ No newline at end of file"
+  },
+  {
+    "sha": "172cb894d9bc2614d35b8718ae53e15cc19b3570",
+    "filename": "Lesson9/text.txt",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/VitGames/tms2021Android/blob/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/text.txt",
+    "raw_url": "https://github.com/VitGames/tms2021Android/raw/8fe3bc3aadf012a273b24daaf97869ee2278ce53/Lesson9/text.txt",
+    "contents_url": "https://api.github.com/repos/VitGames/tms2021Android/contents/Lesson9/text.txt?ref=8fe3bc3aadf012a273b24daaf97869ee2278ce53",
+    "patch": "@@ -0,0 +1,3 @@\n+some words to idea.\n+another some good words to idea.\n+reg dovod boring.\n\\ No newline at end of file"
+  }
+]

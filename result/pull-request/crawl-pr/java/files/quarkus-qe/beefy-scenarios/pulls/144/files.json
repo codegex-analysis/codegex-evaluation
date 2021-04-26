@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "8b7d8637ecb65d493e3207b0dd1d83eef1ccafcd",
+    "filename": "004-quarkus-HHH-and-HV/README.md",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/quarkus-qe/beefy-scenarios/blob/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/README.md",
+    "raw_url": "https://github.com/quarkus-qe/beefy-scenarios/raw/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/README.md",
+    "contents_url": "https://api.github.com/repos/quarkus-qe/beefy-scenarios/contents/004-quarkus-HHH-and-HV/README.md?ref=6505f460d81317fd3a975fa4a33809223e33548a",
+    "patch": "@@ -3,4 +3,5 @@ This scenario uses in-memory Java database H2.\n Test class annotated with `@QuarkusTestResource(H2DatabaseTestResource.class)` starts an in-memory H2 database\n \n Module that covers integration with some Hibernate features like:\n-- Reproducer for [14201](https://github.com/quarkusio/quarkus/issues/14201) and [14881](https://github.com/quarkusio/quarkus/issues/14881): possible data loss bug in hibernate. This is covered under the Java package `io.quarkus.qe.hibernate.items`.\n\\ No newline at end of file\n+- Reproducer for [14201](https://github.com/quarkusio/quarkus/issues/14201) and [14881](https://github.com/quarkusio/quarkus/issues/14881): possible data loss bug in hibernate. This is covered under the Java package `io.quarkus.qe.hibernate.items`.\n+- Reproducer for [QUARKUS-661](https://issues.redhat.com/browse/QUARKUS-661): @TransactionScoped Context does not call @Predestroy on TransactionScoped Beans. This is covered under the Java package `io.quarkus.qe.hibernate.transaction`.\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e39e674eee2c3324b5414b3bc68e8f6f57cc0aa7",
+    "filename": "004-quarkus-HHH-and-HV/src/main/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBean.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/quarkus-qe/beefy-scenarios/blob/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/src/main/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBean.java",
+    "raw_url": "https://github.com/quarkus-qe/beefy-scenarios/raw/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/src/main/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBean.java",
+    "contents_url": "https://api.github.com/repos/quarkus-qe/beefy-scenarios/contents/004-quarkus-HHH-and-HV/src/main/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBean.java?ref=6505f460d81317fd3a975fa4a33809223e33548a",
+    "patch": "@@ -0,0 +1,34 @@\n+package io.quarkus.qe.hibernate.transaction;\n+\n+import java.util.concurrent.atomic.AtomicBoolean;\n+\n+import javax.annotation.PostConstruct;\n+import javax.annotation.PreDestroy;\n+import javax.transaction.TransactionScoped;\n+\n+@TransactionScoped\n+public class TransactionScopeBean {\n+    public static final AtomicBoolean PRE_DESTROY_INVOKED = new AtomicBoolean(false);\n+    public static final AtomicBoolean POST_DESTROY_INVOKED = new AtomicBoolean(false);\n+\n+    private int value = 0;\n+\n+    public int increment() {\n+        return ++value;\n+    }\n+\n+    @PostConstruct\n+    void postConstruct() {\n+        POST_DESTROY_INVOKED.set(true);\n+    }\n+\n+    @PreDestroy\n+    void preDestroy() {\n+        PRE_DESTROY_INVOKED.set(true);\n+    }\n+\n+    public static void resetFlags() {\n+        PRE_DESTROY_INVOKED.set(false);\n+        POST_DESTROY_INVOKED.set(false);\n+    }\n+}"
+  },
+  {
+    "sha": "f780e098909317675362737ef85032aafb3e9814",
+    "filename": "004-quarkus-HHH-and-HV/src/main/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBeanResource.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/quarkus-qe/beefy-scenarios/blob/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/src/main/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBeanResource.java",
+    "raw_url": "https://github.com/quarkus-qe/beefy-scenarios/raw/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/src/main/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBeanResource.java",
+    "contents_url": "https://api.github.com/repos/quarkus-qe/beefy-scenarios/contents/004-quarkus-HHH-and-HV/src/main/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBeanResource.java?ref=6505f460d81317fd3a975fa4a33809223e33548a",
+    "patch": "@@ -0,0 +1,35 @@\n+package io.quarkus.qe.hibernate.transaction;\n+\n+import javax.inject.Inject;\n+import javax.transaction.Transactional;\n+import javax.ws.rs.GET;\n+import javax.ws.rs.POST;\n+import javax.ws.rs.Path;\n+\n+@Path(\"/transaction-scope\")\n+public class TransactionScopeBeanResource {\n+\n+    @Inject\n+    TransactionScopeBean bean;\n+\n+    @POST\n+    @Transactional\n+    @Path(\"/invoke-bean\")\n+    public int invokeBean() {\n+        TransactionScopeBean.resetFlags();\n+        return bean.increment();\n+    }\n+\n+    @GET\n+    @Path(\"/is-post-construct-invoked\")\n+    public boolean isPostConstructInvoked() {\n+        return TransactionScopeBean.POST_DESTROY_INVOKED.get();\n+    }\n+\n+    @GET\n+    @Path(\"/is-pre-destroy-invoked\")\n+    public boolean isPreDestroyInvoked() {\n+        return TransactionScopeBean.PRE_DESTROY_INVOKED.get();\n+    }\n+\n+}"
+  },
+  {
+    "sha": "8068e329c88ab798dea6bf078f86752368ab5cf8",
+    "filename": "004-quarkus-HHH-and-HV/src/test/java/io/quarkus/qe/hibernate/transaction/NativeTransactionScopeBeanResourceIT.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/quarkus-qe/beefy-scenarios/blob/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/src/test/java/io/quarkus/qe/hibernate/transaction/NativeTransactionScopeBeanResourceIT.java",
+    "raw_url": "https://github.com/quarkus-qe/beefy-scenarios/raw/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/src/test/java/io/quarkus/qe/hibernate/transaction/NativeTransactionScopeBeanResourceIT.java",
+    "contents_url": "https://api.github.com/repos/quarkus-qe/beefy-scenarios/contents/004-quarkus-HHH-and-HV/src/test/java/io/quarkus/qe/hibernate/transaction/NativeTransactionScopeBeanResourceIT.java?ref=6505f460d81317fd3a975fa4a33809223e33548a",
+    "patch": "@@ -0,0 +1,8 @@\n+package io.quarkus.qe.hibernate.transaction;\n+\n+import io.quarkus.test.junit.NativeImageTest;\n+\n+@NativeImageTest\n+public class NativeTransactionScopeBeanResourceIT extends TransactionScopeBeanResourceTest {\n+\n+}"
+  },
+  {
+    "sha": "7dcc4b510ad2f8660d6aaef24083cbcda08baa60",
+    "filename": "004-quarkus-HHH-and-HV/src/test/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBeanResourceTest.java",
+    "status": "added",
+    "additions": 56,
+    "deletions": 0,
+    "changes": 56,
+    "blob_url": "https://github.com/quarkus-qe/beefy-scenarios/blob/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/src/test/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBeanResourceTest.java",
+    "raw_url": "https://github.com/quarkus-qe/beefy-scenarios/raw/6505f460d81317fd3a975fa4a33809223e33548a/004-quarkus-HHH-and-HV/src/test/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBeanResourceTest.java",
+    "contents_url": "https://api.github.com/repos/quarkus-qe/beefy-scenarios/contents/004-quarkus-HHH-and-HV/src/test/java/io/quarkus/qe/hibernate/transaction/TransactionScopeBeanResourceTest.java?ref=6505f460d81317fd3a975fa4a33809223e33548a",
+    "patch": "@@ -0,0 +1,56 @@\n+package io.quarkus.qe.hibernate.transaction;\n+\n+import static io.restassured.RestAssured.given;\n+import static org.hamcrest.Matchers.is;\n+import static org.junit.jupiter.api.Assertions.assertEquals;\n+\n+import org.junit.jupiter.api.Test;\n+\n+import io.quarkus.test.junit.QuarkusTest;\n+\n+@QuarkusTest\n+public class TransactionScopeBeanResourceTest {\n+\n+    private static final String TRANSACTION_SCOPE_BASE_PATH = \"/transaction-scope\";\n+\n+    private static final String EXPECTED_RESPONSE_FROM_INVOKE_BEAN = \"1\";\n+    private static final String TRUE = Boolean.TRUE.toString();\n+    private static final String FALSE = Boolean.FALSE.toString();\n+\n+    @Test\n+    public void shouldPostConstructAndPreDestroyBeInvoked() {\n+        givenPostConstructAndPreDestroyAreNotInvoked();\n+        whenInvokeBean();\n+        thenIsPostConstructInvoked();\n+        thenIsPreDestroyInvoked();\n+    }\n+\n+    private void givenPostConstructAndPreDestroyAreNotInvoked() {\n+        assertEquals(FALSE, getPostConstructInvokeResult(), \"PostConstruct method has been invoked already\");\n+        assertEquals(FALSE, getPreDestroyInvokeResult(), \"PreDestroy method has been invoked already\");\n+    }\n+\n+    private void whenInvokeBean() {\n+        given().when().post(transactionScopePath(\"/invoke-bean\")).then().body(is(EXPECTED_RESPONSE_FROM_INVOKE_BEAN));\n+    }\n+\n+    private void thenIsPostConstructInvoked() {\n+        assertEquals(TRUE, getPostConstructInvokeResult(), \"PostConstruct method is not invoked\");\n+    }\n+\n+    private void thenIsPreDestroyInvoked() {\n+        assertEquals(TRUE, getPreDestroyInvokeResult(), \"PreDestroy method is not invoked\");\n+    }\n+\n+    private String getPostConstructInvokeResult() {\n+        return given().when().get(transactionScopePath(\"/is-post-construct-invoked\")).asString();\n+    }\n+\n+    private String getPreDestroyInvokeResult() {\n+        return given().when().get(transactionScopePath(\"/is-pre-destroy-invoked\")).asString();\n+    }\n+\n+    private String transactionScopePath(String path) {\n+        return TRANSACTION_SCOPE_BASE_PATH + path;\n+    }\n+}"
+  }
+]

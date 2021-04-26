@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "75b2b7764833b388381b5a2cccd3d1acb34ebd62",
+    "filename": "server/src/main/java/org/elasticsearch/index/shard/IndexShard.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/50883c78db8de3c19048d973711a17bae6fb6b49/server/src/main/java/org/elasticsearch/index/shard/IndexShard.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/50883c78db8de3c19048d973711a17bae6fb6b49/server/src/main/java/org/elasticsearch/index/shard/IndexShard.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/server/src/main/java/org/elasticsearch/index/shard/IndexShard.java?ref=50883c78db8de3c19048d973711a17bae6fb6b49",
+    "patch": "@@ -1442,7 +1442,7 @@ public long recoverLocallyUpToGlobalCheckpoint() {\n         }\n         try {\n             maybeCheckIndex(); // check index here and won't do it again if ops-based recovery occurs\n-            recoveryState.setStage(RecoveryState.Stage.TRANSLOG);\n+            recoveryState.setLocalTranslogStage();\n             if (safeCommit.isPresent() == false) {\n                 logger.trace(\"skip local recovery as no safe commit found\");\n                 return UNASSIGNED_SEQ_NO;\n@@ -1608,7 +1608,7 @@ private void loadGlobalCheckpointToReplicationTracker() throws IOException {\n     public void openEngineAndRecoverFromTranslog() throws IOException {\n         recoveryState.validateCurrentStage(RecoveryState.Stage.INDEX);\n         maybeCheckIndex();\n-        recoveryState.setStage(RecoveryState.Stage.TRANSLOG);\n+        recoveryState.setLocalTranslogStage();\n         final RecoveryState.Translog translogRecoveryStats = recoveryState.getTranslog();\n         final Engine.TranslogRecoveryRunner translogRecoveryRunner = (engine, snapshot) -> {\n             translogRecoveryStats.totalOperations(snapshot.totalOperations());"
+  },
+  {
+    "sha": "97cff3681875b25d0c176b320c618dd94c57973d",
+    "filename": "server/src/main/java/org/elasticsearch/indices/recovery/RecoveryState.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/50883c78db8de3c19048d973711a17bae6fb6b49/server/src/main/java/org/elasticsearch/indices/recovery/RecoveryState.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/50883c78db8de3c19048d973711a17bae6fb6b49/server/src/main/java/org/elasticsearch/indices/recovery/RecoveryState.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/server/src/main/java/org/elasticsearch/indices/recovery/RecoveryState.java?ref=50883c78db8de3c19048d973711a17bae6fb6b49",
+    "patch": "@@ -222,6 +222,14 @@ public synchronized RecoveryState setStage(Stage stage) {\n         return this;\n     }\n \n+    public synchronized RecoveryState setLocalTranslogStage() {\n+        return setStage(Stage.TRANSLOG);\n+    }\n+\n+    public synchronized RecoveryState setRemoteTranslogStage() {\n+        return setStage(Stage.TRANSLOG);\n+    }\n+\n     public Index getIndex() {\n         return index;\n     }"
+  },
+  {
+    "sha": "a0d449b0418b7485f44eff9a3db0d3b7e1b68ce7",
+    "filename": "server/src/main/java/org/elasticsearch/indices/recovery/RecoveryTarget.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/50883c78db8de3c19048d973711a17bae6fb6b49/server/src/main/java/org/elasticsearch/indices/recovery/RecoveryTarget.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/50883c78db8de3c19048d973711a17bae6fb6b49/server/src/main/java/org/elasticsearch/indices/recovery/RecoveryTarget.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/server/src/main/java/org/elasticsearch/indices/recovery/RecoveryTarget.java?ref=50883c78db8de3c19048d973711a17bae6fb6b49",
+    "patch": "@@ -452,7 +452,7 @@ public void cleanFiles(int totalTranslogOps, long globalCheckpoint, Store.Metada\n                     assert indexShard.assertRetentionLeasesPersisted();\n                 }\n                 indexShard.maybeCheckIndex();\n-                state().setStage(RecoveryState.Stage.TRANSLOG);\n+                state().setRemoteTranslogStage();\n             } catch (CorruptIndexException | IndexFormatTooNewException | IndexFormatTooOldException ex) {\n                 // this is a fatal exception at this stage.\n                 // this means we transferred files from the remote that have not be checksummed and they are"
+  },
+  {
+    "sha": "ad82c257a7c620cc3543cb6c6ade2c2fceca8f3d",
+    "filename": "x-pack/plugin/searchable-snapshots/src/internalClusterTest/java/org/elasticsearch/xpack/searchablesnapshots/SearchableSnapshotsRelocationIntegTests.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/50883c78db8de3c19048d973711a17bae6fb6b49/x-pack/plugin/searchable-snapshots/src/internalClusterTest/java/org/elasticsearch/xpack/searchablesnapshots/SearchableSnapshotsRelocationIntegTests.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/50883c78db8de3c19048d973711a17bae6fb6b49/x-pack/plugin/searchable-snapshots/src/internalClusterTest/java/org/elasticsearch/xpack/searchablesnapshots/SearchableSnapshotsRelocationIntegTests.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/searchable-snapshots/src/internalClusterTest/java/org/elasticsearch/xpack/searchablesnapshots/SearchableSnapshotsRelocationIntegTests.java?ref=50883c78db8de3c19048d973711a17bae6fb6b49",
+    "patch": "@@ -90,7 +90,7 @@ public void testRelocationWaitsForPreWarm() throws Exception {\n             assertEquals(secondDataNode, shardRecoveryState.getTargetNode().getName());\n         });\n \n-        assertBusy(() -> assertSame(RecoveryState.Stage.TRANSLOG, getActiveRelocations(restoredIndex).get(0).getStage()));\n+        assertBusy(() -> assertSame(RecoveryState.Stage.FINALIZE, getActiveRelocations(restoredIndex).get(0).getStage()));\n         final Index restoredIdx = clusterAdmin().prepareState().get().getState().metadata().index(restoredIndex).getIndex();\n         final IndicesService indicesService = internalCluster().getInstance(IndicesService.class, secondDataNode);\n         assertEquals(1, indicesService.indexService(restoredIdx).getShard(0).outstandingCleanFilesConditions());\n@@ -126,7 +126,7 @@ public void testRelocationWaitsForPreWarm() throws Exception {\n             .stream()\n             // filter for relocations that are not in stage FINALIZE (they could end up in this stage without progress for good if the\n             // target node does not have enough cache space available to hold the primary completely\n-            .filter(recoveryState -> recoveryState.getSourceNode() != null && recoveryState.getStage() != RecoveryState.Stage.FINALIZE)\n+            .filter(recoveryState -> recoveryState.getSourceNode() != null)\n             .collect(Collectors.toList());\n     }\n }"
+  },
+  {
+    "sha": "9e236d6952770c324adc9cba468245b9028563b1",
+    "filename": "x-pack/plugin/searchable-snapshots/src/main/java/org/elasticsearch/indices/recovery/SearchableSnapshotRecoveryState.java",
+    "status": "modified",
+    "additions": 35,
+    "deletions": 1,
+    "changes": 36,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/50883c78db8de3c19048d973711a17bae6fb6b49/x-pack/plugin/searchable-snapshots/src/main/java/org/elasticsearch/indices/recovery/SearchableSnapshotRecoveryState.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/50883c78db8de3c19048d973711a17bae6fb6b49/x-pack/plugin/searchable-snapshots/src/main/java/org/elasticsearch/indices/recovery/SearchableSnapshotRecoveryState.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/searchable-snapshots/src/main/java/org/elasticsearch/indices/recovery/SearchableSnapshotRecoveryState.java?ref=50883c78db8de3c19048d973711a17bae6fb6b49",
+    "patch": "@@ -16,6 +16,7 @@\n \n public final class SearchableSnapshotRecoveryState extends RecoveryState {\n     private boolean preWarmComplete;\n+    private boolean remoteTranslogSet;\n \n     public SearchableSnapshotRecoveryState(ShardRouting shardRouting, DiscoveryNode targetNode, @Nullable DiscoveryNode sourceNode) {\n         super(shardRouting, targetNode, sourceNode, new Index());\n@@ -24,7 +25,7 @@ public SearchableSnapshotRecoveryState(ShardRouting shardRouting, DiscoveryNode\n     @Override\n     public synchronized RecoveryState setStage(Stage stage) {\n         // The transition to the final state was done by #prewarmCompleted, just ignore the transition\n-        if (getStage() == Stage.DONE) {\n+        if (getStage() == Stage.DONE || stage == Stage.FINALIZE && remoteTranslogSet) {\n             return this;\n         }\n \n@@ -35,9 +36,42 @@ public synchronized RecoveryState setStage(Stage stage) {\n             return this;\n         }\n \n+        if (stage == Stage.INIT) {\n+            remoteTranslogSet = false;\n+        }\n+\n         return super.setStage(stage);\n     }\n \n+    @Override\n+    public synchronized RecoveryState setRemoteTranslogStage() {\n+        remoteTranslogSet = true;\n+        super.setStage(Stage.TRANSLOG);\n+        return super.setStage(Stage.FINALIZE);\n+    }\n+\n+    @Override\n+    public synchronized void validateCurrentStage(Stage expected) {\n+        if (remoteTranslogSet == false) {\n+            super.validateCurrentStage(expected);\n+        } else {\n+            final Stage stage = getStage();\n+            // For small indices it's possible that pre-warming finished shortly\n+            // after transitioning to FINALIZE stage\n+            if (stage != Stage.FINALIZE && stage != Stage.DONE) {\n+                assert false : \"expected stage [\" + Stage.FINALIZE + \" || \" + Stage.DONE + \"]; but current stage is [\" + stage + \"]\";\n+                throw new IllegalStateException(\n+                    \"expected stage [\" + Stage.FINALIZE + \" || \" + Stage.DONE + \"]; \" + \"but current stage is [\" + stage + \"]\"\n+                );\n+            }\n+        }\n+    }\n+\n+    // Visible for tests\n+    boolean isRemoteTranslogSet() {\n+        return remoteTranslogSet;\n+    }\n+\n     public synchronized void setPreWarmComplete() {\n         // For small shards it's possible that the\n         // cache is pre-warmed before the stage has transitioned"
+  },
+  {
+    "sha": "54da35887f1bd86192afc30717b53ae1fef30b38",
+    "filename": "x-pack/plugin/searchable-snapshots/src/test/java/org/elasticsearch/indices/recovery/SearchableSnapshotsRecoveryStateTests.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/50883c78db8de3c19048d973711a17bae6fb6b49/x-pack/plugin/searchable-snapshots/src/test/java/org/elasticsearch/indices/recovery/SearchableSnapshotsRecoveryStateTests.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/50883c78db8de3c19048d973711a17bae6fb6b49/x-pack/plugin/searchable-snapshots/src/test/java/org/elasticsearch/indices/recovery/SearchableSnapshotsRecoveryStateTests.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/searchable-snapshots/src/test/java/org/elasticsearch/indices/recovery/SearchableSnapshotsRecoveryStateTests.java?ref=50883c78db8de3c19048d973711a17bae6fb6b49",
+    "patch": "@@ -128,6 +128,19 @@ public void testFilesAreIgnored() {\n         assertThat(recoveryState.getIndex().getFileDetails(\"non_pre_warmed_file\"), is(nullValue()));\n     }\n \n+    public void testResetAfterRemoteTranslogIsSetResetsFlag() {\n+        SearchableSnapshotRecoveryState recoveryState = createRecoveryState();\n+        recoveryState.getIndex().setFileDetailsComplete();\n+\n+        recoveryState.setStage(RecoveryState.Stage.INDEX).setStage(RecoveryState.Stage.VERIFY_INDEX).setRemoteTranslogStage();\n+\n+        assertThat(recoveryState.getStage(), equalTo(RecoveryState.Stage.FINALIZE));\n+        assertThat(recoveryState.isRemoteTranslogSet(), equalTo(true));\n+\n+        recoveryState.setStage(RecoveryState.Stage.INIT);\n+        assertThat(recoveryState.isRemoteTranslogSet(), equalTo(false));\n+    }\n+\n     private SearchableSnapshotRecoveryState createRecoveryState() {\n         ShardRouting shardRouting = TestShardRouting.newShardRouting(\n             randomAlphaOfLength(10),"
+  }
+]

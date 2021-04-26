@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "3ee37c8d71b7eaa5e9561a831389712902174692",
+    "filename": "src/main/java/io/shiftleft/controller/CustomerController.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 7,
+    "changes": 18,
+    "blob_url": "https://github.com/jlem0714/shiftleft-java-demo/blob/22ec581a38b1d859efa275292dbdd1787be15891/src/main/java/io/shiftleft/controller/CustomerController.java",
+    "raw_url": "https://github.com/jlem0714/shiftleft-java-demo/raw/22ec581a38b1d859efa275292dbdd1787be15891/src/main/java/io/shiftleft/controller/CustomerController.java",
+    "contents_url": "https://api.github.com/repos/jlem0714/shiftleft-java-demo/contents/src/main/java/io/shiftleft/controller/CustomerController.java?ref=22ec581a38b1d859efa275292dbdd1787be15891",
+    "patch": "@@ -255,13 +255,17 @@ public void saveSettings(HttpServletResponse httpResponse, WebRequest request) t\n \n     FileOutputStream fos = new FileOutputStream(file, true);\n     // First entry is the filename -> remove it\n-    String[] settingsArr = Arrays.copyOfRange(settings, 1, settings.length);\n-    // on setting at a linez\n-    fos.write(String.join(\"\\n\",settingsArr).getBytes());\n-    fos.write((\"\\n\"+cookie[cookie.length-1]).getBytes());\n-    fos.close();\n-    httpResponse.getOutputStream().println(\"Settings Saved\");\n-  }\n+    \tString[] settingsArr = Arrays.copyOfRange(settings, 1, settings.length);\n+\t// Instead of writing the entire value from the cookie, use an allow list based file write\n+\tfor (String asetting : settingsArr) {\n+\t\tif (asetting.startsWith(\"language\") && asetting.length() > 10) {\n+\t\t\tString langCode = asetting.substring(8, 10);\n+\t\t\tif (langCode.equals(\"en\")) {\n+\t\t\t\tString langSetting = \"language=english\";\n+\t\t\t\tfos.write(langSetting.getBytes());\n+\t\t\t}\n+\t\t}\n+\t}\n \n   /**\n    * Debug test for saving and reading a customer"
+  }
+]

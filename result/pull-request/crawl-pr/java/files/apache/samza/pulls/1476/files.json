@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "fe97919778399f3c0fd471b9c4b832bb88769a71",
+    "filename": "docs/learn/documentation/versioned/operations/monitoring.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/samza/blob/3ae6b3284ee449f676bdf50681e442f591bbd8b3/docs/learn/documentation/versioned/operations/monitoring.md",
+    "raw_url": "https://github.com/apache/samza/raw/3ae6b3284ee449f676bdf50681e442f591bbd8b3/docs/learn/documentation/versioned/operations/monitoring.md",
+    "contents_url": "https://api.github.com/repos/apache/samza/contents/docs/learn/documentation/versioned/operations/monitoring.md?ref=3ae6b3284ee449f676bdf50681e442f591bbd8b3",
+    "patch": "@@ -394,6 +394,7 @@ All \\<system\\>, \\<stream\\>, \\<partition\\>, \\<store-name\\>, \\<topic\\>, are popula\n | | executor-work-factor | The work factor of the run loop. A work factor of 1 indicates full throughput, while a work factor of less than 1 will introduce delays into the execution to approximate the requested work factor. The work factor is set by the disk space monitor in accordance with the disk quota policy. Given the latest percentage of available disk quota, this policy returns the work factor that should be applied. |\n | | physical-memory-mb | The physical memory used by the Samza container process (native + on heap) (in MBs). |\n | | physical-memory-utilization | The ratio between the physical memory used by the Samza container process (native + on heap) and the total physical memory of the Samza container. |\n+| | container-active-threads | The approximate actively used threads in a Samza container's thread pool. |\n | | <TaskName\\>-<StoreName\\>-restore-time | Time taken to restore task stores (per task store). |\n \n "
+  },
+  {
+    "sha": "3602c2704280bcc3803b70e2e760f2924bf4ea90",
+    "filename": "samza-core/src/main/scala/org/apache/samza/container/SamzaContainer.scala",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 5,
+    "changes": 12,
+    "blob_url": "https://github.com/apache/samza/blob/3ae6b3284ee449f676bdf50681e442f591bbd8b3/samza-core/src/main/scala/org/apache/samza/container/SamzaContainer.scala",
+    "raw_url": "https://github.com/apache/samza/raw/3ae6b3284ee449f676bdf50681e442f591bbd8b3/samza-core/src/main/scala/org/apache/samza/container/SamzaContainer.scala",
+    "contents_url": "https://api.github.com/repos/apache/samza/contents/samza-core/src/main/scala/org/apache/samza/container/SamzaContainer.scala?ref=3ae6b3284ee449f676bdf50681e442f591bbd8b3",
+    "patch": "@@ -26,7 +26,7 @@ import java.nio.file.Path\n import java.time.Duration\n import java.util\n import java.util.{Base64, Optional}\n-import java.util.concurrent.{CountDownLatch, ExecutorService, Executors, ScheduledExecutorService, TimeUnit}\n+import java.util.concurrent.{CountDownLatch, ExecutorService, Executors, ScheduledExecutorService, ThreadPoolExecutor, TimeUnit}\n \n import com.google.common.annotations.VisibleForTesting\n import com.google.common.util.concurrent.ThreadFactoryBuilder\n@@ -619,16 +619,18 @@ object SamzaContainer extends Logging {\n \n     val containerMemoryMb : Int = new ClusterManagerConfig(config).getContainerMemoryMb\n \n-    val memoryStatisticsMonitor : SystemStatisticsMonitor = new StatisticsMonitorImpl()\n-    memoryStatisticsMonitor.registerListener(new SystemStatisticsMonitor.Listener {\n+    val hostStatisticsMonitor : SystemStatisticsMonitor = new StatisticsMonitorImpl()\n+    hostStatisticsMonitor.registerListener(new SystemStatisticsMonitor.Listener {\n       override def onUpdate(sample: SystemMemoryStatistics): Unit = {\n         val physicalMemoryBytes : Long = sample.getPhysicalMemoryBytes\n         val physicalMemoryMb : Float = physicalMemoryBytes / (1024.0F * 1024.0F)\n         val memoryUtilization : Float = physicalMemoryMb.toFloat / containerMemoryMb\n+        val containerActiveThreads : Long = taskThreadPool.asInstanceOf[ThreadPoolExecutor].getActiveCount\n         logger.debug(\"Container physical memory utilization (mb): \" + physicalMemoryMb)\n         logger.debug(\"Container physical memory utilization: \" + memoryUtilization)\n         samzaContainerMetrics.physicalMemoryMb.set(physicalMemoryMb)\n-        samzaContainerMetrics.physicalMemoryUtilization.set(memoryUtilization);\n+        samzaContainerMetrics.physicalMemoryUtilization.set(memoryUtilization)\n+        samzaContainerMetrics.containerActiveThreads.set(containerActiveThreads)\n       }\n     })\n \n@@ -674,7 +676,7 @@ object SamzaContainer extends Logging {\n       reporters = reporters,\n       jvm = jvm,\n       diskSpaceMonitor = diskSpaceMonitor,\n-      hostStatisticsMonitor = memoryStatisticsMonitor,\n+      hostStatisticsMonitor = hostStatisticsMonitor,\n       taskThreadPool = taskThreadPool,\n       timerExecutor = timerExecutor,\n       containerContext = containerContext,"
+  },
+  {
+    "sha": "33d288f7cc0ebc13988e4c82204f6b81cbe6f487",
+    "filename": "samza-core/src/main/scala/org/apache/samza/container/SamzaContainerMetrics.scala",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/samza/blob/3ae6b3284ee449f676bdf50681e442f591bbd8b3/samza-core/src/main/scala/org/apache/samza/container/SamzaContainerMetrics.scala",
+    "raw_url": "https://github.com/apache/samza/raw/3ae6b3284ee449f676bdf50681e442f591bbd8b3/samza-core/src/main/scala/org/apache/samza/container/SamzaContainerMetrics.scala",
+    "contents_url": "https://api.github.com/repos/apache/samza/contents/samza-core/src/main/scala/org/apache/samza/container/SamzaContainerMetrics.scala?ref=3ae6b3284ee449f676bdf50681e442f591bbd8b3",
+    "patch": "@@ -49,6 +49,7 @@ class SamzaContainerMetrics(\n   val physicalMemoryMb = newGauge(\"physical-memory-mb\", 0.0F)\n   val physicalMemoryUtilization = newGauge(\"physical-memory-utilization\", 0.0F)\n   val containerThreadPoolSize = newGauge(\"container-thread-pool-size\", 0L)\n+  val containerActiveThreads = newGauge(\"container-active-threads\", 0L)\n \n   val taskStoreRestorationMetrics: util.Map[TaskName, Gauge[Long]] = new util.HashMap[TaskName, Gauge[Long]]()\n "
+  }
+]

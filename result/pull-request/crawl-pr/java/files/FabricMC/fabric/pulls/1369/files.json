@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "d54ac3ee0d4c482c7fa8bb12d89305341bcde30d",
+    "filename": "fabric-api-base/src/main/java/net/fabricmc/fabric/api/event/EventFactory.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 3,
+    "changes": 24,
+    "blob_url": "https://github.com/FabricMC/fabric/blob/d64a9f3187734b354c20254ecf951ebe310f9dcc/fabric-api-base/src/main/java/net/fabricmc/fabric/api/event/EventFactory.java",
+    "raw_url": "https://github.com/FabricMC/fabric/raw/d64a9f3187734b354c20254ecf951ebe310f9dcc/fabric-api-base/src/main/java/net/fabricmc/fabric/api/event/EventFactory.java",
+    "contents_url": "https://api.github.com/repos/FabricMC/fabric/contents/fabric-api-base/src/main/java/net/fabricmc/fabric/api/event/EventFactory.java?ref=d64a9f3187734b354c20254ecf951ebe310f9dcc",
+    "patch": "@@ -48,6 +48,10 @@ public static void invalidate() {\n \t/**\n \t * Create an \"array-backed\" Event instance.\n \t *\n+\t * <p>If your factory simply delegates to the listeners without adding custom behavior,\n+\t * consider using {@linkplain #createArrayBacked(Class, Object, Function) the other overload}\n+\t * if performance of this event is critical.\n+\t *\n \t * @param type           The listener class type.\n \t * @param invokerFactory The invoker factory, combining multiple listeners into one instance.\n \t * @param <T>            The listener type.\n@@ -58,7 +62,14 @@ public static void invalidate() {\n \t}\n \n \t/**\n-\t * Create an \"array-backed\" Event instance with a custom empty invoker.\n+\t * Create an \"array-backed\" Event instance with a custom empty invoker,\n+\t * for an event whose {@code invokerFactory} only delegates to the listeners.\n+\t * <ul>\n+\t *   <li>If there is no listener, the custom empty invoker will be used.</li>\n+\t *   <li><b>If there is only one listener, that one will be used as the invoker\n+\t *   and the factory will not be called.</b></li>\n+\t *   <li>Only when there are at least two listeners will the factory be used.</li>\n+\t * </ul>\n \t *\n \t * <p>Having a custom empty invoker (of type (...) -&gt; {}) increases performance\n \t * relative to iterating over an empty array; however, it only really matters\n@@ -70,9 +81,16 @@ public static void invalidate() {\n \t * @param <T>            The listener type.\n \t * @return The Event instance.\n \t */\n-\t// TODO: Deprecate this once we have working codegen\n \tpublic static <T> Event<T> createArrayBacked(Class<T> type, T emptyInvoker, Function<T[], T> invokerFactory) {\n-\t\treturn EventFactoryImpl.createArrayBacked(type, emptyInvoker, invokerFactory);\n+\t\treturn createArrayBacked(type, listeners -> {\n+\t\t\tif (listeners.length == 0) {\n+\t\t\t\treturn emptyInvoker;\n+\t\t\t} else if (listeners.length == 1) {\n+\t\t\t\treturn listeners[0];\n+\t\t\t} else {\n+\t\t\t\treturn invokerFactory.apply(listeners);\n+\t\t\t}\n+\t\t});\n \t}\n \n \t/**"
+  },
+  {
+    "sha": "f4a47eb5cf8b5fe39f93f9c902397b652a226b67",
+    "filename": "fabric-api-base/src/main/java/net/fabricmc/fabric/impl/base/event/ArrayBackedEvent.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 29,
+    "changes": 38,
+    "blob_url": "https://github.com/FabricMC/fabric/blob/d64a9f3187734b354c20254ecf951ebe310f9dcc/fabric-api-base/src/main/java/net/fabricmc/fabric/impl/base/event/ArrayBackedEvent.java",
+    "raw_url": "https://github.com/FabricMC/fabric/raw/d64a9f3187734b354c20254ecf951ebe310f9dcc/fabric-api-base/src/main/java/net/fabricmc/fabric/impl/base/event/ArrayBackedEvent.java",
+    "contents_url": "https://api.github.com/repos/FabricMC/fabric/contents/fabric-api-base/src/main/java/net/fabricmc/fabric/impl/base/event/ArrayBackedEvent.java?ref=d64a9f3187734b354c20254ecf951ebe310f9dcc",
+    "patch": "@@ -18,59 +18,39 @@\n \n import java.lang.reflect.Array;\n import java.util.Arrays;\n+import java.util.Objects;\n import java.util.concurrent.locks.Lock;\n import java.util.concurrent.locks.ReentrantLock;\n import java.util.function.Function;\n \n import net.fabricmc.fabric.api.event.Event;\n \n class ArrayBackedEvent<T> extends Event<T> {\n-\tprivate final Class<? super T> type;\n \tprivate final Function<T[], T> invokerFactory;\n-\tprivate final T dummyInvoker;\n \tprivate final Lock lock = new ReentrantLock();\n \tprivate T[] handlers;\n \n-\tArrayBackedEvent(Class<? super T> type, T dummyInvoker, Function<T[], T> invokerFactory) {\n-\t\tthis.type = type;\n-\t\tthis.dummyInvoker = dummyInvoker;\n+\t@SuppressWarnings(\"unchecked\")\n+\tArrayBackedEvent(Class<? super T> type, Function<T[], T> invokerFactory) {\n \t\tthis.invokerFactory = invokerFactory;\n+\t\tthis.handlers = (T[]) Array.newInstance(type, 0);\n \t\tupdate();\n \t}\n \n-\t@SuppressWarnings(\"unchecked\")\n \tvoid update() {\n-\t\tif (handlers == null) {\n-\t\t\tif (dummyInvoker != null) {\n-\t\t\t\tinvoker = dummyInvoker;\n-\t\t\t} else {\n-\t\t\t\tinvoker = invokerFactory.apply((T[]) Array.newInstance(type, 0));\n-\t\t\t}\n-\t\t} else if (handlers.length == 1) {\n-\t\t\tinvoker = handlers[0];\n-\t\t} else {\n-\t\t\tinvoker = invokerFactory.apply(handlers);\n-\t\t}\n+\t\tthis.invoker = invokerFactory.apply(handlers);\n \t}\n \n-\t@SuppressWarnings(\"unchecked\")\n \t@Override\n \tpublic void register(T listener) {\n-\t\tif (listener == null) {\n-\t\t\tthrow new NullPointerException(\"Tried to register a null listener!\");\n-\t\t}\n+\t\tObjects.requireNonNull(listener, \"Tried to register a null listener!\");\n \n \t\tlock.lock();\n \n \t\ttry {\n-\t\t\tif (handlers == null) {\n-\t\t\t\thandlers = (T[]) Array.newInstance(type, 1);\n-\t\t\t\thandlers[0] = listener;\n-\t\t\t} else {\n-\t\t\t\thandlers = Arrays.copyOf(handlers, handlers.length + 1);\n-\t\t\t\thandlers[handlers.length - 1] = listener;\n-\t\t\t}\n-\n+\t\t\t// We use a copy-on-write strategy to allow lock-free concurrent reads.\n+\t\t\thandlers = Arrays.copyOf(handlers, handlers.length + 1);\n+\t\t\thandlers[handlers.length - 1] = listener;\n \t\t\tupdate();\n \t\t} finally {\n \t\t\tlock.unlock();"
+  },
+  {
+    "sha": "ef5ab991f2c0b28001069deda561b52011084544",
+    "filename": "fabric-api-base/src/main/java/net/fabricmc/fabric/impl/base/event/EventFactoryImpl.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 5,
+    "changes": 6,
+    "blob_url": "https://github.com/FabricMC/fabric/blob/d64a9f3187734b354c20254ecf951ebe310f9dcc/fabric-api-base/src/main/java/net/fabricmc/fabric/impl/base/event/EventFactoryImpl.java",
+    "raw_url": "https://github.com/FabricMC/fabric/raw/d64a9f3187734b354c20254ecf951ebe310f9dcc/fabric-api-base/src/main/java/net/fabricmc/fabric/impl/base/event/EventFactoryImpl.java",
+    "contents_url": "https://api.github.com/repos/FabricMC/fabric/contents/fabric-api-base/src/main/java/net/fabricmc/fabric/impl/base/event/EventFactoryImpl.java?ref=d64a9f3187734b354c20254ecf951ebe310f9dcc",
+    "patch": "@@ -39,11 +39,7 @@ public static void invalidate() {\n \t}\n \n \tpublic static <T> Event<T> createArrayBacked(Class<? super T> type, Function<T[], T> invokerFactory) {\n-\t\treturn createArrayBacked(type, null /* buildEmptyInvoker(type, invokerFactory) */, invokerFactory);\n-\t}\n-\n-\tpublic static <T> Event<T> createArrayBacked(Class<? super T> type, T emptyInvoker, Function<T[], T> invokerFactory) {\n-\t\tArrayBackedEvent<T> event = new ArrayBackedEvent<>(type, emptyInvoker, invokerFactory);\n+\t\tArrayBackedEvent<T> event = new ArrayBackedEvent<>(type, invokerFactory);\n \t\tARRAY_BACKED_EVENTS.add(event);\n \t\treturn event;\n \t}"
+  }
+]

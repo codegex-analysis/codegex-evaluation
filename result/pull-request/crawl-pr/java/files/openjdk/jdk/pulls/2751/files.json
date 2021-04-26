@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "31e583795c31b5abff574b20a4633e32327af128",
+    "filename": "src/hotspot/os/aix/globals_aix.hpp",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 12,
+    "changes": 19,
+    "blob_url": "https://github.com/openjdk/jdk/blob/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/os/aix/globals_aix.hpp",
+    "raw_url": "https://github.com/openjdk/jdk/raw/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/os/aix/globals_aix.hpp",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/hotspot/os/aix/globals_aix.hpp?ref=cc17b91361945fb28ea59d8ddeeaaea32875cd0b",
+    "patch": "@@ -1,6 +1,6 @@\n /*\n  * Copyright (c) 2005, 2020, Oracle and/or its affiliates. All rights reserved.\n- * Copyright (c) 2012, 2018 SAP SE. All rights reserved.\n+ * Copyright (c) 2012, 2021 SAP SE. All rights reserved.\n  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.\n  *\n  * This code is free software; you can redistribute it and/or modify it\n@@ -48,15 +48,6 @@\n   product(bool, AllowExtshm, false,                                                 \\\n           \"Allow VM to run with EXTSHM=ON.\")                                        \\\n                                                                                     \\\n-  /*  Maximum expected size of the data segment. That correlates with the      */   \\\n-  /*  to the maximum C Heap consumption we expect.                             */   \\\n-  /*  We need to know this because we need to leave \"breathing space\" for the  */   \\\n-  /*  data segment when placing the java heap. If that space is too small, we  */   \\\n-  /*  reduce our chance of getting a low heap address (needed for compressed   */   \\\n-  /*  Oops).                                                                   */   \\\n-  product(uintx, MaxExpectedDataSegmentSize, 8*G,                                   \\\n-          \"Maximum expected Data Segment Size.\")                                    \\\n-                                                                                    \\\n   /* Use optimized addresses for the polling page.                             */   \\\n   product(bool, OptimizePollingPageLocation, true,                                  \\\n              \"Optimize the location of the polling page used for Safepoints\")       \\\n@@ -75,8 +66,12 @@\n   /* explicit commit behaviour. This flag, if true, causes the VM to touch     */   \\\n   /* memory on os::commit_memory() (which normally is a noop).                 */   \\\n   product(bool, UseExplicitCommit, false,                                           \\\n-          \"Explicit commit for virtual memory.\")\n-\n+          \"Explicit commit for virtual memory.\")                                    \\\n+                                                                                    \\\n+  /* On AIX lets create a large reserve size since thread stacks live in the */     \\\n+  /* and therefore the break needs more breathing space. */                         \\\n+  product(size_t, BrkReserveSize, 8*G, DIAGNOSTIC,                                  \\\n+          \"Size of no-reserve-zone following program break\")                        \\\n // end of RUNTIME_OS_FLAGS\n \n //"
+  },
+  {
+    "sha": "579c9bbf83081ae7f255225d72e07cd7fc209d35",
+    "filename": "src/hotspot/os/linux/globals_linux.hpp",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/openjdk/jdk/blob/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/os/linux/globals_linux.hpp",
+    "raw_url": "https://github.com/openjdk/jdk/raw/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/os/linux/globals_linux.hpp",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/hotspot/os/linux/globals_linux.hpp?ref=cc17b91361945fb28ea59d8ddeeaaea32875cd0b",
+    "patch": "@@ -1,5 +1,5 @@\n /*\n- * Copyright (c) 2005, 2020, Oracle and/or its affiliates. All rights reserved.\n+ * Copyright (c) 2005, 2021, Oracle and/or its affiliates. All rights reserved.\n  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.\n  *\n  * This code is free software; you can redistribute it and/or modify it\n@@ -82,7 +82,11 @@\n           \"Use CPU_ALLOC code path in os::active_processor_count \")     \\\n                                                                         \\\n   product(bool, DumpPerfMapAtExit, false, DIAGNOSTIC,                   \\\n-          \"Write map file for Linux perf tool at exit\")\n+          \"Write map file for Linux perf tool at exit\")                 \\\n+                                                                        \\\n+  product(size_t, BrkReserveSize,                                       \\\n+          LP64_ONLY(2*G) NOT_LP64(64*M), DIAGNOSTIC,                    \\\n+          \"Size of no-reserve-zone following program break\")            \\\n \n // end of RUNTIME_OS_FLAGS\n "
+  },
+  {
+    "sha": "cfd97dcd277ceabd529880d828a73a60211acd52",
+    "filename": "src/hotspot/os/posix/os_posix.cpp",
+    "status": "modified",
+    "additions": 43,
+    "deletions": 0,
+    "changes": 43,
+    "blob_url": "https://github.com/openjdk/jdk/blob/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/os/posix/os_posix.cpp",
+    "raw_url": "https://github.com/openjdk/jdk/raw/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/os/posix/os_posix.cpp",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/hotspot/os/posix/os_posix.cpp?ref=cc17b91361945fb28ea59d8ddeeaaea32875cd0b",
+    "patch": "@@ -51,6 +51,7 @@\n #include <signal.h>\n #include <sys/mman.h>\n #include <sys/resource.h>\n+#include <sys/shm.h>\n #include <sys/utsname.h>\n #include <time.h>\n #include <unistd.h>\n@@ -1765,3 +1766,45 @@ int os::PlatformMonitor::wait(jlong millis) {\n     return OS_OK;\n   }\n }\n+\n+\n+/// sbrk protection zone handling ///////////////////////\n+\n+#ifndef __APPLE__\n+\n+// We define a zone starting at the initial value for sbrk, with a configurable\n+//  length, into which we do not allow the VM to place mappings.\n+static const address g_initial_brk = ::sbrk(0);\n+static const address g_lowest_mapping_above_initial_brk = (address)SIZE_MAX;\n+\n+static address brk_protection_zone_end() {\n+  return MIN2(g_initial_brk + BrkZoneSize,\n+              g_lowest_mapping_above_initial_brk);\n+}\n+\n+bool os::Posix::is_in_brk_protection_zone(address p) {\n+  return p != NULL &&\n+         g_initial_brk != (address)-1 &&\n+         p >= g_initial_brk && p < brk_protection_zone_end();\n+}\n+\n+void os::Posix::update_lowest_mapping_above_initial_brk(address p) {\n+  // This is to be called for addresses returned by ::mmap or ::shmat with\n+  // a NULL wish address: the OS itself may place mappings into what we regard\n+  // as protected brk zone, and for those mappings, we need to disable zone\n+  // protection to be able to later re-map those addresses.\n+  const address brknow = (address)::sbrk(0);\n+  if (is_in_brk_protection_zone(p)) {\n+    g_lowest_mapping_above_initial_brk = p;\n+  }\n+}\n+\n+void os::Posix::print_brk_info(outputStream* st) {\n+  const address brknow = (address)::sbrk(0);\n+  st->print_cr(\"brk initial: \" PTR_FORMAT \", now: \" PTR_FORMAT \" (+\" SIZE_FORMAT \"k), \"\n+               \"reserved zone end: \" PTR_FORMAT,\n+               p2i(g_initial_brk), p2i(brknow), (brknow - (address)g_initial_brk) / K,\n+               p2i(brk_protection_zone_end()));\n+}\n+\n+#endif // !__APPLE__"
+  },
+  {
+    "sha": "b1d8ef613f18b706cf68709fc79cbd67f2510b9c",
+    "filename": "src/hotspot/os/posix/os_posix.hpp",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/openjdk/jdk/blob/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/os/posix/os_posix.hpp",
+    "raw_url": "https://github.com/openjdk/jdk/raw/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/os/posix/os_posix.hpp",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/hotspot/os/posix/os_posix.hpp?ref=cc17b91361945fb28ea59d8ddeeaaea32875cd0b",
+    "patch": "@@ -97,6 +97,11 @@ class Posix {\n   static bool handle_stack_overflow(JavaThread* thread, address addr, address pc,\n                                     const void* ucVoid,\n                                     address* stub);\n+\n+  static bool is_in_brk_protection_zone(address p)                MACOS_ONLY({ return false; });\n+  static void update_lowest_mapping_above_initial_brk(address p)  MACOS_ONLY({ });\n+  static void print_brk_info(outputStream* st)                    MACOS_ONLY({ });\n+\n };\n \n /*"
+  },
+  {
+    "sha": "b9d72344c0e0df1f0ff6ec3cf5c3d32f871a4291",
+    "filename": "src/hotspot/share/runtime/globals.hpp",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/openjdk/jdk/blob/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/share/runtime/globals.hpp",
+    "raw_url": "https://github.com/openjdk/jdk/raw/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/share/runtime/globals.hpp",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/hotspot/share/runtime/globals.hpp?ref=cc17b91361945fb28ea59d8ddeeaaea32875cd0b",
+    "patch": "@@ -2087,6 +2087,7 @@ const intx ObjectAlignmentInBytes = 8;\n              \"Mark all threads after a safepoint, and clear on a modify \"   \\\n              \"fence. Add cleanliness checks.\")                              \\\n \n+\n // end of RUNTIME_FLAGS\n \n DECLARE_FLAGS(LP64_RUNTIME_FLAGS)"
+  },
+  {
+    "sha": "f040474a5ba563d993d7106da9a0f5317bd347e5",
+    "filename": "src/hotspot/share/runtime/os.cpp",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/openjdk/jdk/blob/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/share/runtime/os.cpp",
+    "raw_url": "https://github.com/openjdk/jdk/raw/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/share/runtime/os.cpp",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/hotspot/share/runtime/os.cpp?ref=cc17b91361945fb28ea59d8ddeeaaea32875cd0b",
+    "patch": "@@ -1883,7 +1883,6 @@ void os::realign_memory(char *addr, size_t bytes, size_t alignment_hint) {\n \n char* os::reserve_memory_special(size_t size, size_t alignment,\n                                  char* addr, bool executable) {\n-\n   assert(is_aligned(addr, alignment), \"Unaligned request address\");\n \n   char* result = pd_reserve_memory_special(size, alignment, addr, executable);"
+  },
+  {
+    "sha": "0d41a3230c7ced3db51fb4541eeba73e0ce459c4",
+    "filename": "src/hotspot/share/utilities/globalDefinitions.hpp",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/openjdk/jdk/blob/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/share/utilities/globalDefinitions.hpp",
+    "raw_url": "https://github.com/openjdk/jdk/raw/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/share/utilities/globalDefinitions.hpp",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/hotspot/share/utilities/globalDefinitions.hpp?ref=cc17b91361945fb28ea59d8ddeeaaea32875cd0b",
+    "patch": "@@ -386,6 +386,7 @@ typedef unsigned int uint;   NEEDS_CLEANUP\n typedef   signed char s_char;\n typedef unsigned char u_char;\n typedef u_char*       address;\n+typedef const u_char* const_address;\n typedef uintptr_t     address_word; // unsigned integer which will hold a pointer\n                                     // except for some implementations of a C++\n                                     // linkage pointer to function. Should never"
+  },
+  {
+    "sha": "49c50f0be0e13858fad1d3313f7093b21eafc02e",
+    "filename": "src/hotspot/share/utilities/macros.hpp",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/openjdk/jdk/blob/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/share/utilities/macros.hpp",
+    "raw_url": "https://github.com/openjdk/jdk/raw/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/src/hotspot/share/utilities/macros.hpp",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/hotspot/share/utilities/macros.hpp?ref=cc17b91361945fb28ea59d8ddeeaaea32875cd0b",
+    "patch": "@@ -431,6 +431,17 @@\n #define NOT_WINDOWS(code) code\n #endif\n \n+#ifndef _WINDOWS\n+#ifndef POSIX\n+#define POSIX\n+#endif\n+#define POSIX_ONLY(code) code\n+#define NOT_POSIX(code)\n+#else\n+#define POSIX_ONLY(code)\n+#define NOT_POSIX(code) code\n+#endif\n+\n #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)\n #ifndef BSD\n #define BSD"
+  },
+  {
+    "sha": "e7b670bc9251b08b3f289f6054d7960501ab1b70",
+    "filename": "test/hotspot/gtest/runtime/test_os.cpp",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/openjdk/jdk/blob/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/test/hotspot/gtest/runtime/test_os.cpp",
+    "raw_url": "https://github.com/openjdk/jdk/raw/cc17b91361945fb28ea59d8ddeeaaea32875cd0b/test/hotspot/gtest/runtime/test_os.cpp",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/test/hotspot/gtest/runtime/test_os.cpp?ref=cc17b91361945fb28ea59d8ddeeaaea32875cd0b",
+    "patch": "@@ -750,3 +750,25 @@ TEST_VM(os, dll_address_to_function_and_library_name) {\n     }\n   }\n }\n+\n+#ifndef _WIN32\n+TEST_VM(os, test_reserve_at_sbrk) {\n+  const size_t ag = os::vm_allocation_granularity();\n+  // Test that we are not allowed within BreakReserveSize feet of the program break.\n+  if (BrkReserveSize > 0) {\n+    address brknow = (address)os::Posix::get_sbrk();\n+    for (address addr = align_up(brknow, ag);\n+         addr < (brknow + BrkReserveSize);\n+         addr += NOT_LP64(M) LP64_ONLY(M * 32))\n+    {\n+      address p = (address)os::attempt_reserve_memory_at((char*)addr, ag, false);\n+      EXPECT_EQ(p, (address)NULL);\n+      if (p != NULL) {\n+        os::Posix::print_brk_info(tty);\n+        os::release_memory((char*)p, ag);\n+        break; // we failed.\n+      }\n+    }\n+  }\n+}\n+#endif"
+  }
+]

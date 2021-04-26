@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "14f1987200db84943913f1137c013d62366f7c48",
+    "filename": "robolectric/src/test/java/org/robolectric/shadows/ShadowBitmapTest.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/robolectric/robolectric/blob/1cd9fa2d92e42e7333abd3c7995896a0c66add74/robolectric/src/test/java/org/robolectric/shadows/ShadowBitmapTest.java",
+    "raw_url": "https://github.com/robolectric/robolectric/raw/1cd9fa2d92e42e7333abd3c7995896a0c66add74/robolectric/src/test/java/org/robolectric/shadows/ShadowBitmapTest.java",
+    "contents_url": "https://api.github.com/repos/robolectric/robolectric/contents/robolectric/src/test/java/org/robolectric/shadows/ShadowBitmapTest.java?ref=1cd9fa2d92e42e7333abd3c7995896a0c66add74",
+    "patch": "@@ -282,6 +282,12 @@ public void shouldThrowExceptionForSetPixelOnImmutableBitmap() {\n     bitmap.setPixel(0, 0, 2);\n   }\n \n+  @Test(expected = IllegalStateException.class)\n+  public void shouldThrowExceptionForSetPixelsOnImmutableBitmap() {\n+    Bitmap bitmap = Bitmap.createBitmap(new int[] {1}, 1, 1, Bitmap.Config.ARGB_8888);\n+    bitmap.setPixels(new int[] {1}, 0, 0, 0, 0, 1, 1);\n+  }\n+\n   @Test\n   public void bitmapsAreReused() {\n     Bitmap b = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);"
+  },
+  {
+    "sha": "123dd948b90e75900c5f980e5907efa377ee97d9",
+    "filename": "shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmap.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 7,
+    "changes": 31,
+    "blob_url": "https://github.com/robolectric/robolectric/blob/1cd9fa2d92e42e7333abd3c7995896a0c66add74/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmap.java",
+    "raw_url": "https://github.com/robolectric/robolectric/raw/1cd9fa2d92e42e7333abd3c7995896a0c66add74/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmap.java",
+    "contents_url": "https://api.github.com/repos/robolectric/robolectric/contents/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmap.java?ref=1cd9fa2d92e42e7333abd3c7995896a0c66add74",
+    "patch": "@@ -264,7 +264,14 @@ protected static Bitmap createScaledBitmap(\n     if (shadowBitmap.config == null) {\n       shadowBitmap.config = Config.ARGB_8888;\n     }\n-    shadowBitmap.setPixels(new int[shadowBitmap.getHeight() * shadowBitmap.getWidth()], 0, 0, 0, 0, shadowBitmap.getWidth(), shadowBitmap.getHeight());\n+    shadowBitmap.setPixelsInternal(\n+        new int[shadowBitmap.getHeight() * shadowBitmap.getWidth()],\n+        0,\n+        0,\n+        0,\n+        0,\n+        shadowBitmap.getWidth(),\n+        shadowBitmap.getHeight());\n     return scaledBitmap;\n   }\n \n@@ -295,7 +302,8 @@ protected static Bitmap createBitmap(Bitmap src, int x, int y, int width, int he\n   @Implementation\n   protected void setPixels(\n       int[] pixels, int offset, int stride, int x, int y, int width, int height) {\n-    this.colors = pixels;\n+    checkBitmapMutable();\n+    setPixelsInternal(pixels, offset, stride, x, y, width, height);\n   }\n \n   @Implementation\n@@ -390,11 +398,7 @@ protected int getPixel(int x, int y) {\n \n   @Implementation\n   protected void setPixel(int x, int y, int color) {\n-    if (isRecycled()) {\n-      throw new IllegalStateException(\"Can't call setPixel() on a recycled bitmap\");\n-    } else if (!isMutable()) {\n-      throw new IllegalStateException(\"Bitmap is immutable\");\n-    }\n+    checkBitmapMutable();\n     internalCheckPixelAccess(x, y);\n     if (colors == null) {\n       colors = new int[getWidth() * getHeight()];\n@@ -721,6 +725,19 @@ public void setCreatedFromResId(int resId, String description) {\n     appendDescription(\" for resource:\" + description);\n   }\n \n+  void setPixelsInternal(\n+      int[] pixels, int offset, int stride, int x, int y, int width, int height) {\n+    this.colors = pixels;\n+  }\n+\n+  private void checkBitmapMutable() {\n+    if (isRecycled()) {\n+      throw new IllegalStateException(\"Can't call setPixel() on a recycled bitmap\");\n+    } else if (!isMutable()) {\n+      throw new IllegalStateException(\"Bitmap is immutable\");\n+    }\n+  }\n+\n   private void internalCheckPixelAccess(int x, int y) {\n     if (x < 0) {\n       throw new IllegalArgumentException(\"x must be >= 0\");"
+  },
+  {
+    "sha": "11328a15e8dbf8567df5d79f2a56f992d46780a3",
+    "filename": "shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmapFactory.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/robolectric/robolectric/blob/1cd9fa2d92e42e7333abd3c7995896a0c66add74/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmapFactory.java",
+    "raw_url": "https://github.com/robolectric/robolectric/raw/1cd9fa2d92e42e7333abd3c7995896a0c66add74/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmapFactory.java",
+    "contents_url": "https://api.github.com/repos/robolectric/robolectric/contents/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmapFactory.java?ref=1cd9fa2d92e42e7333abd3c7995896a0c66add74",
+    "patch": "@@ -280,7 +280,7 @@ private static Bitmap create(\n \n     shadowBitmap.setWidth(p.x);\n     shadowBitmap.setHeight(p.y);\n-    shadowBitmap.setPixels(new int[p.x * p.y], 0, 0, 0, 0, p.x, p.y);\n+    shadowBitmap.setPixelsInternal(new int[p.x * p.y], 0, 0, 0, 0, p.x, p.y);\n     if (options != null) {\n       options.outWidth = p.x;\n       options.outHeight = p.y;"
+  }
+]

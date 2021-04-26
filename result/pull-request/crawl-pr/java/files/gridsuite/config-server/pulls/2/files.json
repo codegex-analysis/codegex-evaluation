@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "82553187871219f4f31dc956e023f27fc8148ad8",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/gridsuite/config-server/blob/a62c9fbbb24171ab1fea8904d9fa320004155015/pom.xml",
+    "raw_url": "https://github.com/gridsuite/config-server/raw/a62c9fbbb24171ab1fea8904d9fa320004155015/pom.xml",
+    "contents_url": "https://api.github.com/repos/gridsuite/config-server/contents/pom.xml?ref=a62c9fbbb24171ab1fea8904d9fa320004155015",
+    "patch": "@@ -15,7 +15,7 @@\n     <parent>\n         <groupId>com.powsybl</groupId>\n         <artifactId>powsybl-parent-ws</artifactId>\n-        <version>3</version>\n+        <version>5</version>\n         <relativePath/>\n     </parent>\n \n@@ -46,7 +46,9 @@\n     <properties>\n         <java.version>11</java.version>\n \n-        <gridsuite-dependencies.version>4</gridsuite-dependencies.version>\n+        <gridsuite-dependencies.version>5</gridsuite-dependencies.version>\n+\n+        <jib.to.image>gridsuite/config-server</jib.to.image>\n     </properties>\n \n     <build>"
+  },
+  {
+    "sha": "2a5375d424c69aeb17700840c1cd8bd712af220b",
+    "filename": "src/main/java/org/gridsuite/config/server/CassandraConfig.java",
+    "status": "modified",
+    "additions": 35,
+    "deletions": 19,
+    "changes": 54,
+    "blob_url": "https://github.com/gridsuite/config-server/blob/a62c9fbbb24171ab1fea8904d9fa320004155015/src/main/java/org/gridsuite/config/server/CassandraConfig.java",
+    "raw_url": "https://github.com/gridsuite/config-server/raw/a62c9fbbb24171ab1fea8904d9fa320004155015/src/main/java/org/gridsuite/config/server/CassandraConfig.java",
+    "contents_url": "https://api.github.com/repos/gridsuite/config-server/contents/src/main/java/org/gridsuite/config/server/CassandraConfig.java?ref=a62c9fbbb24171ab1fea8904d9fa320004155015",
+    "patch": "@@ -6,14 +6,19 @@\n  */\n package org.gridsuite.config.server;\n \n+import com.datastax.oss.driver.api.core.CqlSession;\n+import com.datastax.oss.driver.api.core.type.codec.registry.CodecRegistry;\n+import com.datastax.oss.driver.internal.core.type.codec.registry.DefaultCodecRegistry;\n import org.springframework.context.annotation.Bean;\n import org.springframework.context.annotation.Configuration;\n import org.springframework.context.annotation.PropertySource;\n import org.springframework.core.env.Environment;\n-import org.springframework.data.cassandra.config.AbstractReactiveCassandraConfiguration;\n-import org.springframework.data.cassandra.config.CassandraClusterFactoryBean;\n+import org.springframework.data.cassandra.config.CqlSessionFactoryBean;\n+import org.springframework.data.cassandra.config.SessionFactoryFactoryBean;\n+import org.springframework.data.cassandra.core.CassandraAdminTemplate;\n+import org.springframework.data.cassandra.core.convert.CassandraConverter;\n+import org.springframework.data.cassandra.core.convert.MappingCassandraConverter;\n import org.springframework.data.cassandra.core.mapping.CassandraMappingContext;\n-import org.springframework.data.cassandra.core.mapping.SimpleUserTypeResolver;\n import org.springframework.data.cassandra.repository.config.EnableReactiveCassandraRepositories;\n \n /**\n@@ -24,30 +29,41 @@\n @PropertySource(value = {\"classpath:cassandra.properties\"})\n @PropertySource(value = {\"file:/config/cassandra.properties\"}, ignoreResourceNotFound = true)\n @EnableReactiveCassandraRepositories\n-public class CassandraConfig extends AbstractReactiveCassandraConfiguration {\n+public class CassandraConfig {\n \n-    @Override\n-    protected String getKeyspaceName() {\n-        return CassandraConstants.KEYSPACE_CONFIG;\n+    @Bean\n+    public CqlSessionFactoryBean session(Environment env) {\n+        CqlSessionFactoryBean session = new CqlSessionFactoryBean();\n+        session.setContactPoints(env.getRequiredProperty(\"cassandra.contact-points\"));\n+        session.setPort(Integer.parseInt(env.getRequiredProperty(\"cassandra.port\")));\n+        session.setLocalDatacenter(\"datacenter1\");\n+        session.setKeyspaceName(CassandraConstants.KEYSPACE_CONFIG);\n+        return session;\n     }\n \n-    @Override\n-    protected boolean getMetricsEnabled() {\n-        return false;\n+    @Bean\n+    public CassandraMappingContext mappingContext() {\n+        return new CassandraMappingContext();\n+    }\n+\n+    @Bean\n+    public CassandraConverter converter(CassandraMappingContext mappingContext) {\n+        MappingCassandraConverter mappingCassandraConverter = new MappingCassandraConverter(mappingContext);\n+        CodecRegistry codecRegistry = new DefaultCodecRegistry(\"\");\n+        mappingCassandraConverter.setCodecRegistry(codecRegistry);\n+        return mappingCassandraConverter;\n     }\n \n     @Bean\n-    public CassandraClusterFactoryBean cluster(Environment env) {\n-        CassandraClusterFactoryBean cluster = new CassandraClusterFactoryBean();\n-        cluster.setContactPoints(env.getRequiredProperty(\"cassandra.contact-points\"));\n-        cluster.setPort(Integer.parseInt(env.getRequiredProperty(\"cassandra.port\")));\n-        return cluster;\n+    public SessionFactoryFactoryBean sessionFactory(CqlSession session, CassandraConverter converter) {\n+        SessionFactoryFactoryBean sessionFactory = new SessionFactoryFactoryBean();\n+        sessionFactory.setSession(session);\n+        sessionFactory.setConverter(converter);\n+        return sessionFactory;\n     }\n \n     @Bean\n-    public CassandraMappingContext cassandraMapping(Environment env) {\n-        CassandraMappingContext mappingContext =  new CassandraMappingContext();\n-        mappingContext.setUserTypeResolver(new SimpleUserTypeResolver(cluster(env).getObject(), CassandraConstants.KEYSPACE_CONFIG));\n-        return mappingContext;\n+    public CassandraAdminTemplate cassandraTemplate(CqlSession session, CassandraConverter converter) {\n+        return new CassandraAdminTemplate(session, converter);\n     }\n }"
+  },
+  {
+    "sha": "eae8ba0838321b2001d464799dbb6bde60e77ef9",
+    "filename": "src/test/java/org/gridsuite/config/server/AbstractEmbeddedCassandraSetup.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/gridsuite/config-server/blob/a62c9fbbb24171ab1fea8904d9fa320004155015/src/test/java/org/gridsuite/config/server/AbstractEmbeddedCassandraSetup.java",
+    "raw_url": "https://github.com/gridsuite/config-server/raw/a62c9fbbb24171ab1fea8904d9fa320004155015/src/test/java/org/gridsuite/config/server/AbstractEmbeddedCassandraSetup.java",
+    "contents_url": "https://api.github.com/repos/gridsuite/config-server/contents/src/test/java/org/gridsuite/config/server/AbstractEmbeddedCassandraSetup.java?ref=a62c9fbbb24171ab1fea8904d9fa320004155015",
+    "patch": "@@ -6,9 +6,9 @@\n  */\n package org.gridsuite.config.server;\n \n+import com.github.nosan.embedded.cassandra.api.connection.CqlSessionCassandraConnection;\n import org.gridsuite.config.test.EmbeddedCassandraFactoryConfig;\n import org.springframework.beans.factory.annotation.Autowired;\n-import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnection;\n import org.springframework.test.context.ContextConfiguration;\n import org.springframework.test.context.ContextHierarchy;\n \n@@ -25,6 +25,6 @@\n public abstract class AbstractEmbeddedCassandraSetup {\n \n     @Autowired\n-    private ClusterCassandraConnection clusterCassandraConnection;\n+    private CqlSessionCassandraConnection cqlSessionCassandraConnection;\n \n }"
+  }
+]

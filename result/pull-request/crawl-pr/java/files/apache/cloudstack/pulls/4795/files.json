@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "e150d8fb7f1ba244b2d9a0feb2381c3ae5e9181b",
+    "filename": "api/src/main/java/org/apache/cloudstack/api/response/HostResponse.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 4,
+    "changes": 12,
+    "blob_url": "https://github.com/apache/cloudstack/blob/29f9085bbc321e7f4fbf4e081b55fd61c6cab0a5/api/src/main/java/org/apache/cloudstack/api/response/HostResponse.java",
+    "raw_url": "https://github.com/apache/cloudstack/raw/29f9085bbc321e7f4fbf4e081b55fd61c6cab0a5/api/src/main/java/org/apache/cloudstack/api/response/HostResponse.java",
+    "contents_url": "https://api.github.com/repos/apache/cloudstack/contents/api/src/main/java/org/apache/cloudstack/api/response/HostResponse.java?ref=29f9085bbc321e7f4fbf4e081b55fd61c6cab0a5",
+    "patch": "@@ -347,10 +347,6 @@ public void setCpuSpeed(Long cpuSpeed) {\n         this.cpuSpeed = cpuSpeed;\n     }\n \n-    public String getCpuAllocated() {\n-        return cpuAllocated;\n-    }\n-\n     public void setCpuAllocated(String cpuAllocated) {\n         this.cpuAllocated = cpuAllocated;\n     }\n@@ -622,6 +618,14 @@ public String getCpuUsed() {\n         return cpuUsed;\n     }\n \n+    public String getCpuAllocated() {\n+        return cpuAllocated;\n+    }\n+\n+    public String getCpuAllocatedWithOverprovisioning() {\n+        return cpuAllocatedWithOverprovisioning;\n+    }\n+\n     public Double getAverageLoad() {\n         return cpuloadaverage;\n     }"
+  },
+  {
+    "sha": "7aeba237f025be7074c6e6d8157e126b090c3da4",
+    "filename": "plugins/metrics/src/main/java/org/apache/cloudstack/metrics/MetricsServiceImpl.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/cloudstack/blob/29f9085bbc321e7f4fbf4e081b55fd61c6cab0a5/plugins/metrics/src/main/java/org/apache/cloudstack/metrics/MetricsServiceImpl.java",
+    "raw_url": "https://github.com/apache/cloudstack/raw/29f9085bbc321e7f4fbf4e081b55fd61c6cab0a5/plugins/metrics/src/main/java/org/apache/cloudstack/metrics/MetricsServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/apache/cloudstack/contents/plugins/metrics/src/main/java/org/apache/cloudstack/metrics/MetricsServiceImpl.java?ref=29f9085bbc321e7f4fbf4e081b55fd61c6cab0a5",
+    "patch": "@@ -286,6 +286,7 @@ public InfrastructureResponse listInfrastructure() {\n             metricsResponse.setCpuTotal(hostResponse.getCpuNumber(), hostResponse.getCpuSpeed(), cpuOvercommitRatio);\n             metricsResponse.setCpuUsed(hostResponse.getCpuUsed(), hostResponse.getCpuNumber(), hostResponse.getCpuSpeed());\n             metricsResponse.setCpuAllocated(hostResponse.getCpuAllocated(), hostResponse.getCpuNumber(), hostResponse.getCpuSpeed());\n+            metricsResponse.setCpuAllocatedWithOverprovisioning(hostResponse.getCpuAllocatedWithOverprovisioning(), hostResponse.getCpuNumber(), hostResponse.getCpuSpeed());\n             metricsResponse.setLoadAverage(hostResponse.getAverageLoad());\n             metricsResponse.setMemTotal(hostResponse.getMemoryTotal(), memoryOvercommitRatio);\n             metricsResponse.setMemAllocated(hostResponse.getMemoryAllocated());"
+  },
+  {
+    "sha": "da7f4f34a35b6edb2b32df7b0205d92be8acd790",
+    "filename": "plugins/metrics/src/main/java/org/apache/cloudstack/response/HostMetricsResponse.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 2,
+    "changes": 15,
+    "blob_url": "https://github.com/apache/cloudstack/blob/29f9085bbc321e7f4fbf4e081b55fd61c6cab0a5/plugins/metrics/src/main/java/org/apache/cloudstack/response/HostMetricsResponse.java",
+    "raw_url": "https://github.com/apache/cloudstack/raw/29f9085bbc321e7f4fbf4e081b55fd61c6cab0a5/plugins/metrics/src/main/java/org/apache/cloudstack/response/HostMetricsResponse.java",
+    "contents_url": "https://api.github.com/repos/apache/cloudstack/contents/plugins/metrics/src/main/java/org/apache/cloudstack/response/HostMetricsResponse.java?ref=29f9085bbc321e7f4fbf4e081b55fd61c6cab0a5",
+    "patch": "@@ -17,11 +17,12 @@\n \n package org.apache.cloudstack.response;\n \n-import com.cloud.serializer.Param;\n-import com.google.gson.annotations.SerializedName;\n import org.apache.cloudstack.api.response.HostResponse;\n import org.apache.cloudstack.outofbandmanagement.OutOfBandManagement;\n \n+import com.cloud.serializer.Param;\n+import com.google.gson.annotations.SerializedName;\n+\n public class HostMetricsResponse extends HostResponse {\n     @SerializedName(\"powerstate\")\n     @Param(description = \"out-of-band management power state\")\n@@ -43,6 +44,10 @@\n     @Param(description = \"the total cpu allocated in Ghz\")\n     private String cpuAllocated;\n \n+    @SerializedName(\"cpuallocatedghzwithoverprovisioning\")\n+    @Param(description = \"the total cpu allocated in Ghz after applying the cpu.overprovisioning.factor\", since=\"4.15.1\")\n+    private String cpuAllocatedWithOverprovisioning;\n+\n     @SerializedName(\"cpuloadaverage\")\n     @Param(description = \"the average cpu load the last minute\")\n     private Double loadAverage;\n@@ -133,6 +138,12 @@ public void setCpuAllocated(final String cpuAllocated, final Integer cpuNumber,\n         }\n     }\n \n+    public void setCpuAllocatedWithOverprovisioning(String cpuAllocatedWithOverprovisioning, final Integer cpuNumber, final Long cpuSpeed) {\n+        if (cpuAllocatedWithOverprovisioning != null && cpuNumber != null && cpuSpeed != null) {\n+            this.cpuAllocatedWithOverprovisioning = String.format(\"%.2f Ghz\", Double.valueOf(cpuAllocatedWithOverprovisioning.replace(\"%\", \"\")) * cpuNumber * cpuSpeed / (100.0 * 1000.0));\n+        }\n+    }\n+\n     public void setMemTotal(final Long memTotal, final Double overcommitRatio) {\n         if (memTotal != null && overcommitRatio != null) {\n             this.memTotal = String.format(\"%.2f GB (x %.1f)\", memTotal / (1024.0 * 1024.0 * 1024.0), overcommitRatio);"
+  }
+]

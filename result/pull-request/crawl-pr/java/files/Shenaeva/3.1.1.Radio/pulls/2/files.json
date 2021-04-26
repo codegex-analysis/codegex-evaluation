@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "eef897e471dbe527a61bf5c0e6877bdd4699cebd",
+    "filename": ".github/workflows/maven.yml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/Shenaeva/3.1.1.Radio/blob/2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf/.github/workflows/maven.yml",
+    "raw_url": "https://github.com/Shenaeva/3.1.1.Radio/raw/2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf/.github/workflows/maven.yml",
+    "contents_url": "https://api.github.com/repos/Shenaeva/3.1.1.Radio/contents/.github/workflows/maven.yml?ref=2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf",
+    "patch": "@@ -7,7 +7,8 @@ on:\n   push:\n     branches: \n     - main\n-    - flexible/*\n+    - flexible\n+    - lombok/*\n   pull_request:\n     branches: [ main ]\n "
+  },
+  {
+    "sha": "78b2cc53b203f0b97534bb1184cdc7b474339fb4",
+    "filename": "3.1.1.Radio.iml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/Shenaeva/3.1.1.Radio/blob/ba14785a4d7542b9843e5fe71744f4fcfc6b9786/3.1.1.Radio.iml",
+    "raw_url": "https://github.com/Shenaeva/3.1.1.Radio/raw/ba14785a4d7542b9843e5fe71744f4fcfc6b9786/3.1.1.Radio.iml",
+    "contents_url": "https://api.github.com/repos/Shenaeva/3.1.1.Radio/contents/3.1.1.Radio.iml?ref=ba14785a4d7542b9843e5fe71744f4fcfc6b9786",
+    "patch": "@@ -1,2 +0,0 @@\n-<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n-<module type=\"JAVA_MODULE\" version=\"4\" />\n\\ No newline at end of file"
+  },
+  {
+    "sha": "51c1af6da267197597d32f8927c5f04c68dedd6e",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/Shenaeva/3.1.1.Radio/blob/2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf/pom.xml",
+    "raw_url": "https://github.com/Shenaeva/3.1.1.Radio/raw/2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf/pom.xml",
+    "contents_url": "https://api.github.com/repos/Shenaeva/3.1.1.Radio/contents/pom.xml?ref=2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf",
+    "patch": "@@ -21,6 +21,13 @@\n             <version>5.4.2</version>\n             <scope>test</scope>\n         </dependency>\n+\n+        <dependency>\n+            <groupId>org.projectlombok</groupId>\n+            <artifactId>lombok</artifactId>\n+            <version>1.18.16</version>\n+            <scope>provided</scope>\n+        </dependency>\n     </dependencies>\n \n     <build>"
+  },
+  {
+    "sha": "ece2e4c14dc84f7a0d91cb0616f4077938146d1f",
+    "filename": "src/main/java/ru/netology/Radio/Radio.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 50,
+    "changes": 75,
+    "blob_url": "https://github.com/Shenaeva/3.1.1.Radio/blob/2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf/src/main/java/ru/netology/Radio/Radio.java",
+    "raw_url": "https://github.com/Shenaeva/3.1.1.Radio/raw/2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf/src/main/java/ru/netology/Radio/Radio.java",
+    "contents_url": "https://api.github.com/repos/Shenaeva/3.1.1.Radio/contents/src/main/java/ru/netology/Radio/Radio.java?ref=2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf",
+    "patch": "@@ -1,13 +1,35 @@\n package ru.netology.Radio;\n \n+import lombok.*;\n+\n+@NoArgsConstructor\n+@Data\n+@AllArgsConstructor\n public class Radio {\n     private int minStationNumber;\n-    private int maxStationNumber = 9;\n+    private int maxStationNumber = 10;\n     private int currentStationNumber;\n     private int minVolume;\n-    private int maxVolume = 10;\n+    private int maxVolume = 100;\n     private int soundVolume;\n \n+    public Radio(int currentStationNumber, int soundVolume) {\n+        if(currentStationNumber < minStationNumber) {\n+            return;\n+        }\n+        if (currentStationNumber > maxStationNumber) {\n+            return;\n+        }\n+        this.currentStationNumber = currentStationNumber;\n+        if (soundVolume < minVolume) {\n+            return;\n+        }\n+        if (soundVolume > maxVolume) {\n+            return;\n+        }\n+        this.soundVolume = soundVolume;\n+    }\n+\n     /**\n      * переключает радиостанцию вперед,\n      * проверяет, если станция последняя по счету, то переключает на первую\n@@ -36,6 +58,7 @@ public void prev() {\n         }\n     }\n \n+\n     /**\n      * прибавляет звук\n      * проверяет, что если звук находится на максимуме, то изменения не происходят, если нет, то прибавляет\n@@ -58,52 +81,4 @@ public void lessen() {\n         System.out.println(soundVolume);\n     }\n \n-    //getters, setters\n-    public int getMinStationNumber() {\n-        return minStationNumber;\n-    }\n-\n-    public void setMinStationNumber(int minStationNumber) {\n-        this.minStationNumber = minStationNumber;\n-    }\n-\n-    public int getMaxStationNumber() {\n-        return maxStationNumber;\n-    }\n-\n-    public void setMaxStationNumber(int maxStationNumber) {\n-        this.maxStationNumber = maxStationNumber;\n-    }\n-\n-    public int getCurrentStationNumber() {\n-        return currentStationNumber;\n-    }\n-\n-    public void setCurrentStationNumber(int currentStationNumber) {\n-        this.currentStationNumber = currentStationNumber;\n-    }\n-\n-    public int getMinVolume() {\n-        return minVolume;\n-    }\n-\n-    public void setMinVolume(int minVolume) {\n-        this.minVolume = minVolume;\n-    }\n-\n-    public int getMaxVolume() {\n-        return maxVolume;\n-    }\n-\n-    public void setMaxVolume(int maxVolume) {\n-        this.maxVolume = maxVolume;\n-    }\n-\n-    public int getSoundVolume() {\n-        return soundVolume;\n-    }\n-\n-    public void setSoundVolume(int soundVolume) {\n-        this.soundVolume = soundVolume;\n-    }\n }"
+  },
+  {
+    "sha": "6cd840509b07de4f3aa637218c49ceff3750b301",
+    "filename": "src/test/java/ru/netology/Radio/RadioTest.java",
+    "status": "modified",
+    "additions": 73,
+    "deletions": 49,
+    "changes": 122,
+    "blob_url": "https://github.com/Shenaeva/3.1.1.Radio/blob/2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf/src/test/java/ru/netology/Radio/RadioTest.java",
+    "raw_url": "https://github.com/Shenaeva/3.1.1.Radio/raw/2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf/src/test/java/ru/netology/Radio/RadioTest.java",
+    "contents_url": "https://api.github.com/repos/Shenaeva/3.1.1.Radio/contents/src/test/java/ru/netology/Radio/RadioTest.java?ref=2992bfed3db4f4ac2ee41b88667d3bcb95aa4acf",
+    "patch": "@@ -7,82 +7,106 @@\n class RadioTest {\n \n     @Test\n-    void nextStation() {\n-        Radio radio = new Radio(); //создаем новый экзампляр класса\n-        assertEquals(0, radio.getCurrentStationNumber());\n-        radio.setCurrentStationNumber(3); //присваеваем текущее значение\n-        radio.next(); //вызываем метод\n-        int resultStationNumber = radio.getCurrentStationNumber(); //ФР\n-        assertEquals(4, resultStationNumber); //проверка\n+    void nextStationAndVolume() {\n+        Radio radio = new Radio(3,10);\n+        radio.next();\n+        radio.more();\n+        assertEquals(4, radio.getCurrentStationNumber());\n+        assertEquals(11, radio.getSoundVolume());\n     }\n \n     @Test\n-    void nextStationMax() {\n-        Radio radio = new Radio(); //создаем новый экзампляр класса\n+    void nextStationMaxAndMoreVolumeMax() {\n+        Radio radio = new Radio(10,100);\n+        radio.next();\n+        radio.more();\n         assertEquals(0, radio.getCurrentStationNumber());\n-        radio.setCurrentStationNumber(9); //присваеваем текущее значение\n-        radio.next(); //вызываем метод\n-        int resultStationNumber = radio.getCurrentStationNumber(); //ФР\n-        assertEquals(0, resultStationNumber); //проверка\n+        assertEquals(100, radio.getSoundVolume());\n     }\n \n     @Test\n-    void prevStation() {\n-        Radio radio = new Radio(); //создаем новый экзампляр класса\n-        assertEquals(0, radio.getCurrentStationNumber());\n-        radio.setCurrentStationNumber(9); //присваеваем текущее значение\n-        radio.prev(); //вызываем метод\n-        int resultStationNumber = radio.getCurrentStationNumber(); //ФР\n-        assertEquals(8, resultStationNumber); //проверка\n+    void prevStationAndVolumeMax() {\n+        Radio radio = new Radio(9,101);\n+        radio.prev();\n+        radio.lessen();\n+        assertEquals(8, radio.getCurrentStationNumber());\n+        assertEquals(0, radio.getSoundVolume());\n     }\n \n     @Test\n-    void prevStationMin() {\n-        Radio radio = new Radio(); //создаем новый экзампляр класса\n-        assertEquals(0, radio.getCurrentStationNumber()); // проверка с 0\n-        radio.setCurrentStationNumber(0); //присваеваем текущее значение\n-        radio.prev(); //вызываем метод\n-        int resultStationNumber = radio.getCurrentStationNumber(); //ФР\n-        assertEquals(9, resultStationNumber); //проверка\n+    void prevStationMinAndLessenVolume() {\n+        Radio radio = new Radio(0,99);\n+        radio.prev();\n+        radio.lessen();\n+        assertEquals(10, radio.getCurrentStationNumber());\n+        assertEquals(98, radio.getSoundVolume());\n     }\n \n     @Test\n-    void moreVolume() {\n-        Radio radio = new Radio();\n-        assertEquals(0, radio.getSoundVolume());\n-        radio.setSoundVolume(5);\n+    void moreVolumeAndPrevStation() {\n+        Radio radio = new Radio(7,77);\n+        radio.prev();\n         radio.more();\n-        int resultVolume = radio.getSoundVolume();\n-        assertEquals(6, resultVolume);\n+        assertEquals(6, radio.getCurrentStationNumber());\n+        assertEquals(78, radio.getSoundVolume());\n     }\n \n     @Test\n-    void moreVolumeMax() {\n-        Radio radio = new Radio();\n-        assertEquals(0, radio.getSoundVolume());\n-        radio.setSoundVolume(10);\n+    void moreVolumeMaxAndPrevStation() {\n+        Radio radio = new Radio(7,100);\n+        radio.prev();\n         radio.more();\n-        int resultVolume = radio.getSoundVolume();\n-        assertEquals(10, resultVolume);\n+        assertEquals(6, radio.getCurrentStationNumber());\n+        assertEquals(100, radio.getSoundVolume());\n     }\n \n     @Test\n     void lessenVolume() {\n-        Radio radio = new Radio();\n-        assertEquals(0, radio.getSoundVolume());\n-        radio.setSoundVolume(10);\n+        Radio radio = new Radio(10, 10);\n+        radio.next();\n         radio.lessen();\n-        int resultVolume = radio.getSoundVolume();\n-        assertEquals(9, resultVolume);\n+        assertEquals(0,radio.getCurrentStationNumber());\n+        assertEquals(9, radio.getSoundVolume());\n     }\n \n     @Test\n-    void lessenVolumeMin() {\n-        Radio radio = new Radio();\n+    void lessenVolumeMinAndNextStation() {\n+        Radio radio = new Radio(0,0);\n+        radio.next();\n+        radio.lessen();\n+        assertEquals(1, radio.getCurrentStationNumber());\n         assertEquals(0, radio.getSoundVolume());\n-        radio.setSoundVolume(0);\n+    }\n+\n+    @Test\n+    void lessenVolumeMinAndPrevStation() {\n+        Radio radio = new Radio(10,-1);\n+        radio.prev();\n         radio.lessen();\n-        int resultVolume = radio.getSoundVolume();\n-        assertEquals(0, resultVolume);\n+        assertEquals(9, radio.getCurrentStationNumber());\n+        assertEquals(0, radio.getSoundVolume());\n     }\n+\n+    @Test\n+    void setCurrentStationAndLessenVolume(){\n+        Radio radio = new Radio(7,70);\n+        assertEquals(7, radio.getCurrentStationNumber());\n+        assertEquals(70, radio.getSoundVolume());\n+    }\n+\n+    @Test\n+    void setCurrentStationMaxAndLessenVolume(){\n+        Radio radio = new Radio(11,101);\n+        assertEquals(0, radio.getCurrentStationNumber());\n+        assertEquals(0, radio.getSoundVolume());\n+    }\n+\n+\n+    @Test\n+    void setCurrentStationMinAndLessenVolume() {\n+        Radio radio = new Radio(-1, -1);\n+        assertEquals(0, radio.getCurrentStationNumber());\n+        assertEquals(0, radio.getSoundVolume());\n+    }\n+\n }\n\\ No newline at end of file"
+  }
+]

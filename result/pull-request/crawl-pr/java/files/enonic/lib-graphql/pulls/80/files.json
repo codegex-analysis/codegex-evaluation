@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "39517edf167f7cb1850b1338c6931af8d342aea6",
+    "filename": "README.MD",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 4,
+    "changes": 15,
+    "blob_url": "https://github.com/enonic/lib-graphql/blob/a949ecf0d26026f59442c5a0f3e636b3abcc3b8e/README.MD",
+    "raw_url": "https://github.com/enonic/lib-graphql/raw/a949ecf0d26026f59442c5a0f3e636b3abcc3b8e/README.MD",
+    "contents_url": "https://api.github.com/repos/enonic/lib-graphql/contents/README.MD?ref=a949ecf0d26026f59442c5a0f3e636b3abcc3b8e",
+    "patch": "@@ -12,6 +12,7 @@ It allows you to define a GraphQL schema and execute GraphQL queries against thi\n \n | Version | XP Version  | Dependency                       |\n |---------|-------------|----------------------------------|\n+| 2.0.0   | 7.0.0       | com.enonic.lib:lib-graphql:2.0.0 |\n | 1.1.1   | 7.0.0       | com.enonic.lib:lib-graphql:1.1.1 |\n | 1.1.0   | 7.0.0       | com.enonic.lib:lib-graphql:1.1.0 |\n | 1.0.0   | 7.0.0       | com.enonic.lib:lib-graphql:1.0.0 |\n@@ -74,10 +75,12 @@ var database = {\n     }\n };\n \n+var schemaGenerator = graphQlLib.newSchemaGenerator();\n+\n // Defines the object types. \n // Firstly, an object type 'Person' with a mandatory String field 'name', a mandatory Integer field 'age' \n // and an array of Person field 'children'.\n-var personObjectType = graphQlLib.createObjectType({\n+var personObjectType = schemaGenerator.createObjectType({\n     name: 'Person',\n     description: 'A person type.',\n     fields: {\n@@ -111,7 +114,7 @@ var personObjectType = graphQlLib.createObjectType({\n });\n \n // Defines a second object type 'Query', the root object type containing all the root retrieval requests.\n-var rootQueryType = graphQlLib.createObjectType({\n+var rootQueryType = schemaGenerator.createObjectType({\n     name: 'Query',\n     fields: {\n         // Unique request getPersonByName taking a mandatory String 'name' as parameter and returning a person \n@@ -129,14 +132,14 @@ var rootQueryType = graphQlLib.createObjectType({\n });\n \n // Define the GraphQL schema\n-var schema = graphQlLib.createSchema({\n+var schema = schemaGenerator.createSchema({\n     query: rootQueryType\n });\n \n // POST request handler that will execute the query received as parameter against the schema defined above.\n exports.post = function (req) {\n     var body = JSON.parse(req.body);\n-    var result = graphQlLib.execute(schema, body.query, body.variables);\n+    var result = JSON.stringify(graphQlLib.execute(schema, body.query, body.variables));\n     return {\n         contentType: 'application/json',\n         body: result\n@@ -193,3 +196,7 @@ exports.test = function () {\n     }, result);\n };\n ```\n+### Breaking changes\n+\n+#### 2.0.0\n+Functions can no longer be created directly, use the `schemaGenerator` object instead."
+  },
+  {
+    "sha": "9bce22936560d327033586b98bb50a650852fecd",
+    "filename": "docs/api.adoc",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 2,
+    "changes": 26,
+    "blob_url": "https://github.com/enonic/lib-graphql/blob/a949ecf0d26026f59442c5a0f3e636b3abcc3b8e/docs/api.adoc",
+    "raw_url": "https://github.com/enonic/lib-graphql/raw/a949ecf0d26026f59442c5a0f3e636b3abcc3b8e/docs/api.adoc",
+    "contents_url": "https://api.github.com/repos/enonic/lib-graphql/contents/docs/api.adoc?ref=a949ecf0d26026f59442c5a0f3e636b3abcc3b8e",
+    "patch": "@@ -16,13 +16,18 @@ GraphQL comes with a set of default scalar types:\n * GraphQLBoolean\n * GraphQLID\n \n-The following scalars are supported starting from version 1.2.0 of GraphQL Lib:\n+The following scalars are supported starting from version 1.2.0 of the GraphQL Lib:\n \n * Json\n * Date\n * Time\n * DateTime\n \n+The following scalars are supported starting from version 2.0.0 of the GraphQL Lib:\n+\n+* LocalDateTime\n+* LocalTime\n+\n == Type wrappers\n \n By default the type of field has an occurrence of 0..1.\n@@ -73,6 +78,8 @@ Executes a GraphQL query and variables against a schema\n \n == Schema creation functions\n \n+Starting from version 2.0.0 of the GraphQL Lib in order to create a schema you must use `schemaGenerator` object, which contains the following functions:\n+\n === createSchema\n \n Creates a GraphQL schema\n@@ -127,7 +134,8 @@ Creates a GraphQL union type\n ==== Parameters\n |===\n |name: String (Required) | Type name\n-|types: Array<GraphQLObjectType> | Possible types\n+|types: Array<GraphQLObjectType OR GraphQLTypeReference> (Required) | Possible types\n+|typeResolver: Function (Required) | Type resolution function\n |===\n \n === createEnumType\n@@ -141,8 +149,22 @@ Creates a GraphQL enum type\n |description: String | Description\n |===\n \n+In order to create an instance of `schemaGenerator` call `newSchemaGenerator()` method of the GraphQL Lib, for instance:\n+\n+```\n+const libGraphQL = require('/lib/graphql');\n+\n+const schemaGenerator = libGraphQL.newSchemaGenerator();\n+\n+schemaGenerator.createObjectType({\n+   ...\n+});\n+```\n \n+=== Breaking changes\n \n+==== 2.0.0\n+Functions can no longer be created directly, use the `schemaGenerator` object instead.\n \n \n "
+  }
+]

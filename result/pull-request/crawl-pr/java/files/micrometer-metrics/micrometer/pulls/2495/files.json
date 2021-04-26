@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "8e0f2ef72ec31314c59d6945d70fa6fa787821f5",
+    "filename": "micrometer-core/src/main/java/io/micrometer/core/instrument/Timer.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/micrometer-metrics/micrometer/blob/bb178262986b85a06c46cf08b0ea31647e0485b8/micrometer-core/src/main/java/io/micrometer/core/instrument/Timer.java",
+    "raw_url": "https://github.com/micrometer-metrics/micrometer/raw/bb178262986b85a06c46cf08b0ea31647e0485b8/micrometer-core/src/main/java/io/micrometer/core/instrument/Timer.java",
+    "contents_url": "https://api.github.com/repos/micrometer-metrics/micrometer/contents/micrometer-core/src/main/java/io/micrometer/core/instrument/Timer.java?ref=bb178262986b85a06c46cf08b0ea31647e0485b8",
+    "patch": "@@ -270,6 +270,14 @@ default double percentile(double percentile, TimeUnit unit) {\n             this.startTime = clock.monotonicTime();\n         }\n \n+        public Duration elapsed() {\n+          return Duration.ofNanos(clock.monotonicTime() - startTime);\n+        }\n+\n+        public long elapsed(TimeUnit unit) {\n+          return unit.convert(clock.monotonicTime() - startTime, TimeUnit.NANOSECONDS);\n+        }\n+\n         /**\n          * Records the duration of the operation.\n          *"
+  },
+  {
+    "sha": "d44c615f7dd2e125d9b1c601faccb84be13540af",
+    "filename": "micrometer-test/src/main/java/io/micrometer/core/tck/TimerTest.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/micrometer-metrics/micrometer/blob/bb178262986b85a06c46cf08b0ea31647e0485b8/micrometer-test/src/main/java/io/micrometer/core/tck/TimerTest.java",
+    "raw_url": "https://github.com/micrometer-metrics/micrometer/raw/bb178262986b85a06c46cf08b0ea31647e0485b8/micrometer-test/src/main/java/io/micrometer/core/tck/TimerTest.java",
+    "contents_url": "https://api.github.com/repos/micrometer-metrics/micrometer/contents/micrometer-test/src/main/java/io/micrometer/core/tck/TimerTest.java?ref=bb178262986b85a06c46cf08b0ea31647e0485b8",
+    "patch": "@@ -188,6 +188,28 @@ default void recordWithSample(MeterRegistry registry) {\n                 () -> assertEquals(10, timer.totalTime(TimeUnit.NANOSECONDS), 1.0e-12));\n     }\n \n+    @Test\n+    @DisplayName(\"elapsed with stateful Sample instance\")\n+    default void elapsedWithSample(MeterRegistry registry) {\n+        Timer timer = registry.timer(\"myTimer\");\n+        Timer.Sample sample = Timer.start(registry);\n+\n+        clock(registry).add(10, TimeUnit.NANOSECONDS);\n+        assertAll(() -> assertEquals(Duration.ofNanos(10), sample.elapsed()),\n+            () -> assertEquals(10, sample.elapsed(TimeUnit.NANOSECONDS)),\n+            () -> assertEquals(0, sample.elapsed(TimeUnit.MILLISECONDS)));\n+        clock(registry).add(500, TimeUnit.MILLISECONDS);\n+        Duration expectedDuration = Duration.ofNanos(10).plusMillis(500);\n+        assertAll(() -> assertEquals(expectedDuration, sample.elapsed()),\n+            () -> assertEquals(expectedDuration.toNanos(), sample.elapsed(TimeUnit.NANOSECONDS)),\n+            () -> assertEquals(expectedDuration.toMillis(), sample.elapsed(TimeUnit.MILLISECONDS)));\n+        sample.stop(timer);\n+        clock(registry).add(step());\n+\n+        assertAll(() -> assertEquals(1L, timer.count()),\n+                () -> assertEquals(expectedDuration.toNanos(), timer.totalTime(TimeUnit.NANOSECONDS), 1.0e-12));\n+    }\n+\n     @Test\n     default void recordMax(MeterRegistry registry) {\n         Timer timer = registry.timer(\"my.timer\");"
+  }
+]

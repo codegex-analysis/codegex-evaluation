@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "69f1f88acb5cd2d10764eb42536f84b8bd0b7c00",
+    "filename": "src/main/java/ru/pentragon/spring1l7/spring1l7/controller/ProductController.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 2,
+    "changes": 26,
+    "blob_url": "https://github.com/RamirLanner/Spring1_L7/blob/29e0d67b4a1b38704a398d3f5ce015240c853d2c/src/main/java/ru/pentragon/spring1l7/spring1l7/controller/ProductController.java",
+    "raw_url": "https://github.com/RamirLanner/Spring1_L7/raw/29e0d67b4a1b38704a398d3f5ce015240c853d2c/src/main/java/ru/pentragon/spring1l7/spring1l7/controller/ProductController.java",
+    "contents_url": "https://api.github.com/repos/RamirLanner/Spring1_L7/contents/src/main/java/ru/pentragon/spring1l7/spring1l7/controller/ProductController.java?ref=29e0d67b4a1b38704a398d3f5ce015240c853d2c",
+    "patch": "@@ -1,10 +1,14 @@\n package ru.pentragon.spring1l7.spring1l7.controller;\n \n import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.data.domain.Sort;\n+import org.springframework.http.HttpStatus;\n+import org.springframework.http.ResponseEntity;\n import org.springframework.web.bind.annotation.*;\n import ru.pentragon.spring1l7.spring1l7.model.Product;\n import ru.pentragon.spring1l7.spring1l7.services.ProductService;\n \n+import javax.transaction.Transactional;\n import java.util.List;\n \n @RestController\n@@ -14,9 +18,27 @@\n     @Autowired\n     private ProductService productService;\n \n+\n+    @Transactional\n+    public List<Product> getAll(int page, int size, Sort.Direction sortCost, Sort.Direction sortName){\n+        return productService.getAll(page-1, size,sortCost, sortName);\n+    }\n+\n+    //http://localhost:8189/app/products?page=1&size=21&sortCost=DESC&sortName=DESC\n     @GetMapping\n-    public List<Product> getAll(){\n-        return productService.getAll();\n+    public ResponseEntity<Object> returnAll(@RequestParam(defaultValue = \"1\") Integer page,\n+                                            @RequestParam(defaultValue = \"10\") Integer size,\n+                                            @RequestParam(defaultValue = \"ASC\") String sortCost,\n+                                            @RequestParam(defaultValue = \"ASC\") String sortName){\n+        Sort.Direction sortCostDir = Sort.Direction.ASC;\n+        Sort.Direction sortNameDir = Sort.Direction.ASC;\n+        if(sortCost.equals(\"DESC\")) sortCostDir = Sort.Direction.DESC;\n+        if(sortName.equals(\"DESC\")) sortNameDir = Sort.Direction.DESC;\n+        List<Product> prod = getAll(page, size,sortCostDir,sortNameDir);\n+        if (prod.isEmpty()) {\n+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);\n+        }\n+        return ResponseEntity.ok(prod);//getAll(page, size);\n     }\n \n     @GetMapping(\"/{id}\")"
+  },
+  {
+    "sha": "ddb4f30884624beffb3feb7b1b794fafb218c984",
+    "filename": "src/main/java/ru/pentragon/spring1l7/spring1l7/model/SortType.java",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/RamirLanner/Spring1_L7/blob/29e0d67b4a1b38704a398d3f5ce015240c853d2c/src/main/java/ru/pentragon/spring1l7/spring1l7/model/SortType.java",
+    "raw_url": "https://github.com/RamirLanner/Spring1_L7/raw/29e0d67b4a1b38704a398d3f5ce015240c853d2c/src/main/java/ru/pentragon/spring1l7/spring1l7/model/SortType.java",
+    "contents_url": "https://api.github.com/repos/RamirLanner/Spring1_L7/contents/src/main/java/ru/pentragon/spring1l7/spring1l7/model/SortType.java?ref=29e0d67b4a1b38704a398d3f5ce015240c853d2c",
+    "patch": "@@ -0,0 +1,6 @@\n+package ru.pentragon.spring1l7.spring1l7.model;\n+\n+public enum SortType {\n+    ASC,\n+    DESC\n+}"
+  },
+  {
+    "sha": "9f54a62011eb7c5bc917dc161829bbdd69a26314",
+    "filename": "src/main/java/ru/pentragon/spring1l7/spring1l7/repository/ProductRepository.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/RamirLanner/Spring1_L7/blob/29e0d67b4a1b38704a398d3f5ce015240c853d2c/src/main/java/ru/pentragon/spring1l7/spring1l7/repository/ProductRepository.java",
+    "raw_url": "https://github.com/RamirLanner/Spring1_L7/raw/29e0d67b4a1b38704a398d3f5ce015240c853d2c/src/main/java/ru/pentragon/spring1l7/spring1l7/repository/ProductRepository.java",
+    "contents_url": "https://api.github.com/repos/RamirLanner/Spring1_L7/contents/src/main/java/ru/pentragon/spring1l7/spring1l7/repository/ProductRepository.java?ref=29e0d67b4a1b38704a398d3f5ce015240c853d2c",
+    "patch": "@@ -1,8 +1,9 @@\n package ru.pentragon.spring1l7.spring1l7.repository;\n \n+import org.springframework.data.domain.PageRequest;\n+import org.springframework.data.domain.Sort;\n import org.springframework.data.jpa.repository.JpaRepository;\n import org.springframework.stereotype.Repository;\n-import org.springframework.web.bind.annotation.GetMapping;\n import ru.pentragon.spring1l7.spring1l7.model.Product;\n \n import java.util.List;"
+  },
+  {
+    "sha": "ca2966939b762472de93616169809d0907ba0ca7",
+    "filename": "src/main/java/ru/pentragon/spring1l7/spring1l7/services/ProductService.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/RamirLanner/Spring1_L7/blob/29e0d67b4a1b38704a398d3f5ce015240c853d2c/src/main/java/ru/pentragon/spring1l7/spring1l7/services/ProductService.java",
+    "raw_url": "https://github.com/RamirLanner/Spring1_L7/raw/29e0d67b4a1b38704a398d3f5ce015240c853d2c/src/main/java/ru/pentragon/spring1l7/spring1l7/services/ProductService.java",
+    "contents_url": "https://api.github.com/repos/RamirLanner/Spring1_L7/contents/src/main/java/ru/pentragon/spring1l7/spring1l7/services/ProductService.java?ref=29e0d67b4a1b38704a398d3f5ce015240c853d2c",
+    "patch": "@@ -1,6 +1,8 @@\n package ru.pentragon.spring1l7.spring1l7.services;\n \n import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.data.domain.PageRequest;\n+import org.springframework.data.domain.Sort;\n import org.springframework.stereotype.Service;\n import ru.pentragon.spring1l7.spring1l7.model.Product;\n import ru.pentragon.spring1l7.spring1l7.repository.ProductRepository;\n@@ -17,6 +19,12 @@\n         return productrRepository.findAll();\n     }\n \n+    public List<Product> getAll(int page, int size, Sort.Direction sortCost, Sort.Direction sortName){\n+        return productrRepository.findAll(PageRequest.of(page, size\n+                , Sort.by(sortCost,\"cost\").and(Sort.by(sortName,\"title\")))).toList();\n+        //return productrRepository.findAll(PageRequest.of(page, size)).toList();\n+    }\n+\n     public Product getProductByID(Long id){\n         return productrRepository.findById(id).get();\n     }"
+  }
+]

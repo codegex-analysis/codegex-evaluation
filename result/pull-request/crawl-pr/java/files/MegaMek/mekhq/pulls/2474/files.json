@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "c6a859742a17bf34a2c0904b239d76ac84d5cf66",
+    "filename": "MekHQ/src/mekhq/campaign/unit/actions/RestoreUnitAction.java",
+    "status": "modified",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/MegaMek/mekhq/blob/34a091984f645fd68354af53ab7068b6674f1acf/MekHQ/src/mekhq/campaign/unit/actions/RestoreUnitAction.java",
+    "raw_url": "https://github.com/MegaMek/mekhq/raw/34a091984f645fd68354af53ab7068b6674f1acf/MekHQ/src/mekhq/campaign/unit/actions/RestoreUnitAction.java",
+    "contents_url": "https://api.github.com/repos/MegaMek/mekhq/contents/MekHQ/src/mekhq/campaign/unit/actions/RestoreUnitAction.java?ref=34a091984f645fd68354af53ab7068b6674f1acf",
+    "patch": "@@ -87,6 +87,8 @@ private void restoreUnit(Campaign campaign, Unit unit, Entity newEntity) {\n         newEntity.setExternalIdAsString(unit.getId().toString());\n         campaign.getGame().addEntity(newEntity.getId(), newEntity);\n \n+        copyC3Networks(oldEntity, newEntity);\n+\n         unit.setEntity(newEntity);\n \n         unit.removeParts();\n@@ -99,6 +101,38 @@ private void restoreUnit(Campaign campaign, Unit unit, Entity newEntity) {\n         unit.resetPilotAndEntity();\n     }\n \n+    /**\n+     * Copies the C3 network setup from the source to the target.\n+     * @param source The source {@link Entity}.\n+     * @param target The target {@link Entity}.\n+     */\n+    private static void copyC3Networks(Entity source, Entity target) {\n+        target.setC3UUIDAsString(source.getC3UUIDAsString());\n+        target.setC3Master(source.getC3Master(), false);\n+        target.setC3MasterIsUUIDAsString(source.getC3MasterIsUUIDAsString());\n+\n+        // Reassign the C3NetId\n+        // TODO: Add Entity::setC3NetId(String)\n+        String c3NetId = source.getC3NetId();\n+        if (c3NetId != null) {\n+            for (Entity entity : target.getGame().getEntitiesVector()) {\n+                if (target.getId() == entity.getId()) {\n+                    continue;\n+                }\n+\n+                if (c3NetId.equals(entity.getC3NetId())) {\n+                    target.setC3NetId(entity);\n+                    break;\n+                }\n+            }\n+        }\n+\n+        for (int pos = 0; pos < Entity.MAX_C3i_NODES; ++pos) {\n+            target.setC3iNextUUIDAsString(pos, source.getC3iNextUUIDAsString(pos));\n+            target.setNC3NextUUIDAsString(pos, source.getNC3NextUUIDAsString(pos));\n+        }\n+    }\n+\n     /**\n      * Restores a unit using the old per-part logic.\n      * @param campaign The campaign which owns the unit."
+  }
+]

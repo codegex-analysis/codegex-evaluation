@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "cf559d4f11b6fc5fe4c8f3fc548d0c0d8f70adec",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/dreamncn/Qianji_auto/blob/46d4405c6db13cc2288330443666fdca96582989/.gitignore",
+    "raw_url": "https://github.com/dreamncn/Qianji_auto/raw/46d4405c6db13cc2288330443666fdca96582989/.gitignore",
+    "contents_url": "https://api.github.com/repos/dreamncn/Qianji_auto/contents/.gitignore?ref=46d4405c6db13cc2288330443666fdca96582989",
+    "patch": "@@ -13,4 +13,5 @@\n .DS_Store\n /build\n /captures\n-.externalNativeBuild\n\\ No newline at end of file\n+.externalNativeBuild\n+rhino-1.7.13/build/.transforms/*"
+  },
+  {
+    "sha": "d50666bde451e4c878ae18fb50049ab337cc8969",
+    "filename": "app/src/main/java/cn/dreamn/qianji_auto/core/db/Dao/AssetDao.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/dreamncn/Qianji_auto/blob/46d4405c6db13cc2288330443666fdca96582989/app/src/main/java/cn/dreamn/qianji_auto/core/db/Dao/AssetDao.java",
+    "raw_url": "https://github.com/dreamncn/Qianji_auto/raw/46d4405c6db13cc2288330443666fdca96582989/app/src/main/java/cn/dreamn/qianji_auto/core/db/Dao/AssetDao.java",
+    "contents_url": "https://api.github.com/repos/dreamncn/Qianji_auto/contents/app/src/main/java/cn/dreamn/qianji_auto/core/db/Dao/AssetDao.java?ref=46d4405c6db13cc2288330443666fdca96582989",
+    "patch": "@@ -27,6 +27,9 @@\n     @Query(\"SELECT * FROM asset\")\n     Asset[] getAll();\n \n+    @Query(\"SELECT * FROM asset WHERE name LIKE 'regex:%'\")\n+    Asset[] getAllFromRegex();\n+\n     @Query(\"SELECT * FROM asset WHERE id=:id\")\n     Asset[] get(int id);\n "
+  },
+  {
+    "sha": "be90125046be21eb9461313cff413f3539f8ba40",
+    "filename": "app/src/main/java/cn/dreamn/qianji_auto/core/db/Helper/Assets.java",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 4,
+    "changes": 27,
+    "blob_url": "https://github.com/dreamncn/Qianji_auto/blob/46d4405c6db13cc2288330443666fdca96582989/app/src/main/java/cn/dreamn/qianji_auto/core/db/Helper/Assets.java",
+    "raw_url": "https://github.com/dreamncn/Qianji_auto/raw/46d4405c6db13cc2288330443666fdca96582989/app/src/main/java/cn/dreamn/qianji_auto/core/db/Helper/Assets.java",
+    "contents_url": "https://api.github.com/repos/dreamncn/Qianji_auto/contents/app/src/main/java/cn/dreamn/qianji_auto/core/db/Helper/Assets.java?ref=46d4405c6db13cc2288330443666fdca96582989",
+    "patch": "@@ -19,12 +19,14 @@\n \n import android.os.Bundle;\n \n+import com.xuexiang.xutil.common.StringUtils;\n+\n import java.util.ArrayList;\n+import java.util.regex.Pattern;\n \n+import cn.dreamn.qianji_auto.core.db.DbManger;\n import cn.dreamn.qianji_auto.core.db.Table.Asset;\n import cn.dreamn.qianji_auto.core.db.Table.Asset2;\n-import cn.dreamn.qianji_auto.core.db.DbManger;\n-import cn.dreamn.qianji_auto.core.db.Table.BookName;\n import cn.dreamn.qianji_auto.utils.tools.Logs;\n \n public class Assets {\n@@ -110,9 +112,26 @@ public static void updMap(int id, String assetName, String mapName) {\n     }\n \n     public static String getMap(String assetName) {\n-        if (assetName == null) return \"\";\n+        if (StringUtils.isEmptyTrim(assetName)) return \"\";\n         Asset[] assets = DbManger.db.AssetDao().get(assetName);\n-        if (assetName.equals(\"\")) return \"\";\n+        // 正则匹配内容  需要在内容中以regex:开头\n+        Asset[] assetsArr = DbManger.db.AssetDao().getAllFromRegex();\n+        if (assetsArr.length > 0) {\n+            for (Asset item : assetsArr) {\n+                // 替换掉 'regex:'\n+                String pattern = item.name.replaceFirst(\"regex:\", \"\");\n+                if (StringUtils.isEmptyTrim(pattern)) {\n+                    continue;\n+                }\n+                // 匹配\n+                boolean isMatch = Pattern.matches(pattern, assetName);\n+                if (isMatch) {\n+                    Logs.i(\"资产匹配\", String.format(\"源内容：[%s]，被正则表达式：[%s]，成功匹配。\", assetName, pattern));\n+                    return item.mapName;\n+                }\n+            }\n+        }\n+\n         //没有资产创造资产\n         if (assets.length <= 0) {\n             DbManger.db.AssetDao().add(assetName, assetName);"
+  }
+]

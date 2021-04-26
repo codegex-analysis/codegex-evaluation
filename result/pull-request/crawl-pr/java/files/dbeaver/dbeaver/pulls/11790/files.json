@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "8f2c16c807d565834900db89b01b124526e2f8b5",
+    "filename": "plugins/org.jkiss.dbeaver.ext.postgresql/src/org/jkiss/dbeaver/ext/postgresql/model/PostgreAttribute.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 4,
+    "changes": 15,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/9b44f04d445752cf5d340ec4087501b0a14434bc/plugins/org.jkiss.dbeaver.ext.postgresql/src/org/jkiss/dbeaver/ext/postgresql/model/PostgreAttribute.java",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/9b44f04d445752cf5d340ec4087501b0a14434bc/plugins/org.jkiss.dbeaver.ext.postgresql/src/org/jkiss/dbeaver/ext/postgresql/model/PostgreAttribute.java",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.postgresql/src/org/jkiss/dbeaver/ext/postgresql/model/PostgreAttribute.java?ref=9b44f04d445752cf5d340ec4087501b0a14434bc",
+    "patch": "@@ -39,9 +39,7 @@\n import org.jkiss.dbeaver.model.struct.DBSTypedObjectExt4;\n import org.jkiss.utils.CommonUtils;\n \n-import java.util.Comparator;\n-import java.util.Set;\n-import java.util.TreeSet;\n+import java.util.*;\n \n /**\n  * PostgreAttribute\n@@ -421,7 +419,16 @@ public boolean allowCustomValue()\n         public Object[] getPossibleValues(PostgreAttribute column)\n         {\n             Set<PostgreDataType> types = new TreeSet<>(Comparator.comparing(JDBCDataType::getTypeName));\n-            types.addAll(column.getDatabase().getLocalDataTypes());\n+            try {\n+                Collection<PostgreSchema> schemas = column.getDatabase().getSchemas(new VoidProgressMonitor());\n+                for (PostgreSchema schema : schemas) {\n+                    List<PostgreDataType> dataTypes = schema.getDataTypeCache().getCachedObjects();\n+                    types.addAll(dataTypes);\n+                }\n+            } catch (DBException e) {\n+                log.debug(\"Can't get data types from database schemas\", e);\n+                types.addAll(column.getDatabase().getLocalDataTypes());\n+            }\n             return types.toArray(new PostgreDataType[0]);\n         }\n     }"
+  }
+]

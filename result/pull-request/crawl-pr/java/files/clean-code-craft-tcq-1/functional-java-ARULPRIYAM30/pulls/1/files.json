@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "a22bdeb26283434fb68ccc481c15870b45af009b",
+    "filename": ".github/workflows/main-workflow.yml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/blob/c14cf29f7a0ae73da455d0c465acbfed23274c55/.github/workflows/main-workflow.yml",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/raw/c14cf29f7a0ae73da455d0c465acbfed23274c55/.github/workflows/main-workflow.yml",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/contents/.github/workflows/main-workflow.yml?ref=c14cf29f7a0ae73da455d0c465acbfed23274c55",
+    "patch": "@@ -9,14 +9,14 @@ jobs:\n   build:\n \n     runs-on: ubuntu-latest\n-\n+    \n     steps:\n     - uses: actions/checkout@v2\n     - name: Set up JDK 1.8\n       uses: actions/setup-java@v1\n       with:\n         java-version: 1.8\n     - name: Build\n-      run: javac vitals/Main.java\n+      run: javac vitals/BMSDriver.java\n     - name: Verify\n-      run: java -ea -classpath . vitals.Main\n+      run: java -ea -classpath . vitals.BMSDriver"
+  },
+  {
+    "sha": "2f780545b70258d3d1270abd37058a243744c30a",
+    "filename": "vitals/BMSDriver.java",
+    "status": "added",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/blob/c14cf29f7a0ae73da455d0c465acbfed23274c55/vitals/BMSDriver.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/raw/c14cf29f7a0ae73da455d0c465acbfed23274c55/vitals/BMSDriver.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/contents/vitals/BMSDriver.java?ref=c14cf29f7a0ae73da455d0c465acbfed23274c55",
+    "patch": "@@ -0,0 +1,21 @@\n+package vitals;\n+\n+public class BMSDriver {\n+\tstatic boolean batteryIsOk(float temperature, float soc, float chargeRate) {       \n+        BatteryCheck testBattery = new BatteryCheck(temperature, soc, chargeRate);\n+        return testBattery.isBatteryOk();\n+    }\n+    public static void main(String[] args) {\n+        assert(batteryIsOk(25 , 15, 0.9f) == false);\n+        assert(batteryIsOk(25 , 65, 0.9f) == false);\n+        assert(batteryIsOk(50, 65, 0.7f) == false);\n+        assert(batteryIsOk(15, 85, 0.7f) == false);\n+        assert(batteryIsOk(15, 15, 0.7f) == false);\n+        assert(batteryIsOk(15, 25, 0.9f) == false);\n+        assert(batteryIsOk(45, 80, 0.8f) == true);\n+        assert(batteryIsOk(50 , 90, 0.9f) == false);\n+        assert(batteryIsOk(-1 , 40, 0.6f) == false);\n+    }\n+}\n+\n+"
+  },
+  {
+    "sha": "37cdafc032bb59f5227ca7505199b84140864e23",
+    "filename": "vitals/BatteryCheck.java",
+    "status": "added",
+    "additions": 50,
+    "deletions": 0,
+    "changes": 50,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/blob/c14cf29f7a0ae73da455d0c465acbfed23274c55/vitals/BatteryCheck.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/raw/c14cf29f7a0ae73da455d0c465acbfed23274c55/vitals/BatteryCheck.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/contents/vitals/BatteryCheck.java?ref=c14cf29f7a0ae73da455d0c465acbfed23274c55",
+    "patch": "@@ -0,0 +1,50 @@\n+package vitals;\n+\n+public class BatteryCheck {\n+\tpublic static float UPPER_LIMIT_TEMPERATURE = 45;\n+\tpublic static float LOWER_LIMIT_TEMPERATURE = 0;\n+\tpublic static float UPPER_LIMIT_SOC = 80;\n+\tpublic static float LOWER_LIMIT_SOC = 20;\n+\tpublic static float MAX_CHARGE_RATE = 0.8f;\n+\t\n+\tfloat temperature;\n+\tfloat soc;\n+\tfloat chargeRate;\n+\n+\tpublic BatteryCheck(float temperature, float soc, float chargeRate) {\n+\t\tthis.temperature = temperature;\n+\t\tthis.soc = soc;\n+\t\tthis.chargeRate = chargeRate;\n+\t}\n+\tpublic boolean isBatteryOk() {\n+\t\treturn (checkTemperatureOk() && checkSocOk()) && checkChargeRateOk();\n+\t}\n+\tpublic boolean checkTemperatureOk() {\t\t\n+\t\tif(!checkLimitRange(LOWER_LIMIT_TEMPERATURE, UPPER_LIMIT_TEMPERATURE, temperature))\n+\t\t{\n+\t\t\t//Temperature out of range\n+\t\t\treturn false;\n+\t\t}\t\n+\t\treturn true;\n+\t}\n+\tpublic boolean checkSocOk() {\n+\t\tif(!checkLimitRange(LOWER_LIMIT_SOC, UPPER_LIMIT_SOC, soc))\n+\t\t{\t//soc out of range\n+\t\t\treturn false;\n+\t\t}\t\n+\t\treturn true;\n+\t}\n+\tpublic boolean checkChargeRateOk() {\n+\t\tif(checkCharge(MAX_CHARGE_RATE, chargeRate).equals(\"high\"))\n+\t\t{\t//Charge Rate out of range\n+            \t\treturn false;\n+\t\t}\n+\t\treturn true;\n+\t}\n+\tprivate boolean checkLimitRange(float min, float max, float value) {\n+\t\treturn !(value < min || value > max); \n+\t}\n+\tprivate String checkCharge(float max, float value) {\n+\t\treturn (value>max) ? \"high\" : \"low\"; \n+\t}\t\n+}"
+  },
+  {
+    "sha": "7833f94d0a1d6cbaa29822e4add4f5317834c3a8",
+    "filename": "vitals/Main.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 23,
+    "changes": 23,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/blob/b171c71fe80b6bde78700ffc1fa21cf447259833/vitals/Main.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/raw/b171c71fe80b6bde78700ffc1fa21cf447259833/vitals/Main.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-ARULPRIYAM30/contents/vitals/Main.java?ref=b171c71fe80b6bde78700ffc1fa21cf447259833",
+    "patch": "@@ -1,23 +0,0 @@\n-package vitals;\n-\n-public class Main {\n-    static boolean batteryIsOk(float temperature, float soc, float chargeRate) {\n-        if(temperature < 0 || temperature > 45) {\n-            System.out.println(\"Temperature is out of range!\");\n-            return false;\n-        } else if(soc < 20 || soc > 80) {\n-            System.out.println(\"State of Charge is out of range!\");\n-            return false;\n-        } else if(chargeRate > 0.8) {\n-            System.out.println(\"Charge Rate is out of range!\");\n-            return false;\n-        }\n-        return true;\n-    }\n-\n-    public static void main(String[] args) {\n-        assert(batteryIsOk(25, 70, 0.7f) == true);\n-        assert(batteryIsOk(50, 85, 0.0f) == false);\n-        System.out.println(\"Some more tests needed\");\n-    }\n-}"
+  }
+]

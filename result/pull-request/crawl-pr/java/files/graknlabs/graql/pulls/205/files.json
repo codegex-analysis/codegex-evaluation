@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "13d49de3772efe1146de2bcca17d2afb4279d3cc",
+    "filename": "grammar/Graql.g4",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/graknlabs/graql/blob/04acc14b63e3c100f0e5c774216e62dbeeacffe1/grammar/Graql.g4",
+    "raw_url": "https://github.com/graknlabs/graql/raw/04acc14b63e3c100f0e5c774216e62dbeeacffe1/grammar/Graql.g4",
+    "contents_url": "https://api.github.com/repos/graknlabs/graql/contents/grammar/Graql.g4?ref=04acc14b63e3c100f0e5c774216e62dbeeacffe1",
+    "patch": "@@ -26,6 +26,7 @@ eof_pattern           :   pattern          EOF ;\n eof_patterns          :   patterns         EOF ;\n eof_definables        :   definables       EOF ;\n eof_variable          :   pattern_variable EOF ;\n+eof_label             :   label            EOF ;\n eof_schema_rule       :   schema_rule      EOF ;\n \n // GRAQL QUERY LANGUAGE ========================================================"
+  },
+  {
+    "sha": "5a1499f0483bd4aabc5212dbf7e5c4e30c5037c4",
+    "filename": "java/Graql.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/graknlabs/graql/blob/04acc14b63e3c100f0e5c774216e62dbeeacffe1/java/Graql.java",
+    "raw_url": "https://github.com/graknlabs/graql/raw/04acc14b63e3c100f0e5c774216e62dbeeacffe1/java/Graql.java",
+    "contents_url": "https://api.github.com/repos/graknlabs/graql/contents/java/Graql.java?ref=04acc14b63e3c100f0e5c774216e62dbeeacffe1",
+    "patch": "@@ -81,6 +81,10 @@ public static BoundVariable parseVariable(String variable) {\n         return parser.parseVariableEOF(variable);\n     }\n \n+    public static String parseLabel(String label) {\n+        return parser.parseLabelEOF(label);\n+    }\n+\n     public static GraqlMatch.Unfiltered match(Pattern... patterns) {\n         return match(Arrays.asList(patterns));\n     }"
+  },
+  {
+    "sha": "d4167e4b8b4415386b48171d067a368128d525be",
+    "filename": "java/parser/Parser.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/graknlabs/graql/blob/04acc14b63e3c100f0e5c774216e62dbeeacffe1/java/parser/Parser.java",
+    "raw_url": "https://github.com/graknlabs/graql/raw/04acc14b63e3c100f0e5c774216e62dbeeacffe1/java/parser/Parser.java",
+    "contents_url": "https://api.github.com/repos/graknlabs/graql/contents/java/parser/Parser.java?ref=04acc14b63e3c100f0e5c774216e62dbeeacffe1",
+    "patch": "@@ -168,6 +168,10 @@ public BoundVariable parseVariableEOF(String variableString) {\n         return parse(variableString, GraqlParser::eof_variable, this::visitEof_variable);\n     }\n \n+    public String parseLabelEOF(String labelString) {\n+        return parse(labelString, GraqlParser::eof_label, this::visitEof_label);\n+    }\n+\n     public Definable parseSchemaRuleEOF(String ruleString) {\n         return parse(ruleString, GraqlParser::eof_schema_rule, this::visitEof_schema_rule);\n     }\n@@ -217,6 +221,11 @@ public BoundVariable visitEof_variable(GraqlParser.Eof_variableContext ctx) {\n         return visitPattern_variable(ctx.pattern_variable());\n     }\n \n+    @Override\n+    public String visitEof_label(GraqlParser.Eof_labelContext ctx) {\n+        return ctx.label().getText();\n+    }\n+\n     @Override\n     public Rule visitEof_schema_rule(GraqlParser.Eof_schema_ruleContext ctx) {\n         return visitSchema_rule(ctx.schema_rule());"
+  }
+]

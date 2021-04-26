@@ -1,0 +1,99 @@
+[
+  {
+    "sha": "d1157fb897ca896765e9222ddc1a655611e2ab4c",
+    "filename": "src/main/java/sda/ispeak/prework/controllers/TopicController.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 1,
+    "changes": 13,
+    "blob_url": "https://github.com/daniel250592/englishCourseApp/blob/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/controllers/TopicController.java",
+    "raw_url": "https://github.com/daniel250592/englishCourseApp/raw/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/controllers/TopicController.java",
+    "contents_url": "https://api.github.com/repos/daniel250592/englishCourseApp/contents/src/main/java/sda/ispeak/prework/controllers/TopicController.java?ref=df7d2614e52e80fcfc7133aed347e291561db558",
+    "patch": "@@ -2,7 +2,9 @@\n \n import lombok.AllArgsConstructor;\n import org.springframework.web.bind.annotation.*;\n-import sda.ispeak.prework.models.dtos.TopicProfile;\n+import sda.ispeak.prework.models.dtos.topic.NewTopicDto;\n+import sda.ispeak.prework.models.dtos.topic.TopicProfile;\n+import sda.ispeak.prework.models.topic.Topic;\n import sda.ispeak.prework.services.TopicService;\n \n import java.util.List;\n@@ -14,11 +16,20 @@\n \n     private final TopicService service;\n \n+    @PostMapping(\"/add-new-topic\")\n+    public Topic addTopic(@RequestBody NewTopicDto newTopicDto) {\n+        return service.save(newTopicDto);\n+    }\n \n     @GetMapping()\n     public List<TopicProfile> getAllTopics() {\n \n         return service.getAllTopics();\n     }\n \n+    @GetMapping(\"/content/{id}\")\n+    public String getContentFromTopic(@PathVariable long id) {\n+\n+        return service.getContentFromTopic(id);\n+    }\n }"
+  },
+  {
+    "sha": "15d28baebb713e97cd430d0c7a04661b47c0c987",
+    "filename": "src/main/java/sda/ispeak/prework/models/dtos/topic/NewTopicDto.java",
+    "status": "added",
+    "additions": 50,
+    "deletions": 0,
+    "changes": 50,
+    "blob_url": "https://github.com/daniel250592/englishCourseApp/blob/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/models/dtos/topic/NewTopicDto.java",
+    "raw_url": "https://github.com/daniel250592/englishCourseApp/raw/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/models/dtos/topic/NewTopicDto.java",
+    "contents_url": "https://api.github.com/repos/daniel250592/englishCourseApp/contents/src/main/java/sda/ispeak/prework/models/dtos/topic/NewTopicDto.java?ref=df7d2614e52e80fcfc7133aed347e291561db558",
+    "patch": "@@ -0,0 +1,50 @@\n+package sda.ispeak.prework.models.dtos.topic;\n+\n+import lombok.AllArgsConstructor;\n+import lombok.Builder;\n+import lombok.ToString;\n+\n+import javax.validation.constraints.NotBlank;\n+import javax.validation.constraints.NotNull;\n+import javax.validation.constraints.Size;\n+\n+@Builder\n+@ToString\n+@AllArgsConstructor\n+public class NewTopicDto {\n+\n+    @NotNull(message = \"Wpisz id\")\n+    @NotBlank(message = \"Wpisz id\")\n+    private long id;\n+\n+    @NotNull(message = \"Nazwij temat\")\n+    @NotBlank(message = \"Nazwij temat\")\n+    @Size(min = 2, max = 100, message = \"Temat musi zawierać minimalnie 2 znaki, maksymalnie 50 znaków\")\n+    private String name;\n+\n+    private String content;\n+\n+    public long getId() {\n+        return id;\n+    }\n+\n+    public void setId(long id) {\n+        this.id = id;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public void setName(String name) {\n+        this.name = name;\n+    }\n+\n+    public String getContent() {\n+        return content;\n+    }\n+\n+    public void setContent(String content) {\n+        this.content = content;\n+    }\n+}"
+  },
+  {
+    "sha": "e00177a4a31f7df851c713288d38a6e2daf69593",
+    "filename": "src/main/java/sda/ispeak/prework/models/dtos/topic/TopicProfile.java",
+    "status": "renamed",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/daniel250592/englishCourseApp/blob/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/models/dtos/topic/TopicProfile.java",
+    "raw_url": "https://github.com/daniel250592/englishCourseApp/raw/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/models/dtos/topic/TopicProfile.java",
+    "contents_url": "https://api.github.com/repos/daniel250592/englishCourseApp/contents/src/main/java/sda/ispeak/prework/models/dtos/topic/TopicProfile.java?ref=df7d2614e52e80fcfc7133aed347e291561db558",
+    "patch": "@@ -1,4 +1,4 @@\n-package sda.ispeak.prework.models.dtos;\n+package sda.ispeak.prework.models.dtos.topic;\n \n import com.sun.istack.NotNull;\n import lombok.Builder;\n@@ -11,7 +11,6 @@\n \n     private long id;\n \n-    @Size(min = 2, max = 100, message = \"Temat musi zawierać minimalnie 2 znaki, maksymalnie 50 znaków\")\n     private String name;\n \n     public long getId() {",
+    "previous_filename": "src/main/java/sda/ispeak/prework/models/dtos/TopicProfile.java"
+  },
+  {
+    "sha": "aca751361062786fb80c488811b91ac1c864a61c",
+    "filename": "src/main/java/sda/ispeak/prework/models/exceptions/NoSuchTopicExeption.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/daniel250592/englishCourseApp/blob/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/models/exceptions/NoSuchTopicExeption.java",
+    "raw_url": "https://github.com/daniel250592/englishCourseApp/raw/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/models/exceptions/NoSuchTopicExeption.java",
+    "contents_url": "https://api.github.com/repos/daniel250592/englishCourseApp/contents/src/main/java/sda/ispeak/prework/models/exceptions/NoSuchTopicExeption.java?ref=df7d2614e52e80fcfc7133aed347e291561db558",
+    "patch": "@@ -0,0 +1,12 @@\n+package sda.ispeak.prework.models.exceptions;\n+\n+public class NoSuchTopicExeption extends IspeakException {\n+\n+    public NoSuchTopicExeption(String message) {\n+        super(message);\n+    }\n+    @Override\n+    public String getMessage() {\n+        return super.getMessage();\n+    }\n+}"
+  },
+  {
+    "sha": "de82839758584fe9db1758cecf5fc22ea389cd72",
+    "filename": "src/main/java/sda/ispeak/prework/models/mappers/TopicMapper.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 1,
+    "changes": 11,
+    "blob_url": "https://github.com/daniel250592/englishCourseApp/blob/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/models/mappers/TopicMapper.java",
+    "raw_url": "https://github.com/daniel250592/englishCourseApp/raw/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/models/mappers/TopicMapper.java",
+    "contents_url": "https://api.github.com/repos/daniel250592/englishCourseApp/contents/src/main/java/sda/ispeak/prework/models/mappers/TopicMapper.java?ref=df7d2614e52e80fcfc7133aed347e291561db558",
+    "patch": "@@ -1,6 +1,7 @@\n package sda.ispeak.prework.models.mappers;\n \n-import sda.ispeak.prework.models.dtos.TopicProfile;\n+import sda.ispeak.prework.models.dtos.topic.NewTopicDto;\n+import sda.ispeak.prework.models.dtos.topic.TopicProfile;\n import sda.ispeak.prework.models.topic.Topic;\n \n \n@@ -13,5 +14,13 @@ public static TopicProfile map(Topic topic) {\n                 .name(topic.getName())\n                 .build();\n     }\n+    public static Topic map(NewTopicDto newTopicDto) {\n+\n+        return Topic.builder()\n+                .id(newTopicDto.getId())\n+                .name(newTopicDto.getName())\n+                .content(newTopicDto.getContent())\n+                .build();\n+    }\n \n }"
+  },
+  {
+    "sha": "4b265016ac5387f1eb319477b26c1ac14e52f418",
+    "filename": "src/main/java/sda/ispeak/prework/services/TopicService.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 2,
+    "changes": 16,
+    "blob_url": "https://github.com/daniel250592/englishCourseApp/blob/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/services/TopicService.java",
+    "raw_url": "https://github.com/daniel250592/englishCourseApp/raw/df7d2614e52e80fcfc7133aed347e291561db558/src/main/java/sda/ispeak/prework/services/TopicService.java",
+    "contents_url": "https://api.github.com/repos/daniel250592/englishCourseApp/contents/src/main/java/sda/ispeak/prework/services/TopicService.java?ref=df7d2614e52e80fcfc7133aed347e291561db558",
+    "patch": "@@ -1,14 +1,15 @@\n package sda.ispeak.prework.services;\n \n import org.springframework.stereotype.Service;\n-import sda.ispeak.prework.models.dtos.TopicProfile;\n+import sda.ispeak.prework.models.dtos.topic.NewTopicDto;\n+import sda.ispeak.prework.models.dtos.topic.TopicProfile;\n+import sda.ispeak.prework.models.exceptions.NoSuchTopicExeption;\n import sda.ispeak.prework.models.mappers.TopicMapper;\n import sda.ispeak.prework.models.topic.Topic;\n import sda.ispeak.prework.repositories.TopicRepository;\n \n import java.util.Comparator;\n import java.util.List;\n-import java.util.Optional;\n import java.util.stream.Collectors;\n \n @Service\n@@ -26,4 +27,15 @@ public TopicService(TopicRepository topicRepository) {\n                 .sorted(Comparator.comparing(Topic::getId)).map(TopicMapper::map)\n                 .collect(Collectors.toList());\n     }\n+\n+    public String getContentFromTopic(long id) {\n+\n+        return topicRepository.findById(id).orElseThrow(() -> new NoSuchTopicExeption(\"Brak takiego tematu\"))\n+                .getContent();\n+    }\n+\n+    public Topic save(NewTopicDto newTopicDto) {\n+        Topic topic = TopicMapper.map(newTopicDto);\n+        return topicRepository.save(topic);\n+    }\n }"
+  },
+  {
+    "sha": "5f9fe47dcf47b494bd6f20d236498d564c940f89",
+    "filename": "src/test/java/sda/ispeak/prework/services/TopicServiceTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/daniel250592/englishCourseApp/blob/df7d2614e52e80fcfc7133aed347e291561db558/src/test/java/sda/ispeak/prework/services/TopicServiceTest.java",
+    "raw_url": "https://github.com/daniel250592/englishCourseApp/raw/df7d2614e52e80fcfc7133aed347e291561db558/src/test/java/sda/ispeak/prework/services/TopicServiceTest.java",
+    "contents_url": "https://api.github.com/repos/daniel250592/englishCourseApp/contents/src/test/java/sda/ispeak/prework/services/TopicServiceTest.java?ref=df7d2614e52e80fcfc7133aed347e291561db558",
+    "patch": "@@ -5,7 +5,7 @@\n import org.mockito.InjectMocks;\n import org.mockito.Mock;\n import org.mockito.junit.jupiter.MockitoExtension;\n-import sda.ispeak.prework.models.dtos.TopicProfile;\n+import sda.ispeak.prework.models.dtos.topic.TopicProfile;\n import sda.ispeak.prework.models.topic.Topic;\n import sda.ispeak.prework.repositories.TopicRepository;\n "
+  },
+  {
+    "sha": "7abea1522a11ed5f69049846a3d80a9887a0eb7a",
+    "filename": "src/test/resources/application.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/daniel250592/englishCourseApp/blob/df7d2614e52e80fcfc7133aed347e291561db558/src/test/resources/application.properties",
+    "raw_url": "https://github.com/daniel250592/englishCourseApp/raw/df7d2614e52e80fcfc7133aed347e291561db558/src/test/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/daniel250592/englishCourseApp/contents/src/test/resources/application.properties?ref=df7d2614e52e80fcfc7133aed347e291561db558",
+    "patch": "@@ -2,7 +2,7 @@\n spring.datasource.url=jdbc:h2:mem:ispeak\n spring.datasource.username=root\n spring.datasource.password=admin\n-spring.jpa.hibernate.ddl-auto=create\n+spring.jpa.hibernate.ddl-auto=update\n \n spring.banner.location=banner.txt\n "
+  }
+]

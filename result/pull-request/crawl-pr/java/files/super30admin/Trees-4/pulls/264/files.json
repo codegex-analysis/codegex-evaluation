@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "4aa6dfddf80570890e439b4f6ac26e5227277065",
+    "filename": "KthSmallestElementinBST.py",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/super30admin/Trees-4/blob/b5c12e823086937b097c35f6df427f836f1d8b90/KthSmallestElementinBST.py",
+    "raw_url": "https://github.com/super30admin/Trees-4/raw/b5c12e823086937b097c35f6df427f836f1d8b90/KthSmallestElementinBST.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Trees-4/contents/KthSmallestElementinBST.py?ref=b5c12e823086937b097c35f6df427f836f1d8b90",
+    "patch": "@@ -0,0 +1,24 @@\n+﻿#TimeComplexity:MAX(O(Depth+K) or O(N) )\n+#SpaceComplexity: O(Depth)\n+#Did this code successfully run on Leetcode : Yes \n+#Any problem you faced while coding this : No\n+# Definition for a binary tree node.\n+# class TreeNode:\n+#     def __init__(self, val=0, left=None, right=None):\n+#         self.val = val\n+#         self.left = left\n+#         self.right = right\n+class Solution:\n+    def kthSmallest(self, root: TreeNode, k: int) -> int:\n+        stack=[]#Iterative approach going till the leaf doing inorder traversal\n+        while True:\n+            while root:\n+                stack.append(root)#append all left nodes till you reach leaf\n+                root=root.left\n+    \n+            k-=1\n+            root=stack.pop()#taking root element\n+            if k==0:\n+                return root.val\n+            root=root.right #going to right subtree\n+            \n\\ No newline at end of file"
+  },
+  {
+    "sha": "fa5de36ff19e698c5d27590dc107da69582117fb",
+    "filename": "lowestCommonAncestorofBST.py",
+    "status": "added",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/super30admin/Trees-4/blob/b5c12e823086937b097c35f6df427f836f1d8b90/lowestCommonAncestorofBST.py",
+    "raw_url": "https://github.com/super30admin/Trees-4/raw/b5c12e823086937b097c35f6df427f836f1d8b90/lowestCommonAncestorofBST.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Trees-4/contents/lowestCommonAncestorofBST.py?ref=b5c12e823086937b097c35f6df427f836f1d8b90",
+    "patch": "@@ -0,0 +1,23 @@\n+﻿#TimeComplexity:O(Depth) \n+#SpaceComplexity: O(Depth)\n+#Did this code successfully run on Leetcode : Yes \n+#Any problem you faced while coding this : No\n+# Definition for a binary tree node.\n+# class TreeNode:\n+#     def __init__(self, x):\n+#         self.val = x\n+#         self.left = None\n+#         self.right = None\n+\n+class Solution:\n+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':\n+        #print(root.val)\n+        if root.val==p.val or root.val==q.val:#since BST is sorted we check if any of p,q are root then it is answer\n+            return root\n+        elif (root.val>=p.val and root.val<=q.val) or (root.val<=p.val and root.val>=q.val):#If one is smaller and other is greater then root is the parent for both since one will be in left subtree and other will be in right subtree.\n+            return root\n+        elif root.val<p.val and root.val<q.val:#if both are greater than root repeat same procedure for right subtree\n+            return self.lowestCommonAncestor(root.right,p,q)\n+        else:# else repeat for left subtree\n+            return self.lowestCommonAncestor(root.left,p,q)\n+        \n\\ No newline at end of file"
+  },
+  {
+    "sha": "5ce6bdf446f9ca5a52a91522803c6eca370554c0",
+    "filename": "lowestCommonAncestorofBinaryTree.py",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/super30admin/Trees-4/blob/b5c12e823086937b097c35f6df427f836f1d8b90/lowestCommonAncestorofBinaryTree.py",
+    "raw_url": "https://github.com/super30admin/Trees-4/raw/b5c12e823086937b097c35f6df427f836f1d8b90/lowestCommonAncestorofBinaryTree.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Trees-4/contents/lowestCommonAncestorofBinaryTree.py?ref=b5c12e823086937b097c35f6df427f836f1d8b90",
+    "patch": "@@ -0,0 +1,28 @@\n+﻿#TimeComplexity:O(N) \n+#SpaceComplexity: O(Depth)\n+#Did this code successfully run on Leetcode : Yes \n+#Any problem you faced while coding this : No\n+# Definition for a binary tree node.\n+# class TreeNode:\n+#     def __init__(self, x):\n+#         self.val = x\n+#         self.left = None\n+#         self.right = None\n+\n+class Solution:\n+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':\n+        if root==None:\n+            return None\n+        if root==p or root==q:#if root is wither p or q return root\n+            return root\n+        \n+        left=self.lowestCommonAncestor(root.left,p,q)#we will get a value from left if p or q exists else we will get None\n+        right=self.lowestCommonAncestor(root.right,p,q)# similarly for right\n+        \n+        if left!=None and right!=None:#Finally if both are not null it means root is the answer as each of p, q are present to either sides of root\n+            return root\n+        elif left!=None:#Here both are present to the left hence only left is not none and right is None\n+            return left\n+        else: #else they are present to the right side\n+            return right\n+        \n\\ No newline at end of file"
+  }
+]

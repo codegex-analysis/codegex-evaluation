@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "18922e8159d9a355a9d16e7a640098e4d61a81d3",
+    "filename": "app/src/main/java/com/headmostlab/notes/ui/note/NoteFragment.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 14,
+    "changes": 42,
+    "blob_url": "https://github.com/vkharapaev/gb-notes-hw11/blob/3f962f44cb8637e62c84bdb4cc7b0cd9926cc2e1/app/src/main/java/com/headmostlab/notes/ui/note/NoteFragment.java",
+    "raw_url": "https://github.com/vkharapaev/gb-notes-hw11/raw/3f962f44cb8637e62c84bdb4cc7b0cd9926cc2e1/app/src/main/java/com/headmostlab/notes/ui/note/NoteFragment.java",
+    "contents_url": "https://api.github.com/repos/vkharapaev/gb-notes-hw11/contents/app/src/main/java/com/headmostlab/notes/ui/note/NoteFragment.java?ref=3f962f44cb8637e62c84bdb4cc7b0cd9926cc2e1",
+    "patch": "@@ -1,5 +1,6 @@\n package com.headmostlab.notes.ui.note;\n \n+import android.app.AlertDialog;\n import android.content.Intent;\n import android.content.res.Configuration;\n import android.os.Bundle;\n@@ -107,20 +108,7 @@ public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceStat\n             binding.deleteNoteButton.setVisibility(View.GONE);\n         } else {\n             setHasOptionsMenu(true);\n-            binding.deleteNoteButton.setOnClickListener(it -> viewModel.deleteNote().observe(getViewLifecycleOwner(), event ->\n-                    {\n-                        Integer content = event.getContentIfNotHandled();\n-                        if (content != null) {\n-                            Toast.makeText(requireActivity(), getString(content), Toast.LENGTH_SHORT).show();\n-                            deselectNote();\n-                            if (isPortrait) {\n-                                getParentFragmentManager().popBackStack();\n-                            } else {\n-                                getParentFragmentManager().beginTransaction().remove(this).commit();\n-                            }\n-                        }\n-                    }\n-            ));\n+            binding.deleteNoteButton.setOnClickListener(it -> deleteNoteWithConfirmation());\n         }\n \n         binding.saveNoteButton.setOnClickListener(it -> {\n@@ -149,6 +137,32 @@ public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceStat\n         viewModel.getNoteToShare().observe(getViewLifecycleOwner(), this::share);\n     }\n \n+    private void deleteNoteWithConfirmation() {\n+        new AlertDialog.Builder(requireActivity())\n+                .setTitle(R.string.note_delete_warning_message)\n+                .setPositiveButton(R.string.btn_ok, (dialog, which) -> deleteNote())\n+                .setNegativeButton(R.string.btn_cancel, (dialog, which) -> {\n+                })\n+                .create().show();\n+    }\n+\n+    private void deleteNote() {\n+        viewModel.deleteNote().observe(getViewLifecycleOwner(), event ->\n+                {\n+                    Integer content = event.getContentIfNotHandled();\n+                    if (content != null) {\n+                        Toast.makeText(requireActivity(), getString(content), Toast.LENGTH_SHORT).show();\n+                        deselectNote();\n+                        if (isPortrait) {\n+                            getParentFragmentManager().popBackStack();\n+                        } else {\n+                            getParentFragmentManager().beginTransaction().remove(this).commit();\n+                        }\n+                    }\n+                }\n+        );\n+    }\n+\n     public void show(Note note) {\n         if (note != null) {\n             binding.title.setText(note.getTitle());"
+  },
+  {
+    "sha": "a4fc7da8402a341cc0ee97aac0e1ed7c056e765e",
+    "filename": "app/src/main/res/values/strings.xml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/vkharapaev/gb-notes-hw11/blob/3f962f44cb8637e62c84bdb4cc7b0cd9926cc2e1/app/src/main/res/values/strings.xml",
+    "raw_url": "https://github.com/vkharapaev/gb-notes-hw11/raw/3f962f44cb8637e62c84bdb4cc7b0cd9926cc2e1/app/src/main/res/values/strings.xml",
+    "contents_url": "https://api.github.com/repos/vkharapaev/gb-notes-hw11/contents/app/src/main/res/values/strings.xml?ref=3f962f44cb8637e62c84bdb4cc7b0cd9926cc2e1",
+    "patch": "@@ -15,4 +15,7 @@\n     <string name=\"delete\">Delete</string>\n     <string name=\"msg_success\">Success</string>\n     <string name=\"msg_failure\">Failure</string>\n+    <string name=\"note_delete_warning_message\">Do you really want to delete the note?</string>\n+    <string name=\"btn_ok\">OK</string>\n+    <string name=\"btn_cancel\">Cancel</string>\n </resources>\n\\ No newline at end of file"
+  }
+]

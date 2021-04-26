@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "4e1ca3a47b47f06b22e47746f11e84f2691d60ef",
+    "filename": "flink-runtime/src/main/java/org/apache/flink/runtime/state/StateBackendLoader.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 4,
+    "changes": 4,
+    "blob_url": "https://github.com/apache/flink/blob/0fd18d6e17cd5a0e32916cb142734a1801cdd06b/flink-runtime/src/main/java/org/apache/flink/runtime/state/StateBackendLoader.java",
+    "raw_url": "https://github.com/apache/flink/raw/0fd18d6e17cd5a0e32916cb142734a1801cdd06b/flink-runtime/src/main/java/org/apache/flink/runtime/state/StateBackendLoader.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/main/java/org/apache/flink/runtime/state/StateBackendLoader.java?ref=0fd18d6e17cd5a0e32916cb142734a1801cdd06b",
+    "patch": "@@ -386,10 +386,6 @@ public static boolean stateBackendFromApplicationOrConfigOrDefaultUseManagedMemo\n     private static StateBackend loadChangelogStateBackend(\n             StateBackend backend, ClassLoader classLoader) throws DynamicCodeLoadingException {\n \n-        LOG.info(\n-                \"Delegate State Backend is used, and the root State Backend is {}\",\n-                backend.getClass().getSimpleName());\n-\n         // ChangelogStateBackend resides in a separate module, load it using reflection\n         try {\n             Constructor<? extends DelegatingStateBackend> constructor ="
+  },
+  {
+    "sha": "f1192d9f02ab4aecfb8c00fb2ded6cea133974ff",
+    "filename": "flink-state-backends/flink-statebackend-changelog/src/main/java/org/apache/flink/state/changelog/ChangelogStateBackend.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/apache/flink/blob/0fd18d6e17cd5a0e32916cb142734a1801cdd06b/flink-state-backends/flink-statebackend-changelog/src/main/java/org/apache/flink/state/changelog/ChangelogStateBackend.java",
+    "raw_url": "https://github.com/apache/flink/raw/0fd18d6e17cd5a0e32916cb142734a1801cdd06b/flink-state-backends/flink-statebackend-changelog/src/main/java/org/apache/flink/state/changelog/ChangelogStateBackend.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-state-backends/flink-statebackend-changelog/src/main/java/org/apache/flink/state/changelog/ChangelogStateBackend.java?ref=0fd18d6e17cd5a0e32916cb142734a1801cdd06b",
+    "patch": "@@ -38,6 +38,9 @@\n import org.apache.flink.runtime.state.ttl.TtlTimeProvider;\n import org.apache.flink.util.Preconditions;\n \n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+\n import javax.annotation.Nonnull;\n \n import java.util.Collection;\n@@ -50,6 +53,8 @@\n \n     private static final long serialVersionUID = 1000L;\n \n+    private static final Logger LOG = LoggerFactory.getLogger(ChangelogStateBackend.class);\n+\n     private final StateBackend delegatedStateBackend;\n \n     public ChangelogStateBackend(StateBackend stateBackend) {\n@@ -58,6 +63,10 @@ public ChangelogStateBackend(StateBackend stateBackend) {\n         Preconditions.checkArgument(\n                 !(stateBackend instanceof DelegatingStateBackend),\n                 \"Recursive Delegation is not supported.\");\n+\n+        LOG.info(\n+                \"ChangelogStateBackend is used, delegating {}.\",\n+                delegatedStateBackend.getClass().getSimpleName());\n     }\n \n     @Override"
+  }
+]

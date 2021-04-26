@@ -1,0 +1,129 @@
+[
+  {
+    "sha": "1d140170aa87acf55711796d56c83259d3957a50",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql.ui/icons/google_cloud_sql_logo.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql.ui/icons/google_cloud_sql_logo.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql.ui/icons/google_cloud_sql_logo.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql.ui/icons/google_cloud_sql_logo.png?ref=4aad657088db0102f0da397ac7946b572a99edeb"
+  },
+  {
+    "sha": "4769c5015d5116b0597b46cfe9ee45565b512be6",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerConnectionPage.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 10,
+    "changes": 37,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerConnectionPage.java",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerConnectionPage.java",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerConnectionPage.java?ref=4aad657088db0102f0da397ac7946b572a99edeb",
+    "patch": "@@ -59,12 +59,13 @@\n     private final Image LOGO_AZURE;\n     private final Image LOGO_SQLSERVER;\n     private final Image LOGO_SYBASE;\n+    private final Image LOGO_GCLOUD;\n \n     public SQLServerConnectionPage() {\n         LOGO_AZURE = createImage(\"icons/azure_logo.png\");\n         LOGO_SQLSERVER = createImage(\"icons/mssql_logo.png\");\n         LOGO_SYBASE = createImage(\"icons/sybase_logo.png\");\n-\n+        LOGO_GCLOUD = createImage(\"icons/google_cloud_sql_logo.png\");\n     }\n \n     @Override\n@@ -74,13 +75,15 @@ public void dispose()\n         UIUtils.dispose(LOGO_AZURE);\n         UIUtils.dispose(LOGO_SQLSERVER);\n         UIUtils.dispose(LOGO_SYBASE);\n+        UIUtils.dispose(LOGO_GCLOUD);\n     }\n \n     @Override\n     public void createControl(Composite composite)\n     {\n         boolean isSqlServer = isSqlServer();\n         boolean isDriverAzure = isSqlServer && isDriverAzure();\n+        boolean isDriverGoogleCloud = isDriverGoogleCloud();\n \n         Composite settingsGroup = new Composite(composite, SWT.NONE);\n         GridLayout gl = new GridLayout(4, false);\n@@ -92,16 +95,19 @@ public void createControl(Composite composite)\n \n         {\n             Label hostLabel = new Label(settingsGroup, SWT.NONE);\n-            hostLabel.setText(SQLServerUIMessages.dialog_connection_host_label);\n+            hostLabel.setText(\n+                isDriverGoogleCloud\n+                    ? SQLServerUIMessages.dialog_connection_cloud_instance_label\n+                    : SQLServerUIMessages.dialog_connection_host_label);\n             hostLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));\n \n             hostText = new Text(settingsGroup, SWT.BORDER);\n             gd = new GridData(GridData.FILL_HORIZONTAL);\n             gd.grabExcessHorizontalSpace = true;\n             hostText.setLayoutData(gd);\n \n-            if (isDriverAzure) {\n-                // no port number for Azure\n+            if (isDriverAzure || isDriverGoogleCloud) {\n+                // no port number for Azure or Google Cloud\n                 gd.horizontalSpan = 3;\n             } else {\n                 Label portLabel = new Label(settingsGroup, SWT.NONE);\n@@ -219,12 +225,17 @@ public boolean isComplete()\n     public Image getImage() {\n         boolean isSqlServer = isSqlServer();\n         boolean isDriverAzure = isSqlServer && isDriverAzure();\n-\n-        return isSqlServer ?\n-            (isDriverAzure ?\n-                LOGO_AZURE :\n-                LOGO_SQLSERVER) :\n-            LOGO_SYBASE;\n+        boolean isDriverGoogleCloud = isDriverGoogleCloud();\n+\n+        if (isDriverAzure) {\n+            return LOGO_AZURE;\n+        } else if (isDriverGoogleCloud) {\n+            return LOGO_GCLOUD;\n+        } else if (isSqlServer) {\n+            return LOGO_SQLSERVER;\n+        } else {\n+            return LOGO_SYBASE;\n+        }\n     }\n \n     private boolean isDriverAzure() {\n@@ -235,6 +246,10 @@ private boolean isSqlServer() {\n         return SQLServerUtils.isDriverSqlServer(getSite().getDriver());\n     }\n \n+    private boolean isDriverGoogleCloud() {\n+        return SQLServerUtils.isDriverGoogleCloud(getSite().getDriver());\n+    }\n+\n     @Override\n     public void loadSettings()\n     {\n@@ -247,6 +262,8 @@ public void loadSettings()\n         if (hostText != null) {\n             if (!CommonUtils.isEmpty(connectionInfo.getHostName())) {\n                 hostText.setText(connectionInfo.getHostName());\n+            } else if (getSite().getDriver().getDriverParameter(\"defaultHost\") != null) {\n+                hostText.setText(getSite().getDriver().getDriverParameter(\"defaultHost\").toString());\n             } else {\n                 hostText.setText(isDriverAzure ? SQLServerConstants.DEFAULT_HOST_AZURE : SQLServerConstants.DEFAULT_HOST);\n             }"
+  },
+  {
+    "sha": "93ad2b4c6ad79dc9991b6f03c89ec9678335fc94",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerUIMessages.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerUIMessages.java",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerUIMessages.java",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerUIMessages.java?ref=4aad657088db0102f0da397ac7946b572a99edeb",
+    "patch": "@@ -29,6 +29,7 @@\n     public static String dialog_connection_adp_authentication_button;\n     public static String dialog_connection_database_schema_label;\n     public static String dialog_connection_host_label;\n+    public static String dialog_connection_cloud_instance_label;\n     public static String dialog_connection_password_label;\n     public static String dialog_connection_port_label;\n     public static String dialog_connection_user_name_label;"
+  },
+  {
+    "sha": "585ffb46b251a5dfaa1dc4d30aa5445ecafd4458",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerUIMessages.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerUIMessages.properties",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerUIMessages.properties",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql.ui/src/org/jkiss/dbeaver/ext/mssql/ui/SQLServerUIMessages.properties?ref=4aad657088db0102f0da397ac7946b572a99edeb",
+    "patch": "@@ -5,6 +5,7 @@ dialog_connection_windows_authentication_button=Windows Authentication\n dialog_connection_adp_authentication_button=Active Directory Authentication\n dialog_connection_database_schema_label=Database/Schema:\n dialog_connection_host_label=Host:\n+dialog_connection_cloud_instance_label=Cloud instance:\n dialog_connection_password_label=Password:\n dialog_connection_port_label=Port:\n dialog_connection_user_name_label=User name:"
+  },
+  {
+    "sha": "4613d212d1b82deab3c0fef321ad08a0a78e842c",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon.png?ref=4aad657088db0102f0da397ac7946b572a99edeb"
+  },
+  {
+    "sha": "05d4693579e77b0ae227d5440856616e38180cc1",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon@2x.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon@2x.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon@2x.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon@2x.png?ref=4aad657088db0102f0da397ac7946b572a99edeb"
+  },
+  {
+    "sha": "faef77ec555f2a9cadadb3f36ef408b28195c04d",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon_big.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon_big.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon_big.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon_big.png?ref=4aad657088db0102f0da397ac7946b572a99edeb"
+  },
+  {
+    "sha": "6ca216e24e764f6ae148f89f52fdd2270e58d5b4",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon_big@2x.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon_big@2x.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon_big@2x.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql/icons/google_cloud_sql_icon_big@2x.png?ref=4aad657088db0102f0da397ac7946b572a99edeb"
+  },
+  {
+    "sha": "63ade92899ed8e17dba7c30ae903b5718ac86adf",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql/plugin.xml",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/plugin.xml",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/plugin.xml",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql/plugin.xml?ref=4aad657088db0102f0da397ac7946b572a99edeb",
+    "patch": "@@ -190,6 +190,29 @@\n                     <file type=\"jar\" path=\"maven:/com.microsoft.azure:adal4j:RELEASE[1.6.0]\" optional=\"true\" />\n                 </driver>\n \n+                <driver\n+                        id=\"gcloud-mssql\"\n+                        label=\"Google Cloud SQL - SQL Server\"\n+                        icon=\"icons/google_cloud_sql_icon.png\"\n+                        iconBig=\"icons/google_cloud_sql_icon_big.png\"\n+                        category=\"Google Cloud SQL\"\n+                        class=\"com.microsoft.sqlserver.jdbc.SQLServerDriver\"\n+                        sampleURL=\"jdbc:sqlserver://localhost;socketFactoryClass=com.google.cloud.sql.sqlserver.SocketFactory;socketFactoryConstructorArg={host}[;databaseName={database}]\"\n+                        useURL=\"true\"\n+                        defaultPort=\"1433\"\n+                        defaultDatabase=\"master\"\n+                        webURL=\"https://github.com/Microsoft/mssql-jdbc\"\n+                        propertiesURL=\"https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/blob/main/docs/jdbc-sqlserver.md\"\n+                        promoted=\"1\"\n+                        categories=\"sql\">\n+\n+                    <file type=\"jar\" path=\"maven:/com.google.cloud.sql:cloud-sql-connector-jdbc-sqlserver:RELEASE\"/>\n+                    <file type=\"jar\" path=\"drivers/mssql/new\" bundle=\"drivers.mssql.new\"/>\n+                    <file type=\"lib\" os=\"win32\" arch=\"x86_64\" path=\"drivers/mssql/new/auth/x64\" optional=\"true\" bundle=\"drivers.mssql.new\"/>\n+                    <file type=\"license\" path=\"drivers/mssql/new/LICENSE.txt\" bundle=\"drivers.mssql.new\"/>\n+                    <parameter name=\"defaultHost\" value=\"project:region:instance\"/>\n+                </driver>\n+\n                 <!-- jTDS driver - deprecated -->\n                 <driver\n                         id=\"jtds\""
+  },
+  {
+    "sha": "8eb9074254cf37e800a70691d07b00940f78a4bd",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql/src/org/jkiss/dbeaver/ext/mssql/SQLServerDataSourceProvider.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/src/org/jkiss/dbeaver/ext/mssql/SQLServerDataSourceProvider.java",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/src/org/jkiss/dbeaver/ext/mssql/SQLServerDataSourceProvider.java",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql/src/org/jkiss/dbeaver/ext/mssql/SQLServerDataSourceProvider.java?ref=4aad657088db0102f0da397ac7946b572a99edeb",
+    "patch": "@@ -25,6 +25,7 @@\n import org.jkiss.dbeaver.model.connection.DBPConnectionConfiguration;\n import org.jkiss.dbeaver.model.connection.DBPDriver;\n import org.jkiss.dbeaver.model.impl.jdbc.JDBCDataSourceProvider;\n+import org.jkiss.dbeaver.model.impl.jdbc.JDBCURL;\n import org.jkiss.dbeaver.model.runtime.DBRProgressMonitor;\n import org.jkiss.utils.CommonUtils;\n \n@@ -54,6 +55,10 @@ public long getFeatures() {\n \n     @Override\n     public String getConnectionURL(DBPDriver driver, DBPConnectionConfiguration connectionInfo) {\n+        if (driver.isUseURL()) {\n+            return JDBCURL.generateUrlByTemplate(driver, connectionInfo);\n+        }\n+\n         StringBuilder url = new StringBuilder();\n         boolean isJtds = SQLServerUtils.isDriverJtds(driver);\n         boolean isSqlServer = SQLServerUtils.isDriverSqlServer(driver);"
+  },
+  {
+    "sha": "c35bde2d92520b41dc293e8bf86369d1e08ddd0b",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mssql/src/org/jkiss/dbeaver/ext/mssql/SQLServerUtils.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/src/org/jkiss/dbeaver/ext/mssql/SQLServerUtils.java",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/4aad657088db0102f0da397ac7946b572a99edeb/plugins/org.jkiss.dbeaver.ext.mssql/src/org/jkiss/dbeaver/ext/mssql/SQLServerUtils.java",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mssql/src/org/jkiss/dbeaver/ext/mssql/SQLServerUtils.java?ref=4aad657088db0102f0da397ac7946b572a99edeb",
+    "patch": "@@ -63,6 +63,10 @@ public static boolean isDriverAzure(DBPDriver driver) {\n         return driver.getId().contains(\"azure\");\n     }\n \n+    public static boolean isDriverGoogleCloud(DBPDriver driver) {\n+        return driver.getId().contains(\"gcloud\");\n+    }\n+\n     public static boolean isDriverJtds(DBPDriver driver) {\n         return driver.getSampleURL().startsWith(\"jdbc:jtds\");\n     }"
+  }
+]

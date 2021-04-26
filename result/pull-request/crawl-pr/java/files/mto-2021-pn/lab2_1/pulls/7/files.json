@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "92e6802929a6bd07616f6b66d36a50237f4cdc6b",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/6d91d058aec1add052bd79119f50a76a65dba158/.gitignore",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/6d91d058aec1add052bd79119f50a76a65dba158/.gitignore",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/.gitignore?ref=6d91d058aec1add052bd79119f50a76a65dba158",
+    "patch": "@@ -2,3 +2,5 @@\n /.settings/\n /.classpath\n /.project\n+*.iml\n+/.idea"
+  },
+  {
+    "sha": "f70ef393d031e7710d126dff69c6ad958fb6a68a",
+    "filename": "src/main/java/edu/iis/mto/bsearch/BinarySearch.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/6d91d058aec1add052bd79119f50a76a65dba158/src/main/java/edu/iis/mto/bsearch/BinarySearch.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/6d91d058aec1add052bd79119f50a76a65dba158/src/main/java/edu/iis/mto/bsearch/BinarySearch.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/main/java/edu/iis/mto/bsearch/BinarySearch.java?ref=6d91d058aec1add052bd79119f50a76a65dba158",
+    "patch": "@@ -21,16 +21,19 @@ private BinarySearch() {}\n      * @return obiekt rezultatu o polach: - found (true jezeli znaleziony) - position (jezeli znaleziony - pozycja w\n      *         sekwencji, jezeli nie znaleziony -1)\n      */\n-    public static SearchResult search(int key, int[] seq) {\n+    public static SearchResult search(int key, int[] seq) throws IllegalArgumentException {\n         int start = 0;\n         int end = seq.length - 1;\n+        if (end == -1) {\n+            throw new IllegalArgumentException();\n+        }\n         int center;\n         SearchResult result = new SearchResult();\n \n         while (start <= end) {\n             center = (start + end) / 2;\n             if (seq[center] == key) {\n-                result.setPosition(center + 1);\n+                result.setPosition(center);\n                 break;\n             } else {\n                 if (seq[center] < key) {"
+  },
+  {
+    "sha": "34b4b6b4ab1b1774069a9f4ece11a8cd7bd10813",
+    "filename": "src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java",
+    "status": "modified",
+    "additions": 82,
+    "deletions": 7,
+    "changes": 89,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/6d91d058aec1add052bd79119f50a76a65dba158/src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/6d91d058aec1add052bd79119f50a76a65dba158/src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java?ref=6d91d058aec1add052bd79119f50a76a65dba158",
+    "patch": "@@ -1,19 +1,94 @@\n package edu.iis.mto.bsearch;\n \n-import static org.junit.jupiter.api.Assertions.*;\n-\n-import org.junit.jupiter.api.BeforeEach;\n import org.junit.jupiter.api.Test;\n \n+import static org.junit.jupiter.api.Assertions.*;\n+\n \n class BinarySearchTest {\n \n-    @BeforeEach\n-    void setUp() throws Exception {}\n+    int NOT_FOUND = -1;\n+    int FIRST = 0;\n \n     @Test\n-    void test() {\n-        fail(\"Not yet implemented\");\n+    public void sequenceLengthEqualsOneAndElementInSequence() {\n+        int[] seq = {5};\n+        int key = 5;\n+\n+        SearchResult result = BinarySearch.search(key, seq);\n+        assertTrue(result.isFound());\n+        assertEquals(key, seq[result.getPosition()]);\n+    }\n+\n+    @Test\n+    public void sequenceLengthEqualsOneAndElementNotInSequence() {\n+        int[] seq = {5};\n+        int key = 1;\n+\n+        SearchResult result = BinarySearch.search(key, seq);\n+        assertFalse(result.isFound());\n+        assertEquals(NOT_FOUND, result.getPosition());\n+    }\n+\n+    @Test\n+    public void sequenceLengthMoreThanOneAndElementFirstInSequence() {\n+        int[] seq = {1, 2, 3};\n+        int key = seq[0];\n+\n+        SearchResult result = BinarySearch.search(key, seq);\n+        assertTrue(result.isFound());\n+        assertEquals(FIRST, result.getPosition());\n+    }\n+\n+    @Test\n+    public void sequenceLengthMoreThanOneAndElementLastInSequence() {\n+        int[] seq = {1, 2, 3};\n+        int LAST = seq.length - 1;\n+        int key = seq[LAST];\n+\n+        SearchResult result = BinarySearch.search(key, seq);\n+        assertTrue(result.isFound());\n+        assertEquals(LAST, result.getPosition());\n+    }\n+\n+    @Test\n+    public void sequenceLengthMoreThanOneAndOddAndElementCenterOfSequence() {\n+        int[] seq = {1, 2, 3};\n+        int CENTER = seq.length / 2;\n+        int key = seq[CENTER];\n+\n+        SearchResult result = BinarySearch.search(key, seq);\n+        assertTrue(result.isFound());\n+        assertEquals(CENTER, result.getPosition());\n+    }\n+\n+    @Test\n+    public void sequenceLengthMoreThanOneAndEvenAndElementCenterOfSequence() {\n+        int[] seq = {1, 2};\n+        int CENTER = seq.length / 2;\n+        int key = seq[CENTER];\n+\n+        SearchResult result = BinarySearch.search(key, seq);\n+        assertTrue(result.isFound());\n+        assertEquals(CENTER, result.getPosition());\n+    }\n+\n+    @Test\n+    public void sequenceLengthMoreThanOneAndElementNotInSequence() {\n+        int[] seq = {1, 2, 3};\n+        int key = 4;\n+\n+        SearchResult result = BinarySearch.search(key, seq);\n+        assertFalse(result.isFound());\n+        assertEquals(NOT_FOUND, result.getPosition());\n+    }\n+\n+    @Test\n+    public void IllegalArgumentExceptionThrown() {\n+        int[] seq = {};\n+        int key = 2;\n+\n+        assertThrows(IllegalArgumentException.class, () -> BinarySearch.search(key, seq));\n     }\n \n }"
+  }
+]

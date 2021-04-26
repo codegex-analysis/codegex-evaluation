@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "72e9459018decaee6e7876c27c3b06b23105ce45",
+    "filename": "diag.cpp",
+    "status": "added",
+    "additions": 57,
+    "deletions": 0,
+    "changes": 57,
+    "blob_url": "https://github.com/super30admin/Array-1/blob/910fef44aab5737325ea7e2ecb4ecfbd87fe55a4/diag.cpp",
+    "raw_url": "https://github.com/super30admin/Array-1/raw/910fef44aab5737325ea7e2ecb4ecfbd87fe55a4/diag.cpp",
+    "contents_url": "https://api.github.com/repos/super30admin/Array-1/contents/diag.cpp?ref=910fef44aab5737325ea7e2ecb4ecfbd87fe55a4",
+    "patch": "@@ -0,0 +1,57 @@\n+//TC: O(m*n) where m is number of rows and n is number of columns\n+//SC: O(1) \n+\n+class Solution {\n+public:\n+    vector<int> findDiagonalOrder(vector<vector<int>>& matrix) {\n+        \n+        vector<int> result;\n+            \n+        if(matrix.size() == 0) return result;\n+        int dir = 1; //1=up, -1=down\n+        int r = 0; \n+        int c = 0;\n+        int m = matrix.size(); //num_rows\n+        int n = matrix[0].size(); //num_cols\n+                \n+        while(result.size()<m*n){\n+            result.push_back(matrix[r][c]);\n+            if(dir == 1){\n+                //check if column goes out of bounds\n+                //if column is last, then increment row, change direction\n+                if(c == n-1){\n+                    r = r+1;\n+                    dir = -1;\n+                }\n+                else if(r==0){\n+                    c++;\n+                    dir = -1;\n+                }\n+                else {\n+                     r--;\n+                     c++;\n+                }\n+            }\n+            \n+            else {\n+                //if row is last, increment column, change direction\n+                if(r == m-1){\n+                    c = c+1;\n+                    dir = 1;\n+                }\n+                else if(c==0){\n+                    r++;\n+                    dir = 1;\n+                }\n+                else {\n+                     c--;\n+                     r++;\n+                }                \n+            }       \n+        }\n+    \n+    return result;\n+        \n+        \n+    }\n+};\n\\ No newline at end of file"
+  },
+  {
+    "sha": "0ffd659bcbd688969b869c96f557895ac87b9a08",
+    "filename": "product.cpp",
+    "status": "added",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/super30admin/Array-1/blob/910fef44aab5737325ea7e2ecb4ecfbd87fe55a4/product.cpp",
+    "raw_url": "https://github.com/super30admin/Array-1/raw/910fef44aab5737325ea7e2ecb4ecfbd87fe55a4/product.cpp",
+    "contents_url": "https://api.github.com/repos/super30admin/Array-1/contents/product.cpp?ref=910fef44aab5737325ea7e2ecb4ecfbd87fe55a4",
+    "patch": "@@ -0,0 +1,26 @@\n+//TC: O(n) where n is number of elements\n+//SC: O(1) where \n+\n+class Solution {\n+public:\n+    vector<int> productExceptSelf(vector<int>& nums) {\n+        \n+        vector<int> answer(nums.size());\n+        answer[0] = 1;\n+        \n+        //store all elements to the left side of particular index\n+        for(int i=1; i<nums.size(); i++){\n+            answer[i] = answer[i-1]*nums[i-1];\n+        }\n+        \n+        int r = 1;\n+        //r contains product of all elements to the right of string\n+        for(int j = nums.size()-1; j>=0; j--){\n+            answer[j] = answer[j]*r;\n+            r = r*nums[j];\n+        }\n+        \n+        return answer;\n+        \n+    }\n+};\n\\ No newline at end of file"
+  },
+  {
+    "sha": "b517667831cc82cb08b67f4f8034c0a171b20d9a",
+    "filename": "spiral.cpp",
+    "status": "added",
+    "additions": 55,
+    "deletions": 0,
+    "changes": 55,
+    "blob_url": "https://github.com/super30admin/Array-1/blob/910fef44aab5737325ea7e2ecb4ecfbd87fe55a4/spiral.cpp",
+    "raw_url": "https://github.com/super30admin/Array-1/raw/910fef44aab5737325ea7e2ecb4ecfbd87fe55a4/spiral.cpp",
+    "contents_url": "https://api.github.com/repos/super30admin/Array-1/contents/spiral.cpp?ref=910fef44aab5737325ea7e2ecb4ecfbd87fe55a4",
+    "patch": "@@ -0,0 +1,55 @@\n+//TC: O(n*m) where n is number of rows, m is the number of columns\n+//SC: O(1)\n+\n+class Solution {\n+public:\n+    vector<int> spiralOrder(vector<vector<int>>& matrix) {\n+       \n+        vector<int> result;\n+        \n+        if(matrix.size() == 0)\n+            return result;\n+        \n+        int top = 0;\n+        int left = 0;\n+        int right = matrix[0].size()-1;\n+        int bottom = matrix.size()-1;\n+        \n+        int length = matrix[0].size()*matrix.size();\n+        int n = 0;\n+\n+        //checking bounds of the matrix\n+        while(top <= bottom && left <= right){\n+            //left->right\n+            for(int i=left; i<=right; i++){\n+                result.push_back(matrix[top][i]);\n+            }\n+            top++;\n+            \n+            //top->bottom\n+            for(int j = top; j<=bottom; j++){\n+                result.push_back(matrix[j][right]);\n+            }\n+            right--;\n+            \n+            //right->left\n+            if(top <= bottom && left <= right){\n+                for(int i=right; i>=left; i--){\n+                    result.push_back(matrix[bottom][i]);\n+                }\n+            }\n+            bottom--;\n+\n+            \n+            //bottom->top\n+            if(top <= bottom && left <= right){\n+                for(int j=bottom; j>=top; j--){\n+                    result.push_back(matrix[j][left]);\n+                }\n+            }\n+            left++;\n+        }\n+        \n+        return result;\n+    }\n+};\n\\ No newline at end of file"
+  }
+]

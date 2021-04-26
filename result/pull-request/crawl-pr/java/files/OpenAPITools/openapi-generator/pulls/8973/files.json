@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "d5d8a907a310861fe61e0a400fe10ab824daac03",
+    "filename": "modules/openapi-generator/src/main/resources/bash/Dockerfile.mustache",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 6,
+    "changes": 18,
+    "blob_url": "https://github.com/OpenAPITools/openapi-generator/blob/54299d8276a46f629b20a2c3b479e56e73dd6f12/modules/openapi-generator/src/main/resources/bash/Dockerfile.mustache",
+    "raw_url": "https://github.com/OpenAPITools/openapi-generator/raw/54299d8276a46f629b20a2c3b479e56e73dd6f12/modules/openapi-generator/src/main/resources/bash/Dockerfile.mustache",
+    "contents_url": "https://api.github.com/repos/OpenAPITools/openapi-generator/contents/modules/openapi-generator/src/main/resources/bash/Dockerfile.mustache?ref=54299d8276a46f629b20a2c3b479e56e73dd6f12",
+    "patch": "@@ -1,7 +1,6 @@\n-FROM ubuntu:16.10\n+FROM alpine:3.12.0\n \n-RUN apt-get update -y && apt-get full-upgrade -y\n-RUN apt-get install -y bash-completion zsh curl cowsay git vim bsdmainutils\n+RUN apk add --update --no-cache curl ca-certificates bash bash-completion zsh curl git vim ncurses util-linux\n \n ADD {{scriptName}} /usr/bin/{{scriptName}}\n ADD _{{scriptName}} /usr/local/share/zsh/site-functions/_{{scriptName}}\n@@ -30,7 +29,7 @@ RUN echo 'export PROMPT=\"[{{appName}}] \\$ \"' >> ~/.zshrc\n #\n # Setup a welcome message with basic instruction\n #\n-RUN echo 'cat << EOF\\n\\\n+RUN echo -e 'echo \"\\\n \\n\\\n This Docker provides preconfigured environment for running the command\\n\\\n line REST client for $(tput setaf 6){{appName}}$(tput sgr0).\\n\\\n@@ -63,7 +62,14 @@ $ {{scriptName}} <operationId> -h\\n\\\n By default you are logged into Zsh with full autocompletion for your REST API,\\n\\\n but you can switch to Bash, where basic autocompletion is also supported.\\n\\\n \\n\\\n-EOF\\n\\\n+\"\\\n ' | tee -a ~/.bashrc ~/.zshrc\n \n-ENTRYPOINT [\"zsh\"]\n+#\n+# Poormans chsh & cleanup to make image as compact as possible\n+#\n+\n+RUN sed -i 's/root:x:0:0:root:\\/root:\\/bin\\/ash/root:x:0:0:root:\\/root:\\/bin\\/zsh/' /etc/passwd\n+RUN apk del git vim && rm -f /var/cache/apk/*\n+\n+ENTRYPOINT [\"/bin/zsh\"]"
+  }
+]

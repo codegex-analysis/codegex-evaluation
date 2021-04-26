@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "f9b70513443f7a9d4e368530da61e6aac3a3c9c5",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/mojohaus/properties-maven-plugin/blob/0c7b68fc3bebbde647a881aa0c9a298ff1973433/pom.xml",
+    "raw_url": "https://github.com/mojohaus/properties-maven-plugin/raw/0c7b68fc3bebbde647a881aa0c9a298ff1973433/pom.xml",
+    "contents_url": "https://api.github.com/repos/mojohaus/properties-maven-plugin/contents/pom.xml?ref=0c7b68fc3bebbde647a881aa0c9a298ff1973433",
+    "patch": "@@ -164,4 +164,43 @@\n       </plugin>\n     </plugins>\n   </build>\n+  <profiles>\n+    <profile>\n+      <id>run-its</id>\n+      <build>\n+        <plugins>\n+          <plugin>\n+            <artifactId>maven-invoker-plugin</artifactId>\n+            <version>3.2.2</version>\n+            <executions>\n+              <execution>\n+                <phase>integration-test</phase>\n+                <goals>\n+                  <goal>install</goal>\n+                  <goal>run</goal>\n+                </goals>\n+                <configuration>\n+                  <projectsDirectory>src/it</projectsDirectory>\n+                  <addTestClassPath>true</addTestClassPath>\n+                  <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>\n+                  <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>\n+                  <invokerPropertiesFile>invoke.properties</invokerPropertiesFile>\n+                  <preBuildHookScript>prepare</preBuildHookScript>\n+                  <postBuildHookScript>verify</postBuildHookScript>\n+                  <debug>true</debug>\n+                  <environmentVariables>\n+                    <testing.versionUnderTest>${project.version}</testing.versionUnderTest>\n+                  </environmentVariables>\n+                  <scriptVariables>\n+                    <resultsBase>${project.build.directory}/itresults</resultsBase>\n+                  </scriptVariables>\n+                  <settingsFile>src/it/settings.xml</settingsFile>\n+                </configuration>\n+              </execution>\n+            </executions>\n+          </plugin>\n+        </plugins>\n+      </build>\n+    </profile>\n+  </profiles>\n </project>"
+  },
+  {
+    "sha": "47c10f8697a3d394d2172044b84aeed080c0fe12",
+    "filename": "src/it/WriteActiveProfilePropertiesToOutputFile/invoke.properties",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/mojohaus/properties-maven-plugin/blob/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/WriteActiveProfilePropertiesToOutputFile/invoke.properties",
+    "raw_url": "https://github.com/mojohaus/properties-maven-plugin/raw/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/WriteActiveProfilePropertiesToOutputFile/invoke.properties",
+    "contents_url": "https://api.github.com/repos/mojohaus/properties-maven-plugin/contents/src/it/WriteActiveProfilePropertiesToOutputFile/invoke.properties?ref=0c7b68fc3bebbde647a881aa0c9a298ff1973433",
+    "patch": "@@ -0,0 +1,3 @@\n+invoker.debug = true\n+invoker.goals = generate-resources\n+invoker.buildResult = success"
+  },
+  {
+    "sha": "f878e00db413be4307edc4f6fff67e73f478e982",
+    "filename": "src/it/WriteActiveProfilePropertiesToOutputFile/pom.xml",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/mojohaus/properties-maven-plugin/blob/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/WriteActiveProfilePropertiesToOutputFile/pom.xml",
+    "raw_url": "https://github.com/mojohaus/properties-maven-plugin/raw/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/WriteActiveProfilePropertiesToOutputFile/pom.xml",
+    "contents_url": "https://api.github.com/repos/mojohaus/properties-maven-plugin/contents/src/it/WriteActiveProfilePropertiesToOutputFile/pom.xml?ref=0c7b68fc3bebbde647a881aa0c9a298ff1973433",
+    "patch": "@@ -0,0 +1,37 @@\n+<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n+  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n+  <modelVersion>4.0.0</modelVersion>\n+  <parent>\n+    <groupId>@project.groupId@</groupId>\n+    <artifactId>it-test-parent</artifactId>\n+    <version>@project.version@</version>\n+    <relativePath>../it-test-parent/pom.xml</relativePath>\n+  </parent>\n+\t<!-- Build description -->\n+  <artifactId>WriteActiveProfilePropertiesToOutputFile</artifactId>\n+  <packaging>pom</packaging>\n+  <name>${project.artifactId}</name>\n+\n+\t<!-- Build plugins and extensions -->\n+  <build>\n+    <plugins>\n+      <plugin>\n+        <groupId>@project.groupId@</groupId>\n+        <artifactId>properties-maven-plugin</artifactId>\n+        <version>@project.version@</version>\n+        <executions>\n+          <execution>\n+            <phase>generate-resources</phase>\n+            <goals>\n+              <goal>write-active-profile-properties</goal>\n+            </goals>\n+            <configuration>\n+              <outputFile>${project.build.directory}/itresults/WriteActiveProfilePropertiesToOutputFile</outputFile>\n+            </configuration>\n+          </execution>\n+        </executions>\n+      </plugin>\n+    </plugins>\n+  </build>\n+\n+</project>"
+  },
+  {
+    "sha": "2e69eb88c98d4a0f0a83f6186e39797d0d0503bb",
+    "filename": "src/it/WriteActiveProfilePropertiesToOutputFile/prepare.groovy",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/mojohaus/properties-maven-plugin/blob/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/WriteActiveProfilePropertiesToOutputFile/prepare.groovy",
+    "raw_url": "https://github.com/mojohaus/properties-maven-plugin/raw/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/WriteActiveProfilePropertiesToOutputFile/prepare.groovy",
+    "contents_url": "https://api.github.com/repos/mojohaus/properties-maven-plugin/contents/src/it/WriteActiveProfilePropertiesToOutputFile/prepare.groovy?ref=0c7b68fc3bebbde647a881aa0c9a298ff1973433",
+    "patch": "@@ -0,0 +1,14 @@\n+import junit.framework.Assert;\n+\n+File target = new File(basedir, \"target/itresults\");\n+if (!target.exists()) {\n+  target.mkdirs();\n+  Assert.assertTrue(\"Folder \" + target.absolutePath + \" must exist\", target.exists());\n+}\n+\n+File f = new File(target, \"WriteActiveProfilePropertiesToOutputFile\");\n+if (f.exists()) {\n+  f.deleteDir();\n+}\n+\n+Assert.assertFalse(\"File \" + f.absolutePath + \" must exist\", f.exists());"
+  },
+  {
+    "sha": "c7de72317d43854b3043e9c8f4e925c16c1c8451",
+    "filename": "src/it/WriteActiveProfilePropertiesToOutputFile/verify.groovy",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/mojohaus/properties-maven-plugin/blob/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/WriteActiveProfilePropertiesToOutputFile/verify.groovy",
+    "raw_url": "https://github.com/mojohaus/properties-maven-plugin/raw/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/WriteActiveProfilePropertiesToOutputFile/verify.groovy",
+    "contents_url": "https://api.github.com/repos/mojohaus/properties-maven-plugin/contents/src/it/WriteActiveProfilePropertiesToOutputFile/verify.groovy?ref=0c7b68fc3bebbde647a881aa0c9a298ff1973433",
+    "patch": "@@ -0,0 +1,10 @@\n+import junit.framework.Assert;\n+\n+File target = new File(basedir, \"target/itresults\");\n+\n+File f = new File(target, \"WriteActiveProfilePropertiesToOutputFile\");\n+def out = f.text\n+Assert.assertTrue(\"File \" + f.absolutePath + \" exists\", f.exists());\n+Assert.assertNotSame(\"File is empty\", 0, f.length());\n+Assert.assertTrue(\"Bob is a dog\", out.contains(\"bob=dog\"))\n+Assert.assertFalse(\"Bob is not a cat\", out.contains(\"bob=cat\"))\n\\ No newline at end of file"
+  },
+  {
+    "sha": "56f223c4fb25828194e00af746ebfde1c23718ec",
+    "filename": "src/it/it-test-parent/invoke.properties",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/mojohaus/properties-maven-plugin/blob/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/it-test-parent/invoke.properties",
+    "raw_url": "https://github.com/mojohaus/properties-maven-plugin/raw/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/it-test-parent/invoke.properties",
+    "contents_url": "https://api.github.com/repos/mojohaus/properties-maven-plugin/contents/src/it/it-test-parent/invoke.properties?ref=0c7b68fc3bebbde647a881aa0c9a298ff1973433",
+    "patch": "@@ -0,0 +1 @@\n+invoker.skip = true"
+  },
+  {
+    "sha": "9534f2705fffe789ea4146306e333d8403a151eb",
+    "filename": "src/it/it-test-parent/pom.xml",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/mojohaus/properties-maven-plugin/blob/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/it-test-parent/pom.xml",
+    "raw_url": "https://github.com/mojohaus/properties-maven-plugin/raw/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/it-test-parent/pom.xml",
+    "contents_url": "https://api.github.com/repos/mojohaus/properties-maven-plugin/contents/src/it/it-test-parent/pom.xml?ref=0c7b68fc3bebbde647a881aa0c9a298ff1973433",
+    "patch": "@@ -0,0 +1,24 @@\n+<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n+  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n+  <modelVersion>4.0.0</modelVersion>\n+\n+  <groupId>@project.groupId@</groupId>\n+  <artifactId>it-test-parent</artifactId>\n+  <version>@project.version@</version>\n+  <packaging>pom</packaging>\n+  <name>${project.artifactId}</name>\n+  <build>\n+    <pluginManagement>\n+      <plugins>\n+        <plugin>\n+          <groupId>@project.groupId@</groupId>\n+          <artifactId>@project.artifactId@</artifactId>\n+          <version>@project.version@</version>\n+          <configuration>\n+            <url>http://www.lolcats.com/images/u/08/23/lolcatsdotcomcm90ebvhwphtzqvf.jpg</url>\n+          </configuration>\n+        </plugin>\n+      </plugins>\n+    </pluginManagement>\n+  </build>\n+</project>"
+  },
+  {
+    "sha": "773eb74d1e0b50c93e9501c597cd15e216fe2255",
+    "filename": "src/it/settings.xml",
+    "status": "added",
+    "additions": 66,
+    "deletions": 0,
+    "changes": 66,
+    "blob_url": "https://github.com/mojohaus/properties-maven-plugin/blob/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/settings.xml",
+    "raw_url": "https://github.com/mojohaus/properties-maven-plugin/raw/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/it/settings.xml",
+    "contents_url": "https://api.github.com/repos/mojohaus/properties-maven-plugin/contents/src/it/settings.xml?ref=0c7b68fc3bebbde647a881aa0c9a298ff1973433",
+    "patch": "@@ -0,0 +1,66 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+\n+<!--\n+Licensed to the Apache Software Foundation (ASF) under one\n+or more contributor license agreements.  See the NOTICE file\n+distributed with this work for additional information\n+regarding copyright ownership.  The ASF licenses this file\n+to you under the Apache License, Version 2.0 (the\n+\"License\"); you may not use this file except in compliance\n+with the License.  You may obtain a copy of the License at\n+\n+  http://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing,\n+software distributed under the License is distributed on an\n+\"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n+KIND, either express or implied.  See the License for the\n+specific language governing permissions and limitations\n+under the License.\n+-->\n+<settings\n+  xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd\"\n+  xmlns=\"http://maven.apache.org/SETTINGS/1.1.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n+\n+  <servers>\n+    <server>\n+      <id>y</id>\n+      <username>X</username>\n+    </server>\n+  </servers>\n+  <profiles>\n+    <profile>\n+      <id>it-repo</id>\n+      <properties>\n+        <bob>dog</bob>\n+      </properties>\n+      <activation>\n+        <activeByDefault>true</activeByDefault>\n+      </activation>\n+      <repositories>\n+        <repository>\n+          <id>local.central</id>\n+          <url>@localRepositoryUrl@</url>\n+          <releases>\n+            <enabled>true</enabled>\n+          </releases>\n+          <snapshots>\n+            <enabled>true</enabled>\n+          </snapshots>\n+        </repository>\n+      </repositories>\n+      <pluginRepositories>\n+        <pluginRepository>\n+          <id>local.central</id>\n+          <url>@localRepositoryUrl@</url>\n+          <releases>\n+            <enabled>true</enabled>\n+          </releases>\n+          <snapshots>\n+            <enabled>true</enabled>\n+          </snapshots>\n+        </pluginRepository>\n+      </pluginRepositories>\n+    </profile>\n+  </profiles>\n+</settings>"
+  },
+  {
+    "sha": "9e1057c2620afd96e708b9d612228e866301abf2",
+    "filename": "src/main/java/org/codehaus/mojo/properties/WriteActiveProfileProperties.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 6,
+    "changes": 14,
+    "blob_url": "https://github.com/mojohaus/properties-maven-plugin/blob/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/main/java/org/codehaus/mojo/properties/WriteActiveProfileProperties.java",
+    "raw_url": "https://github.com/mojohaus/properties-maven-plugin/raw/0c7b68fc3bebbde647a881aa0c9a298ff1973433/src/main/java/org/codehaus/mojo/properties/WriteActiveProfileProperties.java",
+    "contents_url": "https://api.github.com/repos/mojohaus/properties-maven-plugin/contents/src/main/java/org/codehaus/mojo/properties/WriteActiveProfileProperties.java?ref=0c7b68fc3bebbde647a881aa0c9a298ff1973433",
+    "patch": "@@ -1,5 +1,9 @@\n package org.codehaus.mojo.properties;\n \n+import java.util.Iterator;\n+import java.util.List;\n+import java.util.Properties;\n+\n /*\n  * Licensed to the Apache Software Foundation (ASF) under one\n  * or more contributor license agreements.  See the NOTICE file \n@@ -21,18 +25,16 @@\n \n import org.apache.maven.model.Profile;\n import org.apache.maven.plugin.MojoExecutionException;\n-\n-import java.util.Iterator;\n-import java.util.List;\n-import java.util.Properties;\n+import org.apache.maven.plugins.annotations.LifecyclePhase;\n+import org.apache.maven.plugins.annotations.Mojo;\n \n /**\n  * Writes properties of all active profiles to a file.\n  *\n  * @author <a href=\"mailto:zarars@gmail.com\">Zarar Siddiqi</a>\n  * @version $Id$\n- * @goal write-active-profile-properties\n  */\n+@Mojo( name = \"write-active-profile-properties\", defaultPhase = LifecyclePhase.NONE, threadSafe = true )\n public class WriteActiveProfileProperties\n     extends AbstractWritePropertiesMojo\n {\n@@ -42,7 +44,7 @@ public void execute()\n     {\n         validateOutputFile();\n         List<?> list = getProject().getActiveProfiles();\n-        if ( getLog().isInfoEnabled() )\n+        if ( getLog().isDebugEnabled() )\n         {\n             getLog().debug( list.size() + \" profile(s) active\" );\n         }"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "f4e2c17718a39a5f748bb336d0efb4acc534065a",
+    "filename": "substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImage.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 3,
+    "changes": 17,
+    "blob_url": "https://github.com/oracle/graal/blob/3275ab3369a199f3e17e73241b4c56827a3cb0d9/substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImage.java",
+    "raw_url": "https://github.com/oracle/graal/raw/3275ab3369a199f3e17e73241b4c56827a3cb0d9/substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImage.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImage.java?ref=3275ab3369a199f3e17e73241b4c56827a3cb0d9",
+    "patch": "@@ -775,8 +775,19 @@ protected static void ensureDirectoryExists(Path dir) {\n     private void prepareImageBuildArgs() {\n         config.getBuilderJavaArgs().forEach(this::addImageBuilderJavaArgs);\n         addImageBuilderJavaArgs(\"-Xss10m\");\n-        addImageBuilderJavaArgs(oXms + getXmsValue());\n-        addImageBuilderJavaArgs(oXmx + getXmxValue(1));\n+        String customSetXmx = customImageBuilderArgs.stream().filter(s -> s.startsWith(oXmx)).findFirst().orElse(null);\n+        String customSetXms = customImageBuilderArgs.stream().filter(s -> s.startsWith(oXms)).findFirst().orElse(null);\n+        if (customSetXmx != null) {\n+            addImageBuilderJavaArgs(customSetXmx);\n+        }\n+        if (customSetXms != null) {\n+            addImageBuilderJavaArgs(customSetXms);\n+        }\n+        String xmxVal = getXmxValue(1);\n+        if (!\"0\".equals(xmxVal)) {\n+            addImageBuilderJavaArgs(oXmx + xmxVal);\n+            addImageBuilderJavaArgs(oXms + getXmsValue());\n+        }\n         addImageBuilderJavaArgs(\"-Duser.country=US\", \"-Duser.language=en\");\n         /* Prevent JVM that runs the image builder to steal focus */\n         if (OS.getCurrent() != OS.WINDOWS || JavaVersionUtil.JAVA_SPEC > 8) {\n@@ -1151,7 +1162,7 @@ private int completeImageBuild() {\n         /* Perform JavaArgs consolidation - take the maximum of -Xmx, minimum of -Xms */\n         Long xmxValue = consolidateArgs(imageBuilderJavaArgs, oXmx, SubstrateOptionsParser::parseLong, String::valueOf, () -> 0L, Math::max);\n         Long xmsValue = consolidateArgs(imageBuilderJavaArgs, oXms, SubstrateOptionsParser::parseLong, String::valueOf, () -> SubstrateOptionsParser.parseLong(getXmsValue()), Math::max);\n-        if (Long.compareUnsigned(xmsValue, xmxValue) > 0) {\n+        if (xmxValue != null && xmsValue != null && Long.compareUnsigned(xmsValue, xmxValue) > 0) {\n             replaceArg(imageBuilderJavaArgs, oXms, Long.toUnsignedString(xmxValue));\n         }\n "
+  },
+  {
+    "sha": "9ac9d4b73f19875cd6d5645b41f0321469523287",
+    "filename": "substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImageServer.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 8,
+    "changes": 17,
+    "blob_url": "https://github.com/oracle/graal/blob/3275ab3369a199f3e17e73241b4c56827a3cb0d9/substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImageServer.java",
+    "raw_url": "https://github.com/oracle/graal/raw/3275ab3369a199f3e17e73241b4c56827a3cb0d9/substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImageServer.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.driver/src/com/oracle/svm/driver/NativeImageServer.java?ref=3275ab3369a199f3e17e73241b4c56827a3cb0d9",
+    "patch": "@@ -399,15 +399,16 @@ private Server getServerInstance(LinkedHashSet<Path> classpath, LinkedHashSet<Pa\n \n                 /* Maximize reuse by using same VM mem-args for all server-based image builds */\n                 String xmxValueStr = getXmxValue(maxServers);\n-                replaceArg(javaArgs, oXmx, xmxValueStr);\n-                String xmsValueStr = getXmsValue();\n-                long xmxValue = SubstrateOptionsParser.parseLong(xmxValueStr);\n-                long xmsValue = SubstrateOptionsParser.parseLong(xmsValueStr);\n-                if (WordFactory.unsigned(xmsValue).aboveThan(WordFactory.unsigned(xmxValue))) {\n-                    xmsValueStr = Long.toUnsignedString(xmxValue);\n+                if (!\"0\".equals(xmxValueStr)) {\n+                    replaceArg(javaArgs, oXmx, xmxValueStr);\n+                    String xmsValueStr = getXmsValue();\n+                    long xmxValue = SubstrateOptionsParser.parseLong(xmxValueStr);\n+                    long xmsValue = SubstrateOptionsParser.parseLong(xmsValueStr);\n+                    if (WordFactory.unsigned(xmsValue).aboveThan(WordFactory.unsigned(xmxValue))) {\n+                        xmsValueStr = Long.toUnsignedString(xmxValue);\n+                    }\n+                    replaceArg(javaArgs, oXms, xmsValueStr);\n                 }\n-                replaceArg(javaArgs, oXms, xmsValueStr);\n-\n                 Path sessionDir = getSessionDir();\n                 List<Collection<Path>> builderPaths = new ArrayList<>(Arrays.asList(classpath, bootClasspath));\n                 if (config.useJavaModules()) {"
+  }
+]

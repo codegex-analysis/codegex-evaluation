@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "e3798c70a0f66c8050d6a9da565351aa7b92e951",
+    "filename": "az-core/src/main/java/azkaban/Constants.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/azkaban/azkaban/blob/0f2e0cc705726218844f86a10a9f70ecd6f4c30b/az-core/src/main/java/azkaban/Constants.java",
+    "raw_url": "https://github.com/azkaban/azkaban/raw/0f2e0cc705726218844f86a10a9f70ecd6f4c30b/az-core/src/main/java/azkaban/Constants.java",
+    "contents_url": "https://api.github.com/repos/azkaban/azkaban/contents/az-core/src/main/java/azkaban/Constants.java?ref=0f2e0cc705726218844f86a10a9f70ecd6f4c30b",
+    "patch": "@@ -621,5 +621,7 @@\n     // Constant for memory request for flow container\n     public static final String FLOW_PARAM_FLOW_CONTAINER_MEMORY_REQUEST = \"flow.container.memory\"\n         + \".request\";\n+\n+    public static final String FLOW_PARAM_POD_ENV_VAR = \"pod.env.var.\";\n   }\n }"
+  },
+  {
+    "sha": "f78d5b5cd5b8c516f11d1e6463ff7410b8523722",
+    "filename": "azkaban-common/src/main/java/azkaban/executor/container/KubernetesContainerizedImpl.java",
+    "status": "modified",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/azkaban/azkaban/blob/0f2e0cc705726218844f86a10a9f70ecd6f4c30b/azkaban-common/src/main/java/azkaban/executor/container/KubernetesContainerizedImpl.java",
+    "raw_url": "https://github.com/azkaban/azkaban/raw/0f2e0cc705726218844f86a10a9f70ecd6f4c30b/azkaban-common/src/main/java/azkaban/executor/container/KubernetesContainerizedImpl.java",
+    "contents_url": "https://api.github.com/repos/azkaban/azkaban/contents/azkaban-common/src/main/java/azkaban/executor/container/KubernetesContainerizedImpl.java?ref=0f2e0cc705726218844f86a10a9f70ecd6f4c30b",
+    "patch": "@@ -485,6 +485,7 @@ V1PodSpec createPodSpec(final int executionId, final VersionSet versionSet,\n         String.valueOf(executionId));\n     setupJavaRemoteDebug(envVariables, flowParam);\n     setupDevPod(envVariables, flowParam);\n+    setupPodEnvVariables(envVariables, flowParam);\n     // Add env variables to spec builder\n     addEnvVariablesToSpecBuilder(v1SpecBuilder, envVariables);\n \n@@ -530,6 +531,13 @@ String getFlowContainerMemoryRequest(final Map<String, String> flowParam) {\n     return this.memoryRequest;\n   }\n \n+  /**\n+   * This method is used to setup environment variable to enable remote debug on kubernetes flow\n+   * container. Based on this environment variable, you can decide to enable or disable remote\n+   * debug.\n+   * @param envVariables\n+   * @param flowParam\n+   */\n   private void setupJavaRemoteDebug(final Map<String, String> envVariables,\n       final Map<String, String> flowParam) {\n     if (flowParam != null && !flowParam.isEmpty() && flowParam\n@@ -539,6 +547,13 @@ private void setupJavaRemoteDebug(final Map<String, String> envVariables,\n     }\n   }\n \n+  /**\n+   * This method is used to setup environment variable to enable pod as dev pod which can be\n+   * helpful for testing. Based on this environment variable, you can decide to start the flow\n+   * container or not.\n+   * @param envVariables\n+   * @param flowParam\n+   */\n   private void setupDevPod(final Map<String, String> envVariables,\n       final Map<String, String> flowParam) {\n     if (flowParam != null && !flowParam.isEmpty() && flowParam\n@@ -548,6 +563,24 @@ private void setupDevPod(final Map<String, String> envVariables,\n     }\n   }\n \n+  /**\n+   * This method is used to setup any environment variable for a pod which can be passed from\n+   * flow parameter. To provide the generic solution, it is adding all the flow parameters\n+   * starting with @FlowParameters.FLOW_PARAM_POD_ENV_VAR\n+   * @param envVariables\n+   * @param flowParam\n+   */\n+  void setupPodEnvVariables(final Map<String, String> envVariables,\n+      final Map<String, String> flowParam) {\n+    if (flowParam != null && !flowParam.isEmpty()) {\n+      flowParam.forEach((k, v) -> {\n+        if (k.startsWith(FlowParameters.FLOW_PARAM_POD_ENV_VAR)) {\n+          envVariables.put(StringUtils.removeStart(k, FlowParameters.FLOW_PARAM_POD_ENV_VAR), v);\n+        }\n+      });\n+    }\n+  }\n+\n   /**\n    * Adding environment variables in pod spec builder.\n    *"
+  },
+  {
+    "sha": "2aad53e1e265b38960f592af6d3b272fbcbd29b5",
+    "filename": "azkaban-common/src/test/java/azkaban/executor/container/KubernetesContainerizedImplTest.java",
+    "status": "modified",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/azkaban/azkaban/blob/0f2e0cc705726218844f86a10a9f70ecd6f4c30b/azkaban-common/src/test/java/azkaban/executor/container/KubernetesContainerizedImplTest.java",
+    "raw_url": "https://github.com/azkaban/azkaban/raw/0f2e0cc705726218844f86a10a9f70ecd6f4c30b/azkaban-common/src/test/java/azkaban/executor/container/KubernetesContainerizedImplTest.java",
+    "contents_url": "https://api.github.com/repos/azkaban/azkaban/contents/azkaban-common/src/test/java/azkaban/executor/container/KubernetesContainerizedImplTest.java?ref=0f2e0cc705726218844f86a10a9f70ecd6f4c30b",
+    "patch": "@@ -173,6 +173,39 @@ public void testCPUAndMemoryRequestedFromProperties() throws Exception {\n         .equals(MEMORY_REQUESTED_IN_PROPS);\n   }\n \n+  /**\n+   * This test is used to verify that if env variables are set correctly for pod which are set from\n+   * flow param.\n+   * @throws Exception\n+   */\n+  @Test\n+  public void testPodEnvVariablesFromFlowParam() throws Exception {\n+    final Map<String, String> flowParam = new HashMap<>();\n+    flowParam.put(FlowParameters.FLOW_PARAM_POD_ENV_VAR + \"azkaban-bas.version\", \"1.0.0\");\n+    flowParam.put(FlowParameters.FLOW_PARAM_POD_ENV_VAR + \"azkaban-config.version\", \"0.1.0\");\n+    flowParam.put(\"any.other.param\", \"test\");\n+    Map<String,String> envVariables = new HashMap<>();\n+    this.kubernetesContainerizedImpl.setupPodEnvVariables(envVariables, flowParam);\n+    assert (envVariables.size() == 2);\n+  }\n+\n+  /**\n+   * This test is used to verify that if no env variables is set correctly for pod which are set\n+   * from\n+   * flow param.\n+   * @throws Exception\n+   */\n+  @Test\n+  public void testNoPodEnvVariablesFromFlowParam() throws Exception {\n+    final Map<String, String> flowParam = new HashMap<>();\n+    flowParam.put(\"azkaban-bas.version\", \"1.0.0\");\n+    flowParam.put(\"azkaban-config.version\", \"0.1.0\");\n+    flowParam.put(\"any.other.param\", \"test\");\n+    Map<String,String> envVariables = new HashMap<>();\n+    this.kubernetesContainerizedImpl.setupPodEnvVariables(envVariables, flowParam);\n+    assert (envVariables.size() == 0);\n+  }\n+\n   @Test\n   public void testJobTypesInFlow() throws Exception {\n     final ExecutableFlow flow = createTestFlow();"
+  }
+]

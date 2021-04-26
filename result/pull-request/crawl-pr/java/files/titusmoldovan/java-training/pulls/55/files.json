@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "82dccb6af6ed1d1c71602ef2e9d61425a0cbad62",
+    "filename": "_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/BankAccount.java",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/titusmoldovan/java-training/blob/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/BankAccount.java",
+    "raw_url": "https://github.com/titusmoldovan/java-training/raw/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/BankAccount.java",
+    "contents_url": "https://api.github.com/repos/titusmoldovan/java-training/contents/_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/BankAccount.java?ref=fd3a85f33f86779e0addbfdc5348063fea393ab7",
+    "patch": "@@ -0,0 +1,40 @@\n+package code._4_student_effort.BankTransactions;\n+\n+public class BankAccount {\n+    private String name;\n+    private int debit;\n+    public BankAccount(String name, int debit) {\n+        this.name = name;\n+        this.debit = debit;\n+    }\n+\n+    void withdraw(double amount) {\n+        longDatabaseCall();\n+        debit -=amount;\n+        System.out.println(\"Account \"+name+ \" was withdrawn with \"+amount);\n+\n+    }\n+\n+    void deposit(double amount) {\n+        longDatabaseCall();\n+        debit +=amount;\n+        System.out.println(\"Account \"+name+ \" was deposited with \"+amount);\n+\n+    }\n+\n+    void longDatabaseCall() {\n+        try {\n+            Thread.sleep(2000);\n+        } catch (InterruptedException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public int getDebit() {\n+        return debit;\n+    }\n+}"
+  },
+  {
+    "sha": "4a75982e34177d93f71d620ac95e26c69ac0eb45",
+    "filename": "_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/Main.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/titusmoldovan/java-training/blob/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/Main.java",
+    "raw_url": "https://github.com/titusmoldovan/java-training/raw/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/Main.java",
+    "contents_url": "https://api.github.com/repos/titusmoldovan/java-training/contents/_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/Main.java?ref=fd3a85f33f86779e0addbfdc5348063fea393ab7",
+    "patch": "@@ -0,0 +1,11 @@\n+package code._4_student_effort.BankTransactions;\n+\n+public class Main {\n+\n+    public static void main(String[] args) {\n+        BankAccount from = new BankAccount(\"BRD\",1500);\n+        BankAccount to = new BankAccount(\"Raiffaisen\", 120);\n+        TransactionThread transactionThread = new TransactionThread(\"Transfer\",from,to,100);\n+        transactionThread.start();\n+    }\n+}"
+  },
+  {
+    "sha": "19f026ee77ead2155809f89ae98f526e9d6c3bc4",
+    "filename": "_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/TransactionThread.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/titusmoldovan/java-training/blob/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/TransactionThread.java",
+    "raw_url": "https://github.com/titusmoldovan/java-training/raw/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/TransactionThread.java",
+    "contents_url": "https://api.github.com/repos/titusmoldovan/java-training/contents/_7_concurrency/src/main/java/code/_4_student_effort/BankTransactions/TransactionThread.java?ref=fd3a85f33f86779e0addbfdc5348063fea393ab7",
+    "patch": "@@ -0,0 +1,28 @@\n+package code._4_student_effort.BankTransactions;\n+\n+public class TransactionThread extends Thread{\n+    private String name;\n+    private BankAccount from;\n+    private BankAccount to;\n+    private int amount;\n+\n+    public TransactionThread(String name, BankAccount from, BankAccount to, int amount) {\n+       this.name = name;\n+       this.from = from;\n+       this.to = to;\n+       this.amount = amount;\n+    }\n+\n+    @Override\n+    public void run() {\n+       transfer(from,to,amount);\n+    }\n+\n+    private void transfer(BankAccount from, BankAccount to, int amount) {\n+        from.withdraw(amount);\n+        to.deposit(amount);\n+        System.out.println(from.getName()+\" current debit is = \"+from.getDebit());\n+        System.out.println(to.getName()+\" current debit is = \"+to.getDebit());\n+    }\n+\n+}"
+  },
+  {
+    "sha": "70b62b78e4ced0b771ff69b52b6df037b22d1506",
+    "filename": "_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/Main.java",
+    "status": "added",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/titusmoldovan/java-training/blob/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/Main.java",
+    "raw_url": "https://github.com/titusmoldovan/java-training/raw/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/Main.java",
+    "contents_url": "https://api.github.com/repos/titusmoldovan/java-training/contents/_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/Main.java?ref=fd3a85f33f86779e0addbfdc5348063fea393ab7",
+    "patch": "@@ -0,0 +1,27 @@\n+package code._4_student_effort.RabbitRace;\n+\n+public class Main {\n+    public static void main(String[] args) {\n+        RabbitThread r1 = new RabbitThread(1);\n+        RabbitRunnable r2 = new RabbitRunnable(2);\n+        RabbitThread r3 = new RabbitThread(3);\n+        RabbitRunnable r4 = new RabbitRunnable(4);\n+        RabbitThread r5 = new RabbitThread(5);\n+        RabbitRunnable r6 = new RabbitRunnable(6);\n+        RabbitThread r7 = new RabbitThread(7);\n+        RabbitRunnable r8 = new RabbitRunnable(8);\n+        RabbitThread r9 = new RabbitThread(9);\n+        RabbitRunnable r10 = new RabbitRunnable(10);\n+\n+        r1.start();\n+        new Thread(r2).start();\n+        r3.start();\n+        new Thread(r4).start();\n+        r5.start();\n+        new Thread(r6).start();\n+        r7.start();\n+        new Thread(r8).start();\n+        r9.start();\n+        new Thread(r10).start();\n+    }\n+}"
+  },
+  {
+    "sha": "bfd4abe354c2fc1962e770d238f97f606427df56",
+    "filename": "_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/RabbitRunnable.java",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/titusmoldovan/java-training/blob/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/RabbitRunnable.java",
+    "raw_url": "https://github.com/titusmoldovan/java-training/raw/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/RabbitRunnable.java",
+    "contents_url": "https://api.github.com/repos/titusmoldovan/java-training/contents/_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/RabbitRunnable.java?ref=fd3a85f33f86779e0addbfdc5348063fea393ab7",
+    "patch": "@@ -0,0 +1,14 @@\n+package code._4_student_effort.RabbitRace;\n+\n+public class RabbitRunnable implements Runnable{\n+    private int nr;\n+\n+    public RabbitRunnable(int nr) {\n+        this.nr = nr;\n+    }\n+\n+    @Override\n+    public void run() {\n+        System.out.println(\"Rabbit \"+nr+\" is running from runnable\");\n+    }\n+}"
+  },
+  {
+    "sha": "89ef1f9f95e336aa299f777d74df72a9f0257108",
+    "filename": "_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/RabbitThread.java",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/titusmoldovan/java-training/blob/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/RabbitThread.java",
+    "raw_url": "https://github.com/titusmoldovan/java-training/raw/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/RabbitThread.java",
+    "contents_url": "https://api.github.com/repos/titusmoldovan/java-training/contents/_7_concurrency/src/main/java/code/_4_student_effort/RabbitRace/RabbitThread.java?ref=fd3a85f33f86779e0addbfdc5348063fea393ab7",
+    "patch": "@@ -0,0 +1,14 @@\n+package code._4_student_effort.RabbitRace;\n+\n+public class RabbitThread extends Thread{\n+    private int nr;\n+\n+    public RabbitThread(int nr) {\n+        this.nr = nr;\n+    }\n+\n+    @Override\n+    public void run() {\n+        System.out.println(\"Rabbit \"+nr+ \" is running from thread\");\n+    }\n+}"
+  },
+  {
+    "sha": "8db4d6e320f612c37a3448ed5e723c8a92067ff9",
+    "filename": "_7_concurrency/src/main/java/code/_4_student_effort/RockPapperScissors/Main.java",
+    "status": "added",
+    "additions": 43,
+    "deletions": 0,
+    "changes": 43,
+    "blob_url": "https://github.com/titusmoldovan/java-training/blob/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RockPapperScissors/Main.java",
+    "raw_url": "https://github.com/titusmoldovan/java-training/raw/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RockPapperScissors/Main.java",
+    "contents_url": "https://api.github.com/repos/titusmoldovan/java-training/contents/_7_concurrency/src/main/java/code/_4_student_effort/RockPapperScissors/Main.java?ref=fd3a85f33f86779e0addbfdc5348063fea393ab7",
+    "patch": "@@ -0,0 +1,43 @@\n+package code._4_student_effort.RockPapperScissors;\n+\n+public class Main {\n+    public static void main(String[] args) throws InterruptedException {\n+\n+        Player player1 = new Player(\"Player 1\");\n+        Player player2 = new Player(\"Player 2\");\n+\n+        player1.start();\n+        player1.join();\n+        player2.start();\n+\n+        System.out.println(player1.getPlayerName()+\": \"+player1.getChose());\n+        System.out.println(player2.getPlayerName()+\": \"+player2.getChose());\n+\n+        match(player1,player2);\n+\n+    }\n+\n+    private static void match(Player player1, Player player2) {\n+        if(player1.getChose().equals(player2.getChose())){\n+            System.out.println(\"Draw\");\n+        }else if(player1.getChose().equals(\"Papper\")){\n+            if(player2.getChose().equals(\"Rock\")){\n+                System.out.println(\"Winner: \"+ player1.getPlayerName());\n+            }else{\n+                System.out.println(\"Winner:\"+ player2.getPlayerName());\n+            }\n+        }else if(player1.getChose().equals(\"Rock\")){\n+            if(player2.getChose().equals(\"Papper\")){\n+                System.out.println(\"Winner: \"+ player2.getPlayerName());\n+            }else{\n+                System.out.println(\"Winner: \"+ player1.getPlayerName());\n+            }\n+        }else{\n+            if(player2.getChose().equals(\"Rock\")){\n+                System.out.println(\"Winner: \"+ player2.getPlayerName());\n+            }else{\n+                System.out.println(\"Winner: \"+ player1.getPlayerName());\n+            }\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "76a778c605774f24d6e05c210e24b949da262f3b",
+    "filename": "_7_concurrency/src/main/java/code/_4_student_effort/RockPapperScissors/Player.java",
+    "status": "added",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/titusmoldovan/java-training/blob/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RockPapperScissors/Player.java",
+    "raw_url": "https://github.com/titusmoldovan/java-training/raw/fd3a85f33f86779e0addbfdc5348063fea393ab7/_7_concurrency/src/main/java/code/_4_student_effort/RockPapperScissors/Player.java",
+    "contents_url": "https://api.github.com/repos/titusmoldovan/java-training/contents/_7_concurrency/src/main/java/code/_4_student_effort/RockPapperScissors/Player.java?ref=fd3a85f33f86779e0addbfdc5348063fea393ab7",
+    "patch": "@@ -0,0 +1,27 @@\n+package code._4_student_effort.RockPapperScissors;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+import java.util.Random;\n+\n+public class Player extends Thread{\n+    private String playerName;\n+    private String chose;\n+\n+    public Player(String name) {\n+        this.playerName = name;\n+    }\n+    @Override\n+    public void run() {\n+        List<String> options = new ArrayList<>(List.of(\"Rock\",\"Papper\",\"Scissors\"));\n+        chose = options.get(new Random().nextInt(3));\n+    }\n+\n+    public String getPlayerName() {\n+        return playerName;\n+    }\n+\n+    public String getChose() {\n+        return chose;\n+    }\n+}"
+  }
+]

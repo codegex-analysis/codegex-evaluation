@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "aa7890099b217bfda2d8d4fb2bbd81580216d1b4",
+    "filename": "flink-table/flink-table-planner-blink/src/main/java/org/apache/flink/table/planner/plan/nodes/exec/stream/StreamExecTemporalJoin.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 7,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/flink/blob/8274716fd02d80374775a4bf69e67faf26105ea4/flink-table/flink-table-planner-blink/src/main/java/org/apache/flink/table/planner/plan/nodes/exec/stream/StreamExecTemporalJoin.java",
+    "raw_url": "https://github.com/apache/flink/raw/8274716fd02d80374775a4bf69e67faf26105ea4/flink-table/flink-table-planner-blink/src/main/java/org/apache/flink/table/planner/plan/nodes/exec/stream/StreamExecTemporalJoin.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-table/flink-table-planner-blink/src/main/java/org/apache/flink/table/planner/plan/nodes/exec/stream/StreamExecTemporalJoin.java?ref=8274716fd02d80374775a4bf69e67faf26105ea4",
+    "patch": "@@ -45,14 +45,12 @@\n import org.apache.flink.table.runtime.operators.join.temporal.TemporalProcessTimeJoinOperator;\n import org.apache.flink.table.runtime.operators.join.temporal.TemporalRowTimeJoinOperator;\n import org.apache.flink.table.runtime.typeutils.InternalTypeInfo;\n-import org.apache.flink.table.types.logical.LogicalType;\n import org.apache.flink.table.types.logical.RowType;\n import org.apache.flink.util.Preconditions;\n \n import org.apache.flink.shaded.guava18.com.google.common.collect.Lists;\n \n import java.util.Optional;\n-import java.util.stream.IntStream;\n \n /**\n  * {@link StreamExecNode} for temporal table join (FOR SYSTEM_TIME AS OF) and temporal TableFunction\n@@ -141,11 +139,7 @@ public StreamExecTemporalJoin(\n         RowDataKeySelector leftKeySelector = getLeftKeySelector(leftInputType);\n         RowDataKeySelector rightKeySelector = getRightKeySelector(rightInputType);\n         ret.setStateKeySelectors(leftKeySelector, rightKeySelector);\n-        LogicalType[] keyTypes =\n-                IntStream.of(joinSpec.getLeftKeys())\n-                        .mapToObj(leftInputType::getTypeAt)\n-                        .toArray(LogicalType[]::new);\n-        ret.setStateKeyType(InternalTypeInfo.ofFields(keyTypes));\n+        ret.setStateKeyType(leftKeySelector.getProducedType());\n         return ret;\n     }\n "
+  }
+]

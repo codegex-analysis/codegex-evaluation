@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "ae961b23d1cc60088721cd43f0f2506d7a023e86",
+    "filename": "spring-batch-core/src/main/java/org/springframework/batch/core/JobParameters.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 3,
+    "changes": 9,
+    "blob_url": "https://github.com/spring-projects/spring-batch/blob/b4b5b3e730fceb6942c3e66e3f8873bb6d4ccb65/spring-batch-core/src/main/java/org/springframework/batch/core/JobParameters.java",
+    "raw_url": "https://github.com/spring-projects/spring-batch/raw/b4b5b3e730fceb6942c3e66e3f8873bb6d4ccb65/spring-batch-core/src/main/java/org/springframework/batch/core/JobParameters.java",
+    "contents_url": "https://api.github.com/repos/spring-projects/spring-batch/contents/spring-batch-core/src/main/java/org/springframework/batch/core/JobParameters.java?ref=b4b5b3e730fceb6942c3e66e3f8873bb6d4ccb65",
+    "patch": "@@ -1,5 +1,5 @@\n /*\n- * Copyright 2006-2018 the original author or authors.\n+ * Copyright 2006-2021 the original author or authors.\n  *\n  * Licensed under the Apache License, Version 2.0 (the \"License\");\n  * you may not use this file except in compliance with the License.\n@@ -20,6 +20,8 @@\n import java.util.Date;\n import java.util.LinkedHashMap;\n import java.util.Map;\n+import java.util.Objects;\n+import java.util.Optional;\n import java.util.Properties;\n \n import org.springframework.lang.Nullable;\n@@ -38,6 +40,7 @@\n  * @author Lucas Ward\n  * @author Michael Minella\n  * @author Mahmoud Ben Hassine\n+ * @author Taeik Lim\n  * @since 1.0\n  */\n @SuppressWarnings(\"serial\")\n@@ -269,8 +272,8 @@ public Properties toProperties() {\n \t\tProperties props = new Properties();\n \n \t\tfor (Map.Entry<String, JobParameter> param : parameters.entrySet()) {\n-\t\t\tif(param.getValue() != null) {\n-\t\t\t\tprops.put(param.getKey(), param.getValue().toString());\n+\t\t\tif (param.getValue() != null) {\n+\t\t\t\tprops.put(param.getKey(), Objects.toString(param.getValue().toString(), \"\"));\n \t\t\t}\n \t\t}\n "
+  },
+  {
+    "sha": "3eb34a5cd274433dd97df5b5879446f9c3c5a88b",
+    "filename": "spring-batch-core/src/test/java/org/springframework/batch/core/JobParametersTests.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 1,
+    "changes": 15,
+    "blob_url": "https://github.com/spring-projects/spring-batch/blob/b4b5b3e730fceb6942c3e66e3f8873bb6d4ccb65/spring-batch-core/src/test/java/org/springframework/batch/core/JobParametersTests.java",
+    "raw_url": "https://github.com/spring-projects/spring-batch/raw/b4b5b3e730fceb6942c3e66e3f8873bb6d4ccb65/spring-batch-core/src/test/java/org/springframework/batch/core/JobParametersTests.java",
+    "contents_url": "https://api.github.com/repos/spring-projects/spring-batch/contents/spring-batch-core/src/test/java/org/springframework/batch/core/JobParametersTests.java?ref=b4b5b3e730fceb6942c3e66e3f8873bb6d4ccb65",
+    "patch": "@@ -1,5 +1,5 @@\n /*\n- * Copyright 2008-2018 the original author or authors.\n+ * Copyright 2008-2021 the original author or authors.\n  *\n  * Licensed under the Apache License, Version 2.0 (the \"License\");\n  * you may not use this file except in compliance with the License.\n@@ -25,6 +25,7 @@\n import java.util.HashMap;\n import java.util.Map;\n import java.util.Map.Entry;\n+import java.util.Properties;\n \n import org.junit.Before;\n import org.junit.Test;\n@@ -35,6 +36,7 @@\n  * @author Dave Syer\n  * @author Michael Minella\n  * @author Mahmoud Ben Hassine\n+ * @author Taeik Lim\n  *\n  */\n public class JobParametersTests {\n@@ -228,4 +230,15 @@ public void testDoubleReturnsNullWhenKeyDoesntExit(){\n \tpublic void testDateReturnsNullWhenKeyDoesntExit(){\n \t\tassertNull(new JobParameters().getDate(\"keythatdoesntexist\"));\n \t}\n+\n+\t@Test\n+\tpublic void testToPropertiesWithNullValue() {\n+\t\tMap<String, JobParameter> parameterMap = new HashMap<>();\n+\t\tLong value = null;\n+\t\tparameterMap.put(\"nullkey\", new JobParameter(value));\n+\t\tJobParameters jobParameters = new JobParameters(parameterMap);\n+\n+\t\tProperties properties = jobParameters.toProperties();\n+\t\tassertEquals(\"\", properties.get(\"nullkey\"));\n+\t}\n }"
+  }
+]

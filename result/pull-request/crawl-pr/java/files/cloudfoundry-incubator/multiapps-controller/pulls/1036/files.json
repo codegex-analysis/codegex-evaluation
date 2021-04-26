@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c52e0de0ae662662a0af81cbdb933f7eb2c0d4e1",
+    "filename": "multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/Messages.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/cloudfoundry-incubator/multiapps-controller/blob/61e951f32972c84df49726f172b7b01f0916f414/multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/Messages.java",
+    "raw_url": "https://github.com/cloudfoundry-incubator/multiapps-controller/raw/61e951f32972c84df49726f172b7b01f0916f414/multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/Messages.java",
+    "contents_url": "https://api.github.com/repos/cloudfoundry-incubator/multiapps-controller/contents/multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/Messages.java?ref=61e951f32972c84df49726f172b7b01f0916f414",
+    "patch": "@@ -227,6 +227,7 @@\n \n     // Progress messages\n \n+    public static final String OPERATION_ID = \"Operation ID: {0}\";\n     public static final String MTA_SCHEMA_VERSION_DETECTED_AS = \"Detected MTA schema version: \\\"{0}\\\"\";\n     public static final String DEPLOYING_IN_ORG_0_AND_SPACE_1 = \"Deploying in org \\\"{0}\\\" and space \\\"{1}\\\"\";\n     public static final String NO_DEPLOYED_MTA_DETECTED = \"No deployed MTA detected - this is initial deployment\";"
+  },
+  {
+    "sha": "534b9041ab0f9977b5b7e239d8e7d18a377fb738",
+    "filename": "multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/listeners/AbstractProcessExecutionListener.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 11,
+    "changes": 39,
+    "blob_url": "https://github.com/cloudfoundry-incubator/multiapps-controller/blob/61e951f32972c84df49726f172b7b01f0916f414/multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/listeners/AbstractProcessExecutionListener.java",
+    "raw_url": "https://github.com/cloudfoundry-incubator/multiapps-controller/raw/61e951f32972c84df49726f172b7b01f0916f414/multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/listeners/AbstractProcessExecutionListener.java",
+    "contents_url": "https://api.github.com/repos/cloudfoundry-incubator/multiapps-controller/contents/multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/listeners/AbstractProcessExecutionListener.java?ref=61e951f32972c84df49726f172b7b01f0916f414",
+    "patch": "@@ -37,19 +37,15 @@\n     private HistoricOperationEventService historicOperationEventService;\n     @Inject\n     private FlowableFacade flowableFacade;\n-\t@Inject\n+    @Inject\n     protected ApplicationConfiguration configuration;\n \n     private StepLogger stepLogger;\n \n     @Override\n     public void notify(DelegateExecution execution) {\n+        initializeMustHaveVariables(execution);\n         try {\n-            String correlationId = VariableHandling.get(execution, Variables.CORRELATION_ID);\n-            if (correlationId == null) {\n-                correlationId = execution.getProcessInstanceId();\n-                VariableHandling.set(execution, Variables.CORRELATION_ID, correlationId);\n-            }\n             this.stepLogger = createStepLogger(execution);\n             notifyInternal(execution);\n         } catch (Exception e) {\n@@ -60,6 +56,30 @@ public void notify(DelegateExecution execution) {\n         }\n     }\n \n+    private void initializeMustHaveVariables(DelegateExecution execution) {\n+        try {\n+            initializeCorrelationId(execution);\n+            initializeTaskId(execution);\n+        } catch (Exception e) {\n+            LOGGER.error(Messages.EXECUTION_OF_PROCESS_LISTENER_HAS_FAILED, e);\n+            throw new SLException(e, Messages.EXECUTION_OF_PROCESS_LISTENER_HAS_FAILED);\n+        }\n+    }\n+\n+    private void initializeCorrelationId(DelegateExecution execution) {\n+        String correlationId = VariableHandling.get(execution, Variables.CORRELATION_ID);\n+        if (correlationId == null) {\n+            VariableHandling.set(execution, Variables.CORRELATION_ID, execution.getProcessInstanceId());\n+        }\n+    }\n+\n+    private void initializeTaskId(DelegateExecution execution) {\n+        String taskId = VariableHandling.get(execution, Variables.TASK_ID);\n+        if (taskId == null) {\n+            VariableHandling.set(execution, Variables.TASK_ID, execution.getCurrentActivityId());\n+        }\n+    }\n+\n     protected void logException(Exception e, String message) {\n         LOGGER.error(message, e);\n         getProcessLogger().error(message, e);\n@@ -70,12 +90,9 @@ protected ProcessLogger getProcessLogger() {\n     }\n \n     protected void finalizeLogs(DelegateExecution execution) {\n-        processLogsPersister.persistLogs(VariableHandling.get(execution, Variables.CORRELATION_ID), getTaskId(execution));\n-    }\n-\n-    private String getTaskId(DelegateExecution execution) {\n+        String correlationId = VariableHandling.get(execution, Variables.CORRELATION_ID);\n         String taskId = VariableHandling.get(execution, Variables.TASK_ID);\n-        return taskId != null ? taskId : execution.getCurrentActivityId();\n+        processLogsPersister.persistLogs(correlationId, taskId);\n     }\n \n     protected StepLogger getStepLogger() {"
+  },
+  {
+    "sha": "49b58198149ab408d998d59866d5ced63f875698",
+    "filename": "multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/listeners/StartProcessListener.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/cloudfoundry-incubator/multiapps-controller/blob/61e951f32972c84df49726f172b7b01f0916f414/multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/listeners/StartProcessListener.java",
+    "raw_url": "https://github.com/cloudfoundry-incubator/multiapps-controller/raw/61e951f32972c84df49726f172b7b01f0916f414/multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/listeners/StartProcessListener.java",
+    "contents_url": "https://api.github.com/repos/cloudfoundry-incubator/multiapps-controller/contents/multiapps-controller-process/src/main/java/org/cloudfoundry/multiapps/controller/process/listeners/StartProcessListener.java?ref=61e951f32972c84df49726f172b7b01f0916f414",
+    "patch": "@@ -57,6 +57,7 @@ protected void notifyInternal(DelegateExecution execution) {\n             return;\n         }\n         String correlationId = VariableHandling.get(execution, Variables.CORRELATION_ID);\n+        getStepLogger().info(Messages.OPERATION_ID, correlationId);\n         ProcessType processType = processTypeParser.getProcessType(execution);\n \n         if (getOperation(correlationId) == null) {"
+  }
+]

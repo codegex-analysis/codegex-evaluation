@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "a2a9fa5dfd8fd4c610b35b90c1706d0f8c00bafd",
+    "filename": "task04/src/com/example/task04/ConsoleHandler.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/blob/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/ConsoleHandler.java",
+    "raw_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/raw/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/ConsoleHandler.java",
+    "contents_url": "https://api.github.com/repos/ulearn-me-course-java/5-java-oop-principles/contents/task04/src/com/example/task04/ConsoleHandler.java?ref=abec4747a033da4497dc94db439c89359fe6a92f",
+    "patch": "@@ -0,0 +1,8 @@\n+package com.example.task04;\n+\n+public class ConsoleHandler implements MessageHandler{\n+    @Override\n+    public void log(String message) {\n+        System.out.println(message);\n+    }\n+}"
+  },
+  {
+    "sha": "aa0f0d54176b130860fb451578ff7bc4417736a6",
+    "filename": "task04/src/com/example/task04/FileHandler.java",
+    "status": "added",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/blob/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/FileHandler.java",
+    "raw_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/raw/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/FileHandler.java",
+    "contents_url": "https://api.github.com/repos/ulearn-me-course-java/5-java-oop-principles/contents/task04/src/com/example/task04/FileHandler.java?ref=abec4747a033da4497dc94db439c89359fe6a92f",
+    "patch": "@@ -0,0 +1,21 @@\n+package com.example.task04;\n+\n+import java.io.FileWriter;\n+import java.io.IOException;\n+\n+public class FileHandler implements MessageHandler{\n+    @Override\n+    public void log(String message) {\n+\n+        String path = \"task04\\\\src\\\\log.txt\";\n+\n+        try (FileWriter writer = new FileWriter(path,true)) {\n+            writer.write(message + \"\\n\\n\");\n+            writer.flush();\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+            System.out.println(\"file handler error\");\n+        }\n+\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e66c4e5fdee9b4e5327ca8ea25233e00afb6476a",
+    "filename": "task04/src/com/example/task04/LogLevel.java",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/blob/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/LogLevel.java",
+    "raw_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/raw/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/LogLevel.java",
+    "contents_url": "https://api.github.com/repos/ulearn-me-course-java/5-java-oop-principles/contents/task04/src/com/example/task04/LogLevel.java?ref=abec4747a033da4497dc94db439c89359fe6a92f",
+    "patch": "@@ -0,0 +1,3 @@\n+package com.example.task04;\n+\n+public enum LogLevel {DEBUG, INFO, WARNING, ERROR}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e5329adddce6ebdce9f7f53f93700e6d63d714b3",
+    "filename": "task04/src/com/example/task04/Logger.java",
+    "status": "added",
+    "additions": 94,
+    "deletions": 0,
+    "changes": 94,
+    "blob_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/blob/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/Logger.java",
+    "raw_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/raw/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/Logger.java",
+    "contents_url": "https://api.github.com/repos/ulearn-me-course-java/5-java-oop-principles/contents/task04/src/com/example/task04/Logger.java?ref=abec4747a033da4497dc94db439c89359fe6a92f",
+    "patch": "@@ -0,0 +1,94 @@\n+package com.example.task04;\n+\n+import java.text.SimpleDateFormat;\n+import java.util.ArrayList;\n+import java.util.Date;\n+import java.util.HashMap;\n+\n+public class Logger {\n+\n+    private static HashMap<String, Logger> loggers = new HashMap<>();\n+    private ArrayList<MessageHandler> handlers = new ArrayList<>();\n+    private final String name;\n+    private LogLevel level = LogLevel.INFO;\n+\n+    public Logger(String name, LogLevel level) {\n+        this.name = name;\n+        this.level = level;\n+    }\n+\n+    public Logger(String name) {\n+        this.name = name;\n+    }\n+\n+    public void addHandler(MessageHandler handler){\n+        handlers.add(handler);\n+    }\n+\n+    public static Logger getLogger(String name) {\n+        return loggers.containsKey(name) ? loggers.get(name) : new Logger(name);\n+    }\n+\n+    public void setLevel(LogLevel level) {\n+        this.level = level;\n+    }\n+\n+    public LogLevel getLevel() {\n+        return level;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    private void log(LogLevel level, String message) {\n+        for (MessageHandler handler : handlers) {\n+            String logMess = writeMessage(level, message);\n+            if (logMess != null)\n+                handler.log(logMess);\n+        }\n+    }\n+\n+    private void log(LogLevel level, String message, Object... params) {\n+        writeMessage(level, String.format(message, params));\n+    }\n+\n+    private String writeMessage(LogLevel level, String message) {\n+        if (level.ordinal() >= this.level.ordinal())\n+            return String.format(\"[%s] %s %s - %s\", level, new SimpleDateFormat(\"yyyy.MM.dd HH:mm:ss\").format(new Date()), name, message);\n+        return null;\n+    }\n+\n+    public void error(String message) {\n+        log(LogLevel.ERROR, message);\n+    }\n+\n+    public void error(String message, Object... params) {\n+        error(String.format(message, params));\n+    }\n+\n+    public void warning(String message) {\n+        log(LogLevel.WARNING, message);\n+    }\n+\n+    public void warning(String message, Object... params) {\n+        warning(String.format(message, params));\n+    }\n+\n+    public void info(String message) {\n+        log(LogLevel.INFO, message);\n+    }\n+\n+    public void info(String message, Object... params) {\n+        warning(String.format(message, params));\n+    }\n+\n+    public void debug(String message) {\n+        log(LogLevel.DEBUG, message);\n+    }\n+\n+    public void debug(String message, Object... params) {\n+        warning(String.format(message, params));\n+    }\n+\n+}"
+  },
+  {
+    "sha": "9dee874be2bf2bb26b3ea71c17ad601df239fe54",
+    "filename": "task04/src/com/example/task04/MemoryHandler.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/blob/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/MemoryHandler.java",
+    "raw_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/raw/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/MemoryHandler.java",
+    "contents_url": "https://api.github.com/repos/ulearn-me-course-java/5-java-oop-principles/contents/task04/src/com/example/task04/MemoryHandler.java?ref=abec4747a033da4497dc94db439c89359fe6a92f",
+    "patch": "@@ -0,0 +1,29 @@\n+package com.example.task04;\n+\n+import java.util.ArrayList;\n+\n+public class MemoryHandler implements MessageHandler {\n+\n+    private final MessageHandler handler;\n+    private final int size;\n+    private ArrayList<String> logs;\n+\n+    public MemoryHandler(MessageHandler handler, int size) {\n+        this.handler = handler;\n+        logs = new ArrayList<>();\n+        this.size = size;\n+    }\n+\n+    @Override\n+    public void log(String message) {\n+        logs.add(message);\n+        if (logs.size() == size)\n+            sendLogs();\n+    }\n+\n+    public void sendLogs() {\n+        for (String log : logs)\n+            handler.log(log);\n+        logs.clear();\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "13beca02f2cd86a3229ee86c2770c949d13c7a7d",
+    "filename": "task04/src/com/example/task04/MessageHandler.java",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/blob/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/MessageHandler.java",
+    "raw_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/raw/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/MessageHandler.java",
+    "contents_url": "https://api.github.com/repos/ulearn-me-course-java/5-java-oop-principles/contents/task04/src/com/example/task04/MessageHandler.java?ref=abec4747a033da4497dc94db439c89359fe6a92f",
+    "patch": "@@ -0,0 +1,5 @@\n+package com.example.task04;\n+\n+public interface MessageHandler {\n+    void log(String message);\n+}"
+  },
+  {
+    "sha": "79c81e4022b497fc5354400e43eb0feaffe81209",
+    "filename": "task04/src/com/example/task04/RotationFileHandler.java",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/blob/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/RotationFileHandler.java",
+    "raw_url": "https://github.com/ulearn-me-course-java/5-java-oop-principles/raw/abec4747a033da4497dc94db439c89359fe6a92f/task04/src/com/example/task04/RotationFileHandler.java",
+    "contents_url": "https://api.github.com/repos/ulearn-me-course-java/5-java-oop-principles/contents/task04/src/com/example/task04/RotationFileHandler.java?ref=abec4747a033da4497dc94db439c89359fe6a92f",
+    "patch": "@@ -0,0 +1,31 @@\n+package com.example.task04;\n+\n+import java.io.FileWriter;\n+import java.io.IOException;\n+import java.time.LocalDateTime;\n+import java.time.temporal.ChronoUnit;\n+\n+public class RotationFileHandler implements MessageHandler {\n+\n+    private ChronoUnit interval;\n+\n+    public RotationFileHandler(ChronoUnit unit) {\n+        interval = unit;\n+    }\n+\n+    @Override\n+    public void log(String message) {\n+        LocalDateTime currentTime = LocalDateTime.now().truncatedTo(interval);\n+        String fileName = String.format(\"log_%s.txt\", currentTime.toString().replace(':', '_'));\n+\n+        String path = String.format(\"task04\\\\src\\\\rotations\\\\%s\", fileName);\n+\n+        try (FileWriter writer = new FileWriter(path, true)) {\n+            writer.write(message + \"\\n\\n\");\n+            writer.flush();\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+            System.out.println(\"rotation file handler error\");\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

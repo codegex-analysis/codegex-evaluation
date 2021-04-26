@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "c36a37e70be79ecdf5536e58a874c3b6a8d72dd4",
+    "filename": "src/main/java/com/client/core/base/util/Utility.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 10,
+    "changes": 14,
+    "blob_url": "https://github.com/bullhorn/starter-kit-spring-maven/blob/aab7eadf0c90f0dc5909a7589bd17c5572170727/src/main/java/com/client/core/base/util/Utility.java",
+    "raw_url": "https://github.com/bullhorn/starter-kit-spring-maven/raw/aab7eadf0c90f0dc5909a7589bd17c5572170727/src/main/java/com/client/core/base/util/Utility.java",
+    "contents_url": "https://api.github.com/repos/bullhorn/starter-kit-spring-maven/contents/src/main/java/com/client/core/base/util/Utility.java?ref=aab7eadf0c90f0dc5909a7589bd17c5572170727",
+    "patch": "@@ -54,16 +54,10 @@\n \n \tpublic static Map<? extends BullhornRelatedEntity, Set<String>> getRequestedFields(BullhornRelatedEntity[] relatedEntities,\n \t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t   List<? extends WorkflowAction<?, ?>> actions) {\n-\t\tMap<? extends BullhornRelatedEntity, Set<String>> requestedFields = actions.stream().map(WorkflowAction::getRelatedEntityFields).reduce(Maps.newLinkedHashMap(), (map, relatedEntityFields) -> {\n-\t\t\treturn relatedEntityFields.entrySet().parallelStream().collect(Collectors.toMap(Map.Entry::getKey, oneRelatedEntityFields -> {\n-\t\t\t\tif (map.containsKey(oneRelatedEntityFields.getKey())) {\n-\t\t\t\t\tSet<String> currentFields = map.get(oneRelatedEntityFields.getKey());\n-\n-\t\t\t\t\treturn Utility.mergeFieldSets(oneRelatedEntityFields.getValue(), currentFields);\n-\t\t\t\t} else {\n-\t\t\t\t\treturn oneRelatedEntityFields.getValue();\n-\t\t\t\t}\n-\t\t\t}));\n+\t\tMap<? extends BullhornRelatedEntity, Set<String>> requestedFields = actions.stream().map(WorkflowAction::getRelatedEntityFields).reduce(Maps.newLinkedHashMap(), (firstMap, secondMap) -> {\n+\t\t\treturn Stream.concat(firstMap.entrySet().stream(), secondMap.entrySet().stream())\n+\t\t\t\t\t.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,\n+\t\t\t\t\t\t\tUtility::mergeFieldSets));\n \t\t});\n \n \t\treturn Stream.concat(Stream.of(relatedEntities), Stream.of(StandardRelatedEntity.values())).collect(Collectors.toMap(Function.identity(), relatedEntity -> {"
+  }
+]

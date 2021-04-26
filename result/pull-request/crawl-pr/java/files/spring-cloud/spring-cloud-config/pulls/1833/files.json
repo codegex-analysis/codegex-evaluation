@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "faa8aa016b1c8b06f0ef5d55eb9f5b5d981be63f",
+    "filename": "spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultEnvironmentProperties.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-config/blob/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultEnvironmentProperties.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-config/raw/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultEnvironmentProperties.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-config/contents/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultEnvironmentProperties.java?ref=c88ae73e68832d5639687a79e18ac67ca6ec6219",
+    "patch": "@@ -59,6 +59,16 @@\n \t */\n \tprivate String defaultKey = \"application\";\n \n+\t/**\n+\t * KV2 API required \"data\" after \"mount-path\". There could be folder/path structure,\n+\t * where the keys/applications are grouped. This property is the path after\n+\t * mount-path, under which application(s) are located (appended after \"data\") Default\n+\t * value is blank, which means all grouped applications are located right under the\n+\t * mount-path\n+\t *\n+\t */\n+\tprivate String pathToKey = \"\";\n+\n \t/** Vault profile separator. Defaults to comma. */\n \tprivate String profileSeparator = \",\";\n \n@@ -263,6 +273,14 @@ public AuthenticationMethod getAuthentication() {\n \t\treturn authentication;\n \t}\n \n+\tpublic String getPathToKey() {\n+\t\treturn pathToKey;\n+\t}\n+\n+\tpublic void setPathToKey(String pathToKey) {\n+\t\tthis.pathToKey = pathToKey;\n+\t}\n+\n \tpublic enum AuthenticationMethod {\n \n \t\t/**"
+  },
+  {
+    "sha": "17b86bfa0d33e1e5895f54f0c1b80f12c1a32785",
+    "filename": "spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultEnvironmentRepository.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-config/blob/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultEnvironmentRepository.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-config/raw/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultEnvironmentRepository.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-config/contents/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultEnvironmentRepository.java?ref=c88ae73e68832d5639687a79e18ac67ca6ec6219",
+    "patch": "@@ -92,7 +92,8 @@ public VaultEnvironmentRepository(ObjectProvider<HttpServletRequest> request, En\n \n \t\tString baseUrl = String.format(\"%s://%s:%s\", this.scheme, this.host, this.port);\n \n-\t\tthis.accessStrategy = VaultKvAccessStrategyFactory.forVersion(rest, baseUrl, properties.getKvVersion());\n+\t\tthis.accessStrategy = VaultKvAccessStrategyFactory.forVersion(rest, baseUrl, properties.getKvVersion(),\n+\t\t\t\tproperties.getPathToKey());\n \t}\n \n \t/* for testing */ void setAccessStrategy(VaultKvAccessStrategy accessStrategy) {"
+  },
+  {
+    "sha": "75b50154e5cb87eff6d00135f2f0635e3ad04df8",
+    "filename": "spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyFactory.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 3,
+    "changes": 16,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-config/blob/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyFactory.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-config/raw/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyFactory.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-config/contents/spring-cloud-config-server/src/main/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyFactory.java?ref=c88ae73e68832d5639687a79e18ac67ca6ec6219",
+    "patch": "@@ -18,6 +18,7 @@\n \n import com.fasterxml.jackson.databind.JsonNode;\n \n+import org.springframework.util.StringUtils;\n import org.springframework.web.client.RestOperations;\n \n /**\n@@ -39,15 +40,16 @@ private VaultKvAccessStrategyFactory() {\n \t * @param rest must not be {@literal null}.\n \t * @param baseUrl the Vault base URL.\n \t * @param version version of the Vault key-value backend.\n+\t * @param pathToKey path after the mount-path, under which the key(s) can be found.\n \t * @return the access strategy.\n \t */\n-\tpublic static VaultKvAccessStrategy forVersion(RestOperations rest, String baseUrl, int version) {\n+\tpublic static VaultKvAccessStrategy forVersion(RestOperations rest, String baseUrl, int version, String pathToKey) {\n \n \t\tswitch (version) {\n \t\tcase 1:\n \t\t\treturn new V1VaultKvAccessStrategy(baseUrl, rest);\n \t\tcase 2:\n-\t\t\treturn new V2VaultKvAccessStrategy(baseUrl, rest);\n+\t\t\treturn new V2VaultKvAccessStrategy(baseUrl, pathToKey, rest);\n \t\tdefault:\n \t\t\tthrow new IllegalArgumentException(\"No support for given Vault k/v backend version \" + version);\n \t\t}\n@@ -79,12 +81,20 @@ public String extractDataFromBody(VaultResponse body) {\n \t */\n \tstatic class V2VaultKvAccessStrategy extends VaultKvAccessStrategySupport {\n \n-\t\tV2VaultKvAccessStrategy(String baseUrl, RestOperations rest) {\n+\t\tprivate String pathToKey;\n+\n+\t\tV2VaultKvAccessStrategy(String baseUrl, String pathToKey, RestOperations rest) {\n \t\t\tsuper(baseUrl, rest);\n+\t\t\tthis.pathToKey = pathToKey;\n \t\t}\n \n \t\t@Override\n \t\tpublic String getPath() {\n+\n+\t\t\tif (StringUtils.hasText(pathToKey)) {\n+\t\t\t\treturn \"data/\" + pathToKey + \"/{key}\";\n+\t\t\t}\n+\n \t\t\treturn \"data/{key}\";\n \t\t}\n "
+  },
+  {
+    "sha": "b2144616720f485d4f01028618b629a76afa4bba",
+    "filename": "spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultEnvironmentRepositoryTests.java",
+    "status": "modified",
+    "additions": 38,
+    "deletions": 1,
+    "changes": 39,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-config/blob/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultEnvironmentRepositoryTests.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-config/raw/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultEnvironmentRepositoryTests.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-config/contents/spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultEnvironmentRepositoryTests.java?ref=c88ae73e68832d5639687a79e18ac67ca6ec6219",
+    "patch": "@@ -333,6 +333,43 @@ public void testVaultVersioning() {\n \t\t\t\t.isEqualTo(firstResult);\n \t}\n \n+\t@Test\n+\t@SuppressWarnings(\"unchecked\")\n+\tpublic void testVaultKV2WithPath2Key() {\n+\t\tRestTemplate rest = mock(RestTemplate.class);\n+\n+\t\tResponseEntity<VaultResponse> myAppResp = mock(ResponseEntity.class);\n+\t\twhen(myAppResp.getStatusCode()).thenReturn(HttpStatus.OK);\n+\t\tVaultResponse myAppVaultResp = getVaultResponse(\"{\\\"data\\\": {\\\"data\\\": {\\\"foo\\\": \\\"bar\\\"}}}\");\n+\t\twhen(myAppResp.getBody()).thenReturn(myAppVaultResp);\n+\t\twhen(rest.exchange(eq(\"http://127.0.0.1:8200/v1/secret/data/myorg/{key}\"), eq(HttpMethod.GET),\n+\t\t\t\tany(HttpEntity.class), eq(VaultResponse.class), eq(\"myapp\"))).thenReturn(myAppResp);\n+\n+\t\tResponseEntity<VaultResponse> appResp = mock(ResponseEntity.class);\n+\t\twhen(appResp.getStatusCode()).thenReturn(HttpStatus.OK);\n+\t\tVaultResponse appVaultResp = getVaultResponse(\"{\\\"data\\\": {\\\"data\\\": {\\\"def-foo\\\":\\\"def-bar\\\"}}}\");\n+\t\twhen(appResp.getBody()).thenReturn(appVaultResp);\n+\t\twhen(rest.exchange(eq(\"http://127.0.0.1:8200/v1/secret/data/myorg/{key}\"), eq(HttpMethod.GET),\n+\t\t\t\tany(HttpEntity.class), eq(VaultResponse.class), eq(\"application\"))).thenReturn(appResp);\n+\n+\t\tfinal VaultEnvironmentProperties vaultEnvironmentProperties = new VaultEnvironmentProperties();\n+\t\tvaultEnvironmentProperties.setKvVersion(2);\n+\t\tvaultEnvironmentProperties.setPathToKey(\"myorg\");\n+\t\tVaultEnvironmentRepository repo = new VaultEnvironmentRepository(mockHttpRequest(),\n+\t\t\t\tnew EnvironmentWatch.Default(), rest, vaultEnvironmentProperties, mockTokenProvider());\n+\n+\t\tEnvironment e = repo.findOne(\"myapp\", null, null);\n+\t\tassertThat(e.getName()).as(\"Name should be the same as the application argument\").isEqualTo(\"myapp\");\n+\t\tassertThat(e.getPropertySources().size()).as(\n+\t\t\t\t\"Properties for specified application and default application with key 'application' should be returned\")\n+\t\t\t\t.isEqualTo(2);\n+\t\tMap<String, String> firstResult = new HashMap<>();\n+\t\tfirstResult.put(\"foo\", \"bar\");\n+\t\tassertThat(e.getPropertySources().get(0).getSource())\n+\t\t\t\t.as(\"Properties for specified application should be returned in priority position\")\n+\t\t\t\t.isEqualTo(firstResult);\n+\t}\n+\n \t@Test\n \t@SuppressWarnings({ \"Duplicates\", \"unchecked\" })\n \tpublic void testNamespaceHeaderSent() {\n@@ -401,7 +438,7 @@ private ConfigTokenProvider mockTokenProvider() {\n \t\t\tString baseUrl = String.format(\"%s://%s:%s\", properties.getScheme(), properties.getHost(),\n \t\t\t\t\tproperties.getPort());\n \t\t\tthis.accessStrategy = VaultKvAccessStrategyFactory.forVersion(restTemplate, baseUrl,\n-\t\t\t\t\tproperties.getKvVersion());\n+\t\t\t\t\tproperties.getKvVersion(), \"\");\n \t\t}\n \n \t\t@Override"
+  },
+  {
+    "sha": "4c5e37fe8778965789b1f302059f59acd2e539dd",
+    "filename": "spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyFactoryTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-config/blob/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyFactoryTest.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-config/raw/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyFactoryTest.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-config/contents/spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyFactoryTest.java?ref=c88ae73e68832d5639687a79e18ac67ca6ec6219",
+    "patch": "@@ -30,19 +30,19 @@\n \n \t@Test\n \tpublic void testGetV1Strategy() {\n-\t\tVaultKvAccessStrategy vaultKvAccessStrategy = VaultKvAccessStrategyFactory.forVersion(null, \"foo\", 1);\n+\t\tVaultKvAccessStrategy vaultKvAccessStrategy = VaultKvAccessStrategyFactory.forVersion(null, \"foo\", 1, \"\");\n \t\tassertThat(vaultKvAccessStrategy instanceof V1VaultKvAccessStrategy).isTrue();\n \t}\n \n \t@Test\n \tpublic void testGetV2Strategy() {\n-\t\tVaultKvAccessStrategy vaultKvAccessStrategy = VaultKvAccessStrategyFactory.forVersion(null, \"foo\", 2);\n+\t\tVaultKvAccessStrategy vaultKvAccessStrategy = VaultKvAccessStrategyFactory.forVersion(null, \"foo\", 2, \"\");\n \t\tassertThat(vaultKvAccessStrategy instanceof V2VaultKvAccessStrategy).isTrue();\n \t}\n \n \t@Test(expected = IllegalArgumentException.class)\n \tpublic void testGetUnsupportedStrategy() {\n-\t\tVaultKvAccessStrategyFactory.forVersion(null, \"foo\", 0);\n+\t\tVaultKvAccessStrategyFactory.forVersion(null, \"foo\", 0, \"\");\n \t}\n \n }"
+  },
+  {
+    "sha": "bb4ca09e1d832bf85dc3849778ec5a64cdc6e439",
+    "filename": "spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-config/blob/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyTest.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-config/raw/c88ae73e68832d5639687a79e18ac67ca6ec6219/spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyTest.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-config/contents/spring-cloud-config-server/src/test/java/org/springframework/cloud/config/server/environment/VaultKvAccessStrategyTest.java?ref=c88ae73e68832d5639687a79e18ac67ca6ec6219",
+    "patch": "@@ -36,7 +36,7 @@\n \tprivate ObjectMapper objectMapper = new ObjectMapper();\n \n \tprivate static VaultKvAccessStrategySupport getStrategy(int version) {\n-\t\treturn (VaultKvAccessStrategySupport) VaultKvAccessStrategyFactory.forVersion(null, \"foo\", version);\n+\t\treturn (VaultKvAccessStrategySupport) VaultKvAccessStrategyFactory.forVersion(null, \"foo\", version, \"\");\n \t}\n \n \t@Test"
+  }
+]

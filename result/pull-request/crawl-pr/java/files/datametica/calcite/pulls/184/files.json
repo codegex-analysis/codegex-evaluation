@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "ea82dd61215411d9d044872d11ec90172a7b347a",
+    "filename": "core/src/main/java/org/apache/calcite/sql/dialect/BigQuerySqlDialect.java",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/datametica/calcite/blob/b07edef882184c9d74350ae6cd7a1e77d6b90938/core/src/main/java/org/apache/calcite/sql/dialect/BigQuerySqlDialect.java",
+    "raw_url": "https://github.com/datametica/calcite/raw/b07edef882184c9d74350ae6cd7a1e77d6b90938/core/src/main/java/org/apache/calcite/sql/dialect/BigQuerySqlDialect.java",
+    "contents_url": "https://api.github.com/repos/datametica/calcite/contents/core/src/main/java/org/apache/calcite/sql/dialect/BigQuerySqlDialect.java?ref=b07edef882184c9d74350ae6cd7a1e77d6b90938",
+    "patch": "@@ -934,6 +934,12 @@ private void unparseOtherFunction(SqlWriter writer, SqlCall call, int leftPrec,\n     case \"REGEXP_LIKE\":\n       unparseRegexpLike(writer, call, leftPrec, rightPrec);\n       break;\n+    case \"RADIANS\":\n+      unparseRadianAndDeggreefunction(writer, call, leftPrec, rightPrec, true);\n+      break;\n+    case \"DEGREES\":\n+      unparseRadianAndDeggreefunction(writer, call, leftPrec, rightPrec, false);\n+      break;\n     default:\n       super.unparseCall(writer, call, leftPrec, rightPrec);\n     }\n@@ -1113,6 +1119,29 @@ private void unparseRandomfunction(SqlWriter writer, SqlCall call, int leftPrec,\n     unparseCall(writer, plusNode, leftPrec, rightPrec);\n   }\n \n+  private void unparseRadianAndDeggreefunction(SqlWriter writer, SqlCall call,\n+                                               int leftPrec, int rightPrec, boolean isRadian) {\n+    SqlNode numericNode = SqlLiteral.createExactNumeric(\"-1\", SqlParserPos.ZERO);\n+    SqlCall acosCall = ACOS.createCall(SqlParserPos.ZERO, numericNode);\n+\n+    SqlNumericLiteral divideLiteral = SqlLiteral.createExactNumeric(\"180\",\n+            SqlParserPos.ZERO);\n+    SqlNode[] divideOperand = getDivideOperandsForRadianOrDegree(acosCall, divideLiteral, isRadian);\n+    SqlCall divideCall = new SqlBasicCall(SqlStdOperatorTable.DIVIDE, divideOperand,\n+            SqlParserPos.ZERO);\n+    SqlNode[] multiplyOperand = new SqlNode[] { call.operand(0), divideCall};\n+    SqlCall multiplyCall = new SqlBasicCall(MULTIPLY, multiplyOperand,\n+            SqlParserPos.ZERO);\n+    super.unparseCall(writer, multiplyCall, leftPrec, rightPrec);\n+  }\n+  private SqlNode[] getDivideOperandsForRadianOrDegree(SqlNode call1,\n+                                                      SqlNode call2, boolean isRadian) {\n+    if (isRadian) {\n+      return new SqlNode[] { call1, call2};\n+    }\n+    return new SqlNode[] { call2, call1};\n+  }\n+\n   @Override protected String getDateTimeFormatString(\n       String standardDateFormat, Map<SqlDateTimeFormat, String> dateTimeFormatMap) {\n     String dateTimeFormat = super.getDateTimeFormatString(standardDateFormat, dateTimeFormatMap);"
+  },
+  {
+    "sha": "9b7ee9c4ffb393c3b7a9e308f8732c20c8ea5149",
+    "filename": "core/src/test/java/org/apache/calcite/rel/rel2sql/RelToSqlConverterTest.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/datametica/calcite/blob/b07edef882184c9d74350ae6cd7a1e77d6b90938/core/src/test/java/org/apache/calcite/rel/rel2sql/RelToSqlConverterTest.java",
+    "raw_url": "https://github.com/datametica/calcite/raw/b07edef882184c9d74350ae6cd7a1e77d6b90938/core/src/test/java/org/apache/calcite/rel/rel2sql/RelToSqlConverterTest.java",
+    "contents_url": "https://api.github.com/repos/datametica/calcite/contents/core/src/test/java/org/apache/calcite/rel/rel2sql/RelToSqlConverterTest.java?ref=b07edef882184c9d74350ae6cd7a1e77d6b90938",
+    "patch": "@@ -7097,6 +7097,24 @@ public void testCaseForLnFunction() {\n             .withBigQuery()\n             .ok(expectedBQ);\n   }\n+\n+  @Test public void testRadian() {\n+    String query = \"SELECT RADIANS(0.12)\";\n+    final String expectedBQ = \"SELECT 0.12 * (ACOS(-1) / 180)\";\n+\n+    sql(query)\n+            .withBigQuery()\n+            .ok(expectedBQ);\n+  }\n+\n+  @Test public void testDegrees() {\n+    String query = \"SELECT DEGREES(0.12)\";\n+    final String expectedBQ = \"SELECT 0.12 * (180 / ACOS(-1))\";\n+\n+    sql(query)\n+            .withBigQuery()\n+            .ok(expectedBQ);\n+  }\n }\n \n // End RelToSqlConverterTest.java"
+  }
+]

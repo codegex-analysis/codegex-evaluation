@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "fbe28e34a0f09ac938bc177a849da3661ecc746a",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 22,
+    "changes": 38,
+    "blob_url": "https://github.com/liuzhengyang/lets-hotfix-idea-plugin/blob/87f336e728fe4c4a29a11a414438e5976c6b9e40/build.gradle",
+    "raw_url": "https://github.com/liuzhengyang/lets-hotfix-idea-plugin/raw/87f336e728fe4c4a29a11a414438e5976c6b9e40/build.gradle",
+    "contents_url": "https://api.github.com/repos/liuzhengyang/lets-hotfix-idea-plugin/contents/build.gradle?ref=87f336e728fe4c4a29a11a414438e5976c6b9e40",
+    "patch": "@@ -1,44 +1,38 @@\n plugins {\n     id 'java'\n-    id 'org.jetbrains.intellij' version '0.4.2'\n-    id \"io.franzbecker.gradle-lombok\" version \"2.1\"\n+    id 'org.jetbrains.intellij' version '0.4.14'\n+    id \"io.franzbecker.gradle-lombok\" version \"3.1.0\"\n }\n \n \n group 'com.github.lzy'\n-version '0.0.10'\n-\n-sourceCompatibility = 1.8\n+version '0.0.11'\n \n repositories {\n-    maven {\n-        url \"https://plugins.gradle.org/m2/\"\n-    }\n     mavenCentral()\n }\n \n dependencies {\n-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'\n-    implementation 'com.squareup.retrofit2:converter-jackson:2.5.0'\n-    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'\n-    testCompile group: 'junit', name: 'junit', version: '4.12'\n-    compile group: 'com.alibaba', name: 'fastjson', version: '1.1.25'\n-    compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.0'\n+    // https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit\n+    implementation group: 'com.squareup.retrofit2', name: 'retrofit', version: '2.9.0'\n+    // https://mvnrepository.com/artifact/com.squareup.retrofit2/converter-gson\n+    implementation group: 'com.squareup.retrofit2', name: 'converter-gson', version: '2.9.0'\n+    // https://mvnrepository.com/artifact/junit/junit\n+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'\n+    // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4\n+    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'\n }\n \n intellij {\n     plugins 'java'\n }\n \n patchPluginXml {\n-    changeNotes \"\"\"\n+    changeNotes\n+    \"\"\"\n         Add hostname keyword filter\n         增加了hostname的搜索框，减少hostname太多的烦恼\n-      \"\"\"\n-    sinceBuild(\"162.539.11\")\n-    untilBuild(\"210.*\")\n-}\n-\n-publishPlugin {\n-    token intellijPublishToken\n+    \"\"\"\n+    sinceBuild(\"162.*\")\n+    untilBuild(\"211.*\")\n }"
+  },
+  {
+    "sha": "d5bf6850d7507876016074a8bfbb1c25d589c174",
+    "filename": "settings.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/liuzhengyang/lets-hotfix-idea-plugin/blob/87f336e728fe4c4a29a11a414438e5976c6b9e40/settings.gradle",
+    "raw_url": "https://github.com/liuzhengyang/lets-hotfix-idea-plugin/raw/87f336e728fe4c4a29a11a414438e5976c6b9e40/settings.gradle",
+    "contents_url": "https://api.github.com/repos/liuzhengyang/lets-hotfix-idea-plugin/contents/settings.gradle?ref=87f336e728fe4c4a29a11a414438e5976c6b9e40",
+    "patch": "@@ -1,2 +1 @@\n-rootProject.name = 'lets-hotfix-idea-plugin'\n-\n+rootProject.name = 'lets-hotfix-idea-plugin'\n\\ No newline at end of file"
+  },
+  {
+    "sha": "edb2f86326e49b001dbf8196293ec93c981eeb90",
+    "filename": "src/main/java/com/github/hotreload/action/HotReloadAction.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/liuzhengyang/lets-hotfix-idea-plugin/blob/87f336e728fe4c4a29a11a414438e5976c6b9e40/src/main/java/com/github/hotreload/action/HotReloadAction.java",
+    "raw_url": "https://github.com/liuzhengyang/lets-hotfix-idea-plugin/raw/87f336e728fe4c4a29a11a414438e5976c6b9e40/src/main/java/com/github/hotreload/action/HotReloadAction.java",
+    "contents_url": "https://api.github.com/repos/liuzhengyang/lets-hotfix-idea-plugin/contents/src/main/java/com/github/hotreload/action/HotReloadAction.java?ref=87f336e728fe4c4a29a11a414438e5976c6b9e40",
+    "patch": "@@ -107,12 +107,9 @@ public void actionPerformed(@NotNull AnActionEvent e) {\n                 log(\"Files \" + Arrays.toString(files));\n                 compilerManager.compile(files, (aborted, errors, warnings, compileContext) -> {\n                     if (errors == 0) {\n-                        VirtualFile[] outputRoots =\n-                                compilerModuleExtension.getOutputRoots(true);\n+                        VirtualFile[] outputRoots = compilerModuleExtension.getOutputRoots(true);\n                         log(\"Output Directories \" + Arrays.toString(outputRoots));\n-                        if (outputRoots != null) {\n-                            result[0] = findClassFile(outputRoots, psiFile);\n-                        }\n+                        result[0] = findClassFile(outputRoots, psiFile);\n                         reloadClassFile(project, result[0]);\n                     } else {\n                         log(\"Compile error \" + errors);"
+  },
+  {
+    "sha": "76b69fab6691ed319354246c3c1fc81ace59eae4",
+    "filename": "src/main/resources/META-INF/plugin.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/liuzhengyang/lets-hotfix-idea-plugin/blob/87f336e728fe4c4a29a11a414438e5976c6b9e40/src/main/resources/META-INF/plugin.xml",
+    "raw_url": "https://github.com/liuzhengyang/lets-hotfix-idea-plugin/raw/87f336e728fe4c4a29a11a414438e5976c6b9e40/src/main/resources/META-INF/plugin.xml",
+    "contents_url": "https://api.github.com/repos/liuzhengyang/lets-hotfix-idea-plugin/contents/src/main/resources/META-INF/plugin.xml?ref=87f336e728fe4c4a29a11a414438e5976c6b9e40",
+    "patch": "@@ -22,7 +22,7 @@\n         </ul>\n     ]]></change-notes>\n \n-    <version>0.0.2</version>\n+    <version>0.0.11</version>\n \n     <extensions defaultExtensionNs=\"com.intellij\">\n         <applicationConfigurable groupId=\"tools\""
+  }
+]

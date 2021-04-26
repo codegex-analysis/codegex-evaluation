@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "94a25f7f4cb416c083d265558da75d457237d671",
+    "filename": ".idea/vcs.xml",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/evgeniiruchko/Java3_HomeWork5/blob/e45664ae6ade89d9ec4a8263b35478c161488c63/.idea/vcs.xml",
+    "raw_url": "https://github.com/evgeniiruchko/Java3_HomeWork5/raw/e45664ae6ade89d9ec4a8263b35478c161488c63/.idea/vcs.xml",
+    "contents_url": "https://api.github.com/repos/evgeniiruchko/Java3_HomeWork5/contents/.idea/vcs.xml?ref=e45664ae6ade89d9ec4a8263b35478c161488c63",
+    "patch": "@@ -0,0 +1,6 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<project version=\"4\">\n+  <component name=\"VcsDirectoryMappings\">\n+    <mapping directory=\"$PROJECT_DIR$\" vcs=\"Git\" />\n+  </component>\n+</project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "746ede5b02d835bfe1bf6558aba68e714cf1e2cb",
+    "filename": "src/ru/geekbrains/Java3/Car.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/evgeniiruchko/Java3_HomeWork5/blob/e45664ae6ade89d9ec4a8263b35478c161488c63/src/ru/geekbrains/Java3/Car.java",
+    "raw_url": "https://github.com/evgeniiruchko/Java3_HomeWork5/raw/e45664ae6ade89d9ec4a8263b35478c161488c63/src/ru/geekbrains/Java3/Car.java",
+    "contents_url": "https://api.github.com/repos/evgeniiruchko/Java3_HomeWork5/contents/src/ru/geekbrains/Java3/Car.java?ref=e45664ae6ade89d9ec4a8263b35478c161488c63",
+    "patch": "@@ -2,6 +2,8 @@\n \n public class Car implements Runnable {\n     private static int CARS_COUNT;\n+    public static volatile boolean isFinished = false;\n+\n     static {\n         CARS_COUNT = 0;\n     }\n@@ -26,11 +28,23 @@ public void run() {\n             System.out.println(this.name + \" готовится\");\n             Thread.sleep(500 + (int)(Math.random() * 800));\n             System.out.println(this.name + \" готов\");\n+            /* Не знаю, насколько правильно объявлять CountDownLatch в Майне. и так к нему тут обращаться.\n+            Просьба прокомментировать этот момент.\n+            Пробовал его сделать в этом классе, но при этом не получилось сдрежать выполнение Майна.\n+             */\n+            Main.READY_CARS.countDown(); // в случае с CyclicBarrier эту строку убирал\n+            Main.READY_CARS.await();\n         } catch (Exception e) {\n             e.printStackTrace();\n         }\n         for (int i = 0; i < race.getStages().size(); i++) {\n             race.getStages().get(i).go(this);\n         }\n+\n+        Main.FINISHED_CARS.countDown();\n+        if (!isFinished){\n+            isFinished = true;\n+            System.out.println(this.name + \" - WIN\");\n+        }\n     }\n }"
+  },
+  {
+    "sha": "d0dc66ff925e34dac0639b5f3e3d6500812b9b50",
+    "filename": "src/ru/geekbrains/Java3/Main.java",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 3,
+    "changes": 35,
+    "blob_url": "https://github.com/evgeniiruchko/Java3_HomeWork5/blob/e45664ae6ade89d9ec4a8263b35478c161488c63/src/ru/geekbrains/Java3/Main.java",
+    "raw_url": "https://github.com/evgeniiruchko/Java3_HomeWork5/raw/e45664ae6ade89d9ec4a8263b35478c161488c63/src/ru/geekbrains/Java3/Main.java",
+    "contents_url": "https://api.github.com/repos/evgeniiruchko/Java3_HomeWork5/contents/src/ru/geekbrains/Java3/Main.java?ref=e45664ae6ade89d9ec4a8263b35478c161488c63",
+    "patch": "@@ -1,19 +1,48 @@\n package ru.geekbrains.Java3;\n \n+import java.util.concurrent.BrokenBarrierException;\n+import java.util.concurrent.CountDownLatch;\n+import java.util.concurrent.CyclicBarrier;\n+import java.util.concurrent.Semaphore;\n+\n public class Main {\n     public static final int CARS_COUNT = 4;\n+    /*\n+    Не смог объяснить, поэтому оставил в комментарии\n+    Почему с CyclicBarrier всё работает когда я передаю количество участников + 1?\n+    а если просто количество участников, то он последнего не дожидается и продолжает выполнение.\n+    При этом main не завершаясь висит после того как все потоки выполнились.\n+    Может из-за того что await() вызываю в двух местах (в майне и в Cаr)?\n+\n+    С CountDownLatch всё отрабатывает как надо.\n+     */\n+    //public static final CyclicBarrier READY_CARS = new CyclicBarrier(CARS_COUNT + 1);\n+    public static final CountDownLatch READY_CARS = new CountDownLatch(CARS_COUNT);\n+    public static final CountDownLatch FINISHED_CARS = new CountDownLatch(CARS_COUNT);\n+    public static Semaphore tunnelSemaphore = new Semaphore(CARS_COUNT / 2);\n+\n+\n     public static void main(String[] args) {\n         System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Подготовка!!!\");\n-        Race race = new Race(new Road(60), new Tunnel(), new Road(40));\n+        Race race = new Race(new Road(60), new Tunnel(tunnelSemaphore), new Road(40));\n         Car[] cars = new Car[CARS_COUNT];\n         for (int i = 0; i < cars.length; i++) {\n             cars[i] = new Car(race, 20 + (int) (Math.random() * 10));\n         }\n         for (int i = 0; i < cars.length; i++) {\n             new Thread(cars[i]).start();\n         }\n-        System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка началась!!!\");\n-        System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка закончилась!!!\");\n+        try {\n+            READY_CARS.await();\n+            System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка началась!!!\");\n+\n+            FINISHED_CARS.await();\n+            System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка закончилась!!!\");\n+        } catch (InterruptedException e) {\n+            e.printStackTrace();\n+        } /*catch (BrokenBarrierException e) {\n+            e.printStackTrace();\n+        }*/\n     }\n }\n "
+  },
+  {
+    "sha": "a91347b5469d43db87b040f907299d19762f62c4",
+    "filename": "src/ru/geekbrains/Java3/Tunnel.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/evgeniiruchko/Java3_HomeWork5/blob/e45664ae6ade89d9ec4a8263b35478c161488c63/src/ru/geekbrains/Java3/Tunnel.java",
+    "raw_url": "https://github.com/evgeniiruchko/Java3_HomeWork5/raw/e45664ae6ade89d9ec4a8263b35478c161488c63/src/ru/geekbrains/Java3/Tunnel.java",
+    "contents_url": "https://api.github.com/repos/evgeniiruchko/Java3_HomeWork5/contents/src/ru/geekbrains/Java3/Tunnel.java?ref=e45664ae6ade89d9ec4a8263b35478c161488c63",
+    "patch": "@@ -1,21 +1,28 @@\n package ru.geekbrains.Java3;\n \n+import java.util.concurrent.Semaphore;\n+\n public class Tunnel extends Stage {\n-    public Tunnel() {\n+    private final Semaphore semaphore;\n+\n+    public Tunnel(Semaphore semaphore) {\n         this.length = 80;\n         this.description = \"Тоннель \" + length + \" метров\";\n+        this.semaphore = semaphore;\n     }\n     @Override\n     public void go(Car c) {\n         try {\n             try {\n                 System.out.println(c.getName() + \" готовится к этапу(ждет): \" + description);\n+                semaphore.acquire();\n                 System.out.println(c.getName() + \" начал этап: \" + description);\n                 Thread.sleep(length / c.getSpeed() * 1000);\n             } catch (InterruptedException e) {\n                 e.printStackTrace();\n             } finally {\n                 System.out.println(c.getName() + \" закончил этап: \" + description);\n+                semaphore.release();\n             }\n         } catch (Exception e) {\n             e.printStackTrace();"
+  }
+]

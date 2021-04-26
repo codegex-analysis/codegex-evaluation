@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "a1836b00b86f3f60085568fa643c8df4cf009ad1",
+    "filename": "antlr/src/main/antlr4/org/apache/iotdb/db/qp/sql/SqlBase.g4",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/iotdb/blob/e54f78bd28e78919ddc2e25d298719fda4d9b988/antlr/src/main/antlr4/org/apache/iotdb/db/qp/sql/SqlBase.g4",
+    "raw_url": "https://github.com/apache/iotdb/raw/e54f78bd28e78919ddc2e25d298719fda4d9b988/antlr/src/main/antlr4/org/apache/iotdb/db/qp/sql/SqlBase.g4",
+    "contents_url": "https://api.github.com/repos/apache/iotdb/contents/antlr/src/main/antlr4/org/apache/iotdb/db/qp/sql/SqlBase.g4?ref=e54f78bd28e78919ddc2e25d298719fda4d9b988",
+    "patch": "@@ -84,6 +84,7 @@ statement\n     | KILL QUERY INT? #killQuery\n     | TRACING ON #tracingOn\n     | TRACING OFF #tracingOff\n+    | TRACING CLEAR ALL #tracingClearAll\n     | COUNT TIMESERIES prefixPath? (GROUP BY LEVEL OPERATOR_EQ INT)? #countTimeseries\n     | COUNT DEVICES prefixPath? #countDevices\n     | COUNT STORAGE GROUP prefixPath? #countStorageGroup"
+  },
+  {
+    "sha": "d48b7e9fd054801220861bc9650b4c11b5f5d6b5",
+    "filename": "server/src/main/java/org/apache/iotdb/db/conf/IoTDBConfig.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/apache/iotdb/blob/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/conf/IoTDBConfig.java",
+    "raw_url": "https://github.com/apache/iotdb/raw/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/conf/IoTDBConfig.java",
+    "contents_url": "https://api.github.com/repos/apache/iotdb/contents/server/src/main/java/org/apache/iotdb/db/conf/IoTDBConfig.java?ref=e54f78bd28e78919ddc2e25d298719fda4d9b988",
+    "patch": "@@ -24,6 +24,7 @@\n import org.apache.iotdb.db.engine.storagegroup.timeindex.TimeIndexLevel;\n import org.apache.iotdb.db.exception.LoadConfigurationException;\n import org.apache.iotdb.db.metadata.MManager;\n+import org.apache.iotdb.db.query.control.TracingManager;\n import org.apache.iotdb.db.service.TSServiceImpl;\n import org.apache.iotdb.rpc.RpcTransportFactory;\n import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;\n@@ -36,6 +37,7 @@\n import org.slf4j.LoggerFactory;\n \n import java.io.File;\n+import java.io.IOException;\n import java.util.regex.Matcher;\n import java.util.regex.Pattern;\n \n@@ -1309,6 +1311,21 @@ public boolean isEnablePerformanceTracing() {\n \n   public void setEnablePerformanceTracing(boolean enablePerformanceTracing) {\n     this.enablePerformanceTracing = enablePerformanceTracing;\n+    if (!enablePerformanceTracing) {\n+      try {\n+        TracingManager.getInstance().close();\n+      } catch (IOException e) {\n+        logger.info(\"close Tracing stream error:{}\" + e.getMessage());\n+      }\n+    } else {\n+      Boolean writerStatus = TracingManager.getInstance().getWriterStatus();\n+      if (!writerStatus) {\n+        TracingManager.getInstance()\n+            .reOpenBufferedWriter(\n+                IoTDBDescriptor.getInstance().getConfig().getTracingDir(),\n+                IoTDBConstant.TRACING_LOG);\n+      }\n+    }\n   }\n \n   public long getPerformanceStatDisplayInterval() {"
+  },
+  {
+    "sha": "f9d7e3b73fafd22d3f0a80eb05a381fa71508483",
+    "filename": "server/src/main/java/org/apache/iotdb/db/qp/constant/SQLConstant.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/iotdb/blob/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/constant/SQLConstant.java",
+    "raw_url": "https://github.com/apache/iotdb/raw/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/constant/SQLConstant.java",
+    "contents_url": "https://api.github.com/repos/apache/iotdb/contents/server/src/main/java/org/apache/iotdb/db/qp/constant/SQLConstant.java?ref=e54f78bd28e78919ddc2e25d298719fda4d9b988",
+    "patch": "@@ -178,6 +178,8 @@ private SQLConstant() {\n   public static final int TOK_TRIGGER_STOP = 103;\n   public static final int TOK_SHOW_TRIGGERS = 104;\n \n+  public static final int TOK_TRACING_CLEAR_ALL = 105;\n+\n   public static final Map<Integer, String> tokenSymbol = new HashMap<>();\n   public static final Map<Integer, String> tokenNames = new HashMap<>();\n   public static final Map<Integer, Integer> reverseWords = new HashMap<>();"
+  },
+  {
+    "sha": "70ce6c6ccf4eeffd44fddf3ff17f7c6bb3015484",
+    "filename": "server/src/main/java/org/apache/iotdb/db/qp/executor/PlanExecutor.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 1,
+    "changes": 20,
+    "blob_url": "https://github.com/apache/iotdb/blob/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/executor/PlanExecutor.java",
+    "raw_url": "https://github.com/apache/iotdb/raw/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/executor/PlanExecutor.java",
+    "contents_url": "https://api.github.com/repos/apache/iotdb/contents/server/src/main/java/org/apache/iotdb/db/qp/executor/PlanExecutor.java?ref=e54f78bd28e78919ddc2e25d298719fda4d9b988",
+    "patch": "@@ -106,6 +106,7 @@\n import org.apache.iotdb.db.query.context.QueryContext;\n import org.apache.iotdb.db.query.control.QueryTimeManager;\n import org.apache.iotdb.db.query.control.QueryTimeManager.QueryInfo;\n+import org.apache.iotdb.db.query.control.TracingManager;\n import org.apache.iotdb.db.query.dataset.AlignByDeviceDataSet;\n import org.apache.iotdb.db.query.dataset.ListDataSet;\n import org.apache.iotdb.db.query.dataset.ShowDevicesDataSet;\n@@ -410,7 +411,24 @@ private void operateKillQuery(KillQueryPlan killQueryPlan) throws QueryIdNotExsi\n   }\n \n   private void operateTracing(TracingPlan plan) {\n-    IoTDBDescriptor.getInstance().getConfig().setEnablePerformanceTracing(plan.isTracingOn());\n+    if (plan.tracingType() != null && plan.tracingType() > 0) {\n+      tracingClearAll();\n+    } else {\n+      IoTDBDescriptor.getInstance().getConfig().setEnablePerformanceTracing(plan.isTracingOn());\n+    }\n+  }\n+\n+  private void tracingClearAll() {\n+    Boolean isTracingOn = IoTDBDescriptor.getInstance().getConfig().isEnablePerformanceTracing();\n+    String tracingDir = IoTDBDescriptor.getInstance().getConfig().getTracingDir();\n+    String tracingDirName = IoTDBConstant.TRACING_LOG;\n+    if (isTracingOn) {\n+      IoTDBDescriptor.getInstance().getConfig().setEnablePerformanceTracing(false);\n+      TracingManager.getInstance().clearTracingAllInfo(tracingDir, tracingDirName);\n+      IoTDBDescriptor.getInstance().getConfig().setEnablePerformanceTracing(true);\n+    } else {\n+      TracingManager.getInstance().clearTracingAllInfo(tracingDir, tracingDirName);\n+    }\n   }\n \n   private void operateFlush(FlushPlan plan) throws StorageGroupNotSetException {"
+  },
+  {
+    "sha": "1bc1dea2e360d569712470b6bbce0fde385017c8",
+    "filename": "server/src/main/java/org/apache/iotdb/db/qp/logical/sys/TracingOperator.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/apache/iotdb/blob/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/logical/sys/TracingOperator.java",
+    "raw_url": "https://github.com/apache/iotdb/raw/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/logical/sys/TracingOperator.java",
+    "contents_url": "https://api.github.com/repos/apache/iotdb/contents/server/src/main/java/org/apache/iotdb/db/qp/logical/sys/TracingOperator.java?ref=e54f78bd28e78919ddc2e25d298719fda4d9b988",
+    "patch": "@@ -24,13 +24,25 @@\n \n   private boolean isTracingOn;\n \n+  private Integer tracingType;\n+\n   public TracingOperator(int tokenIntType, boolean isTracingOn) {\n     super(tokenIntType);\n     this.isTracingOn = isTracingOn;\n     operatorType = OperatorType.TRACING;\n   }\n \n+  public TracingOperator(int tokenIntType, int tracingType) {\n+    super(tokenIntType);\n+    this.tracingType = tracingType;\n+    operatorType = OperatorType.TRACING;\n+  }\n+\n   public boolean isTracingOn() {\n     return isTracingOn;\n   }\n+\n+  public Integer tracingType() {\n+    return tracingType;\n+  }\n }"
+  },
+  {
+    "sha": "1eeb6c541efb16475ddafc7535e458686b38793a",
+    "filename": "server/src/main/java/org/apache/iotdb/db/qp/physical/sys/TracingPlan.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/apache/iotdb/blob/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/physical/sys/TracingPlan.java",
+    "raw_url": "https://github.com/apache/iotdb/raw/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/physical/sys/TracingPlan.java",
+    "contents_url": "https://api.github.com/repos/apache/iotdb/contents/server/src/main/java/org/apache/iotdb/db/qp/physical/sys/TracingPlan.java?ref=e54f78bd28e78919ddc2e25d298719fda4d9b988",
+    "patch": "@@ -28,12 +28,18 @@\n public class TracingPlan extends PhysicalPlan {\n \n   private boolean isTracingOn;\n+  private Integer tracingType;\n \n   public TracingPlan(boolean isTracingOn) {\n     super(false, OperatorType.TRACING);\n     this.isTracingOn = isTracingOn;\n   }\n \n+  public TracingPlan(Integer tracingType) {\n+    super(false, OperatorType.TRACING);\n+    this.tracingType = tracingType;\n+  }\n+\n   @Override\n   public List<PartialPath> getPaths() {\n     return Collections.emptyList();\n@@ -42,4 +48,8 @@ public TracingPlan(boolean isTracingOn) {\n   public boolean isTracingOn() {\n     return isTracingOn;\n   }\n+\n+  public Integer tracingType() {\n+    return tracingType;\n+  }\n }"
+  },
+  {
+    "sha": "cbdea84154846800ed3abaebc0ed1648528a174b",
+    "filename": "server/src/main/java/org/apache/iotdb/db/qp/sql/IoTDBSqlVisitor.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/iotdb/blob/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/sql/IoTDBSqlVisitor.java",
+    "raw_url": "https://github.com/apache/iotdb/raw/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/sql/IoTDBSqlVisitor.java",
+    "contents_url": "https://api.github.com/repos/apache/iotdb/contents/server/src/main/java/org/apache/iotdb/db/qp/sql/IoTDBSqlVisitor.java?ref=e54f78bd28e78919ddc2e25d298719fda4d9b988",
+    "patch": "@@ -204,6 +204,7 @@\n import org.apache.iotdb.db.qp.sql.SqlBaseParser.TableElementContext;\n import org.apache.iotdb.db.qp.sql.SqlBaseParser.TagClauseContext;\n import org.apache.iotdb.db.qp.sql.SqlBaseParser.TimeIntervalContext;\n+import org.apache.iotdb.db.qp.sql.SqlBaseParser.TracingClearAllContext;\n import org.apache.iotdb.db.qp.sql.SqlBaseParser.TracingOffContext;\n import org.apache.iotdb.db.qp.sql.SqlBaseParser.TracingOnContext;\n import org.apache.iotdb.db.qp.sql.SqlBaseParser.TriggerAttributeContext;\n@@ -897,6 +898,11 @@ public Operator visitTracingOff(TracingOffContext ctx) {\n     return new TracingOperator(SQLConstant.TOK_TRACING, false);\n   }\n \n+  @Override\n+  public Operator visitTracingClearAll(TracingClearAllContext ctx) {\n+    return new TracingOperator(SQLConstant.TOK_TRACING, SQLConstant.TOK_TRACING_CLEAR_ALL);\n+  }\n+\n   @Override\n   public Operator visitCountTimeseries(CountTimeseriesContext ctx) {\n     PrefixPathContext pathContext = ctx.prefixPath();"
+  },
+  {
+    "sha": "b632963191b89da6c4d4e255b6c9c812974443ec",
+    "filename": "server/src/main/java/org/apache/iotdb/db/qp/strategy/PhysicalGenerator.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/iotdb/blob/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/strategy/PhysicalGenerator.java",
+    "raw_url": "https://github.com/apache/iotdb/raw/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/qp/strategy/PhysicalGenerator.java",
+    "contents_url": "https://api.github.com/repos/apache/iotdb/contents/server/src/main/java/org/apache/iotdb/db/qp/strategy/PhysicalGenerator.java?ref=e54f78bd28e78919ddc2e25d298719fda4d9b988",
+    "patch": "@@ -249,7 +249,11 @@ public PhysicalPlan transformToPhysicalPlan(Operator operator, int fetchSize)\n         return new FlushPlan(flushOperator.isSeq(), flushOperator.getStorageGroupList());\n       case TRACING:\n         TracingOperator tracingOperator = (TracingOperator) operator;\n-        return new TracingPlan(tracingOperator.isTracingOn());\n+        if (tracingOperator.tracingType() != null) {\n+          return new TracingPlan(tracingOperator.tracingType());\n+        } else {\n+          return new TracingPlan(tracingOperator.isTracingOn());\n+        }\n       case QUERY:\n         QueryOperator query = (QueryOperator) operator;\n         return transformQuery(query, fetchSize);"
+  },
+  {
+    "sha": "4bfe1f49a4e9f80df6664da0757d04efa9c61efe",
+    "filename": "server/src/main/java/org/apache/iotdb/db/query/control/TracingManager.java",
+    "status": "modified",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/apache/iotdb/blob/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/query/control/TracingManager.java",
+    "raw_url": "https://github.com/apache/iotdb/raw/e54f78bd28e78919ddc2e25d298719fda4d9b988/server/src/main/java/org/apache/iotdb/db/query/control/TracingManager.java",
+    "contents_url": "https://api.github.com/repos/apache/iotdb/contents/server/src/main/java/org/apache/iotdb/db/query/control/TracingManager.java?ref=e54f78bd28e78919ddc2e25d298719fda4d9b988",
+    "patch": "@@ -202,6 +202,26 @@ public void close() throws IOException {\n     writer.close();\n   }\n \n+  public boolean getWriterStatus() {\n+    try {\n+      writer.flush();\n+      return true;\n+    } catch (IOException e) {\n+      return false;\n+    }\n+  }\n+\n+  public void reOpenBufferedWriter(String dirName, String logFileName) {\n+    File logFile = SystemFileFactory.INSTANCE.getFile(dirName + File.separator + logFileName);\n+    FileWriter fileWriter = null;\n+    try {\n+      fileWriter = new FileWriter(logFile, true);\n+    } catch (IOException e) {\n+      logger.error(\"Meeting error while again open TracingManager_writer: {}\", e.getMessage());\n+    }\n+    writer = new BufferedWriter(fileWriter);\n+  }\n+\n   private static class TracingManagerHelper {\n \n     private static final TracingManager INSTANCE =\n@@ -210,4 +230,28 @@ public void close() throws IOException {\n \n     private TracingManagerHelper() {}\n   }\n+\n+  /** Clear all Tracing records */\n+  public void clearTracingAllInfo(String dirName, String logFileName) {\n+    File tracingDir = SystemFileFactory.INSTANCE.getFile(dirName);\n+    if (tracingDir.exists()) {\n+      File logFile = SystemFileFactory.INSTANCE.getFile(dirName + File.separator + logFileName);\n+      if (logFile.exists()) {\n+        try {\n+          Boolean flag = logFile.delete();\n+          if (!flag) {\n+            FileWriter fw5 = new FileWriter(logFile);\n+            BufferedWriter bw1 = new BufferedWriter(fw5);\n+            bw1.write(\"\");\n+            bw1.close();\n+            fw5.close();\n+          }\n+        } catch (IOException e) {\n+          logger.error(\"TracingFile Clear all error: {}\", e.getMessage());\n+        }\n+      }\n+    } else {\n+      logger.info(\"Directory does not exist tracingDir: {}\", tracingDir);\n+    }\n+  }\n }"
+  }
+]

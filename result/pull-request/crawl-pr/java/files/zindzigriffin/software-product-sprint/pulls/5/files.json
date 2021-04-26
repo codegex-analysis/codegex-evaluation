@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "0490b65804a8b94c416d6f0dc2df60fb72d80ffe",
+    "filename": "portfolio/pom.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/zindzigriffin/software-product-sprint/blob/0f04ed8f2bdc604c8fb2b4f1011f0147ee14a04b/portfolio/pom.xml",
+    "raw_url": "https://github.com/zindzigriffin/software-product-sprint/raw/0f04ed8f2bdc604c8fb2b4f1011f0147ee14a04b/portfolio/pom.xml",
+    "contents_url": "https://api.github.com/repos/zindzigriffin/software-product-sprint/contents/portfolio/pom.xml?ref=0f04ed8f2bdc604c8fb2b4f1011f0147ee14a04b",
+    "patch": "@@ -12,7 +12,7 @@\n     <maven.compiler.source>11</maven.compiler.source>\n     <maven.compiler.target>11</maven.compiler.target>\n     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n-    <jetty.version>11.0.0</jetty.version>\n+    <jetty.version>9.4.31.v20200723</jetty.version>\n \n     <!-- Project-specific properties -->\n     <exec.mainClass>com.google.sps.ServerMain</exec.mainClass>\n@@ -38,6 +38,11 @@\n       <artifactId>jetty-annotations</artifactId>\n       <version>${jetty.version}</version>\n     </dependency>\n+    <dependency>\n+      <groupId>com.google.code.gson</groupId>\n+      <artifactId>gson</artifactId>\n+      <version>2.8.6</version>\n+    </dependency>\n   </dependencies>\n \n   <build>"
+  },
+  {
+    "sha": "742da80df586c2da8497cdb090dea95afb6137c3",
+    "filename": "portfolio/src/main/java/com/google/sps/servlets/Servlet.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 3,
+    "changes": 15,
+    "blob_url": "https://github.com/zindzigriffin/software-product-sprint/blob/0f04ed8f2bdc604c8fb2b4f1011f0147ee14a04b/portfolio/src/main/java/com/google/sps/servlets/Servlet.java",
+    "raw_url": "https://github.com/zindzigriffin/software-product-sprint/raw/0f04ed8f2bdc604c8fb2b4f1011f0147ee14a04b/portfolio/src/main/java/com/google/sps/servlets/Servlet.java",
+    "contents_url": "https://api.github.com/repos/zindzigriffin/software-product-sprint/contents/portfolio/src/main/java/com/google/sps/servlets/Servlet.java?ref=0f04ed8f2bdc604c8fb2b4f1011f0147ee14a04b",
+    "patch": "@@ -1,19 +1,28 @@\n \n package com.google.sps.servlets;\n+\n+import com.google.gson.Gson;\n import java.io.IOException;\n+import java.util.Date;\n import javax.servlet.annotation.WebServlet;\n import javax.servlet.http.HttpServlet;\n import javax.servlet.http.HttpServletRequest;\n import javax.servlet.http.HttpServletResponse;\n @WebServlet(\"/My-Portfolio\")\n \n public class Servlet extends HttpServlet{\n+    String [] random_messages = {\"I did martial arts for 13 years\", \"I used to be a competitive swimmer.\",\"I love cooking\"};\n     @Override\n \n     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {\n-\n-    response.setContentType(\"text/plain;\");\n-    response.getWriter().println(\"Butterflies are one of my favorite insects.\");\n+    String json = convertToJsonUsingGson(random_messages);\n+    response.setContentType(\"application/json;\");\n+    response.getWriter().println(json);\n+  }\n+private String convertToJsonUsingGson(String[] random_messages) {\n+        Gson gson = new Gson();\n+        String json = gson.toJson(random_messages);\n+    return json;\n   }\n }\n "
+  },
+  {
+    "sha": "885f6515aa8140cf3988e42fda0733d2845af354",
+    "filename": "portfolio/src/main/webapp/script.js",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 3,
+    "changes": 10,
+    "blob_url": "https://github.com/zindzigriffin/software-product-sprint/blob/0f04ed8f2bdc604c8fb2b4f1011f0147ee14a04b/portfolio/src/main/webapp/script.js",
+    "raw_url": "https://github.com/zindzigriffin/software-product-sprint/raw/0f04ed8f2bdc604c8fb2b4f1011f0147ee14a04b/portfolio/src/main/webapp/script.js",
+    "contents_url": "https://api.github.com/repos/zindzigriffin/software-product-sprint/contents/portfolio/src/main/webapp/script.js?ref=0f04ed8f2bdc604c8fb2b4f1011f0147ee14a04b",
+    "patch": "@@ -27,9 +27,13 @@ function addRandomGreeting() {\n   greetingContainer.innerText = greeting;\n }\n async function showServerTime() {\n+    console.log(\"At the top of the function.\")\n   const responseFromServer = await fetch('/My-Portfolio');\n-  const textFromResponse = await responseFromServer.text();\n-\n+  const textFromResponse = await responseFromServer.json();\n+  console.log(textFromResponse)\n   const dateContainer = document.getElementById('text-container');\n-  dateContainer.innerText = textFromResponse;\n+  const random_greeting = Math.floor(Math.random() * 3);\n+  dateContainer.innerText = textFromResponse[random_greeting];\n+\n+\n }"
+  }
+]

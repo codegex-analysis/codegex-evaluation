@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "d19172d29797a903b9e7333366c8fc2af0b222b4",
+    "filename": "hbase-client/src/main/java/org/apache/hadoop/hbase/client/RetriesExhaustedException.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/hbase/blob/abbcb961b0df1178789a2db77465e81e955806ac/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RetriesExhaustedException.java",
+    "raw_url": "https://github.com/apache/hbase/raw/abbcb961b0df1178789a2db77465e81e955806ac/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RetriesExhaustedException.java",
+    "contents_url": "https://api.github.com/repos/apache/hbase/contents/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RetriesExhaustedException.java?ref=abbcb961b0df1178789a2db77465e81e955806ac",
+    "patch": "@@ -48,7 +48,7 @@ public RetriesExhaustedException(final String msg, final IOException e) {\n    */\n   @InterfaceAudience.Private\n   public static class ThrowableWithExtraContext {\n-    private final Throwable throwable;\n+    public final Throwable throwable;\n     private final long whenAsEpochMilli;\n     private final String extras;\n "
+  },
+  {
+    "sha": "c0900c8fc74cfa25bb7f06861391b6c9a0a8d516",
+    "filename": "hbase-client/src/main/java/org/apache/hadoop/hbase/client/RpcRetryingCallerImpl.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/apache/hbase/blob/abbcb961b0df1178789a2db77465e81e955806ac/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RpcRetryingCallerImpl.java",
+    "raw_url": "https://github.com/apache/hbase/raw/abbcb961b0df1178789a2db77465e81e955806ac/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RpcRetryingCallerImpl.java",
+    "contents_url": "https://api.github.com/repos/apache/hbase/contents/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RpcRetryingCallerImpl.java?ref=abbcb961b0df1178789a2db77465e81e955806ac",
+    "patch": "@@ -32,6 +32,8 @@\n import org.apache.hadoop.hbase.CallQueueTooBigException;\n import org.apache.hadoop.hbase.DoNotRetryIOException;\n import org.apache.hadoop.hbase.exceptions.PreemptiveFastFailException;\n+import org.apache.hadoop.hbase.quotas.RpcThrottlingException;\n+import org.apache.hadoop.hbase.quotas.ThrottlingException;\n import org.apache.hadoop.hbase.util.EnvironmentEdgeManager;\n import org.apache.hadoop.hbase.util.ExceptionUtil;\n import org.apache.hadoop.ipc.RemoteException;\n@@ -102,7 +104,13 @@ public T callWithRetries(RetryingCallable<T> callable, int callTimeout)\n       long expectedSleep;\n       try {\n         // bad cache entries are cleared in the call to RetryingCallable#throwable() in catch block\n-        callable.prepare(tries != 0);\n+        Throwable t = null;\n+        if (exceptions != null && !exceptions.isEmpty()) {\n+          t = exceptions.get(exceptions.size() - 1).throwable;\n+        }\n+        if (!(t instanceof RpcThrottlingException)) {\n+          callable.prepare(tries != 0);\n+        }\n         interceptor.intercept(context.prepare(callable, tries));\n         return callable.call(getTimeout(callTimeout));\n       } catch (PreemptiveFastFailException e) {"
+  }
+]

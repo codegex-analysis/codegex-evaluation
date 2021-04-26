@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "cbad5217c8253fbf735ed4f9b7582ec1c407fc84",
+    "filename": "plugin/pom.xml",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 7,
+    "changes": 24,
+    "blob_url": "https://github.com/jenkinsci/git-forensics-plugin/blob/a5f0f87aa54bea52cd6f9be0c521210dd769cc6d/plugin/pom.xml",
+    "raw_url": "https://github.com/jenkinsci/git-forensics-plugin/raw/a5f0f87aa54bea52cd6f9be0c521210dd769cc6d/plugin/pom.xml",
+    "contents_url": "https://api.github.com/repos/jenkinsci/git-forensics-plugin/contents/plugin/pom.xml?ref=a5f0f87aa54bea52cd6f9be0c521210dd769cc6d",
+    "patch": "@@ -36,7 +36,7 @@\n     <bootstrap4-api.version>4.6.0-2</bootstrap4-api.version>\n     <font-awesome-api.version>5.15.2-2</font-awesome-api.version>\n \n-    <git-plugin.version>4.6.0</git-plugin.version>\n+    <git-plugin.version>4.6.1-rc4276.96bd39e55b7b</git-plugin.version>\n     <git-client.version>3.6.0</git-client.version>\n     <scm-api.version>2.6.4</scm-api.version>\n \n@@ -69,11 +69,6 @@\n         <artifactId>git-client</artifactId>\n         <version>${git-client.version}</version>\n       </dependency>\n-      <dependency>\n-        <groupId>org.jenkins-ci.plugins</groupId>\n-        <artifactId>credentials</artifactId>\n-        <version>2.3.14</version>\n-      </dependency>\n       <dependency>\n         <groupId>org.jenkins-ci.plugins</groupId>\n         <artifactId>script-security</artifactId>\n@@ -109,6 +104,21 @@\n         <artifactId>trilead-api</artifactId>\n         <version>1.0.13</version>\n       </dependency>\n+      <dependency>\n+        <groupId>org.jenkins-ci.plugins</groupId>\n+        <artifactId>structs</artifactId>\n+        <version>1.22</version>\n+      </dependency>\n+      <dependency>\n+        <groupId>org.jenkins-ci.plugins</groupId>\n+        <artifactId>credentials</artifactId>\n+        <version>2.3.15</version>\n+      </dependency>\n+      <dependency>\n+        <groupId>org.jenkins-ci</groupId>\n+        <artifactId>symbol-annotation</artifactId>\n+        <version>1.22</version>\n+      </dependency>\n     </dependencies>\n   </dependencyManagement>\n \n@@ -208,7 +218,7 @@\n     <dependency>\n       <groupId>org.jenkins-ci.plugins</groupId>\n       <artifactId>git</artifactId>\n-      <version>${git-plugin.version}</version>\n+      <version>4.6.0</version>\n       <scope>test</scope>\n       <type>test-jar</type>\n     </dependency>"
+  },
+  {
+    "sha": "f70e5234f750545665b4da80fc67a0e53f6f488e",
+    "filename": "plugin/src/main/java/io/jenkins/plugins/forensics/git/util/GitCommitDecorator.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 41,
+    "changes": 42,
+    "blob_url": "https://github.com/jenkinsci/git-forensics-plugin/blob/a5f0f87aa54bea52cd6f9be0c521210dd769cc6d/plugin/src/main/java/io/jenkins/plugins/forensics/git/util/GitCommitDecorator.java",
+    "raw_url": "https://github.com/jenkinsci/git-forensics-plugin/raw/a5f0f87aa54bea52cd6f9be0c521210dd769cc6d/plugin/src/main/java/io/jenkins/plugins/forensics/git/util/GitCommitDecorator.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/git-forensics-plugin/contents/plugin/src/main/java/io/jenkins/plugins/forensics/git/util/GitCommitDecorator.java?ref=a5f0f87aa54bea52cd6f9be0c521210dd769cc6d",
+    "patch": "@@ -2,15 +2,10 @@\n \n import java.io.IOException;\n import java.net.URL;\n-import java.util.Collections;\n-import java.util.Objects;\n import java.util.Optional;\n \n import org.apache.commons.lang3.StringUtils;\n \n-import edu.hm.hafner.util.Generated;\n-\n-import hudson.plugins.git.GitChangeSet;\n import hudson.plugins.git.browser.GitRepositoryBrowser;\n import hudson.scm.RepositoryBrowser;\n \n@@ -43,7 +38,7 @@ public String asLink(final String id) {\n \n     private Optional<String> createLink(final String id) {\n         try {\n-            URL link = browser.getChangeSetLink(new DummyChangeSet(id));\n+            URL link = browser.getChangeSetLink(id);\n             if (link != null) {\n                 return Optional.of(a().withText(asText(id)).withHref(link.toString()).render());\n             }\n@@ -53,39 +48,4 @@ public String asLink(final String id) {\n         }\n         return Optional.empty();\n     }\n-\n-    // TODO: move this class and the implementation to the Git plugin\n-    private static class DummyChangeSet extends GitChangeSet {\n-        private final String id;\n-\n-        DummyChangeSet(final String id) {\n-            super(Collections.emptyList(), false);\n-            this.id = id;\n-        }\n-\n-        @Override\n-        public String getId() {\n-            return id;\n-        }\n-\n-        @Override @Generated\n-        public boolean equals(final Object o) {\n-            if (this == o) {\n-                return true;\n-            }\n-            if (o == null || getClass() != o.getClass()) {\n-                return false;\n-            }\n-            if (!super.equals(o)) {\n-                return false;\n-            }\n-            DummyChangeSet that = (DummyChangeSet) o;\n-            return Objects.equals(id, that.id);\n-        }\n-\n-        @Override @Generated\n-        public int hashCode() {\n-            return Objects.hash(super.hashCode(), id);\n-        }\n-    }\n }"
+  },
+  {
+    "sha": "241cae66c1e56c83a8ca2445b6cfe5305eacd804",
+    "filename": "plugin/src/test/java/io/jenkins/plugins/forensics/git/reference/GitCheckoutListenerITest.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/jenkinsci/git-forensics-plugin/blob/a5f0f87aa54bea52cd6f9be0c521210dd769cc6d/plugin/src/test/java/io/jenkins/plugins/forensics/git/reference/GitCheckoutListenerITest.java",
+    "raw_url": "https://github.com/jenkinsci/git-forensics-plugin/raw/a5f0f87aa54bea52cd6f9be0c521210dd769cc6d/plugin/src/test/java/io/jenkins/plugins/forensics/git/reference/GitCheckoutListenerITest.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/git-forensics-plugin/contents/plugin/src/test/java/io/jenkins/plugins/forensics/git/reference/GitCheckoutListenerITest.java?ref=a5f0f87aa54bea52cd6f9be0c521210dd769cc6d",
+    "patch": "@@ -70,10 +70,10 @@ public void shouldLogAllGitCommits() throws Exception {\n         assertThat(nextBuild).isNotEmpty()\n                 .hasLatestCommit(gitRepo.head())\n                 .hasOnlyCommits(nextBuildHead)\n-                .hasNoErrorMessages().hasInfoMessages(\"-> Recorded one new commit\",\n-                String.format(\"Found previous build '%s' that contains recorded Git commits\",\n-                        referenceBuild.getOwner()),\n-                String.format(\"-> Starting recording of new commits since '%s'\", referenceBuildHead));\n+                .hasNoErrorMessages()\n+                .hasInfoMessages(\"-> Recorded one new commit\",\n+                        String.format(\"Found previous build '%s' that contains recorded Git commits\", referenceBuild.getOwner()),\n+                        String.format(\"-> Starting recording of new commits since '%s'\", referenceBuildHead));\n     }\n \n     /**"
+  }
+]

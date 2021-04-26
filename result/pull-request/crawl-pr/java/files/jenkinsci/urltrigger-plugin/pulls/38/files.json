@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "be57b6f6ea884d2f9c2b194d67b3eda8a34d5f95",
+    "filename": "src/main/java/org/jenkinsci/plugins/urltrigger/URLTrigger.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/jenkinsci/urltrigger-plugin/blob/8a190b50327f8353b46d59cdd31fd145c8f64241/src/main/java/org/jenkinsci/plugins/urltrigger/URLTrigger.java",
+    "raw_url": "https://github.com/jenkinsci/urltrigger-plugin/raw/8a190b50327f8353b46d59cdd31fd145c8f64241/src/main/java/org/jenkinsci/plugins/urltrigger/URLTrigger.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/urltrigger-plugin/contents/src/main/java/org/jenkinsci/plugins/urltrigger/URLTrigger.java?ref=8a190b50327f8353b46d59cdd31fd145c8f64241",
+    "patch": "@@ -249,6 +249,7 @@ protected boolean checkIfModified(Node pollingNode, XTriggerLog log) throws XTri\n         for (URLTriggerEntry entry : entries) {\n             boolean modified = checkIfModifiedEntry(entry, pollingNode, log);\n             if (modified) {\n+                URLTriggerCause.SetUrlTrigger(entry.getUrl());\n                 return true;\n             }\n         }"
+  },
+  {
+    "sha": "59fbc19d7eec6f429618fbcb99d606b920b35911",
+    "filename": "src/main/java/org/jenkinsci/plugins/urltrigger/URLTriggerCause.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 1,
+    "changes": 11,
+    "blob_url": "https://github.com/jenkinsci/urltrigger-plugin/blob/8a190b50327f8353b46d59cdd31fd145c8f64241/src/main/java/org/jenkinsci/plugins/urltrigger/URLTriggerCause.java",
+    "raw_url": "https://github.com/jenkinsci/urltrigger-plugin/raw/8a190b50327f8353b46d59cdd31fd145c8f64241/src/main/java/org/jenkinsci/plugins/urltrigger/URLTriggerCause.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/urltrigger-plugin/contents/src/main/java/org/jenkinsci/plugins/urltrigger/URLTriggerCause.java?ref=8a190b50327f8353b46d59cdd31fd145c8f64241",
+    "patch": "@@ -9,9 +9,18 @@\n \n     public static final String NAME = \"URLTrigger\";\n     public static final String CAUSE = \"A change within the response URL invocation\";\n+    public static String urlTrigger;\n+\n+    public static void SetUrlTrigger(String url) {\n+        urlTrigger = url;\n+    }\n \n     @Override\n     public String getShortDescription() {\n-        return String.format(\"[%s] - %s\", NAME, CAUSE);\n+        return String.format(\"[%s] - %s of %s\", NAME, CAUSE, urlTrigger);\n+    }\n+\n+    public String getUrlTrigger() {\n+        return urlTrigger;\n     }\n }"
+  },
+  {
+    "sha": "1a6022bc5bff23ca8605e83e34909698e5aac314",
+    "filename": "src/main/java/org/jenkinsci/plugins/urltrigger/environment/URLTriggerEnvironmentContributor.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/jenkinsci/urltrigger-plugin/blob/8a190b50327f8353b46d59cdd31fd145c8f64241/src/main/java/org/jenkinsci/plugins/urltrigger/environment/URLTriggerEnvironmentContributor.java",
+    "raw_url": "https://github.com/jenkinsci/urltrigger-plugin/raw/8a190b50327f8353b46d59cdd31fd145c8f64241/src/main/java/org/jenkinsci/plugins/urltrigger/environment/URLTriggerEnvironmentContributor.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/urltrigger-plugin/contents/src/main/java/org/jenkinsci/plugins/urltrigger/environment/URLTriggerEnvironmentContributor.java?ref=8a190b50327f8353b46d59cdd31fd145c8f64241",
+    "patch": "@@ -0,0 +1,35 @@\n+package org.jenkinsci.plugins.urltrigger.environment;\n+\n+import hudson.EnvVars;\n+import hudson.Extension;\n+import hudson.matrix.MatrixRun;\n+import hudson.matrix.MatrixBuild;\n+import hudson.model.EnvironmentContributor;\n+import hudson.model.Run;\n+import hudson.model.TaskListener;\n+import org.jenkinsci.plugins.urltrigger.URLTriggerCause;\n+\n+import javax.annotation.Nonnull;\n+import java.io.IOException;\n+\n+/**\n+ * @author Fei Yang\n+ */\n+@Extension\n+public class URLTriggerEnvironmentContributor extends EnvironmentContributor {\n+    @Override\n+    public void buildEnvironmentFor(@Nonnull Run r, @Nonnull EnvVars envs, @Nonnull TaskListener listener) throws IOException, InterruptedException {\n+        URLTriggerCause cause = null;\n+        if (r instanceof MatrixRun) {\n+            MatrixBuild parent = ((MatrixRun) r).getParentBuild();\n+            if (parent != null) {\n+                cause = parent.getCause(URLTriggerCause.class);\n+            }\n+        } else {\n+            cause = (URLTriggerCause) r.getCause(URLTriggerCause.class);\n+        }\n+        if (cause != null) {\n+            envs.override(\"URL_TRIGGER\", cause.getUrlTrigger());\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "904ea43b58627323b7397e52048713feb548e749",
+    "filename": "src/test/java/org/jenkinsci/plugins/urltrigger/environment/URLTriggerEnvironmentContributorTest.java",
+    "status": "added",
+    "additions": 66,
+    "deletions": 0,
+    "changes": 66,
+    "blob_url": "https://github.com/jenkinsci/urltrigger-plugin/blob/8a190b50327f8353b46d59cdd31fd145c8f64241/src/test/java/org/jenkinsci/plugins/urltrigger/environment/URLTriggerEnvironmentContributorTest.java",
+    "raw_url": "https://github.com/jenkinsci/urltrigger-plugin/raw/8a190b50327f8353b46d59cdd31fd145c8f64241/src/test/java/org/jenkinsci/plugins/urltrigger/environment/URLTriggerEnvironmentContributorTest.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/urltrigger-plugin/contents/src/test/java/org/jenkinsci/plugins/urltrigger/environment/URLTriggerEnvironmentContributorTest.java?ref=8a190b50327f8353b46d59cdd31fd145c8f64241",
+    "patch": "@@ -0,0 +1,66 @@\n+package org.jenkinsci.plugins.urltrigger.environment;\n+\n+import hudson.EnvVars;\n+import hudson.matrix.*;\n+import hudson.model.BuildListener;\n+import hudson.model.FreeStyleBuild;\n+import hudson.model.FreeStyleProject;\n+import hudson.model.StreamBuildListener;\n+import org.jenkinsci.plugins.urltrigger.URLTriggerCause;\n+import org.junit.Before;\n+import org.junit.ClassRule;\n+import org.junit.Test;\n+import org.jvnet.hudson.test.JenkinsRule;\n+\n+import java.io.IOException;\n+import java.nio.charset.Charset;\n+import java.util.List;\n+import java.util.concurrent.ExecutionException;\n+\n+import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertNotNull;\n+\n+public class URLTriggerEnvironmentContributorTest {\n+    @ClassRule\n+    public static JenkinsRule jenkins = new JenkinsRule();\n+\n+    private BuildListener listener;\n+\n+    @Before\n+    public void setup() {\n+        listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());\n+    }\n+\n+    @Test\n+    public void freeStyleProjectTest() throws IOException, InterruptedException, ExecutionException {\n+        FreeStyleProject p = jenkins.createFreeStyleProject();\n+        URLTriggerCause cause = new URLTriggerCause();\n+        URLTriggerCause.SetUrlTrigger(\"http://test.com\");\n+        FreeStyleBuild b = p.scheduleBuild2(0, cause).get();\n+        EnvVars env = b.getEnvironment(listener);\n+\n+        assertEquals(\"http://test.com\", env.get(\"URL_TRIGGER\"));\n+    }\n+\n+    @Test\n+    public void matrixProjectTest() throws IOException, InterruptedException, ExecutionException {\n+        EnvVars env;\n+        MatrixProject p = jenkins.jenkins.createProject(MatrixProject.class, \"matrixbuild\");\n+        URLTriggerCause cause = new URLTriggerCause();\n+        URLTriggerCause.SetUrlTrigger(\"http://test.com\");\n+        // set up 2x2 matrix\n+        AxisList axes = new AxisList();\n+        axes.add(new TextAxis(\"db\",\"mysql\",\"oracle\"));\n+        axes.add(new TextAxis(\"direction\",\"north\",\"south\"));\n+        p.setAxes(axes);\n+\n+        MatrixBuild build = p.scheduleBuild2(0, cause).get();\n+        List<MatrixRun> runs = build.getRuns();\n+        for (MatrixRun run : runs) {\n+            env = run.getEnvironment(listener);\n+            assertNotNull(env.get(\"db\"));\n+            assertEquals(\"http://test.com\", env.get(\"URL_TRIGGER\"));\n+        }\n+    }\n+\n+}"
+  }
+]

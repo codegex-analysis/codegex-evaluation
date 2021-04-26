@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "2e2a74595de52b90424823d67ac28567b417b41d",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/bcgov/mines-digital-trust/blob/e9604d8c2c516913c174d81d2c5e332120852d61/.gitignore",
+    "raw_url": "https://github.com/bcgov/mines-digital-trust/raw/e9604d8c2c516913c174d81d2c5e332120852d61/.gitignore",
+    "contents_url": "https://api.github.com/repos/bcgov/mines-digital-trust/contents/.gitignore?ref=e9604d8c2c516913c174d81d2c5e332120852d61",
+    "patch": "@@ -50,5 +50,6 @@ build\n .project\n \n docker/**/*.txn\n+docker/bbp-network/von-network\n venv\n "
+  },
+  {
+    "sha": "c4eda634601a69c0f6d26465faaecee7cf7a4dc0",
+    "filename": "docker/bbp-network/docker-compose.yml",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 4,
+    "changes": 26,
+    "blob_url": "https://github.com/bcgov/mines-digital-trust/blob/e9604d8c2c516913c174d81d2c5e332120852d61/docker/bbp-network/docker-compose.yml",
+    "raw_url": "https://github.com/bcgov/mines-digital-trust/raw/e9604d8c2c516913c174d81d2c5e332120852d61/docker/bbp-network/docker-compose.yml",
+    "contents_url": "https://api.github.com/repos/bcgov/mines-digital-trust/contents/docker/bbp-network/docker-compose.yml?ref=e9604d8c2c516913c174d81d2c5e332120852d61",
+    "patch": "@@ -36,7 +36,7 @@ services:\n       - ${BPA1_PORT}:${BPA1_PORT}\n       - ${BPA1_DEBUG_PORT}:${BPA1_DEBUG_PORT}\n     restart: always\n-    #extra_hosts:\n+    # extra_hosts:\n     #  - host.docker.internal:host-gateway\n   bpa-agent1:\n     image: bcgovimages/aries-cloudagent:py36-1.15-0_0.5.6\n@@ -69,7 +69,7 @@ services:\n       ]\n     volumes:\n       - \"./acapy-static-args.yml:/home/indy/acapy-static-args.yml\"\n-    #extra_hosts:\n+    # extra_hosts:\n     #  - host.docker.internal:host-gateway\n   bpa-wallet-db1:\n     image: \"postgres:12-alpine\"\n@@ -114,7 +114,7 @@ services:\n     ports:\n       - ${BPA2_PORT}:${BPA2_PORT}\n     restart: always\n-    #extra_hosts:\n+    # extra_hosts:\n     #  - host.docker.internal:host-gateway\n   bpa-agent2:\n     image: bcgovimages/aries-cloudagent:py36-1.15-0_0.5.6\n@@ -147,7 +147,7 @@ services:\n       ]\n     volumes:\n       - \"./acapy-static-args.yml:/home/indy/acapy-static-args.yml\"\n-    #extra_hosts:\n+    # extra_hosts:\n     #  - host.docker.internal:host-gateway\n   bpa-wallet-db2:\n     image: \"postgres:12-alpine\"\n@@ -158,6 +158,24 @@ services:\n       - ${POSTGRESQL2_PORT}:5432\n     volumes:\n       - bpa-wallet-db2:/var/lib/postgresql/data\n+\n+\n+#######\n+# Resolver\n+#######\n+  driver-did-sov:\n+    image: universalresolver/driver-did-sov\n+    environment:\n+      uniresolver_driver_did_sov_libIndyPath:\n+      uniresolver_driver_did_sov_poolConfigs: \"_;./local/localhost_9000.txn\"\n+      uniresolver_driver_did_sov_poolVersions: _;2;\n+      uniresolver_driver_did_sov_walletName: wallet\n+    ports:\n+      - \"7776:8080\"\n+    volumes:\n+      - ./:/opt/driver-did-sov/local\n+\n+\n volumes:\n   bpa-wallet-db1:\n   bpa-wallet-db2:"
+  },
+  {
+    "sha": "0c12de1ed5a9fa19e632a0644f1cd8c953b00042",
+    "filename": "docker/bbp-network/register-dids.sh",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/bcgov/mines-digital-trust/blob/e9604d8c2c516913c174d81d2c5e332120852d61/docker/bbp-network/register-dids.sh",
+    "raw_url": "https://github.com/bcgov/mines-digital-trust/raw/e9604d8c2c516913c174d81d2c5e332120852d61/docker/bbp-network/register-dids.sh",
+    "contents_url": "https://api.github.com/repos/bcgov/mines-digital-trust/contents/docker/bbp-network/register-dids.sh?ref=e9604d8c2c516913c174d81d2c5e332120852d61",
+    "patch": "@@ -54,7 +54,7 @@ register_did() {\n             sed -i'' '/'\"$1\"'=/c\\'\"$1\"'='\"${SEED}\"'' $DEST_FILE\n         else\n             sed -i '/'\"$1\"'=/c\\\n-            ACAPY'\"$1\"'_SEED1='\"${SEED}\"'\n+            '\"$1\"'='\"${SEED}\"'\n             ' $DEST_FILE\n         fi\n     else"
+  },
+  {
+    "sha": "479dd1281396f44dc11ff968f0442a4174c72bce",
+    "filename": "docker/bbp-network/start_all.sh",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/bcgov/mines-digital-trust/blob/e9604d8c2c516913c174d81d2c5e332120852d61/docker/bbp-network/start_all.sh",
+    "raw_url": "https://github.com/bcgov/mines-digital-trust/raw/e9604d8c2c516913c174d81d2c5e332120852d61/docker/bbp-network/start_all.sh",
+    "contents_url": "https://api.github.com/repos/bcgov/mines-digital-trust/contents/docker/bbp-network/start_all.sh?ref=e9604d8c2c516913c174d81d2c5e332120852d61",
+    "patch": "@@ -0,0 +1,19 @@\n+#!/usr/bin/env bash\n+\n+#DL, BUILD, RUN, LOCAL HYPERLEDGER\n+git clone https://github.com/bcgov/von-network.git von-network\n+./von-network/manage build\n+./von-network/manage start\n+\n+#GET LOCAL LEDGER GENESIS FILES AND START RESOLVER\n+curl --retry-connrefused --retry 5 --retry-delay 2 http://localhost:9000/genesis -o resolver/localhost_9000.txn\n+\n+while [ $? -ne 0 ];\n+do\n+    sleep 3\n+    curl --retry-connrefused --retry 5 --retry-delay 2 http://localhost:9000/genesis -o resolver/localhost_9000.txn\n+done\n+docker-compose -f ./resolver/docker-compose.yml up -d driver-did-sov \n+\n+#START BB-PacMans\n+docker-compose up bpa1 bpa-agent1 bpa2 bpa-agent2\n\\ No newline at end of file"
+  }
+]

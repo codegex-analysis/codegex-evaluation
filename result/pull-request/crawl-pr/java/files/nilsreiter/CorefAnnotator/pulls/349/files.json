@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "0f6936440ca897f0139596517a13ad60f6e45952",
+    "filename": "src/main/java/de/unistuttgart/ims/coref/annotator/CATreeNode.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 1,
+    "changes": 13,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/CATreeNode.java",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/CATreeNode.java",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/java/de/unistuttgart/ims/coref/annotator/CATreeNode.java?ref=5b3acca254431d75840b5384ca3a5c2a9ba839df",
+    "patch": "@@ -3,6 +3,7 @@\n import java.util.Enumeration;\n import java.util.Iterator;\n import java.util.Vector;\n+import java.time.Instant;\n \n import javax.swing.tree.MutableTreeNode;\n import javax.swing.tree.TreeNode;\n@@ -28,6 +29,8 @@\n \n \tCATreeNode parent = null;\n \n+\tlong lastModified = 0;\n+\n \tpublic CATreeNode(Entity e) {\n \t\tthis(e, e.getLabel());\n \t}\n@@ -59,6 +62,14 @@ public int getChildCount() {\n \t\treturn children.size();\n \t}\n \n+\tpublic long getLastModified() {\n+\t\treturn lastModified;\n+\t}\n+\n+\tpublic void resetLastModified() {\n+\t\tlastModified = 0;\n+\t}\n+\n \tpublic Vector<CATreeNode> getChildren() {\n \t\treturn this.children;\n \t}\n@@ -146,6 +157,7 @@ public void insert(MutableTreeNode child, int index) {\n \t\t\tchildren = new Vector<CATreeNode>();\n \t\t}\n \t\tchildren.insertElementAt((CATreeNode) child, index);\n+\t\tlastModified = Instant.now().toEpochMilli();\n \t}\n \n \tpublic boolean isEntity() {\n@@ -222,7 +234,6 @@ public CATreeNode next() {\n \t@Override\n \tpublic void remove(int index) {\n \t\tchildren.remove(index);\n-\n \t}\n \n \t@Override"
+  },
+  {
+    "sha": "2d467f7da759799cb33e8e25767c5a32e20614e6",
+    "filename": "src/main/java/de/unistuttgart/ims/coref/annotator/DocumentWindow.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 1,
+    "changes": 14,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/DocumentWindow.java",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/DocumentWindow.java",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/java/de/unistuttgart/ims/coref/annotator/DocumentWindow.java?ref=5b3acca254431d75840b5384ca3a5c2a9ba839df",
+    "patch": "@@ -418,6 +418,7 @@ protected void initialiseActions() {\n \t\tthis.actions.deleteAction = new DeleteAction(this);\n \t\tthis.actions.sortByAlpha = SortTree.getSortByAlphabet(this);\n \t\tthis.actions.sortByMentions = SortTree.getSortByMention(this);\n+\t\tthis.actions.sortByLastModified = SortTree.getSortByLastModified(this);\n \t\tthis.actions.fileSaveAction = new FileSaveAction(this);\n \t\tthis.actions.showSearchPanelAction = new ShowSearchPanelAction(Annotator.app, this);\n \t\tthis.actions.copyAction = new CopyAction(this);\n@@ -604,13 +605,16 @@ protected JMenu initialiseMenuEntity() {\n \t\tJMenu sortMenu = new JMenu(Annotator.getString(Strings.MENU_EDIT_ENTITIES_SORT));\n \t\tJRadioButtonMenuItem radio1 = new JRadioButtonMenuItem(this.actions.sortByAlpha);\n \t\tJRadioButtonMenuItem radio2 = new JRadioButtonMenuItem(this.actions.sortByMentions);\n+\t\tJRadioButtonMenuItem radio3 = new JRadioButtonMenuItem(this.actions.sortByLastModified);\n \t\tradio2.setSelected(true);\n \t\tButtonGroup grp = new ButtonGroup();\n+\t\tgrp.add(radio3);\n \t\tgrp.add(radio2);\n \t\tgrp.add(radio1);\n \n \t\tsortMenu.add(radio1);\n \t\tsortMenu.add(radio2);\n+\t\tsortMenu.add(radio3);\n \t\tsortMenu.add(new JCheckBoxMenuItem(this.actions.sortDescending));\n \n \t\tentityMenu.add(sortMenu);\n@@ -800,6 +804,7 @@ public void setDocumentModel(DocumentModel model) {\n \t\tmodel.getTreeModel().addTreeModelListener((SortingTreeModelListener) modelHandler);\n \t\tmodel.getTreeModel().addEntitySortOrderListener(actions.sortByAlpha);\n \t\tmodel.getTreeModel().addEntitySortOrderListener(actions.sortByMentions);\n+\t\tmodel.getTreeModel().addEntitySortOrderListener(actions.sortByLastModified);\n \t\tmodel.getTreeModel().addEntitySortOrderListener(actions.sortDescending);\n \n \t\t// listeners to the flag model\n@@ -1607,7 +1612,13 @@ else if (anno instanceof DetachedMentionPart)\n \t\t\t\t\t\tmi.addActionListener(new ActionListener() {\n \t\t\t\t\t\t\t@Override\n \t\t\t\t\t\t\tpublic void actionPerformed(ActionEvent e) {\n-\t\t\t\t\t\t\t\tgetDocumentModel().edit(new AddMentionsToEntity(entity, getSelection()));\n+\t\t\t\t\t\t\t\tif (Annotator.app.getPreferences().getBoolean(Constants.CFG_REPLACE_MENTION, false)\n+\t\t\t\t\t\t\t\t\t\t&& getSelectedAnnotations(Mention.class).size() == 1) {\n+\t\t\t\t\t\t\t\t\tgetDocumentModel().edit(new MoveMentionsToEntity(entity,\n+\t\t\t\t\t\t\t\t\t\t\tgetSelectedAnnotations(Mention.class)));\n+\t\t\t\t\t\t\t\t} else {\n+\t\t\t\t\t\t\t\t\tgetDocumentModel().edit(new AddMentionsToEntity(entity, getSelection()));\n+\t\t\t\t\t\t\t\t}\n \t\t\t\t\t\t\t}\n \t\t\t\t\t\t});\n \t\t\t\t\t\tmi.setIcon(FontIcon.of(MaterialDesign.MDI_ACCOUNT, new Color(entity.getColor())));\n@@ -1812,6 +1823,7 @@ public void setFile(File file) {\n \t\tAbstractAction showDocumentStatistics = new ShowDocumentStatistics(DocumentWindow.this);\n \t\tSortTree sortByAlpha;\n \t\tSortTree sortByMentions;\n+\t\tSortTree sortByLastModified;\n \t\tToggleEntitySortOrder sortDescending = new ToggleEntitySortOrder(DocumentWindow.this);\n \t\tFormEntityGroup formGroupAction = new FormEntityGroup(DocumentWindow.this);\n \t\tMergeSelectedEntities mergeSelectedEntitiesAction = new MergeSelectedEntities(DocumentWindow.this);"
+  },
+  {
+    "sha": "ffa081dec2addb0e5f4740a47927a0ce97080a89",
+    "filename": "src/main/java/de/unistuttgart/ims/coref/annotator/EntitySortOrder.java",
+    "status": "modified",
+    "additions": 77,
+    "deletions": 64,
+    "changes": 141,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/EntitySortOrder.java",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/EntitySortOrder.java",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/java/de/unistuttgart/ims/coref/annotator/EntitySortOrder.java?ref=5b3acca254431d75840b5384ca3a5c2a9ba839df",
+    "patch": "@@ -1,64 +1,77 @@\n-package de.unistuttgart.ims.coref.annotator;\r\n-\r\n-import java.util.Comparator;\r\n-\r\n-public enum EntitySortOrder {\r\n-\tMentions, Alphabet, None;\r\n-\r\n-\tpublic boolean descending = true;\r\n-\r\n-\tpublic boolean isDescending() {\r\n-\t\treturn descending;\r\n-\t}\r\n-\r\n-\tpublic Comparator<CATreeNode> getComparator() {\r\n-\r\n-\t\tswitch (this) {\r\n-\t\tcase None:\r\n-\t\t\treturn new Comparator<CATreeNode>() {\r\n-\t\t\t\t@Override\r\n-\t\t\t\tpublic int compare(CATreeNode o1, CATreeNode o2) {\r\n-\t\t\t\t\treturn 0;\r\n-\t\t\t\t}\r\n-\t\t\t};\r\n-\t\tcase Mentions:\r\n-\t\t\treturn new Comparator<CATreeNode>() {\r\n-\t\t\t\t@Override\r\n-\t\t\t\tpublic int compare(CATreeNode o1, CATreeNode o2) {\r\n-\t\t\t\t\tint l1 = o1.getChildCount();\r\n-\t\t\t\t\tint l2 = o2.getChildCount();\r\n-\t\t\t\t\treturn (isDescending() ? -1 : 1) * Integer.compare(l1, l2);\r\n-\t\t\t\t}\r\n-\t\t\t};\r\n-\t\tdefault:\r\n-\t\t\treturn new Comparator<CATreeNode>() {\r\n-\t\t\t\t@Override\r\n-\t\t\t\tpublic int compare(CATreeNode o1, CATreeNode o2) {\r\n-\t\t\t\t\tif (!o1.isEntity() || !o2.isEntity())\r\n-\t\t\t\t\t\treturn 0;\r\n-\t\t\t\t\tString l1 = o1.getEntity().getLabel().toLowerCase();\r\n-\t\t\t\t\tString l2 = o2.getEntity().getLabel().toLowerCase();\r\n-\t\t\t\t\tl1 = (l1 == null ? \"null\" : l1);\r\n-\t\t\t\t\tl2 = (l2 == null ? \"null\" : l2);\r\n-\t\t\t\t\tif (l1 == null || l2 == null)\r\n-\t\t\t\t\t\treturn 0;\r\n-\t\t\t\t\treturn (isDescending() ? -1 : 1) * l1.compareTo(l2);\r\n-\t\t\t\t}\r\n-\t\t\t};\r\n-\t\t}\r\n-\r\n-\t}\r\n-\r\n-\tpublic static Comparator<CATreeNode> getVisibilitySortOrder(Comparator<CATreeNode> def) {\r\n-\t\treturn new Comparator<CATreeNode>() {\r\n-\t\t\t@Override\r\n-\t\t\tpublic int compare(CATreeNode o1, CATreeNode o2) {\r\n-\t\t\t\tint r = Integer.compare(o2.getRank(), o1.getRank());\r\n-\t\t\t\tif (r == 0)\r\n-\t\t\t\t\treturn def.compare(o1, o2);\r\n-\t\t\t\treturn r;\r\n-\t\t\t}\r\n-\t\t};\r\n-\r\n-\t}\r\n-}\r\n+package de.unistuttgart.ims.coref.annotator;\n+\n+import java.util.Comparator;\n+\n+public enum EntitySortOrder {\n+\tMentions, Alphabet, LastModified, None;\n+\n+\tpublic boolean descending = true;\n+\n+\tpublic boolean isDescending() {\n+\t\treturn descending;\n+\t}\n+\n+\tpublic Comparator<CATreeNode> getComparator() {\n+\n+\t\tswitch (this) {\n+\t\tcase None:\n+\t\t\treturn new Comparator<CATreeNode>() {\n+\t\t\t\t@Override\n+\t\t\t\tpublic int compare(CATreeNode o1, CATreeNode o2) {\n+\t\t\t\t\treturn 0;\n+\t\t\t\t}\n+\t\t\t};\n+\t\tcase Mentions:\n+\t\t\treturn new Comparator<CATreeNode>() {\n+\t\t\t\t@Override\n+\t\t\t\tpublic int compare(CATreeNode o1, CATreeNode o2) {\n+\t\t\t\t\tint l1 = o1.getChildCount();\n+\t\t\t\t\tint l2 = o2.getChildCount();\n+\t\t\t\t\treturn (isDescending() ? -1 : 1) * Integer.compare(l1, l2);\n+\t\t\t\t}\n+\t\t\t};\n+\t\tcase LastModified:\n+\t\t\treturn new Comparator<CATreeNode>() {\n+\t\t\t\t@Override\n+\t\t\t\tpublic int compare(CATreeNode o1, CATreeNode o2) {\n+\t\t\t\t\tlong l1 = o1.getLastModified();\n+\t\t\t\t\tlong l2 = o2.getLastModified();\n+\t\t\t\t\tif (l1 == l2) {\n+\t\t\t\t\t\tl1 = o1.getChildCount();\n+\t\t\t\t\t\tl2 = o2.getChildCount();\n+\t\t\t\t\t}\n+\t\t\t\t\treturn (isDescending() ? -1 : 1) * Long.compare(l1, l2);\n+\t\t\t\t}\n+\t\t\t};\n+\t\tdefault:\n+\t\t\treturn new Comparator<CATreeNode>() {\n+\t\t\t\t@Override\n+\t\t\t\tpublic int compare(CATreeNode o1, CATreeNode o2) {\n+\t\t\t\t\tif (!o1.isEntity() || !o2.isEntity())\n+\t\t\t\t\t\treturn 0;\n+\t\t\t\t\tString l1 = o1.getEntity().getLabel().toLowerCase();\n+\t\t\t\t\tString l2 = o2.getEntity().getLabel().toLowerCase();\n+\t\t\t\t\tl1 = (l1 == null ? \"null\" : l1);\n+\t\t\t\t\tl2 = (l2 == null ? \"null\" : l2);\n+\t\t\t\t\tif (l1 == null || l2 == null)\n+\t\t\t\t\t\treturn 0;\n+\t\t\t\t\treturn (isDescending() ? -1 : 1) * l1.compareTo(l2);\n+\t\t\t\t}\n+\t\t\t};\n+\t\t}\n+\n+\t}\n+\n+\tpublic static Comparator<CATreeNode> getVisibilitySortOrder(Comparator<CATreeNode> def) {\n+\t\treturn new Comparator<CATreeNode>() {\n+\t\t\t@Override\n+\t\t\tpublic int compare(CATreeNode o1, CATreeNode o2) {\n+\t\t\t\tint r = Integer.compare(o2.getRank(), o1.getRank());\n+\t\t\t\tif (r == 0)\n+\t\t\t\t\treturn def.compare(o1, o2);\n+\t\t\t\treturn r;\n+\t\t\t}\n+\t\t};\n+\n+\t}\n+}"
+  },
+  {
+    "sha": "da95b236eefb942416c808c7b2c18198cb5f2c7b",
+    "filename": "src/main/java/de/unistuttgart/ims/coref/annotator/Strings.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/Strings.java",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/Strings.java",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/java/de/unistuttgart/ims/coref/annotator/Strings.java?ref=5b3acca254431d75840b5384ca3a5c2a9ba839df",
+    "patch": "@@ -84,6 +84,8 @@\n \tpublic static final String ACTION_SORT_ALPHA_TOOLTIP = \"action.sort_alpha.tooltip\";\n \tpublic static final String ACTION_SORT_MENTIONS = \"action.sort_mentions\";\n \tpublic static final String ACTION_SORT_MENTIONS_TOOLTIP = \"action.sort_mentions.tooltip\";\n+\tpublic static final String ACTION_SORT_LASTMODIFIED = \"action.sort_lastmodified\";\n+\tpublic static final String ACTION_SORT_LASTMODIFIED_TOOLTIP = \"action.sort_lastmodified.tooltip\";\n \tpublic static final String ACTION_SORT_REVERT = \"action.sort_revert\";\n \tpublic static final String ACTION_TOGGLE_COMPARE_BY_ENTITY_NAME = \"action.toggle.compare_by_entity_name\";\n \tpublic static final String ACTION_TOGGLE_COMPARE_BY_ENTITY_NAME_TOOLTIP = \"action.toggle.compare_by_entity_name.tooltip\";\n@@ -246,4 +248,4 @@\n \tpublic static final String WINDOWTITLE_EDITED = \"windowtitle.edited\";\n \tpublic static final String WINDOWTITLE_NEW_FILE = \"windowtitle.new_file\";\n \n-}\n\\ No newline at end of file\n+}"
+  },
+  {
+    "sha": "d5ea2118c8053c72589a509bdcc0acbaa9ce6a42",
+    "filename": "src/main/java/de/unistuttgart/ims/coref/annotator/action/SortTree.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/action/SortTree.java",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/action/SortTree.java",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/java/de/unistuttgart/ims/coref/annotator/action/SortTree.java?ref=5b3acca254431d75840b5384ca3a5c2a9ba839df",
+    "patch": "@@ -47,6 +47,13 @@ public static SortTree getSortByMention(DocumentWindow win) {\n \t\treturn st;\n \t}\n \n+\tpublic static SortTree getSortByLastModified(DocumentWindow win) {\n+\t\tSortTree st = new SortTree(win, MaterialDesign.MDI_SORT_NUMERIC, EntitySortOrder.LastModified, true);\n+\t\tst.putValue(Action.NAME, Annotator.getString(Strings.ACTION_SORT_LASTMODIFIED));\n+\t\tst.putValue(Action.SHORT_DESCRIPTION, Annotator.getString(Strings.ACTION_SORT_LASTMODIFIED_TOOLTIP));\n+\t\treturn st;\n+\t}\n+\n \t@Override\n \tpublic void entitySortEvent(EntitySortOrder newOrder, boolean descending) {\n \t\tputValue(Action.SELECTED_KEY, newOrder == order);"
+  },
+  {
+    "sha": "2b0cd743972de2174b3d7defcd263dc2d218c22c",
+    "filename": "src/main/java/de/unistuttgart/ims/coref/annotator/document/EntityTreeModel.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/document/EntityTreeModel.java",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/java/de/unistuttgart/ims/coref/annotator/document/EntityTreeModel.java",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/java/de/unistuttgart/ims/coref/annotator/document/EntityTreeModel.java?ref=5b3acca254431d75840b5384ca3a5c2a9ba839df",
+    "patch": "@@ -219,6 +219,8 @@ private void initialise() {\n \t\t\tentityEvent(Event.get(this, Event.Type.Add, m.getEntity(), m));\n \t\t\tif (m.getDiscontinuous() != null)\n \t\t\t\tentityEvent(Event.get(this, Event.Type.Add, m, m.getDiscontinuous()));\n+\t\t\t// last modified should only represent user actions, so reset\n+\t\t\tget(m.getEntity()).resetLastModified();\n \t\t}\n \t\tAnnotator.logger.debug(\"Added all mentions\");\n \t}"
+  },
+  {
+    "sha": "303a43246e6d1928482f1d19cd200d3e2b858089",
+    "filename": "src/main/resources/locales/strings.properties",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/resources/locales/strings.properties",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/resources/locales/strings.properties",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/resources/locales/strings.properties?ref=5b3acca254431d75840b5384ca3a5c2a9ba839df",
+    "patch": "@@ -88,6 +88,8 @@ action.sort_alpha = Sort alphabetically\n action.sort_alpha.tooltip = Sort alphabetically\n action.sort_mentions = Sort by mentions\n action.sort_mentions.tooltip = Sort by mentions\n+action.sort_lastmodified = Sort by last modified\n+action.sort_lastmodified.tooltip = Sort by last modified\n action.sort_revert = Sort descending\n action.toggle.ask_before_file_overwrite = Ask before overwriting files\n action.toggle.compare_by_entity_name = Compare by entity name"
+  },
+  {
+    "sha": "6283672908faf6167c343c8cdb4545e88247447c",
+    "filename": "src/main/resources/locales/strings_de.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/resources/locales/strings_de.properties",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/5b3acca254431d75840b5384ca3a5c2a9ba839df/src/main/resources/locales/strings_de.properties",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/resources/locales/strings_de.properties?ref=5b3acca254431d75840b5384ca3a5c2a9ba839df",
+    "patch": "@@ -83,6 +83,7 @@ action.show.log = Logdatei anzeigen\n action.show_mention_in_tree = Im Baum anzeigen\n action.sort_alpha = Alphabetisch sortieren\n action.sort_mentions = Nach Anzahl der Mentions sortieren\n+action.sort_lastmodified = Nach zuletzt bearbeitet sortieren\n action.sort_revert = Absteigend sortieren\n action.toggle.ask_before_file_overwrite = Vor dem �berschreiben von Dateien nachfragen\n action.toggle.compare_by_entity_name = Vergleich �ber Entit�tennamen"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "583c6a11c8714ba3424c8645d98025b4b59489ea",
+    "filename": "src/beast/app/beauti/BeautiDoc.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 9,
+    "changes": 22,
+    "blob_url": "https://github.com/CompEvol/beast2/blob/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/app/beauti/BeautiDoc.java",
+    "raw_url": "https://github.com/CompEvol/beast2/raw/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/app/beauti/BeautiDoc.java",
+    "contents_url": "https://api.github.com/repos/CompEvol/beast2/contents/src/beast/app/beauti/BeautiDoc.java?ref=7489e73ed607d4d63f7c1bf24f5b399f7fb83535",
+    "patch": "@@ -52,6 +52,7 @@\n import beast.core.BEASTObject;\n import beast.core.Description;\n import beast.core.Distribution;\n+import beast.core.Function;\n import beast.core.Input;\n import beast.core.Input.Validate;\n import beast.core.MCMC;\n@@ -1359,15 +1360,18 @@ void setClockRate()  {\n                         }\n                     }\n                     BranchRateModel.Base model = treeLikelihood.branchRateModelInput.get();\n-                    if (model != null) {\n-                        RealParameter clockRate = model.meanRateInput.get();\n-                        clockRate.isEstimatedInput.setValue(needsEstimation, clockRate);\n-                        if (firstClock == null) {\n-                            firstClock = clockRate;\n-                        }\n-                    }\n-                    i++;\n-                }\n+\t\t\t\t\tif (model != null) {\n+\t\t\t\t\t\tif (model.meanRateInput.get() instanceof RealParameter) {\n+\t\t\t\t\t\t\tRealParameter clockRate = (RealParameter) model.meanRateInput.get();\n+\n+\t\t\t\t\t\t\tclockRate.isEstimatedInput.setValue(needsEstimation, clockRate);\n+\t\t\t\t\t\t\tif (firstClock == null) {\n+\t\t\t\t\t\t\t\tfirstClock = clockRate;\n+\t\t\t\t\t\t\t}\n+\t\t\t\t\t\t}\n+\t\t\t\t\t}\n+\t\t\t\t\ti++;\n+\t\t\t\t}\n             }\n         }\n     }"
+  },
+  {
+    "sha": "758917e7794c48cfa80c9ee0c9ffc9d2fdfe2dec",
+    "filename": "src/beast/app/beauti/ClockModelListInputEditor.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 14,
+    "changes": 31,
+    "blob_url": "https://github.com/CompEvol/beast2/blob/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/app/beauti/ClockModelListInputEditor.java",
+    "raw_url": "https://github.com/CompEvol/beast2/raw/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/app/beauti/ClockModelListInputEditor.java",
+    "contents_url": "https://api.github.com/repos/CompEvol/beast2/contents/src/beast/app/beauti/ClockModelListInputEditor.java?ref=7489e73ed607d4d63f7c1bf24f5b399f7fb83535",
+    "patch": "@@ -12,6 +12,7 @@\n import beast.app.draw.ListInputEditor;\n import beast.app.draw.SmallLabel;\n import beast.core.BEASTInterface;\n+import beast.core.Function;\n import beast.core.Input;\n import beast.core.MCMC;\n import beast.core.Operator;\n@@ -120,20 +121,22 @@ private void setUpOperator() {\n \t    \t\tAlignment data = doc.alignments.get(i); \n \t    \t\tint weight = data.getSiteCount();\n \t    \t\tBranchRateModel.Base clockModel = (BranchRateModel.Base) doc.clockModels.get(i);\n-\t    \t\tRealParameter clockRate = clockModel.meanRateInput.get();\n-\t    \t\t//clockRate.m_bIsEstimated.setValue(true, clockRate);\n-\t    \t\tif (clockRate.isEstimatedInput.get()) {\n-\t    \t\t\tif (commonClockRate < 0) {\n-\t    \t\t\t\tcommonClockRate = clockRate.valuesInput.get().get(0);\n-\t    \t\t\t} else {\n-\t    \t\t\t\tif (Math.abs(commonClockRate - clockRate.valuesInput.get().get(0)) > 1e-10) {\n-\t    \t\t\t\t\tisAllClocksAreEqual = false;\n-\t    \t\t\t\t}\n-\t    \t\t\t}\n-    \t\t\t\tweights += weight + \" \";\n-\t    \t\t\tparameters.add(clockRate);\n-\t    \t\t}\n-\t    \t\t//doc.autoSetClockRate = false;\n+\t\t\t\tif (clockModel.meanRateInput.get() instanceof RealParameter) {\n+\t\t\t\t\tRealParameter clockRate = (RealParameter) clockModel.meanRateInput.get();\n+\t\t\t\t\t// clockRate.m_bIsEstimated.setValue(true, clockRate);\n+\t\t\t\t\tif (clockRate.isEstimatedInput.get()) {\n+\t\t\t\t\t\tif (commonClockRate < 0) {\n+\t\t\t\t\t\t\tcommonClockRate = clockRate.valuesInput.get().get(0);\n+\t\t\t\t\t\t} else {\n+\t\t\t\t\t\t\tif (Math.abs(commonClockRate - clockRate.valuesInput.get().get(0)) > 1e-10) {\n+\t\t\t\t\t\t\t\tisAllClocksAreEqual = false;\n+\t\t\t\t\t\t\t}\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tweights += weight + \" \";\n+\t\t\t\t\t\tparameters.add(clockRate);\n+\t\t\t\t\t}\n+\t\t\t\t\t// doc.autoSetClockRate = false;\n+\t\t\t\t}\n \t    \t}\n \t    \tif (!fixMeanRatesCheckBox.isSelected()) {\n \t    \t\tfixMeanRatesValidateLabel.setVisible(false);"
+  },
+  {
+    "sha": "60821f013768852d711124069016037be8aea072",
+    "filename": "src/beast/evolution/branchratemodel/BranchRateModel.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/CompEvol/beast2/blob/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/evolution/branchratemodel/BranchRateModel.java",
+    "raw_url": "https://github.com/CompEvol/beast2/raw/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/evolution/branchratemodel/BranchRateModel.java",
+    "contents_url": "https://api.github.com/repos/CompEvol/beast2/contents/src/beast/evolution/branchratemodel/BranchRateModel.java?ref=7489e73ed607d4d63f7c1bf24f5b399f7fb83535",
+    "patch": "@@ -2,8 +2,9 @@\n \n import beast.core.CalculationNode;\n import beast.core.Description;\n+import beast.core.Function;\n import beast.core.Input;\n-import beast.core.parameter.RealParameter;\n+import beast.core.Function;\n import beast.evolution.tree.Node;\n \n /**\n@@ -16,7 +17,7 @@\n \n     @Description(value = \"Base implementation of a clock model.\", isInheritable = false)\n     public abstract class Base extends CalculationNode implements BranchRateModel {\n-        final public Input<RealParameter> meanRateInput = new Input<>(\"clock.rate\", \"mean clock rate (defaults to 1.0)\");\n+        final public Input<Function> meanRateInput = new Input<>(\"clock.rate\", \"mean clock rate (defaults to 1.0)\");\n \n         // empty at the moment but brings together the required interfaces\n     }"
+  },
+  {
+    "sha": "93ba66cffcae4d32ffd7899736493529dfafe3d9",
+    "filename": "src/beast/evolution/branchratemodel/RandomLocalClockModel.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/CompEvol/beast2/blob/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/evolution/branchratemodel/RandomLocalClockModel.java",
+    "raw_url": "https://github.com/CompEvol/beast2/raw/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/evolution/branchratemodel/RandomLocalClockModel.java",
+    "contents_url": "https://api.github.com/repos/CompEvol/beast2/contents/src/beast/evolution/branchratemodel/RandomLocalClockModel.java?ref=7489e73ed607d4d63f7c1bf24f5b399f7fb83535",
+    "patch": "@@ -2,6 +2,7 @@\n \n import beast.core.Citation;\n import beast.core.Description;\n+import beast.core.Function;\n import beast.core.Input;\n import beast.core.parameter.BooleanParameter;\n import beast.core.parameter.RealParameter;\n@@ -44,7 +45,7 @@\n                     false, Input.Validate.OPTIONAL);\n \n     Tree tree;\n-    RealParameter meanRate;\n+    protected Function meanRate;\n     boolean scaling = true;\n \n     @Override\n@@ -145,7 +146,7 @@ private void recalculateScaleFactor() {\n \n             scaleFactor = timeTotal / branchTotal;\n \n-            scaleFactor *= meanRate.getValue();\n+            scaleFactor *= meanRate.getArrayValue();\n         } else {\n             scaleFactor = 1.0;\n         }"
+  },
+  {
+    "sha": "9692ec9a82d2c098fc099b8cc4dbcf7c05cef971",
+    "filename": "src/beast/evolution/branchratemodel/StrictClockModel.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 10,
+    "changes": 25,
+    "blob_url": "https://github.com/CompEvol/beast2/blob/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/evolution/branchratemodel/StrictClockModel.java",
+    "raw_url": "https://github.com/CompEvol/beast2/raw/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/evolution/branchratemodel/StrictClockModel.java",
+    "contents_url": "https://api.github.com/repos/CompEvol/beast2/contents/src/beast/evolution/branchratemodel/StrictClockModel.java?ref=7489e73ed607d4d63f7c1bf24f5b399f7fb83535",
+    "patch": "@@ -1,6 +1,7 @@\n package beast.evolution.branchratemodel;\n \n import beast.core.Description;\n+import beast.core.Function;\n import beast.core.parameter.RealParameter;\n import beast.evolution.tree.Node;\n \n@@ -11,16 +12,21 @@\n @Description(\"Defines a mean rate for each branch in the beast.tree.\")\n public class StrictClockModel extends BranchRateModel.Base {\n \n-    //public Input<RealParameter> muParameterInput = new Input<>(\"clock.rate\", \"the clock rate (defaults to 1.0)\");\n+    // public Input<RealParameter> muParameterInput = new Input<>(\"clock.rate\", \"the\n+    // clock rate (defaults to 1.0)\");\n \n-    RealParameter muParameter;\n+    protected Function muSource;\n+    private double mu = 1.0;\n \n     @Override\n     public void initAndValidate() {\n-        muParameter = meanRateInput.get();\n-        if (muParameter != null) {\n-            muParameter.setBounds(Math.max(0.0, muParameter.getLower()), muParameter.getUpper());\n-            mu = muParameter.getValue();\n+        if (meanRateInput.get() != null) {\n+            muSource = meanRateInput.get();\n+            if (muSource instanceof RealParameter) {\n+                RealParameter muParameter = (RealParameter) muSource;\n+                muParameter.setBounds(Math.max(0.0, muParameter.getLower()), muParameter.getUpper());\n+            }\n+            mu = muSource.getArrayValue();\n         }\n     }\n \n@@ -31,21 +37,20 @@ public double getRateForBranch(final Node node) {\n \n     @Override\n     public boolean requiresRecalculation() {\n-        mu = muParameter.getValue();\n+        mu = muSource.getArrayValue();\n         return true;\n     }\n \n     @Override\n     protected void restore() {\n-        mu = muParameter.getValue();\n+        mu = muSource.getArrayValue();\n         super.restore();\n     }\n \n     @Override\n     protected void store() {\n-        mu = muParameter.getValue();\n+        mu = muSource.getArrayValue();\n         super.store();\n     }\n \n-    private double mu = 1.0;\n }"
+  },
+  {
+    "sha": "872f22723318717775d1759d23fa04f40109d600",
+    "filename": "src/beast/evolution/branchratemodel/UCRelaxedClockModel.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 6,
+    "changes": 17,
+    "blob_url": "https://github.com/CompEvol/beast2/blob/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/evolution/branchratemodel/UCRelaxedClockModel.java",
+    "raw_url": "https://github.com/CompEvol/beast2/raw/7489e73ed607d4d63f7c1bf24f5b399f7fb83535/src/beast/evolution/branchratemodel/UCRelaxedClockModel.java",
+    "contents_url": "https://api.github.com/repos/CompEvol/beast2/contents/src/beast/evolution/branchratemodel/UCRelaxedClockModel.java?ref=7489e73ed607d4d63f7c1bf24f5b399f7fb83535",
+    "patch": "@@ -6,8 +6,10 @@\n \r\n import org.apache.commons.math.MathException;\r\n \r\n+import beast.core.CalculationNode;\r\n import beast.core.Citation;\r\n import beast.core.Description;\r\n+import beast.core.Function;\r\n import beast.core.Input;\r\n import beast.core.parameter.IntegerParameter;\r\n import beast.core.parameter.RealParameter;\r\n@@ -54,7 +56,7 @@\n \r\n     ParametricDistribution distribution; //the distribution of the rates\r\n \r\n-    RealParameter meanRate;\r\n+    Function meanRate;\r\n     Tree tree;\r\n     private int branchCount;//the number of branches of the tree\r\n     private boolean normalize = false;//\r\n@@ -212,7 +214,7 @@ public double getRateForBranch(Node node) {\n             }\r\n             renormalize = false;\r\n         }\r\n-        return getRawRate(node) * scaleFactor * meanRate.getValue();\r\n+        return getRawRate(node) * scaleFactor * meanRate.getArrayValue();\r\n     }\r\n \r\n     /**\r\n@@ -365,11 +367,14 @@ protected boolean requiresRecalculation() {\n         if (rateInput.get() != null && rateInput.get().somethingIsDirty()) {\r\n             return true;\r\n         }\r\n-        if (meanRate.somethingIsDirty()) {\r\n-            return true;\r\n+        \r\n+        if (meanRate instanceof RealParameter) {\r\n+        \treturn ((RealParameter) meanRate).somethingIsDirty() || recompute;\r\n+        } else if (meanRate instanceof CalculationNode) {\r\n+        \treturn ((CalculationNode) meanRate).isDirtyCalculation() || recompute;\r\n+        } else {\r\n+        \treturn recompute;\r\n         }\r\n-\r\n-        return recompute;\r\n     }\r\n \r\n     @Override\r"
+  }
+]

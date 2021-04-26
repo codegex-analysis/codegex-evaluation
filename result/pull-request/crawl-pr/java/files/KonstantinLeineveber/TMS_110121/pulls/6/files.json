@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "3a8b8d8acb88c59b304d700c35ba7c35a343a343",
+    "filename": "lesson12/src/annotations/MyService.java",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/KonstantinLeineveber/TMS_110121/blob/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/annotations/MyService.java",
+    "raw_url": "https://github.com/KonstantinLeineveber/TMS_110121/raw/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/annotations/MyService.java",
+    "contents_url": "https://api.github.com/repos/KonstantinLeineveber/TMS_110121/contents/lesson12/src/annotations/MyService.java?ref=e48ac98477d7835025372ef849501bb2379bb773",
+    "patch": "@@ -0,0 +1,41 @@\n+package annotations;\n+\n+@Version(num = 7.1, nameVersion = \"Nougat\")\n+public class MyService {\n+    private double version = 7.1;\n+    private String nameVersion = \"Nougat\";\n+    private String dataVersion = \"16.01.2021\";\n+\n+    public double getVersion() {\n+        return version;\n+    }\n+\n+    public void setVersion(double version) {\n+        this.version = version;\n+    }\n+\n+    public String getNameVersion() {\n+        return nameVersion;\n+    }\n+\n+    public void setNameVersion(String nameVersion) {\n+        this.nameVersion = nameVersion;\n+    }\n+\n+    @Override\n+    public boolean equals(Object myService) {\n+        return super.equals(myService);\n+    }\n+\n+    @Override\n+    public int hashCode() {\n+        return super.hashCode();\n+    }\n+\n+    private String thisClassInfo() {\n+        return \"Версия: \" + getVersion() + '\\n'\n+                + \"Название версии: \" + getNameVersion() + '\\n'\n+                + \"Хэшкод: \" + hashCode();\n+\n+    }\n+}"
+  },
+  {
+    "sha": "7509c066bef8a1f27dd0a298d018a46c33bae2a3",
+    "filename": "lesson12/src/annotations/Runner.java",
+    "status": "added",
+    "additions": 64,
+    "deletions": 0,
+    "changes": 64,
+    "blob_url": "https://github.com/KonstantinLeineveber/TMS_110121/blob/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/annotations/Runner.java",
+    "raw_url": "https://github.com/KonstantinLeineveber/TMS_110121/raw/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/annotations/Runner.java",
+    "contents_url": "https://api.github.com/repos/KonstantinLeineveber/TMS_110121/contents/lesson12/src/annotations/Runner.java?ref=e48ac98477d7835025372ef849501bb2379bb773",
+    "patch": "@@ -0,0 +1,64 @@\n+package annotations;\n+\n+import java.lang.reflect.Field;\n+import java.lang.reflect.Method;\n+import java.util.Objects;\n+\n+public class Runner {\n+\n+    public static void main(String[] args) throws Exception {\n+        //    Придумать и написать собственную аннотацию @Version,\n+//    которая бует хранить информацию о версии класса сервиса\n+//    (поле обязательное) MyService и кодовое название версии (поле не обязательное)\n+//    - (например номер версии = 7.1, а кодовое название версии = Nougat).\n+//    Класс MyService должен иметь переменные c private модификаторами,\n+//    конструктор по умолчанию, get и set методы, переопределенные методы\n+//    equals и hashcode, а так же private метод (private thisClassInfo),\n+//    который будет просто печатать данные о самом классе (данные любые на ваш выбор),\n+//    в котором он определен.\n+//    Написать программу, которая будет анализировать присутствие\n+//    аннотации над классом MyService и если она присутствует - создавать\n+//    экземпляр этого класса, задавать значения его полям и вызывать метод\n+//    thisClassInfo (использовать возможности пакета reflection).\n+\n+        Class<MyService> clazz = MyService.class;\n+        inspectService(clazz);\n+\n+\n+    }\n+\n+    private static void inspectService(Class<MyService> clazz) throws Exception {\n+        boolean isAnnotated = clazz.isAnnotationPresent(Version.class);\n+        if (isAnnotated) {\n+            MyService myService1 = (MyService) clazz.newInstance();\n+            MyService myService2 = (MyService) clazz.newInstance();\n+            Method[] methods = clazz.getDeclaredMethods();\n+            for (Method m : methods) {\n+                Version annotation = m.getAnnotation(Version.class);\n+            }\n+            myService2.setVersion(3.6);\n+            myService2.setNameVersion(\"Armagedon\");\n+            Field privateStringField = clazz.getDeclaredField(\"dataVersion\");\n+\n+            privateStringField.setAccessible(true);\n+            privateStringField.set(myService2, \"12.03.2005\");\n+            String fieldValue = (String) privateStringField.get(myService2);\n+\n+            Method method = clazz.getDeclaredMethod(\"thisClassInfo\");\n+            method.setAccessible(true);\n+            String returnValue = (String)\n+                    method.invoke(myService1);\n+            String returnValue2 = (String)\n+                    method.invoke(myService2);\n+\n+            System.out.println(\"MyService1:\" + '\\n' + returnValue);\n+            System.out.println(\"Дата выпуска версии = \" + fieldValue + '\\n');\n+            System.out.println(\"MyService2:\" + '\\n' + returnValue2);\n+            System.out.println(\"Дата выпуска версии = \" + fieldValue + '\\n');\n+            System.out.println(\"Можно ли сравнить MyService1 и MyService2? - \" + '\\n' + myService1.equals(myService2));\n+\n+        } else {\n+            System.out.printf(\"Class [ %s ] not annotated with `Version` annotation\", clazz.getName());\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "10a886a855ffd348080c6d4167daaf654c1a8dee",
+    "filename": "lesson12/src/annotations/Version.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/KonstantinLeineveber/TMS_110121/blob/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/annotations/Version.java",
+    "raw_url": "https://github.com/KonstantinLeineveber/TMS_110121/raw/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/annotations/Version.java",
+    "contents_url": "https://api.github.com/repos/KonstantinLeineveber/TMS_110121/contents/lesson12/src/annotations/Version.java?ref=e48ac98477d7835025372ef849501bb2379bb773",
+    "patch": "@@ -0,0 +1,12 @@\n+package annotations;\n+\n+import java.lang.annotation.*;\n+\n+@Target(ElementType.TYPE)\n+@Retention(RetentionPolicy.RUNTIME)\n+public @interface Version {\n+\n+    double num();\n+\n+    String nameVersion();\n+}"
+  },
+  {
+    "sha": "d022dbc51fb1f8dce0e93ba53a7f8fcaf2ff37ca",
+    "filename": "lesson12/src/zad28/Massiv.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/KonstantinLeineveber/TMS_110121/blob/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/zad28/Massiv.java",
+    "raw_url": "https://github.com/KonstantinLeineveber/TMS_110121/raw/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/zad28/Massiv.java",
+    "contents_url": "https://api.github.com/repos/KonstantinLeineveber/TMS_110121/contents/lesson12/src/zad28/Massiv.java?ref=e48ac98477d7835025372ef849501bb2379bb773",
+    "patch": "@@ -0,0 +1,25 @@\n+package zad28;\n+\n+import java.util.ArrayList;\n+\n+public class Massiv<T> {\n+//    Написать класс, который умеет хранить в себе массив любых типов данных (int, long\n+//    etc.). Реализовать метод get(int index), который возвращает любой элемент\n+//    массива по индексу.\n+\n+    private T[] array;\n+\n+    public T[] getArray() {\n+        return array;\n+    }\n+\n+    public void setArray(T... array) {\n+        this.array = array;\n+    }\n+\n+    public T get(int numberOfArray) {\n+        return array[numberOfArray];\n+    }\n+\n+\n+}"
+  },
+  {
+    "sha": "4b05ec21a746f237cb8578b7489932c85ad93897",
+    "filename": "lesson12/src/zad28/Runner.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/KonstantinLeineveber/TMS_110121/blob/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/zad28/Runner.java",
+    "raw_url": "https://github.com/KonstantinLeineveber/TMS_110121/raw/e48ac98477d7835025372ef849501bb2379bb773/lesson12/src/zad28/Runner.java",
+    "contents_url": "https://api.github.com/repos/KonstantinLeineveber/TMS_110121/contents/lesson12/src/zad28/Runner.java?ref=e48ac98477d7835025372ef849501bb2379bb773",
+    "patch": "@@ -0,0 +1,10 @@\n+package zad28;\n+\n+public class Runner extends Massiv {\n+    public static void main(String[] args) {\n+\n+        Massiv<Number> arr = new Massiv<>();\n+        arr.setArray(16, 15, 11516, 15.3, 182, 1616, 4841, 616);\n+        System.out.println(arr.get(6));\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

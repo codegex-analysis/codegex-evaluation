@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "639cdd514dfe53459746aa0ffc6ebea3e7e39714",
+    "filename": ".dockerignore",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/muun/apollo/blob/20ce376dde9171846f92a2026a4f0b1b68caed2f/.dockerignore",
+    "raw_url": "https://github.com/muun/apollo/raw/20ce376dde9171846f92a2026a4f0b1b68caed2f/.dockerignore",
+    "contents_url": "https://api.github.com/repos/muun/apollo/contents/.dockerignore?ref=20ce376dde9171846f92a2026a4f0b1b68caed2f",
+    "patch": "@@ -0,0 +1 @@\n+local.properties"
+  },
+  {
+    "sha": "2a264c76eebea705229a0b4d83514c9d51a5a05f",
+    "filename": ".github/workflows/build-release.yml",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/muun/apollo/blob/20ce376dde9171846f92a2026a4f0b1b68caed2f/.github/workflows/build-release.yml",
+    "raw_url": "https://github.com/muun/apollo/raw/20ce376dde9171846f92a2026a4f0b1b68caed2f/.github/workflows/build-release.yml",
+    "contents_url": "https://api.github.com/repos/muun/apollo/contents/.github/workflows/build-release.yml?ref=20ce376dde9171846f92a2026a4f0b1b68caed2f",
+    "patch": "@@ -0,0 +1,32 @@\n+name: build-release\n+on: \n+  push:\n+    tags:\n+      - v*\n+jobs:\n+  build-release:\n+    runs-on: ubuntu-20.04\n+    steps:\n+      - name: Set up Docker Buildx\n+        uses: docker/setup-buildx-action@154c24e1f33dbb5865a021c99f1318cfebf27b32\n+\n+      - name: Checkout\n+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f\n+\n+      - name: Build\n+        uses: docker/build-push-action@9379083e426e2e84abb80c8c091f5cdeb7d3fd7a\n+        with:\n+          load: true\n+          tags: muun_android:latest\n+          file: android/Dockerfile\n+          context: .\n+\n+      - name: Build apollo\n+        run: |\n+          docker run --rm -t -v \"${GITHUB_WORKSPACE}:/src/android/apolloui/build/outputs/\" muun_android:latest\n+\n+      - name: Upload release\n+        uses: actions/upload-artifact@e448a9b857ee2131e752b06002bf0e093c65e571\n+        with:\n+          name: apk\n+          path: apk/prod/release/apolloui-prod-release-unsigned.apk"
+  },
+  {
+    "sha": "629d2985f08c68f09c77919e9a14c9a41865a61b",
+    "filename": "BUILD.md",
+    "status": "added",
+    "additions": 54,
+    "deletions": 0,
+    "changes": 54,
+    "blob_url": "https://github.com/muun/apollo/blob/20ce376dde9171846f92a2026a4f0b1b68caed2f/BUILD.md",
+    "raw_url": "https://github.com/muun/apollo/raw/20ce376dde9171846f92a2026a4f0b1b68caed2f/BUILD.md",
+    "contents_url": "https://api.github.com/repos/muun/apollo/contents/BUILD.md?ref=20ce376dde9171846f92a2026a4f0b1b68caed2f",
+    "patch": "@@ -0,0 +1,54 @@\n+# Building locally\n+\n+## Requirements\n+\n+* [OpenJDK](https://adoptopenjdk.net/?variant=openjdk11&jvmVariant=hotspot) >= 8\n+* [Golang](https://golang.org/dl/) >= 1.16\n+* [Android NDK](https://developer.android.com/ndk/downloads) >= 21\n+\n+## Instructions\n+\n+Ensure the env var `ANDROID_NDK_HOME` points to your NDK install directory.\n+\n+```shell\n+tools/bootstrap-gomobile.sh\n+tools/libwallet-android.sh\n+./gradlew :android:apollo:assembleProdRelease\n+```\n+\n+# Reproducible build\n+\n+## Requirements\n+\n+* [Docker](https://www.docker.com/)\n+\n+## Instructions\n+\n+```shell\n+docker build -f android/Dockerfile -t muun_android:latest .\n+docker run --rm -ti -v \"$PWD:/src/android/apolloui/build/outputs/\" muun_android:latest\n+```\n+\n+# (Advanced) Verifying an existing APK\n+\n+## Requirements\n+\n+* [Docker](https://www.docker.com/)\n+* (Optional) [ADB](https://developer.android.com/studio/releases/platform-tools)\n+\n+## Instructions\n+\n+### (Optional) Obtaining the APK from your phone\n+\n+```shell\n+adb pull $(adb shell pm path io.muun.apollo | grep \"/base.apk\" | sed 's/^package://') apollo-play.apk\n+```\n+\n+### Verifying\n+\n+Checkout the commit that corresponds to the version of the app you want to verify.\n+\n+```shell\n+tools/verify-apollo.sh <path-to-verify.apk>\n+```\n+"
+  },
+  {
+    "sha": "6fa567f7f693526ef3efcee409afe03e8e8e40ff",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 20,
+    "changes": 22,
+    "blob_url": "https://github.com/muun/apollo/blob/20ce376dde9171846f92a2026a4f0b1b68caed2f/README.md",
+    "raw_url": "https://github.com/muun/apollo/raw/20ce376dde9171846f92a2026a4f0b1b68caed2f/README.md",
+    "contents_url": "https://api.github.com/repos/muun/apollo/contents/README.md?ref=20ce376dde9171846f92a2026a4f0b1b68caed2f",
+    "patch": "@@ -14,23 +14,9 @@ The app follows the [clean](https://fernandocejas.com/2014/09/03/architecting-an\n \n There's also a pure java **common** module with code shared all over.\n \n-### LibWallet\n+## Build\n \n-Setup\n-```\n-brew install golang\n-# Add your GOPATH to your bash profile\n-bash tools/bootstrap-gomobile.sh\n-```\n-\n- - Set the `ANDROID_HOME` env var to the SDK installation path for Android Studio. Most likely `~/Library/Android/sdk/`\n- - Install the Android NDK using Android Studio. Go to Tools > SDK Manager > SDK Tools and select `NDK (Side by side)`.\n- - Take note of the SDK path it shows when the install process ends and set it as `ANDROID_NDK_HOME` env var. It should of the form `~/Android/sdk/ndk/20.0.5594570`\n-\n-Building for Android\n-```\n-GO111MODULE=off go run golang.org/x/mobile/cmd/gomobile bind -target=android -o android/apollo/libs/libwallet.aar github.com/muun/muun/libwallet\n-```\n+For instructions on how to build Muun Wallet please refer to BUILD.md\n \n ## Auditing\n \n@@ -39,10 +25,6 @@ GO111MODULE=off go run golang.org/x/mobile/cmd/gomobile bind -target=android -o\n * All the business logic that decides when to sign what happens in the **domain** layer.\n * The **presentation** layer only depends on the **domain** layer, it never references **data** directly.\n \n-## Veryfing our builds\n-\n-Our builds are not reproducible yet! Stay tuned.\n-\n ## Responsible Disclosure\n \n Send us an email to report any security related bugs or vulnerabilities at [security@muun.com](mailto:security@muun.com)."
+  }
+]

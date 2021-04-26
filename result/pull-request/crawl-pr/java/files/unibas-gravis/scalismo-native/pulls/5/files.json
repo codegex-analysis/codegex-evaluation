@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "0e05dbf2184725dea504b192d350a093b896261b",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/unibas-gravis/scalismo-native/blob/5a47363af29557ef0478d5b5a44057a883d06752/README.md",
+    "raw_url": "https://github.com/unibas-gravis/scalismo-native/raw/5a47363af29557ef0478d5b5a44057a883d06752/README.md",
+    "contents_url": "https://api.github.com/repos/unibas-gravis/scalismo-native/contents/README.md?ref=5a47363af29557ef0478d5b5a44057a883d06752",
+    "patch": "@@ -29,3 +29,15 @@ All code is available to you under the Apache license, version 2, available at h\n \n Copyright, University of Basel, 2016.\n \n+## Deploy to sonatype\n+\n+Unfortunately, we cannot directly publish to sonatype using sbt. Instead, we need to do a publish, \n+and then upload the files manually. To add insult to insjury, we currently also need to sign the files manually. \n+Do the following:\n+\n+* sbt publish\n+* navigate to the tmp directly, and there in the subfolder where the files were published\n+* sign all the files using: for f in *.jar *.pom; do gpg2   -ab  $f ; done\n+* directly from this directory, create a zip file\n+* upload them manually to https://oss.sonatype.org/#stagingRepositories\n+"
+  },
+  {
+    "sha": "faf5acd3e8aacb23db702ad06e4460f31c761abc",
+    "filename": "build.sbt",
+    "status": "modified",
+    "additions": 43,
+    "deletions": 4,
+    "changes": 47,
+    "blob_url": "https://github.com/unibas-gravis/scalismo-native/blob/5a47363af29557ef0478d5b5a44057a883d06752/build.sbt",
+    "raw_url": "https://github.com/unibas-gravis/scalismo-native/raw/5a47363af29557ef0478d5b5a44057a883d06752/build.sbt",
+    "contents_url": "https://api.github.com/repos/unibas-gravis/scalismo-native/contents/build.sbt?ref=5a47363af29557ef0478d5b5a44057a883d06752",
+    "patch": "@@ -6,25 +6,64 @@ organization in ThisBuild := productPackage.mkString(\".\")\n \n version in ThisBuild := productVersion\n \n-javacOptions in ThisBuild ++= Seq(\"-source\", \"1.6\", \"-target\", \"1.6\")\n+javacOptions in ThisBuild ++= Seq(\"-source\", \"1.8\", \"-target\", \"1.8\")\n \n-scalacOptions in ThisBuild ++= Seq(\"-encoding\", \"UTF-8\", \"-Xlint\", \"-deprecation\", \"-unchecked\", \"-feature\", \"-target:jvm-1.6\")\n+javacOptions in (ThisBuild, doc) := Seq(\"-source\", \"1.8\")\n+\n+scalacOptions in ThisBuild ++= Seq(\"-encoding\", \"UTF-8\", \"-Xlint\", \"-deprecation\", \"-unchecked\", \"-feature\", \"-target:jvm-1.8\")\n \n publishTo in ThisBuild := Some(Resolver.file(\"file\",  new File( publishPrefix )) )\n \n crossPaths in ThisBuild := false\n \n \n+homepage in ThisBuild := Some(url(\"https://scalismo.org\"))\n+licenses in ThisBuild += (\"Apache-2.0\", url(\"http://www.apache.org/licenses/LICENSE-2.0\"))\n+scmInfo in ThisBuild := Some(ScmInfo(url(\"https://github.com/unibas-gravis/scalismo-native\"), \"git@github.com:unibas-gravis/scalismo-native.git\"))\n+developers in ThisBuild := List(Developer(\"marcelluethi\", \"marcelluethi\", \"marcel.luethi@unibas.ch\", url(\"https://github.com/marcelluethi\")))\n+publishMavenStyle := true\n+\n+/*\n+ Eventually we want to publish to sonatype. However, as the files in the\n+ build need fixup locally, we cannot directly publish. Rather we publish in\n+ a tmp directory and copy the resulting release files manually onto sonatype.\n+ This is justified as we don't release often.\n+*/\n+\n+// This is what we would like to do\n+//publishTo in ThisBuild := Some(\n+//      if (isSnapshot.value)\n+//        Opts.resolver.sonatypeSnapshots\n+//      else\n+//        Opts.resolver.sonatypeStaging\n+//    )\n+\n+// This is what we do instead\n+publishTo := Some(MavenCache(\"local-maven\", new File( publishPrefix )))\n \n // the root project itself does not publish anything, but depends on the publish[-local] tasks.\n // Well, except that for the implementation, it also needs to be \"fixed up\".\n // So first, set the task to do nothing, then add the dependency. The other dependencies are found transitively.\n \n publishLocal := {}\n \n-publishLocal <<= publishLocal dependsOn (publishLocalFixup in impl_all, publishLocalFixup in impl_linux64, publishLocalFixup in impl_mac64, publishLocalFixup in impl_win64, publishLocalFixup in impl_win32, publishLocalFixup in impl_win)\n+publishLocal <<= publishLocal dependsOn (\n+  publishLocalFixup in impl_all,\n+  publishLocalFixup in impl_linux64,\n+  publishLocalFixup in impl_mac64,\n+  publishLocalFixup in impl_win64,\n+  publishLocalFixup in impl_win32,\n+  publishLocalFixup in impl_win\n+)\n \n publish := {}\n \n-publish <<= publish dependsOn (publishFixup in impl_all, publishFixup in impl_linux64, publishFixup in impl_mac64, publishFixup in impl_win64, publishFixup in impl_win32, publishFixup in impl_win)\n+publish <<= publish dependsOn (\n+  publishFixup in impl_all,\n+  publishFixup in impl_linux64,\n+  publishFixup in impl_mac64,\n+  publishFixup in impl_win64,\n+  publishFixup in impl_win32,\n+  publishFixup in impl_win\n+)\n "
+  },
+  {
+    "sha": "065fd9d50214ce80f66471b6d2d4c1151e3cd2b1",
+    "filename": "implementation/build.sbt",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/unibas-gravis/scalismo-native/blob/5a47363af29557ef0478d5b5a44057a883d06752/implementation/build.sbt",
+    "raw_url": "https://github.com/unibas-gravis/scalismo-native/raw/5a47363af29557ef0478d5b5a44057a883d06752/implementation/build.sbt",
+    "contents_url": "https://api.github.com/repos/unibas-gravis/scalismo-native/contents/implementation/build.sbt?ref=5a47363af29557ef0478d5b5a44057a883d06752",
+    "patch": "@@ -16,6 +16,7 @@ publishFixup <<= (baseDirectory, name, fixupExclude) map { (base, productName, e\n     productName,\n     excludes\n   ).!\n+\n }\n \n publishLocalFixup <<= (baseDirectory, name, fixupExclude) map { (base, productName, exclude) =>\n@@ -37,5 +38,5 @@ publishFixup <<= publishFixup dependsOn(publishFixup in stub, publish)\n // that's not strictly required for sbt proper, but it helps IntelliJ Idea.\n unmanagedBase := (unmanagedBase in stub).value\n \n-publishArtifact in(Compile, packageDoc) := false\n+publishArtifact in(Compile, packageDoc) := true\n "
+  },
+  {
+    "sha": "203657894f1d07f9d0ffb9dce760a42a0b9688cd",
+    "filename": "project/Build.scala",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/unibas-gravis/scalismo-native/blob/5a47363af29557ef0478d5b5a44057a883d06752/project/Build.scala",
+    "raw_url": "https://github.com/unibas-gravis/scalismo-native/raw/5a47363af29557ef0478d5b5a44057a883d06752/project/Build.scala",
+    "contents_url": "https://api.github.com/repos/unibas-gravis/scalismo-native/contents/project/Build.scala?ref=5a47363af29557ef0478d5b5a44057a883d06752",
+    "patch": "@@ -42,12 +42,12 @@ object Build extends sbt.Build {\n   // stub/src/main/java/scalismo/support/nativelibs/NativeLibraryBundles.java\n   // implementation/src/main/java/scalismo/support/nativelibs/NativeLibraryBundlesImplementation.java\n   //\n-  lazy val productVersion = \"4.0.0\"\n+  lazy val productVersion = \"4.0.1\"\n \n \n   lazy val productPackage = Seq(\"ch\", \"unibas\", \"cs\", \"gravis\")\n \n-  lazy val publishPrefix = \"/export/contrib/statismo/repo/public\"\n+  lazy val publishPrefix = s\"${System.getProperty(\"java.io.tmpdir\")}\"\n   lazy val publishLocalPrefix = s\"${System.getProperty(\"user.home\")}/.ivy2/local\"\n \n   // these task and settings keys are needed for the implementation project"
+  },
+  {
+    "sha": "133a8f197e3686c1164f73b4424d248fda1ecd6b",
+    "filename": "project/build.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/unibas-gravis/scalismo-native/blob/5a47363af29557ef0478d5b5a44057a883d06752/project/build.properties",
+    "raw_url": "https://github.com/unibas-gravis/scalismo-native/raw/5a47363af29557ef0478d5b5a44057a883d06752/project/build.properties",
+    "contents_url": "https://api.github.com/repos/unibas-gravis/scalismo-native/contents/project/build.properties?ref=5a47363af29557ef0478d5b5a44057a883d06752",
+    "patch": "@@ -1 +1 @@\n-sbt.version=0.13.0\n+sbt.version=0.13.17"
+  },
+  {
+    "sha": "a1d65e291ad863e745c46232dedcfbd9a975a78e",
+    "filename": "project/plugins.sbt",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/unibas-gravis/scalismo-native/blob/5a47363af29557ef0478d5b5a44057a883d06752/project/plugins.sbt",
+    "raw_url": "https://github.com/unibas-gravis/scalismo-native/raw/5a47363af29557ef0478d5b5a44057a883d06752/project/plugins.sbt",
+    "contents_url": "https://api.github.com/repos/unibas-gravis/scalismo-native/contents/project/plugins.sbt?ref=5a47363af29557ef0478d5b5a44057a883d06752",
+    "patch": "@@ -1 +1,9 @@\n+resolvers += Resolver.url(\"bintray-sbt-plugin-releases\", url(\"https://dl.bintray.com/banno/oss\"))(\n+  Resolver.ivyStylePatterns\n+)\n+\n+resolvers += \"sonatype-releases\" at \"https://oss.sonatype.org/content/repositories/releases/\"\n+\n+\n addSbtPlugin(\"com.typesafe.sbteclipse\" % \"sbteclipse-plugin\" % \"2.3.0\")\n+addSbtPlugin(\"com.jsuereth\" % \"sbt-pgp\" % \"1.0.0\")"
+  },
+  {
+    "sha": "e919abc3d1d8fce9547fc66eb41ab6169a0d7928",
+    "filename": "stub/build.sbt",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/unibas-gravis/scalismo-native/blob/5a47363af29557ef0478d5b5a44057a883d06752/stub/build.sbt",
+    "raw_url": "https://github.com/unibas-gravis/scalismo-native/raw/5a47363af29557ef0478d5b5a44057a883d06752/stub/build.sbt",
+    "contents_url": "https://api.github.com/repos/unibas-gravis/scalismo-native/contents/stub/build.sbt?ref=5a47363af29557ef0478d5b5a44057a883d06752",
+    "patch": "@@ -3,7 +3,7 @@\n \n name := \"scalismo-native-stub\"\n \n-publishArtifact in(Compile, packageDoc) := false\n+publishArtifact in(Compile, packageDoc) := true\n \n publishFixup <<= (baseDirectory, unmanagedBase in Compile, name) map { (base, lib, productName) =>\n   val topDir = s\"$publishPrefix/${productPackage.mkString(\"/\")}\""
+  }
+]

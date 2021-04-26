@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "aab862aa10723299022c9cf317ee42dc6e4bbf3e",
+    "filename": "2021/java/823.binary-trees-with-factors.java",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/snowan/interviews/blob/5f836c5019836cfacd8ff1f04b30e5818f2e9f9e/2021/java/823.binary-trees-with-factors.java",
+    "raw_url": "https://github.com/snowan/interviews/raw/5f836c5019836cfacd8ff1f04b30e5818f2e9f9e/2021/java/823.binary-trees-with-factors.java",
+    "contents_url": "https://api.github.com/repos/snowan/interviews/contents/2021/java/823.binary-trees-with-factors.java?ref=5f836c5019836cfacd8ff1f04b30e5818f2e9f9e",
+    "patch": "@@ -0,0 +1,31 @@\n+/**\n+     * sort the array\n+     *\n+     * and use HashMap to record each Integer, and the number of trees with that Integer as root\n+     * (1) each integer arr[i] will always have one tree with only itself\n+     * (2) if arr[i] has divisor (arr[j] (j < i) in the map, and if arr[i]/arr[j] also in the map\n+     *     then a can be the root of its left subtree, and arr[i]/arr[j] can be the root of its right subtree;\n+     *     the number of such tree is map.get(a) * map.get(arr[i]/arr[j])\n+     * (3) res to sum each arr[i] \n+     */\n+    public int numFactoredBinaryTrees(int[] arr) {\n+        if (arr == null || arr.length == 0) return 0;\n+        int mod = (int)1e9 + 7;\n+        int len = arr.length;\n+        long res = 0;\n+        Arrays.sort(arr);\n+        Map<Integer, Long> map = new HashMap<>();\n+        for (int i = 0; i < len; i++) {\n+            map.put(arr[i], 1L);\n+            for (int j = 0; j < i; j++) {\n+                if (arr[i] % arr[j] == 0) {\n+                    map.put(arr[i], \n+                            (map.get(arr[i]) + map.get(arr[j]) * map.getOrDefault(arr[i] / arr[j], 0L)) % mod);\n+                }\n+                \n+            }\n+            res = (res + map.get(arr[i])) % mod;\n+        }\n+        return (int) res;\n+    }\n+}"
+  }
+]

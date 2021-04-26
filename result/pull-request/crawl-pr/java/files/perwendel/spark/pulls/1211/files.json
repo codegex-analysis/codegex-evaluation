@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "2a5b29115fecf2067a201745982eb1b2ec946a5f",
+    "filename": "src/main/java/spark/FilterImpl.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/perwendel/spark/blob/b5572807d674f87eece5eaf32ccd990bd24f47ce/src/main/java/spark/FilterImpl.java",
+    "raw_url": "https://github.com/perwendel/spark/raw/b5572807d674f87eece5eaf32ccd990bd24f47ce/src/main/java/spark/FilterImpl.java",
+    "contents_url": "https://api.github.com/repos/perwendel/spark/contents/src/main/java/spark/FilterImpl.java?ref=b5572807d674f87eece5eaf32ccd990bd24f47ce",
+    "patch": "@@ -27,7 +27,7 @@\n  */\n public abstract class FilterImpl implements Filter, Wrapper {\n \n-    static final String DEFAULT_ACCEPT_TYPE = \"*/*\";\n+    public static final String DEFAULT_ACCEPT_TYPE = \"*/*\";\n \n     private String path;\n     private String acceptType;\n@@ -63,7 +63,7 @@ static FilterImpl create(final String path, final Filter filter) {\n      * @param filter     the filter\n      * @return the wrapped route\n      */\n-    static FilterImpl create(final String path, String acceptType, final Filter filter) {\n+    public static FilterImpl create(final String path, String acceptType, final Filter filter) {\n         if (acceptType == null) {\n             acceptType = DEFAULT_ACCEPT_TYPE;\n         }"
+  },
+  {
+    "sha": "1f102d23a1d0f9eb6b9722076714d5e9ed54ae78",
+    "filename": "src/main/java/spark/RouteImpl.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/perwendel/spark/blob/b5572807d674f87eece5eaf32ccd990bd24f47ce/src/main/java/spark/RouteImpl.java",
+    "raw_url": "https://github.com/perwendel/spark/raw/b5572807d674f87eece5eaf32ccd990bd24f47ce/src/main/java/spark/RouteImpl.java",
+    "contents_url": "https://api.github.com/repos/perwendel/spark/contents/src/main/java/spark/RouteImpl.java?ref=b5572807d674f87eece5eaf32ccd990bd24f47ce",
+    "patch": "@@ -26,7 +26,7 @@\n  * @author Per Wendel\n  */\n public abstract class RouteImpl implements Route, Wrapper {\n-    static final String DEFAULT_ACCEPT_TYPE = \"*/*\";\n+    public static final String DEFAULT_ACCEPT_TYPE = \"*/*\";\n \n     private String path;\n     private String acceptType;"
+  },
+  {
+    "sha": "2478c06b740a6cf7da69ce3b49a6eeb3552e139b",
+    "filename": "src/main/java/spark/route/Routes.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/perwendel/spark/blob/b5572807d674f87eece5eaf32ccd990bd24f47ce/src/main/java/spark/route/Routes.java",
+    "raw_url": "https://github.com/perwendel/spark/raw/b5572807d674f87eece5eaf32ccd990bd24f47ce/src/main/java/spark/route/Routes.java",
+    "contents_url": "https://api.github.com/repos/perwendel/spark/contents/src/main/java/spark/route/Routes.java?ref=b5572807d674f87eece5eaf32ccd990bd24f47ce",
+    "patch": "@@ -21,6 +21,7 @@\n import java.util.HashMap;\n import java.util.List;\n import java.util.Map;\n+import java.util.concurrent.CopyOnWriteArrayList;\n \n import spark.FilterImpl;\n import spark.RouteImpl;\n@@ -49,7 +50,7 @@ public static Routes create() {\n      * Constructor\n      */\n     protected Routes() {\n-        routes = new ArrayList<>();\n+        routes = new CopyOnWriteArrayList<>();\n     }\n \n     /**"
+  },
+  {
+    "sha": "2fd97086a2cf53ce670327f956ec7c4e93603547",
+    "filename": "src/test/java/spark/route/RoutesConcurrencyTest.java",
+    "status": "added",
+    "additions": 103,
+    "deletions": 0,
+    "changes": 103,
+    "blob_url": "https://github.com/perwendel/spark/blob/b5572807d674f87eece5eaf32ccd990bd24f47ce/src/test/java/spark/route/RoutesConcurrencyTest.java",
+    "raw_url": "https://github.com/perwendel/spark/raw/b5572807d674f87eece5eaf32ccd990bd24f47ce/src/test/java/spark/route/RoutesConcurrencyTest.java",
+    "contents_url": "https://api.github.com/repos/perwendel/spark/contents/src/test/java/spark/route/RoutesConcurrencyTest.java?ref=b5572807d674f87eece5eaf32ccd990bd24f47ce",
+    "patch": "@@ -0,0 +1,103 @@\n+package spark.route;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+import java.util.concurrent.Callable;\n+import java.util.concurrent.ExecutorService;\n+import java.util.concurrent.Executors;\n+import java.util.concurrent.Future;\n+import java.util.concurrent.TimeUnit;\n+import java.util.concurrent.atomic.AtomicInteger;\n+\n+import org.junit.After;\n+import org.junit.Before;\n+import org.junit.Rule;\n+import org.junit.Test;\n+import org.junit.rules.ErrorCollector;\n+\n+import spark.FilterImpl;\n+import spark.RouteImpl;\n+\n+import static org.hamcrest.CoreMatchers.equalTo;\n+import static org.hamcrest.CoreMatchers.is;\n+\n+public class RoutesConcurrencyTest {\n+    private final AtomicInteger numberOfSuccessfulIterations = new AtomicInteger();\n+    private final AtomicInteger numberOfFailedIterations = new AtomicInteger();\n+    private ExecutorService executorService;\n+\n+    @Rule\n+    public final ErrorCollector collector = new ErrorCollector();\n+\n+    private static final int NUMBER_OF_ITERATIONS = 10_000;\n+    private static final int NUMBER_OF_THREADS = 2;\n+    private static final int NUMBER_OF_TASKS = NUMBER_OF_THREADS;\n+\n+    private static final String ROUTE_PATH_PREFIX = \"/route/\";\n+    private static final String FILTER_PATH_PREFIX = \"/filter/\";\n+\n+    @Before\n+    public void setup() {\n+        numberOfSuccessfulIterations.set(0);\n+        numberOfFailedIterations.set(0);\n+    }\n+\n+    @After\n+    public void teardown() {\n+        if (executorService != null && !executorService.isShutdown()) {\n+            try {\n+                executorService.shutdownNow();\n+                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {\n+                    System.err.println(\"Executor service did not terminate.\");\n+                }\n+            } catch (InterruptedException e) {\n+                Thread.currentThread().interrupt();\n+            }\n+        }\n+    }\n+\n+    @Test\n+    public void classShouldBeThreadSafe() throws Exception {\n+        executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);\n+        List<Callable<Void>> tasks = partitionIterationsIntoTasks();\n+        List<Future<Void>> futureResults = executorService.invokeAll(tasks);\n+        executorService.shutdown();\n+        for (Future<Void> futureResult : futureResults) {\n+            futureResult.get();\n+            collector.checkThat(futureResult.isDone(), is(true));\n+        }\n+        collector.checkThat(numberOfSuccessfulIterations.intValue(), equalTo(NUMBER_OF_ITERATIONS));\n+        collector.checkThat(numberOfFailedIterations.intValue(), equalTo(0));\n+    }\n+\n+    private List<Callable<Void>> partitionIterationsIntoTasks() {\n+        final List<Callable<Void>> tasks = new ArrayList<>();\n+        final Routes routes = Routes.create();\n+        final int numberOfIterationsPerTask = NUMBER_OF_ITERATIONS / NUMBER_OF_TASKS;\n+        for (int taskIndex = 0; taskIndex < NUMBER_OF_TASKS; taskIndex++) {\n+            final int fromIteration = numberOfIterationsPerTask * taskIndex;\n+            final int toIteration = numberOfIterationsPerTask * (taskIndex + 1);\n+            tasks.add(() -> {\n+                for (int iterationIndex = fromIteration; iterationIndex < toIteration; iterationIndex++) {\n+                    try {\n+                        String routePath = ROUTE_PATH_PREFIX + iterationIndex;\n+                        String filterPath = FILTER_PATH_PREFIX + iterationIndex;\n+                        routes.add(HttpMethod.get, RouteImpl.create(routePath, RouteImpl.DEFAULT_ACCEPT_TYPE, null));\n+                        routes.add(HttpMethod.get, FilterImpl.create(filterPath, FilterImpl.DEFAULT_ACCEPT_TYPE, null));\n+                        routes.find(HttpMethod.get, routePath, RouteImpl.DEFAULT_ACCEPT_TYPE);\n+                        routes.findMultiple(HttpMethod.get, filterPath, FilterImpl.DEFAULT_ACCEPT_TYPE);\n+                        routes.findAll();\n+                        routes.remove(routePath, HttpMethod.get.toString());\n+                        routes.remove(filterPath);\n+                        routes.clear();\n+                        numberOfSuccessfulIterations.getAndIncrement();\n+                    } catch (Exception e) {\n+                        numberOfFailedIterations.getAndIncrement();\n+                    }\n+                }\n+                return null;\n+            });\n+        }\n+        return tasks;\n+    }\n+}"
+  }
+]

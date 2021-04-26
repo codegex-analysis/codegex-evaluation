@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "3c723f74f21fecde55779f0e7e1aa64075c39006",
+    "filename": "R/fill_pdf.R",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 7,
+    "changes": 25,
+    "blob_url": "https://github.com/pridiltal/staplr/blob/1c2cd95d49bcaffffd4eca12afb1eea27c3d342f/R/fill_pdf.R",
+    "raw_url": "https://github.com/pridiltal/staplr/raw/1c2cd95d49bcaffffd4eca12afb1eea27c3d342f/R/fill_pdf.R",
+    "contents_url": "https://api.github.com/repos/pridiltal/staplr/contents/R/fill_pdf.R?ref=1c2cd95d49bcaffffd4eca12afb1eea27c3d342f",
+    "patch": "@@ -321,14 +321,8 @@ get_fields <- function(input_filepath = NULL, convert_field_names = FALSE, encod\n   # generate the data field dump in a temporary file\n   # theoratically, using dump_data_fields_utf8 can get rid of the need to use sub_demical\n   # but this fails to process inputs containing stuff like emoji\n-  system_command <- paste(pdftk_cmd(),\n-                          shQuote(input_filepath),\n-                          'dump_data_fields','output',\n-                          shQuote(fieldsTemp))\n-  system(system_command)\n   # here encoding isn't important because any unusual character is in numeric character references\n-  fields <- paste0(readLines(fieldsTemp,encoding = 'UTF-8'),\n-                   collapse = '\\n')\n+  fields <- rjava_get_fields(input_filepath)\n \n   # https://stackoverflow.com/questions/5060076/convert-html-character-entity-encoding-in-r\n   fields <- XML::xpathApply(XML::htmlParse(fields, asText=TRUE,encoding = \"UTF-8\"),\n@@ -413,6 +407,23 @@ get_fields <- function(input_filepath = NULL, convert_field_names = FALSE, encod\n   return(fields)\n }\n \n+rjava_get_fields = function(f) {\n+  jar_path = system.file('pdftk-java/pdftk.jar', package = 'staplr', mustWork = TRUE)\n+  rJava::.jaddClassPath(jar_path)\n+  # instead of an output file, write the output to this byte array so we can\n+  # send it directly back to R\n+  out = rJava::.jnew('java/io/ByteArrayOutputStream')\n+  ofs = rJava::.jnew('java/io/PrintStream',\n+                     rJava::.jcast(out, 'java/io/OutputStream'))\n+  input_reader = rJava::.jnew('pdftk/com/lowagie/text/pdf/PdfReader', f)\n+  output_utf8_b = FALSE\n+  # `report.ReportAcroFormFields` is the java function that actually prints the\n+  # form fields\n+  rJava::.jcall('com/gitlab/pdftk_java/report', 'V', 'ReportAcroFormFields',\n+                ofs, input_reader, output_utf8_b)\n+  rJava::.jcall(out, 'Ljava/lang/String;', 'toString')\n+}\n+\n \n \n # taken outside to make testing easier"
+  }
+]

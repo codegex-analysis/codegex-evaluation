@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "eaccfc11e4df24fa61d66d52b011ef7dabe4d880",
+    "filename": "dhis-2/dhis-api/src/main/java/org/hisp/dhis/cache/LocalCache.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/dhis2/dhis2-core/blob/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-api/src/main/java/org/hisp/dhis/cache/LocalCache.java",
+    "raw_url": "https://github.com/dhis2/dhis2-core/raw/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-api/src/main/java/org/hisp/dhis/cache/LocalCache.java",
+    "contents_url": "https://api.github.com/repos/dhis2/dhis2-core/contents/dhis-2/dhis-api/src/main/java/org/hisp/dhis/cache/LocalCache.java?ref=bbb585b5b52aea5f3f139a82dcd3d65e78cac367",
+    "patch": "@@ -156,7 +156,7 @@ public void invalidate( String key )\n     @Override\n     public void invalidateAll()\n     {\n-        cache2kInstance.clear();\n+        cache2kInstance.removeAll();\n     }\n \n     @Override"
+  },
+  {
+    "sha": "2d2a99da633ed86f1c0b0f91d5c40499c73f17e6",
+    "filename": "dhis-2/dhis-services/dhis-service-tracker/src/main/java/org/hisp/dhis/tracker/preheat/cache/DefaultPreheatCacheService.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 1,
+    "changes": 12,
+    "blob_url": "https://github.com/dhis2/dhis2-core/blob/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-services/dhis-service-tracker/src/main/java/org/hisp/dhis/tracker/preheat/cache/DefaultPreheatCacheService.java",
+    "raw_url": "https://github.com/dhis2/dhis2-core/raw/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-services/dhis-service-tracker/src/main/java/org/hisp/dhis/tracker/preheat/cache/DefaultPreheatCacheService.java",
+    "contents_url": "https://api.github.com/repos/dhis2/dhis2-core/contents/dhis-2/dhis-services/dhis-service-tracker/src/main/java/org/hisp/dhis/tracker/preheat/cache/DefaultPreheatCacheService.java?ref=bbb585b5b52aea5f3f139a82dcd3d65e78cac367",
+    "patch": "@@ -41,9 +41,11 @@\n import org.cache2k.Cache;\n import org.cache2k.Cache2kBuilder;\n import org.hisp.dhis.common.IdentifiableObject;\n+import org.hisp.dhis.common.event.ApplicationCacheClearedEvent;\n import org.hisp.dhis.external.conf.ConfigurationKey;\n import org.hisp.dhis.external.conf.DhisConfigurationProvider;\n import org.hisp.dhis.tracker.TrackerIdScheme;\n+import org.springframework.context.event.EventListener;\n import org.springframework.core.env.Environment;\n import org.springframework.stereotype.Service;\n \n@@ -139,9 +141,17 @@ public void put( final String cacheKey, final String id, IdentifiableObject obje\n         }\n     }\n \n+    @EventListener\n+    @Override\n+    public void handleApplicationCachesCleared( ApplicationCacheClearedEvent event )\n+    {\n+        invalidateCache();\n+    }\n+\n+    @Override\n     public void invalidateCache()\n     {\n-        cache.keySet().forEach( k -> cache.get( k ).removeAll() );\n+        cache.values().forEach( Cache::removeAll );\n     }\n \n     private boolean isCacheEnabled()"
+  },
+  {
+    "sha": "b2b404bcc7fdcf64293486d7d93a3a89fcbd4ba0",
+    "filename": "dhis-2/dhis-services/dhis-service-tracker/src/main/java/org/hisp/dhis/tracker/preheat/cache/PreheatCacheService.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/dhis2/dhis2-core/blob/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-services/dhis-service-tracker/src/main/java/org/hisp/dhis/tracker/preheat/cache/PreheatCacheService.java",
+    "raw_url": "https://github.com/dhis2/dhis2-core/raw/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-services/dhis-service-tracker/src/main/java/org/hisp/dhis/tracker/preheat/cache/PreheatCacheService.java",
+    "contents_url": "https://api.github.com/repos/dhis2/dhis2-core/contents/dhis-2/dhis-services/dhis-service-tracker/src/main/java/org/hisp/dhis/tracker/preheat/cache/PreheatCacheService.java?ref=bbb585b5b52aea5f3f139a82dcd3d65e78cac367",
+    "patch": "@@ -31,6 +31,7 @@\n import java.util.Optional;\n \n import org.hisp.dhis.common.IdentifiableObject;\n+import org.hisp.dhis.common.event.ApplicationCacheClearedEvent;\n \n /**\n  * A DHIS2 metadata cache implementation to reduce db lookups during pre-heat\n@@ -79,4 +80,11 @@\n      * Invalidates all caches.\n      */\n     void invalidateCache();\n+\n+    /**\n+     * Event handler for {@link ApplicationCacheClearedEvent}.\n+     *\n+     * @param event the {@link ApplicationCacheClearedEvent}.\n+     */\n+    void handleApplicationCachesCleared( ApplicationCacheClearedEvent event );\n }"
+  },
+  {
+    "sha": "612e640102539ac2bbe8a92573e9d64ec7055c2d",
+    "filename": "dhis-2/dhis-support/dhis-support-system/src/main/java/org/hisp/dhis/cache/CacheProvider.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/dhis2/dhis2-core/blob/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-support/dhis-support-system/src/main/java/org/hisp/dhis/cache/CacheProvider.java",
+    "raw_url": "https://github.com/dhis2/dhis2-core/raw/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-support/dhis-support-system/src/main/java/org/hisp/dhis/cache/CacheProvider.java",
+    "contents_url": "https://api.github.com/repos/dhis2/dhis2-core/contents/dhis-2/dhis-support/dhis-support-system/src/main/java/org/hisp/dhis/cache/CacheProvider.java?ref=bbb585b5b52aea5f3f139a82dcd3d65e78cac367",
+    "patch": "@@ -29,6 +29,8 @@\n \n import java.time.Duration;\n \n+import org.hisp.dhis.common.event.ApplicationCacheClearedEvent;\n+\n /**\n  * The {@link CacheProvider} has a factory method for each {@link Cache} use\n  * case in DHIS2.\n@@ -98,4 +100,6 @@\n     <V> Cache<V> createUserGroupNameCache();\n \n     <V> Cache<V> createUserDisplayNameCache();\n+\n+    void handleApplicationCachesCleared( ApplicationCacheClearedEvent event );\n }"
+  },
+  {
+    "sha": "c4be18172454ed9b766da2c8c1c8a5bc2398de99",
+    "filename": "dhis-2/dhis-support/dhis-support-system/src/main/java/org/hisp/dhis/cache/DefaultCacheProvider.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/dhis2/dhis2-core/blob/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-support/dhis-support-system/src/main/java/org/hisp/dhis/cache/DefaultCacheProvider.java",
+    "raw_url": "https://github.com/dhis2/dhis2-core/raw/bbb585b5b52aea5f3f139a82dcd3d65e78cac367/dhis-2/dhis-support/dhis-support-system/src/main/java/org/hisp/dhis/cache/DefaultCacheProvider.java",
+    "contents_url": "https://api.github.com/repos/dhis2/dhis2-core/contents/dhis-2/dhis-support/dhis-support-system/src/main/java/org/hisp/dhis/cache/DefaultCacheProvider.java?ref=bbb585b5b52aea5f3f139a82dcd3d65e78cac367",
+    "patch": "@@ -408,6 +408,7 @@ private long getActualSize( long size )\n     }\n \n     @EventListener\n+    @Override\n     public void handleApplicationCachesCleared( ApplicationCacheClearedEvent event )\n     {\n         allCaches.values().forEach( Cache::invalidateAll );"
+  }
+]

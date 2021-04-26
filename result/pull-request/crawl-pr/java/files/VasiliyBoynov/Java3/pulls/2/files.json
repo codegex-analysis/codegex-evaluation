@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "248bb5ef4e0ef68b08d9bd9bca5b7e821f144acb",
+    "filename": "src/main/java/Lesson5/Car.java",
+    "status": "added",
+    "additions": 79,
+    "deletions": 0,
+    "changes": 79,
+    "blob_url": "https://github.com/VasiliyBoynov/Java3/blob/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Car.java",
+    "raw_url": "https://github.com/VasiliyBoynov/Java3/raw/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Car.java",
+    "contents_url": "https://api.github.com/repos/VasiliyBoynov/Java3/contents/src/main/java/Lesson5/Car.java?ref=0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195",
+    "patch": "@@ -0,0 +1,79 @@\n+package Lesson5;\n+\n+import java.util.concurrent.CountDownLatch;\n+import java.util.concurrent.CyclicBarrier;\n+import java.util.concurrent.Semaphore;\n+import java.util.concurrent.atomic.AtomicBoolean;\n+import java.util.concurrent.locks.Lock;\n+import java.util.concurrent.locks.ReentrantLock;\n+\n+public class Car implements Runnable {\n+    private static int CARS_COUNT;\n+    private Race race;\n+    private int speed;\n+    private String name;\n+\n+    private static CyclicBarrier cb;\n+    private static CountDownLatch cdl;\n+    private static Semaphore smp ;\n+    private static Lock lock =  new ReentrantLock();\n+    private static volatile boolean init = false;\n+    private static AtomicBoolean win = new AtomicBoolean(false);\n+\n+    public static CountDownLatch getCdl() {\n+        return cdl;\n+    }\n+\n+    public static void setCdl(CountDownLatch cdl) {\n+        Car.cdl = cdl;\n+    }\n+\n+    public static Semaphore getSmp() {\n+        return smp;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+    public int getSpeed() {\n+        return speed;\n+    }\n+    public Car(Race race, int speed) {\n+        this.race = race;\n+        this.speed = speed;\n+        CARS_COUNT++;\n+        this.name = \"Участник #\" + CARS_COUNT;\n+        //this.cb=cb;\n+        //this.cdl = cdl;\n+\n+    }\n+    @Override\n+    public void run() {\n+        try {\n+            lock.lock();\n+                if (!init){\n+                    //System.out.println(this.name+\"run initialisation\");\n+                    init=true;\n+                    cb = new CyclicBarrier(CARS_COUNT);\n+                    smp = new Semaphore((int) (CARS_COUNT/2)) ;\n+                }\n+            lock.unlock();\n+            System.out.println(this.name + \" готовится\");\n+            Thread.sleep(500 + (int)(Math.random() * 800));\n+            System.out.println(this.name + \" готов\");\n+            cdl.countDown();\n+            cb.await();\n+\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        }\n+        for (int i = 0; i < race.getStages().size(); i++) {\n+            race.getStages().get(i).go(this);\n+        }\n+        if (win.compareAndSet(false,true)){\n+            System.out.println(this.name + \" WIN!!\");\n+        };\n+        cdl.countDown();\n+    }\n+}\n+"
+  },
+  {
+    "sha": "7e6b28db1ffd8e28879bfbf6bf34234d0113e6c0",
+    "filename": "src/main/java/Lesson5/MainClass.java",
+    "status": "added",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/VasiliyBoynov/Java3/blob/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/MainClass.java",
+    "raw_url": "https://github.com/VasiliyBoynov/Java3/raw/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/MainClass.java",
+    "contents_url": "https://api.github.com/repos/VasiliyBoynov/Java3/contents/src/main/java/Lesson5/MainClass.java?ref=0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195",
+    "patch": "@@ -0,0 +1,27 @@\n+package Lesson5;\n+\n+import java.util.concurrent.CountDownLatch;\n+import java.util.concurrent.CyclicBarrier;\n+\n+public class MainClass {\n+    public static final int CARS_COUNT = 4;\n+    public static void main(String[] args) throws InterruptedException {\n+        Car.setCdl(new CountDownLatch(CARS_COUNT));\n+        System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Подготовка!!!\");\n+\n+        Race race = new Race(new Road(60), new Tunnel(), new Road(40));\n+        Car[] cars = new Car[CARS_COUNT];\n+        for (int i = 0; i < cars.length; i++) {\n+            cars[i] = new Car(race, 20 + (int) (Math.random() * 10));\n+        }\n+        for (int i = 0; i < cars.length; i++) {\n+            new Thread(cars[i]).start();\n+        }\n+\n+        Car.getCdl().await();\n+        Car.setCdl(new CountDownLatch(CARS_COUNT));\n+        System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка началась!!!\");\n+        Car.getCdl().await();\n+        System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка закончилась!!!\");\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "29dbeadff714b0a1ed14e1773cef1ed5e073e9c9",
+    "filename": "src/main/java/Lesson5/Race.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/VasiliyBoynov/Java3/blob/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Race.java",
+    "raw_url": "https://github.com/VasiliyBoynov/Java3/raw/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Race.java",
+    "contents_url": "https://api.github.com/repos/VasiliyBoynov/Java3/contents/src/main/java/Lesson5/Race.java?ref=0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195",
+    "patch": "@@ -0,0 +1,12 @@\n+package Lesson5;\n+\n+import java.util.ArrayList;\n+import java.util.Arrays;\n+\n+public class Race {\n+    private ArrayList<Stage> stages;\n+    public ArrayList<Stage> getStages() { return stages; }\n+    public Race(Stage... stages) {\n+        this.stages = new ArrayList<>(Arrays.asList(stages));\n+    }\n+}"
+  },
+  {
+    "sha": "cd9238185038155607d543bce97a316c1f7649f6",
+    "filename": "src/main/java/Lesson5/Road.java",
+    "status": "added",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/VasiliyBoynov/Java3/blob/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Road.java",
+    "raw_url": "https://github.com/VasiliyBoynov/Java3/raw/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Road.java",
+    "contents_url": "https://api.github.com/repos/VasiliyBoynov/Java3/contents/src/main/java/Lesson5/Road.java?ref=0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195",
+    "patch": "@@ -0,0 +1,18 @@\n+package Lesson5;\n+\n+public class Road extends Stage {\n+    public Road(int length) {\n+        this.length = length;\n+        this.description = \"Дорога \" + length + \" метров\";\n+    }\n+    @Override\n+    public void go(Car c) {\n+        try {\n+            System.out.println(c.getName() + \" начал этап: \" + description);\n+            Thread.sleep(length / c.getSpeed() * 1000);\n+            System.out.println(c.getName() + \" закончил этап: \" + description);\n+        } catch (InterruptedException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "25686ce4105c4a0a3f451ee792d79a4de92f9b34",
+    "filename": "src/main/java/Lesson5/Stage.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/VasiliyBoynov/Java3/blob/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Stage.java",
+    "raw_url": "https://github.com/VasiliyBoynov/Java3/raw/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Stage.java",
+    "contents_url": "https://api.github.com/repos/VasiliyBoynov/Java3/contents/src/main/java/Lesson5/Stage.java?ref=0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195",
+    "patch": "@@ -0,0 +1,10 @@\n+package Lesson5;\n+\n+public abstract class Stage {\n+    protected int length;\n+    protected String description;\n+    public String getDescription() {\n+        return description;\n+    }\n+    public abstract void go(Car c);\n+}"
+  },
+  {
+    "sha": "3c5d8fd2a6c1a435e123969e9f56081acdad1553",
+    "filename": "src/main/java/Lesson5/Tunnel.java",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/VasiliyBoynov/Java3/blob/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Tunnel.java",
+    "raw_url": "https://github.com/VasiliyBoynov/Java3/raw/0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195/src/main/java/Lesson5/Tunnel.java",
+    "contents_url": "https://api.github.com/repos/VasiliyBoynov/Java3/contents/src/main/java/Lesson5/Tunnel.java?ref=0d14ab7f43e041dfe1d1e7c22bd65570fb6e8195",
+    "patch": "@@ -0,0 +1,31 @@\n+package Lesson5;\n+\n+public class Tunnel extends Stage {\n+    private static int count;\n+    public Tunnel() {\n+        this.length = 80;\n+        this.description = \"Тоннель \" + length + \" метров\";\n+    }\n+    @Override\n+    public void go(Car c) {\n+        try {\n+            try {\n+                System.out.println(c.getName() + \" готовится к этапу(ждет): \" + description);\n+                Car.getSmp().acquire();\n+                System.out.println(c.getName() + \" начал этап: \" + description);\n+                count++;\n+                System.out.printf(\"[DEBUG] В тонеле %d участников %n \",count);\n+                Thread.sleep(length / c.getSpeed() * 1000);\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            } finally {\n+                System.out.println(c.getName() + \" закончил этап: \" + description);\n+                count--;\n+                Car.getSmp().release();\n+            }\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}\n+"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "48eb756db35c5028dd87ca571b1d6a5708bd30cd",
+    "filename": "launcher/src/main/scripts/bin/launcher.py",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 8,
+    "changes": 23,
+    "blob_url": "https://github.com/airlift/airlift/blob/b41d051ce00c795365e68cf4276c3219d5e3cabc/launcher/src/main/scripts/bin/launcher.py",
+    "raw_url": "https://github.com/airlift/airlift/raw/b41d051ce00c795365e68cf4276c3219d5e3cabc/launcher/src/main/scripts/bin/launcher.py",
+    "contents_url": "https://api.github.com/repos/airlift/airlift/contents/launcher/src/main/scripts/bin/launcher.py?ref=b41d051ce00c795365e68cf4276c3219d5e3cabc",
+    "patch": "@@ -195,11 +195,6 @@ def build_java_execution(options, daemon):\n     if options.log_levels_set and not exists(options.log_levels):\n         raise Exception('Log levels file is missing: %s' % options.log_levels)\n \n-    with open(os.devnull, 'w') as devnull:\n-        try:\n-            subprocess.check_call(['java', '-version'], stdout=devnull, stderr=devnull)\n-        except (OSError, subprocess.CalledProcessError):\n-            raise Exception('Java is not installed')\n \n     properties = options.properties.copy()\n \n@@ -223,16 +218,28 @@ def build_java_execution(options, daemon):\n     system_properties = ['-D%s=%s' % i for i in properties.items()]\n     classpath = pathjoin(options.install_path, 'lib', '*')\n \n-    command = ['java', '-cp', classpath]\n+\n+    env = os.environ.copy()\n+\n+    java_executable = 'java' # subject to configuration maybe\n+    if 'JAVA_HOME' in env:\n+        java_exceutable = pathjoin(env['JAVA_HOME'], 'bin', java_executable)\n+\n+    with open(os.devnull, 'w') as devnull:\n+        try:\n+            subprocess.check_call([java_executable, '-version'], stdout=devnull, stderr=devnull)\n+        except (OSError, subprocess.CalledProcessError):\n+            raise Exception('Java is not installed')\n+\n+\n+    command = [java_executable, '-cp', classpath]\n     command += jvm_properties + options.jvm_options + system_properties\n     command += [main_class]\n \n     if options.verbose:\n         print(command)\n         print(\"\")\n \n-    env = os.environ.copy()\n-\n     # set process name: https://github.com/airlift/procname\n     process_name = launcher_properties.get('process-name', '')\n     if len(process_name) > 0:"
+  }
+]

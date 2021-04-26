@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "017465d52d507d605a2e546d7f39ea96d80ce330",
+    "filename": "flink-clients/src/main/java/org/apache/flink/client/cli/CliFrontend.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/flink/blob/bbfe60eb6db082a292800187af1734c687136b32/flink-clients/src/main/java/org/apache/flink/client/cli/CliFrontend.java",
+    "raw_url": "https://github.com/apache/flink/raw/bbfe60eb6db082a292800187af1734c687136b32/flink-clients/src/main/java/org/apache/flink/client/cli/CliFrontend.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-clients/src/main/java/org/apache/flink/client/cli/CliFrontend.java?ref=bbfe60eb6db082a292800187af1734c687136b32",
+    "patch": "@@ -1124,19 +1124,19 @@ public static void main(final String[] args) {\n         final List<CustomCommandLine> customCommandLines =\n                 loadCustomCommandLines(configuration, configurationDirectory);\n \n+        int retCode = 31;\n         try {\n             final CliFrontend cli = new CliFrontend(configuration, customCommandLines);\n \n             SecurityUtils.install(new SecurityConfiguration(cli.configuration));\n-            int retCode =\n-                    SecurityUtils.getInstalledContext().runSecured(() -> cli.parseAndRun(args));\n-            System.exit(retCode);\n+            retCode = SecurityUtils.getInstalledContext().runSecured(() -> cli.parseAndRun(args));\n         } catch (Throwable t) {\n             final Throwable strippedThrowable =\n                     ExceptionUtils.stripException(t, UndeclaredThrowableException.class);\n             LOG.error(\"Fatal error while running command line interface.\", strippedThrowable);\n             strippedThrowable.printStackTrace();\n-            System.exit(31);\n+        } finally {\n+            System.exit(retCode);\n         }\n     }\n "
+  }
+]

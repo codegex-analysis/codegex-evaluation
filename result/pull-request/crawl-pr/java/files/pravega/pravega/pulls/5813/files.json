@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "c826612b39b254f3f7ff1c23ab638ff0258534d1",
+    "filename": "client/src/main/java/io/pravega/client/BatchClientFactory.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/pravega/pravega/blob/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/BatchClientFactory.java",
+    "raw_url": "https://github.com/pravega/pravega/raw/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/BatchClientFactory.java",
+    "contents_url": "https://api.github.com/repos/pravega/pravega/contents/client/src/main/java/io/pravega/client/BatchClientFactory.java?ref=899b459aff06e52d250b346f0cf008480769b838",
+    "patch": "@@ -16,6 +16,7 @@\n import io.pravega.client.batch.impl.BatchClientFactoryImpl;\n import io.pravega.client.connection.impl.SocketConnectionFactoryImpl;\n import io.pravega.client.segment.impl.NoSuchSegmentException;\n+import io.pravega.client.segment.impl.Segment;\n import io.pravega.client.stream.EventStreamReader;\n import io.pravega.client.stream.Serializer;\n import io.pravega.client.stream.Stream;\n@@ -80,6 +81,14 @@ static BatchClientFactory withScope(String scope, ClientConfig config) {\n      */\n     <T> SegmentIterator<T> readSegment(SegmentRange segment, Serializer<T> deserializer);\n \n+    /**\n+     * Return {@link SegmentRange} with lowest and highest offset for the given {@link Segment}.\n+     *\n+     * @param segment The {@link Segment}\n+     * @return {@link SegmentRange} representing the entire {@link Segment}.\n+     */\n+    SegmentRange currentSegmentRange(Segment segment);\n+\n     /**\n      * Closes the client factory. This will close any connections created through it.\n      * @see java.lang.AutoCloseable#close()"
+  },
+  {
+    "sha": "1455587e8ad1e64ac163e7be77df4a7fd3716a04",
+    "filename": "client/src/main/java/io/pravega/client/admin/impl/StreamCutHelper.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/pravega/pravega/blob/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/admin/impl/StreamCutHelper.java",
+    "raw_url": "https://github.com/pravega/pravega/raw/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/admin/impl/StreamCutHelper.java",
+    "contents_url": "https://api.github.com/repos/pravega/pravega/contents/client/src/main/java/io/pravega/client/admin/impl/StreamCutHelper.java?ref=899b459aff06e52d250b346f0cf008480769b838",
+    "patch": "@@ -23,9 +23,11 @@\n import io.pravega.client.stream.impl.StreamCutImpl;\n import io.pravega.client.stream.impl.StreamImpl;\n import io.pravega.shared.security.auth.AccessOperation;\n+\n import java.util.Map;\n import java.util.concurrent.CompletableFuture;\n import java.util.stream.Collectors;\n+\n import lombok.Cleanup;\n import lombok.extern.slf4j.Slf4j;\n "
+  },
+  {
+    "sha": "5ea03daa280e082e37e89ab798054ce12a9dd4ab",
+    "filename": "client/src/main/java/io/pravega/client/batch/impl/BatchClientFactoryImpl.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/pravega/pravega/blob/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/batch/impl/BatchClientFactoryImpl.java",
+    "raw_url": "https://github.com/pravega/pravega/raw/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/batch/impl/BatchClientFactoryImpl.java",
+    "contents_url": "https://api.github.com/repos/pravega/pravega/contents/client/src/main/java/io/pravega/client/batch/impl/BatchClientFactoryImpl.java?ref=899b459aff06e52d250b346f0cf008480769b838",
+    "patch": "@@ -77,6 +77,20 @@ public StreamSegmentsIterator getSegments(final Stream stream, final StreamCut f\n                 segment.asImpl().getStartOffset(), segment.asImpl().getEndOffset());\n     }\n \n+    @Override\n+    public SegmentRange currentSegmentRange(final Segment segment) {\n+        final DelegationTokenProvider tokenProvider = DelegationTokenProviderFactory\n+                .create(controller, segment.getStream().getScope(), segment.getStream().getStreamName(), AccessOperation.READ);\n+\n+        SegmentInfo segmentInfo = segmentToInfo(segment, tokenProvider);\n+\n+        return SegmentRangeImpl.builder()\n+                .segment(segment)\n+                .startOffset(segmentInfo.getStartingOffset())\n+                .endOffset(segmentInfo.getWriteOffset())\n+                .build();\n+    }\n+\n     private StreamSegmentsIterator listSegments(final Stream stream, final Optional<StreamCut> startStreamCut,\n                                                 final Optional<StreamCut> endStreamCut) {\n         val startCut = startStreamCut.filter(sc -> !sc.equals(StreamCut.UNBOUNDED));"
+  },
+  {
+    "sha": "73104c8b977614bd905394ea9bd0575b63d107ef",
+    "filename": "client/src/main/java/io/pravega/client/batch/impl/SegmentRangeImpl.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/pravega/pravega/blob/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/batch/impl/SegmentRangeImpl.java",
+    "raw_url": "https://github.com/pravega/pravega/raw/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/batch/impl/SegmentRangeImpl.java",
+    "contents_url": "https://api.github.com/repos/pravega/pravega/contents/client/src/main/java/io/pravega/client/batch/impl/SegmentRangeImpl.java?ref=899b459aff06e52d250b346f0cf008480769b838",
+    "patch": "@@ -13,6 +13,7 @@\n import com.google.common.base.Preconditions;\n import io.pravega.client.batch.SegmentRange;\n import io.pravega.client.segment.impl.Segment;\n+import io.pravega.client.stream.StreamCut;\n import lombok.AccessLevel;\n import lombok.Builder;\n import lombok.EqualsAndHashCode;\n@@ -23,6 +24,7 @@\n /**\n  * Implementation of {@link SegmentRange}.\n  */\n+\n @Beta\n @Builder\n @ToString\n@@ -75,4 +77,20 @@ public SegmentRangeImpl build() {\n             return new SegmentRangeImpl(segment, startOffset, endOffset);\n         }\n     }\n+\n+    /**\n+     * Obtain {@link SegmentRange} from start and end {@link StreamCut} for a given {@link Segment}.\n+     * @param segment The {@link Segment}\n+     * @param start Beginning of the {@link SegmentRange}\n+     * @param end End of the {@link SegmentRange}\n+     * @return {@link SegmentRange} covering start-end\n+     */\n+    public static SegmentRange fromStreamCuts(final Segment segment, final StreamCut start, final StreamCut end) {\n+        Preconditions.checkState(!start.equals(StreamCut.UNBOUNDED), \"Start StreamCut may not be UNBOUNDED\");\n+        Preconditions.checkState(!end.equals(StreamCut.UNBOUNDED), \"End StreamCut may not be UNBOUNDED\");\n+        long startOffset = start.asImpl().getPositions().getOrDefault(segment, -1L);\n+        long endOffset = end.asImpl().getPositions().getOrDefault(segment, -1L);\n+        Preconditions.checkState(startOffset >= 0 && endOffset > startOffset, \"Start offset should be less than end offset.\");\n+        return new SegmentRangeImpl(segment, startOffset, endOffset);\n+    }\n }"
+  },
+  {
+    "sha": "942dab40244c5c53cf45d4e0c9f8792c12e11fc5",
+    "filename": "client/src/main/java/io/pravega/client/stream/impl/StreamCutImpl.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/pravega/pravega/blob/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/stream/impl/StreamCutImpl.java",
+    "raw_url": "https://github.com/pravega/pravega/raw/899b459aff06e52d250b346f0cf008480769b838/client/src/main/java/io/pravega/client/stream/impl/StreamCutImpl.java",
+    "contents_url": "https://api.github.com/repos/pravega/pravega/contents/client/src/main/java/io/pravega/client/stream/impl/StreamCutImpl.java?ref=899b459aff06e52d250b346f0cf008480769b838",
+    "patch": "@@ -63,9 +63,13 @@ public StreamCutImpl(Stream stream, Map<Segment, Long> positions) {\n         this.positions = ImmutableMap.copyOf(positions);\n     }\n \n+    public StreamCutImpl(Stream stream, Segment segment, long position) {\n+        this(stream, Collections.singletonMap(segment, position));\n+    }\n+\n     @Override\n     public Map<Segment, Long> getPositions() {\n-        return Collections.unmodifiableMap(positions);\n+        return positions;\n     }\n \n     @Override"
+  },
+  {
+    "sha": "2996fa8d5602d34c907347a6c8833ac7a0e95c96",
+    "filename": "client/src/test/java/io/pravega/client/batch/impl/BatchClientImplTest.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/pravega/pravega/blob/899b459aff06e52d250b346f0cf008480769b838/client/src/test/java/io/pravega/client/batch/impl/BatchClientImplTest.java",
+    "raw_url": "https://github.com/pravega/pravega/raw/899b459aff06e52d250b346f0cf008480769b838/client/src/test/java/io/pravega/client/batch/impl/BatchClientImplTest.java",
+    "contents_url": "https://api.github.com/repos/pravega/pravega/contents/client/src/test/java/io/pravega/client/batch/impl/BatchClientImplTest.java?ref=899b459aff06e52d250b346f0cf008480769b838",
+    "patch": "@@ -141,6 +141,27 @@ public void testGetSegmentsWithMultipleSegments() throws Exception {\n         assertFalse(segmentIterator.hasNext());\n     }\n \n+    @Test(timeout = 5000)\n+    public void testGetCurrentSegment() throws Exception {\n+\n+        PravegaNodeUri location = new PravegaNodeUri(\"localhost\", 0);\n+        @Cleanup\n+        MockConnectionFactoryImpl connectionFactory = getMockConnectionFactory(location);\n+        MockController mockController = new MockController(location.getEndpoint(), location.getPort(), connectionFactory, false);\n+        Stream stream = createStream(SCOPE, STREAM, 1, mockController);\n+        @Cleanup\n+        BatchClientFactoryImpl client = new BatchClientFactoryImpl(mockController, ClientConfig.builder().build(), connectionFactory);\n+\n+        Iterator<SegmentRange> segmentIterator = client.getSegments(stream, null, null).getIterator();\n+        assertTrue(segmentIterator.hasNext());\n+\n+        SegmentRange expectedSegmentRange = segmentIterator.next();\n+        assertFalse(segmentIterator.hasNext());\n+\n+        SegmentRange currentSegmentRange = client.currentSegmentRange(expectedSegmentRange.asImpl().getSegment());\n+        assertEquals(expectedSegmentRange, currentSegmentRange);\n+    }\n+\n     private Stream createStream(String scope, String streamName, int numSegments, MockController mockController) {\n         Stream stream = new StreamImpl(scope, streamName);\n         mockController.createScope(scope);"
+  },
+  {
+    "sha": "d6c4b8246224e3b15d1d0eb72dfabb3f3867141d",
+    "filename": "client/src/test/java/io/pravega/client/batch/impl/SegmentRangeImplTest.java",
+    "status": "modified",
+    "additions": 60,
+    "deletions": 0,
+    "changes": 60,
+    "blob_url": "https://github.com/pravega/pravega/blob/899b459aff06e52d250b346f0cf008480769b838/client/src/test/java/io/pravega/client/batch/impl/SegmentRangeImplTest.java",
+    "raw_url": "https://github.com/pravega/pravega/raw/899b459aff06e52d250b346f0cf008480769b838/client/src/test/java/io/pravega/client/batch/impl/SegmentRangeImplTest.java",
+    "contents_url": "https://api.github.com/repos/pravega/pravega/contents/client/src/test/java/io/pravega/client/batch/impl/SegmentRangeImplTest.java?ref=899b459aff06e52d250b346f0cf008480769b838",
+    "patch": "@@ -11,6 +11,9 @@\n \n import io.pravega.client.batch.SegmentRange;\n import io.pravega.client.segment.impl.Segment;\n+import io.pravega.client.stream.Stream;\n+import io.pravega.client.stream.StreamCut;\n+import io.pravega.client.stream.impl.StreamCutImpl;\n import org.junit.Test;\n \n import static org.junit.Assert.assertEquals;\n@@ -39,4 +42,61 @@ public void testValid() {\n         assertEquals(\"scope\", segmentRange.getScope());\n         assertEquals(\"stream\", segmentRange.getStreamName());\n     }\n+\n+    @Test\n+    public void testFromStreamCutsValid() {\n+        Stream stream = Stream.of(\"scope\", \"stream\");\n+\n+        Segment segment = new Segment(stream.getScope(), stream.getStreamName(), 1L);\n+\n+        StreamCut startStreamCut = new StreamCutImpl(stream, segment, 100L);\n+        StreamCut endStreamCut = new StreamCutImpl(stream, segment, 200L);\n+\n+        SegmentRange segmentRange = SegmentRangeImpl.fromStreamCuts(segment, startStreamCut, endStreamCut);\n+\n+        assertEquals(1L, segmentRange.getSegmentId());\n+        assertEquals(100L, segmentRange.getStartOffset());\n+        assertEquals(200L, segmentRange.getEndOffset());\n+        assertEquals(\"scope\", segmentRange.getScope());\n+        assertEquals(\"stream\", segmentRange.getStreamName());\n+    }\n+\n+    @Test(expected = IllegalStateException.class)\n+    public void testFromStreamCutsInvalidOffsets() {\n+        Stream stream = Stream.of(\"scope\", \"stream\");\n+\n+        Segment segment = new Segment(stream.getScope(), stream.getStreamName(), 1L);\n+\n+        StreamCut startStreamCut = new StreamCutImpl(stream, segment, 100L);\n+        StreamCut endStreamCut = new StreamCutImpl(stream, segment, 200L);\n+\n+        // swap start+end args, will fail as end must be > start\n+        SegmentRangeImpl.fromStreamCuts(segment, endStreamCut, startStreamCut);\n+    }\n+\n+    @Test(expected = IllegalStateException.class)\n+    public void testFromStreamCutsInvalidSegment() {\n+        Stream stream = Stream.of(\"scope\", \"stream\");\n+\n+        Segment segment = new Segment(stream.getScope(), stream.getStreamName(), 1L);\n+\n+        StreamCut startStreamCut = new StreamCutImpl(stream, segment, 100L);\n+        StreamCut endStreamCut = new StreamCutImpl(stream, segment, 200L);\n+\n+        // segment id 2 not found in given stream cuts\n+        SegmentRangeImpl.fromStreamCuts(new Segment(stream.getScope(), stream.getStreamName(), 2L), startStreamCut, endStreamCut);\n+    }\n+\n+    @Test(expected = IllegalStateException.class)\n+    public void testFromStreamCutsInvalidUnbounded() {\n+        Stream stream = Stream.of(\"scope\", \"stream\");\n+\n+        Segment segment = new Segment(stream.getScope(), stream.getStreamName(), 1L);\n+\n+        StreamCut startStreamCut = new StreamCutImpl(stream, segment, 100L);\n+        StreamCut endStreamCut = StreamCut.UNBOUNDED;\n+\n+        // start, end cannot be UNBOUNDED\n+        SegmentRangeImpl.fromStreamCuts(segment, startStreamCut, endStreamCut);\n+    }\n }"
+  }
+]

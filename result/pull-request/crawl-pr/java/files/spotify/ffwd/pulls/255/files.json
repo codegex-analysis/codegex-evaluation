@@ -1,0 +1,37 @@
+[
+  {
+    "sha": "4dccc7540912ffbc260522fbeb7a7e50610b79da",
+    "filename": "core/src/main/java/com/spotify/ffwd/AgentCore.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 4,
+    "changes": 9,
+    "blob_url": "https://github.com/spotify/ffwd/blob/5fefa473d35bddd879bb5bbef8c938089fa3f6b6/core/src/main/java/com/spotify/ffwd/AgentCore.java",
+    "raw_url": "https://github.com/spotify/ffwd/raw/5fefa473d35bddd879bb5bbef8c938089fa3f6b6/core/src/main/java/com/spotify/ffwd/AgentCore.java",
+    "contents_url": "https://api.github.com/repos/spotify/ffwd/contents/core/src/main/java/com/spotify/ffwd/AgentCore.java?ref=5fefa473d35bddd879bb5bbef8c938089fa3f6b6",
+    "patch": "@@ -378,10 +378,11 @@ protected void configure() {\n   /**\n    * Reads the configuration of the agent from multiple possible sources. In order of precedence,\n    * the following sources are loaded:\n-   * - System properties\n-   * - Environment variables\n-   * - YAML file in specified location\n-   * - YAML file bundled with JAR\n+   *<p></p>\n+   * - System properties<p></p>\n+   * - Environment variables<p></p>\n+   * - YAML file in specified location<p></p>\n+   * - YAML file bundled with JAR<p></p>\n    *\n    * Values are merged, those higher on this list override those that are lower.\n    *"
+  },
+  {
+    "sha": "31302d6f7e9152926e71d4e162e349fc3d13039a",
+    "filename": "docs/content/_docs/components.md",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 17,
+    "changes": 33,
+    "blob_url": "https://github.com/spotify/ffwd/blob/5fefa473d35bddd879bb5bbef8c938089fa3f6b6/docs/content/_docs/components.md",
+    "raw_url": "https://github.com/spotify/ffwd/raw/5fefa473d35bddd879bb5bbef8c938089fa3f6b6/docs/content/_docs/components.md",
+    "contents_url": "https://api.github.com/repos/spotify/ffwd/contents/docs/content/_docs/components.md?ref=5fefa473d35bddd879bb5bbef8c938089fa3f6b6",
+    "patch": "@@ -6,42 +6,41 @@ title: Components\n \n This document covers some of the major components in FastForward.\n \n-#### Module\n+![Overview of main FFWD components](./images/ffwd-components.svg \"Overview of main FFWD components\")\n \n-A module is a loadable component that extends the functionality of FastForward.\n-When a module is loaded it typically registers a set of plugins.\n+## Module\n \n-#### Plugin\n+A [module](https://github.com/spotify/ffwd/blob/master/api/src/main/java/com/spotify/ffwd/module/FastForwardModule.java) is a dynamically loaded component that extends the functionality of FastForward.\n+When a module is [loaded](https://github.com/spotify/ffwd/blob/17de95af58f221ad655dce18515835b2818c7241/core/src/main/java/com/spotify/ffwd/AgentCore.java#L400) it typically [registers a plugin](https://github.com/spotify/ffwd/blob/17de95af58f221ad655dce18515835b2818c7241/modules/pubsub/src/main/java/com/spotify/ffwd/pubsub/PubsubOutputModule.java#L36).\n \n-Either an input or an output plugin.\n+## Plugin\n \n-This provides the implementation to read or send data from the agent.\n-A plugin can have multiple _instances_ with different configurations (like\n-which port to listen to).\n+Either an [input](https://github.com/spotify/ffwd/blob/master/api/src/main/java/com/spotify/ffwd/input/PluginSource.java) or an [output](https://github.com/spotify/ffwd/blob/master/api/src/main/java/com/spotify/ffwd/output/PluginSink.java) plugin.\n \n-#### Early Injector\n+This provides an implementation which either ingests or emits data from the agent.\n \n-The early injector is setup by AgentCore and is intended to provide the basic\n-facilities to perform module setup.\n+A plugin can have multiple _instances_ with different configurations (like which port to listen to).\n+\n+## Early Injector\n+\n+The [early injector](https://github.com/spotify/ffwd/blob/17de95af58f221ad655dce18515835b2818c7241/core/src/main/java/com/spotify/ffwd/AgentCore.java#L212) is setup by AgentCore and is intended to provide the basic facilities to perform module setup.\n \n The following is a list of components that are given access to and their\n purpose.\n \n-* _com.spotify.ffwd.module.PluginContext_\n+* [_com.spotify.ffwd.module.PluginContext_](https://github.com/spotify/ffwd/blob/master/api/src/main/java/com/spotify/ffwd/module/PluginContext.java)\n   Register input and output plugins.\n * _com.fasterxml.jackson.databind.ObjectMapper (config)_\n   ObjectMapper used to parse provided configuration file.\n \n-#### Primary Injector\n+## Primary Injector\n \n-The primary injector contains the dependencies which are available after\n-modules have been registered and the initial bootstrap is done.\n+The [primary injector](https://github.com/spotify/ffwd/blob/17de95af58f221ad655dce18515835b2818c7241/core/src/main/java/com/spotify/ffwd/AgentCore.java#L100) contains the dependencies which are available after modules have been registered and the initial bootstrap is done.\n \n It contains all the components of the early injector, with the following\n additions.\n \n-* _eu.toolchain.async.AsyncFramework_ - Framework implementation to use for\n-  async operations.\n+* _eu.toolchain.async.AsyncFramework_ - Framework implementation to use for async operations.\n * _io.netty.channel.EventLoopGroup (boss)_ Event loop group used for boss\n   threads in ServerBootstrap's.\n * _io.netty.channel.EventLoopGroup (worker)_ Event loop group used for"
+  },
+  {
+    "sha": "442383d89625609ffe9f3476d0e2d9d76ab230fe",
+    "filename": "docs/content/_docs/images/ffwd-components.svg",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/spotify/ffwd/blob/5fefa473d35bddd879bb5bbef8c938089fa3f6b6/docs/content/_docs/images/ffwd-components.svg",
+    "raw_url": "https://github.com/spotify/ffwd/raw/5fefa473d35bddd879bb5bbef8c938089fa3f6b6/docs/content/_docs/images/ffwd-components.svg",
+    "contents_url": "https://api.github.com/repos/spotify/ffwd/contents/docs/content/_docs/images/ffwd-components.svg?ref=5fefa473d35bddd879bb5bbef8c938089fa3f6b6"
+  }
+]

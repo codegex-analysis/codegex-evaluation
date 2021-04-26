@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "841a70c5779fad989288278eed3939cddc0dde9b",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/9011e8f7c743c3750399ce8a7e7745c3870522f7/.gitignore",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/9011e8f7c743c3750399ce8a7e7745c3870522f7/.gitignore",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/.gitignore?ref=9011e8f7c743c3750399ce8a7e7745c3870522f7",
+    "patch": "@@ -2,3 +2,5 @@\n /.settings/\n /.classpath\n /.project\n+.idea\n+*.iml\n\\ No newline at end of file"
+  },
+  {
+    "sha": "2d9d4af5f2ba7393a9907b127940581ebea96ef1",
+    "filename": "src/main/java/edu/iis/mto/bsearch/BinarySearch.java",
+    "status": "modified",
+    "additions": 37,
+    "deletions": 37,
+    "changes": 74,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/main/java/edu/iis/mto/bsearch/BinarySearch.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/main/java/edu/iis/mto/bsearch/BinarySearch.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/main/java/edu/iis/mto/bsearch/BinarySearch.java?ref=9011e8f7c743c3750399ce8a7e7745c3870522f7",
+    "patch": "@@ -1,46 +1,46 @@\n-/**\n- *\n- */\n+/** */\n package edu.iis.mto.bsearch;\n \n-/**\n- * Klasa implementująca wyszukiwanie binarne\n- *\n- */\n+import utils.ArrayUtils;\n+\n+/** Klasa implementująca wyszukiwanie binarne */\n public class BinarySearch {\n \n-    private BinarySearch() {}\n+  private BinarySearch() {}\n \n-    /**\n-     * Metoda realizujaca wyszukiwanie binarne\n-     *\n-     * @param key\n-     *            - szukany obiekt\n-     * @param seq\n-     *            - rosnaco uporzadkowana niepusta sekwencja\n-     * @return obiekt rezultatu o polach: - found (true jezeli znaleziony) - position (jezeli znaleziony - pozycja w\n-     *         sekwencji, jezeli nie znaleziony -1)\n-     */\n-    public static SearchResult search(int key, int[] seq) {\n-        int start = 0;\n-        int end = seq.length - 1;\n-        int center;\n-        SearchResult result = new SearchResult();\n+  /**\n+   * Metoda realizujaca wyszukiwanie binarne\n+   *\n+   * @param key - szukany obiekt\n+   * @param seq - rosnaco uporzadkowana niepusta sekwencja\n+   * @return obiekt rezultatu o polach: - found (true jezeli znaleziony) - position (jezeli\n+   *     znaleziony - pozycja w sekwencji, jezeli nie znaleziony -1)\n+   */\n+  public static SearchResult search(int key, int[] seq) {\n+    if (seq.length == 0) throw new IllegalArgumentException();\n \n-        while (start <= end) {\n-            center = (start + end) / 2;\n-            if (seq[center] == key) {\n-                result.setPosition(center + 1);\n-                break;\n-            } else {\n-                if (seq[center] < key) {\n-                    start = center + 1;\n-                } else {\n-                    end = center - 1;\n-                }\n-            }\n-        }\n-        return result;\n+    if (ArrayUtils.arrayHasDuplicates(seq) || !ArrayUtils.isSorted(seq)) {\n+      throw new IllegalArgumentException();\n     }\n \n+    int start = 0;\n+    int end = seq.length - 1;\n+    int center;\n+    SearchResult result = new SearchResult();\n+\n+    while (start <= end) {\n+      center = (start + end) / 2;\n+      if (seq[center] == key) {\n+        result.setPosition(center);\n+        break;\n+      } else {\n+        if (seq[center] < key) {\n+          start = center + 1;\n+        } else {\n+          end = center - 1;\n+        }\n+      }\n+    }\n+    return result;\n+  }\n }"
+  },
+  {
+    "sha": "8a559723ebaefb88228b6b9feab5421cc47aa741",
+    "filename": "src/main/java/edu/iis/mto/bsearch/SearchResult.java",
+    "status": "modified",
+    "additions": 34,
+    "deletions": 36,
+    "changes": 70,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/main/java/edu/iis/mto/bsearch/SearchResult.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/main/java/edu/iis/mto/bsearch/SearchResult.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/main/java/edu/iis/mto/bsearch/SearchResult.java?ref=9011e8f7c743c3750399ce8a7e7745c3870522f7",
+    "patch": "@@ -1,52 +1,50 @@\n-/**\n- *\n- */\n+/** */\n package edu.iis.mto.bsearch;\n \n import java.util.Objects;\n \n public class SearchResult {\n \n-    private static final int NOT_FOUND = -1;\n-    private int position = NOT_FOUND;\n+  private static final int NOT_FOUND = -1;\n+  private int position = NOT_FOUND;\n \n-    public boolean isFound() {\n-        return position > NOT_FOUND;\n-    }\n+  public boolean isFound() {\n+    return position > NOT_FOUND;\n+  }\n \n-    void setPosition(int position) {\n-        if (position > NOT_FOUND) {\n-            this.position = position;\n-        }\n-    }\n+  public int getPosition() {\n+    return position;\n+  }\n \n-    public int getPosition() {\n-        return position;\n+  void setPosition(int position) {\n+    if (position > NOT_FOUND) {\n+      this.position = position;\n     }\n+  }\n \n-    @Override\n-    public int hashCode() {\n-        return Objects.hash(position);\n-    }\n+  @Override\n+  public int hashCode() {\n+    return Objects.hash(position);\n+  }\n \n-    @Override\n-    public boolean equals(Object obj) {\n-        if (this == obj) {\n-            return true;\n-        }\n-        if (obj == null) {\n-            return false;\n-        }\n-        if (getClass() != obj.getClass()) {\n-            return false;\n-        }\n-        SearchResult other = (SearchResult) obj;\n-        return position == other.position;\n+  @Override\n+  public boolean equals(Object obj) {\n+    if (this == obj) {\n+      return true;\n     }\n+    if (obj == null) {\n+      return false;\n+    }\n+    if (getClass() != obj.getClass()) {\n+      return false;\n+    }\n+    SearchResult other = (SearchResult) obj;\n+    return position == other.position;\n+  }\n \n-    @Override\n-    public String toString() {\n+  @Override\n+  public String toString() {\n \n-        return isFound() ? \"( elem at position \" + position + \")\" : \"elem not found\";\n-    }\n+    return isFound() ? \"( elem at position \" + position + \")\" : \"elem not found\";\n+  }\n }"
+  },
+  {
+    "sha": "c68ccad3e870722f325dbf6c1bf569e3e71c3978",
+    "filename": "src/main/java/utils/ArrayUtils.java",
+    "status": "added",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/main/java/utils/ArrayUtils.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/main/java/utils/ArrayUtils.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/main/java/utils/ArrayUtils.java?ref=9011e8f7c743c3750399ce8a7e7745c3870522f7",
+    "patch": "@@ -0,0 +1,21 @@\n+package utils;\n+\n+import java.util.Arrays;\n+import java.util.Set;\n+import java.util.stream.Collectors;\n+\n+public class ArrayUtils {\n+  public static boolean isSorted(int[] array) {\n+    for (int i = 0; i < array.length - 1; i++) {\n+      if (array[i] > array[i + 1]) {\n+        return false;\n+      }\n+    }\n+    return true;\n+  }\n+\n+  public static boolean arrayHasDuplicates(int[] array) {\n+    Set<Integer> set = Arrays.stream(array).boxed().collect(Collectors.toSet());\n+    return array.length != set.size();\n+  }\n+}"
+  },
+  {
+    "sha": "c59cca8646308fcec49452e8c02b74e9bf96962f",
+    "filename": "src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java",
+    "status": "modified",
+    "additions": 49,
+    "deletions": 9,
+    "changes": 58,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java?ref=9011e8f7c743c3750399ce8a7e7745c3870522f7",
+    "patch": "@@ -1,19 +1,59 @@\n package edu.iis.mto.bsearch;\n \n-import static org.junit.jupiter.api.Assertions.*;\n-\n+import org.junit.jupiter.api.Assertions;\n import org.junit.jupiter.api.BeforeEach;\n import org.junit.jupiter.api.Test;\n \n-\n class BinarySearchTest {\n \n-    @BeforeEach\n-    void setUp() throws Exception {}\n+  @BeforeEach\n+  void setUp() throws Exception {}\n+\n+  @Test\n+  void should_return_true_seq_Size_1_and_Element_Is_In_Seq() {\n+    int key = 87;\n+    int[] seq = {key};\n+    SearchResult searchResult = BinarySearch.search(key, seq);\n+    Assertions.assertTrue(searchResult.isFound() && seq[searchResult.getPosition()] == key);\n+  }\n+\n+  @Test\n+  void should_return_true_seq_Size_1_and_Element_Is_Not_In_Seq() {\n+    int key = 87;\n+    int[] seq = {7};\n+    SearchResult searchResult = BinarySearch.search(key, seq);\n+    Assertions.assertTrue(searchResult.isFound() == false && searchResult.getPosition() == -1);\n+  }\n+\n+  @Test\n+  void should_return_true_seq_Size_10_and_Element_Is_In_Seq_In_Position_1() {\n+    int key = 1;\n+    int[] seq = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};\n+    SearchResult searchResult = BinarySearch.search(key, seq);\n+    Assertions.assertTrue(searchResult.isFound() && seq[searchResult.getPosition()] == key);\n+  }\n+\n+  @Test\n+  void should_return_true_seq_Size_10_and_Element_Is_In_Seq_In_Last_Position() {\n+    int key = 10;\n+    int[] seq = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};\n+    SearchResult searchResult = BinarySearch.search(key, seq);\n+    Assertions.assertTrue(searchResult.isFound() && seq[searchResult.getPosition()] == key);\n+  }\n \n-    @Test\n-    void test() {\n-        fail(\"Not yet implemented\");\n-    }\n+  @Test\n+  void should_return_true_seq_Size_11_and_Element_Is_In_Seq_In_The_Middle() {\n+    int key = 6;\n+    int[] seq = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};\n+    SearchResult searchResult = BinarySearch.search(key, seq);\n+    Assertions.assertTrue(searchResult.isFound() && seq[searchResult.getPosition()] == key);\n+  }\n \n+  @Test\n+  void should_return_true_seq_Size_11_and_Element_Is_Not_In_Seq() {\n+    int key = 874;\n+    int[] seq = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};\n+    SearchResult searchResult = BinarySearch.search(key, seq);\n+    Assertions.assertTrue(searchResult.isFound() == false && searchResult.getPosition() == -1);\n+  }\n }"
+  },
+  {
+    "sha": "a44567ffd5873744243a57c36208ac00d3d70b76",
+    "filename": "src/test/java/edu/iis/mto/bsearch/BinarySearchTestBoundaryConditions.java",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/test/java/edu/iis/mto/bsearch/BinarySearchTestBoundaryConditions.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/test/java/edu/iis/mto/bsearch/BinarySearchTestBoundaryConditions.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/test/java/edu/iis/mto/bsearch/BinarySearchTestBoundaryConditions.java?ref=9011e8f7c743c3750399ce8a7e7745c3870522f7",
+    "patch": "@@ -0,0 +1,22 @@\n+package edu.iis.mto.bsearch;\n+\n+import org.junit.jupiter.api.Assertions;\n+import org.junit.jupiter.api.Test;\n+\n+public class BinarySearchTestBoundaryConditions {\n+  @Test\n+  void should_return_true_key_Integer_MAX_VALUE() {\n+    int key = Integer.MAX_VALUE;\n+    int[] seq = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, key};\n+    SearchResult searchResult = BinarySearch.search(key, seq);\n+    Assertions.assertTrue(searchResult.isFound() && seq[searchResult.getPosition()] == key);\n+  }\n+\n+  @Test\n+  void should_return_true_key_Integer_MIN_VALUE() {\n+    int key = Integer.MIN_VALUE;\n+    int[] seq = {key, 1, 2, 3, 4, 5, 6, 7, 8, 9};\n+    SearchResult searchResult = BinarySearch.search(key, seq);\n+    Assertions.assertTrue(searchResult.isFound() && seq[searchResult.getPosition()] == key);\n+  }\n+}"
+  },
+  {
+    "sha": "538eee53577f37857c5f5cdc9909c3edadc071ab",
+    "filename": "src/test/java/edu/iis/mto/bsearch/BinarySearchTestExeptions.java",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/test/java/edu/iis/mto/bsearch/BinarySearchTestExeptions.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/9011e8f7c743c3750399ce8a7e7745c3870522f7/src/test/java/edu/iis/mto/bsearch/BinarySearchTestExeptions.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/test/java/edu/iis/mto/bsearch/BinarySearchTestExeptions.java?ref=9011e8f7c743c3750399ce8a7e7745c3870522f7",
+    "patch": "@@ -0,0 +1,37 @@\n+package edu.iis.mto.bsearch;\n+\n+import org.junit.jupiter.api.Assertions;\n+import org.junit.jupiter.api.Test;\n+\n+public class BinarySearchTestExeptions {\n+  @Test\n+  void should_thorw_IllegalArgumentException_seq_size_0() {\n+    int key = 1;\n+    int[] seq = new int[0];\n+    Assertions.assertThrows(\n+        IllegalArgumentException.class,\n+        () -> {\n+          BinarySearch.search(key, seq);\n+        });\n+  }\n+\n+  @Test\n+  void should_thorw_IllegalArgumentException_duplicates() {\n+    int[] seq = {1, 2, 3, 4, 5, 6, 6, 7, 8, 9};\n+    Assertions.assertThrows(\n+        IllegalArgumentException.class,\n+        () -> {\n+          BinarySearch.search(1, seq);\n+        });\n+  }\n+\n+  @Test\n+  void should_thorw_IllegalArgumentException_seq_is_not_sorted() {\n+    int[] seq = {Integer.MAX_VALUE, 2, 3, 4, 5, 6, 6, 7, 8, Integer.MIN_VALUE};\n+    Assertions.assertThrows(\n+        IllegalArgumentException.class,\n+        () -> {\n+          BinarySearch.search(1, seq);\n+        });\n+  }\n+}"
+  }
+]

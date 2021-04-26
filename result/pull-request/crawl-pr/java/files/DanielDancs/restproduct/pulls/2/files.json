@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "90c055213e57719c6dabde925c9afd74cae8a0e3",
+    "filename": "src/main/java/com/restproducts/controller/ProductController.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 3,
+    "changes": 18,
+    "blob_url": "https://github.com/DanielDancs/restproduct/blob/4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3/src/main/java/com/restproducts/controller/ProductController.java",
+    "raw_url": "https://github.com/DanielDancs/restproduct/raw/4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3/src/main/java/com/restproducts/controller/ProductController.java",
+    "contents_url": "https://api.github.com/repos/DanielDancs/restproduct/contents/src/main/java/com/restproducts/controller/ProductController.java?ref=4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3",
+    "patch": "@@ -4,6 +4,7 @@\n import java.util.Optional;\n \n import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.http.MediaType;\n import org.springframework.http.ResponseEntity;\n import org.springframework.validation.annotation.Validated;\n import org.springframework.web.bind.annotation.DeleteMapping;\n@@ -12,18 +13,19 @@\n import org.springframework.web.bind.annotation.PostMapping;\n import org.springframework.web.bind.annotation.RequestBody;\n import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RequestPart;\n import org.springframework.web.bind.annotation.RestController;\n+import org.springframework.web.multipart.MultipartFile;\n \n import com.restproducts.entities.Product;\n import com.restproducts.service.ProductService;\n \n @RestController\n-@RequestMapping(\"/api/product\")\n+@RequestMapping(value=\"/api/product/\")// produces= MediaType.APPLICATION_JSON_VALUE\n public class ProductController {\n \n \tprivate ProductService productService;\n \t\n-\t@Autowired\n \tpublic ProductController(ProductService productService) {\n \t\tthis.productService = productService;\n \t}\n@@ -33,11 +35,21 @@ public ProductController(ProductService productService) {\n \t\treturn productService.findAll();\n \t}\n \t\n-\t@PostMapping(\"/save\")\n+\t@PostMapping(value=\"/save\", consumes= MediaType.APPLICATION_JSON_VALUE)\n \tpublic Product saveProduct(@Validated @RequestBody Product product) {\n \t\treturn productService.save(product);\n \t}\n \t\n+\t@PostMapping(value=\"/upload\", consumes= {MediaType.APPLICATION_JSON_VALUE,MediaType.MULTIPART_FORM_DATA_VALUE})\n+\tpublic Product uploadData(@RequestPart(\"product\") String product, @RequestPart(\"file\") List<MultipartFile> file) {\n+\t\t\n+\t\tProduct productJson=productService.makeJson(product,file);\n+\t\t\n+\t\treturn productJson;\n+\t}\n+\t\n+//\tegy deletnél még egy Boolean true/false is elég\n+//\ttehát sikerült törölni vagy nem... minden egyébre meg dobunk vissza neki valami http error\n \t@DeleteMapping(\"/{id}\")\n \tpublic ResponseEntity<Product> deleteProduct(@PathVariable Long id) {\n \t\tOptional<Product> opt = productService.findById(id);"
+  },
+  {
+    "sha": "6c8a246ea2a6dacecda2eda6c87d49cc49a40014",
+    "filename": "src/main/java/com/restproducts/controller/TypeController.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/DanielDancs/restproduct/blob/4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3/src/main/java/com/restproducts/controller/TypeController.java",
+    "raw_url": "https://github.com/DanielDancs/restproduct/raw/4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3/src/main/java/com/restproducts/controller/TypeController.java",
+    "contents_url": "https://api.github.com/repos/DanielDancs/restproduct/contents/src/main/java/com/restproducts/controller/TypeController.java?ref=4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3",
+    "patch": "@@ -4,6 +4,7 @@\n import java.util.Optional;\n \n import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.http.MediaType;\n import org.springframework.http.ResponseEntity;\n import org.springframework.validation.annotation.Validated;\n import org.springframework.web.bind.annotation.DeleteMapping;\n@@ -18,12 +19,11 @@\n import com.restproducts.service.TypeService;\n \n @RestController\n-@RequestMapping(\"api/type\")\n+@RequestMapping(value=\"api/type\", produces = MediaType.APPLICATION_JSON_VALUE)\n public class TypeController {\n \n \tprivate TypeService typeService;\n \n-\t@Autowired\n \tpublic TypeController(TypeService typeService) {\n \t\tthis.typeService = typeService;\n \t}\n@@ -33,7 +33,7 @@ public TypeController(TypeService typeService) {\n \t\treturn typeService.findAll();\n \t}\n \t\n-\t@PostMapping(\"/save\")\n+\t@PostMapping(value=\"/save\", consumes= MediaType.APPLICATION_JSON_VALUE)\n \tpublic Type saveType(@Validated @RequestBody Type type) {\n \t\treturn typeService.save(type);\n \t}"
+  },
+  {
+    "sha": "7c1223fca3507d60eca0cb6d2544c0f893855f93",
+    "filename": "src/main/java/com/restproducts/entities/Product.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/DanielDancs/restproduct/blob/4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3/src/main/java/com/restproducts/entities/Product.java",
+    "raw_url": "https://github.com/DanielDancs/restproduct/raw/4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3/src/main/java/com/restproducts/entities/Product.java",
+    "contents_url": "https://api.github.com/repos/DanielDancs/restproduct/contents/src/main/java/com/restproducts/entities/Product.java?ref=4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3",
+    "patch": "@@ -28,7 +28,7 @@\n \tprivate Float price;\n \t\n \t\n-\tprivate Product() {\n+\tpublic Product() {\n \n \t}\n \t"
+  },
+  {
+    "sha": "c2584bd23795e908e4ed8c98d7073051f9aab2f0",
+    "filename": "src/main/java/com/restproducts/service/ProductService.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 1,
+    "changes": 20,
+    "blob_url": "https://github.com/DanielDancs/restproduct/blob/4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3/src/main/java/com/restproducts/service/ProductService.java",
+    "raw_url": "https://github.com/DanielDancs/restproduct/raw/4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3/src/main/java/com/restproducts/service/ProductService.java",
+    "contents_url": "https://api.github.com/repos/DanielDancs/restproduct/contents/src/main/java/com/restproducts/service/ProductService.java?ref=4e736ead9e7118a8a071c2ba7a684e6f3fbf14a3",
+    "patch": "@@ -5,7 +5,11 @@\n \n import org.springframework.beans.factory.annotation.Autowired;\n import org.springframework.stereotype.Service;\n+import org.springframework.web.multipart.MultipartFile;\n \n+import com.fasterxml.jackson.core.JsonProcessingException;\n+import com.fasterxml.jackson.databind.JsonMappingException;\n+import com.fasterxml.jackson.databind.ObjectMapper;\n import com.restproducts.entities.Product;\n import com.restproducts.repo.ProductRepository;\n \n@@ -14,7 +18,6 @@\n \t\n \tprivate ProductRepository productRepo;\n \t\n-\t@Autowired\n \tpublic ProductService (ProductRepository productRepo) {\n \t\tthis.productRepo = productRepo;\n \t}\n@@ -33,5 +36,20 @@ public Product save(Product product) {\n \n \tpublic void deleteById(Long id) {\n \t\tproductRepo.deleteById(id);\n+\t}\n+\n+\tpublic Product makeJson(String product, List<MultipartFile> file) {\n+\t\tProduct productJson = new Product();\n+\t\t\n+\t\ttry {\n+\t\t\tObjectMapper objectMapper = new ObjectMapper();\n+\t\t\tproductJson = objectMapper.readValue(product, Product.class);\n+\t\t} catch (JsonMappingException e) {\n+\t\t\tSystem.out.println(\"OwnError: \" + e.getMessage());\n+\t\t} catch (JsonProcessingException e) {\n+\t\t\tSystem.out.println(\"OwnError: \" + e.getMessage());\n+\t\t}\n+\t\t\n+\t\treturn productJson;\n \t}\t\n }"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "6d0b8f4ec7b83f52c9b47b750a20ce2cffffc520",
+    "filename": "src/main/java/org/codehaus/groovy/classgen/asm/sc/StaticInvocationWriter.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/apache/groovy/blob/45d0ee12301f5fd92ee0837f2350d167ffc923ab/src/main/java/org/codehaus/groovy/classgen/asm/sc/StaticInvocationWriter.java",
+    "raw_url": "https://github.com/apache/groovy/raw/45d0ee12301f5fd92ee0837f2350d167ffc923ab/src/main/java/org/codehaus/groovy/classgen/asm/sc/StaticInvocationWriter.java",
+    "contents_url": "https://api.github.com/repos/apache/groovy/contents/src/main/java/org/codehaus/groovy/classgen/asm/sc/StaticInvocationWriter.java?ref=45d0ee12301f5fd92ee0837f2350d167ffc923ab",
+    "patch": "@@ -246,7 +246,8 @@ protected boolean tryBridgeMethod(final MethodNode target, final Expression rece\n             Expression fixedReceiver = receiver;\n             if (implicitThis) {\n                 if (!controller.isInGeneratedFunction()) {\n-                    fixedReceiver = propX(classX(lookupClassNode), \"this\");\n+                    if (!thisClass.isDerivedFrom(lookupClassNode))\n+                        fixedReceiver = propX(classX(lookupClassNode), \"this\");\n                 } else if (thisClass != null) {\n                     ClassNode current = thisClass.getOuterClass();\n                     fixedReceiver = varX(\"thisObject\", current);"
+  },
+  {
+    "sha": "e3dfa30063520027221145d841e8acbb5c1b1fba",
+    "filename": "src/test/groovy/bugs/Groovy9524.groovy",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/apache/groovy/blob/45d0ee12301f5fd92ee0837f2350d167ffc923ab/src/test/groovy/bugs/Groovy9524.groovy",
+    "raw_url": "https://github.com/apache/groovy/raw/45d0ee12301f5fd92ee0837f2350d167ffc923ab/src/test/groovy/bugs/Groovy9524.groovy",
+    "contents_url": "https://api.github.com/repos/apache/groovy/contents/src/test/groovy/bugs/Groovy9524.groovy?ref=45d0ee12301f5fd92ee0837f2350d167ffc923ab",
+    "patch": "@@ -0,0 +1,48 @@\n+/*\n+ *  Licensed to the Apache Software Foundation (ASF) under one\n+ *  or more contributor license agreements.  See the NOTICE file\n+ *  distributed with this work for additional information\n+ *  regarding copyright ownership.  The ASF licenses this file\n+ *  to you under the Apache License, Version 2.0 (the\n+ *  \"License\"); you may not use this file except in compliance\n+ *  with the License.  You may obtain a copy of the License at\n+ *\n+ *    http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ *  Unless required by applicable law or agreed to in writing,\n+ *  software distributed under the License is distributed on an\n+ *  \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n+ *  KIND, either express or implied.  See the License for the\n+ *  specific language governing permissions and limitations\n+ *  under the License.\n+ */\n+package groovy.bugs\n+\n+import org.junit.Test\n+\n+import static groovy.test.GroovyAssert.assertScript\n+\n+final class Groovy9524 {\n+    @Test\n+    void testEnumConstClassCallingPrivateMethod() {\n+        assertScript '''\n+            @groovy.transform.CompileStatic\n+            class W {\n+                enum X {\n+                    Y {\n+                        def z() {\n+                            truncate('foo', 2)\n+                        }\n+                    }\n+\n+                    abstract def z()\n+\n+                    private String truncate(String input, int maxLength) {\n+                        input.substring(0, maxLength)\n+                    }\n+                }\n+            }\n+            assert W.X.Y.z() == 'fo'\n+        '''\n+    }\n+}"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "a9721dab32d88814a612a70c189ceb028aed27ba",
+    "filename": "zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/SnapStream.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 3,
+    "changes": 23,
+    "blob_url": "https://github.com/apache/zookeeper/blob/f023851ba7ba5745a4a2b14976de8b21da190689/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/SnapStream.java",
+    "raw_url": "https://github.com/apache/zookeeper/raw/f023851ba7ba5745a4a2b14976de8b21da190689/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/SnapStream.java",
+    "contents_url": "https://api.github.com/repos/apache/zookeeper/contents/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/SnapStream.java?ref=f023851ba7ba5745a4a2b14976de8b21da190689",
+    "patch": "@@ -104,10 +104,20 @@ public static CheckedInputStream getInputStream(File file) throws IOException {\n         InputStream is;\n         switch (getStreamMode(file.getName())) {\n         case GZIP:\n-            is = new GZIPInputStream(fis);\n+            try {\n+                is = new GZIPInputStream(fis);\n+            } catch (IOException e) {\n+                fis.close();\n+                throw e;\n+            }\n             break;\n         case SNAPPY:\n-            is = new SnappyInputStream(fis);\n+            try {\n+                is = new SnappyInputStream(fis);\n+            } catch (IOException e) {\n+                fis.close();\n+                throw e;\n+            }\n             break;\n         case CHECKED:\n         default:\n@@ -129,9 +139,16 @@ public static CheckedOutputStream getOutputStream(File file, boolean fsync) thro\n         OutputStream os;\n         switch (streamMode) {\n         case GZIP:\n-            os = new GZIPOutputStream(fos);\n+            try {\n+                os = new GZIPOutputStream(fos);\n+            } catch (IOException e) {\n+                fos.close();\n+                throw e;\n+            }\n             break;\n         case SNAPPY:\n+            // Unlike SnappyInputStream, the SnappyOutputStream\n+            // constructor cannot throw an IOException.\n             os = new SnappyOutputStream(fos);\n             break;\n         case CHECKED:"
+  }
+]

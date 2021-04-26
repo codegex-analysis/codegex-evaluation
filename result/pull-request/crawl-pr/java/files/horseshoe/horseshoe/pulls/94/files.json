@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "02971f474bbe9ba0d67181ae9f9f27282fe15bdb",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/horseshoe/horseshoe/blob/b07188024ad859463bcbcd91334257d063d5b6b2/.gitignore",
+    "raw_url": "https://github.com/horseshoe/horseshoe/raw/b07188024ad859463bcbcd91334257d063d5b6b2/.gitignore",
+    "contents_url": "https://api.github.com/repos/horseshoe/horseshoe/contents/.gitignore?ref=b07188024ad859463bcbcd91334257d063d5b6b2",
+    "patch": "@@ -3,5 +3,4 @@ build\n bin\n .classpath\n .project\n-.settings\n-.vscode\n\\ No newline at end of file\n+.settings\n\\ No newline at end of file"
+  },
+  {
+    "sha": "26ec9c06f99f67ddda22d96696a125443f54d7ca",
+    "filename": ".vscode/settings.json",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/horseshoe/horseshoe/blob/b07188024ad859463bcbcd91334257d063d5b6b2/.vscode/settings.json",
+    "raw_url": "https://github.com/horseshoe/horseshoe/raw/b07188024ad859463bcbcd91334257d063d5b6b2/.vscode/settings.json",
+    "contents_url": "https://api.github.com/repos/horseshoe/horseshoe/contents/.vscode/settings.json?ref=b07188024ad859463bcbcd91334257d063d5b6b2",
+    "patch": "@@ -0,0 +1,4 @@\n+{\n+\t\"java.sources.organizeImports.starThreshold\": 99,\n+\t\"java.sources.organizeImports.staticStarThreshold\": 99\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "06ce18f72c58ce7168aa13fe8b0e1d6064b2ead4",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/horseshoe/horseshoe/blob/b07188024ad859463bcbcd91334257d063d5b6b2/build.gradle",
+    "raw_url": "https://github.com/horseshoe/horseshoe/raw/b07188024ad859463bcbcd91334257d063d5b6b2/build.gradle",
+    "contents_url": "https://api.github.com/repos/horseshoe/horseshoe/contents/build.gradle?ref=b07188024ad859463bcbcd91334257d063d5b6b2",
+    "patch": "@@ -17,8 +17,8 @@ checkstyle {\n }\n \n java {\n-\tsourceCompatibility = JavaVersion.VERSION_1_8\n-\ttargetCompatibility = JavaVersion.VERSION_1_8\n+\tsourceCompatibility = JavaVersion.VERSION_1_9\n+\ttargetCompatibility = JavaVersion.VERSION_1_9\n }\n \n compileJava {"
+  },
+  {
+    "sha": "299c2011d9d1f9b315d5965e0217c6ce08ba97da",
+    "filename": "src/main/java/horseshoe/internal/Accessor.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 29,
+    "changes": 36,
+    "blob_url": "https://github.com/horseshoe/horseshoe/blob/b07188024ad859463bcbcd91334257d063d5b6b2/src/main/java/horseshoe/internal/Accessor.java",
+    "raw_url": "https://github.com/horseshoe/horseshoe/raw/b07188024ad859463bcbcd91334257d063d5b6b2/src/main/java/horseshoe/internal/Accessor.java",
+    "contents_url": "https://api.github.com/repos/horseshoe/horseshoe/contents/src/main/java/horseshoe/internal/Accessor.java?ref=b07188024ad859463bcbcd91334257d063d5b6b2",
+    "patch": "@@ -33,7 +33,7 @@\n \n \tprivate static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();\n \n-\tprivate static final class MethodSignature {\n+\tstatic final class MethodSignature {\n \n \t\tprivate final String name;\n \t\tprivate final String[] types;\n@@ -74,7 +74,7 @@ private MethodSignature(final String signature) {\n \t\t * @param method the method to compare with this signature\n \t\t * @return true if the method matches this signature, otherwise false\n \t\t */\n-\t\tprivate boolean matches(final Method method) {\n+\t\tboolean matches(final Method method) {\n \t\t\tif (!name.equals(method.getName())) {\n \t\t\t\treturn false;\n \t\t\t}\n@@ -1161,9 +1161,9 @@ public static Accessor create(final Class<?> parent, final MethodSignature signa\n \n \t\t\t// Find all matching methods in the first public ancestor class, including all interfaces along the way\n \t\t\tfor (Class<?> ancestor = parent; true; ancestor = ancestor.getSuperclass()) {\n-\t\t\t\tif (Modifier.isPublic(ancestor.getModifiers())) {\n+\t\t\t\tif (Modifier.isPublic(ancestor.getModifiers()) || ancestor.isAnonymousClass()) {\n \t\t\t\t\ttry {\n-\t\t\t\t\t\tgetPublicMethods(methodHandles, ancestor, false, signature, parameterCount);\n+\t\t\t\t\t\tMethodHandler.getPublicMethods(methodHandles, ancestor, false, signature, parameterCount);\n \t\t\t\t\t\tbreak;\n \t\t\t\t\t} catch (final IllegalAccessException e) {\n \t\t\t\t\t\t// Ignore illegal access errors\n@@ -1201,15 +1201,15 @@ public static Accessor createStaticOrClass(final Class<?> parent, final MethodSi\n \t\t\t// Find all matching static methods\n \t\t\tif (Modifier.isPublic(parent.getModifiers())) {\n \t\t\t\ttry {\n-\t\t\t\t\tgetPublicMethods(methodHandles, parent, true, signature, parameterCount);\n+\t\t\t\t\tMethodHandler.getPublicMethods(methodHandles, parent, true, signature, parameterCount);\n \t\t\t\t} catch (final IllegalAccessException e) {\n \t\t\t\t\t// Ignore illegal access errors\n \t\t\t\t}\n \t\t\t}\n \n \t\t\t// Find the Class<?> method\n \t\t\tif (methodHandles.isEmpty()) {\n-\t\t\t\tgetPublicMethods(methodHandles, Class.class, false, signature, parameterCount);\n+\t\t\t\tMethodHandler.getPublicMethods(methodHandles, Class.class, false, signature, parameterCount);\n \t\t\t}\n \n \t\t\tif (methodHandles.size() > 1) {\n@@ -1235,28 +1235,6 @@ public Object get(final Object context, final Object... parameters) throws Throw\n \t\t\treturn methodHandle.invoke(context, parameters);\n \t\t}\n \n-\t\t/**\n-\t\t * Gets the public methods of the specified parent class that match the given information.\n-\t\t *\n-\t\t * @param methodHandles the collection used to store the matching method handles\n-\t\t * @param parent the parent class\n-\t\t * @param isStatic true to match only static methods, false to match only non-static methods\n-\t\t * @param signature the method signature\n-\t\t * @param parameterCount the parameter count of the method\n-\t\t * @throws IllegalAccessException if a matching method is found, but it cannot be accessed\n-\t\t */\n-\t\tpublic static void getPublicMethods(final Collection<MethodHandle> methodHandles, final Class<?> parent, final boolean isStatic, final MethodSignature signature, final int parameterCount) throws IllegalAccessException {\n-\t\t\tfor (final Method method : parent.getMethods()) {\n-\t\t\t\tif (Modifier.isStatic(method.getModifiers()) == isStatic && !method.isSynthetic() && method.getParameterTypes().length == parameterCount && signature.matches(method)) {\n-\t\t\t\t\tmethodHandles.add(LOOKUP.unreflect(method).asSpreader(Object[].class, parameterCount));\n-\n-\t\t\t\t\tif (parameterCount == 0) {\n-\t\t\t\t\t\treturn;\n-\t\t\t\t\t}\n-\t\t\t\t}\n-\t\t\t}\n-\t\t}\n-\n \t\t/**\n \t\t * Gets the public interface methods of the specified parent class that match the given information.\n \t\t *\n@@ -1268,7 +1246,7 @@ public static void getPublicMethods(final Collection<MethodHandle> methodHandles\n \t\tpublic static void getPublicInterfaceMethods(final Collection<MethodHandle> methodHandles, final Class<?> parent, final MethodSignature signature, final int parameterCount) {\n \t\t\tfor (final Class<?> iface : parent.getInterfaces()) {\n \t\t\t\ttry {\n-\t\t\t\t\tgetPublicMethods(methodHandles, iface, false, signature, parameterCount);\n+\t\t\t\t\tMethodHandler.getPublicMethods(methodHandles, iface, false, signature, parameterCount);\n \n \t\t\t\t\tif (parameterCount == 0 && !methodHandles.isEmpty()) {\n \t\t\t\t\t\treturn;"
+  },
+  {
+    "sha": "4b5ce1099e3e69a10aecae17ca9dd3db713f7041",
+    "filename": "src/main/java/horseshoe/internal/MethodHandler.java",
+    "status": "added",
+    "additions": 82,
+    "deletions": 0,
+    "changes": 82,
+    "blob_url": "https://github.com/horseshoe/horseshoe/blob/b07188024ad859463bcbcd91334257d063d5b6b2/src/main/java/horseshoe/internal/MethodHandler.java",
+    "raw_url": "https://github.com/horseshoe/horseshoe/raw/b07188024ad859463bcbcd91334257d063d5b6b2/src/main/java/horseshoe/internal/MethodHandler.java",
+    "contents_url": "https://api.github.com/repos/horseshoe/horseshoe/contents/src/main/java/horseshoe/internal/MethodHandler.java?ref=b07188024ad859463bcbcd91334257d063d5b6b2",
+    "patch": "@@ -0,0 +1,82 @@\n+package horseshoe.internal;\n+\n+import horseshoe.internal.Accessor.MethodSignature;\n+import java.lang.invoke.MethodHandle;\n+import java.lang.invoke.MethodHandles;\n+import java.lang.invoke.MethodHandles.Lookup;\n+import java.lang.reflect.Method;\n+import java.lang.reflect.Modifier;\n+import java.util.Collection;\n+\n+abstract class MethodHandler {\n+\n+\tprivate static final Factory FACTORY;\n+\n+\tstatic {\n+\t\tFactory factory = new Factory();\n+\n+\t\tif (Properties.JAVA_VERSION >= 9.0) {\n+\t\t\ttry {\n+\t\t\t\tfactory = (Factory)MethodHandler.class.getClassLoader().loadClass(Factory.class.getName() + \"9\").getConstructor().newInstance();\n+\t\t\t} catch (final ReflectiveOperationException e) {\n+\t\t\t\tthrow new ExceptionInInitializerError(\"Failed to load Java 9 specialization: \" + e.getMessage());\n+\t\t\t}\n+\t\t}\n+\n+\t\tFACTORY = factory;\n+\t}\n+\n+\tprivate static class Factory {\n+\n+\t\tprotected static final Lookup LOOKUP = MethodHandles.lookup();\n+\n+\t\tprotected Lookup lookup(Class<?> targetClass) throws IllegalAccessException {\n+\t\t\treturn LOOKUP;\n+\t\t}\n+\n+\t}\n+\n+\t@SuppressWarnings(\"unused\")\n+\tprivate static class Factory9 extends Factory {\n+\n+\t\tpublic Factory9() {\n+\t\t\t// public constructor to support reflection access\n+\t\t}\n+\n+\t\t@Override\n+\t\tprotected Lookup lookup(Class<?> targetClass) throws IllegalAccessException {\n+\t\t\tif (targetClass.isAnonymousClass()) {\n+\t\t\t\treturn MethodHandles.privateLookupIn(targetClass, LOOKUP);\n+\t\t\t}\n+\t\t\treturn LOOKUP;\n+\t\t}\n+\n+\t}\n+\n+\t/**\n+\t * Gets the public methods of the specified parent class that match the given information.\n+\t *\n+\t * @param methodHandles the collection used to store the matching method handles\n+\t * @param parent the parent class\n+\t * @param isStatic true to match only static methods, false to match only non-static methods\n+\t * @param signature the method signature\n+\t * @param parameterCount the parameter count of the method\n+\t * @throws IllegalAccessException if a matching method is found, but it cannot be accessed\n+\t */\n+\tstatic void getPublicMethods(final Collection<MethodHandle> methodHandles, final Class<?> parent, final boolean isStatic, final MethodSignature signature, final int parameterCount) throws IllegalAccessException {\n+\t\tfor (final Method method : parent.getMethods()) {\n+\t\t\tif (Modifier.isStatic(method.getModifiers()) == isStatic && !method.isSynthetic() && method.getParameterTypes().length == parameterCount && signature.matches(method)) {\n+\t\t\t\tmethodHandles.add(FACTORY.lookup(parent).unreflect(method).asSpreader(Object[].class, parameterCount));\n+\n+\t\t\t\tif (parameterCount == 0) {\n+\t\t\t\t\treturn;\n+\t\t\t\t}\n+\t\t\t}\n+\t\t}\n+\t}\n+\n+\tMethodHandler() {\n+\t\tthrow new UnsupportedOperationException();\n+\t}\n+\n+}"
+  },
+  {
+    "sha": "3694c25f69fb77350be7732a116fc5940be60483",
+    "filename": "src/test/java/horseshoe/internal/MethodHandlerTests.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/horseshoe/horseshoe/blob/b07188024ad859463bcbcd91334257d063d5b6b2/src/test/java/horseshoe/internal/MethodHandlerTests.java",
+    "raw_url": "https://github.com/horseshoe/horseshoe/raw/b07188024ad859463bcbcd91334257d063d5b6b2/src/test/java/horseshoe/internal/MethodHandlerTests.java",
+    "contents_url": "https://api.github.com/repos/horseshoe/horseshoe/contents/src/test/java/horseshoe/internal/MethodHandlerTests.java?ref=b07188024ad859463bcbcd91334257d063d5b6b2",
+    "patch": "@@ -0,0 +1,35 @@\n+package horseshoe.internal;\n+\n+import static org.junit.jupiter.api.Assertions.assertEquals;\n+import static org.junit.jupiter.api.Assertions.assertThrows;\n+\n+import horseshoe.Template;\n+import java.io.StringWriter;\n+import java.util.Collections;\n+import java.util.concurrent.atomic.AtomicReference;\n+import org.junit.jupiter.api.Test;\n+import org.junit.jupiter.api.function.Executable;\n+\n+public class MethodHandlerTests {\n+\n+\t@Test\n+\tvoid testAnonymousObjectMethods() throws Throwable {\n+\t\t@SuppressWarnings(\"unused\")\n+\t\tfinal Object obj = new Object() {\n+\t\t\tpublic String f() {\n+\t\t\t\treturn \"hello\";\n+\t\t\t}\n+\t\t};\n+\t\tfinal AtomicReference<String> actual = new AtomicReference<>();\n+\t\tfinal Executable e = () -> {\n+\t\t\tactual.set(Template.load(\"{{ obj.f() }}\").render(Collections.singletonMap(\"obj\", obj), new StringWriter()).toString());\n+\t\t};\n+\t\tif (Properties.JAVA_VERSION >= 9.0) {\n+\t\t\te.execute();\n+\t\t\tassertEquals(\"hello\", actual.get());\n+\t\t} else {\n+\t\t\tassertThrows(NoSuchMethodException.class, e);\n+\t\t}\n+\t}\n+\n+}"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "0d4f7dbd1b0e13786765c8dbe7e6c61dc193e6a3",
+    "filename": "app/src/main/java/com/demo/aty/SimpleGuideViewActivity.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/binIoter/GuideView/blob/587791785f5ec8ed3887ea0998de4400e0b223f5/app/src/main/java/com/demo/aty/SimpleGuideViewActivity.java",
+    "raw_url": "https://github.com/binIoter/GuideView/raw/587791785f5ec8ed3887ea0998de4400e0b223f5/app/src/main/java/com/demo/aty/SimpleGuideViewActivity.java",
+    "contents_url": "https://api.github.com/repos/binIoter/GuideView/contents/app/src/main/java/com/demo/aty/SimpleGuideViewActivity.java?ref=587791785f5ec8ed3887ea0998de4400e0b223f5",
+    "patch": "@@ -67,7 +67,8 @@ public void showGuideView2() {\n     final GuideBuilder builder1 = new GuideBuilder();\n     builder1.setTargetView(ll_nearby)\n             .setAlpha(150)\n-            .setHighTargetGraphStyle(Component.CIRCLE);\n+            .setHighTargetGraphStyle(Component.ROUNDRECT)\n+            .setIsHighlightParent(true);\n     builder1.setOnVisibilityChangedListener(new GuideBuilder.OnVisibilityChangedListener() {\n       @Override\n       public void onShown() {"
+  },
+  {
+    "sha": "889351e9510e926b638a55dfa450e9f6ef31633a",
+    "filename": "guideview/src/main/java/com/binioter/guideview/Configuration.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/binIoter/GuideView/blob/587791785f5ec8ed3887ea0998de4400e0b223f5/guideview/src/main/java/com/binioter/guideview/Configuration.java",
+    "raw_url": "https://github.com/binIoter/GuideView/raw/587791785f5ec8ed3887ea0998de4400e0b223f5/guideview/src/main/java/com/binioter/guideview/Configuration.java",
+    "contents_url": "https://api.github.com/repos/binIoter/GuideView/contents/guideview/src/main/java/com/binioter/guideview/Configuration.java?ref=587791785f5ec8ed3887ea0998de4400e0b223f5",
+    "patch": "@@ -90,6 +90,11 @@\n \n   int mExitAnimationId = -1;\n \n+  /**\n+   * 是否高亮显示父 view\n+   */\n+  boolean mIsHighlightShowParent = false;\n+\n   @Override\n   public int describeContents() {\n     return 0;\n@@ -110,6 +115,7 @@ public void writeToParcel(Parcel dest, int flags) {\n     dest.writeInt(mGraphStyle);\n     dest.writeByte((byte) (mAutoDismiss ? 1 : 0));\n     dest.writeByte((byte) (mOverlayTarget ? 1 : 0));\n+    dest.writeByte((byte) (mIsHighlightShowParent ? 1 : 0));\n   }\n \n   public static final Creator<Configuration> CREATOR = new Creator<Configuration>() {\n@@ -129,6 +135,7 @@ public Configuration createFromParcel(Parcel source) {\n       conf.mGraphStyle = source.readInt();\n       conf.mAutoDismiss = source.readByte() == 1;\n       conf.mOverlayTarget = source.readByte() == 1;\n+      conf.mIsHighlightShowParent = source.readByte() == 1;\n       return conf;\n     }\n "
+  },
+  {
+    "sha": "8fde5e8865737caa72c5871ee09c868658d54318",
+    "filename": "guideview/src/main/java/com/binioter/guideview/Guide.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 2,
+    "changes": 16,
+    "blob_url": "https://github.com/binIoter/GuideView/blob/587791785f5ec8ed3887ea0998de4400e0b223f5/guideview/src/main/java/com/binioter/guideview/Guide.java",
+    "raw_url": "https://github.com/binIoter/GuideView/raw/587791785f5ec8ed3887ea0998de4400e0b223f5/guideview/src/main/java/com/binioter/guideview/Guide.java",
+    "contents_url": "https://api.github.com/repos/binIoter/GuideView/contents/guideview/src/main/java/com/binioter/guideview/Guide.java?ref=587791785f5ec8ed3887ea0998de4400e0b223f5",
+    "patch": "@@ -198,12 +198,24 @@ private MaskView onCreateView(Activity activity, ViewGroup overlay) {\n         }\n \n         if (mConfiguration.mTargetView != null) {\n-            maskView.setTargetRect(Common.getViewAbsRect(mConfiguration.mTargetView, parentX, parentY));\n+            if (mConfiguration.mIsHighlightShowParent &&\n+                    mConfiguration.mTargetView.getParent() != null) {\n+                maskView.setTargetRect(Common.getViewAbsRect((View) mConfiguration.mTargetView.getParent(),\n+                        parentX, parentY));\n+            } else {\n+                maskView.setTargetRect(Common.getViewAbsRect(mConfiguration.mTargetView, parentX, parentY));\n+            }\n         } else {\n             // Gets the target view's abs rect\n             View target = activity.findViewById(mConfiguration.mTargetViewId);\n             if (target != null) {\n-                maskView.setTargetRect(Common.getViewAbsRect(target, parentX, parentY));\n+                if (mConfiguration.mIsHighlightShowParent &&\n+                        target.getParent() != null) {\n+                    maskView.setTargetRect(Common.getViewAbsRect((View) target.getParent(),\n+                            parentX, parentY));\n+                } else {\n+                    maskView.setTargetRect(Common.getViewAbsRect(target, parentX, parentY));\n+                }\n             }\n         }\n "
+  },
+  {
+    "sha": "14bd2d4c4ab23e1b948960dc6e1bddacdbd8050f",
+    "filename": "guideview/src/main/java/com/binioter/guideview/GuideBuilder.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/binIoter/GuideView/blob/587791785f5ec8ed3887ea0998de4400e0b223f5/guideview/src/main/java/com/binioter/guideview/GuideBuilder.java",
+    "raw_url": "https://github.com/binIoter/GuideView/raw/587791785f5ec8ed3887ea0998de4400e0b223f5/guideview/src/main/java/com/binioter/guideview/GuideBuilder.java",
+    "contents_url": "https://api.github.com/repos/binIoter/GuideView/contents/guideview/src/main/java/com/binioter/guideview/GuideBuilder.java?ref=587791785f5ec8ed3887ea0998de4400e0b223f5",
+    "patch": "@@ -322,6 +322,19 @@ public GuideBuilder setHighTargetPaddingBottom(int padding) {\n         return this;\n     }\n \n+    /**\n+     * 是否高粱展示父 view\n+     *\n+     * @return GuideBuilder\n+     */\n+    public GuideBuilder setIsHighlightParent(boolean isHighlightParent) {\n+        if (mBuilt) {\n+            throw new BuildException(\"Already created. rebuild a new one.\");\n+        }\n+        mConfiguration.mIsHighlightShowParent = isHighlightParent;\n+        return this;\n+    }\n+\n     /**\n      * 创建Guide，非Fragment版本\n      *"
+  }
+]

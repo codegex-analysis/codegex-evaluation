@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "26e3aa2613558b5748472f6b31dec06a98f162f8",
+    "filename": "core/assets/bundles/bundle.properties",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/Anuken/Mindustry/blob/d186299fe58309c3f512077956d19a42b390fdc8/core/assets/bundles/bundle.properties",
+    "raw_url": "https://github.com/Anuken/Mindustry/raw/d186299fe58309c3f512077956d19a42b390fdc8/core/assets/bundles/bundle.properties",
+    "contents_url": "https://api.github.com/repos/Anuken/Mindustry/contents/core/assets/bundles/bundle.properties?ref=d186299fe58309c3f512077956d19a42b390fdc8",
+    "patch": "@@ -773,7 +773,8 @@ bullet.damage = [stat]{0}[lightgray] damage\n bullet.splashdamage = [stat]{0}[lightgray] area dmg ~[stat] {1}[lightgray] tiles\n bullet.incendiary = [stat]incendiary\n bullet.homing = [stat]homing\n-bullet.frag = [stat]frag\n+bullet.fragbullets = [stat]{0}[lightgray]x frag bullets\n+bullet.frag.stats = [stat]Frag Bullet:\n bullet.lightning = [stat]{0}[lightgray]x lightning ~[stat]{1}[lightgray] damage\n bullet.buildingdamage = [stat]{0}%[lightgray] building damage\n bullet.knockback = [stat]{0}[lightgray] knockback"
+  },
+  {
+    "sha": "60062a04917e10a8619a7b571eac3871804717c9",
+    "filename": "core/src/mindustry/world/meta/values/AmmoListValue.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 5,
+    "changes": 27,
+    "blob_url": "https://github.com/Anuken/Mindustry/blob/d186299fe58309c3f512077956d19a42b390fdc8/core/src/mindustry/world/meta/values/AmmoListValue.java",
+    "raw_url": "https://github.com/Anuken/Mindustry/raw/d186299fe58309c3f512077956d19a42b390fdc8/core/src/mindustry/world/meta/values/AmmoListValue.java",
+    "contents_url": "https://api.github.com/repos/Anuken/Mindustry/contents/core/src/mindustry/world/meta/values/AmmoListValue.java?ref=d186299fe58309c3f512077956d19a42b390fdc8",
+    "patch": "@@ -19,9 +19,17 @@\n \n public class AmmoListValue<T extends UnlockableContent> implements StatValue{\n     private final ObjectMap<T, BulletType> map;\n+    \n+    private final float indent;\n \n     public AmmoListValue(ObjectMap<T, BulletType> map){\n         this.map = map;\n+        this.indent = 0f;\n+    }\n+\n+    public AmmoListValue(ObjectMap<T, BulletType> map, float indent){\n+        this.map = map;\n+        this.indent = indent;\n     }\n \n     @Override\n@@ -33,9 +41,10 @@ public void display(Table table){\n             boolean unit = t instanceof UnitType;\n \n             BulletType type = map.get(t);\n+            boolean isFrag = indent > 0f;\n \n             //no point in displaying unit icon twice\n-            if(!unit & !(t instanceof PowerTurret)){\n+            if(!unit && !(t instanceof PowerTurret) && !isFrag){\n                 table.image(icon(t)).size(3 * 8).padRight(4).right().top();\n                 table.add(t.localizedName).padRight(10).left().top();\n             }\n@@ -59,11 +68,11 @@ public void display(Table table){\n                     sep(bt, Core.bundle.format(\"bullet.splashdamage\", (int)type.splashDamage, Strings.fixed(type.splashDamageRadius / tilesize, 1)));\n                 }\n \n-                if(!unit && !Mathf.equal(type.ammoMultiplier, 1f) && !(type instanceof LiquidBulletType)){\n+                if(!unit && !Mathf.equal(type.ammoMultiplier, 1f) && !(type instanceof LiquidBulletType) && !isFrag){\n                     sep(bt, Core.bundle.format(\"bullet.multiplier\", (int)type.ammoMultiplier));\n                 }\n \n-                if(!Mathf.equal(type.reloadMultiplier, 1f)){\n+                if(!Mathf.equal(type.reloadMultiplier, 1f) && !isFrag){\n                     sep(bt, Core.bundle.format(\"bullet.reload\", Strings.autoFixed(type.reloadMultiplier, 2)));\n                 }\n \n@@ -96,9 +105,17 @@ public void display(Table table){\n                 }\n \n                 if(type.fragBullet != null){\n-                    sep(bt, \"@bullet.frag\");\n+                    sep(bt, Core.bundle.format(\"bullet.fragbullets\", type.fragBullets));\n+                    sep(bt, \"@bullet.frag.stats\");\n+                    bt.row();\n+\n+                    ObjectMap<T, BulletType> fragMap = new ObjectMap<>();\n+                    fragMap = OrderedMap.of(t, type.fragBullet);\n+                    StatValue fragStatValue = new AmmoListValue<>(fragMap, indent + 1f);\n+\n+                    fragStatValue.display(bt);\n                 }\n-            }).padTop(unit ? 0 : -9).left().get().background(unit ? null : Tex.underline);\n+            }).padTop(unit || isFrag ? 0 : -9).padLeft(indent * 8).left().get().background(unit || isFrag ? null : Tex.underline);\n \n             table.row();\n         }"
+  }
+]

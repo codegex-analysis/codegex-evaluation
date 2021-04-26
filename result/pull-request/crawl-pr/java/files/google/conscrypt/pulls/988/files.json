@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "fa9092cddde5eabbc72375adb9787ad6c38413e0",
+    "filename": "common/src/main/java/org/conscrypt/OpenSSLX509CertificateFactory.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 10,
+    "changes": 15,
+    "blob_url": "https://github.com/google/conscrypt/blob/056dc3a16c8948f49be57ca721823e27a989f348/common/src/main/java/org/conscrypt/OpenSSLX509CertificateFactory.java",
+    "raw_url": "https://github.com/google/conscrypt/raw/056dc3a16c8948f49be57ca721823e27a989f348/common/src/main/java/org/conscrypt/OpenSSLX509CertificateFactory.java",
+    "contents_url": "https://api.github.com/repos/google/conscrypt/contents/common/src/main/java/org/conscrypt/OpenSSLX509CertificateFactory.java?ref=056dc3a16c8948f49be57ca721823e27a989f348",
+    "patch": "@@ -88,18 +88,13 @@ T generateItem(InputStream inStream) throws ParsingException {\n                 pbis.unread(buffer, 0, len);\n \n                 if (buffer[0] == '-') {\n-                    if (len == PKCS7_MARKER.length && Arrays.equals(PKCS7_MARKER, buffer)) {\n-                        List<? extends T> items = fromPkcs7PemInputStream(pbis);\n-                        if (items.size() == 0) {\n-                            return null;\n-                        }\n-                        items.get(0);\n-                    } else {\n-                        return fromX509PemInputStream(pbis);\n-                    }\n+                    return fromX509PemInputStream(pbis);\n                 }\n \n-                /* PKCS#7 bags have a byte 0x06 at position 4 in the stream. */\n+                // PKCS#7 bags have a byte 0x06 at position 4 in the stream.\n+                //\n+                // TODO(https://github.com/google/conscrypt/issues/987): Consider\n+                // deprecating this.\n                 if (buffer[4] == 0x06) {\n                     List<? extends T> certs = fromPkcs7DerInputStream(pbis);\n                     if (certs.size() == 0) {"
+  },
+  {
+    "sha": "5040ac584672ad666b2089b3a9d69eb4b23c864b",
+    "filename": "common/src/test/java/org/conscrypt/java/security/cert/CertificateFactoryTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/google/conscrypt/blob/056dc3a16c8948f49be57ca721823e27a989f348/common/src/test/java/org/conscrypt/java/security/cert/CertificateFactoryTest.java",
+    "raw_url": "https://github.com/google/conscrypt/raw/056dc3a16c8948f49be57ca721823e27a989f348/common/src/test/java/org/conscrypt/java/security/cert/CertificateFactoryTest.java",
+    "contents_url": "https://api.github.com/repos/google/conscrypt/contents/common/src/test/java/org/conscrypt/java/security/cert/CertificateFactoryTest.java?ref=056dc3a16c8948f49be57ca721823e27a989f348",
+    "patch": "@@ -377,9 +377,7 @@ private void test_generateCertificate(CertificateFactory cf) throws Exception {\n         }\n \n         // The RI only supports PKCS#7 blobs with generateCertificates, not\n-        // generateCertificate.\n-        //\n-        // TODO(davidben): Also, PEM support for generateCertificate is broken. Remove it?\n+        // generateCertificate. See https://github.com/google/conscrypt/issues/987\n         if (!StandardNames.IS_RI) {\n             byte[] valid = TestUtils.decodeBase64(VALID_CERTIFICATE_PKCS7_DER_BASE64);\n             Certificate c = cf.generateCertificate(new ByteArrayInputStream(valid));\n@@ -878,8 +876,7 @@ private void test_generateCrl(CertificateFactory cf) throws Exception {\n         assertEquals(c, c2);\n \n         // The RI only supports PKCS#7 with generateCRLs, not generateCRL.\n-        //\n-        // TODO(davidben): Also, PEM support for generateCRL is broken. Remove it?\n+        // See https://github.com/google/conscrypt/issues/987\n         if (!StandardNames.IS_RI) {\n             valid = TestUtils.decodeBase64(VALID_CRL_PKCS7_DER_BASE64);\n             c2 = cf.generateCRL(new ByteArrayInputStream(valid));"
+  }
+]

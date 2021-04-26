@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "d932f9642824f5230ea7033578f531c637b83a79",
+    "filename": "src/main/java/edu/kpi/testcourse/logic/Logic.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/blob/310582b6b656a964b2986b50a53deaf661556e67/src/main/java/edu/kpi/testcourse/logic/Logic.java",
+    "raw_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/raw/310582b6b656a964b2986b50a53deaf661556e67/src/main/java/edu/kpi/testcourse/logic/Logic.java",
+    "contents_url": "https://api.github.com/repos/andriyPro100/url-shrtnr-virginia2/contents/src/main/java/edu/kpi/testcourse/logic/Logic.java?ref=310582b6b656a964b2986b50a53deaf661556e67",
+    "patch": "@@ -93,6 +93,18 @@ public String findFullUrl(String alias) {\n     return null;\n   }\n \n+  /**\n+   * Delete full URL by alias.\n+   *\n+   * @param email user email\n+   * @param alias a short URL alias\n+   * @return a full URL\n+   */\n+  public boolean deleteAlias(String email, String alias) {\n+    urls.deleteUrlAlias(email, alias);\n+    return true;\n+  }\n+\n   /**\n    * Error for situation when we are trying to register already registered user.\n    */"
+  },
+  {
+    "sha": "2a5aad5fbfbbe1fd8ee14524b9194d6e37c12db4",
+    "filename": "src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/blob/310582b6b656a964b2986b50a53deaf661556e67/src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java",
+    "raw_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/raw/310582b6b656a964b2986b50a53deaf661556e67/src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java",
+    "contents_url": "https://api.github.com/repos/andriyPro100/url-shrtnr-virginia2/contents/src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java?ref=310582b6b656a964b2986b50a53deaf661556e67",
+    "patch": "@@ -13,6 +13,7 @@\n import io.micronaut.http.MediaType;\n import io.micronaut.http.annotation.Body;\n import io.micronaut.http.annotation.Controller;\n+import io.micronaut.http.annotation.Delete;\n import io.micronaut.http.annotation.Post;\n import io.micronaut.http.server.util.HttpHostResolver;\n import io.micronaut.security.annotation.Secured;\n@@ -71,4 +72,23 @@ public AuthenticatedApiController(\n       );\n     }\n   }\n+\n+  /**\n+   * Deletes specified alias, created by current user.\n+   *\n+   * @param alias to be deleted\n+   * @return 200 (Ok) status code. In case of error could return status code. 400 (Bad request)\n+   */\n+  @Secured(SecurityRule.IS_AUTHENTICATED)\n+  @Delete(value = \"/urls/delete/{alias}\", produces = MediaType.TEXT_PLAIN)\n+  public HttpResponse<String> deleteAlias(Principal principal, String alias) {\n+    var username = principal.getName();\n+    String t = alias.replaceAll(\"[\\r\\n]+\", \"\");\n+    if (logic.deleteAlias(t, username)) {\n+      return HttpResponse.ok(\"Alias was successfully deleted.\");\n+    } else {\n+      return HttpResponse.badRequest(\n+        String.format(\"Alias %s doesn't exist or wasn't created by current user.\", alias));\n+    }\n+  }\n }"
+  },
+  {
+    "sha": "dbdfd0cfca83cfa306cca87431bb1a457e2ca162",
+    "filename": "src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/blob/310582b6b656a964b2986b50a53deaf661556e67/src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java",
+    "raw_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/raw/310582b6b656a964b2986b50a53deaf661556e67/src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java",
+    "contents_url": "https://api.github.com/repos/andriyPro100/url-shrtnr-virginia2/contents/src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java?ref=310582b6b656a964b2986b50a53deaf661556e67",
+    "patch": "@@ -27,8 +27,7 @@ public void createUrlAlias(UrlAlias urlAlias) {\n \n   @Override\n   public void deleteUrlAlias(String email, String alias) {\n-    // TODO: We should implement it\n-    throw new UnsupportedOperationException();\n+    aliases.remove(alias);\n   }\n \n   @Override"
+  },
+  {
+    "sha": "1893912fd97d8b3359cfa77f8309d32e5870ea00",
+    "filename": "src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/blob/310582b6b656a964b2986b50a53deaf661556e67/src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java",
+    "raw_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/raw/310582b6b656a964b2986b50a53deaf661556e67/src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java",
+    "contents_url": "https://api.github.com/repos/andriyPro100/url-shrtnr-virginia2/contents/src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java?ref=310582b6b656a964b2986b50a53deaf661556e67",
+    "patch": "@@ -22,6 +22,24 @@ void shouldCreateAlias() {\n     assertThat(repo.findUrlAlias(\"http://r.com/short\")).isEqualTo(alias);\n   }\n \n+  /**\n+   * Checking the main ability of delete function: TO DELETE!\n+   */\n+  @Test\n+  void shouldDeleteChosenAlias() {\n+    //GIVEN\n+    UrlRepositoryFakeImpl storage = new UrlRepositoryFakeImpl();\n+\n+    //WHEN\n+    UrlAlias testAlias = new UrlAlias(\"test\", \"http://localhost:8080\", \"test@gmail.com\");\n+    storage.createUrlAlias(testAlias);\n+    storage.deleteUrlAlias(testAlias.email(), testAlias.alias());\n+\n+    //THEN\n+    assertThat(storage.findUrlAlias(\"test\")).isNull();\n+  }\n+\n+\n   @Test\n   void shouldNotAllowToCreateSameAliases() {\n     //GIVEN"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "03efcce0fac47343a640429bc976e7143183386c",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/controllers/CategoryController.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/controllers/CategoryController.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/controllers/CategoryController.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/controllers/CategoryController.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -47,8 +47,8 @@ public String editCategory(CategoryDto categoryDto) {\n         return \"/category_edit_form.xhtml?faces-redirect=true\";\n     }\n \n-    public void deleteCategory(Category category) {\n-        categoryService.deleteById(category.getId());\n+    public void deleteCategory(CategoryDto categoryDto) {\n+        categoryService.deleteById(categoryDto.getId());\n     }\n \n     public String saveCategory() {"
+  },
+  {
+    "sha": "143d67e8ee9c702e757dcbf221173b532adc0362",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/controllers/ProductController.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/controllers/ProductController.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/controllers/ProductController.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/controllers/ProductController.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -59,8 +59,8 @@ public String editProduct(ProductDto productDto) {\n         return \"/product_edit_form.xhtml?faces-redirect=true\";\n     }\n \n-    public void deleteProduct(Product product) {\n-        productService.deleteById(product.getId());\n+    public void deleteProduct(ProductDto productDto) {\n+        productService.deleteById(productDto.getId());\n     }\n \n     public String saveProduct() {"
+  },
+  {
+    "sha": "d41eba79b377eade3ebdfabeb1458de427944eff",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/entity/Category.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/entity/Category.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/entity/Category.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/entity/Category.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -27,7 +27,7 @@\n     private String description;\n \n     @OneToMany(mappedBy = \"category\")\n-    @Cascade(org.hibernate.annotations.CascadeType.ALL)\n+//    @Cascade(org.hibernate.annotations.CascadeType.ALL)\n     private List<Product> productList;\n \n     public Category() {"
+  },
+  {
+    "sha": "477f5067bc0198dd51958307b46cfdcbe735494e",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/entity/Product.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/entity/Product.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/entity/Product.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/entity/Product.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -10,8 +10,11 @@\n @NamedQueries({\n         @NamedQuery(name = \"Product.findAll\", query = \"from Product\"),\n         @NamedQuery(name = \"getProductsCount\", query = \"select count(*) from Product\"),\n-        @NamedQuery(name = \"Product.deleteById\", query = \"delete from Product p where p.id = :id\")\n+        @NamedQuery(name = \"Product.deleteById\", query = \"delete from Product p where p.id = :id\"),\n+        @NamedQuery(name = \"getProductsByName\", query = \"from Product p where p.name like :name\"),\n+        @NamedQuery(name = \"getProductsByCategoryId\", query = \"from Product p where p.category.id = :id\")\n })\n+\n public class Product {\n \n     @Id\n@@ -28,7 +31,7 @@\n     private BigDecimal price;\n \n     @ManyToOne\n-    @JoinColumn(name = \"category_id\")\n+//    @JoinColumn(name = \"category_id\")\n     private Category category;\n \n     public Product() {"
+  },
+  {
+    "sha": "1c3f8715481d480f0697ae5430930805059d2d8b",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/repositories/CategoryRepository.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 34,
+    "changes": 36,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/repositories/CategoryRepository.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/repositories/CategoryRepository.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/repositories/CategoryRepository.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -4,16 +4,9 @@\n import org.slf4j.LoggerFactory;\n import ru.grishchenko.entity.Category;\n \n-import javax.annotation.PostConstruct;\n-import javax.annotation.Resource;\n import javax.ejb.Stateless;\n-import javax.enterprise.context.ApplicationScoped;\n-import javax.inject.Named;\n import javax.persistence.EntityManager;\n import javax.persistence.PersistenceContext;\n-import javax.transaction.SystemException;\n-import javax.transaction.Transactional;\n-import javax.transaction.UserTransaction;\n import java.util.List;\n \n @Stateless\n@@ -24,28 +17,6 @@\n     @PersistenceContext(unitName = \"ds\")\n     private EntityManager entityManager;\n \n-//    @Resource\n-//    private UserTransaction userTransaction;\n-//\n-//    @PostConstruct\n-//    public void init() throws SystemException {\n-//        if (getCategoryCount() == 0) {\n-//            try {\n-//                userTransaction.begin();\n-//\n-//                saveOrUpdate(new Category(null, \"Продукты\", \"Продукты питания\"));\n-//                saveOrUpdate(new Category(null, \"Бытовая техника\", \"Техника для дома\"));\n-//                saveOrUpdate(new Category(null, \"Мебель\", \"Спальни, прихожые и тд...\"));\n-//\n-//                userTransaction.commit();\n-//            } catch (Exception e) {\n-//                logger.error(\"\", e);\n-//                userTransaction.rollback();\n-//            }\n-//\n-//        }\n-//    }\n-\n     public List<Category> findAll() {\n         return entityManager.createNamedQuery(\"Category.findAll\", Category.class).getResultList();\n     }\n@@ -62,18 +33,15 @@ public Long getCategoryCount() {\n         return entityManager.createNamedQuery(\"getCategoryCount\", Long.class).getSingleResult();\n     }\n \n-//    @Transactional\n     public void saveOrUpdate(Category category) {\n         if (category.getId() == null) {\n             entityManager.persist(category);\n         }\n         entityManager.merge(category);\n     }\n \n-//    @Transactional\n     public void deleteById(Long id) {\n-        entityManager.createNamedQuery(\"Category.deleteById\", Category.class)\n-                .setParameter(\"id\", id)\n-                .executeUpdate();\n+        entityManager.createNamedQuery(\"Category.deleteById\").setParameter(\"id\", id).executeUpdate();\n+\n     }\n }"
+  },
+  {
+    "sha": "81b046cd2c34fd9cf42defbf9478262f8a27fd1b",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/repositories/ProductRepository.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 32,
+    "changes": 40,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/repositories/ProductRepository.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/repositories/ProductRepository.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/repositories/ProductRepository.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -3,17 +3,9 @@\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n import ru.grishchenko.entity.Product;\n-\n-import javax.annotation.PostConstruct;\n-import javax.annotation.Resource;\n import javax.ejb.Stateless;\n-import javax.enterprise.context.ApplicationScoped;\n-import javax.inject.Inject;\n-import javax.inject.Named;\n import javax.persistence.EntityManager;\n import javax.persistence.PersistenceContext;\n-import javax.transaction.*;\n-import java.math.BigDecimal;\n import java.util.List;\n \n @Stateless\n@@ -27,32 +19,18 @@\n     @PersistenceContext(unitName = \"ds\")\n     private EntityManager entityManager;\n \n-//    @Resource\n-//    private UserTransaction userTransaction;\n-//\n-//    @PostConstruct\n-//    public void init() throws SystemException {\n-//\n-//        if (getProductsCount() == 0) {\n-//            try {\n-//                userTransaction.begin();\n-//\n-//                saveOrUpdate(new Product(null, \"Молоко\", \"Молоко 3.2%\", new BigDecimal(82.50), categoryRepository.findById(1L)));\n-//                saveOrUpdate(new Product(null, \"Хлеб\", \"Батон нарезной\", new BigDecimal(32.00), categoryRepository.findById(1L)));\n-//                saveOrUpdate(new Product(null, \"Соль\", \"Соль пищевая\", new BigDecimal(22.30), categoryRepository.findById(1L)));\n-//\n-//                userTransaction.commit();\n-//            } catch (Exception e) {\n-//                logger.error(\"\", e);\n-//                userTransaction.rollback();\n-//            }\n-//        }\n-//    }\n-\n     public List<Product> findAll() {\n         return entityManager.createNamedQuery(\"Product.findAll\", Product.class).getResultList();\n     }\n \n+    public List<Product> findByName(String name) {\n+        return entityManager.createNamedQuery(\"getProductsByName\", Product.class).setParameter(\"name\", \"%\" + name + \"%\").getResultList();\n+    }\n+\n+    public List<Product> findProductByCategoryId(Long id) {\n+        return entityManager.createNamedQuery(\"getProductsByCategoryId\", Product.class).setParameter(\"id\", id).getResultList();\n+    }\n+\n     public Long getProductsCount() {\n         return entityManager.createNamedQuery(\"getProductsCount\", Long.class).getSingleResult();\n     }\n@@ -61,15 +39,13 @@ public Product findById(Long id) {\n         return entityManager.find(Product.class, id);\n     }\n \n-//    @Transactional\n     public void saveOrUpdate(Product product) {\n         if (product.getId() == null) {\n             entityManager.persist(product);\n         }\n         entityManager.merge(product);\n     }\n \n-//    @Transactional\n     public void deleteById(Long id) {\n         entityManager.createNamedQuery(\"Product.deleteById\").setParameter(\"id\", id).executeUpdate();\n     }"
+  },
+  {
+    "sha": "463b9fb68ecab9d141be439f353adc7541290f2b",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/rest/CategoryServiceRest.java",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/rest/CategoryServiceRest.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/rest/CategoryServiceRest.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/rest/CategoryServiceRest.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -0,0 +1,40 @@\n+package ru.grishchenko.rest;\n+\n+import dto.CategoryDto;\n+import dto.ProductDto;\n+import jdk.nashorn.internal.objects.annotations.Getter;\n+\n+import javax.ejb.Local;\n+import javax.ws.rs.*;\n+import javax.ws.rs.core.MediaType;\n+import java.util.List;\n+\n+@Local\n+@Path(\"/v1/categories\")\n+public interface CategoryServiceRest {\n+\n+    @GET\n+    @Produces(MediaType.APPLICATION_JSON)\n+    List<CategoryDto> findAll();\n+\n+    @GET\n+    @Path(\"/{id}\")\n+    @Produces(MediaType.APPLICATION_JSON)\n+    CategoryDto findById(@PathParam(\"id\") Long id);\n+\n+    @GET\n+    @Path(\"/count\")\n+    Long getCategoryCount();\n+\n+    @POST\n+    @Consumes(MediaType.APPLICATION_JSON)\n+    void insert(CategoryDto categoryDto);\n+\n+    @PUT\n+    @Consumes(MediaType.APPLICATION_JSON)\n+    void update(CategoryDto categoryDto);\n+\n+    @DELETE\n+    @Path(\"/{id}\")\n+    void deleteById(@PathParam(\"id\") Long id);\n+}"
+  },
+  {
+    "sha": "323410f78b889072eef894c53209b61a160574bd",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/rest/ProductServiceRest.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/rest/ProductServiceRest.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/rest/ProductServiceRest.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/rest/ProductServiceRest.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -25,6 +25,16 @@\n     @Produces(MediaType.APPLICATION_JSON)\n     ProductDto findById(@PathParam(\"id\") Long id);\n \n+    @GET\n+    @Path(\"/name/{name}\")\n+    @Produces(MediaType.APPLICATION_JSON)\n+    List<ProductDto> findByName(@PathParam(\"name\") String name);\n+\n+    @GET\n+    @Path(\"/category/{id}\")\n+    @Produces(MediaType.APPLICATION_JSON)\n+    List<ProductDto> findByCategoryId(@PathParam(\"id\") Long id);\n+\n     @POST\n     @Consumes(MediaType.APPLICATION_JSON)\n     void insert(ProductDto productDto);"
+  },
+  {
+    "sha": "76c024704a4ee5665fb5bab8cffd2ad060376873",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/services/CategoryServiceImpl.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 1,
+    "changes": 19,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/services/CategoryServiceImpl.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/services/CategoryServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/services/CategoryServiceImpl.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -3,6 +3,7 @@\n import dto.CategoryDto;\n import ru.grishchenko.entity.Category;\n import ru.grishchenko.repositories.CategoryRepository;\n+import ru.grishchenko.rest.CategoryServiceRest;\n \n import javax.ejb.EJB;\n import javax.ejb.Stateless;\n@@ -11,7 +12,7 @@\n import java.util.stream.Collectors;\n \n @Stateless\n-public class CategoryServiceImpl implements CategoryService{\n+public class CategoryServiceImpl implements CategoryService, CategoryServiceRest {\n \n     @EJB\n     private CategoryRepository categoryRepository;\n@@ -50,6 +51,22 @@ public Long getCategoryCount() {\n         return categoryRepository.getCategoryCount();\n     }\n \n+    @Override\n+    public void insert(CategoryDto categoryDto) {\n+        if (categoryDto.getId() != null) {\n+            throw new IllegalArgumentException();\n+        }\n+        saveOrUpdate(categoryDto);\n+    }\n+\n+    @Override\n+    public void update(CategoryDto categoryDto) {\n+        if (categoryDto.getId() == null) {\n+            throw new IllegalArgumentException();\n+        }\n+        saveOrUpdate(categoryDto);\n+    }\n+\n     @Override\n     @TransactionAttribute\n     public void saveOrUpdate(CategoryDto categoryDto) {"
+  },
+  {
+    "sha": "89f190d336cd51c0881918eca59223b7595c5d95",
+    "filename": "first-jsf-app/src/main/java/ru/grishchenko/services/ProductServiceImpl.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/grisha99/JavaEE/blob/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/services/ProductServiceImpl.java",
+    "raw_url": "https://github.com/grisha99/JavaEE/raw/fc00c783dddd3af61ff7960f921cbaa0ec965d6a/first-jsf-app/src/main/java/ru/grishchenko/services/ProductServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/grisha99/JavaEE/contents/first-jsf-app/src/main/java/ru/grishchenko/services/ProductServiceImpl.java?ref=fc00c783dddd3af61ff7960f921cbaa0ec965d6a",
+    "patch": "@@ -61,6 +61,16 @@ public ProductDto findById(Long id) {\n         return null;\n     }\n \n+    @Override\n+    public List<ProductDto> findByName(String name) {\n+        return productRepository.findByName(name).stream().map(this::createProductDto).collect(Collectors.toList());\n+    }\n+\n+    @Override\n+    public List<ProductDto> findByCategoryId(Long id) {\n+        return productRepository.findProductByCategoryId(id).stream().map(this::createProductDto).collect(Collectors.toList());\n+    }\n+\n     @Override\n     public void insert(ProductDto productDto) {\n         if (productDto.getId() != null) {\n@@ -92,4 +102,16 @@ public void saveOrUpdate(ProductDto productDto) {\n     public void deleteById(Long id) {\n         productRepository.deleteById(id);\n     }\n+\n+    public ProductDto createProductDto(Product product) {\n+        ProductDto productDto = new ProductDto();\n+        productDto.setId(product.getId());\n+        productDto.setName(product.getName());\n+        productDto.setDescription(product.getDescription());\n+        productDto.setPrice(product.getPrice());\n+        Category category = product.getCategory();\n+        productDto.setCategoryId(category != null ? category.getId() : null);\n+        productDto.setCategoryName(category != null ? category.getTitle() : null);\n+        return productDto;\n+    }\n }"
+  }
+]

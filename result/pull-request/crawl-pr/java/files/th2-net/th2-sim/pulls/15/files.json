@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "f928c929cd1fce091ae292f9cfea7553e5c5f5d6",
+    "filename": "gradle.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/th2-net/th2-sim/blob/2e923a6fa1e1b459d4a4befc2ba0eff51f1bb420/gradle.properties",
+    "raw_url": "https://github.com/th2-net/th2-sim/raw/2e923a6fa1e1b459d4a4befc2ba0eff51f1bb420/gradle.properties",
+    "contents_url": "https://api.github.com/repos/th2-net/th2-sim/contents/gradle.properties?ref=2e923a6fa1e1b459d4a4befc2ba0eff51f1bb420",
+    "patch": "@@ -11,7 +11,7 @@\n # limitations under the License.\n ################################################################################\n \n-release_version = 3.1.1\n+release_version = 3.1.2\n \n bintray_user=\n bintray_key="
+  },
+  {
+    "sha": "73e2e6d72c0fa5410d50d5587d80f0c75d196a4f",
+    "filename": "src/main/java/com/exactpro/th2/sim/impl/SimulatorRuleInfo.java",
+    "status": "modified",
+    "additions": 60,
+    "deletions": 13,
+    "changes": 73,
+    "blob_url": "https://github.com/th2-net/th2-sim/blob/2e923a6fa1e1b459d4a4befc2ba0eff51f1bb420/src/main/java/com/exactpro/th2/sim/impl/SimulatorRuleInfo.java",
+    "raw_url": "https://github.com/th2-net/th2-sim/raw/2e923a6fa1e1b459d4a4befc2ba0eff51f1bb420/src/main/java/com/exactpro/th2/sim/impl/SimulatorRuleInfo.java",
+    "contents_url": "https://api.github.com/repos/th2-net/th2-sim/contents/src/main/java/com/exactpro/th2/sim/impl/SimulatorRuleInfo.java?ref=2e923a6fa1e1b459d4a4befc2ba0eff51f1bb420",
+    "patch": "@@ -16,6 +16,8 @@\n import com.exactpro.th2.common.grpc.Message;\n import com.exactpro.th2.common.grpc.MessageBatch;\n import com.exactpro.th2.common.schema.message.MessageRouter;\n+import com.exactpro.th2.common.schema.message.MessageRouterUtils;\n+import com.exactpro.th2.common.schema.message.QueueAttribute;\n import com.exactpro.th2.sim.rule.IRule;\n import com.exactpro.th2.sim.rule.IRuleContext;\n import com.google.protobuf.TextFormat;\n@@ -80,18 +82,20 @@ public void send(@NotNull Message msg) {\n             LOGGER.trace(\"Process message by rule with ID '{}' = {}\", id, TextFormat.shortDebugString(msg));\n         }\n \n-        Message finalMessage = StringUtils.isEmpty(msg.getMetadata().getId().getConnectionId().getSessionAlias()) ? addSessionAlias(msg) : msg;\n+        Message finalMessage = prepareMessage(msg);\n         String sessionAlias = finalMessage.getMetadata().getId().getConnectionId().getSessionAlias();\n \n-        MessageBatch batch = MessageBatch.newBuilder().addMessages(finalMessage).build();\n-        try {\n-            router.send(batch, \"second\", \"publish\", \"parsed\", sessionAlias);\n-        } catch (Exception e) {\n-            LOGGER.error(\"Can not send message with session alias '{}' = {}\", sessionAlias, TextFormat.shortDebugString(msg), e);\n-            if (e instanceof InterruptedException) {\n-                Thread.currentThread().interrupt();\n-            }\n+        sendBatch(MessageBatch.newBuilder().addMessages(finalMessage).build(), sessionAlias);\n+    }\n+\n+    @Override\n+    public void send(@NotNull MessageBatch batch) {\n+        if (batch.getMessagesCount() < 1) {\n+            return;\n         }\n+\n+        String sessionAlias = getSessionAliasFromBatch(batch);\n+        sendBatch(batch, sessionAlias);\n     }\n \n     @Override\n@@ -100,9 +104,52 @@ public void send(@NotNull Message msg, long delay, @NotNull TimeUnit timeUnit) {\n         scheduledExecutorService.schedule(() -> send(msg), delay, Objects.requireNonNull(timeUnit, \"Time unit can not be null\"));\n     }\n \n-    private Message addSessionAlias(Message msg) {\n-        Message.Builder builder = msg.toBuilder();\n-        builder.getMetadataBuilder().getIdBuilder().getConnectionIdBuilder().setSessionAlias(sessionAlias);\n-        return builder.build();\n+    @Override\n+    public void send(@NotNull MessageBatch batch, long delay, TimeUnit timeUnit) {\n+        Objects.requireNonNull(batch, \"Message batch can not be null\");\n+        if (batch.getMessagesCount() < 1) {\n+            return;\n+        }\n+\n+        String sessionAlias = getSessionAliasFromBatch(batch);\n+        scheduledExecutorService.schedule(() -> sendBatch(batch, sessionAlias), delay, Objects.requireNonNull(timeUnit, \"Time unit can not be null\"));\n+    }\n+\n+    private Message prepareMessage(Message msg) {\n+        if (StringUtils.isEmpty(msg.getMetadata().getId().getConnectionId().getSessionAlias())) {\n+            Message.Builder builder = msg.toBuilder();\n+            builder.getMetadataBuilder().getIdBuilder().getConnectionIdBuilder().setSessionAlias(sessionAlias);\n+            return builder.build();\n+        } else {\n+            return msg;\n+        }\n+    }\n+\n+    private String getSessionAliasFromBatch(MessageBatch batch) {\n+        String sessionAlias = null;\n+        for (Message msg : batch.getMessagesList()) {\n+            Message message = prepareMessage(msg);\n+            String msgAlias = message.getMetadata().getId().getConnectionId().getSessionAlias();\n+            if (sessionAlias == null) {\n+                sessionAlias = msgAlias;\n+            }\n+\n+            if (!sessionAlias.equals(msgAlias)) {\n+                throw new IllegalArgumentException(\"Messages have different session alias = [\" + sessionAlias + \",\" + msgAlias + \"]\" );\n+            }\n+        }\n+\n+        return sessionAlias;\n+    }\n+\n+    private void sendBatch(MessageBatch batch, String sessionAlias) {\n+        try {\n+            router.send(batch, QueueAttribute.SECOND.name(), sessionAlias);\n+        } catch (Exception e) {\n+            LOGGER.error(\"Can not send message with session alias '{}' = {}\", sessionAlias, MessageRouterUtils.toJson(batch), e);\n+            if (e instanceof InterruptedException) {\n+                Thread.currentThread().interrupt();\n+            }\n+        }\n     }\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "b9d7955cc5a10139d2924da5dcd93428c396c938",
+    "filename": "src/main/java/com/exactpro/th2/sim/rule/IRuleContext.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 2,
+    "changes": 10,
+    "blob_url": "https://github.com/th2-net/th2-sim/blob/2e923a6fa1e1b459d4a4befc2ba0eff51f1bb420/src/main/java/com/exactpro/th2/sim/rule/IRuleContext.java",
+    "raw_url": "https://github.com/th2-net/th2-sim/raw/2e923a6fa1e1b459d4a4befc2ba0eff51f1bb420/src/main/java/com/exactpro/th2/sim/rule/IRuleContext.java",
+    "contents_url": "https://api.github.com/repos/th2-net/th2-sim/contents/src/main/java/com/exactpro/th2/sim/rule/IRuleContext.java?ref=2e923a6fa1e1b459d4a4befc2ba0eff51f1bb420",
+    "patch": "@@ -14,11 +14,17 @@\n package com.exactpro.th2.sim.rule;\n \n import com.exactpro.th2.common.grpc.Message;\n+import com.exactpro.th2.common.grpc.MessageBatch;\n+import org.jetbrains.annotations.NotNull;\n \n import java.util.concurrent.TimeUnit;\n \n public interface IRuleContext {\n-    void send(Message msg);\n+    void send(@NotNull Message msg);\n \n-    void send(Message msg, long delay, TimeUnit timeUnit);\n+    void send(@NotNull MessageBatch batch);\n+\n+    void send(@NotNull Message msg, long delay, TimeUnit timeUnit);\n+\n+    void send(@NotNull MessageBatch batch, long delay, TimeUnit timeUnit);\n }"
+  }
+]

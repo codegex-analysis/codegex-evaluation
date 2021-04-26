@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "8fd6a12afa0ce97683cdc50f02c41ad509928fcb",
+    "filename": "fe1-web/components/eventList/LaoProperties.tsx",
+    "status": "modified",
+    "additions": 42,
+    "deletions": 7,
+    "changes": 49,
+    "blob_url": "https://github.com/dedis/student_21_pop/blob/84d8920221598ecfe820f9b714b2dfb2dc2e035c/fe1-web/components/eventList/LaoProperties.tsx",
+    "raw_url": "https://github.com/dedis/student_21_pop/raw/84d8920221598ecfe820f9b714b2dfb2dc2e035c/fe1-web/components/eventList/LaoProperties.tsx",
+    "contents_url": "https://api.github.com/repos/dedis/student_21_pop/contents/fe1-web/components/eventList/LaoProperties.tsx?ref=84d8920221598ecfe820f9b714b2dfb2dc2e035c",
+    "patch": "@@ -10,20 +10,55 @@ import { useSelector } from 'react-redux';\n import ParagraphBlock from 'components/ParagraphBlock';\n import { Lao } from 'model/objects';\n import { makeCurrentLao } from 'store/reducers';\n+import EdiText from 'react-editext';\n+import { KeyPairStore } from '../../store';\n \n function renderProperties(lao: Lao) {\n-  return (\n-    <>\n-      <ParagraphBlock text={`Lao name: ${lao.name}`} />\n-      <ParagraphBlock text={`Lao creation: ${lao.creation.toString()}`} />\n-    </>\n-  );\n+  const style = {\n+    fontFamily: 'Helvetica',\n+    fontSize: '14px',\n+    width: 200,\n+  };\n+\n+  const isOrganizer = KeyPairStore.getPublicKey().toString() === lao.organizer.toString();\n+\n+  return (isOrganizer)\n+    ? (\n+      <>\n+        <ParagraphBlock text=\"Lao name: \" />\n+        <EdiText\n+          hint=\"type the new LAO name\"\n+          viewProps={{ style: style }}\n+          inputProps={{ style: style }}\n+          type=\"text\"\n+          onSave={() => {\n+          // TODO: carry out the necessary LAO update interactions with the backend here\n+          }}\n+          value={`${lao.name}`}\n+        />\n+        <ParagraphBlock text=\"Lao creation: \" />\n+        <EdiText\n+          hint=\"type the new creation date\"\n+          viewProps={{ style: style }}\n+          inputProps={{ style: style }}\n+          type=\"text\"\n+          onSave={() => {\n+          // TODO: carry out the necessary LAO update interactions with the backend here\n+          }}\n+          value={`${lao.creation.toString()}`}\n+        />\n+      </>\n+    ) : (\n+      <>\n+        <ParagraphBlock text={`Lao name: ${lao.name}`} />\n+        <ParagraphBlock text={`Lao creation: ${lao.creation.toString()}`} />\n+      </>\n+    );\n }\n \n const LaoProperties = () => {\n   const laoSelect = makeCurrentLao();\n   const lao = useSelector(laoSelect);\n-\n   const [toggleChildrenVisible, setToggleChildrenVisible] = useState(false);\n \n   const toggleChildren = () => (setToggleChildrenVisible(!toggleChildrenVisible));"
+  },
+  {
+    "sha": "de1b6ec108e036b9d87f6c0b0f802403dfa4ab53",
+    "filename": "fe1-web/package-lock.json",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 3,
+    "changes": 23,
+    "blob_url": "https://github.com/dedis/student_21_pop/blob/84d8920221598ecfe820f9b714b2dfb2dc2e035c/fe1-web/package-lock.json",
+    "raw_url": "https://github.com/dedis/student_21_pop/raw/84d8920221598ecfe820f9b714b2dfb2dc2e035c/fe1-web/package-lock.json",
+    "contents_url": "https://api.github.com/repos/dedis/student_21_pop/contents/fe1-web/package-lock.json?ref=84d8920221598ecfe820f9b714b2dfb2dc2e035c",
+    "patch": "@@ -27,6 +27,7 @@\n         \"react\": \"16.13.1\",\n         \"react-datepicker\": \"^3.3.0\",\n         \"react-dom\": \"16.13.1\",\n+        \"react-editext\": \"^3.17.2\",\n         \"react-native\": \"https://github.com/expo/react-native/archive/sdk-39.0.2.tar.gz\",\n         \"react-native-elements\": \"^3.0.0-alpha.1\",\n         \"react-native-gesture-handler\": \"^1.7.0\",\n@@ -31009,6 +31010,19 @@\n         \"react\": \"^16.13.1\"\n       }\n     },\n+    \"node_modules/react-editext\": {\n+      \"version\": \"3.17.2\",\n+      \"resolved\": \"https://registry.npmjs.org/react-editext/-/react-editext-3.17.2.tgz\",\n+      \"integrity\": \"sha512-hP7+3FWFE9jyDE9kF0vfNG2DR6511sngtxermLpUmea6OQm3ab0VisIG3vO4jPFF7GKzxac8+/fhGYb5kVeLvQ==\",\n+      \"engines\": {\n+        \"node\": \">=8\",\n+        \"npm\": \">=5\"\n+      },\n+      \"peerDependencies\": {\n+        \"prop-types\": \"^15.7.2\",\n+        \"react\": \"^15.0.0 || ^16.0.0\"\n+      }\n+    },\n     \"node_modules/react-error-overlay\": {\n       \"version\": \"6.0.9\",\n       \"resolved\": \"https://registry.npmjs.org/react-error-overlay/-/react-error-overlay-6.0.9.tgz\",\n@@ -45179,7 +45193,6 @@\n           \"resolved\": \"https://registry.npmjs.org/metro-react-native-babel-transformer/-/metro-react-native-babel-transformer-0.59.0.tgz\",\n           \"integrity\": \"sha512-1O3wrnMq4NcPQ1asEcl9lRDn/t+F1Oef6S9WaYVIKEhg9m/EQRGVrrTVP+R6B5Eeaj3+zNKbzM8Dx/NWy1hUbQ==\",\n           \"requires\": {\n-            \"@babel/core\": \"^7.0.0\",\n             \"babel-preset-fbjs\": \"^3.3.0\",\n             \"metro-babel-transformer\": \"0.59.0\",\n             \"metro-react-native-babel-preset\": \"0.59.0\",\n@@ -59775,7 +59788,6 @@\n       \"resolved\": \"https://registry.npmjs.org/metro-react-native-babel-transformer/-/metro-react-native-babel-transformer-0.58.0.tgz\",\n       \"integrity\": \"sha512-3A73+cRq1eUPQ8g+hPNGgMUMCGmtQjwqHfoG1DwinAoJ/kr4WOXWWbGZo0xHJNBe/zdHGl0uHcDCp2knPglTdQ==\",\n       \"requires\": {\n-        \"@babel/core\": \"^7.0.0\",\n         \"babel-preset-fbjs\": \"^3.3.0\",\n         \"metro-babel-transformer\": \"0.58.0\",\n         \"metro-react-native-babel-preset\": \"0.58.0\",\n@@ -62910,6 +62922,12 @@\n         \"scheduler\": \"^0.19.1\"\n       }\n     },\n+    \"react-editext\": {\n+      \"version\": \"3.17.2\",\n+      \"resolved\": \"https://registry.npmjs.org/react-editext/-/react-editext-3.17.2.tgz\",\n+      \"integrity\": \"sha512-hP7+3FWFE9jyDE9kF0vfNG2DR6511sngtxermLpUmea6OQm3ab0VisIG3vO4jPFF7GKzxac8+/fhGYb5kVeLvQ==\",\n+      \"requires\": {}\n+    },\n     \"react-error-overlay\": {\n       \"version\": \"6.0.9\",\n       \"resolved\": \"https://registry.npmjs.org/react-error-overlay/-/react-error-overlay-6.0.9.tgz\",\n@@ -62999,7 +63017,6 @@\n           \"resolved\": \"https://registry.npmjs.org/metro-react-native-babel-transformer/-/metro-react-native-babel-transformer-0.59.0.tgz\",\n           \"integrity\": \"sha512-1O3wrnMq4NcPQ1asEcl9lRDn/t+F1Oef6S9WaYVIKEhg9m/EQRGVrrTVP+R6B5Eeaj3+zNKbzM8Dx/NWy1hUbQ==\",\n           \"requires\": {\n-            \"@babel/core\": \"^7.0.0\",\n             \"babel-preset-fbjs\": \"^3.3.0\",\n             \"metro-babel-transformer\": \"0.59.0\",\n             \"metro-react-native-babel-preset\": \"0.59.0\","
+  },
+  {
+    "sha": "94a1bf8a43c16aa0df4ada436b77623e0ee34acd",
+    "filename": "fe1-web/package.json",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/dedis/student_21_pop/blob/84d8920221598ecfe820f9b714b2dfb2dc2e035c/fe1-web/package.json",
+    "raw_url": "https://github.com/dedis/student_21_pop/raw/84d8920221598ecfe820f9b714b2dfb2dc2e035c/fe1-web/package.json",
+    "contents_url": "https://api.github.com/repos/dedis/student_21_pop/contents/fe1-web/package.json?ref=84d8920221598ecfe820f9b714b2dfb2dc2e035c",
+    "patch": "@@ -34,6 +34,7 @@\n     \"react\": \"16.13.1\",\n     \"react-datepicker\": \"^3.3.0\",\n     \"react-dom\": \"16.13.1\",\n+    \"react-editext\": \"^3.17.2\",\n     \"react-native\": \"https://github.com/expo/react-native/archive/sdk-39.0.2.tar.gz\",\n     \"react-native-elements\": \"^3.0.0-alpha.1\",\n     \"react-native-gesture-handler\": \"^1.7.0\","
+  }
+]

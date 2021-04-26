@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "aa1bf9eceb7a01bc00b6998bab0ae4eff0d32af3",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/TakeshySun/BookShop/blob/edd0bb43961a1fbabe26f74203a9899f42e645e5/pom.xml",
+    "raw_url": "https://github.com/TakeshySun/BookShop/raw/edd0bb43961a1fbabe26f74203a9899f42e645e5/pom.xml",
+    "contents_url": "https://api.github.com/repos/TakeshySun/BookShop/contents/pom.xml?ref=edd0bb43961a1fbabe26f74203a9899f42e645e5",
+    "patch": "@@ -106,6 +106,18 @@\n       <version>5.0.1</version>\n     </dependency>\n \n+    <dependency>\n+      <groupId>com.codeborne</groupId>\n+      <artifactId>selenide</artifactId>\n+      <version>5.19.0</version>\n+      <scope>test</scope>\n+    </dependency>\n+    <dependency>\n+      <groupId>com.codeborne</groupId>\n+      <artifactId>selenide</artifactId>\n+      <version>5.19.0</version>\n+      <scope>compile</scope>\n+    </dependency>\n \n   </dependencies>\n "
+  },
+  {
+    "sha": "2de32e5a7315592d78825833c746c72b804c0ef2",
+    "filename": "src/main/java/desktop/selenide/PageWithSelenide.java",
+    "status": "added",
+    "additions": 38,
+    "deletions": 0,
+    "changes": 38,
+    "blob_url": "https://github.com/TakeshySun/BookShop/blob/edd0bb43961a1fbabe26f74203a9899f42e645e5/src/main/java/desktop/selenide/PageWithSelenide.java",
+    "raw_url": "https://github.com/TakeshySun/BookShop/raw/edd0bb43961a1fbabe26f74203a9899f42e645e5/src/main/java/desktop/selenide/PageWithSelenide.java",
+    "contents_url": "https://api.github.com/repos/TakeshySun/BookShop/contents/src/main/java/desktop/selenide/PageWithSelenide.java?ref=edd0bb43961a1fbabe26f74203a9899f42e645e5",
+    "patch": "@@ -0,0 +1,38 @@\n+package desktop.selenide;\n+import org.openqa.selenium.By;\n+\n+import static com.codeborne.selenide.Selenide.*;\n+import static com.codeborne.selenide.Condition.*;\n+\n+public class PageWithSelenide {\n+    public void openPage(){\n+        open(\"https://www.bookdepository.com/\");\n+    }\n+\n+    public void search(){\n+        $(\"input.text-input\").setValue(\"Thinking in Java\");\n+        $(\"button.header-search-btn\").click();\n+    }\n+\n+    public void searchResultContains(String text){\n+        $(\"div.book-item\").shouldHave(text(text));\n+    }\n+\n+    public void clickAddForBook(String bookName){\n+        String xpathSelector = String.format(\"//a[contains(text(),'%s')]/../.././following-sibling::div//a\", bookName);\n+        $(By.xpath(xpathSelector)).click();\n+    }\n+\n+    public void clickBuscketChechoutPopup(){\n+        $(\"a.continue-to-basket \").should(appear);\n+        $(\"a.continue-to-basket \").click();\n+    }\n+\n+    public String getDeliveryCostValueText(){\n+        return $(\"dl.delivery-text dd\").getText();\n+    }\n+\n+    public String getTotalValueText(){\n+        return $(\"dl.total dd\").getText();\n+    }\n+}"
+  },
+  {
+    "sha": "f9b9ff248a6b2a85bbfd6a43b5b3a046d55f9fd8",
+    "filename": "src/test/java/runner/SelenideRunner.java",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/TakeshySun/BookShop/blob/edd0bb43961a1fbabe26f74203a9899f42e645e5/src/test/java/runner/SelenideRunner.java",
+    "raw_url": "https://github.com/TakeshySun/BookShop/raw/edd0bb43961a1fbabe26f74203a9899f42e645e5/src/test/java/runner/SelenideRunner.java",
+    "contents_url": "https://api.github.com/repos/TakeshySun/BookShop/contents/src/test/java/runner/SelenideRunner.java?ref=edd0bb43961a1fbabe26f74203a9899f42e645e5",
+    "patch": "@@ -0,0 +1,22 @@\n+package runner;\n+\n+import io.cucumber.junit.Cucumber;\n+import io.cucumber.junit.CucumberOptions;\n+import org.junit.runner.RunWith;\n+\n+\n+@RunWith(Cucumber.class)\n+@CucumberOptions(\n+        features = {\"src/test/resources/features\"},\n+        glue = \"stepDefs/selenide\",\n+        plugin = {\n+                \"pretty\",\n+                \"json:target/cucumber-reports/Cucumber.json\",\n+//                \"com.epam.reportportal.cucumber.ScenarioReporter\"\n+//                \"com.epam.reportportal.cucumber.StepReporter\"\n+                },\n+        tags = \"@Selenide\"\n+)\n+\n+public class SelenideRunner {\n+}"
+  },
+  {
+    "sha": "909d8d80bbe3a6c841be45553331e9824ddd43cc",
+    "filename": "src/test/java/stepDefs/selenide/SelenideStepDefs.java",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/TakeshySun/BookShop/blob/edd0bb43961a1fbabe26f74203a9899f42e645e5/src/test/java/stepDefs/selenide/SelenideStepDefs.java",
+    "raw_url": "https://github.com/TakeshySun/BookShop/raw/edd0bb43961a1fbabe26f74203a9899f42e645e5/src/test/java/stepDefs/selenide/SelenideStepDefs.java",
+    "contents_url": "https://api.github.com/repos/TakeshySun/BookShop/contents/src/test/java/stepDefs/selenide/SelenideStepDefs.java?ref=edd0bb43961a1fbabe26f74203a9899f42e645e5",
+    "patch": "@@ -0,0 +1,52 @@\n+package stepDefs.selenide;\n+\n+import desktop.selenide.PageWithSelenide;\n+import io.cucumber.datatable.DataTable;\n+import io.cucumber.java.en.And;\n+import io.cucumber.java.en.Given;\n+import org.assertj.core.api.SoftAssertions;\n+\n+import java.util.List;\n+import java.util.Map;\n+\n+public class SelenideStepDefs {\n+\n+    PageWithSelenide page = new PageWithSelenide();\n+\n+    @Given(\"open the \\\"Initial home page\\\"\")\n+    public void openPage(){\n+        page.openPage();\n+    }\n+\n+    @And(\"search for \\\"Thinking in Java\\\"\")\n+    public void searchFor() {\n+        page.search();\n+    }\n+\n+    @And(\"Search results contain the following product {string}\")\n+    public void searchResultsContainTheFollowingProduct(String text) {\n+        page.searchResultContains(text);\n+    }\n+\n+    @And(\"I click Add to basket button for product with name {string}\")\n+    public void iClickAddToBasketButtonForProductWithName(String bookName) {\n+        page.clickAddForBook(bookName);\n+    }\n+\n+    @And(\"I select BasketCheckout in basket pop-up\")\n+    public void iSelectBasketCheckoutInBasketPopUp() {\n+        page.clickBuscketChechoutPopup();\n+    }\n+\n+    @And(\"Basket order summary is following:\")\n+    public void basketOrderSummaryIsAsFollowing(DataTable table) {\n+        List<Map<String, String>> list = table.asMaps(String.class,String.class);\n+        String deliveryCostValue = list.get(0).get(\"Delivery cost\");\n+        String totalValue = list.get(0).get(\"Total\");\n+        SoftAssertions softly = new SoftAssertions();\n+        softly.assertThat(page.getDeliveryCostValueText()).as(\"Delivery Cost is Wrong\").isEqualTo(deliveryCostValue);\n+        softly.assertThat(page.getTotalValueText()).as(\"Total Cost is Wrong\").isEqualTo(totalValue);\n+        softly.assertAll();\n+    }\n+\n+}"
+  },
+  {
+    "sha": "099c00e6b4fb7fe4b21ac667b8f78b372b9ccc8e",
+    "filename": "src/test/resources/features/Selenide.feature",
+    "status": "added",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/TakeshySun/BookShop/blob/edd0bb43961a1fbabe26f74203a9899f42e645e5/src/test/resources/features/Selenide.feature",
+    "raw_url": "https://github.com/TakeshySun/BookShop/raw/edd0bb43961a1fbabe26f74203a9899f42e645e5/src/test/resources/features/Selenide.feature",
+    "contents_url": "https://api.github.com/repos/TakeshySun/BookShop/contents/src/test/resources/features/Selenide.feature?ref=edd0bb43961a1fbabe26f74203a9899f42e645e5",
+    "patch": "@@ -0,0 +1,16 @@\n+\n+Feature: Desktop Checkout for Guest User\n+  As a customer\n+  I want to be able proceed to checkout\n+  So that I can specify my delivery and payment details and place the order\n+\n+  @Selenide\n+  Scenario: Proceed to checkout, final review and place order as guest user\n+    Given open the \"Initial home page\"\n+    And search for \"Thinking in Java\"\n+    And Search results contain the following product \"Thinking in Java\"\n+    And I click Add to basket button for product with name \"Thinking in Java\"\n+    And I select BasketCheckout in basket pop-up\n+    And Basket order summary is following:\n+      | Delivery cost | Total   |\n+      | FREE          | 79,77 € |"
+  }
+]

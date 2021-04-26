@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "f35052c19022b219aba87c7d47298dbeebe7dff4",
+    "filename": "core/src/main/java/com/google/common/truth/StringSubject.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/google/truth/blob/cc02dca1e9d339a9781798c4c7f2154dcaa37c08/core/src/main/java/com/google/common/truth/StringSubject.java",
+    "raw_url": "https://github.com/google/truth/raw/cc02dca1e9d339a9781798c4c7f2154dcaa37c08/core/src/main/java/com/google/common/truth/StringSubject.java",
+    "contents_url": "https://api.github.com/repos/google/truth/contents/core/src/main/java/com/google/common/truth/StringSubject.java?ref=cc02dca1e9d339a9781798c4c7f2154dcaa37c08",
+    "patch": "@@ -125,6 +125,11 @@ public void matches(String regex) {\n             fact(\"expected to match\", regex),\n             fact(\"but was\", actual),\n             simpleFact(\"Looks like you want to use .isEqualTo() for an exact equality assertion.\"));\n+      } else if (Platform.containsMatch(actual, regex)) {\n+        failWithoutActual(\n+            fact(\"expected to match\", regex),\n+            fact(\"but was\", actual),\n+            simpleFact(\"Did you mean to call containsMatch() instead of match()?\"));\n       } else {\n         failWithActual(\"expected to match\", regex);\n       }\n@@ -145,6 +150,11 @@ public void matches(Pattern regex) {\n             simpleFact(\n                 \"If you want an exact equality assertion you can escape your regex with\"\n                     + \" Pattern.quote().\"));\n+      } else if (regex.matcher(actual).find()) {\n+        failWithoutActual(\n+                fact(\"expected to match\", regex),\n+                fact(\"but was\", actual),\n+                simpleFact(\"Did you mean to call containsMatch() instead of match()?\"));\n       } else {\n         failWithActual(\"expected to match\", regex);\n       }"
+  },
+  {
+    "sha": "a6340eacbb14d27010efb7f8670009c80faab334",
+    "filename": "core/src/test/java/com/google/common/truth/StringSubjectTest.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/google/truth/blob/cc02dca1e9d339a9781798c4c7f2154dcaa37c08/core/src/test/java/com/google/common/truth/StringSubjectTest.java",
+    "raw_url": "https://github.com/google/truth/raw/cc02dca1e9d339a9781798c4c7f2154dcaa37c08/core/src/test/java/com/google/common/truth/StringSubjectTest.java",
+    "contents_url": "https://api.github.com/repos/google/truth/contents/core/src/test/java/com/google/common/truth/StringSubjectTest.java?ref=cc02dca1e9d339a9781798c4c7f2154dcaa37c08",
+    "patch": "@@ -215,6 +215,16 @@ public void stringMatchesStringLiteralFail() {\n         .contains(\"Looks like you want to use .isEqualTo() for an exact equality assertion.\");\n   }\n \n+  @Test\n+  public void stringMatchesStringLiteralFailButContainsMatchSuccess() {\n+    expectFailureWhenTestingThat(\"aba\").matches(\"[b]\");\n+    assertFailureValue(\"expected to match\", \"[b]\");\n+    assertFailureValue(\"but was\", \"aba\");\n+    assertThat(expectFailure.getFailure())\n+            .factKeys()\n+            .contains(\"Did you mean to call containsMatch() instead of match()?\");\n+  }\n+\n   @Test\n   @GwtIncompatible(\"Pattern\")\n   public void stringMatchesPattern() {\n@@ -248,6 +258,17 @@ public void stringMatchesPatternLiteralFail() {\n                 + \" Pattern.quote().\");\n   }\n \n+  @Test\n+  @GwtIncompatible(\"Pattern\")\n+  public void stringMatchesPatternLiteralFailButContainsMatchSuccess() {\n+    expectFailureWhenTestingThat(\"aba\").matches(Pattern.compile(\"[b]\"));\n+    assertFailureValue(\"expected to match\", \"[b]\");\n+    assertFailureValue(\"but was\", \"aba\");\n+    assertThat(expectFailure.getFailure())\n+            .factKeys()\n+            .contains(\"Did you mean to call containsMatch() instead of match()?\");\n+  }\n+\n   @Test\n   public void stringDoesNotMatchString() {\n     assertThat(\"abcaqadev\").doesNotMatch(\".*aaa.*\");"
+  }
+]

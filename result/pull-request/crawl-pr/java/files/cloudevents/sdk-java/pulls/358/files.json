@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "e0b6101d8d07cff495e12f92606944e8afbdc819",
+    "filename": "api/src/main/java/io/cloudevents/rw/CloudEventContextWriter.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/cloudevents/sdk-java/blob/3f03b5b2271d89d38d75bd293143e712b6927e8c/api/src/main/java/io/cloudevents/rw/CloudEventContextWriter.java",
+    "raw_url": "https://github.com/cloudevents/sdk-java/raw/3f03b5b2271d89d38d75bd293143e712b6927e8c/api/src/main/java/io/cloudevents/rw/CloudEventContextWriter.java",
+    "contents_url": "https://api.github.com/repos/cloudevents/sdk-java/contents/api/src/main/java/io/cloudevents/rw/CloudEventContextWriter.java?ref=3f03b5b2271d89d38d75bd293143e712b6927e8c",
+    "patch": "@@ -83,11 +83,29 @@ default CloudEventContextWriter withContextAttribute(String name, OffsetDateTime\n      * @return self\n      * @throws CloudEventRWException if anything goes wrong while writing this extension.\n      * @throws IllegalArgumentException if you're trying to set the specversion attribute.\n+     *\n+     * @deprecated CloudEvent specification only permits {@link Integer} type as a\n+     * numeric value.\n      */\n     default CloudEventContextWriter withContextAttribute(String name, Number value) throws CloudEventRWException {\n         return withContextAttribute(name, value.toString());\n     }\n \n+    /**\n+     * Set attribute with type {@link Integer}.\n+     * This setter should not be invoked for specversion, because the writer should\n+     * already know the specversion or because it doesn't need it to correctly write the value.\n+     *\n+     * @param name  name of the attribute\n+     * @param value value of the attribute\n+     * @return self\n+     * @throws CloudEventRWException if anything goes wrong while writing this extension.\n+     * @throws IllegalArgumentException if you're trying to set the specversion attribute.\n+     */\n+    default CloudEventContextWriter withContextAttribute(String name, Integer value) throws CloudEventRWException {\n+        return withContextAttribute(name, value.toString());\n+    }\n+\n     /**\n      * Set attribute with type {@link Boolean} attribute.\n      * This setter should not be invoked for specversion, because the writer should"
+  },
+  {
+    "sha": "557e05d12407e55d5615a73c43b9744a97c4f9c2",
+    "filename": "core/src/test/java/io/cloudevents/core/test/Data.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/cloudevents/sdk-java/blob/3f03b5b2271d89d38d75bd293143e712b6927e8c/core/src/test/java/io/cloudevents/core/test/Data.java",
+    "raw_url": "https://github.com/cloudevents/sdk-java/raw/3f03b5b2271d89d38d75bd293143e712b6927e8c/core/src/test/java/io/cloudevents/core/test/Data.java",
+    "contents_url": "https://api.github.com/repos/cloudevents/sdk-java/contents/core/src/test/java/io/cloudevents/core/test/Data.java?ref=3f03b5b2271d89d38d75bd293143e712b6927e8c",
+    "patch": "@@ -21,6 +21,7 @@\n import io.cloudevents.core.builder.CloudEventBuilder;\n import io.cloudevents.types.Time;\n \n+import java.math.BigDecimal;\n import java.net.URI;\n import java.time.OffsetDateTime;\n import java.util.Objects;\n@@ -116,6 +117,16 @@\n         .withExtension(\"binary\", BINARY_VALUE)\n         .build();\n \n+    public static final CloudEvent V1_WITH_NUMERIC_EXT = CloudEventBuilder.v1()\n+        .withId(ID)\n+        .withType(TYPE)\n+        .withSource(SOURCE)\n+        .withExtension(\"integer\", 42)\n+        .withExtension(\"decimal\", new BigDecimal(\"42.42\"))\n+        .withExtension(\"float\", 4.2f)\n+        .withExtension(\"long\", new Long(4200))\n+        .build();\n+\n     public static final CloudEvent V03_MIN = CloudEventBuilder.v03(V1_MIN).build();\n     public static final CloudEvent V03_WITH_JSON_DATA = CloudEventBuilder.v03(V1_WITH_JSON_DATA).build();\n     public static final CloudEvent V03_WITH_JSON_DATA_WITH_EXT = CloudEventBuilder.v03(V1_WITH_JSON_DATA_WITH_EXT).build();"
+  },
+  {
+    "sha": "50f0931d8f5810248e9dcaacbc7ecd189d5f70cd",
+    "filename": "formats/json-jackson/src/main/java/io/cloudevents/jackson/CloudEventSerializer.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 3,
+    "changes": 19,
+    "blob_url": "https://github.com/cloudevents/sdk-java/blob/3f03b5b2271d89d38d75bd293143e712b6927e8c/formats/json-jackson/src/main/java/io/cloudevents/jackson/CloudEventSerializer.java",
+    "raw_url": "https://github.com/cloudevents/sdk-java/raw/3f03b5b2271d89d38d75bd293143e712b6927e8c/formats/json-jackson/src/main/java/io/cloudevents/jackson/CloudEventSerializer.java",
+    "contents_url": "https://api.github.com/repos/cloudevents/sdk-java/contents/formats/json-jackson/src/main/java/io/cloudevents/jackson/CloudEventSerializer.java?ref=3f03b5b2271d89d38d75bd293143e712b6927e8c",
+    "patch": "@@ -65,10 +65,23 @@ public CloudEventContextWriter withContextAttribute(String name, String value) t\n         }\n \n         @Override\n-        public CloudEventContextWriter withContextAttribute(String name, Number value) throws CloudEventRWException {\n+        public CloudEventContextWriter withContextAttribute(String name, Number value) throws CloudEventRWException\n+        {\n+            // Only Integer types are supported by the specification\n+            if (value instanceof Integer) {\n+                this.withContextAttribute(name, (Integer) value);\n+            } else {\n+                // Default to string representation for other numeric values\n+                this.withContextAttribute(name, value.toString());\n+            }\n+            return this;\n+        }\n+\n+        @Override\n+        public CloudEventContextWriter withContextAttribute(String name, Integer value) throws CloudEventRWException\n+        {\n             try {\n-                gen.writeFieldName(name);\n-                provider.findValueSerializer(value.getClass()).serialize(value, gen, provider);\n+                gen.writeNumberField(name, value.intValue());\n                 return this;\n             } catch (IOException e) {\n                 throw new RuntimeException(e);"
+  },
+  {
+    "sha": "833370ae4853f0d718f47dbc02cf6737cbb506c2",
+    "filename": "formats/json-jackson/src/test/java/io/cloudevents/jackson/JsonFormatTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/cloudevents/sdk-java/blob/3f03b5b2271d89d38d75bd293143e712b6927e8c/formats/json-jackson/src/test/java/io/cloudevents/jackson/JsonFormatTest.java",
+    "raw_url": "https://github.com/cloudevents/sdk-java/raw/3f03b5b2271d89d38d75bd293143e712b6927e8c/formats/json-jackson/src/test/java/io/cloudevents/jackson/JsonFormatTest.java",
+    "contents_url": "https://api.github.com/repos/cloudevents/sdk-java/contents/formats/json-jackson/src/test/java/io/cloudevents/jackson/JsonFormatTest.java?ref=3f03b5b2271d89d38d75bd293143e712b6927e8c",
+    "patch": "@@ -133,7 +133,8 @@ void throwExpectedOnInvalidSpecversion() {\n             Arguments.of(V1_WITH_JSON_DATA_WITH_EXT, \"v1/json_data_with_ext.json\"),\n             Arguments.of(V1_WITH_XML_DATA, \"v1/base64_xml_data.json\"),\n             Arguments.of(V1_WITH_TEXT_DATA, \"v1/base64_text_data.json\"),\n-            Arguments.of(V1_WITH_BINARY_EXT, \"v1/binary_attr.json\")\n+            Arguments.of(V1_WITH_BINARY_EXT, \"v1/binary_attr.json\"),\n+            Arguments.of(V1_WITH_NUMERIC_EXT,\"v1/numeric_ext.json\")\n         );\n     }\n "
+  },
+  {
+    "sha": "9a3074ebc41714f626be78cfd32519ce0dbd4686",
+    "filename": "formats/json-jackson/src/test/resources/v1/numeric_ext.json",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/cloudevents/sdk-java/blob/3f03b5b2271d89d38d75bd293143e712b6927e8c/formats/json-jackson/src/test/resources/v1/numeric_ext.json",
+    "raw_url": "https://github.com/cloudevents/sdk-java/raw/3f03b5b2271d89d38d75bd293143e712b6927e8c/formats/json-jackson/src/test/resources/v1/numeric_ext.json",
+    "contents_url": "https://api.github.com/repos/cloudevents/sdk-java/contents/formats/json-jackson/src/test/resources/v1/numeric_ext.json?ref=3f03b5b2271d89d38d75bd293143e712b6927e8c",
+    "patch": "@@ -0,0 +1,10 @@\n+{\n+    \"specversion\": \"1.0\",\n+    \"id\": \"1\",\n+    \"type\": \"mock.test\",\n+    \"source\": \"http://localhost/source\",\n+    \"integer\": 42,\n+    \"decimal\": \"42.42\",\n+    \"float\": \"4.2\",\n+    \"long\": \"4200\"\n+}"
+  }
+]

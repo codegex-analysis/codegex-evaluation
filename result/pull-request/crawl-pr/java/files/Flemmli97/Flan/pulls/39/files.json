@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "e258f7d9d0f37d272aec5ec9533082ba51899a8c",
+    "filename": "src/main/java/com/flemmli97/flan/player/ClaimDisplay.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/Flemmli97/Flan/blob/0b0dc5b2626eb02768f0c17bc5347dbf9d301e9c/src/main/java/com/flemmli97/flan/player/ClaimDisplay.java",
+    "raw_url": "https://github.com/Flemmli97/Flan/raw/0b0dc5b2626eb02768f0c17bc5347dbf9d301e9c/src/main/java/com/flemmli97/flan/player/ClaimDisplay.java",
+    "contents_url": "https://api.github.com/repos/Flemmli97/Flan/contents/src/main/java/com/flemmli97/flan/player/ClaimDisplay.java?ref=0b0dc5b2626eb02768f0c17bc5347dbf9d301e9c",
+    "patch": "@@ -69,12 +69,16 @@ public boolean display(ServerPlayerEntity player, boolean remove) {\n             };\n         }\n         for (int[] pos : this.poss) {\n+        \tif (pos[2] == -1)\n+        \t\tcontinue;\n             if (pos[1] != pos[2])\n                 player.networkHandler.sendPacket(new ParticleS2CPacket(this.corner, true, pos[0] + 0.5, pos[2] + 0.25, pos[3] + 0.5, 0, 0.5f, 0, 0, 1));\n             player.networkHandler.sendPacket(new ParticleS2CPacket(this.corner, true, pos[0] + 0.5, pos[1] + 0.25, pos[3] + 0.5, 0, 0.5f, 0, 0, 1));\n         }\n         if (this.middlePoss != null)\n             for (int[] pos : this.middlePoss) {\n+            \tif (pos[2] == -1)\n+            \t\tcontinue;\n                 if (pos[1] != pos[2])\n                     player.networkHandler.sendPacket(new ParticleS2CPacket(this.middle, true, pos[0] + 0.5, pos[2] + 0.25, pos[3] + 0.5, 0, 0.5f, 0, 0, 1));\n                 player.networkHandler.sendPacket(new ParticleS2CPacket(this.middle, true, pos[0] + 0.5, pos[1] + 0.25, pos[3] + 0.5, 0, 0.5f, 0, 0, 1));\n@@ -144,6 +148,11 @@ private static void addEvenly(int min, int max, int step, Set<Integer> l) {\n             while (state.getMaterial().isReplaceable()) {\n                 pos = pos.down();\n                 state = world.getBlockState(pos);\n+                // check if void is reached\n+                if(pos.getY() == -1 && !world.getBlockState(pos.up()).getMaterial().isLiquid())\n+                \treturn new int[]{-1, -1};\n+                else if(pos.getY() == -1)\n+                \tbreak;\n             }\n             pos = pos.up();\n             state = world.getBlockState(pos);"
+  }
+]

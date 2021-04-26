@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "350ef7b31407e2d7a95da6734a6fb7e11075de89",
+    "filename": "src/main/java/ru/arturios/Cart.java",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/ArturioBoss/SpringJava/blob/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/Cart.java",
+    "raw_url": "https://github.com/ArturioBoss/SpringJava/raw/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/Cart.java",
+    "contents_url": "https://api.github.com/repos/ArturioBoss/SpringJava/contents/src/main/java/ru/arturios/Cart.java?ref=c0790cd1a9b66bad5813d05f1df6981ac1ae2725",
+    "patch": "@@ -0,0 +1,30 @@\n+package ru.arturios;\n+\n+import org.springframework.stereotype.Controller;\n+import ru.arturios.products.Product;\n+import ru.arturios.products.ProductRepository;\n+\n+@Controller\n+public class Cart {\n+\n+    private final ProductRepository productRepository;\n+\n+    private Product product;\n+\n+    public Cart(ProductRepository productRepository) {\n+        this.productRepository = productRepository;\n+    }\n+\n+    public void saveProduct(String name, int price) {\n+        int qvant = productRepository.getAll().size()+1;\n+        product = new Product(String.valueOf(qvant),name,price);\n+        productRepository.merge(product);\n+        System.out.println(\"Товар \"+name+\" был добавлен\");\n+    }\n+\n+    public void delete(String product) {\n+        String s = productRepository.getById(product).getName();\n+        productRepository.getAll().remove(productRepository.getById(product));\n+        System.out.println(\"Товар \"+s+\" был удалён\");\n+    }\n+}"
+  },
+  {
+    "sha": "17117e3f961a629403bfdf2809e9ee3954e774e7",
+    "filename": "src/main/java/ru/arturios/Commands.java",
+    "status": "added",
+    "additions": 67,
+    "deletions": 0,
+    "changes": 67,
+    "blob_url": "https://github.com/ArturioBoss/SpringJava/blob/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/Commands.java",
+    "raw_url": "https://github.com/ArturioBoss/SpringJava/raw/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/Commands.java",
+    "contents_url": "https://api.github.com/repos/ArturioBoss/SpringJava/contents/src/main/java/ru/arturios/Commands.java?ref=c0790cd1a9b66bad5813d05f1df6981ac1ae2725",
+    "patch": "@@ -0,0 +1,67 @@\n+package ru.arturios;\n+\n+import org.springframework.stereotype.Component;\n+import ru.arturios.products.ProductRepository;\n+\n+@Component\n+public class Commands {\n+\n+    private final ProductRepository productRepository;\n+    private final Cart cart;\n+\n+    public Commands(ProductRepository productRepository, Cart cart) {\n+        this.productRepository = productRepository;\n+        this.cart = cart;\n+    }\n+\n+    public void doAuth(String s) {\n+        if (s.startsWith(\"INFO\")) {\n+            System.out.println(\"****************************\");\n+            System.out.println(\"**      Набор команд      **\");\n+            System.out.println(\"**  add - добавить товар  **\");\n+            System.out.println(\"** del - удалить товар    **\");\n+            System.out.println(\"** all - товары в корзине **\");\n+            System.out.println(\"****************************\");\n+\n+        } else if (s.startsWith(\"all\")){\n+            System.out.println(\"Всего товаров:\");\n+            for (int i = 1; i <= productRepository.getAll().size(); i++) {\n+                System.out.printf(\"id: %s Имя: %s Цена: %s\\n\",productRepository.getById(String.valueOf(i)).getId(),\n+                        productRepository.getById(String.valueOf(i)).getName(),\n+                        productRepository.getById(String.valueOf(i)).getPrice());\n+            }\n+\n+        } else if (s.startsWith(\"add\")){\n+            String[] credentialValues = s.split(\"\\\\s\");\n+            if (credentialValues.length < 3){\n+                System.out.println(\"Введите имя и цену товара\");\n+                System.out.println(\"ПРИМЕР: Процессор 300\");\n+            } else if(!isDigit(credentialValues[2])){\n+                System.out.println(\"Цена товара не может быть не числом\");\n+            } else {\n+                cart.saveProduct(credentialValues[1], Integer.parseInt(credentialValues[2]));\n+            }\n+\n+        } else if (s.startsWith(\"del\")){\n+            String[] credentialValues = s.split(\"\\\\s\");\n+            if (credentialValues.length < 2){\n+                System.out.println(\"Для удаления, введите id товара\");\n+            } else if(!isDigit(credentialValues[1])){\n+                System.out.println(\"id не может быть не числом\");\n+            } else {\n+                cart.delete(credentialValues[1]);\n+            }\n+\n+        }\n+\n+    }\n+\n+    private static boolean isDigit(String s) throws NumberFormatException {\n+        try {\n+            Integer.parseInt(s);\n+            return true;\n+        } catch (NumberFormatException e) {\n+            return false;\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "1625aa386865aed3674472d4c2b40d831fc36935",
+    "filename": "src/main/java/ru/arturios/products/Product.java",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/ArturioBoss/SpringJava/blob/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/products/Product.java",
+    "raw_url": "https://github.com/ArturioBoss/SpringJava/raw/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/products/Product.java",
+    "contents_url": "https://api.github.com/repos/ArturioBoss/SpringJava/contents/src/main/java/ru/arturios/products/Product.java?ref=c0790cd1a9b66bad5813d05f1df6981ac1ae2725",
+    "patch": "@@ -0,0 +1,39 @@\n+package ru.arturios.products;\n+\n+public class Product {\n+\n+    private String id, name;\n+\n+    private int price;\n+\n+\n+    public Product(String id, String name, int price) {\n+        this.id = id;\n+        this.name = name;\n+        this.price = price;\n+    }\n+\n+    public String getId() {\n+        return id;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public int getPrice() {\n+        return price;\n+    }\n+\n+    public void setId(String id) {\n+        this.id = id;\n+    }\n+\n+    public void setName(String name) {\n+        this.name = name;\n+    }\n+\n+    public void setPrice(int price) {\n+        this.price = price;\n+    }\n+}"
+  },
+  {
+    "sha": "ff4fed277ff52c24274c755d16980b029a1253be",
+    "filename": "src/main/java/ru/arturios/products/ProductRepository.java",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/ArturioBoss/SpringJava/blob/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/products/ProductRepository.java",
+    "raw_url": "https://github.com/ArturioBoss/SpringJava/raw/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/products/ProductRepository.java",
+    "contents_url": "https://api.github.com/repos/ArturioBoss/SpringJava/contents/src/main/java/ru/arturios/products/ProductRepository.java?ref=c0790cd1a9b66bad5813d05f1df6981ac1ae2725",
+    "patch": "@@ -0,0 +1,40 @@\n+package ru.arturios.products;\n+\n+import org.springframework.stereotype.Controller;\n+\n+import java.util.Collection;\n+import java.util.Collections;\n+import java.util.LinkedHashMap;\n+import java.util.Map;\n+import java.util.concurrent.atomic.AtomicInteger;\n+\n+@Controller\n+public class ProductRepository {\n+\n+    private AtomicInteger sequence = new AtomicInteger();\n+\n+    private Map<String, Product> productMap = Collections.synchronizedMap(new LinkedHashMap<>());\n+\n+    public ProductRepository() {\n+        this.merge(new Product(\"1\", \"Книги\",  50));\n+        this.merge(new Product(\"2\", \"Мышь\", 150));\n+        this.merge(new Product(\"3\", \"Клавиатура\", 200));\n+        this.merge(new Product(\"4\", \"Компьютер\", 500));\n+        sequence.set(productMap.size());\n+    }\n+\n+    public void merge(Product product) {\n+        if (!productMap.containsKey(product.getId())) {\n+            product.setId(String.valueOf(sequence.incrementAndGet()));\n+        }\n+        productMap.put(product.getId(), product);\n+    }\n+\n+    public Collection<Product> getAll() {\n+        return productMap.values();\n+    }\n+\n+    public Product getById(String id) {\n+        return productMap.get(id);\n+    }\n+}"
+  },
+  {
+    "sha": "da392af07a08fa1f44be74f771c69a548a4ba5a0",
+    "filename": "src/main/java/ru/arturios/run/Runner.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/ArturioBoss/SpringJava/blob/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/run/Runner.java",
+    "raw_url": "https://github.com/ArturioBoss/SpringJava/raw/c0790cd1a9b66bad5813d05f1df6981ac1ae2725/src/main/java/ru/arturios/run/Runner.java",
+    "contents_url": "https://api.github.com/repos/ArturioBoss/SpringJava/contents/src/main/java/ru/arturios/run/Runner.java?ref=c0790cd1a9b66bad5813d05f1df6981ac1ae2725",
+    "patch": "@@ -0,0 +1,34 @@\n+package ru.arturios.run;\n+\n+import org.springframework.boot.CommandLineRunner;\n+import org.springframework.stereotype.Component;\n+import ru.arturios.Commands;\n+\n+import java.util.Scanner;\n+\n+@Component\n+public class Runner implements CommandLineRunner {\n+\n+    private final Commands commands;\n+\n+    public Runner(Commands commands) {\n+        this.commands = commands;\n+    }\n+\n+    @Override\n+    public void run(String... args) throws Exception {\n+        Scanner scanner = new Scanner(System.in);\n+        System.out.println(\"***********************\");\n+        System.out.println(\"** ПРИВЕТ введи INFO **\");\n+        System.out.println(\"***********************\");\n+        while (true) {\n+            commands.doAuth(scanner.nextLine());\n+\n+\n+        }\n+\n+\n+//        String credentials = in.readUTF();\n+\n+    }\n+}"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "5f548ee78aaee6d7a7a3bb8ea77a4c23f4556014",
+    "filename": "src/main/java/ch/heig_vd/app/Main.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 2,
+    "changes": 23,
+    "blob_url": "https://github.com/gen-classroom/projet-besseau_cerottini_maziero_ogi/blob/fcf02792a4a6d847a896011c9e9034f74c5082bc/src/main/java/ch/heig_vd/app/Main.java",
+    "raw_url": "https://github.com/gen-classroom/projet-besseau_cerottini_maziero_ogi/raw/fcf02792a4a6d847a896011c9e9034f74c5082bc/src/main/java/ch/heig_vd/app/Main.java",
+    "contents_url": "https://api.github.com/repos/gen-classroom/projet-besseau_cerottini_maziero_ogi/contents/src/main/java/ch/heig_vd/app/Main.java?ref=fcf02792a4a6d847a896011c9e9034f74c5082bc",
+    "patch": "@@ -4,16 +4,35 @@\n import picocli.CommandLine.Command;\n import picocli.CommandLine.Parameters;\n \n-\n-@Command(name = \"statique\", subcommands = {Build.class, New.class, Serve.class, Clean.class},\n+// Main command info\n+@Command(name = \"statique\",\n+        description = \"Static websites generator\",\n+        version = {\"@|yellow Statique v1.0|@\"},\n+        subcommands = {Build.class, New.class, Serve.class, Clean.class},\n         synopsisSubcommandLabel = \"COMMAND\")\n public class Main {\n     @CommandLine.Spec\n     CommandLine.Model.CommandSpec spec;\n     @Parameters(index = \"0\", description = \"The command to execute\")\n     private String param;\n \n+    // Option -v to display the program version\n+    @CommandLine.Option(names = {\"-v\", \"--version\"},\n+                        versionHelp = true,\n+                        description = \"Displays the current version\")\n+    boolean showVersion;\n+\n     public static void main(String... args) {\n+\n+        // Parses and executes the options\n+        CommandLine commandLine = new CommandLine(new Main());\n+        commandLine.parseArgs(args);\n+        if (commandLine.isVersionHelpRequested()) { // Show version\n+            commandLine.printVersionHelp(System.out);\n+            return;\n+        }\n+\n+        // Executes the subcommands\n         System.exit(new CommandLine(new Main()).execute(args));\n     }\n "
+  },
+  {
+    "sha": "0412b131de10a2144770e907552e8172619f7fa8",
+    "filename": "src/test/java/ch/heig_vd/app/MainTest.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 5,
+    "changes": 12,
+    "blob_url": "https://github.com/gen-classroom/projet-besseau_cerottini_maziero_ogi/blob/fcf02792a4a6d847a896011c9e9034f74c5082bc/src/test/java/ch/heig_vd/app/MainTest.java",
+    "raw_url": "https://github.com/gen-classroom/projet-besseau_cerottini_maziero_ogi/raw/fcf02792a4a6d847a896011c9e9034f74c5082bc/src/test/java/ch/heig_vd/app/MainTest.java",
+    "contents_url": "https://api.github.com/repos/gen-classroom/projet-besseau_cerottini_maziero_ogi/contents/src/test/java/ch/heig_vd/app/MainTest.java?ref=fcf02792a4a6d847a896011c9e9034f74c5082bc",
+    "patch": "@@ -1,7 +1,7 @@\n package ch.heig_vd.app;\n \n-import static org.junit.Assert.assertTrue;\n-\n+import static org.junit.Assert.assertEquals;\n+import picocli.CommandLine;\n import org.junit.Test;\n \n /**\n@@ -10,11 +10,13 @@\n public class MainTest\n {\n     /**\n-     * Rigorous Test :-)\n+     * Tests the -v and --version options\n      */\n     @Test\n-    public void shouldAnswerWithTrue()\n+    public void shouldDisplayTheCurrentVersion()\n     {\n-        assertTrue( true );\n+        int result = new CommandLine(new Main()).execute(\"statique\", \"-v\");\n+        int result2 = new CommandLine(new Main()).execute(\"statique\", \"--version\");\n+        assertEquals(0, result + result2);\n     }\n }\n\\ No newline at end of file"
+  }
+]

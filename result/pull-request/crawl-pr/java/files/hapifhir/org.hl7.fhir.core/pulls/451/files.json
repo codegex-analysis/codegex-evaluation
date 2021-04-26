@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "3bc4ded0323befa3defb8ec7cef1485e605716ea",
+    "filename": "org.hl7.fhir.convertors/src/main/java/org/hl7/fhir/convertors/VersionConvertor_40_50.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 2,
+    "changes": 21,
+    "blob_url": "https://github.com/hapifhir/org.hl7.fhir.core/blob/455cc5cf7f905f834b7a51776eb9b4ec54bec5a8/org.hl7.fhir.convertors/src/main/java/org/hl7/fhir/convertors/VersionConvertor_40_50.java",
+    "raw_url": "https://github.com/hapifhir/org.hl7.fhir.core/raw/455cc5cf7f905f834b7a51776eb9b4ec54bec5a8/org.hl7.fhir.convertors/src/main/java/org/hl7/fhir/convertors/VersionConvertor_40_50.java",
+    "contents_url": "https://api.github.com/repos/hapifhir/org.hl7.fhir.core/contents/org.hl7.fhir.convertors/src/main/java/org/hl7/fhir/convertors/VersionConvertor_40_50.java?ref=455cc5cf7f905f834b7a51776eb9b4ec54bec5a8",
+    "patch": "@@ -967,7 +967,7 @@ protected static void copyBackboneElement(org.hl7.fhir.r4.model.BackboneType src\n     if (src == null) return null;\n     org.hl7.fhir.r5.model.DataRequirement tgt = new org.hl7.fhir.r5.model.DataRequirement();\n     copyElement(src, tgt);\n-    if (src.hasType()) tgt.setType(org.hl7.fhir.r5.model.Enumerations.FHIRAllTypes.fromCode(src.getType()));\n+    if (src.hasType()) tgt.setType(org.hl7.fhir.r5.model.Enumerations.FHIRAllTypes.fromCode(convertResourceName4to5(src.getType())));\n     for (org.hl7.fhir.r4.model.CanonicalType t : src.getProfile()) tgt.getProfile().add(convertCanonical(t));\n     if (src.hasSubject()) tgt.setSubject(convertType(src.getSubject()));\n     for (org.hl7.fhir.r4.model.StringType t : src.getMustSupport()) tgt.getMustSupport().add(convertString(t));\n@@ -981,11 +981,12 @@ protected static void copyBackboneElement(org.hl7.fhir.r4.model.BackboneType src\n     return tgt;\n   }\n \n+\n   public static org.hl7.fhir.r4.model.DataRequirement convertDataRequirement(org.hl7.fhir.r5.model.DataRequirement src) throws FHIRException {\n     if (src == null) return null;\n     org.hl7.fhir.r4.model.DataRequirement tgt = new org.hl7.fhir.r4.model.DataRequirement();\n     copyElement(src, tgt);\n-    if (src.hasType()) tgt.setType(src.getType().toCode());\n+    if (src.hasType()) tgt.setType(convertResourceName5to4(src.getType().toCode()));\n     for (org.hl7.fhir.r5.model.CanonicalType t : src.getProfile()) tgt.getProfile().add(convertCanonical(t));\n     if (src.hasSubject()) tgt.setSubject(convertType(src.getSubject()));\n     for (org.hl7.fhir.r5.model.StringType t : src.getMustSupport()) tgt.getMustSupport().add(convertString(t));\n@@ -999,6 +1000,22 @@ protected static void copyBackboneElement(org.hl7.fhir.r4.model.BackboneType src\n     return tgt;\n   }\n \n+  private static String convertResourceName4to5(String name) {\n+    if (name == null) return null;\n+    if (name.equals(\"MedicationStatement\")) {\n+      return \"MedicationUsage\";\n+    }\n+    return name;\n+  }\n+\n+  private static String convertResourceName5to4(String name) {\n+    if (name == null) return null;\n+    if (name.equals(\"MedicationUsage\")) {\n+      return \"MedicationStatement\";\n+    }\n+    return name;\n+  }\n+\n   public static org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent convertDataRequirementCodeFilterComponent(org.hl7.fhir.r4.model.DataRequirement.DataRequirementCodeFilterComponent src) throws FHIRException {\n     if (src == null) return null;\n     org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent tgt = new org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent();"
+  },
+  {
+    "sha": "334507465746f081d6a7af88dac3ce63e2809bb0",
+    "filename": "org.hl7.fhir.r5/src/main/java/org/hl7/fhir/r5/model/Enumerations.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/hapifhir/org.hl7.fhir.core/blob/455cc5cf7f905f834b7a51776eb9b4ec54bec5a8/org.hl7.fhir.r5/src/main/java/org/hl7/fhir/r5/model/Enumerations.java",
+    "raw_url": "https://github.com/hapifhir/org.hl7.fhir.core/raw/455cc5cf7f905f834b7a51776eb9b4ec54bec5a8/org.hl7.fhir.r5/src/main/java/org/hl7/fhir/r5/model/Enumerations.java",
+    "contents_url": "https://api.github.com/repos/hapifhir/org.hl7.fhir.core/contents/org.hl7.fhir.r5/src/main/java/org/hl7/fhir/r5/model/Enumerations.java?ref=455cc5cf7f905f834b7a51776eb9b4ec54bec5a8",
+    "patch": "@@ -6824,6 +6824,10 @@ public static boolean isValidCode(String codeString) {\n         public String toString() {\r\n           return toCode();\r\n         }\r\n+        \r\n+        public boolean isR4B() {\r\n+          return toCode().startsWith(\"4.0\");\r\n+        }\r\n // end addition\r\n     }\r\n \r"
+  },
+  {
+    "sha": "a8cbc6ec9d8aa23efda14588dfdae8617576e9e2",
+    "filename": "org.hl7.fhir.utilities/src/main/java/org/hl7/fhir/utilities/xml/XmlGenerator.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/hapifhir/org.hl7.fhir.core/blob/455cc5cf7f905f834b7a51776eb9b4ec54bec5a8/org.hl7.fhir.utilities/src/main/java/org/hl7/fhir/utilities/xml/XmlGenerator.java",
+    "raw_url": "https://github.com/hapifhir/org.hl7.fhir.core/raw/455cc5cf7f905f834b7a51776eb9b4ec54bec5a8/org.hl7.fhir.utilities/src/main/java/org/hl7/fhir/utilities/xml/XmlGenerator.java",
+    "contents_url": "https://api.github.com/repos/hapifhir/org.hl7.fhir.core/contents/org.hl7.fhir.utilities/src/main/java/org/hl7/fhir/utilities/xml/XmlGenerator.java?ref=455cc5cf7f905f834b7a51776eb9b4ec54bec5a8",
+    "patch": "@@ -111,7 +111,7 @@ private void processComment(Comment node) throws DOMException, IOException  {\n \t}\n \n \tprivate void processElement(Element element) throws IOException, FHIRException  {\n-\t\tif (!xml.getDefaultNamespace().equals(element.getNamespaceURI()))\n+\t\tif (xml.getDefaultNamespace() == null || !xml.getDefaultNamespace().equals(element.getNamespaceURI()))\n \t\t\txml.setDefaultNamespace(element.getNamespaceURI());\n \n \t\tprocessAttributes(element);"
+  }
+]

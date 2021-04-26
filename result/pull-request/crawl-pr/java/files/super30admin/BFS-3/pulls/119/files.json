@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "40ab8365327b29804cd9f8f93aaee1bd1d4d1bdd",
+    "filename": "cloneGraph",
+    "status": "added",
+    "additions": 59,
+    "deletions": 0,
+    "changes": 59,
+    "blob_url": "https://github.com/super30admin/BFS-3/blob/3740a96ddea387cd826d3ca29c26dd9da0f1eeba/cloneGraph",
+    "raw_url": "https://github.com/super30admin/BFS-3/raw/3740a96ddea387cd826d3ca29c26dd9da0f1eeba/cloneGraph",
+    "contents_url": "https://api.github.com/repos/super30admin/BFS-3/contents/cloneGraph?ref=3740a96ddea387cd826d3ca29c26dd9da0f1eeba",
+    "patch": "@@ -0,0 +1,59 @@\n+/*\n+// Definition for a Node.\n+class Node {\n+    public int val;\n+    public List<Node> neighbors;\n+    public Node() {\n+        val = 0;\n+        neighbors = new ArrayList<Node>();\n+    }\n+    public Node(int _val) {\n+        val = _val;\n+        neighbors = new ArrayList<Node>();\n+    }\n+    public Node(int _val, ArrayList<Node> _neighbors) {\n+        val = _val;\n+        neighbors = _neighbors;\n+    }\n+}\n+*/\n+\n+class Solution {\n+    \n+    //133. Clone Graph\n+    //Time complexity : O(V+E) where V is the no of vertices and E is no of edges\n+    //Space complexity : O(V+E)\n+    \n+    public Node cloneGraph(Node node) {\n+        \n+        if(node == null)\n+            return null;\n+        \n+        Queue<Node> q = new LinkedList<>();\n+        Map<Node,Node> map = new HashMap<>();\n+        Node copyNode = new Node(node.val);   //1'\n+        \n+        map.put(node,copyNode);      //1-->1'\n+        q.add(node);\n+        \n+            \n+        while(!q.isEmpty()){\n+            \n+            Node curr = q.poll();  //1\n+            for(Node n : curr.neighbors){\n+                if(!map.containsKey(n)){\n+                    Node copy = new Node(n.val);\n+                    map.put(n,copy);    //2--> 2'\n+                    q.add(n);\n+                }\n+                \n+                map.get(curr).neighbors.add(map.get(n));\n+                \n+            }\n+           \n+        }\n+        return copyNode;\n+        \n+        \n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "98f7718496c2b0f5adb9d9a77bdeb08f5a1a4a8b",
+    "filename": "removeInvaidParentheses",
+    "status": "added",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/super30admin/BFS-3/blob/3740a96ddea387cd826d3ca29c26dd9da0f1eeba/removeInvaidParentheses",
+    "raw_url": "https://github.com/super30admin/BFS-3/raw/3740a96ddea387cd826d3ca29c26dd9da0f1eeba/removeInvaidParentheses",
+    "contents_url": "https://api.github.com/repos/super30admin/BFS-3/contents/removeInvaidParentheses?ref=3740a96ddea387cd826d3ca29c26dd9da0f1eeba",
+    "patch": "@@ -0,0 +1,58 @@\n+class Solution {\n+    \n+    //Using BFS\n+    //301. Remove Invalid Parentheses\n+    //Time complexity : exponential --O(2^n *n^2)\n+    \n+    public List<String> removeInvalidParentheses(String s) {\n+        \n+        List<String> result = new ArrayList<>();\n+        if(s==null)\n+            return result;\n+        \n+        Queue<String> q = new LinkedList<>();\n+        Set<String> set = new HashSet<>();\n+        q.add(s);\n+        boolean flag = false;\n+        while(!q.isEmpty()){\n+            int size = q.size();\n+            for(int k=0;k<size;k++){\n+                String curr = q.poll();\n+                if(isValid(curr)){\n+                    flag = true;\n+                    result.add(curr);\n+                }\n+                //if found any valid string at that level, don't add it's children\n+                if(!flag){\n+                    for(int i=0;i<curr.length();i++){\n+                        if(Character.isLetter(curr.charAt(i)))\n+                           \n+                           continue;\n+                        String child = curr.substring(0,i) + curr.substring(i+1);\n+                        if(!set.contains(child)){\n+                             set.add(child);\n+                             q.add(child);\n+                        }\n+                       \n+                    }\n+                }\n+            }\n+        }\n+        return result;\n+        \n+    }\n+    private boolean isValid(String str){\n+            int count =0;\n+            for(int i=0;i <str.length();i++){\n+                if(str.charAt(i) =='(')\n+                    count++;\n+                else if(str.charAt(i) ==')'){\n+                    if(count ==0)           //if first character is a closing\n+                        return false;\n+                    count--;\n+                }\n+            }\n+            return count==0;\n+        }\n+        \n+    }"
+  }
+]

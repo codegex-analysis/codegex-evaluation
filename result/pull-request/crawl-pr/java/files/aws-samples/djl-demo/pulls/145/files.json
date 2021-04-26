@@ -1,0 +1,109 @@
+[
+  {
+    "sha": "92b5a041862a2730cd0121307010398c873bc7fd",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/aws-samples/djl-demo/blob/31a3fdc5a39413f61ab32a91d410fd6b532cccec/.gitignore",
+    "raw_url": "https://github.com/aws-samples/djl-demo/raw/31a3fdc5a39413f61ab32a91d410fd6b532cccec/.gitignore",
+    "contents_url": "https://api.github.com/repos/aws-samples/djl-demo/contents/.gitignore?ref=31a3fdc5a39413f61ab32a91d410fd6b532cccec",
+    "patch": "@@ -38,6 +38,7 @@ release.properties\n # Gradle\n .gradle\n build/\n+out/\n \n *.jar\n *.log"
+  },
+  {
+    "sha": "4c64560324aa1a090e9546b17d190de952d4a5d3",
+    "filename": "apache-kafka/README.md",
+    "status": "added",
+    "additions": 50,
+    "deletions": 0,
+    "changes": 50,
+    "blob_url": "https://github.com/aws-samples/djl-demo/blob/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/README.md",
+    "raw_url": "https://github.com/aws-samples/djl-demo/raw/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/README.md",
+    "contents_url": "https://api.github.com/repos/aws-samples/djl-demo/contents/apache-kafka/README.md?ref=31a3fdc5a39413f61ab32a91d410fd6b532cccec",
+    "patch": "@@ -0,0 +1,50 @@\n+# DJL Kafka Sentiment Analysis on Twitter Data\n+\n+This an example to show case how to deploy a deep learning model in [Apache  Kafka](http://kafka.apache.org/).\n+\n+We will use DJL's built-in sentiment analysis model based on PyTorch to run analysis on twitter data.\n+There is a [sample data](data.txt) extracted from the [Kaggle Twitter Sentiment Analysis Dataset](https://www.kaggle.com/kazanova/sentiment140).\n+This demo will make predictions on whether the twit is positive or negative.\n+\n+\n+## Pre-requisite\n+\n+1. DJL requires JDK 8+, you can follow the [quick start guide](https://docs.djl.ai/docs/development/setup.html).\n+2. Kafka installed, download from [website](http://kafka.apache.org/) or use `brew install kafka` \n+\n+## Steps to run\n+\n+#### 1. start zookeeper:\n+\n+`zookeeper-server-start /usr/local/etc/kafka/zookeeper.properties`\n+#### 2. start kafka server:\n+\n+`kafka-server-start  /usr/local/etc/kafka/server.properties`\n+#### 3. create test topic\n+\n+`kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic twitter-data`\n+#### 4. pipe twitter data into producer\n+\n+`kafka-console-producer --broker-list localhost:9092 --topic twitter-data < data.txt`\n+#### 5. run prediction inside consumer\n+`./gradlew run`\n+\n+### sample output\n+\n+```bash\n+content: @Frumph I'd hug you, too!  Poor Frumph.....\n+prediction: [\n+        class: \"Positive\", probability: 0.99894\n+        class: \"Negative\", probability: 0.00105\n+]\n+content: Andre Riue on neighbours..what has the world come to...internets down  lol\n+prediction: [\n+        class: \"Negative\", probability: 0.97309\n+        class: \"Positive\", probability: 0.02690\n+]\n+content: Looks like rain today, bet it buckets down as soon as I step outside front door, always the way !!!!, downhill all the way from today\n+prediction: [\n+        class: \"Negative\", probability: 0.99624\n+        class: \"Positive\", probability: 0.00375\n+]\n+```\n\\ No newline at end of file"
+  },
+  {
+    "sha": "3201dbe2ce840d7782192be8ec37a36d0c6d27ed",
+    "filename": "apache-kafka/build.gradle",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/aws-samples/djl-demo/blob/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/build.gradle",
+    "raw_url": "https://github.com/aws-samples/djl-demo/raw/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/build.gradle",
+    "contents_url": "https://api.github.com/repos/aws-samples/djl-demo/contents/apache-kafka/build.gradle?ref=31a3fdc5a39413f61ab32a91d410fd6b532cccec",
+    "patch": "@@ -0,0 +1,31 @@\n+plugins {\n+    id \"java\"\n+    id \"application\"\n+}\n+group \"com.example\"\n+version \"1.0-SNAPSHOT\"\n+\n+repositories {\n+    jcenter()\n+}\n+\n+dependencies {\n+    implementation 'org.apache.kafka:kafka-clients:2.7.0'\n+    implementation platform(\"ai.djl:bom:0.10.0\")\n+    implementation \"ai.djl:api\"\n+    implementation \"org.slf4j:slf4j-simple:1.7.30\"\n+\n+    runtimeOnly \"ai.djl.pytorch:pytorch-model-zoo\"\n+    runtimeOnly \"ai.djl.pytorch:pytorch-native-auto\"\n+}\n+\n+application {\n+    mainClassName = System.getProperty(\"main\", \"com.example.SentimentAnalysis\")\n+}\n+\n+configure(this) {\n+    sourceCompatibility = JavaVersion.VERSION_1_8\n+    targetCompatibility = JavaVersion.VERSION_1_8\n+\n+    apply from: file(\"${rootProject.projectDir}/../tools/gradle/formatter.gradle\")\n+}"
+  },
+  {
+    "sha": "83f58ddc3bae6562e3d469a35fe758d27cfc6682",
+    "filename": "apache-kafka/data.txt",
+    "status": "added",
+    "additions": 10000,
+    "deletions": 0,
+    "changes": 10000,
+    "blob_url": "https://github.com/aws-samples/djl-demo/blob/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/data.txt",
+    "raw_url": "https://github.com/aws-samples/djl-demo/raw/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/data.txt",
+    "contents_url": "https://api.github.com/repos/aws-samples/djl-demo/contents/apache-kafka/data.txt?ref=31a3fdc5a39413f61ab32a91d410fd6b532cccec"
+  },
+  {
+    "sha": "3337596a2668a0b95b8c5499d0d832cfacf60929",
+    "filename": "apache-kafka/gradle",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/aws-samples/djl-demo/blob/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/gradle",
+    "raw_url": "https://github.com/aws-samples/djl-demo/raw/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/gradle",
+    "contents_url": "https://api.github.com/repos/aws-samples/djl-demo/contents/apache-kafka/gradle?ref=31a3fdc5a39413f61ab32a91d410fd6b532cccec",
+    "patch": "@@ -0,0 +1 @@\n+../gradle\n\\ No newline at end of file"
+  },
+  {
+    "sha": "502f5a2d3ec62262f17012eea81e52ad76758930",
+    "filename": "apache-kafka/gradlew",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/aws-samples/djl-demo/blob/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/gradlew",
+    "raw_url": "https://github.com/aws-samples/djl-demo/raw/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/gradlew",
+    "contents_url": "https://api.github.com/repos/aws-samples/djl-demo/contents/apache-kafka/gradlew?ref=31a3fdc5a39413f61ab32a91d410fd6b532cccec",
+    "patch": "@@ -0,0 +1 @@\n+../gradlew\n\\ No newline at end of file"
+  },
+  {
+    "sha": "fab911d7a21f474c8fb70fd0f1f895ae95d6dc58",
+    "filename": "apache-kafka/src/main/java/com/example/ConsumerLoop.java",
+    "status": "added",
+    "additions": 78,
+    "deletions": 0,
+    "changes": 78,
+    "blob_url": "https://github.com/aws-samples/djl-demo/blob/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/src/main/java/com/example/ConsumerLoop.java",
+    "raw_url": "https://github.com/aws-samples/djl-demo/raw/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/src/main/java/com/example/ConsumerLoop.java",
+    "contents_url": "https://api.github.com/repos/aws-samples/djl-demo/contents/apache-kafka/src/main/java/com/example/ConsumerLoop.java?ref=31a3fdc5a39413f61ab32a91d410fd6b532cccec",
+    "patch": "@@ -0,0 +1,78 @@\n+/*\n+ * Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.\n+ *\n+ * Licensed under the Apache License, Version 2.0 (the \"License\"). You may not use this file except in compliance\n+ * with the License. A copy of the License is located at\n+ *\n+ * http://aws.amazon.com/apache2.0/\n+ *\n+ * or in the \"license\" file accompanying this file. This file is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES\n+ * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions\n+ * and limitations under the License.\n+ */\n+package com.example;\n+\n+import ai.djl.inference.Predictor;\n+import ai.djl.modality.Classifications;\n+import ai.djl.translate.TranslateException;\n+import java.time.Duration;\n+import java.util.HashMap;\n+import java.util.List;\n+import java.util.Map;\n+import java.util.Properties;\n+import org.apache.kafka.clients.consumer.ConsumerRecord;\n+import org.apache.kafka.clients.consumer.ConsumerRecords;\n+import org.apache.kafka.clients.consumer.KafkaConsumer;\n+import org.apache.kafka.common.errors.WakeupException;\n+import org.apache.kafka.common.serialization.StringDeserializer;\n+import org.apache.kafka.common.serialization.VoidDeserializer;\n+\n+public class ConsumerLoop implements Runnable {\n+    private final KafkaConsumer<Void, String> consumer;\n+    private final List<String> topics;\n+    private final int id;\n+    Predictor<String, Classifications> predictor;\n+\n+    public ConsumerLoop(int id, List<String> topics, Predictor<String, Classifications> predictor) {\n+        this.id = id;\n+        this.topics = topics;\n+        Properties props = new Properties();\n+        props.put(\"bootstrap.servers\", \"localhost:9092\");\n+        props.put(\"group.id\", \"test-consumer-group\");\n+        props.put(\"key.deserializer\", VoidDeserializer.class.getName());\n+        props.put(\"value.deserializer\", StringDeserializer.class.getName());\n+        this.consumer = new KafkaConsumer<>(props);\n+        this.predictor = predictor;\n+    }\n+\n+    @Override\n+    public void run() {\n+        try {\n+            consumer.subscribe(topics);\n+\n+            while (true) {\n+                ConsumerRecords<Void, String> records =\n+                        consumer.poll(Duration.ofMillis(Long.MAX_VALUE));\n+                for (ConsumerRecord<Void, String> record : records) {\n+                    Map<String, Object> data = new HashMap<>();\n+                    data.put(\"partition\", record.partition());\n+                    data.put(\"offset\", record.offset());\n+                    data.put(\"value\", record.value());\n+                    // make prediction on text data\n+                    Classifications result = predictor.predict(record.value());\n+                    data.put(\"prediction\", result.toString());\n+                    System.out.println(\"content: \" + data.get(\"value\"));\n+                    System.out.println(\"prediction: \" + data.get(\"prediction\"));\n+                }\n+            }\n+        } catch (WakeupException | TranslateException e) {\n+            // ignore for shutdown\n+        } finally {\n+            consumer.close();\n+        }\n+    }\n+\n+    public void shutdown() {\n+        consumer.wakeup();\n+    }\n+}"
+  },
+  {
+    "sha": "4b1b3c2a863e65b0c9ec34cdf32c36994e8462e5",
+    "filename": "apache-kafka/src/main/java/com/example/SentimentAnalysis.java",
+    "status": "added",
+    "additions": 78,
+    "deletions": 0,
+    "changes": 78,
+    "blob_url": "https://github.com/aws-samples/djl-demo/blob/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/src/main/java/com/example/SentimentAnalysis.java",
+    "raw_url": "https://github.com/aws-samples/djl-demo/raw/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/src/main/java/com/example/SentimentAnalysis.java",
+    "contents_url": "https://api.github.com/repos/aws-samples/djl-demo/contents/apache-kafka/src/main/java/com/example/SentimentAnalysis.java?ref=31a3fdc5a39413f61ab32a91d410fd6b532cccec",
+    "patch": "@@ -0,0 +1,78 @@\n+/*\n+ * Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.\n+ *\n+ * Licensed under the Apache License, Version 2.0 (the \"License\"). You may not use this file except in compliance\n+ * with the License. A copy of the License is located at\n+ *\n+ * http://aws.amazon.com/apache2.0/\n+ *\n+ * or in the \"license\" file accompanying this file. This file is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES\n+ * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions\n+ * and limitations under the License.\n+ */\n+package com.example;\n+\n+import ai.djl.Application;\n+import ai.djl.MalformedModelException;\n+import ai.djl.inference.Predictor;\n+import ai.djl.modality.Classifications;\n+import ai.djl.repository.zoo.Criteria;\n+import ai.djl.repository.zoo.ModelNotFoundException;\n+import ai.djl.repository.zoo.ModelZoo;\n+import ai.djl.repository.zoo.ZooModel;\n+import java.io.IOException;\n+import java.util.ArrayList;\n+import java.util.Arrays;\n+import java.util.List;\n+import java.util.concurrent.ExecutorService;\n+import java.util.concurrent.Executors;\n+import java.util.concurrent.TimeUnit;\n+\n+public class SentimentAnalysis {\n+\n+    private static final String TOPIC = \"twitter-data\";\n+\n+    public static void main(String[] args)\n+            throws MalformedModelException, ModelNotFoundException, IOException {\n+        // Loading Model from DJL Model Zoo\n+        // Specify criteria to find target model\n+        Criteria<String, Classifications> criteria =\n+                Criteria.builder()\n+                        .optApplication(Application.NLP.SENTIMENT_ANALYSIS)\n+                        .setTypes(String.class, Classifications.class)\n+                        .build();\n+        // Load model\n+        ZooModel<String, Classifications> model = ModelZoo.loadModel(criteria);\n+        // Create predictor\n+        Predictor<String, Classifications> predictor = model.newPredictor();\n+\n+        int numConsumers = 3;\n+        List<String> topics = Arrays.asList(TOPIC);\n+        ExecutorService executor = Executors.newFixedThreadPool(numConsumers);\n+\n+        // setup consumer\n+        final List<ConsumerLoop> consumers = new ArrayList<>();\n+        for (int i = 0; i < numConsumers; i++) {\n+            ConsumerLoop consumer = new ConsumerLoop(i, topics, predictor);\n+            consumers.add(consumer);\n+            executor.submit(consumer);\n+        }\n+\n+        Runtime.getRuntime()\n+                .addShutdownHook(\n+                        new Thread() {\n+                            @Override\n+                            public void run() {\n+                                for (ConsumerLoop consumer : consumers) {\n+                                    consumer.shutdown();\n+                                }\n+                                executor.shutdown();\n+                                try {\n+                                    executor.awaitTermination(5000, TimeUnit.MILLISECONDS);\n+                                } catch (InterruptedException e) {\n+                                    e.printStackTrace();\n+                                }\n+                            }\n+                        });\n+    }\n+}"
+  },
+  {
+    "sha": "4351c3fb979444a27db2179409cfc6f1480cbfda",
+    "filename": "apache-kafka/start_service.sh",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/aws-samples/djl-demo/blob/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/start_service.sh",
+    "raw_url": "https://github.com/aws-samples/djl-demo/raw/31a3fdc5a39413f61ab32a91d410fd6b532cccec/apache-kafka/start_service.sh",
+    "contents_url": "https://api.github.com/repos/aws-samples/djl-demo/contents/apache-kafka/start_service.sh?ref=31a3fdc5a39413f61ab32a91d410fd6b532cccec",
+    "patch": "@@ -0,0 +1,5 @@\n+zookeeper-server-start /usr/local/etc/kafka/zookeeper.properties\n+kafka-server-start  /usr/local/etc/kafka/server.properties\n+kafka-topics --zookeeper localhost:2181 --delete --topic twitter-data\n+kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic twitter-data\n+kafka-console-producer --broker-list localhost:9092 --topic twitter-data < data.txt\n\\ No newline at end of file"
+  }
+]

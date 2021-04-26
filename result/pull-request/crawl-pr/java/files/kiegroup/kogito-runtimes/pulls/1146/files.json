@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "df93a400aa89196b934d9ef59fd7457f8a7ea2e9",
+    "filename": "kogito-codegen-modules/kogito-codegen-processes/src/main/resources/class-templates/RestResourceQuarkusTemplate.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/kiegroup/kogito-runtimes/blob/cd24badaeb3b45b050b7b6f95bcddf4389dccba5/kogito-codegen-modules/kogito-codegen-processes/src/main/resources/class-templates/RestResourceQuarkusTemplate.java",
+    "raw_url": "https://github.com/kiegroup/kogito-runtimes/raw/cd24badaeb3b45b050b7b6f95bcddf4389dccba5/kogito-codegen-modules/kogito-codegen-processes/src/main/resources/class-templates/RestResourceQuarkusTemplate.java",
+    "contents_url": "https://api.github.com/repos/kiegroup/kogito-runtimes/contents/kogito-codegen-modules/kogito-codegen-processes/src/main/resources/class-templates/RestResourceQuarkusTemplate.java?ref=cd24badaeb3b45b050b7b6f95bcddf4389dccba5",
+    "patch": "@@ -145,4 +145,11 @@\n                       .orElseThrow(() -> new NotFoundException());\n     }\n \n+    private static <T,U extends org.kie.kogito.MapOutput> ProcessInstance<T> doTransitionWorkItem(ProcessInstance<T> pi, String workItemId, String phase, U model, String user, List<String> groups) {\n+        pi.transitionWorkItem(\n+                workItemId,\n+                HumanTaskTransition.withModel(phase, model, Policies.of(user, groups)));\n+        return pi;\n+    }\n+\n }"
+  },
+  {
+    "sha": "757a1a89d0ed46de5f0775032e5e1e76e2c460dd",
+    "filename": "kogito-codegen-modules/kogito-codegen-processes/src/main/resources/class-templates/RestResourceUserTaskQuarkusTemplate.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 9,
+    "changes": 14,
+    "blob_url": "https://github.com/kiegroup/kogito-runtimes/blob/cd24badaeb3b45b050b7b6f95bcddf4389dccba5/kogito-codegen-modules/kogito-codegen-processes/src/main/resources/class-templates/RestResourceUserTaskQuarkusTemplate.java",
+    "raw_url": "https://github.com/kiegroup/kogito-runtimes/raw/cd24badaeb3b45b050b7b6f95bcddf4389dccba5/kogito-codegen-modules/kogito-codegen-processes/src/main/resources/class-templates/RestResourceUserTaskQuarkusTemplate.java",
+    "contents_url": "https://api.github.com/repos/kiegroup/kogito-runtimes/contents/kogito-codegen-modules/kogito-codegen-processes/src/main/resources/class-templates/RestResourceUserTaskQuarkusTemplate.java?ref=cd24badaeb3b45b050b7b6f95bcddf4389dccba5",
+    "patch": "@@ -90,22 +90,18 @@ public Response signal(@PathParam(\"id\") final String id, @Context UriInfo uriInf\n                                        @QueryParam(\"user\") final String user,\n                                        @QueryParam(\"group\") final List<String> groups,\n                                        final $TaskOutput$ model) {\n+\n         return UnitOfWorkExecutor\n                 .executeInUnitOfWork(\n                         application.unitOfWorkManager(),\n                         () -> process\n                                 .instances()\n                                 .findById(id)\n-                                .map(pi -> {\n-                                    pi.transitionWorkItem(\n-                                            workItemId,\n-                                            HumanTaskTransition.withModel(phase, model, Policies.of(user, groups)));\n-                                    return pi.variables().toOutput();\n-                                }))\n-                                .orElseThrow(() -> new NotFoundException());\n+                                .map(pi -> doTransitionWorkItem(pi, workItemId, phase, model, user, groups))\n+                                .map(pi -> pi.variables().toOutput())\n+                                .orElseThrow(() -> new NotFoundException()));\n     }\n-    \n-    \n+\n     @PATCH\n     @Path(\"/{id}/$taskName$/{workItemId}\")\n     @Consumes(MediaType.APPLICATION_JSON)"
+  }
+]

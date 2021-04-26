@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "ef666384e5687f08af5e6110812f1495137850b6",
+    "filename": "src/main/java/de/unistuttgart/ims/coref/annotator/DocumentWindow.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/ec9a278dbfaeece95213b2c6014e17b86f97541c/src/main/java/de/unistuttgart/ims/coref/annotator/DocumentWindow.java",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/ec9a278dbfaeece95213b2c6014e17b86f97541c/src/main/java/de/unistuttgart/ims/coref/annotator/DocumentWindow.java",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/java/de/unistuttgart/ims/coref/annotator/DocumentWindow.java?ref=ec9a278dbfaeece95213b2c6014e17b86f97541c",
+    "patch": "@@ -1607,7 +1607,13 @@ else if (anno instanceof DetachedMentionPart)\n \t\t\t\t\t\tmi.addActionListener(new ActionListener() {\n \t\t\t\t\t\t\t@Override\n \t\t\t\t\t\t\tpublic void actionPerformed(ActionEvent e) {\n-\t\t\t\t\t\t\t\tgetDocumentModel().edit(new AddMentionsToEntity(entity, getSelection()));\n+\t\t\t\t\t\t\t\tif (Annotator.app.getPreferences().getBoolean(Constants.CFG_REPLACE_MENTION, false)\n+\t\t\t\t\t\t\t\t\t\t&& getSelectedAnnotations(Mention.class).size() == 1) {\n+\t\t\t\t\t\t\t\t\tgetDocumentModel().edit(new MoveMentionsToEntity(entity,\n+\t\t\t\t\t\t\t\t\t\t\tgetSelectedAnnotations(Mention.class)));\n+\t\t\t\t\t\t\t\t} else {\n+\t\t\t\t\t\t\t\t\tgetDocumentModel().edit(new AddMentionsToEntity(entity, getSelection()));\n+\t\t\t\t\t\t\t\t}\n \t\t\t\t\t\t\t}\n \t\t\t\t\t\t});\n \t\t\t\t\t\tmi.setIcon(FontIcon.of(MaterialDesign.MDI_ACCOUNT, new Color(entity.getColor())));"
+  },
+  {
+    "sha": "5dda435cd7c469b9245780542a3338b49cdd9f1d",
+    "filename": "src/main/java/de/unistuttgart/ims/coref/annotator/worker/SaveJCasWorker.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/nilsreiter/CorefAnnotator/blob/ec9a278dbfaeece95213b2c6014e17b86f97541c/src/main/java/de/unistuttgart/ims/coref/annotator/worker/SaveJCasWorker.java",
+    "raw_url": "https://github.com/nilsreiter/CorefAnnotator/raw/ec9a278dbfaeece95213b2c6014e17b86f97541c/src/main/java/de/unistuttgart/ims/coref/annotator/worker/SaveJCasWorker.java",
+    "contents_url": "https://api.github.com/repos/nilsreiter/CorefAnnotator/contents/src/main/java/de/unistuttgart/ims/coref/annotator/worker/SaveJCasWorker.java?ref=ec9a278dbfaeece95213b2c6014e17b86f97541c",
+    "patch": "@@ -37,7 +37,7 @@ protected Object doInBackground() throws Exception {\n \t\t\t\tos = new GZIPOutputStream(new FileOutputStream(file));\n \t\t\t}\n \t\t\tif (os != null)\n-\t\t\t\tXmiCasSerializer.serialize(jcas.getCas(), os);\n+\t\t\t\tXmiCasSerializer.serialize(jcas.getCas(), null, os, true, null);\n \t\t} finally {\n \t\t\tif (os != null)\n \t\t\t\tos.close();"
+  }
+]

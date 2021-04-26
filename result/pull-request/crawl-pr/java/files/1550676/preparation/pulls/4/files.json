@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "8624de9e966e12427b12b473135a3fd0c4dee3d1",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 36,
+    "deletions": 13,
+    "changes": 49,
+    "blob_url": "https://github.com/1550676/preparation/blob/b119c0ff5fb3cdf613e172f8b515748222961a4b/pom.xml",
+    "raw_url": "https://github.com/1550676/preparation/raw/b119c0ff5fb3cdf613e172f8b515748222961a4b/pom.xml",
+    "contents_url": "https://api.github.com/repos/1550676/preparation/contents/pom.xml?ref=b119c0ff5fb3cdf613e172f8b515748222961a4b",
+    "patch": "@@ -7,20 +7,10 @@\n     <groupId>ru.zakharova.elena</groupId>\n     <artifactId>preparation</artifactId>\n     <version>1.0-SNAPSHOT</version>\n-    <build>\n-        <plugins>\n-            <plugin>\n-                <groupId>org.apache.maven.plugins</groupId>\n-                <artifactId>maven-compiler-plugin</artifactId>\n-                <configuration>\n-                    <source>11</source>\n-                    <target>11</target>\n-                </configuration>\n-            </plugin>\n-        </plugins>\n-    </build>\n+\n     <properties>\n-        <java.version>11</java.version>\n+        <maven.compiler.source>11</maven.compiler.source>\n+        <maven.compiler.target>11</maven.compiler.target>\n     </properties>\n     <dependencies>\n         <dependency>\n@@ -29,7 +19,40 @@\n             <version>1.18.10</version>\n             <scope>provided</scope>\n         </dependency>\n+        <dependency>\n+            <groupId>org.hibernate</groupId>\n+            <artifactId>hibernate-core</artifactId>\n+            <version>5.4.10.Final</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.postgresql</groupId>\n+            <artifactId>postgresql</artifactId>\n+            <version>42.2.5</version>\n+        </dependency>\n+\n+        <dependency>\n+            <groupId>org.hibernate</groupId>\n+            <artifactId>hibernate-validator</artifactId>\n+            <version>5.4.3.Final</version>\n+        </dependency>\n     </dependencies>\n \n+        <build>\n+            <plugins>\n+                <plugin>\n+                    <groupId>org.springframework.boot</groupId>\n+                    <artifactId>spring-boot-maven-plugin</artifactId>\n+                    <configuration>\n+                        <excludes>\n+                            <exclude>\n+                                <groupId>org.projectlombok</groupId>\n+                                <artifactId>lombok</artifactId>\n+                            </exclude>\n+                        </excludes>\n+                    </configuration>\n+                </plugin>\n+            </plugins>\n+        </build>\n+\n \n </project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "0e7c31ea3c19024b23bf0c1341eff61b3d63b353",
+    "filename": "src/main/java/ru/zakharova/elena/preparation/hibernate/DAO.java",
+    "status": "added",
+    "additions": 53,
+    "deletions": 0,
+    "changes": 53,
+    "blob_url": "https://github.com/1550676/preparation/blob/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/java/ru/zakharova/elena/preparation/hibernate/DAO.java",
+    "raw_url": "https://github.com/1550676/preparation/raw/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/java/ru/zakharova/elena/preparation/hibernate/DAO.java",
+    "contents_url": "https://api.github.com/repos/1550676/preparation/contents/src/main/java/ru/zakharova/elena/preparation/hibernate/DAO.java?ref=b119c0ff5fb3cdf613e172f8b515748222961a4b",
+    "patch": "@@ -0,0 +1,53 @@\n+package ru.zakharova.elena.preparation.hibernate;\n+\n+import org.hibernate.Session;\n+import org.hibernate.SessionFactory;\n+import org.hibernate.cfg.Configuration;\n+\n+import java.io.Serializable;\n+\n+public class DAO<T, V> {\n+    private SessionFactory factory;\n+\n+    public DAO() {\n+        factory = new Configuration()\n+                .configure(\"hibernate.cfg.xml\")\n+                .buildSessionFactory();\n+    }\n+\n+    public void add(T item) {\n+        Session session = factory.getCurrentSession();\n+        session.beginTransaction();\n+        session.save(item);\n+        session.getTransaction().commit();\n+        session.close();\n+    }\n+\n+    public T getById(Class<T> clazz, V id) {\n+        Session session = factory.getCurrentSession();\n+        session.beginTransaction();\n+        T item = (T) session.get(clazz, (Serializable) id);\n+        session.getTransaction().commit();\n+        session.close();\n+        return item;\n+    }\n+\n+    public void deleteById(Class<T> clazz, V id) {\n+        Session session = factory.getCurrentSession();\n+        session.beginTransaction();\n+        T item = (T) session.get(clazz, (Serializable) id);\n+        session.delete(item);\n+        session.getTransaction().commit();\n+        session.close();\n+    }\n+\n+    public T update(T item) {\n+        Session session = factory.getCurrentSession();\n+        session.beginTransaction();\n+        session.update(item);\n+        session.getTransaction().commit();\n+        session.close();\n+        return item;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "43ef8052ab22eda984758955fdb35b0854903edc",
+    "filename": "src/main/java/ru/zakharova/elena/preparation/hibernate/Student.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/1550676/preparation/blob/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/java/ru/zakharova/elena/preparation/hibernate/Student.java",
+    "raw_url": "https://github.com/1550676/preparation/raw/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/java/ru/zakharova/elena/preparation/hibernate/Student.java",
+    "contents_url": "https://api.github.com/repos/1550676/preparation/contents/src/main/java/ru/zakharova/elena/preparation/hibernate/Student.java?ref=b119c0ff5fb3cdf613e172f8b515748222961a4b",
+    "patch": "@@ -0,0 +1,34 @@\n+package ru.zakharova.elena.preparation.hibernate;\n+\n+import lombok.AllArgsConstructor;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+import lombok.RequiredArgsConstructor;\n+\n+import javax.persistence.*;\n+import java.util.List;\n+\n+@Entity\n+@Table(name = \"students\")\n+@Data\n+@AllArgsConstructor\n+@NoArgsConstructor\n+public class Student {\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    @Column(name = \"id\")\n+    private Long id;\n+\n+    @Column(name = \"name\")\n+    private String name;\n+\n+    @Column(name = \"mark\")\n+    private Byte mark;\n+\n+    public Student(String name, byte mark) {\n+        this.name = name;\n+        this.mark = mark;\n+    }\n+\n+\n+}"
+  },
+  {
+    "sha": "c6773f7eb7700ed30f91041bae675837f62676c3",
+    "filename": "src/main/java/ru/zakharova/elena/preparation/hibernate/Test.java",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/1550676/preparation/blob/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/java/ru/zakharova/elena/preparation/hibernate/Test.java",
+    "raw_url": "https://github.com/1550676/preparation/raw/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/java/ru/zakharova/elena/preparation/hibernate/Test.java",
+    "contents_url": "https://api.github.com/repos/1550676/preparation/contents/src/main/java/ru/zakharova/elena/preparation/hibernate/Test.java?ref=b119c0ff5fb3cdf613e172f8b515748222961a4b",
+    "patch": "@@ -0,0 +1,22 @@\n+package ru.zakharova.elena.preparation.hibernate;\n+\n+import java.util.concurrent.ThreadLocalRandom;\n+\n+public class Test {\n+    public static void main(String[] args) {\n+        DAO<Student, Long> studentDAO = new DAO<>();\n+        for (int i = 1; i < 1001; i++) {\n+            studentDAO.add(new Student(\"Student \"+ i, (byte) ThreadLocalRandom.current().nextInt(0, 101)));\n+        }\n+        System.out.println(studentDAO.getById(Student.class, 4L));\n+        studentDAO.deleteById(Student.class, 4L);\n+        System.out.println(studentDAO.getById(Student.class, 4L));\n+\n+        Student student = studentDAO.getById(Student.class, 3L);\n+        System.out.println(student);\n+        student.setName(\"Mark\");\n+        studentDAO.update(student);\n+        System.out.println(studentDAO.getById(Student.class, 3L));\n+\n+    }\n+}"
+  },
+  {
+    "sha": "b842b3127b4dc7e97ee7da02a5b83acc57b3d41c",
+    "filename": "src/main/resources/create.sql",
+    "status": "added",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/1550676/preparation/blob/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/resources/create.sql",
+    "raw_url": "https://github.com/1550676/preparation/raw/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/resources/create.sql",
+    "contents_url": "https://api.github.com/repos/1550676/preparation/contents/src/main/resources/create.sql?ref=b119c0ff5fb3cdf613e172f8b515748222961a4b",
+    "patch": "@@ -0,0 +1,2 @@\n+DROP TABLE IF EXISTS hiber.students CASCADE;\n+CREATE TABLE hiber.students (id bigserial PRIMARY KEY, name VARCHAR(255), mark smallint);\n\\ No newline at end of file"
+  },
+  {
+    "sha": "95657eeb1de2bf2e6e28161a0af0818e6e668666",
+    "filename": "src/main/resources/hibernate.cfg.xml",
+    "status": "added",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/1550676/preparation/blob/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/resources/hibernate.cfg.xml",
+    "raw_url": "https://github.com/1550676/preparation/raw/b119c0ff5fb3cdf613e172f8b515748222961a4b/src/main/resources/hibernate.cfg.xml",
+    "contents_url": "https://api.github.com/repos/1550676/preparation/contents/src/main/resources/hibernate.cfg.xml?ref=b119c0ff5fb3cdf613e172f8b515748222961a4b",
+    "patch": "@@ -0,0 +1,18 @@\n+<!DOCTYPE hibernate-configuration PUBLIC\n+        \"-//Hibernate/Hibernate Configuration DTD 3.0//EN\"\n+        \"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd\">\n+\n+<hibernate-configuration>\n+    <session-factory>\n+        <property name=\"connection.driver_class\">org.postgresql.Driver</property>\n+        <property name=\"connection.url\">jdbc:postgresql://localhost:5432/postgres?currentSchema=hiber</property>\n+        <property name=\"connection.username\">postgres</property>\n+        <property name=\"connection.password\">admin</property>\n+        <property name=\"connection.pool_size\">8</property>\n+        <property name=\"dialect\">org.hibernate.dialect.PostgreSQL94Dialect</property>\n+        <property name=\"show_sql\">false</property>\n+        <property name=\"current_session_context_class\">thread</property>\n+\n+        <mapping class=\"ru.zakharova.elena.preparation.hibernate.Student\"/>\n+    </session-factory>\n+</hibernate-configuration>\n\\ No newline at end of file"
+  }
+]

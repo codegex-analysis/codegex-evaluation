@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "02596cdbebe28958594f68d8028dfb759c6228b7",
+    "filename": "modules/openapi-generator/src/main/java/org/openapitools/codegen/DefaultCodegen.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/OpenAPITools/openapi-generator/blob/bcc6295cf251ecd5ffc09f69046d4db399666533/modules/openapi-generator/src/main/java/org/openapitools/codegen/DefaultCodegen.java",
+    "raw_url": "https://github.com/OpenAPITools/openapi-generator/raw/bcc6295cf251ecd5ffc09f69046d4db399666533/modules/openapi-generator/src/main/java/org/openapitools/codegen/DefaultCodegen.java",
+    "contents_url": "https://api.github.com/repos/OpenAPITools/openapi-generator/contents/modules/openapi-generator/src/main/java/org/openapitools/codegen/DefaultCodegen.java?ref=bcc6295cf251ecd5ffc09f69046d4db399666533",
+    "patch": "@@ -3017,6 +3017,11 @@ protected void addProperties(Map<String, Schema> properties, List<String> requir\n                 required.addAll(schema.getRequired());\n             }\n \n+            // Composed Schemas may have properties defined on themselves as well in case of nested inheritance this is rather important\n+            if (schema.getProperties() != null) {\n+                properties.putAll(schema.getProperties());\n+            }\n+\n             if (composedSchema.getOneOf() != null) {\n                 for (Schema component : composedSchema.getOneOf()) {\n                     addProperties(properties, required, component);"
+  },
+  {
+    "sha": "e5cc1922a78f74b0326c392a1e863cd5b50ad4e3",
+    "filename": "modules/openapi-generator/src/main/java/org/openapitools/codegen/languages/CSharpClientCodegen.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 3,
+    "changes": 13,
+    "blob_url": "https://github.com/OpenAPITools/openapi-generator/blob/bcc6295cf251ecd5ffc09f69046d4db399666533/modules/openapi-generator/src/main/java/org/openapitools/codegen/languages/CSharpClientCodegen.java",
+    "raw_url": "https://github.com/OpenAPITools/openapi-generator/raw/bcc6295cf251ecd5ffc09f69046d4db399666533/modules/openapi-generator/src/main/java/org/openapitools/codegen/languages/CSharpClientCodegen.java",
+    "contents_url": "https://api.github.com/repos/OpenAPITools/openapi-generator/contents/modules/openapi-generator/src/main/java/org/openapitools/codegen/languages/CSharpClientCodegen.java?ref=bcc6295cf251ecd5ffc09f69046d4db399666533",
+    "patch": "@@ -591,9 +591,11 @@ public CodegenModel fromModel(String name, Schema model) {\n         Map<String, Schema> allDefinitions = ModelUtils.getSchemas(this.openAPI);\n         CodegenModel codegenModel = super.fromModel(name, model);\n         if (allDefinitions != null && codegenModel != null && codegenModel.parent != null) {\n-            final Schema parentModel = allDefinitions.get(toModelName(codegenModel.parent));\n-            if (parentModel != null) {\n-                final CodegenModel parentCodegenModel = super.fromModel(codegenModel.parent, parentModel);\n+            Schema currentParentModel = allDefinitions.get(codegenModel.parentSchema);\n+            // We need to iterate through the whole inheritance structure and check whether we need to inherit properties\n+            while (currentParentModel != null) {\n+                final CodegenModel parentCodegenModel = super.fromModel(codegenModel.parent, currentParentModel);\n+\n                 if (codegenModel.hasEnums) {\n                     codegenModel = this.reconcileInlineEnums(codegenModel, parentCodegenModel);\n                 }\n@@ -610,6 +612,8 @@ public CodegenModel fromModel(String name, Schema model) {\n                 }\n \n                 CodegenProperty last = null;\n+\n+                // Add properties of parent to child if child does not contain the same property (which overrides)\n                 for (final CodegenProperty property : parentCodegenModel.vars) {\n                     // helper list of parentVars simplifies templating\n                     if (!propertyHash.containsKey(property.name)) {\n@@ -620,6 +624,9 @@ public CodegenModel fromModel(String name, Schema model) {\n                         codegenModel.parentVars.add(parentVar);\n                     }\n                 }\n+\n+                // Find parent of current parent if it exists. In inheritance its important to take the whole tree into account\n+                currentParentModel = allDefinitions.get(parentCodegenModel.parentSchema);\n             }\n         }\n "
+  },
+  {
+    "sha": "5034e36dc003da5819d906ef591aae1cf9bac6b1",
+    "filename": "modules/openapi-generator/src/main/java/org/openapitools/codegen/languages/CSharpNetCoreClientCodegen.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 3,
+    "changes": 12,
+    "blob_url": "https://github.com/OpenAPITools/openapi-generator/blob/bcc6295cf251ecd5ffc09f69046d4db399666533/modules/openapi-generator/src/main/java/org/openapitools/codegen/languages/CSharpNetCoreClientCodegen.java",
+    "raw_url": "https://github.com/OpenAPITools/openapi-generator/raw/bcc6295cf251ecd5ffc09f69046d4db399666533/modules/openapi-generator/src/main/java/org/openapitools/codegen/languages/CSharpNetCoreClientCodegen.java",
+    "contents_url": "https://api.github.com/repos/OpenAPITools/openapi-generator/contents/modules/openapi-generator/src/main/java/org/openapitools/codegen/languages/CSharpNetCoreClientCodegen.java?ref=bcc6295cf251ecd5ffc09f69046d4db399666533",
+    "patch": "@@ -327,9 +327,12 @@ public CodegenModel fromModel(String name, Schema model) {\n         Map<String, Schema> allDefinitions = ModelUtils.getSchemas(this.openAPI);\n         CodegenModel codegenModel = super.fromModel(name, model);\n         if (allDefinitions != null && codegenModel != null && codegenModel.parent != null) {\n-            final Schema parentModel = allDefinitions.get(toModelName(codegenModel.parent));\n-            if (parentModel != null) {\n-                final CodegenModel parentCodegenModel = super.fromModel(codegenModel.parent, parentModel);\n+            Schema currentParentModel = allDefinitions.get(codegenModel.parentSchema);\n+            // We need to iterate through the whole inheritance structure and check whether we need to inherit properties\n+            while (currentParentModel != null) {\n+                final CodegenModel parentCodegenModel = super.fromModel(codegenModel.parent, currentParentModel);\n+\n+\n                 if (codegenModel.hasEnums) {\n                     codegenModel = this.reconcileInlineEnums(codegenModel, parentCodegenModel);\n                 }\n@@ -356,6 +359,9 @@ public CodegenModel fromModel(String name, Schema model) {\n                         codegenModel.parentVars.add(parentVar);\n                     }\n                 }\n+\n+                // Find parent of current parent if it exists. In inheritance its important to take the whole tree into account\n+                currentParentModel = allDefinitions.get(parentCodegenModel.parentSchema);\n             }\n         }\n "
+  }
+]

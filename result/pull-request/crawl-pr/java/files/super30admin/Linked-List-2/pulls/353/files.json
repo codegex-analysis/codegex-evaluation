@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "9fb656d14dd2d59a419e0d2abb77770571150a2f",
+    "filename": "BinarySearchTreeIterator.py",
+    "status": "added",
+    "additions": 51,
+    "deletions": 0,
+    "changes": 51,
+    "blob_url": "https://github.com/super30admin/Linked-List-2/blob/4a58eced2930aaffff3593cf41c944874d01ddd2/BinarySearchTreeIterator.py",
+    "raw_url": "https://github.com/super30admin/Linked-List-2/raw/4a58eced2930aaffff3593cf41c944874d01ddd2/BinarySearchTreeIterator.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Linked-List-2/contents/BinarySearchTreeIterator.py?ref=4a58eced2930aaffff3593cf41c944874d01ddd2",
+    "patch": "@@ -0,0 +1,51 @@\n+# Definition for a binary tree node.\n+# class TreeNode:\n+#     def __init__(self, val=0, left=None, right=None):\n+#         self.val = val\n+#         self.left = left\n+#         self.right = right\n+\n+# TC: O(1)\n+# SC: O(N)\n+# LeetCode: Y(https://leetcode.com/problems/binary-search-tree-iterator/)\n+# Approach: Use a stack to perform in-order traversal on the left of the root\n+#           That way top of the stack is the first element of inorder traversal\n+#           After calling next which will be on the top of the stack, it is important to add the nodes of the right subtree of that node on the stack. \n+#       This is done because of the behavior of in-order traversal(Left-Root-Right)\n+class BSTIterator:\n+\n+    def __init__(self, root: TreeNode):\n+        # intialize stack\n+        self.stack = []\n+        \n+        # populate stack by traversing the leftmost path of the tree\n+        self.dfs(root)\n+        \n+\n+    def next(self) -> int:\n+        # next node\n+        poppedNode = self.stack.pop()\n+        \n+        # if there is a right subtree of the popped node then process the right subtree (order of processing nodes in Inorder Traversal)\n+        if poppedNode.right:\n+            self.dfs(poppedNode.right)\n+            \n+        return poppedNode.val\n+        \n+\n+    def hasNext(self) -> bool:\n+        \n+        return len(self.stack) != 0\n+        \n+    def dfs(self, root) -> None:\n+        while root:\n+            self.stack.append(root)\n+            root = root.left\n+            \n+        \n+\n+\n+# Your BSTIterator object will be instantiated and called as such:\n+# obj = BSTIterator(root)\n+# param_1 = obj.next()\n+# param_2 = obj.hasNext()"
+  },
+  {
+    "sha": "902cf0ce5fb963d17da199ce7b81bd18d54566de",
+    "filename": "DeleteWithoutHead.java",
+    "status": "added",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/super30admin/Linked-List-2/blob/4a58eced2930aaffff3593cf41c944874d01ddd2/DeleteWithoutHead.java",
+    "raw_url": "https://github.com/super30admin/Linked-List-2/raw/4a58eced2930aaffff3593cf41c944874d01ddd2/DeleteWithoutHead.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Linked-List-2/contents/DeleteWithoutHead.java?ref=4a58eced2930aaffff3593cf41c944874d01ddd2",
+    "patch": "@@ -0,0 +1,17 @@\n+/**\n+ * Time Complexity: O(1), Space Complexity: O(1)\n+ * Approach: \n+ * As the node to be deleted is not the the tail node, just copy the next node's data into given node.\n+ * After copying, delete the next node\n+ */\n+\n+class DeleteWithoutHead\n+{\n+    void deleteNode(Node node)\n+    {\n+         // copy the next node's data into given node\n+         node.data = node.next.data;\n+         // delete the next node\n+         node.next = node.next.next;\n+    }\n+}"
+  },
+  {
+    "sha": "753bf2b279b09d03603408b6e33e67f55ce8dbd4",
+    "filename": "IntersectionOfTwoLinkedLists.py",
+    "status": "added",
+    "additions": 49,
+    "deletions": 0,
+    "changes": 49,
+    "blob_url": "https://github.com/super30admin/Linked-List-2/blob/4a58eced2930aaffff3593cf41c944874d01ddd2/IntersectionOfTwoLinkedLists.py",
+    "raw_url": "https://github.com/super30admin/Linked-List-2/raw/4a58eced2930aaffff3593cf41c944874d01ddd2/IntersectionOfTwoLinkedLists.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Linked-List-2/contents/IntersectionOfTwoLinkedLists.py?ref=4a58eced2930aaffff3593cf41c944874d01ddd2",
+    "patch": "@@ -0,0 +1,49 @@\n+# Definition for singly-linked list.\n+# class ListNode:\n+#     def __init__(self, x):\n+#         self.val = x\n+#         self.next = None\n+# TC: O(N + M)\n+# SC: O(1)\n+# LeetCode: Y(https://leetcode.com/problems/intersection-of-two-linked-lists/)\n+# Approach: Get the length of the two Linked Lists, and get the difference between two lengths\n+#           Move the current pointer of the larger Linked List by that difference number of nodes\n+#           Then move the two nodes one at a time in the two Linked Lists\n+#           If the two nodes meet then that node is the node of intersection\n+#           If the two nodes don't meet then there is no intersection of two Linked lists\n+class Solution:\n+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> ListNode:\n+        \n+        lengthA = self.calculateLengthOfLinkedList(headA)\n+        lengthB = self.calculateLengthOfLinkedList(headB)\n+        \n+        currentA,currentB = headA, headB\n+        \n+        if lengthA > lengthB:\n+            for i in range(abs(lengthA - lengthB)):\n+                currentA = currentA.next\n+        else:\n+            for i in range(abs(lengthA - lengthB)):\n+                currentB = currentB.next\n+                \n+        while currentA:\n+            if currentA == currentB:\n+                return currentA\n+            currentA = currentA.next\n+            currentB = currentB.next\n+            \n+        return None\n+                \n+            \n+        \n+    def calculateLengthOfLinkedList(self, head: ListNode) -> int:\n+        length = 0\n+        \n+        current = head\n+        \n+        while current:\n+            length += 1\n+            current = current.next\n+            \n+        return length\n+        "
+  },
+  {
+    "sha": "7a9c69ab0a6b2cd0ed21a2b54b4d81872b07b303",
+    "filename": "ReorderList.java",
+    "status": "added",
+    "additions": 90,
+    "deletions": 0,
+    "changes": 90,
+    "blob_url": "https://github.com/super30admin/Linked-List-2/blob/4a58eced2930aaffff3593cf41c944874d01ddd2/ReorderList.java",
+    "raw_url": "https://github.com/super30admin/Linked-List-2/raw/4a58eced2930aaffff3593cf41c944874d01ddd2/ReorderList.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Linked-List-2/contents/ReorderList.java?ref=4a58eced2930aaffff3593cf41c944874d01ddd2",
+    "patch": "@@ -0,0 +1,90 @@\n+/**\n+ * Time Complexity: O(N), Space Complexity: O(1)\n+ * LeetCode: Y (https://leetcode.com/problems/reorder-list/)\n+ * Look out for cycle in the Linked List, be careful with pointers when traversing the Linked list\n+ * Approach: \n+ *  Get the Middle Node of the Linked list\n+ *  Reverse the second half\n+ *  Splice the first and second half together\n+ */\n+/**\n+ * Definition for singly-linked list.\n+ * public class ListNode {\n+ *     int val;\n+ *     ListNode next;\n+ *     ListNode() {}\n+ *     ListNode(int val) { this.val = val; }\n+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n+ * }\n+ */\n+class Solution {\n+    public void reorderList(ListNode head) {\n+        // If the Linked list is empty or has up to 2 nodes then return as no reordering is required\n+        if(head == null || head.next == null || head.next.next == null) {\n+            return;\n+        }\n+        \n+        //Get the middle node of the Linked list\n+        ListNode middleNode = getMiddleNode(head);\n+        \n+        // Reverse the second half\n+        ListNode headOfreversedSecondHalf = reverseLinkedList(middleNode.next);\n+\n+        // IMPORTANT: BREAK THE LINKED LIST AFTER FIRST HALF TO AVOID CYCLE IN LINKED LIST\n+        middleNode.next = null;\n+        \n+        // Reorder the two halves with current1 and current2\n+        ListNode current1 = head, current2 = headOfreversedSecondHalf;\n+        \n+        // Continue reordering until there are nodes in the second half\n+        while(current2 != null) {\n+            // Get the next node of current1 in first half\n+            ListNode temp = current1.next;\n+            \n+            // Splice the first half with second half\n+            current1.next = current2;\n+            \n+            // Move current2 forward in the second half\n+            current2 = current2.next;\n+            \n+            // Finish Splicing\n+            current1.next.next = temp;\n+            \n+            // Move current1 forward in the first half\n+            current1 = temp;\n+        }\n+        \n+    }\n+    \n+    // Helper function to get Middle Node of the Linked List\n+    // 1 -> 2 -> 3 -> 4 -> 5: returns 3\n+    // 1 -> 2 -> 3 -> 4 -> 5 -> 6: returns 3\n+    private ListNode getMiddleNode(ListNode head) {\n+        ListNode slow = head, fast = head;\n+        \n+        while(fast.next != null && fast.next.next != null) {\n+            slow = slow.next;\n+            fast = fast.next.next;\n+        }\n+        \n+        return slow;\n+    }\n+    \n+    // Helper function to reverse a Linked List\n+    private ListNode reverseLinkedList(ListNode head) {\n+        if(head == null || head.next == null) {\n+            return head;\n+        }\n+        \n+        ListNode prev = null, current = head;\n+        \n+        while(current != null) {\n+            ListNode temp = current.next;\n+            current.next = prev;\n+            prev = current;\n+            current = temp;\n+        }\n+        \n+        return prev;\n+    }\n+}"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "377ea4c9b0eed28d39da6d6e371ff8bede18d9f3",
+    "filename": "sentinel-adapter/sentinel-motan-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/motan/MotanUtils.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-adapter/sentinel-motan-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/motan/MotanUtils.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-adapter/sentinel-motan-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/motan/MotanUtils.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-adapter/sentinel-motan-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/motan/MotanUtils.java?ref=5ffe2de14e29905e74c5ca4339810aa308f6533c",
+    "patch": "@@ -16,6 +16,7 @@\n package com.alibaba.csp.sentinel.adapter.motan;\n \n import com.alibaba.csp.sentinel.adapter.motan.config.MotanAdapterGlobalConfig;\n+import com.alibaba.csp.sentinel.log.RecordLog;\n import com.alibaba.csp.sentinel.util.StringUtil;\n import com.weibo.api.motan.rpc.Caller;\n import com.weibo.api.motan.rpc.Request;\n@@ -50,7 +51,7 @@ public static String getMethodResourceName(Caller<?> caller, Request request, Bo\n                 isFirst = false;\n             }\n         } catch (ClassNotFoundException e) {\n-            e.printStackTrace();\n+            RecordLog.warn(\"[MotanUtils] Error in getMethodResourceName\", e);\n         }\n         buf.append(\")\");\n         return buf.toString();"
+  },
+  {
+    "sha": "2f9f735dd3bca3ace9d88dd37e757dd3977b87e9",
+    "filename": "sentinel-cluster/sentinel-cluster-server-default/src/main/java/com/alibaba/csp/sentinel/cluster/flow/statistic/concurrent/expire/RegularExpireStrategy.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-cluster/sentinel-cluster-server-default/src/main/java/com/alibaba/csp/sentinel/cluster/flow/statistic/concurrent/expire/RegularExpireStrategy.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-cluster/sentinel-cluster-server-default/src/main/java/com/alibaba/csp/sentinel/cluster/flow/statistic/concurrent/expire/RegularExpireStrategy.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-cluster/sentinel-cluster-server-default/src/main/java/com/alibaba/csp/sentinel/cluster/flow/statistic/concurrent/expire/RegularExpireStrategy.java?ref=5ffe2de14e29905e74c5ca4339810aa308f6533c",
+    "patch": "@@ -85,7 +85,6 @@ public void run() {\n             try {\n                 clearToken();\n             } catch (Throwable e) {\n-                e.printStackTrace();\n                 RecordLog.warn(\"[RegularExpireStrategy] undefined throwable during clear token: \", e);\n             }\n         }"
+  },
+  {
+    "sha": "b60ddfe5374b47cc6274ed076f0d17ff9fe8fa1e",
+    "filename": "sentinel-cluster/sentinel-cluster-server-envoy-rls/src/main/java/com/alibaba/csp/sentinel/cluster/server/envoy/rls/datasource/EnvoyRlsRuleDataSourceService.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 6,
+    "changes": 12,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-cluster/sentinel-cluster-server-envoy-rls/src/main/java/com/alibaba/csp/sentinel/cluster/server/envoy/rls/datasource/EnvoyRlsRuleDataSourceService.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-cluster/sentinel-cluster-server-envoy-rls/src/main/java/com/alibaba/csp/sentinel/cluster/server/envoy/rls/datasource/EnvoyRlsRuleDataSourceService.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-cluster/sentinel-cluster-server-envoy-rls/src/main/java/com/alibaba/csp/sentinel/cluster/server/envoy/rls/datasource/EnvoyRlsRuleDataSourceService.java?ref=5ffe2de14e29905e74c5ca4339810aa308f6533c",
+    "patch": "@@ -15,21 +15,21 @@\n  */\n package com.alibaba.csp.sentinel.cluster.server.envoy.rls.datasource;\n \n-import java.util.Arrays;\n-import java.util.List;\n-import java.util.Optional;\n-\n import com.alibaba.csp.sentinel.cluster.server.envoy.rls.SentinelEnvoyRlsConstants;\n import com.alibaba.csp.sentinel.cluster.server.envoy.rls.rule.EnvoyRlsRule;\n import com.alibaba.csp.sentinel.cluster.server.envoy.rls.rule.EnvoyRlsRuleManager;\n import com.alibaba.csp.sentinel.config.SentinelConfig;\n import com.alibaba.csp.sentinel.datasource.FileRefreshableDataSource;\n import com.alibaba.csp.sentinel.datasource.ReadableDataSource;\n+import com.alibaba.csp.sentinel.log.RecordLog;\n import com.alibaba.csp.sentinel.util.StringUtil;\n-\n import org.yaml.snakeyaml.Yaml;\n import org.yaml.snakeyaml.representer.Representer;\n \n+import java.util.Arrays;\n+import java.util.List;\n+import java.util.Optional;\n+\n /**\n  * @author Eric Zhao\n  * @since 1.7.0\n@@ -68,7 +68,7 @@ public synchronized void onShutdown() {\n             try {\n                 ds.close();\n             } catch (Exception e) {\n-                e.printStackTrace();\n+                RecordLog.warn(\"[EnvoyRlsRuleDataSourceService] Error when shutdown\", e);\n             }\n         }\n     }"
+  },
+  {
+    "sha": "948ef13a7299a672d43cb3865928723e1c1619b4",
+    "filename": "sentinel-core/src/main/java/com/alibaba/csp/sentinel/cluster/ClusterStateManager.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-core/src/main/java/com/alibaba/csp/sentinel/cluster/ClusterStateManager.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-core/src/main/java/com/alibaba/csp/sentinel/cluster/ClusterStateManager.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-core/src/main/java/com/alibaba/csp/sentinel/cluster/ClusterStateManager.java?ref=5ffe2de14e29905e74c5ca4339810aa308f6533c",
+    "patch": "@@ -196,7 +196,7 @@ private static void sleepIfNeeded() {\n             try {\n                 Thread.sleep(-estimated);\n             } catch (InterruptedException e) {\n-                e.printStackTrace();\n+                RecordLog.warn(\"[ClusterStateManager] Error in sleepIfNeeded\", e );\n             }\n         }\n     }"
+  },
+  {
+    "sha": "82737df003437d39f7161e74345b4563ea7ea255",
+    "filename": "sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/flow/FlowRuleChecker.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 6,
+    "changes": 12,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/flow/FlowRuleChecker.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/flow/FlowRuleChecker.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/flow/FlowRuleChecker.java?ref=5ffe2de14e29905e74c5ca4339810aa308f6533c",
+    "patch": "@@ -15,14 +15,12 @@\n  */\n package com.alibaba.csp.sentinel.slots.block.flow;\n \n-import java.util.Collection;\n-\n import com.alibaba.csp.sentinel.cluster.ClusterStateManager;\n-import com.alibaba.csp.sentinel.cluster.server.EmbeddedClusterTokenServerProvider;\n-import com.alibaba.csp.sentinel.cluster.client.TokenClientProvider;\n-import com.alibaba.csp.sentinel.cluster.TokenResultStatus;\n import com.alibaba.csp.sentinel.cluster.TokenResult;\n+import com.alibaba.csp.sentinel.cluster.TokenResultStatus;\n import com.alibaba.csp.sentinel.cluster.TokenService;\n+import com.alibaba.csp.sentinel.cluster.client.TokenClientProvider;\n+import com.alibaba.csp.sentinel.cluster.server.EmbeddedClusterTokenServerProvider;\n import com.alibaba.csp.sentinel.context.Context;\n import com.alibaba.csp.sentinel.log.RecordLog;\n import com.alibaba.csp.sentinel.node.DefaultNode;\n@@ -34,6 +32,8 @@\n import com.alibaba.csp.sentinel.util.StringUtil;\n import com.alibaba.csp.sentinel.util.function.Function;\n \n+import java.util.Collection;\n+\n /**\n  * Rule checker for flow control rules.\n  *\n@@ -194,7 +194,7 @@ private static boolean applyTokenResult(/*@NonNull*/ TokenResult result, FlowRul\n                 try {\n                     Thread.sleep(result.getWaitInMs());\n                 } catch (InterruptedException e) {\n-                    e.printStackTrace();\n+                    RecordLog.warn(\"[FlowRuleChecker] Error when applyTokenResult\", e);\n                 }\n                 return true;\n             case TokenResultStatus.NO_RULE_EXISTS:"
+  },
+  {
+    "sha": "080e14cac7c762c400f70b88a4a553f3529b30e1",
+    "filename": "sentinel-extension/sentinel-datasource-nacos/src/main/java/com/alibaba/csp/sentinel/datasource/nacos/NacosDataSource.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 8,
+    "changes": 15,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-extension/sentinel-datasource-nacos/src/main/java/com/alibaba/csp/sentinel/datasource/nacos/NacosDataSource.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-extension/sentinel-datasource-nacos/src/main/java/com/alibaba/csp/sentinel/datasource/nacos/NacosDataSource.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-extension/sentinel-datasource-nacos/src/main/java/com/alibaba/csp/sentinel/datasource/nacos/NacosDataSource.java?ref=5ffe2de14e29905e74c5ca4339810aa308f6533c",
+    "patch": "@@ -15,13 +15,6 @@\n  */\n package com.alibaba.csp.sentinel.datasource.nacos;\n \n-import java.util.Properties;\n-import java.util.concurrent.ArrayBlockingQueue;\n-import java.util.concurrent.Executor;\n-import java.util.concurrent.ExecutorService;\n-import java.util.concurrent.ThreadPoolExecutor;\n-import java.util.concurrent.TimeUnit;\n-\n import com.alibaba.csp.sentinel.concurrent.NamedThreadFactory;\n import com.alibaba.csp.sentinel.datasource.AbstractDataSource;\n import com.alibaba.csp.sentinel.datasource.Converter;\n@@ -33,6 +26,13 @@\n import com.alibaba.nacos.api.config.ConfigService;\n import com.alibaba.nacos.api.config.listener.Listener;\n \n+import java.util.Properties;\n+import java.util.concurrent.ArrayBlockingQueue;\n+import java.util.concurrent.Executor;\n+import java.util.concurrent.ExecutorService;\n+import java.util.concurrent.ThreadPoolExecutor;\n+import java.util.concurrent.TimeUnit;\n+\n /**\n  * A read-only {@code DataSource} with Nacos backend. When the data in Nacos backend has been modified,\n  * Nacos will automatically push the new value so that the dynamic configuration can be real-time.\n@@ -129,7 +129,6 @@ private void initNacosListener() {\n             configService.addListener(dataId, groupId, configListener);\n         } catch (Exception e) {\n             RecordLog.warn(\"[NacosDataSource] Error occurred when initializing Nacos data source\", e);\n-            e.printStackTrace();\n         }\n     }\n "
+  },
+  {
+    "sha": "731aa089b673f82002c05092cbfb27024238c7d8",
+    "filename": "sentinel-extension/sentinel-datasource-zookeeper/src/main/java/com/alibaba/csp/sentinel/datasource/zookeeper/ZookeeperDataSource.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-extension/sentinel-datasource-zookeeper/src/main/java/com/alibaba/csp/sentinel/datasource/zookeeper/ZookeeperDataSource.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-extension/sentinel-datasource-zookeeper/src/main/java/com/alibaba/csp/sentinel/datasource/zookeeper/ZookeeperDataSource.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-extension/sentinel-datasource-zookeeper/src/main/java/com/alibaba/csp/sentinel/datasource/zookeeper/ZookeeperDataSource.java?ref=5ffe2de14e29905e74c5ca4339810aa308f6533c",
+    "patch": "@@ -153,7 +153,6 @@ public void nodeChanged() {\n             this.nodeCache.start();\n         } catch (Exception e) {\n             RecordLog.warn(\"[ZookeeperDataSource] Error occurred when initializing Zookeeper data source\", e);\n-            e.printStackTrace();\n         }\n     }\n "
+  },
+  {
+    "sha": "68ad1cca62ec9d1ef21feddff41577a7d886ae17",
+    "filename": "sentinel-transport/sentinel-transport-simple-http/src/main/java/com/alibaba/csp/sentinel/transport/command/http/HttpEventTask.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-transport/sentinel-transport-simple-http/src/main/java/com/alibaba/csp/sentinel/transport/command/http/HttpEventTask.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/5ffe2de14e29905e74c5ca4339810aa308f6533c/sentinel-transport/sentinel-transport-simple-http/src/main/java/com/alibaba/csp/sentinel/transport/command/http/HttpEventTask.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-transport/sentinel-transport-simple-http/src/main/java/com/alibaba/csp/sentinel/transport/command/http/HttpEventTask.java?ref=5ffe2de14e29905e74c5ca4339810aa308f6533c",
+    "patch": "@@ -19,9 +19,9 @@\n import com.alibaba.csp.sentinel.command.CommandRequest;\n import com.alibaba.csp.sentinel.command.CommandResponse;\n import com.alibaba.csp.sentinel.config.SentinelConfig;\n-import com.alibaba.csp.sentinel.transport.log.CommandCenterLog;\n import com.alibaba.csp.sentinel.transport.command.SimpleHttpCommandCenter;\n import com.alibaba.csp.sentinel.transport.command.exception.RequestException;\n+import com.alibaba.csp.sentinel.transport.log.CommandCenterLog;\n import com.alibaba.csp.sentinel.transport.util.HttpCommandUtils;\n import com.alibaba.csp.sentinel.util.StringUtil;\n \n@@ -117,7 +117,6 @@ public void run() {\n             try {\n                 if (printWriter != null) {\n                     String errorMessage = SERVER_ERROR_MESSAGE;\n-                    e.printStackTrace();\n                     if (!writtenHead) {\n                         writeResponse(printWriter, StatusCode.INTERNAL_SERVER_ERROR, errorMessage);\n                     } else {"
+  }
+]

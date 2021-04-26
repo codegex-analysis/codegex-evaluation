@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "51f7526c72241991b45bc40608c50d45bacc4ca1",
+    "filename": "src/main/java/com/zaxxer/hikari/pool/ProxyLeakTask.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/brettwooldridge/HikariCP/blob/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/main/java/com/zaxxer/hikari/pool/ProxyLeakTask.java",
+    "raw_url": "https://github.com/brettwooldridge/HikariCP/raw/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/main/java/com/zaxxer/hikari/pool/ProxyLeakTask.java",
+    "contents_url": "https://api.github.com/repos/brettwooldridge/HikariCP/contents/src/main/java/com/zaxxer/hikari/pool/ProxyLeakTask.java?ref=ac1deb9a2fac94a808aaae573a5cd107650ba138",
+    "patch": "@@ -37,7 +37,7 @@\n    private ScheduledFuture<?> scheduledFuture;\n    private String connectionName;\n    private Exception exception;\n-   private String threadName; \n+   private String threadName;\n    private boolean isLeaked;\n \n    static\n@@ -76,7 +76,7 @@ public void run()\n    {\n       isLeaked = true;\n \n-      final StackTraceElement[] stackTrace = exception.getStackTrace(); \n+      final StackTraceElement[] stackTrace = exception.getStackTrace();\n       final StackTraceElement[] trace = new StackTraceElement[stackTrace.length - 5];\n       System.arraycopy(stackTrace, 5, trace, 0, trace.length);\n "
+  },
+  {
+    "sha": "2f5173fd2250c94b84f2a9161693795fb9643400",
+    "filename": "src/main/java/com/zaxxer/hikari/util/FastList.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/brettwooldridge/HikariCP/blob/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/main/java/com/zaxxer/hikari/util/FastList.java",
+    "raw_url": "https://github.com/brettwooldridge/HikariCP/raw/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/main/java/com/zaxxer/hikari/util/FastList.java",
+    "contents_url": "https://api.github.com/repos/brettwooldridge/HikariCP/contents/src/main/java/com/zaxxer/hikari/util/FastList.java?ref=ac1deb9a2fac94a808aaae573a5cd107650ba138",
+    "patch": "@@ -228,7 +228,7 @@ public T next()\n                return elementData[index++];\n             }\n \n-            throw new NoSuchElementException(\"No more elements in FastList\"); \n+            throw new NoSuchElementException(\"No more elements in FastList\");\n          }\n       };\n    }"
+  },
+  {
+    "sha": "5392cd19a99f8bb03006eaad9af0a731ba6f946b",
+    "filename": "src/test/java/com/zaxxer/hikari/pool/TestConcurrentBag.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 11,
+    "changes": 22,
+    "blob_url": "https://github.com/brettwooldridge/HikariCP/blob/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/test/java/com/zaxxer/hikari/pool/TestConcurrentBag.java",
+    "raw_url": "https://github.com/brettwooldridge/HikariCP/raw/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/test/java/com/zaxxer/hikari/pool/TestConcurrentBag.java",
+    "contents_url": "https://api.github.com/repos/brettwooldridge/HikariCP/contents/src/test/java/com/zaxxer/hikari/pool/TestConcurrentBag.java?ref=ac1deb9a2fac94a808aaae573a5cd107650ba138",
+    "patch": "@@ -71,36 +71,36 @@ public void testConcurrentBag() throws Exception\n    {\n       try (ConcurrentBag<PoolEntry> bag = new ConcurrentBag<>((x) -> CompletableFuture.completedFuture(Boolean.TRUE))) {\n          assertEquals(0, bag.values(8).size());\n-   \n+\n          PoolEntry reserved = pool.newPoolEntry();\n          bag.add(reserved);\n          bag.reserve(reserved);      // reserved\n-   \n+\n          PoolEntry inuse = pool.newPoolEntry();\n          bag.add(inuse);\n          bag.borrow(2, MILLISECONDS); // in use\n-   \n+\n          PoolEntry notinuse = pool.newPoolEntry();\n          bag.add(notinuse); // not in use\n-   \n+\n          bag.dumpState();\n-   \n+\n          ByteArrayOutputStream baos = new ByteArrayOutputStream();\n          PrintStream ps = new PrintStream(baos, true);\n          setSlf4jTargetStream(ConcurrentBag.class, ps);\n-   \n+\n          bag.requite(reserved);\n-   \n+\n          bag.remove(notinuse);\n          assertTrue(new String(baos.toByteArray()).contains(\"not borrowed or reserved\"));\n-   \n+\n          bag.unreserve(notinuse);\n          assertTrue(new String(baos.toByteArray()).contains(\"was not reserved\"));\n-   \n+\n          bag.remove(inuse);\n          bag.remove(inuse);\n          assertTrue(new String(baos.toByteArray()).contains(\"not borrowed or reserved\"));\n-   \n+\n          bag.close();\n          try {\n             PoolEntry bagEntry = pool.newPoolEntry();\n@@ -110,7 +110,7 @@ public void testConcurrentBag() throws Exception\n          catch (IllegalStateException e) {\n             assertTrue(new String(baos.toByteArray()).contains(\"ignoring add()\"));\n          }\n-   \n+\n          assertNotNull(notinuse.toString());\n       }\n    }"
+  },
+  {
+    "sha": "08aa09443a898f8b1b272171409a6974b2cde399",
+    "filename": "src/test/java/com/zaxxer/hikari/pool/TestConnectionCloseBlocking.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 5,
+    "changes": 10,
+    "blob_url": "https://github.com/brettwooldridge/HikariCP/blob/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/test/java/com/zaxxer/hikari/pool/TestConnectionCloseBlocking.java",
+    "raw_url": "https://github.com/brettwooldridge/HikariCP/raw/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/test/java/com/zaxxer/hikari/pool/TestConnectionCloseBlocking.java",
+    "contents_url": "https://api.github.com/repos/brettwooldridge/HikariCP/contents/src/test/java/com/zaxxer/hikari/pool/TestConnectionCloseBlocking.java?ref=ac1deb9a2fac94a808aaae573a5cd107650ba138",
+    "patch": "@@ -59,17 +59,17 @@ public void testConnectionCloseBlocking() throws SQLException {\n       long start = currentTime();\n       try (HikariDataSource ds = new HikariDataSource(config);\n             Connection connection = ds.getConnection()) {\n-            \n+\n             connection.close();\n-   \n+\n             // Hikari only checks for validity for connections with lastAccess > 1000 ms so we sleep for 1001 ms to force\n             // Hikari to do a connection validation which will fail and will trigger the connection to be closed\n             quietlySleep(1100L);\n-   \n+\n             shouldFail = true;\n-   \n+\n             // on physical connection close we sleep 2 seconds\n-            try (Connection connection2 = ds.getConnection()) {   \n+            try (Connection connection2 = ds.getConnection()) {\n                assertTrue(\"Waited longer than timeout\", (elapsedMillis(start) < config.getConnectionTimeout()));\n             }\n       } catch (SQLException e) {"
+  },
+  {
+    "sha": "f26bb6a176dbfe9f7dee3d8e88b9bb1043bda466",
+    "filename": "src/test/java/com/zaxxer/hikari/pool/TestProxies.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 11,
+    "changes": 22,
+    "blob_url": "https://github.com/brettwooldridge/HikariCP/blob/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/test/java/com/zaxxer/hikari/pool/TestProxies.java",
+    "raw_url": "https://github.com/brettwooldridge/HikariCP/raw/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/test/java/com/zaxxer/hikari/pool/TestProxies.java",
+    "contents_url": "https://api.github.com/repos/brettwooldridge/HikariCP/contents/src/test/java/com/zaxxer/hikari/pool/TestProxies.java?ref=ac1deb9a2fac94a808aaae573a5cd107650ba138",
+    "patch": "@@ -231,87 +231,87 @@ public void testOtherExceptions() throws SQLException\n          try (Connection conn = ds.getConnection()) {\n             StubConnection stubConnection = conn.unwrap(StubConnection.class);\n             stubConnection.throwException = true;\n-   \n+\n             try {\n                conn.setTransactionIsolation(Connection.TRANSACTION_NONE);\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                conn.isReadOnly();\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                conn.setReadOnly(false);\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                conn.setCatalog(\"\");\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                conn.setAutoCommit(false);\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                conn.clearWarnings();\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                conn.isValid(0);\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                conn.isWrapperFor(getClass());\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                conn.unwrap(getClass());\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                conn.close();\n                fail();\n             }\n             catch (SQLException e) {\n                // pass\n             }\n-   \n+\n             try {\n                assertFalse(conn.isValid(0));\n             }"
+  },
+  {
+    "sha": "4ef1a1d2a1269ea3526c587041ea72295e544fbf",
+    "filename": "src/test/java/com/zaxxer/hikari/util/ClockSourceTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/brettwooldridge/HikariCP/blob/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/test/java/com/zaxxer/hikari/util/ClockSourceTest.java",
+    "raw_url": "https://github.com/brettwooldridge/HikariCP/raw/ac1deb9a2fac94a808aaae573a5cd107650ba138/src/test/java/com/zaxxer/hikari/util/ClockSourceTest.java",
+    "contents_url": "https://api.github.com/repos/brettwooldridge/HikariCP/contents/src/test/java/com/zaxxer/hikari/util/ClockSourceTest.java?ref=ac1deb9a2fac94a808aaae573a5cd107650ba138",
+    "patch": "@@ -48,7 +48,7 @@ public void testClockSourceDisplay()\n       String ds2 = msSource.elapsedDisplayString0(sTime, eTime2);\n       Assert.assertEquals(\"-59m54s795ms\", ds2);\n \n-      \n+\n       ClockSource nsSource = new ClockSource.NanosecondClockSource();\n \n       final long sTime2 = DAYS.toNanos(3) + HOURS.toNanos(9) + MINUTES.toNanos(24) + SECONDS.toNanos(18) + MILLISECONDS.toNanos(572) + MICROSECONDS.toNanos(324) + NANOSECONDS.toNanos(823);"
+  }
+]

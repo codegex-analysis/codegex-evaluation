@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "9127a1da359aa444cd692d253ab451ecb47867bd",
+    "filename": ".github/workflows/CIT-Testing.yml",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/thaiducloi2000/CheckDayTime/blob/50613cd34885ae2334fd648718619b7135dd72f9/.github/workflows/CIT-Testing.yml",
+    "raw_url": "https://github.com/thaiducloi2000/CheckDayTime/raw/50613cd34885ae2334fd648718619b7135dd72f9/.github/workflows/CIT-Testing.yml",
+    "contents_url": "https://api.github.com/repos/thaiducloi2000/CheckDayTime/contents/.github/workflows/CIT-Testing.yml?ref=50613cd34885ae2334fd648718619b7135dd72f9",
+    "patch": "@@ -0,0 +1,41 @@\n+name: Practice CI with GitHub Actions using Ant and JUnit | © 2021 by Little Kid\n+\n+# Controls when the action will run. Triggers the workflow on push or pull request\n+# events but only for the main branch\n+on:\n+  push:\n+    branches: [ main ] # Lấy code từ nhánh main nếu có ai push code lên  \n+  pull_request:\n+    branches: [ main ] # Lấy code từ nhánh main nếu có ai gửi pull request  \n+\n+# A workflow run is made up of one or more jobs that can run sequentially or in parallel\n+jobs: # Những công việc dev làm thường ngày: lấy code, build, chạy test, đóng gói, gửi build...\n+  # This workflow contains a single job called \"build\"\n+  build:\n+    # The type of runner that the job will run on\n+    runs-on: ubuntu-latest\n+\n+    # Steps represent a sequence of tasks that will be executed as part of the job\n+    steps:\n+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it\n+      - name: Check-out repository # Lấy code từ kho thảy vào máy ảo của GitHub chuẩn bị build ở bước sau\n+        uses: actions/checkout@v2\n+\n+      - name: Set up JDK 1.8 \n+        uses: actions/setup-java@v1 # Khai báo cần dùng JDK để build\n+        with:\n+          java-version: 1.8 # Khai báo sử dụng phiên bản JDK 1.8 để build\n+     \n+      - name: Build project with Ant\n+        run: ant -noinput -buildfile build.xml # Quá trình build sẽ cần đến file cấu hình build.xml, build-impl.xml\n+      \n+      - name: Distribute jar-war file # Gửi file .jar .war đi đâu, CD nhảy vào ...\n+        run: mkdir staging && cp dist/*.jar staging # tạo thư mục staging chứa file .jar .war sau khi build      \n+     \n+      - name: Make hyperlink to jar-war file # Tạo hyperlink để download build \n+        uses: actions/upload-artifact@v1\n+        with:\n+          name: 1.0-SNAPSHOT.jar # Bản build được đánh version 1.0-SNAPSHOT\n+          path: staging\n+\n+# End of CI workflow file"
+  }
+]

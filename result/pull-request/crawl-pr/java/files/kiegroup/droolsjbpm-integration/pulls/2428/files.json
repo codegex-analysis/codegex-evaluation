@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "718e94b353be7c57f12e1a497bf547e8e75f5883",
+    "filename": "kie-performance-kit/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/kiegroup/droolsjbpm-integration/blob/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/pom.xml",
+    "raw_url": "https://github.com/kiegroup/droolsjbpm-integration/raw/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/pom.xml",
+    "contents_url": "https://api.github.com/repos/kiegroup/droolsjbpm-integration/contents/kie-performance-kit/pom.xml?ref=9c89da42afa6f65b2adf16dbea8419ccba8d7e1f",
+    "patch": "@@ -14,7 +14,7 @@\n \n   <properties>\n     <java.module.name>org.kie.performance.kit</java.module.name>\n-    <metrics.version>3.1.0</metrics.version>\n+    <metrics.version>4.1.18</metrics.version>\n     <perfrepo.version>1.7</perfrepo.version>\n   </properties>\n "
+  },
+  {
+    "sha": "2eb1cb82693a725d505f0aa6117c9d0690884475",
+    "filename": "kie-performance-kit/src/main/java/org/kie/perf/Executor.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 14,
+    "changes": 14,
+    "blob_url": "https://github.com/kiegroup/droolsjbpm-integration/blob/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/src/main/java/org/kie/perf/Executor.java",
+    "raw_url": "https://github.com/kiegroup/droolsjbpm-integration/raw/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/src/main/java/org/kie/perf/Executor.java",
+    "contents_url": "https://api.github.com/repos/kiegroup/droolsjbpm-integration/contents/kie-performance-kit/src/main/java/org/kie/perf/Executor.java?ref=9c89da42afa6f65b2adf16dbea8419ccba8d7e1f",
+    "patch": "@@ -102,20 +102,6 @@ public void initMetrics(IPerfTest scenario) {\n                 metrics.registerAll(new MemoryUsageGaugeSet(scenario.getClass()));\n             } else if (m == Measure.FILEDESCRIPTORS) {\n                 metrics.register(MetricRegistry.name(scenario.getClass(), \"file.descriptors.usage\"), new FileDescriptorRatioGauge());\n-                metrics.register(MetricRegistry.name(scenario.getClass(), \"file.descriptors.used\"), new Gauge<Long>() {\n-                    @Override\n-                    public Long getValue() {\n-                        try {\n-                            OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();\n-                            Method method = os.getClass().getDeclaredMethod(\"getOpenFileDescriptorCount\");\n-                            method.setAccessible(true);\n-                            return (Long) method.invoke(os);\n-                        } catch (Exception e) {\n-\n-                        }\n-                        return -1L;\n-                    }\n-                });\n             } else if (m == Measure.THREADSTATES) {\n                 metrics.registerAll(new ThreadStatesGaugeSet(scenario.getClass()));\n             } else if (m == Measure.CPUUSAGE) {"
+  },
+  {
+    "sha": "5b610e91bbb04ede47aa241e0be9ab7b9c8d28df",
+    "filename": "kie-performance-kit/src/main/java/org/kie/perf/TestConfig.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 1,
+    "changes": 12,
+    "blob_url": "https://github.com/kiegroup/droolsjbpm-integration/blob/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/src/main/java/org/kie/perf/TestConfig.java",
+    "raw_url": "https://github.com/kiegroup/droolsjbpm-integration/raw/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/src/main/java/org/kie/perf/TestConfig.java",
+    "contents_url": "https://api.github.com/repos/kiegroup/droolsjbpm-integration/contents/kie-performance-kit/src/main/java/org/kie/perf/TestConfig.java?ref=9c89da42afa6f65b2adf16dbea8419ccba8d7e1f",
+    "patch": "@@ -49,7 +49,9 @@\n     protected String perfRepoUrlPath;\n     protected String perfRepoUsername;\n     protected String perfRepoPassword;\n-    \n+\n+    protected String testUIDSuffix;\n+\n     protected String version = Executor.class.getPackage().getImplementationVersion();\n \n     protected List<Measure> measure;\n@@ -158,6 +160,10 @@ public Properties loadProperties() throws Exception {\n         if (perfRepoPassword != null) {\n             properties.put(\"perfRepo.password\", perfRepoPassword);\n         }\n+        testUIDSuffix = System.getProperty(\"testUIDSuffix\");\n+        if (testUIDSuffix != null) {\n+            properties.put(\"testUIDSuffix\", testUIDSuffix);\n+        }\n \n         return properties;\n     }\n@@ -280,6 +286,10 @@ public String getPerfRepoPassword() {\n         return perfRepoPassword;\n     }\n \n+    public String getTestUIDSuffix() {\n+        return testUIDSuffix;\n+    }\n+\n     public static enum ReporterType {\n         CONSOLE, CSV, CSVSINGLE, PERFREPO\n     }"
+  },
+  {
+    "sha": "027d347e0dd54ff4fe50cfdc1ad30522b4e2e58a",
+    "filename": "kie-performance-kit/src/main/java/org/kie/perf/metrics/CPUUsageHistogramSet.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 14,
+    "changes": 20,
+    "blob_url": "https://github.com/kiegroup/droolsjbpm-integration/blob/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/src/main/java/org/kie/perf/metrics/CPUUsageHistogramSet.java",
+    "raw_url": "https://github.com/kiegroup/droolsjbpm-integration/raw/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/src/main/java/org/kie/perf/metrics/CPUUsageHistogramSet.java",
+    "contents_url": "https://api.github.com/repos/kiegroup/droolsjbpm-integration/contents/kie-performance-kit/src/main/java/org/kie/perf/metrics/CPUUsageHistogramSet.java?ref=9c89da42afa6f65b2adf16dbea8419ccba8d7e1f",
+    "patch": "@@ -1,8 +1,7 @@\n package org.kie.perf.metrics;\n \n import java.lang.management.ManagementFactory;\n-import java.lang.management.OperatingSystemMXBean;\n-import java.lang.reflect.Method;\n+import com.sun.management.OperatingSystemMXBean;\n import java.util.HashMap;\n import java.util.Map;\n import java.util.Timer;\n@@ -19,22 +18,15 @@\n     private Class<?> scenario;\n     private Histogram cpuUsageHistogram = new Histogram(new UniformReservoir());\n     private OperatingSystemMXBean operatingSystemMXBean;\n-    private Method getProcessCpuLoad;\n     private Timer timer = new Timer();\n \n     private static CPUUsageHistogramSet instance = null;\n \n     private CPUUsageHistogramSet(Class<?> scenario) {\n         this.scenario = scenario;\n-\n-        operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();\n-        try {\n-            getProcessCpuLoad = operatingSystemMXBean.getClass().getMethod(\"getProcessCpuLoad\");\n-            getProcessCpuLoad.setAccessible(true);\n-        } catch (Exception e) {\n-\n+        operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();\n         }\n-    }\n+\n \n     public static CPUUsageHistogramSet getInstance(Class<?> scenario) {\n         if (instance == null) {\n@@ -46,8 +38,8 @@ public static CPUUsageHistogramSet getInstance(Class<?> scenario) {\n     private void update() {\n         Double value = null;\n         try {\n-            if (getProcessCpuLoad != null && operatingSystemMXBean != null) {\n-                value = (Double) getProcessCpuLoad.invoke(operatingSystemMXBean);\n+            if ( operatingSystemMXBean != null) {\n+                value = operatingSystemMXBean.getProcessCpuLoad();\n                 value *= 100;\n             }\n         } catch (Exception e) {\n@@ -76,7 +68,7 @@ public void stop() {\n     public Map<String, Metric> getMetrics() {\n         final Map<String, Metric> metrics = new HashMap<String, Metric>();\n \n-        if (getProcessCpuLoad != null && operatingSystemMXBean != null) {\n+        if (operatingSystemMXBean != null) {\n             metrics.put(MetricRegistry.name(scenario, \"cpu.usage\"), cpuUsageHistogram);\n         }\n "
+  },
+  {
+    "sha": "bb676caf521c483d4b0378f8ea4ec9664340ef37",
+    "filename": "kie-performance-kit/src/main/java/org/kie/perf/metrics/PerfRepoReporter.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/kiegroup/droolsjbpm-integration/blob/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/src/main/java/org/kie/perf/metrics/PerfRepoReporter.java",
+    "raw_url": "https://github.com/kiegroup/droolsjbpm-integration/raw/9c89da42afa6f65b2adf16dbea8419ccba8d7e1f/kie-performance-kit/src/main/java/org/kie/perf/metrics/PerfRepoReporter.java",
+    "contents_url": "https://api.github.com/repos/kiegroup/droolsjbpm-integration/contents/kie-performance-kit/src/main/java/org/kie/perf/metrics/PerfRepoReporter.java?ref=9c89da42afa6f65b2adf16dbea8419ccba8d7e1f",
+    "patch": "@@ -110,7 +110,8 @@ public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> c\n             }\n         }\n \n-        String testUid = tc.getProjectName().toLowerCase().replaceAll(\" \", \"_\") + \"_\" + tc.getSuite().toLowerCase() + \"_\" + tc.getScenario().toLowerCase();\n+        String testUid = tc.getProjectName().toLowerCase().replaceAll(\" \", \"_\") + \"_\"\n+                + tc.getSuite().toLowerCase() + \"_\" + tc.getScenario().toLowerCase() + \"_\" + tc.getTestUIDSuffix();\n \n         TestExecutionBuilder testExecution = TestExecution.builder().testUid(testUid).name(testExecutionName + \" - Result\").started(new Date());\n "
+  }
+]

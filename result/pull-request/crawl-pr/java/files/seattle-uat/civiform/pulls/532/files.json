@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "3e73ee1ca319323267ef65d80e213fa053dccd25",
+    "filename": "test-support/test_oidc_provider.js",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/seattle-uat/civiform/blob/f242efdae2afb504e39991aa4c372ab15a315a6c/test-support/test_oidc_provider.js",
+    "raw_url": "https://github.com/seattle-uat/civiform/raw/f242efdae2afb504e39991aa4c372ab15a315a6c/test-support/test_oidc_provider.js",
+    "contents_url": "https://api.github.com/repos/seattle-uat/civiform/contents/test-support/test_oidc_provider.js?ref=f242efdae2afb504e39991aa4c372ab15a315a6c",
+    "patch": "@@ -20,14 +20,15 @@ const configuration = {\n           // pretend to be IDCS which uses this key for user email.\n           user_emailid: id + \"@example.com\",\n           // lie about verification for tests.\n-          email_verified: true\n+          email_verified: true,\n+          user_displayname: \"first middle last\"\n         };\n       },\n     };\n   },\n   claims: {\n     openid: ['sub'],\n-    email: ['user_emailid', 'email_verified'],\n+    email: ['user_emailid', 'email_verified', 'user_displayname'],\n   }\n };\n "
+  },
+  {
+    "sha": "88d9e39210939dafccc4a5823397e77d09cb38ea",
+    "filename": "universal-application-tool-0.0.1/app/views/LoginForm.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/seattle-uat/civiform/blob/f242efdae2afb504e39991aa4c372ab15a315a6c/universal-application-tool-0.0.1/app/views/LoginForm.java",
+    "raw_url": "https://github.com/seattle-uat/civiform/raw/f242efdae2afb504e39991aa4c372ab15a315a6c/universal-application-tool-0.0.1/app/views/LoginForm.java",
+    "contents_url": "https://api.github.com/repos/seattle-uat/civiform/contents/universal-application-tool-0.0.1/app/views/LoginForm.java?ref=f242efdae2afb504e39991aa4c372ab15a315a6c",
+    "patch": "@@ -28,7 +28,14 @@ public Content render(Http.Request request, Optional<String> message) {\n             div(\n                 h1(\"Error: You are not logged in\")\n                     .withCondHidden(!message.orElse(\"\").equals(\"login\")),\n-                h1(\"TODO: IDCS integration\")),\n+                div(\n+                    h1(\"Log In\"),\n+                    redirectButton(\n+                        \"idcs\", \"Login with IDCS (user)\", routes.LoginController.idcsLogin().url()),\n+                    redirectButton(\n+                        \"adfs\",\n+                        \"Login with ADFS (admin)\",\n+                        routes.LoginController.adfsLogin().url()))),\n             div(\n                 h1(\"Or, continue as guest.\"),\n                 redirectButton("
+  },
+  {
+    "sha": "48cf1971bf4dc7952bbe96b49c2e0d406e0cb580",
+    "filename": "universal-application-tool-0.0.1/test/app/SecurityBrowserTest.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/seattle-uat/civiform/blob/f242efdae2afb504e39991aa4c372ab15a315a6c/universal-application-tool-0.0.1/test/app/SecurityBrowserTest.java",
+    "raw_url": "https://github.com/seattle-uat/civiform/raw/f242efdae2afb504e39991aa4c372ab15a315a6c/universal-application-tool-0.0.1/test/app/SecurityBrowserTest.java",
+    "contents_url": "https://api.github.com/repos/seattle-uat/civiform/contents/universal-application-tool-0.0.1/test/app/SecurityBrowserTest.java?ref=f242efdae2afb504e39991aa4c372ab15a315a6c",
+    "patch": "@@ -8,11 +8,15 @@\n import com.google.common.collect.ImmutableMap;\n import controllers.routes;\n import java.util.Optional;\n+import models.Applicant;\n+import org.junit.Before;\n import org.junit.ClassRule;\n import org.junit.Test;\n import org.testcontainers.containers.GenericContainer;\n import org.testcontainers.utility.DockerImageName;\n import play.Application;\n+import repository.ApplicantRepository;\n+import services.WellKnownPaths;\n import support.TestConstants;\n \n public class SecurityBrowserTest extends BaseBrowserTest {\n@@ -23,6 +27,8 @@\n   public static GenericContainer<?> oidcProvider =\n       new GenericContainer<>(OIDC_IMAGE).withExposedPorts(3380);\n \n+  private static ApplicantRepository applicantRepository;\n+\n   @Override\n   protected Application provideApplication() {\n     ImmutableMap<String, Object> config =\n@@ -34,6 +40,11 @@ protected Application provideApplication() {\n     return fakeApplication(config);\n   }\n \n+  @Before\n+  public void getApplicantRepository() {\n+    applicantRepository = app.injector().instanceOf(ApplicantRepository.class);\n+  }\n+\n   protected void loginWithSimulatedIdcs() {\n     goTo(routes.LoginController.idcsLogin());\n     // If we are not cookied, enter a username and password.\n@@ -98,6 +109,21 @@ public void basicOidcLogin() {\n     goTo(routes.ProfileController.myProfile());\n     assertThat(browser.pageSource()).contains(\"OidcClient\");\n     assertThat(browser.pageSource()).contains(\"username@example.com\");\n+\n+    Applicant applicant =\n+        applicantRepository.lookupApplicant(getApplicantId()).toCompletableFuture().join().get();\n+    Optional<String> applicantName =\n+        applicant.getApplicantData().readString(WellKnownPaths.APPLICANT_FIRST_NAME);\n+    assertThat(applicantName).isPresent();\n+    assertThat(applicantName.get()).isEqualTo(\"first\");\n+\n+    applicantName = applicant.getApplicantData().readString(WellKnownPaths.APPLICANT_MIDDLE_NAME);\n+    assertThat(applicantName).isPresent();\n+    assertThat(applicantName.get()).isEqualTo(\"middle\");\n+\n+    applicantName = applicant.getApplicantData().readString(WellKnownPaths.APPLICANT_LAST_NAME);\n+    assertThat(applicantName).isPresent();\n+    assertThat(applicantName.get()).isEqualTo(\"last\");\n   }\n \n   @Test"
+  }
+]

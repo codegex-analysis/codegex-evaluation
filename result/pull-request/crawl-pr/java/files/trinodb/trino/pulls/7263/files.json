@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "430403d59d5ea93e8546e874d22d0c1a8a2a1748",
+    "filename": "core/trino-main/src/main/java/io/trino/sql/planner/DomainTranslator.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/trinodb/trino/blob/f80795d38ef9968b474b875230e39bce85a2703b/core/trino-main/src/main/java/io/trino/sql/planner/DomainTranslator.java",
+    "raw_url": "https://github.com/trinodb/trino/raw/f80795d38ef9968b474b875230e39bce85a2703b/core/trino-main/src/main/java/io/trino/sql/planner/DomainTranslator.java",
+    "contents_url": "https://api.github.com/repos/trinodb/trino/contents/core/trino-main/src/main/java/io/trino/sql/planner/DomainTranslator.java?ref=f80795d38ef9968b474b875230e39bce85a2703b",
+    "patch": "@@ -440,6 +440,13 @@ protected ExtractionResult visitNotExpression(NotExpression node, Boolean comple\n             return process(node.getValue(), !complement);\n         }\n \n+        @Override\n+        protected ExtractionResult visitSymbolReference(SymbolReference node, Boolean complement)\n+        {\n+            ComparisonExpression newNode = new ComparisonExpression(EQUAL, node, TRUE_LITERAL);\n+            return visitComparisonExpression(newNode, complement);\n+        }\n+\n         @Override\n         protected ExtractionResult visitComparisonExpression(ComparisonExpression node, Boolean complement)\n         {"
+  },
+  {
+    "sha": "0f9662d4ee8a382831ef19352474bf17a1ab8fa5",
+    "filename": "core/trino-main/src/test/java/io/trino/sql/planner/TestDomainTranslator.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/trinodb/trino/blob/f80795d38ef9968b474b875230e39bce85a2703b/core/trino-main/src/test/java/io/trino/sql/planner/TestDomainTranslator.java",
+    "raw_url": "https://github.com/trinodb/trino/raw/f80795d38ef9968b474b875230e39bce85a2703b/core/trino-main/src/test/java/io/trino/sql/planner/TestDomainTranslator.java",
+    "contents_url": "https://api.github.com/repos/trinodb/trino/contents/core/trino-main/src/test/java/io/trino/sql/planner/TestDomainTranslator.java?ref=f80795d38ef9968b474b875230e39bce85a2703b",
+    "patch": "@@ -552,6 +552,16 @@ public void testFromOrPredicate()\n         assertEquals(result.getTupleDomain(), withColumnDomains(ImmutableMap.of(C_BIGINT, Domain.create(ValueSet.ofRanges(Range.range(BIGINT, 1L, false, 5L, false)), false))));\n     }\n \n+    @Test\n+    public void testFromSingleBooleanReference()\n+    {\n+        Expression originalPredicate = C_BOOLEAN.toSymbolReference();\n+        ExtractionResult result = fromPredicate(originalPredicate);\n+        assertEquals(result.getTupleDomain(), withColumnDomains(ImmutableMap.of(C_BOOLEAN,\n+                Domain.create(ValueSet.ofRanges(Range.equal(BOOLEAN, true), Range.equal(BOOLEAN, true)), false))));\n+        assertEquals(result.getRemainingExpression(), TRUE_LITERAL);\n+    }\n+\n     @Test\n     public void testFromNotPredicate()\n     {"
+  }
+]

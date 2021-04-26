@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "876f9b8d5a086f0528320ce7407bbaa593941817",
+    "filename": "app/src/main/java/com/github/steroidteam/todolist/MVC/AppController.java",
+    "status": "added",
+    "additions": 55,
+    "deletions": 0,
+    "changes": 55,
+    "blob_url": "https://github.com/steroid-team/app/blob/d0c04ec9be0dbe954137cb653cec2812a386d16f/app/src/main/java/com/github/steroidteam/todolist/MVC/AppController.java",
+    "raw_url": "https://github.com/steroid-team/app/raw/d0c04ec9be0dbe954137cb653cec2812a386d16f/app/src/main/java/com/github/steroidteam/todolist/MVC/AppController.java",
+    "contents_url": "https://api.github.com/repos/steroid-team/app/contents/app/src/main/java/com/github/steroidteam/todolist/MVC/AppController.java?ref=d0c04ec9be0dbe954137cb653cec2812a386d16f",
+    "patch": "@@ -0,0 +1,55 @@\n+package com.github.steroidteam.todolist.MVC;\n+\n+import com.github.steroidteam.todolist.database.Database;\n+import com.github.steroidteam.todolist.database.DatabaseException;\n+import com.github.steroidteam.todolist.database.IdManager;\n+import com.github.steroidteam.todolist.database.TaskDatabaseAdapter;\n+import com.github.steroidteam.todolist.database.VolatileDatabase;\n+import com.github.steroidteam.todolist.todo.Task;\n+\n+/**\n+ * The controller of the App that communicates with the View and the Database\n+ */\n+public class AppController {\n+    private TaskDatabaseAdapter taskDatabaseAdapter;\n+    // TODO Add the view so it can update it\n+\n+    public AppController(Database database, IdManager manager){\n+        taskDatabaseAdapter = new TaskDatabaseAdapter(database, manager);\n+    }\n+\n+    /**\n+     * Create a new Task and put it in the database\n+     *\n+     * @param body   The body of the task\n+     */\n+    public void createTask(String body) {\n+        if (body == null) {\n+            throw new IllegalArgumentException();\n+        }\n+        taskDatabaseAdapter.putTask(new Task(body));\n+    }\n+\n+    /**\n+     * Update a task and put it in the database\n+     *\n+     * @param bodyNewTask   The new body of the task\n+     */\n+    // It must know which task it should update and we can't do that yet\n+    /*\n+    public void updateTask(String bodyNewTask) {\n+        if (bodyNewTask == null) {\n+            throw new IllegalArgumentException();\n+        }\n+        try {\n+            taskDatabaseAdapter.updateTask(new Task(bodyNewTask));\n+        } catch (DatabaseException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+    */\n+    // TODO removeTask since it needs to know which id the view has assigned to the task I don't know how to do it for now\n+\n+    // TODO getTask same problem as removeTask\n+\n+}"
+  },
+  {
+    "sha": "8444094c3ca3f72b0cb48ae1e4a3e43a62d617f9",
+    "filename": "app/src/test/java/com/github/steroidteam/todolist/AppControllerTest.java",
+    "status": "added",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/steroid-team/app/blob/d0c04ec9be0dbe954137cb653cec2812a386d16f/app/src/test/java/com/github/steroidteam/todolist/AppControllerTest.java",
+    "raw_url": "https://github.com/steroid-team/app/raw/d0c04ec9be0dbe954137cb653cec2812a386d16f/app/src/test/java/com/github/steroidteam/todolist/AppControllerTest.java",
+    "contents_url": "https://api.github.com/repos/steroid-team/app/contents/app/src/test/java/com/github/steroidteam/todolist/AppControllerTest.java?ref=d0c04ec9be0dbe954137cb653cec2812a386d16f",
+    "patch": "@@ -0,0 +1,33 @@\n+package com.github.steroidteam.todolist;\n+\n+import com.github.steroidteam.todolist.MVC.AppController;\n+import com.github.steroidteam.todolist.database.Database;\n+import com.github.steroidteam.todolist.database.IdManager;\n+import com.github.steroidteam.todolist.database.TaskDatabaseAdapter;\n+import com.github.steroidteam.todolist.database.VolatileDatabase;\n+import com.github.steroidteam.todolist.todo.Task;\n+\n+import org.junit.Test;\n+\n+import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertThrows;\n+\n+public class AppControllerTest {\n+\n+    @Test\n+    public void createTaskCorrectlyThrowNullArgument() {\n+        assertThrows(IllegalArgumentException.class, () -> {\n+            AppController appController = new AppController(new VolatileDatabase(), new IdManager());\n+            appController.createTask(null);\n+        });\n+    }\n+\n+    @Test\n+    public void createTaskCorrectlyCreatesTask() {\n+        Database db = new VolatileDatabase();\n+        AppController appController = new AppController(db, new IdManager());\n+        appController.createTask(\"test controller create task\");\n+        assertEquals(\"Task{id='1', body='test controller create task'}\", db.get(\"1\"));\n+    }\n+\n+}"
+  }
+]

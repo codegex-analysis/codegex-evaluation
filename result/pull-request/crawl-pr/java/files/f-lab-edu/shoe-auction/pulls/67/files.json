@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "a922971c50b6d48959d77b5cf41df40d063d9c8a",
+    "filename": "src/main/java/com/flab/shoeauction/domain/product/Product.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/f-lab-edu/shoe-auction/blob/75461ddd626e8ba24e12c9e6303cf4601e9a0b1a/src/main/java/com/flab/shoeauction/domain/product/Product.java",
+    "raw_url": "https://github.com/f-lab-edu/shoe-auction/raw/75461ddd626e8ba24e12c9e6303cf4601e9a0b1a/src/main/java/com/flab/shoeauction/domain/product/Product.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/shoe-auction/contents/src/main/java/com/flab/shoeauction/domain/product/Product.java?ref=75461ddd626e8ba24e12c9e6303cf4601e9a0b1a",
+    "patch": "@@ -4,7 +4,10 @@\n import com.flab.shoeauction.controller.dto.ProductDto.SaveRequest;\n import com.flab.shoeauction.domain.BaseTimeEntity;\n import com.flab.shoeauction.domain.brand.Brand;\n+import com.flab.shoeauction.domain.trade.Trade;\n import java.time.LocalDate;\n+import java.util.ArrayList;\n+import java.util.List;\n import javax.persistence.Column;\n import javax.persistence.Entity;\n import javax.persistence.EnumType;\n@@ -13,6 +16,7 @@\n import javax.persistence.Id;\n import javax.persistence.JoinColumn;\n import javax.persistence.ManyToOne;\n+import javax.persistence.OneToMany;\n import lombok.Builder;\n import lombok.Getter;\n import lombok.NoArgsConstructor;\n@@ -69,6 +73,9 @@\n     @JoinColumn(name = \"BRAND_ID\")\n     private Brand brand;\n \n+    @OneToMany(mappedBy = \"product\")\n+    private List<Trade> trades = new ArrayList<>();\n+\n     @Builder\n     public Product(String nameKor, String nameEng, String modelNumber, String color,\n         LocalDate releaseDate, int releasePrice, Currency currency,"
+  },
+  {
+    "sha": "12a34e091192e656dcf1edadf4c7565fd2a192c1",
+    "filename": "src/main/java/com/flab/shoeauction/domain/trade/Trade.java",
+    "status": "added",
+    "additions": 47,
+    "deletions": 0,
+    "changes": 47,
+    "blob_url": "https://github.com/f-lab-edu/shoe-auction/blob/75461ddd626e8ba24e12c9e6303cf4601e9a0b1a/src/main/java/com/flab/shoeauction/domain/trade/Trade.java",
+    "raw_url": "https://github.com/f-lab-edu/shoe-auction/raw/75461ddd626e8ba24e12c9e6303cf4601e9a0b1a/src/main/java/com/flab/shoeauction/domain/trade/Trade.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/shoe-auction/contents/src/main/java/com/flab/shoeauction/domain/trade/Trade.java?ref=75461ddd626e8ba24e12c9e6303cf4601e9a0b1a",
+    "patch": "@@ -0,0 +1,47 @@\n+package com.flab.shoeauction.domain.trade;\n+\n+import com.flab.shoeauction.domain.BaseTimeEntity;\n+import com.flab.shoeauction.domain.product.Product;\n+import com.flab.shoeauction.domain.users.user.User;\n+import javax.persistence.Entity;\n+import javax.persistence.EnumType;\n+import javax.persistence.Enumerated;\n+import javax.persistence.FetchType;\n+import javax.persistence.GeneratedValue;\n+import javax.persistence.Id;\n+import javax.persistence.JoinColumn;\n+import javax.persistence.ManyToOne;\n+import lombok.Getter;\n+\n+@Entity\n+@Getter\n+public class Trade extends BaseTimeEntity {\n+\n+    @Id\n+    @GeneratedValue\n+    private Long id;\n+\n+    @ManyToOne(fetch = FetchType.LAZY)\n+    @JoinColumn(name = \"PUBLISHER_ID\")\n+    private User user;\n+\n+    @ManyToOne(fetch = FetchType.LAZY)\n+    @JoinColumn(name = \"SELLER_ID\")\n+    private User seller;\n+\n+    @ManyToOne(fetch = FetchType.LAZY)\n+    @JoinColumn(name = \"BUYER_ID\")\n+    private User buyer;\n+\n+    @ManyToOne(fetch = FetchType.LAZY)\n+    @JoinColumn(name = \"PRODUCT_ID\")\n+    private Product product;\n+\n+    @Enumerated(EnumType.STRING)\n+    private TradeType type;\n+\n+    @Enumerated(EnumType.STRING)\n+    private TradeStatus status;\n+\n+    private Long price;\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "7957a0a90efe7246032a879f9314f46fa44b9ed0",
+    "filename": "src/main/java/com/flab/shoeauction/domain/trade/TradeStatus.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/f-lab-edu/shoe-auction/blob/75461ddd626e8ba24e12c9e6303cf4601e9a0b1a/src/main/java/com/flab/shoeauction/domain/trade/TradeStatus.java",
+    "raw_url": "https://github.com/f-lab-edu/shoe-auction/raw/75461ddd626e8ba24e12c9e6303cf4601e9a0b1a/src/main/java/com/flab/shoeauction/domain/trade/TradeStatus.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/shoe-auction/contents/src/main/java/com/flab/shoeauction/domain/trade/TradeStatus.java?ref=75461ddd626e8ba24e12c9e6303cf4601e9a0b1a",
+    "patch": "@@ -0,0 +1,12 @@\n+package com.flab.shoeauction.domain.trade;\n+\n+/**\n+ * BID : 구매 또는 판매를 등록하여 입찰 진행중인 상태\n+ * PROGRESS : 입찰 등록한 물품의 거래가 체결되어 거래가 진행중인 상태\n+ * END : 거래가 종료된 상태(또는 취소)\n+ */\n+\n+public enum TradeStatus {\n+    BID, PROGRESS, END\n+\n+}"
+  },
+  {
+    "sha": "90497cdc2701aa806d3cf304247382adf2a476d7",
+    "filename": "src/main/java/com/flab/shoeauction/domain/trade/TradeType.java",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/f-lab-edu/shoe-auction/blob/75461ddd626e8ba24e12c9e6303cf4601e9a0b1a/src/main/java/com/flab/shoeauction/domain/trade/TradeType.java",
+    "raw_url": "https://github.com/f-lab-edu/shoe-auction/raw/75461ddd626e8ba24e12c9e6303cf4601e9a0b1a/src/main/java/com/flab/shoeauction/domain/trade/TradeType.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/shoe-auction/contents/src/main/java/com/flab/shoeauction/domain/trade/TradeType.java?ref=75461ddd626e8ba24e12c9e6303cf4601e9a0b1a",
+    "patch": "@@ -0,0 +1,5 @@\n+package com.flab.shoeauction.domain.trade;\n+\n+public enum TradeType {\n+    SALE, PURCHASE\n+}"
+  }
+]

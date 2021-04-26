@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "d3a3796e633297fc8940cdc4bcad9a0785157d72",
+    "filename": "jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/entities/Customer.java",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/Temzu/studying_spring/blob/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/entities/Customer.java",
+    "raw_url": "https://github.com/Temzu/studying_spring/raw/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/entities/Customer.java",
+    "contents_url": "https://api.github.com/repos/Temzu/studying_spring/contents/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/entities/Customer.java?ref=56cdce0b79e2381796e718980cefd23438974174",
+    "patch": "@@ -2,11 +2,42 @@\n \n import lombok.AllArgsConstructor;\n import lombok.Data;\n+import lombok.EqualsAndHashCode;\n import lombok.NoArgsConstructor;\n \n import javax.persistence.*;\n+import java.util.List;\n \n \n+@Data\n+@NoArgsConstructor\n+@AllArgsConstructor\n+@EqualsAndHashCode\n+@Entity\n+@Table(name = \"customers\")\n public class Customer {\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    @Column(name = \"id\")\n+    private Long id;\n \n+    @Column(name = \"name\")\n+    private String name;\n+\n+    @ManyToMany(fetch = FetchType.EAGER)\n+    @JoinTable(\n+            name = \"customers_products\",\n+            joinColumns = @JoinColumn(name = \"customer_id\"),\n+            inverseJoinColumns = @JoinColumn(name = \"product_id\")\n+    )\n+    private List<Product> products;\n+\n+    public Customer(String name) {\n+        this.name = name;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return String.format(\"Customer [id = %d, name = %s]\", id, name);\n+    }\n }"
+  },
+  {
+    "sha": "13913ca52eb262876ce23c218cedf0722017c55c",
+    "filename": "jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/entities/Product.java",
+    "status": "modified",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/Temzu/studying_spring/blob/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/entities/Product.java",
+    "raw_url": "https://github.com/Temzu/studying_spring/raw/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/entities/Product.java",
+    "contents_url": "https://api.github.com/repos/Temzu/studying_spring/contents/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/entities/Product.java?ref=56cdce0b79e2381796e718980cefd23438974174",
+    "patch": "@@ -1,4 +1,46 @@\n package com.temzu.jpa_hiber.entities;\n \n+import lombok.AllArgsConstructor;\n+import lombok.Data;\n+import lombok.EqualsAndHashCode;\n+import lombok.NoArgsConstructor;\n+\n+import javax.persistence.*;\n+import java.util.List;\n+\n+@Data\n+@NoArgsConstructor\n+@AllArgsConstructor\n+@EqualsAndHashCode\n+@Entity\n+@Table(name = \"products\")\n public class Product {\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    @Column(name = \"id\")\n+    private Long id;\n+\n+    @Column(name = \"title\")\n+    private String title;\n+\n+    @Column(name = \"cost\")\n+    private int cost;\n+\n+    @ManyToMany(fetch = FetchType.EAGER)\n+    @JoinTable(\n+            name = \"customers_products\",\n+            joinColumns = @JoinColumn(name = \"product_id\"),\n+            inverseJoinColumns = @JoinColumn(name = \"customer_id\")\n+    )\n+    private List<Customer> customers;\n+\n+    public Product(String title, int cost) {\n+        this.title = title;\n+        this.cost = cost;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return String.format(\"Product [id = %d, title = %s, cost = %d]\", id, title, cost);\n+    }\n }"
+  },
+  {
+    "sha": "5336d40747c9dc7fb55d9aa0dc8187ff6eabb176",
+    "filename": "jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/ConsumerRepository.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 7,
+    "changes": 7,
+    "blob_url": "https://github.com/Temzu/studying_spring/blob/af50106b4288bfe9b3c2aa260cd7bb0b08d95032/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/ConsumerRepository.java",
+    "raw_url": "https://github.com/Temzu/studying_spring/raw/af50106b4288bfe9b3c2aa260cd7bb0b08d95032/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/ConsumerRepository.java",
+    "contents_url": "https://api.github.com/repos/Temzu/studying_spring/contents/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/ConsumerRepository.java?ref=af50106b4288bfe9b3c2aa260cd7bb0b08d95032",
+    "patch": "@@ -1,7 +0,0 @@\n-package com.temzu.jpa_hiber.repositories;\n-\n-import org.springframework.stereotype.Repository;\n-\n-@Repository\n-public class ConsumerRepository {\n-}"
+  },
+  {
+    "sha": "adf3496ea599a11e865e673283b583d9519c26cf",
+    "filename": "jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/CustomerRepository.java",
+    "status": "added",
+    "additions": 63,
+    "deletions": 0,
+    "changes": 63,
+    "blob_url": "https://github.com/Temzu/studying_spring/blob/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/CustomerRepository.java",
+    "raw_url": "https://github.com/Temzu/studying_spring/raw/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/CustomerRepository.java",
+    "contents_url": "https://api.github.com/repos/Temzu/studying_spring/contents/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/CustomerRepository.java?ref=56cdce0b79e2381796e718980cefd23438974174",
+    "patch": "@@ -0,0 +1,63 @@\n+package com.temzu.jpa_hiber.repositories;\n+\n+import com.temzu.jpa_hiber.entities.Customer;\n+import org.hibernate.Session;\n+import org.hibernate.SessionFactory;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.stereotype.Repository;\n+\n+import javax.persistence.EntityManagerFactory;\n+import java.util.List;\n+\n+@Repository\n+public class CustomerRepository {\n+    private SessionFactory sessionFactory;\n+\n+    @Autowired\n+    public CustomerRepository(EntityManagerFactory factory) {\n+        if(factory.unwrap(SessionFactory.class) == null){\n+            throw new NullPointerException(\"factory is not a hibernate factory\");\n+        }\n+        this.sessionFactory = factory.unwrap(SessionFactory.class);\n+    }\n+\n+    public void saveOrUpdateCustomer(Customer customer) {\n+        try (Session session = sessionFactory.getCurrentSession()) {\n+            session.beginTransaction();\n+            if (customer != null)\n+                session.saveOrUpdate(customer);\n+            session.getTransaction().commit();\n+        }\n+    }\n+\n+    public List<Customer> listCustomers() {\n+        List<Customer> customers;\n+        try (Session session = sessionFactory.getCurrentSession()) {\n+            session.beginTransaction();\n+            customers = session.createQuery(\"from Customer\").getResultList();\n+            session.getTransaction().commit();\n+        }\n+        return customers;\n+    }\n+\n+    public Customer getCustomerById(Long id) {\n+        Customer customer;\n+        try (Session session = sessionFactory.getCurrentSession()) {\n+            session.beginTransaction();\n+            customer = session.get(Customer.class, id);\n+            session.getTransaction().commit();\n+        }\n+        return customer;\n+    }\n+\n+    public void deleteCustomer(Long id) {\n+        try (Session session = sessionFactory.getCurrentSession()) {\n+            session.beginTransaction();\n+            Customer customer = session.get(Customer.class, id);\n+            if (customer != null)\n+                session.delete(customer);\n+            session.getTransaction().commit();\n+        }\n+    }\n+\n+}"
+  },
+  {
+    "sha": "7ac81382887a450bd9c29c43305fbfdfcfc4f89c",
+    "filename": "jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/ProductRepository.java",
+    "status": "modified",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/Temzu/studying_spring/blob/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/ProductRepository.java",
+    "raw_url": "https://github.com/Temzu/studying_spring/raw/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/ProductRepository.java",
+    "contents_url": "https://api.github.com/repos/Temzu/studying_spring/contents/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/repositories/ProductRepository.java?ref=56cdce0b79e2381796e718980cefd23438974174",
+    "patch": "@@ -1,4 +1,62 @@\n package com.temzu.jpa_hiber.repositories;\n \n+import com.temzu.jpa_hiber.entities.Product;\n+import org.hibernate.Session;\n+import org.hibernate.SessionFactory;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.stereotype.Repository;\n+\n+import javax.persistence.EntityManagerFactory;\n+import java.util.List;\n+\n+@Repository\n public class ProductRepository {\n+    private SessionFactory sessionFactory;\n+\n+    @Autowired\n+    public ProductRepository(EntityManagerFactory factory) {\n+        if(factory.unwrap(SessionFactory.class) == null){\n+            throw new NullPointerException(\"factory is not a hibernate factory\");\n+        }\n+        this.sessionFactory = factory.unwrap(SessionFactory.class);\n+    }\n+\n+    public void saveOrUpdateProduct(Product product) {\n+        try (Session session = sessionFactory.getCurrentSession()) {\n+            session.beginTransaction();\n+            if (product != null)\n+                session.saveOrUpdate(product);\n+            session.getTransaction().commit();\n+        }\n+    }\n+\n+    public List<Product> listProducts() {\n+        List<Product> products;\n+        try (Session session = sessionFactory.getCurrentSession()) {\n+            session.beginTransaction();\n+            products = session.createQuery(\"from Product\").getResultList();\n+            session.getTransaction().commit();\n+        }\n+        return products;\n+    }\n+\n+    public Product getProductById(Long id) {\n+        Product product;\n+        try (Session session = sessionFactory.getCurrentSession()) {\n+            session.beginTransaction();\n+            product = session.get(Product.class, id);\n+            session.getTransaction().commit();\n+        }\n+        return product;\n+    }\n+\n+    public void deleteProduct(Long id) {\n+        try (Session session = sessionFactory.getCurrentSession()) {\n+            session.beginTransaction();\n+            Product product = session.get(Product.class, id);\n+            if (product != null)\n+                session.delete(product);\n+            session.getTransaction().commit();\n+        }\n+    }\n }"
+  },
+  {
+    "sha": "ca26590a524fb90818d9e0f41ed82cd1b31b493b",
+    "filename": "jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/services/ShopService.java",
+    "status": "added",
+    "additions": 55,
+    "deletions": 0,
+    "changes": 55,
+    "blob_url": "https://github.com/Temzu/studying_spring/blob/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/services/ShopService.java",
+    "raw_url": "https://github.com/Temzu/studying_spring/raw/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/services/ShopService.java",
+    "contents_url": "https://api.github.com/repos/Temzu/studying_spring/contents/jpa_hiber_part-2/src/main/java/com/temzu/jpa_hiber/services/ShopService.java?ref=56cdce0b79e2381796e718980cefd23438974174",
+    "patch": "@@ -0,0 +1,55 @@\n+package com.temzu.jpa_hiber.services;\n+\n+import com.temzu.jpa_hiber.JpaHiberPart2Application;\n+import com.temzu.jpa_hiber.entities.Customer;\n+import com.temzu.jpa_hiber.entities.Product;\n+import com.temzu.jpa_hiber.repositories.CustomerRepository;\n+import com.temzu.jpa_hiber.repositories.ProductRepository;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.boot.SpringApplication;\n+import org.springframework.context.ConfigurableApplicationContext;\n+import org.springframework.stereotype.Service;\n+\n+import java.time.LocalDate;\n+import java.util.List;\n+import java.util.Optional;\n+import java.util.Set;\n+\n+@Service\n+public class ShopService {\n+    private ProductRepository productRepository;\n+    private CustomerRepository customerRepository;\n+\n+    @Autowired\n+    public void setProductRepository(ProductRepository productRepository) {\n+        this.productRepository = productRepository;\n+    }\n+\n+    @Autowired\n+    public void setConsumerRepository(CustomerRepository customerRepository) {\n+        this.customerRepository = customerRepository;\n+    }\n+\n+    public Set<Product> getProductsByConsumerId(Long id) {\n+        return Set.copyOf(customerRepository.getCustomerById(id).getProducts());\n+    }\n+\n+    public Set<Customer> getCustomersByProductId(Long id) {\n+        return Set.copyOf(productRepository.getProductById(id).getCustomers());\n+    }\n+\n+    public int getCostProductAtTimeOfPurchase(Long id, LocalDate localDate) {\n+        return 2;\n+    }\n+\n+    private static ConfigurableApplicationContext context;\n+    public static void main(String[] args) {\n+        context = SpringApplication.run(JpaHiberPart2Application.class, args);\n+        ShopService shopService = context.getBean(ShopService.class);\n+        System.out.println(shopService.getCustomersByProductId(1L));\n+        System.out.println(shopService.getProductsByConsumerId(3L));\n+        System.out.println(shopService.getProductsByConsumerId(4L));\n+\n+    }\n+\n+}"
+  },
+  {
+    "sha": "a6af56960026b60468f3e4b1b5341e85b77c3141",
+    "filename": "jpa_hiber_part-2/src/main/resources/PostgreSQL.txt",
+    "status": "added",
+    "additions": 64,
+    "deletions": 0,
+    "changes": 64,
+    "blob_url": "https://github.com/Temzu/studying_spring/blob/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/resources/PostgreSQL.txt",
+    "raw_url": "https://github.com/Temzu/studying_spring/raw/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/resources/PostgreSQL.txt",
+    "contents_url": "https://api.github.com/repos/Temzu/studying_spring/contents/jpa_hiber_part-2/src/main/resources/PostgreSQL.txt?ref=56cdce0b79e2381796e718980cefd23438974174",
+    "patch": "@@ -0,0 +1,64 @@\n+BEGIN;\n+\n+CREATE TABLE hiber_schema.customers\n+(\n+    id bigserial,\n+    name character varying(250) NOT NULL,\n+    PRIMARY KEY (id)\n+);\n+\n+ALTER TABLE hiber_schema.customers\n+    OWNER to postgres;\n+\n+INSERT INTO hiber_schema.customers (name) VALUES ('artem'), ('vasya'), ('egor'), ('petr');\n+\n+CREATE TABLE hiber_schema.products\n+(\n+    id bigserial,\n+    title character varying(250) NOT NULL,\n+    cost integer NOT NULL,\n+    PRIMARY KEY (id)\n+);\n+\n+ALTER TABLE hiber_schema.products\n+    OWNER to postgres;\n+\n+INSERT INTO hiber_schema.products (title, cost) VALUES \n+('notebook', 350), \n+('backpack', 2000), \n+('pen', 100), \n+('pencil', 50);\n+\n+CREATE TABLE hiber_schema.customers_products\n+(\n+    customer_id bigint NOT NULL,\n+    product_id bigint NOT NULL,\n+    cost numeric(6, 2) NOT NULL,\n+    date date NOT NULL,\n+    CONSTRAINT fk_customer FOREIGN KEY (customer_id)\n+        REFERENCES hiber_schema.customers (id) MATCH SIMPLE\n+        ON UPDATE NO ACTION\n+        ON DELETE NO ACTION\n+        NOT VALID,\n+    CONSTRAINT fk_product FOREIGN KEY (product_id)\n+        REFERENCES hiber_schema.products (id) MATCH SIMPLE\n+        ON UPDATE NO ACTION\n+        ON DELETE NO ACTION\n+        NOT VALID\n+);\n+\n+ALTER TABLE hiber_schema.customers_products\n+    OWNER to postgres;\n+\n+INSERT INTO hiber_schema.customers_products (customer_id, product_id, cost, date) \n+VALUES \n+(3, 1, 100, '2013-06-01'), \n+(3, 2, 1200, '2013-06-01'), \n+(3, 1, 200, '2016-08-01'), \n+(3, 4, 35, '2016-06-01'),\n+(3, 1, 235, '2019-06-01'),\n+(3, 2, 1800, '2019-06-01'),\n+(4, 1, 150, '2015-06-01'),\n+(3, 3, 70, '2015-06-01');\n+\n+COMIT;\n\\ No newline at end of file"
+  },
+  {
+    "sha": "27c9f779b502a01739b001fb9fcab1ab375b5730",
+    "filename": "jpa_hiber_part-2/src/main/resources/application.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/Temzu/studying_spring/blob/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/resources/application.properties",
+    "raw_url": "https://github.com/Temzu/studying_spring/raw/56cdce0b79e2381796e718980cefd23438974174/jpa_hiber_part-2/src/main/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/Temzu/studying_spring/contents/jpa_hiber_part-2/src/main/resources/application.properties?ref=56cdce0b79e2381796e718980cefd23438974174",
+    "patch": "@@ -1,3 +1,4 @@\n+server.port=8189\n spring.datasource.driver-class-name=org.postgresql.Driver\n spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?currentSchema=hiber_schema\n spring.datasource.username=postgres"
+  }
+]

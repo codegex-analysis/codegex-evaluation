@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "e4e7a731b47692ece100d4cf1022dd04c8158142",
+    "filename": "src/main/java/ch/njol/skript/util/chat/ChatMessages.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 5,
+    "changes": 17,
+    "blob_url": "https://github.com/SkriptLang/Skript/blob/870e6261e90290b0f8005d5a837fe6b430c510bc/src/main/java/ch/njol/skript/util/chat/ChatMessages.java",
+    "raw_url": "https://github.com/SkriptLang/Skript/raw/870e6261e90290b0f8005d5a837fe6b430c510bc/src/main/java/ch/njol/skript/util/chat/ChatMessages.java",
+    "contents_url": "https://api.github.com/repos/SkriptLang/Skript/contents/src/main/java/ch/njol/skript/util/chat/ChatMessages.java?ref=870e6261e90290b0f8005d5a837fe6b430c510bc",
+    "patch": "@@ -506,11 +506,18 @@ public static String stripStyles(String text) {\n \t\t}\n \t\tString plain = sb.toString();\n \t\t\n-\t\t// To be extra safe, strip <, >, § and &; protects against bugs in parser\n-\t\tif (Utils.HEX_SUPPORTED) // Strip '§x'\n-\t\t\tplain = plain.replace(\"§x\", \"\");\n-\t\tplain = plain.replace(\"<\", \"\").replace(\">\", \"\").replace(\"§\", \"\").replace(\"&\", \"\");\n+\t\t// To be extra safe, strip valid <, >, §, &; protects against bugs in parser\n+\t\tif (Utils.HEX_SUPPORTED) // Strip '§x', '&x'\n+\t\t\tplain = plain.replace(\"[§&]x\", \"\");\n+\t\t/*\n+\t\t\t1st Replace: strips json\n+\t\t\t2nd Replace: strips colors using <color name> (Note: this regex expr repalce any two words surrounded by <> such as <any text>)\n+\t\t\t3rd Replace: strips colors & or §\n+\t\t*/\n+\t\tplain = plain.replaceAll(\"<(link|url|run command|suggest command|tooltip):(.*?)>\", \"$2\").replaceAll(\"<\\\\w+? ?\\\\w+?>\", \"\").replaceAll(\"(?i)[&§][0-9a-folkrnm]\", \"\");\n+\n+\n \t\tassert plain != null;\n \t\treturn plain;\n \t}\n-}\n+}\n\\ No newline at end of file"
+  }
+]

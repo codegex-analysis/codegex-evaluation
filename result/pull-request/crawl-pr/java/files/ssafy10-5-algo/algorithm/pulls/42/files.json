@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "c1fa4a967786907bf4ffe442876242a4ccc5e894",
+    "filename": "BOJ/[BOJ]16562_친구비/BOJ16562.java",
+    "status": "added",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/ssafy10-5-algo/algorithm/blob/e9a99c2ed8b63a4c14900bf920f1090e9b813f4c/BOJ/%5BBOJ%5D16562_%EC%B9%9C%EA%B5%AC%EB%B9%84/BOJ16562.java",
+    "raw_url": "https://github.com/ssafy10-5-algo/algorithm/raw/e9a99c2ed8b63a4c14900bf920f1090e9b813f4c/BOJ/%5BBOJ%5D16562_%EC%B9%9C%EA%B5%AC%EB%B9%84/BOJ16562.java",
+    "contents_url": "https://api.github.com/repos/ssafy10-5-algo/algorithm/contents/BOJ/%5BBOJ%5D16562_%EC%B9%9C%EA%B5%AC%EB%B9%84/BOJ16562.java?ref=e9a99c2ed8b63a4c14900bf920f1090e9b813f4c",
+    "patch": "@@ -0,0 +1,58 @@\n+import java.util.*;\n+import java.io.*;\n+\n+public class BOJ16562 {\n+    static int N, M, k, v, w;\n+    static int[] friends, fee;\n+\n+    public static void main(String[] args) throws Exception{\n+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n+        StringTokenizer st = new StringTokenizer(br.readLine());\n+        N = Integer.parseInt(st.nextToken());\n+        M = Integer.parseInt(st.nextToken());\n+        k = Integer.parseInt(st.nextToken());\n+\n+        friends = new int[N+1];\n+        fee = new int[N+1];\n+        st = new StringTokenizer(br.readLine());\n+        for (int i = 1; i <= N; i++) {\n+            friends[i] = i;\n+            fee[i] = Integer.parseInt(st.nextToken());\n+        }\n+\n+        for (int i = 0; i < M; i++) {\n+            st = new StringTokenizer(br.readLine());\n+            v = Integer.parseInt(st.nextToken());\n+            w = Integer.parseInt(st.nextToken());\n+            union(v, w);\n+        }\n+\n+        int sum = 0;\n+        for (int i = 1; i <= N; i++) {\n+            if (friends[i] == i) sum += fee[i];\n+        }\n+\n+        if (sum <= k) System.out.print(sum);\n+        else System.out.print(\"Oh no\");\n+    }\n+\n+    static int find(int x) {\n+        if (friends[x] == x) return x;\n+        return find(friends[x]);\n+    }\n+\n+    static void union(int x, int y) {\n+        int rx = find(x);\n+        int ry = find(y);\n+\n+        int min1 = Math.min(fee[rx], fee[ry]);\n+        int min2 = Math.min(fee[x], fee[y]);\n+\n+        fee[rx] = Math.min(min1, min2);\n+        fee[ry] = fee[rx];\n+\n+        if (rx == ry) return;\n+        if (rx > ry) friends[ry] = rx;\n+        else friends[rx] = ry;\n+    }\n+}"
+  },
+  {
+    "sha": "b02dd6016d5d8eb4660cc8184a682309782ee8fa",
+    "filename": "BOJ/[BOJ]16562_친구비/README.md",
+    "status": "added",
+    "additions": 55,
+    "deletions": 0,
+    "changes": 55,
+    "blob_url": "https://github.com/ssafy10-5-algo/algorithm/blob/e9a99c2ed8b63a4c14900bf920f1090e9b813f4c/BOJ/%5BBOJ%5D16562_%EC%B9%9C%EA%B5%AC%EB%B9%84/README.md",
+    "raw_url": "https://github.com/ssafy10-5-algo/algorithm/raw/e9a99c2ed8b63a4c14900bf920f1090e9b813f4c/BOJ/%5BBOJ%5D16562_%EC%B9%9C%EA%B5%AC%EB%B9%84/README.md",
+    "contents_url": "https://api.github.com/repos/ssafy10-5-algo/algorithm/contents/BOJ/%5BBOJ%5D16562_%EC%B9%9C%EA%B5%AC%EB%B9%84/README.md?ref=e9a99c2ed8b63a4c14900bf920f1090e9b813f4c",
+    "patch": "@@ -0,0 +1,55 @@\n+# [백준 16562번: 친구비 💵](https://www.acmicpc.net/problem/16562)\n+\n+### sudo ✍\n+최근 union-find 알고리즘을 배워서 그걸로 호다닥! 5분 컷! 했다 😁😁  \n+매일 이렇게 아는 알고리즘만 나오면 을매나 좋게요!  \n+\n+<br/>\n+\n+#### 아이디어  \n+1. 연결된 친구인지 조사해본다.\n+2. 연결되지 않았다면 서로 연결해준다.\n+3. 연결된 친구들의 최소 비용을 갱신한다.\n+4. 서로 친구인 사람 무리들의 친구 비용 합을 구한다.\n+5. 친구 비용 합이 준석이 돈 보다 크면 \"Oh no\" 출력 아니면 비용의 합 출력\n+\n+<br/>\n+\n+### algorithm 💻  \n+1. 연결된 친구인지 조사\n+2. 연결되지 않았다면 서로 연결해준다.\n+    ```java\n+    int rx = find(x);\n+    int ry = find(y);\n+\n+    if (rx == ry) return;\n+    if (rx > ry) friends[ry] = rx;\n+    else friends[rx] = ry;\n+    ```\n+\n+3. 연결된 친구들의 최소 비용을 갱신한다.\n+    ```java\n+    int rx = find(x);\n+    int ry = find(y);\n+\n+    int min1 = Math.min(fee[rx], fee[ry]);\n+    int min2 = Math.min(fee[x], fee[y]);\n+\n+    fee[rx] = Math.min(min1, min2);\n+    fee[ry] = fee[rx];\n+    ```\n+\n+4. 각 친구 무리의 비용 합을 구한다.  \n+    ```java\n+    for (int i = 1; i <= N; i++) {\n+        if (friends[i] == i) sum += fee[i];\n+    }\n+    ```\n+\n+5. 답 출력\n+    준석이 돈보다 크면 \"Oh no\" 출력 \n+    준석이 돈보다 작거나 같으면 비용의 합 출력\n+\n+\n+### 추가! 🌵  \n+Union-Find 개념은 티스토리에 따로 정리해서 올려야겠다! 그리고 리드미에 추가해야징!\n\\ No newline at end of file"
+  }
+]

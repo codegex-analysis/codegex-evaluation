@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "2d7eb42bb35912cee324a7fee3d98e6cad9db1d4",
+    "filename": "dropwizard-auth/src/main/java/io/dropwizard/auth/AuthorizationContext.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/dropwizard/dropwizard/blob/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/main/java/io/dropwizard/auth/AuthorizationContext.java",
+    "raw_url": "https://github.com/dropwizard/dropwizard/raw/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/main/java/io/dropwizard/auth/AuthorizationContext.java",
+    "contents_url": "https://api.github.com/repos/dropwizard/dropwizard/contents/dropwizard-auth/src/main/java/io/dropwizard/auth/AuthorizationContext.java?ref=dcf0c879e91f71ac85ef2d69941a832f79bbd2ae",
+    "patch": "@@ -6,7 +6,7 @@\n import javax.annotation.Nullable;\n import javax.ws.rs.container.ContainerRequestContext;\n \n-class AuthorizationContext<P extends Principal> {\n+public abstract class AuthorizationContext<P extends Principal> {\n     private final P principal;\n     private final String role;\n     private final @Nullable"
+  },
+  {
+    "sha": "53322d705c902cce74889da85f7a12354cb7766b",
+    "filename": "dropwizard-auth/src/main/java/io/dropwizard/auth/Authorizer.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/dropwizard/dropwizard/blob/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/main/java/io/dropwizard/auth/Authorizer.java",
+    "raw_url": "https://github.com/dropwizard/dropwizard/raw/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/main/java/io/dropwizard/auth/Authorizer.java",
+    "contents_url": "https://api.github.com/repos/dropwizard/dropwizard/contents/dropwizard-auth/src/main/java/io/dropwizard/auth/Authorizer.java?ref=dcf0c879e91f71ac85ef2d69941a832f79bbd2ae",
+    "patch": "@@ -34,4 +34,15 @@\n     default boolean authorize(P principal, String role, @Nullable ContainerRequestContext requestContext) {\n         return authorize(principal, role);\n     }\n+\n+    /**\n+     * Returns an {@link AuthorizationContext} object, to be used in {@link CachingAuthorizer} as cache key.\n+     * @param principal      a {@link Principal} object, representing a user\n+     * @param role           a user role\n+     * @param requestContext a request context.\n+     * @return {@link AuthorizationContext} object, to be used in {@link CachingAuthorizer}.\n+     */\n+    default AuthorizationContext<P> getAuthorizationContext(P principal, String role, @Nullable ContainerRequestContext requestContext) {\n+        return new DefaultAuthorizationContext<>(principal, role, requestContext);\n+    }\n }"
+  },
+  {
+    "sha": "2e9a856c77e6cbe373c1f91cb86b03e02ab778fa",
+    "filename": "dropwizard-auth/src/main/java/io/dropwizard/auth/CachingAuthorizer.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 2,
+    "changes": 9,
+    "blob_url": "https://github.com/dropwizard/dropwizard/blob/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/main/java/io/dropwizard/auth/CachingAuthorizer.java",
+    "raw_url": "https://github.com/dropwizard/dropwizard/raw/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/main/java/io/dropwizard/auth/CachingAuthorizer.java",
+    "contents_url": "https://api.github.com/repos/dropwizard/dropwizard/contents/dropwizard-auth/src/main/java/io/dropwizard/auth/CachingAuthorizer.java?ref=dcf0c879e91f71ac85ef2d69941a832f79bbd2ae",
+    "patch": "@@ -112,7 +112,7 @@ public boolean authorize(P principal, String role) {\n     @Override\n     public boolean authorize(P principal, String role, @Nullable ContainerRequestContext requestContext) {\n         try (Timer.Context context = getsTimer.time()) {\n-            final AuthorizationContext<P> cacheKey = new AuthorizationContext<>(principal, role, requestContext);\n+            final AuthorizationContext<P> cacheKey = getAuthorizationContext(principal, role, requestContext);\n             final Boolean result = cache.get(cacheKey);\n             return result == null ? false : result;\n         } catch (CompletionException e) {\n@@ -127,6 +127,11 @@ public boolean authorize(P principal, String role, @Nullable ContainerRequestCon\n         }\n     }\n \n+    @Override\n+    public AuthorizationContext<P> getAuthorizationContext(P principal, String role, @Nullable ContainerRequestContext requestContext) {\n+        return underlying.getAuthorizationContext(principal, role, requestContext);\n+    }\n+\n     /**\n      * Discards any cached role associations for the given principal and role.\n      *\n@@ -135,7 +140,7 @@ public boolean authorize(P principal, String role, @Nullable ContainerRequestCon\n      * @param requestContext\n      */\n     public void invalidate(P principal, String role, ContainerRequestContext requestContext) {\n-        cache.invalidate(new AuthorizationContext<>(principal, role, requestContext));\n+        cache.invalidate(getAuthorizationContext(principal, role, requestContext));\n     }\n \n     /**"
+  },
+  {
+    "sha": "fcc25d683e8e69c1529493b2348402b0f351631d",
+    "filename": "dropwizard-auth/src/main/java/io/dropwizard/auth/DefaultAuthorizationContext.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/dropwizard/dropwizard/blob/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/main/java/io/dropwizard/auth/DefaultAuthorizationContext.java",
+    "raw_url": "https://github.com/dropwizard/dropwizard/raw/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/main/java/io/dropwizard/auth/DefaultAuthorizationContext.java",
+    "contents_url": "https://api.github.com/repos/dropwizard/dropwizard/contents/dropwizard-auth/src/main/java/io/dropwizard/auth/DefaultAuthorizationContext.java?ref=dcf0c879e91f71ac85ef2d69941a832f79bbd2ae",
+    "patch": "@@ -0,0 +1,12 @@\n+package io.dropwizard.auth;\n+\n+import java.security.Principal;\n+\n+import javax.annotation.Nullable;\n+import javax.ws.rs.container.ContainerRequestContext;\n+\n+public class DefaultAuthorizationContext<P extends Principal> extends AuthorizationContext<P> {\n+    DefaultAuthorizationContext(P principal, String role, @Nullable ContainerRequestContext requestContext) {\n+        super(principal, role, requestContext);\n+    }\n+}"
+  },
+  {
+    "sha": "ee0c4743af56bd4bceaca633baa50adb0210cb2e",
+    "filename": "dropwizard-auth/src/test/java/io/dropwizard/auth/CachingAuthorizerTest.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/dropwizard/dropwizard/blob/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/test/java/io/dropwizard/auth/CachingAuthorizerTest.java",
+    "raw_url": "https://github.com/dropwizard/dropwizard/raw/dcf0c879e91f71ac85ef2d69941a832f79bbd2ae/dropwizard-auth/src/test/java/io/dropwizard/auth/CachingAuthorizerTest.java",
+    "contents_url": "https://api.github.com/repos/dropwizard/dropwizard/contents/dropwizard-auth/src/test/java/io/dropwizard/auth/CachingAuthorizerTest.java?ref=dcf0c879e91f71ac85ef2d69941a832f79bbd2ae",
+    "patch": "@@ -13,6 +13,7 @@\n import static org.assertj.core.api.Assertions.assertThat;\n import static org.assertj.core.api.Assertions.assertThatNullPointerException;\n import static org.mockito.ArgumentMatchers.any;\n+import static org.mockito.ArgumentMatchers.eq;\n import static org.mockito.Mockito.anyString;\n import static org.mockito.Mockito.inOrder;\n import static org.mockito.Mockito.mock;\n@@ -33,10 +34,14 @@\n     private final Principal principal2 = new PrincipalImpl(\"principal2\");\n     private final String role = \"popular_kids\";\n     private final ContainerRequestContext requestContext = mock(ContainerRequestContext.class);\n+    private final AuthorizationContext<Principal> authorizationContext = new DefaultAuthorizationContext<>(principal, role, requestContext);\n+    private final AuthorizationContext<Principal> authorizationContext2 = new DefaultAuthorizationContext<>(principal2, role, requestContext);\n \n     @BeforeEach\n     public void setUp() throws Exception {\n         when(underlying.authorize(any(), anyString(), any())).thenReturn(true);\n+        when(underlying.getAuthorizationContext(eq(principal), anyString(), any())).thenReturn(authorizationContext);\n+        when(underlying.getAuthorizationContext(eq(principal2), anyString(), any())).thenReturn(authorizationContext2);\n     }\n \n     @Test"
+  }
+]

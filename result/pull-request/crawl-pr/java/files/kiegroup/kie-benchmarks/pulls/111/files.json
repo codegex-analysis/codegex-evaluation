@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "1612a0be37d72a6092bb80c4739d308f5d0c3912",
+    "filename": "jbpm-benchmarks/jbpm-performance-tests-jmh/src/main/java/org/jbpm/test/performance/scenario/load/LParallelGatewayTwoTimesProcess.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/kiegroup/kie-benchmarks/blob/518b9a999386163ef745940b526832629ae8b06b/jbpm-benchmarks/jbpm-performance-tests-jmh/src/main/java/org/jbpm/test/performance/scenario/load/LParallelGatewayTwoTimesProcess.java",
+    "raw_url": "https://github.com/kiegroup/kie-benchmarks/raw/518b9a999386163ef745940b526832629ae8b06b/jbpm-benchmarks/jbpm-performance-tests-jmh/src/main/java/org/jbpm/test/performance/scenario/load/LParallelGatewayTwoTimesProcess.java",
+    "contents_url": "https://api.github.com/repos/kiegroup/kie-benchmarks/contents/jbpm-benchmarks/jbpm-performance-tests-jmh/src/main/java/org/jbpm/test/performance/scenario/load/LParallelGatewayTwoTimesProcess.java?ref=518b9a999386163ef745940b526832629ae8b06b",
+    "patch": "@@ -54,6 +54,11 @@ public void init() {\n         jc = JBPMController.getInstance();\n         jc.addWorkItemHandler(\"Manual Task\", new ManualTaskWorkItemHandler());\n         manager = jc.createRuntimeManager(ProcessStorage.ParallelGatewayTwoTimes.getPath());\n+\n+        // It seems that something is not thread safe and this initialization helps to prevent null-pointer exception.\n+        RuntimeEngine runtimeEngine = jc.getRuntimeEngine();\n+        KieSession ksession = runtimeEngine.getKieSession();\n+        manager.disposeRuntimeEngine(runtimeEngine);\n     }\n \n     @BenchmarkMode(Mode.Throughput)"
+  },
+  {
+    "sha": "8bb5ebc7db27256ea664761d3a611bfe314ea89e",
+    "filename": "jbpm-benchmarks/kieserver-performance-tests/pom.xml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/kiegroup/kie-benchmarks/blob/518b9a999386163ef745940b526832629ae8b06b/jbpm-benchmarks/kieserver-performance-tests/pom.xml",
+    "raw_url": "https://github.com/kiegroup/kie-benchmarks/raw/518b9a999386163ef745940b526832629ae8b06b/jbpm-benchmarks/kieserver-performance-tests/pom.xml",
+    "contents_url": "https://api.github.com/repos/kiegroup/kie-benchmarks/contents/jbpm-benchmarks/kieserver-performance-tests/pom.xml?ref=518b9a999386163ef745940b526832629ae8b06b",
+    "patch": "@@ -15,7 +15,7 @@\n \n   <properties>\n     <kit.version>${version.org.kie}</kit.version>\n-    <metrics.version>3.1.0</metrics.version>\n+    <metrics.version>4.1.18</metrics.version>\n \n     <!-- >>>>>>>>>>>>>>>> Performance configuration <<<<<<<<<<<<<<<<<<<< -->\n \n@@ -50,6 +50,8 @@\n     <perfRepo.username></perfRepo.username>\n     <perfRepo.password></perfRepo.password>\n \n+    <testUIDSuffix></testUIDSuffix>\n+\n     <!-- Measure - MemoryUsage,FileDescriptors,ThreadStates -->\n     <measure>MemoryUsage,FileDescriptors,ThreadStates</measure>\n \n@@ -188,6 +190,8 @@\n             <argument>-DperfRepo.username=${perfRepo.username}</argument>\n             <argument>-DperfRepo.password=${perfRepo.password}</argument>\n \n+            <argument>-DtestUIDSuffix=${testUIDSuffix}</argument>\n+\n             <argument>-DremoteAPI=${remoteAPI}</argument>\n             <argument>-Dkieserver.username=${kieserver.username}</argument>\n             <argument>-Dkieserver.password=${kieserver.password}</argument>"
+  },
+  {
+    "sha": "97d095eb4244e1957337a801d6d1fe5da550574f",
+    "filename": "jbpm-benchmarks/kieserver-performance-tests/run.sh",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/kiegroup/kie-benchmarks/blob/518b9a999386163ef745940b526832629ae8b06b/jbpm-benchmarks/kieserver-performance-tests/run.sh",
+    "raw_url": "https://github.com/kiegroup/kie-benchmarks/raw/518b9a999386163ef745940b526832629ae8b06b/jbpm-benchmarks/kieserver-performance-tests/run.sh",
+    "contents_url": "https://api.github.com/repos/kiegroup/kie-benchmarks/contents/jbpm-benchmarks/kieserver-performance-tests/run.sh?ref=518b9a999386163ef745940b526832629ae8b06b",
+    "patch": "@@ -95,6 +95,11 @@ then\n   PARAMS=\"$PARAMS -DperfRepo.password=$perfRepo_password\"\n fi\n \n+if [ -n \"$testUIDSuffix\" ]\n+then\n+  PARAMS=\"$PARAMS -DtestUIDSuffix=$testUIDSuffix\"\n+fi\n+\n if [ -n \"$remoteAPI\" ]\n then\n   PARAMS=\"$PARAMS -DremoteAPI=$remoteAPI\""
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "19a5a0784c5a332b1b2d0e66ad5c7907ea683034",
+    "filename": ".github/workflows/docker.yml",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/finos/legend-sdlc/blob/af6a9902c61f6f65705e0fd73c379ae51945dc96/.github/workflows/docker.yml",
+    "raw_url": "https://github.com/finos/legend-sdlc/raw/af6a9902c61f6f65705e0fd73c379ae51945dc96/.github/workflows/docker.yml",
+    "contents_url": "https://api.github.com/repos/finos/legend-sdlc/contents/.github/workflows/docker.yml?ref=af6a9902c61f6f65705e0fd73c379ae51945dc96",
+    "patch": "@@ -0,0 +1,29 @@\n+name: Docker\n+\n+on:\n+  push:\n+    branches:\n+      - master\n+  pull_request:\n+    branches:\n+      - \"**\"\n+\n+jobs:\n+  release:\n+    name: Run Image Checks\n+    runs-on: ubuntu-latest\n+    steps:\n+      - name: Checkout code\n+        uses: actions/checkout@v2\n+      - name: Build simplified Docker image for checks\n+        # NOTE: if this gets more complicated, consider having this as a bash script\n+        run: mkdir -p ./legend-sdlc-server/target && touch ./legend-sdlc-server/target/legend-sdlc-server-dummy-shaded.jar && docker build --quiet --tag local/legend-sdlc-server:${{ github.sha }} ./legend-sdlc-server\n+      - name: Scan image for security issues\n+        uses: Azure/container-scan@v0\n+        env:\n+          # Skip `won't fix` CVEs\n+          # See https://github.com/Azure/container-scan/issues/61\n+          TRIVY_IGNORE_UNFIXED: true\n+        with:\n+          image-name: local/legend-sdlc-server:${{ github.sha }}\n+          severity-threshold: CRITICAL"
+  },
+  {
+    "sha": "b23190c4b209402b8d5daac10697c357f616a919",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 22,
+    "changes": 32,
+    "blob_url": "https://github.com/finos/legend-sdlc/blob/af6a9902c61f6f65705e0fd73c379ae51945dc96/.gitignore",
+    "raw_url": "https://github.com/finos/legend-sdlc/raw/af6a9902c61f6f65705e0fd73c379ae51945dc96/.gitignore",
+    "contents_url": "https://api.github.com/repos/finos/legend-sdlc/contents/.gitignore?ref=af6a9902c61f6f65705e0fd73c379ae51945dc96",
+    "patch": "@@ -1,29 +1,17 @@\n-.DS_Store\n+# OS\n+.DS_STORE\n+*.swp\n+*~\n+[Dd]esktop.ini\n+Thumbs.db\n \n-# Docusaurus generated folders\n-website/translated_docs/\n-website/build/\n-website/i18n/\n-\n-# Yarn build\n-website/node_modules/\n-\n-# Generated docs\n-docs/contributing.md\n-\n-# We use YARN\n-website/package-lock.json\n-\n-# Project and build files\n+# IDE\n .idea/**\n **/*.iml\n+\n+# Build\n **/target\n **/lib\n **/surefire-reports-aggregate\n **/dependency-reduced-pom.xml\n-\n-# VS Code\n-.vscode\n-.classpath\n-.settings\n-.project\n\\ No newline at end of file\n+/logs"
+  },
+  {
+    "sha": "2cbb271bec089f377a169bafe4cc2c28be3c4101",
+    "filename": "legend-sdlc-server-shared/src/main/java/org/finos/legend/sdlc/server/auth/LegendSDLCWebFilter.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/finos/legend-sdlc/blob/af6a9902c61f6f65705e0fd73c379ae51945dc96/legend-sdlc-server-shared/src/main/java/org/finos/legend/sdlc/server/auth/LegendSDLCWebFilter.java",
+    "raw_url": "https://github.com/finos/legend-sdlc/raw/af6a9902c61f6f65705e0fd73c379ae51945dc96/legend-sdlc-server-shared/src/main/java/org/finos/legend/sdlc/server/auth/LegendSDLCWebFilter.java",
+    "contents_url": "https://api.github.com/repos/finos/legend-sdlc/contents/legend-sdlc-server-shared/src/main/java/org/finos/legend/sdlc/server/auth/LegendSDLCWebFilter.java?ref=af6a9902c61f6f65705e0fd73c379ae51945dc96",
+    "patch": "@@ -219,7 +219,7 @@ public static Cookie getSessionCookie(HttpServletRequest httpRequest)\n     public static void setSessionCookie(HttpServletResponse httpResponse, Session session)\n     {\n         // TODO should we make this Secure and HttpOnly?\n-        String value = SESSION_TOKEN_COOKIE_NAME + \"=\" + session.encode() + \"; path=/\";\n+        String value = SESSION_TOKEN_COOKIE_NAME + \"=\" + session.encode() + \"; path=/; SameSite=None\";\n         httpResponse.setHeader(\"Set-Cookie\", value);\n     }\n "
+  },
+  {
+    "sha": "6f938d599ee0221a27062534f19831bda820ab6d",
+    "filename": "legend-sdlc-server/Dockerfile",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/finos/legend-sdlc/blob/af6a9902c61f6f65705e0fd73c379ae51945dc96/legend-sdlc-server/Dockerfile",
+    "raw_url": "https://github.com/finos/legend-sdlc/raw/af6a9902c61f6f65705e0fd73c379ae51945dc96/legend-sdlc-server/Dockerfile",
+    "contents_url": "https://api.github.com/repos/finos/legend-sdlc/contents/legend-sdlc-server/Dockerfile?ref=af6a9902c61f6f65705e0fd73c379ae51945dc96",
+    "patch": "@@ -1,3 +1,3 @@\n-FROM openjdk:11\n+FROM openjdk:11.0.10\n COPY target/legend-sdlc-server-*-shaded.jar /app/bin/\n CMD java -XX:+ExitOnOutOfMemoryError -XX:MaxRAMPercentage=60 -Xss4M -cp /app/bin/*.jar -Dfile.encoding=UTF8 org.finos.legend.sdlc.server.LegendSDLCServer server /config/config.json"
+  }
+]

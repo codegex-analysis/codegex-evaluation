@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "d662fa62d2c0b0fdaa51cf4289bad5a27ef79f4f",
+    "filename": "src/main/java/com/google/devtools/build/lib/rules/java/JavaRuntimeInfo.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/bazelbuild/bazel/blob/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/rules/java/JavaRuntimeInfo.java",
+    "raw_url": "https://github.com/bazelbuild/bazel/raw/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/rules/java/JavaRuntimeInfo.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel/contents/src/main/java/com/google/devtools/build/lib/rules/java/JavaRuntimeInfo.java?ref=5b164634da76909e9c30d6019f01a8d8c56b695c",
+    "patch": "@@ -69,7 +69,7 @@ public static JavaRuntimeInfo from(RuleContext ruleContext) {\n   }\n \n   @Nullable\n-  private static JavaRuntimeInfo from(RuleContext ruleContext, String attributeName) {\n+  static JavaRuntimeInfo from(RuleContext ruleContext, String attributeName) {\n     if (!ruleContext.attributes().has(attributeName, BuildType.LABEL)) {\n       return null;\n     }"
+  },
+  {
+    "sha": "f122eb1b8c0d55093432fb47b0dfa0a4c8a6e0c9",
+    "filename": "src/main/java/com/google/devtools/build/lib/rules/java/JavaStarlarkCommon.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/bazelbuild/bazel/blob/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/rules/java/JavaStarlarkCommon.java",
+    "raw_url": "https://github.com/bazelbuild/bazel/raw/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/rules/java/JavaStarlarkCommon.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel/contents/src/main/java/com/google/devtools/build/lib/rules/java/JavaStarlarkCommon.java?ref=5b164634da76909e9c30d6019f01a8d8c56b695c",
+    "patch": "@@ -182,7 +182,7 @@ public JavaInfo makeNonStrict(JavaInfo javaInfo) {\n \n   @Override\n   public Provider getJavaToolchainProvider() {\n-    return ToolchainInfo.PROVIDER;\n+    return JavaToolchainProvider.PROVIDER;\n   }\n \n   @Override"
+  },
+  {
+    "sha": "63bc5526a9ba81c30dfccf4383aa23f7c5f566a1",
+    "filename": "src/main/java/com/google/devtools/build/lib/rules/java/JavaToolchain.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/bazelbuild/bazel/blob/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/rules/java/JavaToolchain.java",
+    "raw_url": "https://github.com/bazelbuild/bazel/raw/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/rules/java/JavaToolchain.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel/contents/src/main/java/com/google/devtools/build/lib/rules/java/JavaToolchain.java?ref=5b164634da76909e9c30d6019f01a8d8c56b695c",
+    "patch": "@@ -104,8 +104,7 @@ public ConfiguredTarget create(RuleContext ruleContext)\n \n     FilesToRunProvider jacocoRunner = ruleContext.getExecutablePrerequisite(\"jacocorunner\");\n \n-    JavaRuntimeInfo javaRuntime =\n-        (JavaRuntimeInfo) ruleContext.getPrerequisite(\"java_runtime\").get(ToolchainInfo.PROVIDER);\n+    JavaRuntimeInfo javaRuntime = JavaRuntimeInfo.from(ruleContext, \"java_runtime\");\n \n     JavaToolchainProvider provider =\n         JavaToolchainProvider.create(\n@@ -136,10 +135,13 @@ public ConfiguredTarget create(RuleContext ruleContext)\n             proguardAllowlister,\n             semantics,\n             javaRuntime);\n+    ToolchainInfo toolchainInfo =\n+        new ToolchainInfo(ImmutableMap.<String, Object>builder().put(\"java\", provider).build());\n     RuleConfiguredTargetBuilder builder =\n         new RuleConfiguredTargetBuilder(ruleContext)\n             .addStarlarkTransitiveInfo(JavaToolchainProvider.LEGACY_NAME, provider)\n             .addNativeDeclaredProvider(provider)\n+            .addNativeDeclaredProvider(toolchainInfo)\n             .addProvider(RunfilesProvider.class, RunfilesProvider.simple(Runfiles.EMPTY))\n             .setFilesToBuild(new NestedSetBuilder<Artifact>(Order.STABLE_ORDER).build());\n "
+  },
+  {
+    "sha": "984991c83711ccff4fa7eab22df037e87bd7c15e",
+    "filename": "src/main/java/com/google/devtools/build/lib/rules/java/JavaToolchainProvider.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 6,
+    "changes": 28,
+    "blob_url": "https://github.com/bazelbuild/bazel/blob/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/rules/java/JavaToolchainProvider.java",
+    "raw_url": "https://github.com/bazelbuild/bazel/raw/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/rules/java/JavaToolchainProvider.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel/contents/src/main/java/com/google/devtools/build/lib/rules/java/JavaToolchainProvider.java?ref=5b164634da76909e9c30d6019f01a8d8c56b695c",
+    "patch": "@@ -17,7 +17,6 @@\n \n import com.google.common.collect.ImmutableList;\n import com.google.common.collect.ImmutableListMultimap;\n-import com.google.common.collect.ImmutableMap;\n import com.google.common.collect.ImmutableSet;\n import com.google.devtools.build.lib.actions.Artifact;\n import com.google.devtools.build.lib.analysis.FilesToRunProvider;\n@@ -30,21 +29,28 @@\n import com.google.devtools.build.lib.collect.nestedset.Depset;\n import com.google.devtools.build.lib.collect.nestedset.NestedSet;\n import com.google.devtools.build.lib.concurrent.ThreadSafety.Immutable;\n+import com.google.devtools.build.lib.packages.BuiltinProvider;\n+import com.google.devtools.build.lib.packages.NativeInfo;\n+import com.google.devtools.build.lib.packages.Provider;\n import com.google.devtools.build.lib.skyframe.serialization.autocodec.AutoCodec;\n import com.google.devtools.build.lib.skyframe.serialization.autocodec.AutoCodec.VisibleForSerialization;\n import com.google.devtools.build.lib.starlarkbuildapi.java.JavaToolchainStarlarkApiProviderApi;\n import java.util.Iterator;\n import javax.annotation.Nullable;\n+import net.starlark.java.eval.EvalException;\n import net.starlark.java.eval.Sequence;\n import net.starlark.java.eval.StarlarkList;\n-import net.starlark.java.syntax.Location;\n \n /** Information about the JDK used by the <code>java_*</code> rules. */\n @Immutable\n @AutoCodec\n-public class JavaToolchainProvider extends ToolchainInfo\n+public class JavaToolchainProvider extends NativeInfo\n     implements JavaToolchainStarlarkApiProviderApi {\n \n+  public static final BuiltinProvider<JavaToolchainProvider> PROVIDER =\n+      new BuiltinProvider<JavaToolchainProvider>(\n+          \"JavaToolchainInfo\", JavaToolchainProvider.class) {};\n+\n   /** Returns the Java Toolchain associated with the rule being analyzed or {@code null}. */\n   public static JavaToolchainProvider from(RuleContext ruleContext) {\n     TransitiveInfoCollection prerequisite =\n@@ -59,8 +65,13 @@ public static JavaToolchainProvider from(ProviderCollection collection) {\n   private static JavaToolchainProvider from(\n       ProviderCollection collection, @Nullable RuleErrorConsumer errorConsumer) {\n     ToolchainInfo toolchainInfo = collection.get(ToolchainInfo.PROVIDER);\n-    if (toolchainInfo instanceof JavaToolchainProvider) {\n-      return (JavaToolchainProvider) toolchainInfo;\n+    try {\n+      JavaToolchainProvider provider = (JavaToolchainProvider) toolchainInfo.getValue(\"java\");\n+      if (provider != null) {\n+        return provider;\n+      }\n+    } catch (EvalException e) {\n+      // Ignore?\n     }\n     if (errorConsumer != null) {\n       errorConsumer.ruleError(\"The selected Java toolchain is not a JavaToolchainProvider\");\n@@ -183,7 +194,7 @@ public static JavaToolchainProvider create(\n       FilesToRunProvider proguardAllowlister,\n       JavaSemantics javaSemantics,\n       JavaRuntimeInfo javaRuntime) {\n-    super(ImmutableMap.of(), Location.BUILTIN);\n+    super();\n \n     this.label = label;\n     this.bootclasspath = bootclasspath;\n@@ -421,4 +432,9 @@ public Depset getStarlarkBootclasspath() {\n   public Depset getStarlarkTools() {\n     return Depset.of(Artifact.TYPE, getTools());\n   }\n+\n+  @Override\n+  public Provider getProvider() {\n+    return PROVIDER;\n+  }\n }"
+  },
+  {
+    "sha": "a475dac0091771879f9bd5fbbf2a31436f72faf3",
+    "filename": "src/main/java/com/google/devtools/build/lib/starlarkbuildapi/java/JavaToolchainStarlarkApiProviderApi.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/bazelbuild/bazel/blob/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/starlarkbuildapi/java/JavaToolchainStarlarkApiProviderApi.java",
+    "raw_url": "https://github.com/bazelbuild/bazel/raw/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/lib/starlarkbuildapi/java/JavaToolchainStarlarkApiProviderApi.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel/contents/src/main/java/com/google/devtools/build/lib/starlarkbuildapi/java/JavaToolchainStarlarkApiProviderApi.java?ref=5b164634da76909e9c30d6019f01a8d8c56b695c",
+    "patch": "@@ -18,7 +18,7 @@\n import com.google.devtools.build.lib.collect.nestedset.Depset;\n import com.google.devtools.build.lib.starlarkbuildapi.FileApi;\n import com.google.devtools.build.lib.starlarkbuildapi.FilesToRunProviderApi;\n-import com.google.devtools.build.lib.starlarkbuildapi.platform.ToolchainInfoApi;\n+import com.google.devtools.build.lib.starlarkbuildapi.core.StructApi;\n import javax.annotation.Nullable;\n import net.starlark.java.annot.StarlarkBuiltin;\n import net.starlark.java.annot.StarlarkMethod;\n@@ -34,7 +34,7 @@\n     doc =\n         \"Provides access to information about the Java toolchain rule. \"\n             + \"Accessible as a 'java_toolchain' field on a Target struct.\")\n-public interface JavaToolchainStarlarkApiProviderApi extends ToolchainInfoApi {\n+public interface JavaToolchainStarlarkApiProviderApi extends StructApi {\n \n   String LEGACY_NAME = \"java_toolchain\";\n "
+  },
+  {
+    "sha": "dda1b87c7978ec1f20b1b280c8da95287c498b3a",
+    "filename": "src/main/java/com/google/devtools/build/skydoc/fakebuildapi/java/FakeJavaToolchainStarlarkApiProviderApi.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 9,
+    "changes": 17,
+    "blob_url": "https://github.com/bazelbuild/bazel/blob/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/skydoc/fakebuildapi/java/FakeJavaToolchainStarlarkApiProviderApi.java",
+    "raw_url": "https://github.com/bazelbuild/bazel/raw/5b164634da76909e9c30d6019f01a8d8c56b695c/src/main/java/com/google/devtools/build/skydoc/fakebuildapi/java/FakeJavaToolchainStarlarkApiProviderApi.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel/contents/src/main/java/com/google/devtools/build/skydoc/fakebuildapi/java/FakeJavaToolchainStarlarkApiProviderApi.java?ref=5b164634da76909e9c30d6019f01a8d8c56b695c",
+    "patch": "@@ -18,7 +18,6 @@\n import com.google.devtools.build.lib.starlarkbuildapi.FileApi;\n import com.google.devtools.build.lib.starlarkbuildapi.FilesToRunProviderApi;\n import com.google.devtools.build.lib.starlarkbuildapi.java.JavaToolchainStarlarkApiProviderApi;\n-import net.starlark.java.eval.EvalException;\n import net.starlark.java.eval.Printer;\n import net.starlark.java.eval.Sequence;\n \n@@ -60,17 +59,17 @@ public Depset getStarlarkTools() {\n   }\n \n   @Override\n-  public String toProto() throws EvalException {\n-    return \"\";\n-  }\n+  public void repr(Printer printer) {}\n+\n+  private FakeJavaToolchainStarlarkApiProviderApi() {}\n \n   @Override\n-  public String toJson() throws EvalException {\n-    return \"\";\n+  public String toProto() {\n+    return null;\n   }\n \n   @Override\n-  public void repr(Printer printer) {}\n-\n-  private FakeJavaToolchainStarlarkApiProviderApi() {}\n+  public String toJson() {\n+    return null;\n+  }\n }"
+  },
+  {
+    "sha": "6e30e681d3a4dac4db95ceec307c12c120d3720e",
+    "filename": "src/test/java/com/google/devtools/build/lib/rules/java/JavaStarlarkApiTest.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 11,
+    "changes": 17,
+    "blob_url": "https://github.com/bazelbuild/bazel/blob/5b164634da76909e9c30d6019f01a8d8c56b695c/src/test/java/com/google/devtools/build/lib/rules/java/JavaStarlarkApiTest.java",
+    "raw_url": "https://github.com/bazelbuild/bazel/raw/5b164634da76909e9c30d6019f01a8d8c56b695c/src/test/java/com/google/devtools/build/lib/rules/java/JavaStarlarkApiTest.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel/contents/src/test/java/com/google/devtools/build/lib/rules/java/JavaStarlarkApiTest.java?ref=5b164634da76909e9c30d6019f01a8d8c56b695c",
+    "patch": "@@ -23,7 +23,6 @@\n import com.google.devtools.build.lib.actions.Artifact;\n import com.google.devtools.build.lib.actions.util.ActionsTestUtil;\n import com.google.devtools.build.lib.analysis.ConfiguredTarget;\n-import com.google.devtools.build.lib.analysis.platform.ToolchainInfo;\n import com.google.devtools.build.lib.analysis.test.InstrumentedFilesInfo;\n import com.google.devtools.build.lib.analysis.util.BuildViewTestCase;\n import com.google.devtools.build.lib.cmdline.Label;\n@@ -1853,11 +1852,9 @@ public void javaToolchainFlag_default() throws Exception {\n             configuredTarget.get(\n                 new StarlarkProvider.Key(\n                     Label.parseAbsolute(\"//foo:rule.bzl\", ImmutableMap.of()), \"result\"));\n-    Label javaToolchainLabel =\n-        ((JavaToolchainProvider)\n-                ((ConfiguredTarget) info.getValue(\"java_toolchain_label\"))\n-                    .get(ToolchainInfo.PROVIDER))\n-            .getToolchainLabel();\n+    JavaToolchainProvider javaToolchainProvider =\n+        JavaToolchainProvider.from((ConfiguredTarget) info.getValue(\"java_toolchain_label\"));\n+    Label javaToolchainLabel = javaToolchainProvider.getToolchainLabel();\n     assertWithMessage(javaToolchainLabel.toString())\n         .that(\n             javaToolchainLabel.toString().endsWith(\"jdk:remote_toolchain\")\n@@ -1896,11 +1893,9 @@ public void javaToolchainFlag_set() throws Exception {\n             configuredTarget.get(\n                 new StarlarkProvider.Key(\n                     Label.parseAbsolute(\"//foo:rule.bzl\", ImmutableMap.of()), \"result\"));\n-    Label javaToolchainLabel =\n-        ((JavaToolchainProvider)\n-                ((ConfiguredTarget) info.getValue(\"java_toolchain_label\"))\n-                    .get(ToolchainInfo.PROVIDER))\n-            .getToolchainLabel();\n+    JavaToolchainProvider javaToolchainProvider =\n+        JavaToolchainProvider.from((ConfiguredTarget) info.getValue(\"java_toolchain_label\"));\n+    Label javaToolchainLabel = javaToolchainProvider.getToolchainLabel();\n     assertThat(javaToolchainLabel.toString()).isEqualTo(\"//java/com/google/test:toolchain\");\n   }\n "
+  },
+  {
+    "sha": "dc5366f27a5f5f70060640b1c6b0e2022597c0e2",
+    "filename": "tools/jdk/java_toolchain_alias.bzl",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 2,
+    "changes": 12,
+    "blob_url": "https://github.com/bazelbuild/bazel/blob/5b164634da76909e9c30d6019f01a8d8c56b695c/tools/jdk/java_toolchain_alias.bzl",
+    "raw_url": "https://github.com/bazelbuild/bazel/raw/5b164634da76909e9c30d6019f01a8d8c56b695c/tools/jdk/java_toolchain_alias.bzl",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel/contents/tools/jdk/java_toolchain_alias.bzl?ref=5b164634da76909e9c30d6019f01a8d8c56b695c",
+    "patch": "@@ -118,12 +118,20 @@ java_runtime_version_alias = rule(\n \n def _java_toolchain_alias(ctx):\n     \"\"\"An experimental implementation of java_toolchain_alias using toolchain resolution.\"\"\"\n+    toolchain_info = None\n     if java_common.is_java_toolchain_resolution_enabled_do_not_use(ctx = ctx):\n-        toolchain = ctx.toolchains[\"@bazel_tools//tools/jdk:toolchain_type\"]\n+        toolchain_info = ctx.toolchains[\"@bazel_tools//tools/jdk:toolchain_type\"]\n+        if hasattr(toolchain_info, \"java\"):\n+            toolchain = toolchain_info.java\n+        else:\n+            toolchain = toolchain_info\n     else:\n         toolchain = ctx.attr._java_toolchain[java_common.JavaToolchainInfo]\n+    providers = [toolchain]\n+    if toolchain_info != None and toolchain_info != toolchain:\n+        providers.append(toolchain_info)\n     return struct(\n-        providers = [toolchain],\n+        providers = providers,\n         # Use the legacy provider syntax for compatibility with the native rules.\n         java_toolchain = toolchain,\n     )"
+  }
+]

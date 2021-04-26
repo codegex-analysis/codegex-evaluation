@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "164a243a88bed857548e8755d90a2467b461e168",
+    "filename": "src/main/java/net/minecraftforge/registries/ForgeRegistry.java",
+    "status": "modified",
+    "additions": 47,
+    "deletions": 0,
+    "changes": 47,
+    "blob_url": "https://github.com/MinecraftForge/MinecraftForge/blob/fc243b980c34174b79686ff11d880f3c8b74f132/src/main/java/net/minecraftforge/registries/ForgeRegistry.java",
+    "raw_url": "https://github.com/MinecraftForge/MinecraftForge/raw/fc243b980c34174b79686ff11d880f3c8b74f132/src/main/java/net/minecraftforge/registries/ForgeRegistry.java",
+    "contents_url": "https://api.github.com/repos/MinecraftForge/MinecraftForge/contents/src/main/java/net/minecraftforge/registries/ForgeRegistry.java?ref=fc243b980c34174b79686ff11d880f3c8b74f132",
+    "patch": "@@ -31,6 +31,10 @@\n import javax.annotation.Nonnull;\n import javax.annotation.Nullable;\n \n+import com.mojang.datafixers.util.Pair;\n+import com.mojang.serialization.Codec;\n+import com.mojang.serialization.DataResult;\n+import com.mojang.serialization.DynamicOps;\n import net.minecraftforge.fml.ModLoadingContext;\n import net.minecraftforge.fml.common.ObfuscationReflectionHelper;\n import net.minecraftforge.fml.loading.AdvancedLogMessageAdapter;\n@@ -101,6 +105,8 @@\n     private final ResourceLocation name;\n     private final RegistryKey<Registry<V>> key;\n     private final RegistryBuilder<V> builder;\n+    \n+    private final Codec<V> codec = new RegistryCodec();\n \n     ForgeRegistry(RegistryManager stage, ResourceLocation name, RegistryBuilder<V> builder)\n     {\n@@ -185,6 +191,11 @@ public String getTagFolder()\n         return tagFolder;\n     }\n \n+    @Override\n+    public Codec<V> getCodec() {\n+        return this.codec;\n+    }\n+\n     @Override\n     public void registerAll(@SuppressWarnings(\"unchecked\") V... values)\n     {\n@@ -839,6 +850,42 @@ public Snapshot makeSnapshot()\n         return ret;\n     }\n \n+    private class RegistryCodec implements Codec<V> {\n+        @Override\n+        public <T> DataResult<Pair<V, T>> decode(DynamicOps<T> ops, T input) {\n+            if(ops.compressMaps())\n+            {\n+                return ops.getNumberValue(input).flatMap(n ->\n+                {\n+                    int id = n.intValue();\n+                    if(ids.get(id) == null)\n+                    {\n+                        return DataResult.error(\"Unknown registry id \" + n);\n+                    }\n+                    V val = ForgeRegistry.this.getValue(id);\n+                    return DataResult.success(val);\n+                }).map(v -> Pair.of(v, input));\n+            }\n+            else\n+            {\n+                return ResourceLocation.CODEC.decode(ops, input).flatMap(keyValuePair -> !ForgeRegistry.this.containsKey(keyValuePair.getFirst()) ?\n+                        DataResult.error(\"Unknown registry key: \" + keyValuePair.getFirst()) :\n+                        DataResult.success(keyValuePair.mapFirst(ForgeRegistry.this::getValue)));\n+            }\n+        }\n+\n+        @Override\n+        public <T> DataResult<T> encode(V input, DynamicOps<T> ops, T prefix) {\n+            ResourceLocation key = getKey(input);\n+            if(key == null)\n+            {\n+                return DataResult.error(\"Unknown registry element \" + input);\n+            }\n+            T toMerge = ops.compressMaps() ? ops.createInt(getID(input)) : ops.createString(key.toString());\n+            return ops.mergeToPrimitive(prefix, toMerge);\n+        }\n+    }\n+\n     public static class Snapshot\n     {\n         private static final Comparator<ResourceLocation> sorter = (a,b) -> a.compareNamespaced(b);"
+  },
+  {
+    "sha": "598fc5c6afaacfb748301093752355c59b51caf7",
+    "filename": "src/main/java/net/minecraftforge/registries/IForgeRegistry.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/MinecraftForge/MinecraftForge/blob/fc243b980c34174b79686ff11d880f3c8b74f132/src/main/java/net/minecraftforge/registries/IForgeRegistry.java",
+    "raw_url": "https://github.com/MinecraftForge/MinecraftForge/raw/fc243b980c34174b79686ff11d880f3c8b74f132/src/main/java/net/minecraftforge/registries/IForgeRegistry.java",
+    "contents_url": "https://api.github.com/repos/MinecraftForge/MinecraftForge/contents/src/main/java/net/minecraftforge/registries/IForgeRegistry.java?ref=fc243b980c34174b79686ff11d880f3c8b74f132",
+    "patch": "@@ -25,6 +25,7 @@\n import javax.annotation.Nonnull;\n import javax.annotation.Nullable;\n \n+import com.mojang.serialization.Codec;\n import net.minecraft.util.RegistryKey;\n import net.minecraft.util.ResourceLocation;\n \n@@ -54,6 +55,8 @@\n     @Nonnull Collection<V>                 getValues();\n     @Nonnull Set<Entry<RegistryKey<V>, V>> getEntries();\n \n+    Codec<V> getCodec();\n+\n     /**\n      * Retrieve the slave map of type T from the registry.\n      * Slave maps are maps which are dependent on registry content in some way."
+  },
+  {
+    "sha": "2451b32b501f0765d6eedf2193671800d711c912",
+    "filename": "src/test/java/net/minecraftforge/debug/misc/CodecRegistryTest.java",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/MinecraftForge/MinecraftForge/blob/fc243b980c34174b79686ff11d880f3c8b74f132/src/test/java/net/minecraftforge/debug/misc/CodecRegistryTest.java",
+    "raw_url": "https://github.com/MinecraftForge/MinecraftForge/raw/fc243b980c34174b79686ff11d880f3c8b74f132/src/test/java/net/minecraftforge/debug/misc/CodecRegistryTest.java",
+    "contents_url": "https://api.github.com/repos/MinecraftForge/MinecraftForge/contents/src/test/java/net/minecraftforge/debug/misc/CodecRegistryTest.java?ref=fc243b980c34174b79686ff11d880f3c8b74f132",
+    "patch": "@@ -0,0 +1,52 @@\n+package net.minecraftforge.debug.misc;\n+\n+import com.google.gson.JsonElement;\n+import com.google.gson.JsonObject;\n+import com.google.gson.JsonParseException;\n+import com.mojang.datafixers.util.Pair;\n+import com.mojang.serialization.Codec;\n+import com.mojang.serialization.DataResult;\n+import com.mojang.serialization.JsonOps;\n+import com.mojang.serialization.RecordBuilder;\n+import com.mojang.serialization.codecs.RecordCodecBuilder;\n+import net.minecraft.block.Block;\n+import net.minecraft.block.Blocks;\n+import net.minecraft.item.Item;\n+import net.minecraft.item.Items;\n+import net.minecraft.nbt.CompoundNBT;\n+import net.minecraft.nbt.INBT;\n+import net.minecraft.nbt.NBTDynamicOps;\n+import net.minecraftforge.fml.common.Mod;\n+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;\n+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;\n+import net.minecraftforge.registries.ForgeRegistries;\n+import org.apache.logging.log4j.LogManager;\n+import org.apache.logging.log4j.Logger;\n+\n+@Mod(\"codec_registry_test\")\n+public class CodecRegistryTest {\n+\n+    private static final Logger LOGGER = LogManager.getLogger(\"Codec Registry Test\");\n+\n+    private static final Codec<Pair<Block, Item>> CODEC = RecordCodecBuilder.create(codecInstance -> codecInstance.group(\n+        ForgeRegistries.BLOCKS.getCodec().fieldOf(\"block\").forGetter(Pair::getFirst),\n+        ForgeRegistries.ITEMS.getCodec().fieldOf(\"item\").forGetter(Pair::getSecond)\n+    ).apply(codecInstance, Pair::of));\n+\n+    public CodecRegistryTest() {\n+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);\n+    }\n+\n+    public void commonSetup(final FMLCommonSetupEvent event) {\n+        JsonObject json = new JsonObject();\n+        json.addProperty(\"block\", \"minecraft:diamond_block\");\n+        json.addProperty(\"item\", \"minecraft:diamond_pickaxe\");\n+\n+        DataResult<Pair<Pair<Block, Item>, JsonElement>> result = CODEC.decode(JsonOps.INSTANCE, json);\n+        result.resultOrPartial(LOGGER::warn).ifPresent(pair -> LOGGER.info(\"Successfully decoded a diamond block and a diamond pickaxe from json to Block/Item\"));\n+\n+        Pair<Block, Item> pair = Pair.of(Blocks.DIAMOND_BLOCK, Items.DIAMOND_PICKAXE);\n+        DataResult<INBT> result2 = CODEC.encodeStart(NBTDynamicOps.INSTANCE, pair);\n+        result2.resultOrPartial(LOGGER::warn).ifPresent(inbt -> LOGGER.info(\"Successfully encoded a Pair<Block, Item> to an INBT: \" + inbt.getString()));\n+    }\n+}"
+  },
+  {
+    "sha": "43353dda0f40f0a38e7f3585edca4ff91756024a",
+    "filename": "src/test/resources/META-INF/mods.toml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/MinecraftForge/MinecraftForge/blob/fc243b980c34174b79686ff11d880f3c8b74f132/src/test/resources/META-INF/mods.toml",
+    "raw_url": "https://github.com/MinecraftForge/MinecraftForge/raw/fc243b980c34174b79686ff11d880f3c8b74f132/src/test/resources/META-INF/mods.toml",
+    "contents_url": "https://api.github.com/repos/MinecraftForge/MinecraftForge/contents/src/test/resources/META-INF/mods.toml?ref=fc243b980c34174b79686ff11d880f3c8b74f132",
+    "patch": "@@ -120,3 +120,5 @@ license=\"LGPL v2.1\"\n     modId=\"add_entity_attribute_test\"\n [[mods]]\n     modId=\"enum_argument_test\"\n+[[mods]]\n+    modId=\"codec_registry_test\""
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "3f8e8ccef9a5bada07202eb3b169b4246facd597",
+    "filename": "src/main/java/cat/udl/eps/softarch/academicrecruit/domain/Candidate.java",
+    "status": "added",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/58578357fde61b94a4dfca7fb6039710831b3697/src/main/java/cat/udl/eps/softarch/academicrecruit/domain/Candidate.java",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/58578357fde61b94a4dfca7fb6039710831b3697/src/main/java/cat/udl/eps/softarch/academicrecruit/domain/Candidate.java",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/main/java/cat/udl/eps/softarch/academicrecruit/domain/Candidate.java?ref=58578357fde61b94a4dfca7fb6039710831b3697",
+    "patch": "@@ -0,0 +1,21 @@\n+package cat.udl.eps.softarch.academicrecruit.domain;\n+\n+import lombok.Data;\n+import lombok.EqualsAndHashCode;\n+import lombok.Getter;\n+import lombok.Setter;\n+\n+import javax.persistence.*;\n+\n+@Entity\n+@Data\n+@EqualsAndHashCode(callSuper = true)\n+public class Candidate extends UriEntity<Long> {\n+\n+    @Id @GeneratedValue(strategy = GenerationType.AUTO)\n+    private Long id;\n+\n+    private String name;\n+\n+}\n+"
+  },
+  {
+    "sha": "925dbc2b4709166a047a9c947cc873a5616fd3ff",
+    "filename": "src/main/java/cat/udl/eps/softarch/academicrecruit/repository/CandidateRepository.java",
+    "status": "added",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/58578357fde61b94a4dfca7fb6039710831b3697/src/main/java/cat/udl/eps/softarch/academicrecruit/repository/CandidateRepository.java",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/58578357fde61b94a4dfca7fb6039710831b3697/src/main/java/cat/udl/eps/softarch/academicrecruit/repository/CandidateRepository.java",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/main/java/cat/udl/eps/softarch/academicrecruit/repository/CandidateRepository.java?ref=58578357fde61b94a4dfca7fb6039710831b3697",
+    "patch": "@@ -0,0 +1,15 @@\n+package cat.udl.eps.softarch.academicrecruit.repository;\n+import cat.udl.eps.softarch.academicrecruit.domain.Candidate;\n+import org.springframework.data.repository.PagingAndSortingRepository;\n+import org.springframework.data.rest.core.annotation.RepositoryRestResource;\n+@RepositoryRestResource\n+public interface CandidateRepository extends PagingAndSortingRepository<Candidate, Long> {\n+\n+    /* Interface provides automatically, as defined in https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/repository/PagingAndSortingRepository.html\n+     * count, delete, deleteAll, deleteById, existsById, findAll, findAllById, findById, save, saveAll\n+     *\n+     * Additional methods following the syntax defined in\n+     * https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.query-creation\n+     */\n+\n+}"
+  },
+  {
+    "sha": "13b30bc786dffcc4cb7c01a63d3cfa92ca2016af",
+    "filename": "src/test/java/cat/udl/eps/softarch/academicrecruit/steps/CreateCandidateStepDefs.java",
+    "status": "added",
+    "additions": 53,
+    "deletions": 0,
+    "changes": 53,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/58578357fde61b94a4dfca7fb6039710831b3697/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/CreateCandidateStepDefs.java",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/58578357fde61b94a4dfca7fb6039710831b3697/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/CreateCandidateStepDefs.java",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/CreateCandidateStepDefs.java?ref=58578357fde61b94a4dfca7fb6039710831b3697",
+    "patch": "@@ -0,0 +1,53 @@\n+package cat.udl.eps.softarch.academicrecruit.steps;\n+\n+import cat.udl.eps.softarch.academicrecruit.domain.Candidate;\n+import cat.udl.eps.softarch.academicrecruit.domain.Participant;\n+import cat.udl.eps.softarch.academicrecruit.repository.CandidateRepository;\n+import cat.udl.eps.softarch.academicrecruit.repository.ParticipantRepository;\n+import cat.udl.eps.softarch.academicrecruit.steps.AuthenticationStepDefs;\n+import cat.udl.eps.softarch.academicrecruit.steps.StepDefs;\n+import io.cucumber.java.en.And;\n+import io.cucumber.java.en.When;\n+import org.springframework.http.MediaType;\n+\n+import static org.hamcrest.Matchers.is;\n+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;\n+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;\n+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;\n+\n+public class CreateCandidateStepDefs {\n+\n+    final StepDefs stepDefs;\n+    final CandidateRepository candidateRepository;\n+\n+    public CreateCandidateStepDefs(StepDefs stepDefs, CandidateRepository candidateRepository) {\n+        this.stepDefs = stepDefs;\n+        this.candidateRepository = candidateRepository;\n+    }\n+\n+    @When(\"I create a candidate with name {string}\")\n+    public void iCreateANewCandidateWithName(String name) throws Throwable {\n+        Candidate candidate = new Candidate();\n+        candidate.setName(name);\n+\n+        stepDefs.result = stepDefs.mockMvc.perform(\n+                post(\"/candidates\")\n+                        .contentType(MediaType.APPLICATION_JSON)\n+                        .content(stepDefs.mapper.writeValueAsString(candidate))\n+                        .accept(MediaType.APPLICATION_JSON)\n+                        .with(AuthenticationStepDefs.authenticate()))\n+                .andDo(print());\n+    }\n+\n+    @And(\"It has been created a candidate with name {string}\")\n+    public void itHasBeenCreatedACandidateWithNameAndIsProvidedBy(String name) throws Throwable {\n+        String newResourceUri = stepDefs.result.andReturn().getResponse().getHeader(\"Location\");\n+        stepDefs.result = stepDefs.mockMvc.perform(\n+                get(newResourceUri)\n+                        .accept(MediaType.APPLICATION_JSON)\n+                        .with(AuthenticationStepDefs.authenticate()))\n+                .andDo(print())\n+                .andExpect(jsonPath(\"$.name\", is(name)));\n+    }\n+}"
+  },
+  {
+    "sha": "a45c5a924de4ab74f272a43e0434955970c2fafc",
+    "filename": "src/test/java/cat/udl/eps/softarch/academicrecruit/steps/DeleteCandidateStepDefs.java",
+    "status": "added",
+    "additions": 54,
+    "deletions": 0,
+    "changes": 54,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/58578357fde61b94a4dfca7fb6039710831b3697/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/DeleteCandidateStepDefs.java",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/58578357fde61b94a4dfca7fb6039710831b3697/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/DeleteCandidateStepDefs.java",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/DeleteCandidateStepDefs.java?ref=58578357fde61b94a4dfca7fb6039710831b3697",
+    "patch": "@@ -0,0 +1,54 @@\n+package cat.udl.eps.softarch.academicrecruit.steps;\n+\n+        import cat.udl.eps.softarch.academicrecruit.domain.Candidate;\n+        import cat.udl.eps.softarch.academicrecruit.domain.Participant;\n+        import cat.udl.eps.softarch.academicrecruit.repository.CandidateRepository;\n+        import cat.udl.eps.softarch.academicrecruit.repository.ParticipantRepository;\n+        import io.cucumber.java.en.And;\n+        import io.cucumber.java.en.When;\n+        import org.springframework.http.MediaType;\n+\n+        import static org.hamcrest.Matchers.is;\n+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;\n+        import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;\n+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;\n+\n+public class DeleteCandidateStepDefs {\n+    final StepDefs stepDefs;\n+    final CandidateRepository candidateRepository;\n+    private String newResourceUri;\n+\n+    public DeleteCandidateStepDefs(StepDefs stepDefs, CandidateRepository candidateRepository) {\n+        this.stepDefs = stepDefs;\n+        this.candidateRepository = candidateRepository;\n+    }\n+\n+\n+    @When(\"I delete a candidate with name {string}\")\n+    public void iDeleteCandidateTo(String name) throws Throwable {\n+\n+        Candidate candidate = new Candidate();\n+        candidate.setName(name);\n+        candidateRepository.save(candidate);\n+\n+        newResourceUri = \"/candidates/\"+ candidate.getId();\n+\n+        stepDefs.result = stepDefs.mockMvc.perform(\n+                delete(newResourceUri)\n+                        .contentType(MediaType.APPLICATION_JSON)\n+                        .content(stepDefs.mapper.writeValueAsString(candidate))\n+                        .accept(MediaType.APPLICATION_JSON)\n+                        .with(AuthenticationStepDefs.authenticate())\n+        ).andDo(print());\n+    }\n+\n+    @And(\"The previously deleted candidate doesn't exist\")\n+    public void thePreviouslyDeletedCandidateNotInDataBase() throws Throwable {\n+        stepDefs.result = stepDefs.mockMvc.perform(\n+                get (newResourceUri)\n+                        .accept(MediaType.APPLICATION_JSON)\n+                        .with(AuthenticationStepDefs.authenticate()))\n+                .andDo(print());\n+    }\n+}"
+  },
+  {
+    "sha": "b42f8cf2ab10d0916e185dcfcde8f211afb49d93",
+    "filename": "src/test/java/cat/udl/eps/softarch/academicrecruit/steps/UpdateCandidateStepDefs.java",
+    "status": "added",
+    "additions": 57,
+    "deletions": 0,
+    "changes": 57,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/58578357fde61b94a4dfca7fb6039710831b3697/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/UpdateCandidateStepDefs.java",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/58578357fde61b94a4dfca7fb6039710831b3697/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/UpdateCandidateStepDefs.java",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/UpdateCandidateStepDefs.java?ref=58578357fde61b94a4dfca7fb6039710831b3697",
+    "patch": "@@ -0,0 +1,57 @@\n+package cat.udl.eps.softarch.academicrecruit.steps;\n+\n+import cat.udl.eps.softarch.academicrecruit.domain.Candidate;\n+import cat.udl.eps.softarch.academicrecruit.domain.Participant;\n+import cat.udl.eps.softarch.academicrecruit.repository.CandidateRepository;\n+import cat.udl.eps.softarch.academicrecruit.repository.ParticipantRepository;\n+import io.cucumber.java.en.And;\n+import io.cucumber.java.en.When;\n+import org.json.JSONObject;\n+import org.springframework.http.MediaType;\n+\n+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;\n+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;\n+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;\n+import static org.hamcrest.Matchers.is;\n+\n+public class UpdateCandidateStepDefs {\n+\n+    final StepDefs stepDefs;\n+    final CandidateRepository candidateRepository;\n+    private String newResourceUri;\n+\n+    public UpdateCandidateStepDefs(StepDefs stepDefs, CandidateRepository candidateRepository) {\n+        this.stepDefs = stepDefs;\n+        this.candidateRepository = candidateRepository;\n+    }\n+\n+\n+    @When(\"I change the name of the candidate to {string}\")\n+    public void iChangeNameOfCandidateTo(String name) throws Throwable {\n+\n+        Candidate candidate = new Candidate();\n+        candidate.setName(name);\n+        candidateRepository.save(candidate);\n+\n+        newResourceUri = \"/candidates/\"+ candidate.getId();\n+\n+        stepDefs.result = stepDefs.mockMvc.perform(\n+                patch(newResourceUri)\n+                        .contentType(MediaType.APPLICATION_JSON)\n+                        .content(stepDefs.mapper.writeValueAsString(candidate))\n+                        .accept(MediaType.APPLICATION_JSON)\n+                        .with(AuthenticationStepDefs.authenticate())\n+        ).andDo(print());\n+    }\n+\n+    @And(\"The previously updated candidate has now name {string}\")\n+    public void thePreviouslyUpdatedCandidateHasNowName(String name) throws Throwable {\n+        stepDefs.result = stepDefs.mockMvc.perform(\n+                get(newResourceUri)\n+                        .accept(MediaType.APPLICATION_JSON)\n+                        .with(AuthenticationStepDefs.authenticate()))\n+                .andDo(print())\n+                .andExpect(jsonPath(\"$.name\", is(name)));\n+    }\n+}"
+  },
+  {
+    "sha": "9f103a96e02f5580d733ddcf34fde5c1a22dd4bb",
+    "filename": "src/test/resources/features/CreateCandidate.feature",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/58578357fde61b94a4dfca7fb6039710831b3697/src/test/resources/features/CreateCandidate.feature",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/58578357fde61b94a4dfca7fb6039710831b3697/src/test/resources/features/CreateCandidate.feature",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/resources/features/CreateCandidate.feature?ref=58578357fde61b94a4dfca7fb6039710831b3697",
+    "patch": "@@ -0,0 +1,13 @@\n+Feature: Create Participant\n+  In order to create the candidates\n+  As a admin\n+  I want to create a candidate\n+\n+  Background:\n+    Given There is a registered administrator with username \"admin\" and password \"password\" and email \"admin@sample.app\"\n+\n+  Scenario: Admin Created candidate\n+    Given I login as \"admin\" with password \"password\"\n+    When I create a candidate with name \"name\"\n+    Then The response code is 201\n+    And It has been created a candidate with name \"name\""
+  },
+  {
+    "sha": "18e5ad2b3bca39e7002b229dd4414d13e42d96a4",
+    "filename": "src/test/resources/features/DeleteCandidate.feature",
+    "status": "added",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/58578357fde61b94a4dfca7fb6039710831b3697/src/test/resources/features/DeleteCandidate.feature",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/58578357fde61b94a4dfca7fb6039710831b3697/src/test/resources/features/DeleteCandidate.feature",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/resources/features/DeleteCandidate.feature?ref=58578357fde61b94a4dfca7fb6039710831b3697",
+    "patch": "@@ -0,0 +1,15 @@\n+Feature: Candidate Delte\n+  In order to control candidates\n+  As an administrator\n+  I want to delete existing candidates\n+\n+  Background:\n+    Given There is a registered administrator with username \"admin\" and password \"password\" and email \"admin@sample.app\"\n+    And I login as \"admin\" with password \"password\"\n+    And I create a candidate with name \"name\"\n+\n+  Scenario: Admin deletes participant\n+    When I delete a candidate with name \"lluc\"\n+    Then The response code is 204\n+    And The previously deleted candidate doesn't exist\n+    And The response code is 404"
+  },
+  {
+    "sha": "9990f843a4262b8374cab05deb7b6b9f11f90b52",
+    "filename": "src/test/resources/features/UpdateCandidate.feature",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/58578357fde61b94a4dfca7fb6039710831b3697/src/test/resources/features/UpdateCandidate.feature",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/58578357fde61b94a4dfca7fb6039710831b3697/src/test/resources/features/UpdateCandidate.feature",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/resources/features/UpdateCandidate.feature?ref=58578357fde61b94a4dfca7fb6039710831b3697",
+    "patch": "@@ -0,0 +1,14 @@\n+Feature: Update Candidate\n+  In order to modify the candidate\n+  As an admin\n+  I want to update a candidate\n+\n+  Background:\n+    Given There is a registered administrator with username \"admin\" and password \"password\" and email \"admin@sample.app\"\n+    And I login as \"admin\" with password \"password\"\n+    And I create a candidate with name \"name\"\n+\n+  Scenario: Admin updates name\n+    When I change the name of the candidate to \"lluc\"\n+    Then The response code is 200\n+    And The previously updated candidate has now name \"lluc\""
+  }
+]

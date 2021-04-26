@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "9f8831a8441aea647efd383c041003c7ba606e90",
+    "filename": "molten-http-client/src/main/java/com/hotels/molten/http/client/OkHttpCallFactoryFactory.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/ExpediaGroup/molten/blob/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/OkHttpCallFactoryFactory.java",
+    "raw_url": "https://github.com/ExpediaGroup/molten/raw/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/OkHttpCallFactoryFactory.java",
+    "contents_url": "https://api.github.com/repos/ExpediaGroup/molten/contents/molten-http-client/src/main/java/com/hotels/molten/http/client/OkHttpCallFactoryFactory.java?ref=757fe2852d651a32c50898e7f5f3d15a1af1fd93",
+    "patch": "@@ -21,6 +21,7 @@\n import java.util.concurrent.ExecutorService;\n import java.util.concurrent.TimeUnit;\n import java.util.function.Function;\n+import java.util.stream.Collectors;\n import javax.net.ssl.KeyManager;\n import javax.net.ssl.SSLContext;\n import javax.net.ssl.TrustManager;\n@@ -81,6 +82,9 @@\n                 }\n             });\n         }\n+        if (configuration.getProtocol() != null) {\n+            clientBuilder.protocols(createProtocols(configuration.getProtocol()));\n+        }\n         if (configuration.getHttpTracing() != null) {\n             clientBuilder.addNetworkInterceptor(TracingInterceptor.create(configuration.getHttpTracing()));\n         }\n@@ -141,4 +145,11 @@ private void addEventTracing(OkHttpClient.Builder clientBuilder, RetrofitService\n             clientBuilder.eventListenerFactory(DelegatingEventListener.delegatedFactory(eventListenerFactories)::apply);\n         }\n     }\n+\n+    private List<okhttp3.Protocol> createProtocols(List<Protocol> protocol) {\n+        return protocol.stream()\n+            .map(Protocol::getOkhttpProtocol)\n+            .distinct()\n+            .collect(Collectors.toList());\n+    }\n }"
+  },
+  {
+    "sha": "b4cc2adf6e9396dcba43ce69fabd0b3fb95c59d6",
+    "filename": "molten-http-client/src/main/java/com/hotels/molten/http/client/Protocol.java",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/ExpediaGroup/molten/blob/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/Protocol.java",
+    "raw_url": "https://github.com/ExpediaGroup/molten/raw/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/Protocol.java",
+    "contents_url": "https://api.github.com/repos/ExpediaGroup/molten/contents/molten-http-client/src/main/java/com/hotels/molten/http/client/Protocol.java?ref=757fe2852d651a32c50898e7f5f3d15a1af1fd93",
+    "patch": "@@ -0,0 +1,48 @@\n+package com.hotels.molten.http.client;\n+/*\n+ * Copyright (c) 2020 Expedia, Inc.\n+ *\n+ * Licensed under the Apache License, Version 2.0 (the \"License\");\n+ * you may not use this file except in compliance with the License.\n+ * You may obtain a copy of the License at\n+ *\n+ *     http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Unless required by applicable law or agreed to in writing, software\n+ * distributed under the License is distributed on an \"AS IS\" BASIS,\n+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+ * See the License for the specific language governing permissions and\n+ * limitations under the License.\n+ */\n+import lombok.AllArgsConstructor;\n+import lombok.Getter;\n+import lombok.NonNull;\n+import reactor.netty.http.HttpProtocol;\n+\n+/**\n+ * The different configurable types of http protocols.\n+ */\n+@Getter\n+@AllArgsConstructor\n+public enum Protocol {\n+\n+    /**\n+     * Cleartext HTTP/2 with no \"upgrade\" round trip.\n+     */\n+    HTTP_2C(HttpProtocol.H2C, okhttp3.Protocol.H2_PRIOR_KNOWLEDGE),\n+    /**\n+     * The IETF's binary-framed protocol that includes header compression.\n+     * HTTP/2 requires deployments of HTTP/2 that use TLS 1.2 support\n+     */\n+    HTTP_2(HttpProtocol.H2, okhttp3.Protocol.HTTP_2),\n+    /**\n+     * A plaintext framing that includes persistent connections.\n+     */\n+    HTTP_1_1(HttpProtocol.HTTP11, okhttp3.Protocol.HTTP_1_1);\n+\n+    @NonNull\n+    private final HttpProtocol nettyProtocol;\n+    @NonNull\n+    private final okhttp3.Protocol okhttpProtocol;\n+\n+}"
+  },
+  {
+    "sha": "43416c1ccfcf9623b5f2f6abb40c0ed6931973c9",
+    "filename": "molten-http-client/src/main/java/com/hotels/molten/http/client/ReactorNettyCallFactoryFactory.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/ExpediaGroup/molten/blob/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/ReactorNettyCallFactoryFactory.java",
+    "raw_url": "https://github.com/ExpediaGroup/molten/raw/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/ReactorNettyCallFactoryFactory.java",
+    "contents_url": "https://api.github.com/repos/ExpediaGroup/molten/contents/molten-http-client/src/main/java/com/hotels/molten/http/client/ReactorNettyCallFactoryFactory.java?ref=757fe2852d651a32c50898e7f5f3d15a1af1fd93",
+    "patch": "@@ -25,6 +25,7 @@\n import io.netty.handler.ssl.SslContextBuilder;\n import org.slf4j.LoggerFactory;\n import reactor.core.publisher.Mono;\n+import reactor.netty.http.HttpProtocol;\n import reactor.netty.http.client.HttpClient;\n import reactor.netty.http.client.HttpClientMetricsRecorder;\n import reactor.netty.resources.ConnectionProvider;\n@@ -62,6 +63,9 @@\n                 })\n             );\n \n+        if (configuration.getProtocol() != null) {\n+            httpClient = httpClient.protocol(createProtocols(configuration.getProtocol()));\n+        }\n         var sslContextConfiguration = configuration.getSslContextConfiguration();\n         if (sslContextConfiguration != null) {\n             httpClient = httpClient.secure(spec -> {\n@@ -114,4 +118,11 @@ private HttpClient addHttpTracing(HttpClient httpClient, RetrofitServiceClientCo\n         }\n         return client;\n     }\n+\n+    private HttpProtocol[] createProtocols(List<Protocol> protocol) {\n+        return protocol.stream()\n+            .map(Protocol::getNettyProtocol)\n+            .distinct()\n+            .toArray(HttpProtocol[]::new);\n+    }\n }"
+  },
+  {
+    "sha": "cecd8078fe62f98276ec5849ed82369ecf76fc29",
+    "filename": "molten-http-client/src/main/java/com/hotels/molten/http/client/RetrofitServiceClientBuilder.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/ExpediaGroup/molten/blob/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/RetrofitServiceClientBuilder.java",
+    "raw_url": "https://github.com/ExpediaGroup/molten/raw/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/RetrofitServiceClientBuilder.java",
+    "contents_url": "https://api.github.com/repos/ExpediaGroup/molten/contents/molten-http-client/src/main/java/com/hotels/molten/http/client/RetrofitServiceClientBuilder.java?ref=757fe2852d651a32c50898e7f5f3d15a1af1fd93",
+    "patch": "@@ -23,6 +23,7 @@\n \n import java.time.Duration;\n import java.util.Collections;\n+import java.util.List;\n import java.util.Optional;\n import java.util.Set;\n import java.util.concurrent.ConcurrentHashMap;\n@@ -356,6 +357,16 @@ private RetrofitServiceClientBuilder(Class<API> api, String baseUrl) {\n         this.configuration.setReportHttpEvents(true);\n         return this;\n     }\n+    /**\n+     * Sets configuration http protocol. If not set default protocols of OkHttpClient/HttpClient will be used.\n+     *\n+     * @param protocol the (@code Protocol} to set.\n+     * @return this builder\n+     */\n+    public RetrofitServiceClientBuilder<API> protocol(List<Protocol> protocol) {\n+        this.configuration.setProtocol(protocol);\n+        return this;\n+    }\n \n     /**\n      * Sets protobuf to be used for serializing request and deserializing response."
+  },
+  {
+    "sha": "87eba805709b5add1f96e198129a56ae4b09922c",
+    "filename": "molten-http-client/src/main/java/com/hotels/molten/http/client/RetrofitServiceClientConfiguration.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/ExpediaGroup/molten/blob/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/RetrofitServiceClientConfiguration.java",
+    "raw_url": "https://github.com/ExpediaGroup/molten/raw/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/main/java/com/hotels/molten/http/client/RetrofitServiceClientConfiguration.java",
+    "contents_url": "https://api.github.com/repos/ExpediaGroup/molten/contents/molten-http-client/src/main/java/com/hotels/molten/http/client/RetrofitServiceClientConfiguration.java?ref=757fe2852d651a32c50898e7f5f3d15a1af1fd93",
+    "patch": "@@ -21,6 +21,8 @@\n import static java.util.Objects.requireNonNull;\n \n import java.time.Duration;\n+import java.util.List;\n+import java.util.Objects;\n \n import brave.http.HttpTracing;\n import io.micrometer.core.instrument.MeterRegistry;\n@@ -64,6 +66,7 @@\n     private RecoveryConfiguration recoveryConfiguration = DEFAULT_RECOVERY_CONFIGURATION;\n     private int retries = DEFAULT_NUMBER_OF_RETRIES;\n     private ConnectionSettings connectionSettings = DEFAULT_CONNECTION_SETTINGS;\n+    private List<Protocol> protocol;\n     @Setter\n     @NonNull\n     private RequestTracking requestTracking = RequestTracking.builder().build();\n@@ -102,6 +105,13 @@ void setConnectionSettings(ConnectionSettings connectionSettings) {\n         this.connectionSettings = connectionSettings;\n     }\n \n+    void setProtocol(List<Protocol> protocol) {\n+        checkArgument(protocol != null, \"Non-null protocol settings must be set.\");\n+        checkArgument(!protocol.isEmpty(), \"Non-empty protocol settings must be set.\");\n+        checkArgument(protocol.stream().noneMatch(Objects::isNull), \"All the protocols must be non-null.\");\n+        this.protocol = protocol;\n+    }\n+\n     /**\n      * Calculates the total timeout for this configuration considering avg/peak response times and number of retries.\n      * If there are retries the total timeout considers the very last request at average response time."
+  },
+  {
+    "sha": "9afd84985f7b2559ccd45ae3cc974a61f0bcfe30",
+    "filename": "molten-http-client/src/test/java/com/hotels/molten/http/client/RetrofitServiceClientBuilderTest.java",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/ExpediaGroup/molten/blob/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/test/java/com/hotels/molten/http/client/RetrofitServiceClientBuilderTest.java",
+    "raw_url": "https://github.com/ExpediaGroup/molten/raw/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/test/java/com/hotels/molten/http/client/RetrofitServiceClientBuilderTest.java",
+    "contents_url": "https://api.github.com/repos/ExpediaGroup/molten/contents/molten-http-client/src/test/java/com/hotels/molten/http/client/RetrofitServiceClientBuilderTest.java?ref=757fe2852d651a32c50898e7f5f3d15a1af1fd93",
+    "patch": "@@ -43,6 +43,7 @@\n import io.micrometer.core.instrument.MeterRegistry;\n import io.micrometer.core.instrument.Timer;\n import io.micrometer.core.instrument.simple.SimpleMeterRegistry;\n+import io.vertx.core.http.HttpVersion;\n import lombok.extern.slf4j.Slf4j;\n import org.slf4j.MDC;\n import org.testng.annotations.AfterClass;\n@@ -142,6 +143,28 @@ public void should_get_response(String clientType) {\n             .verifyComplete();\n     }\n \n+    @Test(dataProvider = \"common\")\n+    public void should_get_response_when_called_with_HTTP_1_1(String clientType) {\n+        ServiceEndpoint client = defaultClientBuilder(clientType)\n+            .protocol(List.of(Protocol.HTTP_1_1))\n+            .buildClient();\n+        StepVerifier.create(client.checkProtocol(HttpVersion.HTTP_1_1))\n+            .thenAwait()\n+            .expectNextCount(1L)\n+            .verifyComplete();\n+    }\n+\n+    @Test(dataProvider = \"common\")\n+    public void should_get_response_when_called_with_HTTP_2C(String clientType) {\n+        ServiceEndpoint client = defaultClientBuilder(clientType)\n+            .protocol(List.of(Protocol.HTTP_2C))\n+            .buildClient();\n+        StepVerifier.create(client.checkProtocol(HttpVersion.HTTP_2))\n+            .thenAwait()\n+            .expectNextCount(1L)\n+            .verifyComplete();\n+    }\n+\n     @Test(dataProvider = \"common\")\n     public void should_get_query_response(String clientType) {\n         ServiceEndpoint client = defaultClientBuilder(clientType).buildClient();"
+  },
+  {
+    "sha": "1fbf54336e4726e3f434947d6d377178282c5ca8",
+    "filename": "molten-http-client/src/test/java/com/hotels/molten/http/client/ServiceEndpoint.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/ExpediaGroup/molten/blob/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/test/java/com/hotels/molten/http/client/ServiceEndpoint.java",
+    "raw_url": "https://github.com/ExpediaGroup/molten/raw/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/test/java/com/hotels/molten/http/client/ServiceEndpoint.java",
+    "contents_url": "https://api.github.com/repos/ExpediaGroup/molten/contents/molten-http-client/src/test/java/com/hotels/molten/http/client/ServiceEndpoint.java?ref=757fe2852d651a32c50898e7f5f3d15a1af1fd93",
+    "patch": "@@ -18,6 +18,7 @@\n \n import java.util.List;\n \n+import io.vertx.core.http.HttpVersion;\n import reactor.core.publisher.Mono;\n import retrofit2.http.Body;\n import retrofit2.http.DELETE;\n@@ -76,4 +77,7 @@\n \n     @GET(\"resetcounter\")\n     Mono<String> resetCounter();\n+\n+    @GET(\"/checkProtocol/{http}\")\n+    Mono<String> checkProtocol(@Path(\"http\") HttpVersion http);\n }"
+  },
+  {
+    "sha": "516ca1460dec4cc437a1ea0b8bb5d6c0b0cdef49",
+    "filename": "molten-http-client/src/test/java/com/hotels/molten/http/client/StubJsonServiceServer.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/ExpediaGroup/molten/blob/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/test/java/com/hotels/molten/http/client/StubJsonServiceServer.java",
+    "raw_url": "https://github.com/ExpediaGroup/molten/raw/757fe2852d651a32c50898e7f5f3d15a1af1fd93/molten-http-client/src/test/java/com/hotels/molten/http/client/StubJsonServiceServer.java",
+    "contents_url": "https://api.github.com/repos/ExpediaGroup/molten/contents/molten-http-client/src/test/java/com/hotels/molten/http/client/StubJsonServiceServer.java?ref=757fe2852d651a32c50898e7f5f3d15a1af1fd93",
+    "patch": "@@ -112,6 +112,15 @@ public void start(boolean compressionSupported, boolean isTlsRequired) {\n                 rc.response().setStatusCode(code).end(toJson(\"error\"));\n             }\n         });\n+        //Check http protocols, if not match with the request respond with 500\n+        router.route(\"/checkProtocol/:http\").handler(rc -> {\n+            var version = rc.request().version().name();\n+            if (version.equals(rc.pathParam(\"http\"))) {\n+                rc.response().setStatusCode(200).end(toJson(SUCCESS));\n+            } else {\n+                rc.response().setStatusCode(500).end(toJson(\"error\"));\n+            }\n+        });\n         // responds with success delayed with ms milliseconds\n         router.route(\"/delay/:ms\").handler(rc -> {\n             int timeout = Optional.ofNullable(rc.pathParam(\"ms\")).map(Ints::tryParse).orElse(0);"
+  }
+]

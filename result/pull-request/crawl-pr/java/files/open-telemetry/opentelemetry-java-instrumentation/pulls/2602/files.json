@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "092b94460f4d7148bf52d2fe4ea3da06e6359cdb",
+    "filename": "buildSrc/src/main/groovy/MuzzlePlugin.groovy",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/b12d30f08da5dacfd4a82a936b3b9ddf15eadfd0/buildSrc/src/main/groovy/MuzzlePlugin.groovy",
+    "raw_url": "https://github.com/open-telemetry/opentelemetry-java-instrumentation/raw/b12d30f08da5dacfd4a82a936b3b9ddf15eadfd0/buildSrc/src/main/groovy/MuzzlePlugin.groovy",
+    "contents_url": "https://api.github.com/repos/open-telemetry/opentelemetry-java-instrumentation/contents/buildSrc/src/main/groovy/MuzzlePlugin.groovy?ref=b12d30f08da5dacfd4a82a936b3b9ddf15eadfd0",
+    "patch": "@@ -358,6 +358,10 @@ class MuzzlePlugin implements Plugin<Project> {\n       config.dependencies.add(dep)\n     }\n     for (String additionalDependency : muzzleDirective.additionalDependencies) {\n+      if (additionalDependency.count(\":\") < 2) {\n+        // Dependency definition without version, use the artifact's version.\n+        additionalDependency += \":${versionArtifact.version}\"\n+      }\n       config.dependencies.add(instrumentationProject.dependencies.create(additionalDependency) {\n         transitive = true\n       })"
+  },
+  {
+    "sha": "122a6bd4d8ebaa6b3d55d1af21d161a03b4c8233",
+    "filename": "instrumentation/aws-sdk/aws-sdk-2.2/javaagent/aws-sdk-2.2-javaagent.gradle",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/b12d30f08da5dacfd4a82a936b3b9ddf15eadfd0/instrumentation/aws-sdk/aws-sdk-2.2/javaagent/aws-sdk-2.2-javaagent.gradle",
+    "raw_url": "https://github.com/open-telemetry/opentelemetry-java-instrumentation/raw/b12d30f08da5dacfd4a82a936b3b9ddf15eadfd0/instrumentation/aws-sdk/aws-sdk-2.2/javaagent/aws-sdk-2.2-javaagent.gradle",
+    "contents_url": "https://api.github.com/repos/open-telemetry/opentelemetry-java-instrumentation/contents/instrumentation/aws-sdk/aws-sdk-2.2/javaagent/aws-sdk-2.2-javaagent.gradle?ref=b12d30f08da5dacfd4a82a936b3b9ddf15eadfd0",
+    "patch": "@@ -5,6 +5,9 @@ muzzle {\n     group = \"software.amazon.awssdk\"\n     module = \"aws-core\"\n     versions = \"[2.2.0,)\"\n+    // Used by all SDK services, the only case it isn't is an SDK extension such as a custom HTTP\n+    // client, which is not target of instrumentation anyways.\n+    extraDependency \"software.amazon.awssdk:protocol-core\"\n   }\n }\n "
+  }
+]

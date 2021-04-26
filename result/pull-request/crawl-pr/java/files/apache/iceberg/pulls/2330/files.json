@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "cfb5d1fdf5b6d8cee4da1961f17e900d6dbe9dd5",
+    "filename": "spark3/src/main/java/org/apache/iceberg/spark/source/SparkTable.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/apache/iceberg/blob/492386eab677f1626c7430348ba045e2ac454f89/spark3/src/main/java/org/apache/iceberg/spark/source/SparkTable.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/492386eab677f1626c7430348ba045e2ac454f89/spark3/src/main/java/org/apache/iceberg/spark/source/SparkTable.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/spark3/src/main/java/org/apache/iceberg/spark/source/SparkTable.java?ref=492386eab677f1626c7430348ba045e2ac454f89",
+    "patch": "@@ -63,7 +63,8 @@\n \n   private static final Logger LOG = LoggerFactory.getLogger(SparkTable.class);\n \n-  private static final Set<String> RESERVED_PROPERTIES = Sets.newHashSet(\"provider\", \"format\", \"current-snapshot-id\");\n+  private static final Set<String> RESERVED_PROPERTIES =\n+      Sets.newHashSet(\"provider\", \"format\", \"current-snapshot-id\", \"location\");\n   private static final Set<TableCapability> CAPABILITIES = ImmutableSet.of(\n       TableCapability.BATCH_READ,\n       TableCapability.BATCH_WRITE,\n@@ -138,6 +139,7 @@ public StructType schema() {\n     String currentSnapshotId = icebergTable.currentSnapshot() != null ?\n         String.valueOf(icebergTable.currentSnapshot().snapshotId()) : \"none\";\n     propsBuilder.put(\"current-snapshot-id\", currentSnapshotId);\n+    propsBuilder.put(\"location\", icebergTable.location());\n \n     icebergTable.properties().entrySet().stream()\n         .filter(entry -> !RESERVED_PROPERTIES.contains(entry.getKey()))"
+  },
+  {
+    "sha": "1fc07834d22c9aa25207344bea0befac397faa42",
+    "filename": "spark3/src/test/java/org/apache/iceberg/actions/TestCreateActions.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/apache/iceberg/blob/492386eab677f1626c7430348ba045e2ac454f89/spark3/src/test/java/org/apache/iceberg/actions/TestCreateActions.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/492386eab677f1626c7430348ba045e2ac454f89/spark3/src/test/java/org/apache/iceberg/actions/TestCreateActions.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/spark3/src/test/java/org/apache/iceberg/actions/TestCreateActions.java?ref=492386eab677f1626c7430348ba045e2ac454f89",
+    "patch": "@@ -447,6 +447,30 @@ public void testProperties() throws Exception {\n     }\n   }\n \n+  @Test\n+  public void testSparkTableReservedProperties() throws Exception {\n+    String destTableName = \"iceberg_reserved_properties\";\n+    String source = sourceName(\"test_reserved_properties_table\");\n+    String dest = destName(destTableName);\n+    createSourceTable(CREATE_PARQUET, source);\n+    assertMigratedFileCount(Actions.snapshot(source, dest), source, dest);\n+    SparkTable table = loadTable(dest);\n+\n+    String[] keys = {\"provider\", \"format\", \"current-snapshot-id\", \"location\"};\n+\n+    for (String entry : keys) {\n+      Assert.assertTrue(\n+              \"Created table missing reserved property \" + entry, table.properties().containsKey(entry));\n+    }\n+\n+    Assert.assertEquals(\"Property value is not the expected value\", \"iceberg\", table.properties().get(\"provider\"));\n+    Assert.assertEquals(\"Property value is not the expected value\", \"iceberg/parquet\",\n+        table.properties().get(\"format\"));\n+    Assert.assertTrue(\"Current-snapshot-id doesn't exist\",\n+        !table.properties().get(\"current-snapshot-id\").equals(\"none\"));\n+    Assert.assertTrue(\"location isn't correct\", table.properties().get(\"location\").endsWith(destTableName));\n+  }\n+\n   @Test\n   public void testSnapshotDefaultLocation() throws Exception {\n     String source = sourceName(\"test_snapshot_default\");"
+  }
+]

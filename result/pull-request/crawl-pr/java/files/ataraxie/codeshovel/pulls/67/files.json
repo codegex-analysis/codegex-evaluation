@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "a53f7b8d5a217623b24473bab3c7fe3e94415e43",
+    "filename": "bin/clone-java-repositories.sh",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/bin/clone-java-repositories.sh",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/bin/clone-java-repositories.sh",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/bin/clone-java-repositories.sh?ref=cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579",
+    "patch": "@@ -42,3 +42,6 @@ git -C \"$1\" clone https://github.com/zulip/zulip.git\n \n # TypeScript Repos\n git -C \"$1\" clone https://github.com/microsoft/vscode.git\n+\n+# Ruby Repos\n+git -C \"$1\" clone https://github.com/fastlane/fastlane.git"
+  },
+  {
+    "sha": "4c65531de2c9df2b224857b812f7fe2f09e81c1f",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/pom.xml",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/pom.xml",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/pom.xml?ref=cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579",
+    "patch": "@@ -90,6 +90,11 @@\n \t\t\t<artifactId>${j2v8.artifactId}</artifactId>\n \t\t\t<version>4.6.0</version>\n \t\t</dependency>\n+\t\t<dependency>\n+\t\t\t<groupId>org.jruby</groupId>\n+\t\t\t<artifactId>jrubyparser</artifactId>\n+\t\t\t<version>0.5.3</version>\n+\t\t</dependency>\n \t</dependencies>\n \t<build>\n \t\t<plugins>"
+  },
+  {
+    "sha": "118d19cd419843496ca8349aa051dd322044fce2",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/impl/PythonFunction.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/PythonFunction.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/PythonFunction.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/impl/PythonFunction.java?ref=cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579",
+    "patch": "@@ -36,6 +36,7 @@ private Yparameter getParameter(PythonParser.Def_parameterContext param) {\n \n     private Yparameter getParameter(PythonParser.Named_parameterContext param) {\n         String argumentName = \"\";\n+        // TODO should * and ** be part of the metadata?\n         if (param.getParent().getChild(0).getText().contains(\"*\")) {\n             // OK this looks a little shaky but is meant to include *args and **kwargs\n             argumentName += param.getParent().getChild(0).getText();"
+  },
+  {
+    "sha": "4cf2ec61cb66752e1adab519dcd214092f73d5c6",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/impl/RubyFunction.java",
+    "status": "added",
+    "additions": 104,
+    "deletions": 0,
+    "changes": 104,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/RubyFunction.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/RubyFunction.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/impl/RubyFunction.java?ref=cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579",
+    "patch": "@@ -0,0 +1,104 @@\n+package com.felixgrund.codeshovel.parser.impl;\n+\n+import com.felixgrund.codeshovel.entities.Yexceptions;\n+import com.felixgrund.codeshovel.entities.Ymodifiers;\n+import com.felixgrund.codeshovel.entities.Yparameter;\n+import com.felixgrund.codeshovel.parser.AbstractFunction;\n+import com.felixgrund.codeshovel.parser.Yfunction;\n+import com.felixgrund.codeshovel.wrappers.Commit;\n+import org.jrubyparser.ast.*;\n+\n+import java.util.ArrayList;\n+import java.util.Collections;\n+import java.util.List;\n+\n+public class RubyFunction extends AbstractFunction<MethodDefNode> implements Yfunction {\n+\n+    RubyFunction(MethodDefNode function, Commit commit, String sourceFilePath, String sourceFileContent) {\n+        super(function, commit, sourceFilePath, sourceFileContent);\n+    }\n+\n+    @Override\n+    protected String getInitialName(MethodDefNode rawMethod) {\n+        return rawMethod.getName();\n+    }\n+\n+    @Override\n+    protected String getInitialType(MethodDefNode rawMethod) {\n+        return null;\n+    }\n+\n+    @Override\n+    protected Ymodifiers getInitialModifiers(MethodDefNode rawMethod) {\n+        // TODO is this the best place to put a receiver? Perhaps this should be a context?\n+        if (rawMethod instanceof DefsNode) {\n+            DefsNode singletonMethod = (DefsNode) rawMethod;\n+            Node receiver = singletonMethod.getReceiver();\n+            if (receiver instanceof INameNode) {\n+                INameNode namedReceiver = (INameNode) receiver;\n+                String receiverName = namedReceiver.getName();\n+                return new Ymodifiers(Collections.singletonList(receiverName));\n+            }\n+        }\n+        return Ymodifiers.NONE;\n+    }\n+\n+    @Override\n+    protected Yexceptions getInitialExceptions(MethodDefNode rawMethod) {\n+        return Yexceptions.NONE;\n+    }\n+\n+    @Override\n+    protected List<Yparameter> getInitialParameters(MethodDefNode rawMethod) {\n+        // TODO how does namesOnly affect this line?\n+        List<String> parameterStrings = rawMethod.getArgs().getNormativeParameterNameList(false);\n+        List<Yparameter> parametersList = new ArrayList<>();\n+        for (String parameterString : parameterStrings) {\n+            Yparameter parameter = new Yparameter(parameterString, null);\n+            // TODO set metadata using default arguments and optional arguments\n+            // see: https://medium.com/podiihq/ruby-parameters-c178fdcd1f4e\n+            // parameter.setMetadata();\n+            parametersList.add(parameter);\n+        }\n+        return parametersList;\n+    }\n+\n+    @Override\n+    protected String getInitialBody(MethodDefNode rawMethod) {\n+        return rawMethod.getBody().toString();\n+    }\n+\n+    @Override\n+    protected int getInitialBeginLine(MethodDefNode rawMethod) {\n+        return rawMethod.getNamePosition().getStartLine() + 1;\n+    }\n+\n+    @Override\n+    protected int getInitialEndLine(MethodDefNode rawMethod) {\n+        return rawMethod.getPosition().getEndLine() + 1;\n+    }\n+\n+    @Override\n+    protected String getInitialParentName(MethodDefNode rawMethod) {\n+        // TODO this currently only covers class and module\n+        // node.getClosestIScope is probably more what we want, but we need custom\n+        //    name retrieval for every node that implements IScope\n+        for(Node scope = rawMethod.getParent(); scope != null; scope = scope.getParent()) {\n+            if (scope instanceof IScopingNode) {\n+                return ((IScopingNode) scope).getCPath().getName();\n+            }\n+        }\n+\n+        return null;\n+    }\n+\n+    @Override\n+    protected String getInitialFunctionPath(MethodDefNode rawMethod) {\n+        return null;\n+    }\n+\n+    @Override\n+    protected String getInitialAnnotation(MethodDefNode rawMethod) {\n+        return null;\n+    }\n+}"
+  },
+  {
+    "sha": "079068bb99423fb23f27d16a4da07373dc2231f9",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/impl/RubyParser.java",
+    "status": "added",
+    "additions": 128,
+    "deletions": 0,
+    "changes": 128,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/RubyParser.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/RubyParser.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/impl/RubyParser.java?ref=cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579",
+    "patch": "@@ -0,0 +1,128 @@\n+package com.felixgrund.codeshovel.parser.impl;\n+\n+import com.felixgrund.codeshovel.changes.*;\n+import com.felixgrund.codeshovel.entities.Ycommit;\n+import com.felixgrund.codeshovel.exceptions.ParseException;\n+import com.felixgrund.codeshovel.parser.AbstractParser;\n+import com.felixgrund.codeshovel.parser.Yfunction;\n+import com.felixgrund.codeshovel.parser.Yparser;\n+import com.felixgrund.codeshovel.util.Utl;\n+import com.felixgrund.codeshovel.wrappers.Commit;\n+import com.felixgrund.codeshovel.wrappers.StartEnvironment;\n+import org.jrubyparser.CompatVersion;\n+import org.jrubyparser.Parser;\n+import org.jrubyparser.ast.DefnNode;\n+import org.jrubyparser.ast.DefsNode;\n+import org.jrubyparser.ast.MethodDefNode;\n+import org.jrubyparser.ast.Node;\n+import org.jrubyparser.parser.ParserConfiguration;\n+import org.jrubyparser.util.NoopVisitor;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+\n+import java.io.StringReader;\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+public class RubyParser extends AbstractParser implements Yparser {\n+\n+    public static final String ACCEPTED_FILE_EXTENSION = \".*\\\\.rb$\";\n+    private Logger log = LoggerFactory.getLogger(JavaParser.class);\n+\n+    public RubyParser(StartEnvironment startEnv, String filePath, String fileContent, Commit commit) throws ParseException {\n+        super(startEnv, filePath, fileContent, commit);\n+    }\n+\n+    @Override\n+    protected List<Yfunction> parseMethods() throws ParseException {\n+        try {\n+            Parser rubyParser = new Parser();\n+            StringReader in = new StringReader(this.fileContent);\n+            CompatVersion version = CompatVersion.RUBY2_0;\n+            ParserConfiguration config = new ParserConfiguration(0, version);\n+            Node rootNode = rubyParser.parse(this.filePath, in, config);\n+            RubyMethodVisitor visitor =  new RubyMethodVisitor() {\n+                @Override\n+                public boolean methodMatches(Yfunction method) {\n+                    return method.getBody() != null;\n+                }\n+            };\n+            rootNode.accept(visitor);\n+            return visitor.getMatchedNodes();\n+        } catch (Exception e) {\n+            System.err.println(\"JavaParser::parseMethods() - parse error. path: \" + this.filePath + \"; content:\\n\" + this.fileContent);\n+            throw new ParseException(\"Error during parsing of content\", this.filePath, this.fileContent);\n+        }\n+    }\n+\n+    @Override\n+    public double getScopeSimilarity(Yfunction function, Yfunction compareFunction) {\n+        // TODO\n+        return Utl.parentNamesMatch(function, compareFunction) ? 1.0 : 0.0;\n+    }\n+\n+    @Override\n+    public String getAcceptedFileExtension() {\n+        return ACCEPTED_FILE_EXTENSION;\n+    }\n+\n+    @Override\n+    public List<Ychange> getMinorChanges(Ycommit commit, Yfunction compareFunction) {\n+        List<Ychange> changes = new ArrayList<>();\n+        Yreturntypechange yreturntypechange = getReturnTypeChange(commit, compareFunction);\n+        Ymodifierchange ymodifierchange = getModifiersChange(commit, compareFunction);\n+        Ybodychange ybodychange = getBodyChange(commit, compareFunction);\n+\n+        // TODO this currently does nothing. Parameter metadata is not collected\n+        Yparametermetachange yparametermetachange = getParametersMetaChange(commit, compareFunction);\n+        if (yreturntypechange != null) {\n+            changes.add(yreturntypechange);\n+        }\n+        if (ymodifierchange != null) {\n+            changes.add(ymodifierchange);\n+        }\n+        if (ybodychange != null) {\n+            changes.add(ybodychange);\n+        }\n+        if (yparametermetachange != null) {\n+            changes.add(yparametermetachange);\n+        }\n+        return changes;\n+    }\n+\n+\n+    private Yfunction transformMethod(MethodDefNode method) {\n+        return new RubyFunction(method, this.commit, this.filePath, this.fileContent);\n+    }\n+\n+    public abstract class RubyMethodVisitor extends NoopVisitor {\n+\n+        private List<Yfunction> matchedNodes = new ArrayList<>();\n+\n+        public abstract boolean methodMatches(Yfunction method);\n+\n+        private void addMethodIfMatches(MethodDefNode method) {\n+            Yfunction yfunction = transformMethod(method);\n+            if (methodMatches(yfunction)) {\n+                matchedNodes.add(yfunction);\n+            }\n+        }\n+\n+        @Override\n+        public Object visitDefnNode(DefnNode defnNode) {\n+            addMethodIfMatches(defnNode);\n+            return this.visit(defnNode);\n+        }\n+\n+        @Override\n+        public Object visitDefsNode(DefsNode defsNode) {\n+            addMethodIfMatches(defsNode);\n+            return this.visit(defsNode);\n+        }\n+\n+        public List<Yfunction> getMatchedNodes() {\n+            return matchedNodes;\n+        }\n+    }\n+\n+}"
+  },
+  {
+    "sha": "f3c5c0fb6fae54a62fc2da5cd8a162e2731c098c",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptFunction.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptFunction.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptFunction.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptFunction.java?ref=cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579",
+    "patch": "@@ -21,6 +21,7 @@\n     }\n \n     private Yparameter getParameter(V8Object param) {\n+        // TODO should `?` (implying optional) or `...` (implying varargs) be in the metadata?\n         String stype;\n         V8Object v8type = param.getObject(\"type\");\n         if (v8type.isUndefined()) {"
+  },
+  {
+    "sha": "35d77f0db80ca9914b9642bbb5bfeb9d5ad7f040",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptParser.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptParser.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptParser.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptParser.java?ref=cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579",
+    "patch": "@@ -61,6 +61,7 @@ public String getAcceptedFileExtension() {\n         Ymodifierchange ymodifierchange = getModifiersChange(commit, compareFunction);\n         Ybodychange ybodychange = getBodyChange(commit, compareFunction);\n         Yannotationchange yannotationchange = getAnnotationChange(commit, compareFunction);\n+        // TODO consider parameter meta change\n         if (yreturntypechange != null) {\n             changes.add(yreturntypechange);\n         }"
+  },
+  {
+    "sha": "f67ddcf54dbd2f8fe47d5320769df8a12fa843be",
+    "filename": "src/main/java/com/felixgrund/codeshovel/util/ParserFactory.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/util/ParserFactory.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/main/java/com/felixgrund/codeshovel/util/ParserFactory.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/util/ParserFactory.java?ref=cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579",
+    "patch": "@@ -5,6 +5,7 @@\n import com.felixgrund.codeshovel.parser.Yparser;\n import com.felixgrund.codeshovel.parser.impl.JavaParser;\n import com.felixgrund.codeshovel.parser.impl.PythonParser;\n+import com.felixgrund.codeshovel.parser.impl.RubyParser;\n import com.felixgrund.codeshovel.parser.impl.TypeScriptParser;\n import com.felixgrund.codeshovel.wrappers.Commit;\n import com.felixgrund.codeshovel.wrappers.StartEnvironment;\n@@ -27,6 +28,8 @@ public static Yparser getParser(StartEnvironment startEnv, String filePath, Stri\n \t\t\t\tparser = new PythonParser(startEnv, filePath, fileContent, commit);\n \t\t\t} else if (filePath.matches(TypeScriptParser.ACCEPTED_FILE_EXTENSION)) {\n \t\t\t\tparser = new TypeScriptParser(startEnv, filePath, fileContent, commit);\n+\t\t\t} else if (filePath.matches(RubyParser.ACCEPTED_FILE_EXTENSION)) {\n+\t\t\t\tparser = new RubyParser(startEnv, filePath, fileContent, commit);\n \t\t\t} else {\n \t\t\t\tthrow new NoParserFoundException(\"No parser found for filename \" + filePath);\n \t\t\t}"
+  },
+  {
+    "sha": "a2886a3f1cd839a1f92f651873e92692ab7fcc52",
+    "filename": "src/test/resources/oracles/ruby/fastland-detect_values-detect_selected_provisioning_profiles.json",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/test/resources/oracles/ruby/fastland-detect_values-detect_selected_provisioning_profiles.json",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579/src/test/resources/oracles/ruby/fastland-detect_values-detect_selected_provisioning_profiles.json",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/test/resources/oracles/ruby/fastland-detect_values-detect_selected_provisioning_profiles.json?ref=cfc1c63c9df6bd2dcbb8f62e8951fcccfd460579",
+    "patch": "@@ -0,0 +1,10 @@\n+{\n+    \"repositoryName\": \"fastlane\",\n+    \"filePath\": \"gym/lib/gym/detect_values.rb\",\n+    \"functionName\": \"detect_selected_provisioning_profiles\",\n+    \"functionStartLine\": 79,\n+    \"startCommitName\": \"2c34e6573dcf0014670af3a554fa92a9ad2566b7\",\n+    \"expectedResult\": {\n+\n+    }\n+}"
+  }
+]

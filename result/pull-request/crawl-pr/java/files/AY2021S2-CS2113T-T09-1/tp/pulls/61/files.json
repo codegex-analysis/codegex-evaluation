@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "19e86fe56e3036392d0377331b43d2899e574ed4",
+    "filename": "src/main/java/META-INF/MANIFEST.MF",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/blob/47199630063061e51bb46f36e7093073df376a6f/src/main/java/META-INF/MANIFEST.MF",
+    "raw_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/raw/47199630063061e51bb46f36e7093073df376a6f/src/main/java/META-INF/MANIFEST.MF",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2113T-T09-1/tp/contents/src/main/java/META-INF/MANIFEST.MF?ref=47199630063061e51bb46f36e7093073df376a6f",
+    "patch": "@@ -0,0 +1,3 @@\n+Manifest-Version: 1.0\n+Main-Class: seedu.duke.Duke\n+"
+  },
+  {
+    "sha": "a0b4f938bd610ca35f5e97307684c6782933b685",
+    "filename": "src/main/java/seedu/duke/commands/ListCheckedInCommand.java",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/blob/47199630063061e51bb46f36e7093073df376a6f/src/main/java/seedu/duke/commands/ListCheckedInCommand.java",
+    "raw_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/raw/47199630063061e51bb46f36e7093073df376a6f/src/main/java/seedu/duke/commands/ListCheckedInCommand.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2113T-T09-1/tp/contents/src/main/java/seedu/duke/commands/ListCheckedInCommand.java?ref=47199630063061e51bb46f36e7093073df376a6f",
+    "patch": "@@ -0,0 +1,13 @@\n+package seedu.duke.commands;\n+\n+import seedu.duke.person.TrackingList;\n+\n+public class ListCheckedInCommand extends Command {\n+\n+    public static final String COMMAND = \"list\";\n+\n+    @Override\n+    public CommandOutput execute(TrackingList trackingList) {\n+        return new CommandOutput(trackingList.listPerson(), COMMAND);\n+    }\n+}"
+  },
+  {
+    "sha": "12a04a317dae8b6945d76dc16d94071827dd3fa9",
+    "filename": "src/main/java/seedu/duke/commands/ListCommand.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/blob/47199630063061e51bb46f36e7093073df376a6f/src/main/java/seedu/duke/commands/ListCommand.java",
+    "raw_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/raw/47199630063061e51bb46f36e7093073df376a6f/src/main/java/seedu/duke/commands/ListCommand.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2113T-T09-1/tp/contents/src/main/java/seedu/duke/commands/ListCommand.java?ref=47199630063061e51bb46f36e7093073df376a6f",
+    "patch": "@@ -7,7 +7,8 @@\n  */\n public class ListCommand extends Command {\n \n-    public static final String COMMAND = \"list\";\n+    public static final String COMMAND = \"listall\";\n+\n \n     @Override\n     public CommandOutput execute(TrackingList trackingList) {"
+  },
+  {
+    "sha": "e7ac8c95628dc52ec585dd5fb4e5b2c250a89e92",
+    "filename": "src/main/java/seedu/duke/parser/Parser.java",
+    "status": "modified",
+    "additions": 38,
+    "deletions": 19,
+    "changes": 57,
+    "blob_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/blob/47199630063061e51bb46f36e7093073df376a6f/src/main/java/seedu/duke/parser/Parser.java",
+    "raw_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/raw/47199630063061e51bb46f36e7093073df376a6f/src/main/java/seedu/duke/parser/Parser.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2113T-T09-1/tp/contents/src/main/java/seedu/duke/parser/Parser.java?ref=47199630063061e51bb46f36e7093073df376a6f",
+    "patch": "@@ -1,11 +1,15 @@\n package seedu.duke.parser;\n \n+\n+\n+\n import seedu.duke.commands.CheckInCommand;\n import seedu.duke.commands.CheckoutCommand;\n import seedu.duke.commands.Command;\n import seedu.duke.commands.DeleteCommand;\n import seedu.duke.commands.ExitCommand;\n import seedu.duke.commands.FindCommand;\n+import seedu.duke.commands.ListCheckedInCommand;\n import seedu.duke.commands.ListCommand;\n import seedu.duke.exceptions.InvalidCommandException;\n import seedu.duke.exceptions.NoArgumentPassedException;\n@@ -25,10 +29,7 @@\n     public static String[] splitTextIntoTwoFields(String text) {\n \n         String[] textArray = text.split(\" \", 2);\n-        textArray[0] = textArray[0].toLowerCase().trim();\n-        if (textArray.length != 1) {\n-            textArray[1] = textArray[1].trim();\n-        }\n+        textArray[0] = textArray[0].toLowerCase();\n         return textArray;\n     }\n \n@@ -39,12 +40,12 @@ public Command parseCommand(String userInput) throws\n         String argument = null;\n         assert userInput != null : \"User input cannot be null\";\n         userInput = userInput.trim();\n-        inputArray = splitTextIntoTwoFields(userInput);\n+        inputArray = splitTextIntoTwoFields(userInput);   //inputArray may be of size 1 or size 2\n         String command;\n         command = inputArray[0];\n         if (inputArray.length != 1) {\n-            argument = inputArray[1];\n-        } else if (!command.equals(\"list\") && !command.equals(\"exit\")) {\n+            argument = inputArray[1].trim();\n+        } else if (!command.equals(\"list\") && !command.equals(\"exit\") && !command.equals(\"listall\")) {\n             throw new InvalidCommandException();\n         }\n         switch (command) {\n@@ -56,6 +57,8 @@ public Command parseCommand(String userInput) throws\n             return parseFind(argument);\n         case ListCommand.COMMAND:\n             return parseList();\n+        case ListCheckedInCommand.COMMAND:\n+            return parseCheckedInList();\n         case DeleteCommand.COMMAND:\n             return parseDelete();\n         case ExitCommand.COMMAND:\n@@ -65,6 +68,8 @@ public Command parseCommand(String userInput) throws\n         }\n     }\n \n+\n+\n     private ExitCommand parseExit() {\n         return new ExitCommand();\n     }\n@@ -77,10 +82,17 @@ private Command parseList() {\n         return new ListCommand();\n     }\n \n-    private Command parseFind(String argument) {\n-        String[] findDetails = argument.split(\"i/\",2);\n-        String id = findDetails[1];\n-        String name = findDetails[0].substring(2); //starts from index 1 due to inclusion of \"/n\" flag\n+    private Command parseCheckedInList() {\n+        return new ListCheckedInCommand();\n+    }\n+\n+    private Command parseFind(String argument) throws WrongFlagException {\n+        String id;\n+        if (argument.startsWith(\"i/\")) {\n+            id = argument.substring(2);\n+        } else {\n+            throw new WrongFlagException();\n+        }\n \n         return new FindCommand(id);\n     }\n@@ -90,26 +102,33 @@ private Command parseCheckOut(String argument) throws NoArgumentPassedException,\n             throw new NoArgumentPassedException();\n         }\n         String[] checkoutDetails = argument.split(\"i/\",2);\n-        if (checkoutDetails.length != 2) {\n+        if (checkoutDetails.length != 2) {    //checks if i/ is provided\n             throw new WrongFlagException();\n         }\n-        String id = checkoutDetails[1];\n-        String name = checkoutDetails[0].substring(2); //starts from index 1 due to inclusion of \"/n\" flag\n-\n+        String id = checkoutDetails[1].trim();\n+        String name = \"NULL\";    //dummy string value since name class cannot accept null.\n+        if (!checkoutDetails[0].isBlank()) {\n+            name = checkoutDetails[0].trim().substring(2); //starts from index 1 due to inclusion of \"/n\" flag\n+        }\n         return new CheckoutCommand(id,name);\n     }\n \n     private Command parseCheckIn(String argument) throws NoArgumentPassedException, WrongFlagException {\n         if (argument.isBlank()) {\n             throw new NoArgumentPassedException();\n         }\n+        assert !argument.isBlank() : \"Argument cannot be blank.\";\n         String[] checkInDetails = argument.split(\"i/\",2);\n-        if (checkInDetails.length != 2) {\n+        if (checkInDetails.length != 2) {       //checks if i/ is provided\n             throw new WrongFlagException();\n         }\n-        String id = checkInDetails[1];\n-        String name = checkInDetails[0].substring(2); //starts from index 1 due to inclusion of \"/n\" flag\n-\n+        String id = checkInDetails[1].trim();\n+        String name;\n+        if (checkInDetails[0].isBlank()) {     //checks if n/ is provided\n+            throw new NoArgumentPassedException();\n+        } else {\n+            name = checkInDetails[0].trim().substring(2); //starts from index 1 due to inclusion of \"/n\" flag\n+        }\n         return new CheckInCommand(id, name, null);\n     }\n "
+  },
+  {
+    "sha": "7bd982f074087542e46423058fd4abc03d330cfa",
+    "filename": "src/main/java/seedu/duke/ui/TextUi.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 4,
+    "changes": 17,
+    "blob_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/blob/47199630063061e51bb46f36e7093073df376a6f/src/main/java/seedu/duke/ui/TextUi.java",
+    "raw_url": "https://github.com/AY2021S2-CS2113T-T09-1/tp/raw/47199630063061e51bb46f36e7093073df376a6f/src/main/java/seedu/duke/ui/TextUi.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2113T-T09-1/tp/contents/src/main/java/seedu/duke/ui/TextUi.java?ref=47199630063061e51bb46f36e7093073df376a6f",
+    "patch": "@@ -1,6 +1,5 @@\n package seedu.duke.ui;\n \n-import seedu.duke.commands.CheckInCommand;\n import seedu.duke.commands.CommandOutput;\n import seedu.duke.person.Person;\n import java.util.logging.Logger;\n@@ -35,9 +34,12 @@ public TextUi(InputStream in, PrintStream out) {\n     public void printReaction(CommandOutput commandOutput) {\n         String command = commandOutput.command;\n         switch (command) {\n-        case \"list\":\n+        case \"listall\":\n             printList(commandOutput.persons);\n             break;\n+        case \"list\":\n+            printCheckedInList(commandOutput.persons);\n+            break;\n         default:\n             printDivider();\n             out.println(commandOutput.messageToUser);\n@@ -48,8 +50,15 @@ public void printReaction(CommandOutput commandOutput) {\n     private void printList(List<Person> persons) {\n         assert persons instanceof List : \"Only can print list\";\n         for (Person person : persons) {\n-            if (person.getCheckedIn()) {\n-                out.println(\"Name: \" + person.getName());\n+            out.println(\"Name: \" + person.getName());\n+        }\n+    }\n+\n+    private void printCheckedInList(List<Person> persons) {\n+        assert persons instanceof List : \"Only prints list\";\n+        for (int i = 0; i < persons.size(); ++i) {\n+            if (persons.get(i).getCheckedIn()) {\n+                out.println(i + \". Name: \" + persons.get(i).getName());\n             }\n         }\n     }"
+  }
+]

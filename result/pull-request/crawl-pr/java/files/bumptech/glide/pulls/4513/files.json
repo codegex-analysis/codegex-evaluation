@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "b5bcf9ba34203e66d4fa37dee8097681892717f3",
+    "filename": "library/src/main/java/com/bumptech/glide/load/data/HttpUrlFetcher.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/bumptech/glide/blob/0248e2ec93f68e15060fffe5adeb4fc100fbb3b8/library/src/main/java/com/bumptech/glide/load/data/HttpUrlFetcher.java",
+    "raw_url": "https://github.com/bumptech/glide/raw/0248e2ec93f68e15060fffe5adeb4fc100fbb3b8/library/src/main/java/com/bumptech/glide/load/data/HttpUrlFetcher.java",
+    "contents_url": "https://api.github.com/repos/bumptech/glide/contents/library/src/main/java/com/bumptech/glide/load/data/HttpUrlFetcher.java?ref=0248e2ec93f68e15060fffe5adeb4fc100fbb3b8",
+    "patch": "@@ -1,5 +1,9 @@\n package com.bumptech.glide.load.data;\n \n+import android.net.TrafficStats;\n+import android.os.Process;\n+import android.os.StrictMode;\n+import android.os.StrictMode.ThreadPolicy;\n import android.text.TextUtils;\n import android.util.Log;\n import androidx.annotation.NonNull;\n@@ -53,6 +57,13 @@ public HttpUrlFetcher(GlideUrl glideUrl, int timeout) {\n   @Override\n   public void loadData(\n       @NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {\n+    TrafficStats.setThreadStatsTag(Process.myPid());\n+    // Temporarily disable the detection of network operations to avoid network violation from\n+    // gmscore during token's refresh, which results to failure to fetch images via Glide\n+    // ref: go/weird-network-violation-agmm\n+    ThreadPolicy oldThreadPolicy = StrictMode.getThreadPolicy();\n+    StrictMode.setThreadPolicy(new ThreadPolicy.Builder(oldThreadPolicy).permitNetwork().build());\n+\n     long startTime = LogTime.getLogTime();\n     try {\n       InputStream result = loadDataWithRedirects(glideUrl.toURL(), 0, null, glideUrl.getHeaders());\n@@ -67,6 +78,9 @@ public void loadData(\n         Log.v(TAG, \"Finished http url fetcher fetch in \" + LogTime.getElapsedMillis(startTime));\n       }\n     }\n+\n+    StrictMode.setThreadPolicy(oldThreadPolicy);\n+    TrafficStats.clearThreadStatsTag();\n   }\n \n   private InputStream loadDataWithRedirects("
+  },
+  {
+    "sha": "9539802cbea6ca2c8e14d469c6624f9a28d787ad",
+    "filename": "library/src/main/java/com/bumptech/glide/load/engine/DecodeJob.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/bumptech/glide/blob/0248e2ec93f68e15060fffe5adeb4fc100fbb3b8/library/src/main/java/com/bumptech/glide/load/engine/DecodeJob.java",
+    "raw_url": "https://github.com/bumptech/glide/raw/0248e2ec93f68e15060fffe5adeb4fc100fbb3b8/library/src/main/java/com/bumptech/glide/load/engine/DecodeJob.java",
+    "contents_url": "https://api.github.com/repos/bumptech/glide/contents/library/src/main/java/com/bumptech/glide/load/engine/DecodeJob.java?ref=0248e2ec93f68e15060fffe5adeb4fc100fbb3b8",
+    "patch": "@@ -1,6 +1,8 @@\n package com.bumptech.glide.load.engine;\n \n import android.os.Build;\n+import android.os.StrictMode;\n+import android.os.StrictMode.ThreadPolicy;\n import android.util.Log;\n import androidx.annotation.NonNull;\n import androidx.core.util.Pools;\n@@ -220,6 +222,13 @@ public void cancel() {\n   @SuppressWarnings(\"PMD.AvoidRethrowingException\")\n   @Override\n   public void run() {\n+\n+    // Temporarily disable the detection of network operations to avoid network violation from\n+    // gmscore during token's refresh, which results to failure to fetch images via Glide\n+    // ref: go/weird-network-violation-agmm\n+    ThreadPolicy oldThreadPolicy = StrictMode.getThreadPolicy();\n+    StrictMode.setThreadPolicy(new ThreadPolicy.Builder(oldThreadPolicy).permitNetwork().build());\n+\n     // This should be much more fine grained, but since Java's thread pool implementation silently\n     // swallows all otherwise fatal exceptions, this will at least make it obvious to developers\n     // that something is failing.\n@@ -267,6 +276,7 @@ public void run() {\n       }\n       GlideTrace.endSection();\n     }\n+    StrictMode.setThreadPolicy(oldThreadPolicy);\n   }\n \n   private void runWrapped() {"
+  }
+]

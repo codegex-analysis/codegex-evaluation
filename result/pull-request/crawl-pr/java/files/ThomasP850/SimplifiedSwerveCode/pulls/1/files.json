@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "916327749551c04121c767e4ff6b09de1ddc0ee4",
+    "filename": "src/main/java/frc/robot/OI.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/ThomasP850/SimplifiedSwerveCode/blob/de0f46488fe512f85e8549b91719b3cc2216cb9d/src/main/java/frc/robot/OI.java",
+    "raw_url": "https://github.com/ThomasP850/SimplifiedSwerveCode/raw/de0f46488fe512f85e8549b91719b3cc2216cb9d/src/main/java/frc/robot/OI.java",
+    "contents_url": "https://api.github.com/repos/ThomasP850/SimplifiedSwerveCode/contents/src/main/java/frc/robot/OI.java?ref=de0f46488fe512f85e8549b91719b3cc2216cb9d",
+    "patch": "@@ -33,7 +33,7 @@\n     static Logger logger = Logger.getLogger(SubsystemFactory.class.getName());\n     \n     private double  deadzone    = 0.09;\n-    private double  scaleFactor = 1.0;\n+    private double  scaleFactor = 1.2;\n \n     private HashMap<Integer, String> allocatedJoyButtons = new HashMap<Integer, String>();\n \n@@ -252,7 +252,7 @@ public double getFilteredValue(double raw)\n         if (Math.abs(raw) < deadzone) {\n             return 0; \n         } else {\n-            return raw * (scaleFactor); // Set the output to a ceratin percent of of the input\n+            return raw * (scaleFactor); // Set the output to a certain percent of of the input\n         }\n     }\n "
+  },
+  {
+    "sha": "981d1f88ac0785ee428aed68f20442c7956d922f",
+    "filename": "src/main/java/frc/robot/subsystem/PortMan.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/ThomasP850/SimplifiedSwerveCode/blob/de0f46488fe512f85e8549b91719b3cc2216cb9d/src/main/java/frc/robot/subsystem/PortMan.java",
+    "raw_url": "https://github.com/ThomasP850/SimplifiedSwerveCode/raw/de0f46488fe512f85e8549b91719b3cc2216cb9d/src/main/java/frc/robot/subsystem/PortMan.java",
+    "contents_url": "https://api.github.com/repos/ThomasP850/SimplifiedSwerveCode/contents/src/main/java/frc/robot/subsystem/PortMan.java?ref=de0f46488fe512f85e8549b91719b3cc2216cb9d",
+    "patch": "@@ -75,6 +75,7 @@\n     public static final String pwm8_label = \"PWM8\";\n     public static final String pwm9_label = \"PWM9\";\n \n+    \n     public static final String pcm0_label = \"PCM0\";\n \tpublic static final String pcm1_label = \"PCM1\";\n     public static final String pcm2_label = \"PCM2\";"
+  },
+  {
+    "sha": "c108f1e2bbb81ee37078e741a3a6551c977f529e",
+    "filename": "src/main/java/frc/robot/subsystem/SubsystemFactory.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/ThomasP850/SimplifiedSwerveCode/blob/de0f46488fe512f85e8549b91719b3cc2216cb9d/src/main/java/frc/robot/subsystem/SubsystemFactory.java",
+    "raw_url": "https://github.com/ThomasP850/SimplifiedSwerveCode/raw/de0f46488fe512f85e8549b91719b3cc2216cb9d/src/main/java/frc/robot/subsystem/SubsystemFactory.java",
+    "contents_url": "https://api.github.com/repos/ThomasP850/SimplifiedSwerveCode/contents/src/main/java/frc/robot/subsystem/SubsystemFactory.java?ref=de0f46488fe512f85e8549b91719b3cc2216cb9d",
+    "patch": "@@ -56,10 +56,13 @@ private SubsystemFactory() {\n         allMACs.put(\"00:80:2F:17:D7:4B\", \"RIO2\"); //eth0\n         allMACs.put(\"00:80:2F:17:D7:4C\", \"RIO2\"); //usb0\n         allMACs.put(\"00:80:2F:25:B4:CA\", \"RIO4\");\n+        allMACs.put(\"00:80:2F:30:DB:F8\", \"COVID\"); //eth0\n+        allMACs.put(\"00:80:2F:30:DB:F9\", \"COVID\"); //usb0\n     }\n \n     public static SubsystemFactory getInstance() {\n \n+            \n         if (me == null) {\n             me = new SubsystemFactory();\n         }"
+  },
+  {
+    "sha": "baef151f239f68b3024cae8f2b9f4dd0c6913c7b",
+    "filename": "src/main/java/frc/robot/subsystem/swerve/DrivetrainSubsystem.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 16,
+    "changes": 31,
+    "blob_url": "https://github.com/ThomasP850/SimplifiedSwerveCode/blob/de0f46488fe512f85e8549b91719b3cc2216cb9d/src/main/java/frc/robot/subsystem/swerve/DrivetrainSubsystem.java",
+    "raw_url": "https://github.com/ThomasP850/SimplifiedSwerveCode/raw/de0f46488fe512f85e8549b91719b3cc2216cb9d/src/main/java/frc/robot/subsystem/swerve/DrivetrainSubsystem.java",
+    "contents_url": "https://api.github.com/repos/ThomasP850/SimplifiedSwerveCode/contents/src/main/java/frc/robot/subsystem/swerve/DrivetrainSubsystem.java?ref=de0f46488fe512f85e8549b91719b3cc2216cb9d",
+    "patch": "@@ -21,14 +21,13 @@\n import org.frcteam2910.common.robot.drivers.Mk2SwerveModuleBuilder;\n \n public class DrivetrainSubsystem extends SubsystemBase {\n-    private static final double TRACKWIDTH = 17.5;\n+    private static final double TRACKWIDTH = 17.5;  \n     private static final double WHEELBASE = 17.5;\n \n-    //Need to calibrate\n-    private static final double FRONT_LEFT_ANGLE_OFFSET = -Math.toRadians(152.1);\n-    private static final double FRONT_RIGHT_ANGLE_OFFSET = -Math.toRadians(71.1);\n-    private static final double BACK_LEFT_ANGLE_OFFSET = -Math.toRadians(214.5);\n-    private static final double BACK_RIGHT_ANGLE_OFFSET = -Math.toRadians(357.0);\n+    private static final double FRONT_LEFT_ANGLE_OFFSET = -Math.toRadians(339.3);\n+    private static final double FRONT_RIGHT_ANGLE_OFFSET = -Math.toRadians(266.9);\n+    private static final double BACK_LEFT_ANGLE_OFFSET = -Math.toRadians(61.4);\n+    private static final double BACK_RIGHT_ANGLE_OFFSET = -Math.toRadians(123.1);\n \n     private SwerveModule frontLeftModule ;\n     private SwerveModule frontRightModule ;\n@@ -59,37 +58,37 @@ public void init(PortMan portMan) throws Exception {\n         //Need to update encoder ports and motor ports\n         frontLeftModule = new Mk2SwerveModuleBuilder(\n             new Vector2(TRACKWIDTH / 2.0, WHEELBASE / 2.0))\n-            .angleEncoder(new AnalogInput(portMan.acquirePort(PortMan.analog1_label, \"FL.Swerve.Encoder\")), FRONT_LEFT_ANGLE_OFFSET)\n-            .angleMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_15_label, \"FL.Swerve.angle\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n+            .angleEncoder(new AnalogInput(portMan.acquirePort(PortMan.analog0_label, \"FL.Swerve.Encoder\")), FRONT_LEFT_ANGLE_OFFSET)\n+            .angleMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_17_label, \"FL.Swerve.angle\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n                     Mk2SwerveModuleBuilder.MotorType.NEO)\n-            .driveMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_10_label, \"FL.Swerve.drive\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n+            .driveMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_06_label, \"FL.Swerve.drive\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n                     Mk2SwerveModuleBuilder.MotorType.NEO)\n             .build();\n \n         frontRightModule = new Mk2SwerveModuleBuilder(\n             new Vector2(TRACKWIDTH / 2.0, -WHEELBASE / 2.0))\n-            .angleEncoder(new AnalogInput(portMan.acquirePort(PortMan.analog0_label, \"FR.Swerve.Encoder\")), FRONT_RIGHT_ANGLE_OFFSET)\n-            .angleMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_17_label, \"FR.Swerve.angle\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n+            .angleEncoder(new AnalogInput(portMan.acquirePort(PortMan.analog1_label, \"FR.Swerve.Encoder\")), FRONT_RIGHT_ANGLE_OFFSET)\n+            .angleMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_14_label, \"FR.Swerve.angle\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n                     Mk2SwerveModuleBuilder.MotorType.NEO)\n-            .driveMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_06_label, \"FR.Swerve.drive\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n+            .driveMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_09_label, \"FR.Swerve.drive\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n                     Mk2SwerveModuleBuilder.MotorType.NEO)\n             .build();\n             \n         backLeftModule = new Mk2SwerveModuleBuilder(\n             new Vector2(-TRACKWIDTH / 2.0, WHEELBASE / 2.0))\n             .angleEncoder(new AnalogInput(portMan.acquirePort(PortMan.analog2_label, \"BL.Swerve.Encoder\")), BACK_LEFT_ANGLE_OFFSET)\n-            .angleMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_59_label, \"BL.Swerve.angle\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n+            .angleMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_15_label, \"BL.Swerve.angle\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n                     Mk2SwerveModuleBuilder.MotorType.NEO)\n-            .driveMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_60_label, \"BL.Swerve.drive\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n+            .driveMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_10_label, \"BL.Swerve.drive\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n                     Mk2SwerveModuleBuilder.MotorType.NEO)\n             .build();\n \n         backRightModule = new Mk2SwerveModuleBuilder(\n             new Vector2(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0))\n             .angleEncoder(new AnalogInput(portMan.acquirePort(PortMan.analog3_label, \"BR.Swerve.Encoder\")), BACK_RIGHT_ANGLE_OFFSET)\n-            .angleMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_14_label, \"BR.Swerve.angle\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n+            .angleMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_59_label, \"BR.Swerve.angle\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n                     Mk2SwerveModuleBuilder.MotorType.NEO)\n-            .driveMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_09_label, \"BR.Swerve.drive\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n+            .driveMotor(new CANSparkMax(portMan.acquirePort(PortMan.can_60_label, \"BR.Swerve.drive\"), CANSparkMaxLowLevel.MotorType.kBrushless),\n                     Mk2SwerveModuleBuilder.MotorType.NEO)\n             .build();\n "
+  }
+]

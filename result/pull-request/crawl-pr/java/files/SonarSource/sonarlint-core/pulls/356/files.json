@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "3247634ce4c694113242f5bf95596187bbd0dcf4",
+    "filename": "core/src/main/java/org/sonarsource/sonarlint/core/ConnectedSonarLintEngineImpl.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/SonarSource/sonarlint-core/blob/958e708ce77a7e3ad9a2b30e27f65de58fd4cdf2/core/src/main/java/org/sonarsource/sonarlint/core/ConnectedSonarLintEngineImpl.java",
+    "raw_url": "https://github.com/SonarSource/sonarlint-core/raw/958e708ce77a7e3ad9a2b30e27f65de58fd4cdf2/core/src/main/java/org/sonarsource/sonarlint/core/ConnectedSonarLintEngineImpl.java",
+    "contents_url": "https://api.github.com/repos/SonarSource/sonarlint-core/contents/core/src/main/java/org/sonarsource/sonarlint/core/ConnectedSonarLintEngineImpl.java?ref=958e708ce77a7e3ad9a2b30e27f65de58fd4cdf2",
+    "patch": "@@ -28,6 +28,7 @@\n import java.util.function.Function;\n import java.util.function.Predicate;\n import java.util.function.Supplier;\n+import java.util.stream.Collectors;\n import javax.annotation.Nullable;\n import org.sonar.api.utils.log.Logger;\n import org.sonar.api.utils.log.Loggers;\n@@ -64,6 +65,7 @@\n public final class ConnectedSonarLintEngineImpl implements ConnectedSonarLintEngine {\n \n   private static final Logger LOG = Loggers.get(ConnectedSonarLintEngineImpl.class);\n+  private static final String SECURITY_REPOSITORY_HINT = \"security\";\n \n   private final ConnectedGlobalConfiguration globalConfig;\n   private StorageContainer storageContainer;\n@@ -312,6 +314,15 @@ public void stop(boolean deleteStorage) {\n     }\n   }\n \n+  @Override\n+  public List<ServerIssue> getUnresolvedTaintVulnerabilities(ProjectBinding binding, String filePath) {\n+    List<ServerIssue> serverIssues = getServerIssues(binding, filePath);\n+    return serverIssues.stream()\n+      .filter(it -> it.ruleKey().contains(SECURITY_REPOSITORY_HINT))\n+      .filter(it -> it.resolution().isEmpty())\n+      .collect(Collectors.toList());\n+  }\n+\n   private <U> U runInConnectedContainer(EndpointParams endpoint, HttpClient client, Function<ConnectedContainer, U> func) {\n     ConnectedContainer connectedContainer = new ConnectedContainer(globalConfig, endpoint, client);\n     try {"
+  },
+  {
+    "sha": "14ea594ffa76a9285d1a546245f8319a20b4e4dc",
+    "filename": "core/src/main/java/org/sonarsource/sonarlint/core/client/api/connected/ConnectedSonarLintEngine.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/SonarSource/sonarlint-core/blob/958e708ce77a7e3ad9a2b30e27f65de58fd4cdf2/core/src/main/java/org/sonarsource/sonarlint/core/client/api/connected/ConnectedSonarLintEngine.java",
+    "raw_url": "https://github.com/SonarSource/sonarlint-core/raw/958e708ce77a7e3ad9a2b30e27f65de58fd4cdf2/core/src/main/java/org/sonarsource/sonarlint/core/client/api/connected/ConnectedSonarLintEngine.java",
+    "contents_url": "https://api.github.com/repos/SonarSource/sonarlint-core/contents/core/src/main/java/org/sonarsource/sonarlint/core/client/api/connected/ConnectedSonarLintEngine.java?ref=958e708ce77a7e3ad9a2b30e27f65de58fd4cdf2",
+    "patch": "@@ -197,4 +197,10 @@\n    */\n   <G> List<G> getExcludedFiles(ProjectBinding projectBinding, Collection<G> files, Function<G, String> ideFilePathExtractor, Predicate<G> testFilePredicate);\n \n+\n+  /**\n+   *\n+   * @return Returns all unresolved taint vulnerabilities from remote server.\n+   */\n+  List<ServerIssue> getUnresolvedTaintVulnerabilities(ProjectBinding binding, String filePath);\n }"
+  }
+]

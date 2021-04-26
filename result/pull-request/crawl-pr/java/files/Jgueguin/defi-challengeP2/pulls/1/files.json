@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "53fb31db9c6d5405864ae9965319e523cfee5053",
+    "filename": "src/com/openclassrooms/Main.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 21,
+    "changes": 32,
+    "blob_url": "https://github.com/Jgueguin/defi-challengeP2/blob/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/Main.java",
+    "raw_url": "https://github.com/Jgueguin/defi-challengeP2/raw/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/Main.java",
+    "contents_url": "https://api.github.com/repos/Jgueguin/defi-challengeP2/contents/src/com/openclassrooms/Main.java?ref=805afe129682336603fe6dcf2d85ae7faa67ef86",
+    "patch": "@@ -1,33 +1,23 @@\n package com.openclassrooms;\n \n-import com.openclassrooms.store.Inventory;\n-import com.openclassrooms.store.Mouse;\n-import com.openclassrooms.store.Screen;\n+import com.openclassrooms.store.*;\n \n public class Main {\n \n     public static void main(String[] args) {\n-        System.out.println(\"Inventory POC\");\n-\n-        Mouse m = new Mouse(\"DELL\", 20.0);\n-        Screen s = new Screen(\"Samsung\", 150.0, \"1920x1080\");\n+        Mouse dellMouse = new Mouse(Brand.DELL, 20.0);\n+        Screen samsungScreen = new Screen(Brand.SAMSUNG, 150.0, \"1920x1080\");\n \n         Inventory inventory = new Inventory();\n-        inventory.addScreen(s);\n-        inventory.addMouse(m);\n-\n-        for(int i=0; i < inventory.screens.length; i++ ) {\n-            if(inventory.screens[i] != null) {\n-                System.out.println(inventory.screens[i].brand);\n-            }\n-        }\n+        inventory.addItem(samsungScreen, 5);\n \n-        for(int j = 0; j < inventory.mice.length; j++ ) {\n-            if(inventory.mice[j] != null) {\n-                System.out.println(inventory.mice[j].brand);\n-            }\n-        }\n+        inventory.addItem(dellMouse, 12);\n+        inventory.removeItem(dellMouse, 2);\n+        inventory.displayInventoryOnConsole();\n \n+        inventory.removeItem(dellMouse, 12);\n \n+        inventory.displayInventoryOnConsole();\n+        inventory.displayItemsOnConsole();\n     }\n-}\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "fb731db327d07c0e259c334be20403f640db64ae",
+    "filename": "src/com/openclassrooms/store/Brand.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/Jgueguin/defi-challengeP2/blob/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Brand.java",
+    "raw_url": "https://github.com/Jgueguin/defi-challengeP2/raw/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Brand.java",
+    "contents_url": "https://api.github.com/repos/Jgueguin/defi-challengeP2/contents/src/com/openclassrooms/store/Brand.java?ref=805afe129682336603fe6dcf2d85ae7faa67ef86",
+    "patch": "@@ -0,0 +1,7 @@\n+package com.openclassrooms.store;\n+\n+public enum Brand {\n+    DELL,\n+    APPLE,\n+    SAMSUNG\n+}"
+  },
+  {
+    "sha": "2627715aa7d8d85116ede451a5f62120521e4ad9",
+    "filename": "src/com/openclassrooms/store/Inventory.java",
+    "status": "modified",
+    "additions": 55,
+    "deletions": 17,
+    "changes": 72,
+    "blob_url": "https://github.com/Jgueguin/defi-challengeP2/blob/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Inventory.java",
+    "raw_url": "https://github.com/Jgueguin/defi-challengeP2/raw/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Inventory.java",
+    "contents_url": "https://api.github.com/repos/Jgueguin/defi-challengeP2/contents/src/com/openclassrooms/store/Inventory.java?ref=805afe129682336603fe6dcf2d85ae7faa67ef86",
+    "patch": "@@ -1,32 +1,70 @@\n package com.openclassrooms.store;\n \n+import java.util.HashMap;\n+import java.util.Map;\n+\n+/**\n+ * Manage items and quantity of them\n+ * Can display all items on the console\n+ */\n public class Inventory {\n \n-    public Screen[] screens;\n-    public Mouse[] mice;\n+    private Map<Item, Integer> items = new HashMap<>();\n+\n+    public Inventory() {    }\n \n-    public Inventory() {\n-        screens = new Screen[10];\n-        mice = new Mouse[10];\n+    public Inventory(Map<Item, Integer> existingItems) {\n+        items.putAll(existingItems);\n     }\n \n-    public void addScreen(Screen a) {\n-        for(int i = 0; i< screens.length; i++) {\n-            if(screens[i] == null) {\n-               screens[i] = a;\n-               break;\n-            }\n+    /**\n+     * Add the quantity of the item in the inventory.\n+     * It considers the existing quantity.\n+     * @param item The item to add in the inventory\n+     * @param quantity The quantity of item to add\n+     */\n+    public void addItem(Item item, Integer quantity) {\n+        if(items.containsKey(item)) {\n+            quantity = items.get(item) + quantity;\n         }\n+        items.put(item, quantity);\n     }\n \n-    public void addMouse(Mouse a) {\n-        for(int i = 0; i< mice.length; i++) {\n-            if(mice[i] == null) {\n-                mice[i] = a;\n-                break;\n+    /**\n+     * Remove the provided quantity of an item from the inventory\n+     * Don't manage error cases.\n+     * If the new quantity (existing quantity - provided quantity) is less than 0\n+     * then the inventory must contain 0;\n+     * @param item The item to remove from the inventory\n+     * @param quantity The quantity to remove\n+     */\n+    public void removeItem(Item item, Integer quantity) {\n+        if(items.containsKey(item)) {\n+            Integer existingCount = items.get(item);\n+            Integer newQuantity = existingCount - quantity;\n+            if(newQuantity < 0) {\n+                newQuantity = 0;\n             }\n+            items.put(item, newQuantity);\n         }\n     }\n \n+    /**\n+     * Display on the console items and quantity.\n+     * Format [Class Name - Brand - Quantity]\n+     */\n+    public void displayInventoryOnConsole() {\n+        // Using lambdas\n+        items.forEach((item, quantity) ->\n+                System.out.println((item.getClass().getSimpleName() + \" - \" + item.getBrand() + \":\" + quantity)));\n+    }\n+\n+    /**\n+     * Display on the console items without quantity.\n+     */\n+    public void displayItemsOnConsole() {\n+        // Using lambdas\n+        items.forEach((item, quantity) -> System.out.println((item)));\n+    }\n \n-}\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "7497d0405d17eef5487ba4f429a0610a7aaea948",
+    "filename": "src/com/openclassrooms/store/Item.java",
+    "status": "added",
+    "additions": 38,
+    "deletions": 0,
+    "changes": 38,
+    "blob_url": "https://github.com/Jgueguin/defi-challengeP2/blob/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Item.java",
+    "raw_url": "https://github.com/Jgueguin/defi-challengeP2/raw/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Item.java",
+    "contents_url": "https://api.github.com/repos/Jgueguin/defi-challengeP2/contents/src/com/openclassrooms/store/Item.java?ref=805afe129682336603fe6dcf2d85ae7faa67ef86",
+    "patch": "@@ -0,0 +1,38 @@\n+package com.openclassrooms.store;\n+\n+/**\n+ * Item class represents any kind of items that should be managed in this inventory.\n+ * The class must be abstract.\n+ */\n+public abstract class Item {\n+\n+    protected Brand brand;\n+    protected double price;\n+\n+    public Item(Brand brand, double price) {\n+        this.brand = brand;\n+        this.price = price;\n+    }\n+\n+    public Brand getBrand() {\n+        return brand;\n+    }\n+\n+    public void setBrand(Brand brand) {\n+        this.brand = brand;\n+    }\n+\n+    public double getPrice() {\n+        return price;\n+    }\n+\n+    public void setPrice(double price) {\n+        this.price = price;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return \"brand=\" + brand +\n+                \", price=\" + price;\n+    }\n+}"
+  },
+  {
+    "sha": "f037c9c27f897f64a5aa782f634d7c97c29712c8",
+    "filename": "src/com/openclassrooms/store/Mouse.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 7,
+    "changes": 16,
+    "blob_url": "https://github.com/Jgueguin/defi-challengeP2/blob/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Mouse.java",
+    "raw_url": "https://github.com/Jgueguin/defi-challengeP2/raw/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Mouse.java",
+    "contents_url": "https://api.github.com/repos/Jgueguin/defi-challengeP2/contents/src/com/openclassrooms/store/Mouse.java?ref=805afe129682336603fe6dcf2d85ae7faa67ef86",
+    "patch": "@@ -1,13 +1,15 @@\n package com.openclassrooms.store;\n \n-public class Mouse {\n+public class Mouse extends Item {\n \n-    public String brand;\n-    public double price;\n-\n-    public Mouse(String a, double b) {\n-        this.brand = a; // Updating brand field\n-        this.price = b; // Updating price field\n+    public Mouse(Brand brand, double price) {\n+        super(brand, price);\n     }\n \n+    @Override\n+    public String toString() {\n+        return \"Mouse{\" +\n+                super.toString() +\n+                '}';\n+    }\n }"
+  },
+  {
+    "sha": "1dd3549718117a7af4c54195d38a817cb149d59e",
+    "filename": "src/com/openclassrooms/store/Screen.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 8,
+    "changes": 27,
+    "blob_url": "https://github.com/Jgueguin/defi-challengeP2/blob/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Screen.java",
+    "raw_url": "https://github.com/Jgueguin/defi-challengeP2/raw/805afe129682336603fe6dcf2d85ae7faa67ef86/src/com/openclassrooms/store/Screen.java",
+    "contents_url": "https://api.github.com/repos/Jgueguin/defi-challengeP2/contents/src/com/openclassrooms/store/Screen.java?ref=805afe129682336603fe6dcf2d85ae7faa67ef86",
+    "patch": "@@ -1,15 +1,26 @@\n package com.openclassrooms.store;\n \n-public class Screen {\n+public class Screen extends Item {\n \n-    public String brand;\n-    public double price;\n-    public String resolution;\n+    private String resolution;\n \n-    public Screen(String a, double b, String c) {\n-        this.brand = a;\n-        this.price = b;\n-        this.resolution = c;\n+    public String getResolution() {\n+        return resolution;\n     }\n \n+    public void setResolution(String resolution) {\n+        this.resolution = resolution;\n+    }\n+\n+    public Screen(Brand brand, double price, String resolution) {\n+        super(brand, price);\n+        this.resolution = resolution;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return \"Screen{\" + super.toString() +\n+                \", resolution='\" + resolution + '\\'' +\n+                '}';\n+    }\n }"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "9190ae3deed861b4b133e308025a86591ef28f73",
+    "filename": "servlet/pom.xml",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/e88be57e37ead8dd303403c15a97f2f9f8c8dc46/servlet/pom.xml",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/e88be57e37ead8dd303403c15a97f2f9f8c8dc46/servlet/pom.xml",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/servlet/pom.xml?ref=e88be57e37ead8dd303403c15a97f2f9f8c8dc46",
+    "patch": "@@ -14,6 +14,24 @@\n         <maven.compiler.source>11</maven.compiler.source>\n     </properties>\n \n+    <dependencies>\n+        <dependency>\n+            <groupId>javax.servlet</groupId>\n+            <artifactId>javax.servlet-api</artifactId>\n+            <version>3.1.0</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.eclipse.jetty</groupId>\n+            <artifactId>jetty-server</artifactId>\n+            <version>${jettyVersion}</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.eclipse.jetty</groupId>\n+            <artifactId>jetty-servlet</artifactId>\n+            <version>${jettyVersion}</version>\n+        </dependency>\n+    </dependencies>\n+\n     <build>\n         <plugins>\n             <plugin>"
+  },
+  {
+    "sha": "2a7088f575cb488d6d641372f6e7c06277f4b09a",
+    "filename": "servlet/src/main/java/AuthFilter.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/e88be57e37ead8dd303403c15a97f2f9f8c8dc46/servlet/src/main/java/AuthFilter.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/e88be57e37ead8dd303403c15a97f2f9f8c8dc46/servlet/src/main/java/AuthFilter.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/servlet/src/main/java/AuthFilter.java?ref=e88be57e37ead8dd303403c15a97f2f9f8c8dc46",
+    "patch": "@@ -0,0 +1,32 @@\n+import java.io.IOException;\n+import javax.servlet.Filter;\n+import javax.servlet.FilterChain;\n+import javax.servlet.FilterConfig;\n+import javax.servlet.ServletException;\n+import javax.servlet.ServletRequest;\n+import javax.servlet.ServletResponse;\n+import javax.servlet.http.Cookie;\n+import javax.servlet.http.HttpServletRequest;\n+\n+public class AuthFilter implements Filter {\n+\n+  @Override\n+  public void init(FilterConfig filterConfig) throws ServletException {\n+  }\n+\n+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {\n+    HttpServletRequest req = (HttpServletRequest) request;\n+    Cookie[] cookies = req.getCookies();\n+    if (cookies != null) {\n+      for (Cookie cookie : cookies) {\n+        if (cookie.getName().equals(\"hh-auth\") && cookie.getValue().length() > 10) {\n+          chain.doFilter(request, response);\n+        }\n+      }\n+    }\n+  }\n+\n+  @Override\n+  public void destroy() {\n+  }\n+}"
+  },
+  {
+    "sha": "239999646950011fd07520a50bb741700156fc5b",
+    "filename": "servlet/src/main/java/CounterServlet.java",
+    "status": "added",
+    "additions": 91,
+    "deletions": 0,
+    "changes": 91,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/e88be57e37ead8dd303403c15a97f2f9f8c8dc46/servlet/src/main/java/CounterServlet.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/e88be57e37ead8dd303403c15a97f2f9f8c8dc46/servlet/src/main/java/CounterServlet.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/servlet/src/main/java/CounterServlet.java?ref=e88be57e37ead8dd303403c15a97f2f9f8c8dc46",
+    "patch": "@@ -0,0 +1,91 @@\n+import java.io.IOException;\n+import java.io.PrintWriter;\n+import javax.servlet.ServletException;\n+import javax.servlet.annotation.WebServlet;\n+import javax.servlet.http.HttpServlet;\n+import javax.servlet.http.HttpServletRequest;\n+import javax.servlet.http.HttpServletResponse;\n+\n+//  Использует только сервлеты. Нужно написать приложение-счетчик – хранить в памяти состояние,\n+//  котороое изменяется через HTTP походы.\n+//  Используйте подходящие коды HTTP ответов из лекции по HTTP\n+//\n+//  GET: /counter - возвращает счетчик\n+//\n+//  POST: /counter - увеличивает счетчик на 1\n+//\n+//  DELETE: /counter - уменьшает счетчик на значение,\n+//  которое передается в заголовке «Subtraction-Value»\n+//\n+//  POST: /counter/clear - сбрасывает счетчик. Для выполнения этого запроса должна\n+//  быть cookie - «hh-auth», единственное условие - она должна быть длиннее 10 символов.\n+\n+@WebServlet(urlPatterns = \"/counter\")\n+public class CounterServlet extends HttpServlet {\n+\n+  private static final String SERLVET_COUNTER = \"/counter\";\n+  private static final String SERVLET_COUNTER_CLEAR = \"/counter/clear\";\n+\n+  private static int counter = 0;\n+\n+  public void incrementCounter() {\n+    counter++;\n+  }\n+\n+  public void decrementCounter(int decrement) {\n+    counter -= decrement;\n+  }\n+\n+  public void clearCounter() {\n+    counter = 0;\n+  }\n+\n+  public static boolean isNumeric(String str) {\n+    try {\n+      Integer.parseInt(str);\n+      return true;\n+    } catch (NumberFormatException e) {\n+      return false;\n+    }\n+  }\n+\n+  @Override\n+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n+    resp.setStatus(200);\n+    PrintWriter writer = resp.getWriter();\n+    writer.print(counter);\n+    writer.flush();\n+  }\n+\n+  @Override\n+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n+    processRequest(req, resp);\n+  }\n+\n+  protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n+    String path = req.getServletPath();\n+\n+    switch (path) {\n+      case SERLVET_COUNTER:\n+        this.incrementCounter();\n+        resp.setStatus(200);\n+        break;\n+      case SERVLET_COUNTER_CLEAR:\n+        this.clearCounter();\n+        resp.setStatus(200);\n+        break;\n+      default:\n+        break;\n+    }\n+  }\n+\n+  @Override\n+  protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n+    if (req.getHeader(\"Subtraction-Value\") != null && isNumeric(req.getHeader(\"Subtraction-Value\"))) {\n+      this.decrementCounter(req.getIntHeader(\"Subtraction-Value\"));\n+      resp.setStatus(200);\n+    } else {\n+      resp.sendError(400);\n+    }\n+  }\n+}"
+  },
+  {
+    "sha": "202850c8452032260926f15ca5964e7a6eda9600",
+    "filename": "servlet/src/main/java/ServletApplication.java",
+    "status": "modified",
+    "additions": 34,
+    "deletions": 1,
+    "changes": 35,
+    "blob_url": "https://github.com/ARkTik2008/hh-java-servers-homework/blob/e88be57e37ead8dd303403c15a97f2f9f8c8dc46/servlet/src/main/java/ServletApplication.java",
+    "raw_url": "https://github.com/ARkTik2008/hh-java-servers-homework/raw/e88be57e37ead8dd303403c15a97f2f9f8c8dc46/servlet/src/main/java/ServletApplication.java",
+    "contents_url": "https://api.github.com/repos/ARkTik2008/hh-java-servers-homework/contents/servlet/src/main/java/ServletApplication.java?ref=e88be57e37ead8dd303403c15a97f2f9f8c8dc46",
+    "patch": "@@ -1,6 +1,39 @@\n+import java.util.EnumSet;\n+import javax.servlet.DispatcherType;\n+import org.eclipse.jetty.server.Server;\n+import org.eclipse.jetty.servlet.ServletHandler;\n+\n public class ServletApplication {\n \n-  public static void main(String[] args) {\n+  //  Использует только сервлеты. Нужно написать приложение-счетчик – хранить в памяти состояние,\n+//  котороое изменяется через HTTP походы.\n+//  Используйте подходящие коды HTTP ответов из лекции по HTTP\n+//\n+//  GET: /counter - возвращает счетчик\n+//\n+//  POST: /counter - увеличивает счетчик на 1\n+//\n+//  DELETE: /counter - уменьшает счетчик на значение,\n+//  которое передается в заголовке «Subtraction-Value»\n+//\n+//  POST: /counter/clear - сбрасывает счетчик. Для выполнения этого запроса должна\n+//  быть cookie - «hh-auth», единственное условие - она должна быть длиннее 10 символов.\n+  final private static int PORT = 8081;\n+\n+  private static Server createServer(int port) {\n+    Server server = new Server(port);\n+    ServletHandler servletHandler = new ServletHandler();\n+    servletHandler.addServletWithMapping(CounterServlet.class, \"/\");\n+    servletHandler.addFilterWithMapping(AuthFilter.class, \"/counter/clear\", EnumSet.of(DispatcherType.REQUEST));\n+    server.setHandler(servletHandler);\n+    return server;\n+  }\n+\n+\n+  public static void main(String[] args) throws Exception {\n     // run, Jetty, run!\n+    Server server = createServer(PORT);\n+    server.start();\n+    server.join();\n   }\n }"
+  }
+]

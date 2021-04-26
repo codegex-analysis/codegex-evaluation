@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "3dc027e2b99a27b0b5ecc51b845f89817e14d699",
+    "filename": "src/main/java/cn/nukkit/Player.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 2,
+    "changes": 13,
+    "blob_url": "https://github.com/CloudburstMC/Nukkit/blob/490570b9cf88e827bb035230273f895049d5a396/src/main/java/cn/nukkit/Player.java",
+    "raw_url": "https://github.com/CloudburstMC/Nukkit/raw/490570b9cf88e827bb035230273f895049d5a396/src/main/java/cn/nukkit/Player.java",
+    "contents_url": "https://api.github.com/repos/CloudburstMC/Nukkit/contents/src/main/java/cn/nukkit/Player.java?ref=490570b9cf88e827bb035230273f895049d5a396",
+    "patch": "@@ -4166,11 +4166,15 @@ public void setMovementSpeed(float speed) {\n     public void setMovementSpeed(float speed, boolean send) {\n         super.setMovementSpeed(speed);\n         if (this.spawned && send) {\n-            Attribute attribute = Attribute.getAttribute(Attribute.MOVEMENT_SPEED).setValue(speed);\n-            this.setAttribute(attribute);\n+            this.sendMovementSpeed(speed);\n         }\n     }\n \n+    public void sendMovementSpeed(float speed){\n+        Attribute attribute = Attribute.getAttribute(Attribute.MOVEMENT_SPEED).setValue(speed);\n+        this.setAttribute(attribute);\n+    }\n+\n     public Entity getKiller() {\n         return killer;\n     }\n@@ -4899,6 +4903,11 @@ public synchronized Locale getLocale() {\n     public void setSprinting(boolean value) {\n         if (isSprinting() != value) {\n             super.setSprinting(value);\n+\n+            if(this.hasEffect(Effect.SPEED)) {\n+                float movementSpeed = this.getMovementSpeed();\n+                this.sendMovementSpeed(value ? movementSpeed * 1.3f : movementSpeed);\n+            }\n         }\n     }\n "
+  }
+]

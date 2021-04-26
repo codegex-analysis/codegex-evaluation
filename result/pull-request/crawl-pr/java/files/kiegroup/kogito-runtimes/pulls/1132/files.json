@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "e114ceb11f40968fee7751dcf1272cb10d9f23ad",
+    "filename": "kogito-build-parent/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/kiegroup/kogito-runtimes/blob/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/kogito-build-parent/pom.xml",
+    "raw_url": "https://github.com/kiegroup/kogito-runtimes/raw/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/kogito-build-parent/pom.xml",
+    "contents_url": "https://api.github.com/repos/kiegroup/kogito-runtimes/contents/kogito-build-parent/pom.xml?ref=71d41fe6ca61123c0bcbe2eb29177999729b7c5d",
+    "patch": "@@ -117,7 +117,7 @@\n     <version.org.jsonschema2pojo-maven-plugin>1.0.1</version.org.jsonschema2pojo-maven-plugin>\n \n     <!-- this version property is used in plugins but also in dependencies too -->\n-    <version.io.quarkus>1.11.5.Final</version.io.quarkus>\n+    <version.io.quarkus>1.11.6.Final</version.io.quarkus>\n \n     <!-- dependencies versions -->\n     <version.ch.obermuhlner>2.0.1</version.ch.obermuhlner>"
+  },
+  {
+    "sha": "274ce72701bb60da2dcccce171437c94f03d0ddc",
+    "filename": "kogito-quarkus-parent/pom.xml",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/kiegroup/kogito-runtimes/blob/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/kogito-quarkus-parent/pom.xml",
+    "raw_url": "https://github.com/kiegroup/kogito-runtimes/raw/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/kogito-quarkus-parent/pom.xml",
+    "contents_url": "https://api.github.com/repos/kiegroup/kogito-runtimes/contents/kogito-quarkus-parent/pom.xml?ref=71d41fe6ca61123c0bcbe2eb29177999729b7c5d",
+    "patch": "@@ -25,6 +25,18 @@\n         <type>pom</type>\n         <scope>import</scope>\n       </dependency>\n+      <dependency>\n+        <groupId>org.kie.kogito</groupId>\n+        <artifactId>kogito-quarkus-parent-quarkus-platform-descriptor</artifactId>\n+        <version>${project.version}</version>\n+      </dependency>\n+      <dependency>\n+        <groupId>org.kie.kogito</groupId>\n+        <artifactId>kogito-quarkus-parent-quarkus-platform-descriptor</artifactId>\n+        <classifier>${project.version}</classifier>\n+        <type>json</type>\n+        <version>${project.version}</version>\n+      </dependency>\n     </dependencies>\n   </dependencyManagement>\n "
+  },
+  {
+    "sha": "bbc92cb6f83bfbc3b0de0d5c7c79ada9f245f148",
+    "filename": "kogito-quarkus-platform/pom.xml",
+    "status": "added",
+    "additions": 72,
+    "deletions": 0,
+    "changes": 72,
+    "blob_url": "https://github.com/kiegroup/kogito-runtimes/blob/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/kogito-quarkus-platform/pom.xml",
+    "raw_url": "https://github.com/kiegroup/kogito-runtimes/raw/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/kogito-quarkus-platform/pom.xml",
+    "contents_url": "https://api.github.com/repos/kiegroup/kogito-runtimes/contents/kogito-quarkus-platform/pom.xml?ref=71d41fe6ca61123c0bcbe2eb29177999729b7c5d",
+    "patch": "@@ -0,0 +1,72 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n+         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n+         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n+\n+    <modelVersion>4.0.0</modelVersion>\n+         \n+    <parent>\n+        <groupId>org.kie.kogito</groupId>\n+        <artifactId>kogito-build-parent</artifactId>\n+        <version>2.0.0-SNAPSHOT</version>\n+        <relativePath>../kogito-build-parent/pom.xml</relativePath>\n+    </parent>\n+\n+    <artifactId>kogito-quarkus-parent-quarkus-platform-descriptor</artifactId>\n+    <packaging>pom</packaging>\n+\n+    <name>Kogito :: Quarkus Platform Descriptor</name>\n+\n+    <properties>\n+        <pluginPhase>process-resources</pluginPhase>\n+    </properties>\n+\n+    <build>\n+        <plugins>\n+            <plugin>\n+                <artifactId>maven-resources-plugin</artifactId>\n+                <executions>\n+                    <execution>\n+                        <id>copy-resources</id>\n+                        <phase>validate</phase>\n+                        <goals>\n+                            <goal>copy-resources</goal>\n+                        </goals>\n+                        <configuration>\n+                            <outputDirectory>${basedir}/target/resources</outputDirectory>\n+                            <resources>\n+                                <resource>\n+                                    <directory>${basedir}/src/main/resources</directory>\n+                                    <filtering>true</filtering>\n+                                </resource>\n+                            </resources>\n+                        </configuration>\n+                    </execution>\n+                </executions>\n+            </plugin>\n+            <plugin>\n+                <groupId>io.quarkus</groupId>\n+                <artifactId>quarkus-platform-descriptor-json-plugin</artifactId>\n+                <version>${version.io.quarkus}</version>\n+                <executions>\n+                    <execution>\n+                        <phase>${pluginPhase}</phase>\n+                        <goals>\n+                            <goal>generate-extensions-json</goal>\n+                            <!-- <goal>generate-platform-descriptor-json</goal> -->\n+                        </goals>\n+                        <configuration>\n+                            <!-- <ignoredGroupIds>\n+                                <ignoredGroupId>software.amazon.awssdk</ignoredGroupId>\n+                            </ignoredGroupIds> -->\n+                            <bomArtifactId>kogito-quarkus-parent</bomArtifactId>\n+                            <resolveDependencyManagement>true</resolveDependencyManagement>\n+                            <overridesFile>${basedir}/target/resources/catalog-overrides.json</overridesFile>\n+                        </configuration>\n+                    </execution>\n+                </executions>\n+            </plugin>\n+        </plugins>\n+    </build>\n+\n+</project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "bfd870e452fce47e245d59f1536a24117bec2c48",
+    "filename": "kogito-quarkus-platform/src/main/resources/catalog-overrides.json",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/kiegroup/kogito-runtimes/blob/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/kogito-quarkus-platform/src/main/resources/catalog-overrides.json",
+    "raw_url": "https://github.com/kiegroup/kogito-runtimes/raw/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/kogito-quarkus-platform/src/main/resources/catalog-overrides.json",
+    "contents_url": "https://api.github.com/repos/kiegroup/kogito-runtimes/contents/kogito-quarkus-platform/src/main/resources/catalog-overrides.json?ref=71d41fe6ca61123c0bcbe2eb29177999729b7c5d",
+    "patch": "@@ -0,0 +1,3 @@\n+{\n+}\n+"
+  },
+  {
+    "sha": "70280ae8d7c80d19c9b5d24e56497bd9d1b71a61",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/kiegroup/kogito-runtimes/blob/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/pom.xml",
+    "raw_url": "https://github.com/kiegroup/kogito-runtimes/raw/71d41fe6ca61123c0bcbe2eb29177999729b7c5d/pom.xml",
+    "contents_url": "https://api.github.com/repos/kiegroup/kogito-runtimes/contents/pom.xml?ref=71d41fe6ca61123c0bcbe2eb29177999729b7c5d",
+    "patch": "@@ -135,6 +135,7 @@\n         <module>kogito-springboot</module>\n         <module>kogito-maven-plugin</module>\n         <module>kogito-quarkus-parent</module>\n+        <module>kogito-quarkus-platform</module>\n         <module>archetypes</module>\n         <module>grafana-api</module>\n         <module>addons</module>\n@@ -168,4 +169,4 @@\n   </profiles>\n \n \n-</project>\n\\ No newline at end of file\n+</project>"
+  }
+]

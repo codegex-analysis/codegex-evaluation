@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "e50e9e37006033fdf42abecae624c06ae8fecbe6",
+    "filename": "spark-connector-examples/src/main/scala/io/pravega/example/spark/StreamPravegaToConsole.scala",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/pravega/pravega-samples/blob/3cdeb2d5723e188a3ffe0e84499516b61c479c77/spark-connector-examples/src/main/scala/io/pravega/example/spark/StreamPravegaToConsole.scala",
+    "raw_url": "https://github.com/pravega/pravega-samples/raw/3cdeb2d5723e188a3ffe0e84499516b61c479c77/spark-connector-examples/src/main/scala/io/pravega/example/spark/StreamPravegaToConsole.scala",
+    "contents_url": "https://api.github.com/repos/pravega/pravega-samples/contents/spark-connector-examples/src/main/scala/io/pravega/example/spark/StreamPravegaToConsole.scala?ref=3cdeb2d5723e188a3ffe0e84499516b61c479c77",
+    "patch": "@@ -20,11 +20,13 @@ object StreamPravegaToConsole {\n       .getOrCreate()\n \n     val scope = sys.env.getOrElse(\"PRAVEGA_SCOPE\", \"examples\")\n-    val controller = sys.env.getOrElse(\"PRAVEGA_CONTROLLER\", \"tcp://127.0.0.1:9090\")\n+    val controller = sys.env.getOrElse(\"PRAVEGA_CONTROLLER_URI\", \"tcp://127.0.0.1:9090\")\n+    val checkpointLocation = sys.env.getOrElse(\"CHECKPOINT_DIR\", \"/tmp/spark-checkpoints-StreamPravegaToConsole\")\n \n     spark\n       .readStream\n       .format(\"pravega\")\n+      .option(\"allow_create_scope\", \"false\")\n       .option(\"controller\", controller)\n       .option(\"scope\", scope)\n       .option(\"stream\", \"streamprocessing1\")\n@@ -37,7 +39,7 @@ object StreamPravegaToConsole {\n       .outputMode(\"append\")\n       .format(\"console\")\n       .option(\"truncate\", \"false\")\n-      .option(\"checkpointLocation\", \"/tmp/spark-checkpoints-StreamPravegaToConsole\")\n+      .option(\"checkpointLocation\", checkpointLocation)\n       .start()\n       .awaitTermination()\n   }"
+  },
+  {
+    "sha": "9a27d7995379f498bacc12e4dadb33cadd57cc5f",
+    "filename": "spark-connector-examples/src/main/scala/io/pravega/example/spark/StreamPravegaToPravega.scala",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/pravega/pravega-samples/blob/3cdeb2d5723e188a3ffe0e84499516b61c479c77/spark-connector-examples/src/main/scala/io/pravega/example/spark/StreamPravegaToPravega.scala",
+    "raw_url": "https://github.com/pravega/pravega-samples/raw/3cdeb2d5723e188a3ffe0e84499516b61c479c77/spark-connector-examples/src/main/scala/io/pravega/example/spark/StreamPravegaToPravega.scala",
+    "contents_url": "https://api.github.com/repos/pravega/pravega-samples/contents/spark-connector-examples/src/main/scala/io/pravega/example/spark/StreamPravegaToPravega.scala?ref=3cdeb2d5723e188a3ffe0e84499516b61c479c77",
+    "patch": "@@ -20,11 +20,13 @@ object StreamPravegaToPravega {\n       .getOrCreate()\n \n     val scope = sys.env.getOrElse(\"PRAVEGA_SCOPE\", \"examples\")\n-    val controller = sys.env.getOrElse(\"PRAVEGA_CONTROLLER\", \"tcp://127.0.0.1:9090\")\n+    val controller = sys.env.getOrElse(\"PRAVEGA_CONTROLLER_URI\", \"tcp://127.0.0.1:9090\")\n+    val checkpointLocation = sys.env.getOrElse(\"CHECKPOINT_DIR\", \"/tmp/spark-checkpoints-StreamPravegaToPravega\")\n \n     spark\n       .readStream\n       .format(\"pravega\")\n+      .option(\"allow_create_scope\", \"false\")\n       .option(\"controller\", controller)\n       .option(\"scope\", scope)\n       .option(\"stream\", \"streamprocessing1\")\n@@ -36,10 +38,11 @@ object StreamPravegaToPravega {\n       .trigger(Trigger.ProcessingTime(3000))\n       .outputMode(\"append\")\n       .format(\"pravega\")\n+      .option(\"allow_create_scope\", \"false\")\n       .option(\"controller\", controller)\n       .option(\"scope\", scope)\n       .option(\"stream\", \"streamprocessing2\")\n-      .option(\"checkpointLocation\", \"/tmp/spark-checkpoints-StreamPravegaToPravega\")\n+      .option(\"checkpointLocation\", checkpointLocation)\n       .start()\n       .awaitTermination()\n   }"
+  }
+]

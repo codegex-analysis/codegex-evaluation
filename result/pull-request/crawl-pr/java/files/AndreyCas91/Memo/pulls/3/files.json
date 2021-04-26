@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "7cdc5d52c3770943e5d62d9299629d1de34e2d0a",
+    "filename": "app/src/main/java/ru/geekbrains/memo/MemoAdapter.java",
+    "status": "added",
+    "additions": 73,
+    "deletions": 0,
+    "changes": 73,
+    "blob_url": "https://github.com/AndreyCas91/Memo/blob/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/java/ru/geekbrains/memo/MemoAdapter.java",
+    "raw_url": "https://github.com/AndreyCas91/Memo/raw/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/java/ru/geekbrains/memo/MemoAdapter.java",
+    "contents_url": "https://api.github.com/repos/AndreyCas91/Memo/contents/app/src/main/java/ru/geekbrains/memo/MemoAdapter.java?ref=1164edeb41aa8a4cb3bcd740caa5b5277d454d1c",
+    "patch": "@@ -0,0 +1,73 @@\n+package ru.geekbrains.memo;\n+\n+import android.util.Log;\n+import android.view.LayoutInflater;\n+import android.view.View;\n+import android.view.ViewGroup;\n+\n+import androidx.annotation.NonNull;\n+import androidx.recyclerview.widget.RecyclerView;\n+\n+import com.google.android.material.textview.MaterialTextView;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.MemoVievHolder> {\n+\n+    private static final String TAG = \"adapter\";\n+\n+    private final List<SimpleNote> simpleNoteList = new ArrayList<>();\n+    private final MemoAdapterCallback callback;\n+\n+    public MemoAdapter(MemoAdapterCallback callback) {\n+        this.callback = callback;\n+    }\n+\n+    public void setItems(List<SimpleNote> item){\n+        simpleNoteList.clear();\n+        simpleNoteList.addAll(item);\n+        notifyDataSetChanged();\n+    }\n+\n+    @NonNull\n+    @Override\n+    public MemoVievHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {\n+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_memo, parent, false);\n+        return new MemoVievHolder(view);\n+    }\n+\n+    @Override\n+    public void onBindViewHolder(@NonNull MemoVievHolder holder, int position) {\n+        holder.onBind(simpleNoteList.get(position), position);\n+    }\n+\n+    @Override\n+    public int getItemCount() {\n+        return simpleNoteList.size();\n+    }\n+\n+    class MemoVievHolder extends RecyclerView.ViewHolder{\n+\n+        private final MaterialTextView textView;\n+\n+        public MemoVievHolder(@NonNull View itemView) {\n+            super(itemView);\n+            textView = itemView.findViewById(R.id.tv_item_memo);\n+        }\n+\n+        public void onBind(SimpleNote numb, int position){\n+            Log.d(TAG, String.valueOf(position));\n+            textView.setText(numb.getTitle());\n+\n+            itemView.setOnClickListener(new View.OnClickListener() {\n+                @Override\n+                public void onClick(View view) {\n+                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {\n+                        callback.onItemClicked(getAdapterPosition());\n+                    }\n+                }\n+            });\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "9d9b94cee57ad4a323d0c1132cffcd0e341d32aa",
+    "filename": "app/src/main/java/ru/geekbrains/memo/MemoAdapterCallback.java",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/AndreyCas91/Memo/blob/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/java/ru/geekbrains/memo/MemoAdapterCallback.java",
+    "raw_url": "https://github.com/AndreyCas91/Memo/raw/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/java/ru/geekbrains/memo/MemoAdapterCallback.java",
+    "contents_url": "https://api.github.com/repos/AndreyCas91/Memo/contents/app/src/main/java/ru/geekbrains/memo/MemoAdapterCallback.java?ref=1164edeb41aa8a4cb3bcd740caa5b5277d454d1c",
+    "patch": "@@ -0,0 +1,6 @@\n+package ru.geekbrains.memo;\n+\n+public interface MemoAdapterCallback {\n+\n+    void onItemClicked(int position);\n+}"
+  },
+  {
+    "sha": "d25bede2dac3106209136a3492a2747db2d94af1",
+    "filename": "app/src/main/java/ru/geekbrains/memo/MemoFragment.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 38,
+    "changes": 51,
+    "blob_url": "https://github.com/AndreyCas91/Memo/blob/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/java/ru/geekbrains/memo/MemoFragment.java",
+    "raw_url": "https://github.com/AndreyCas91/Memo/raw/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/java/ru/geekbrains/memo/MemoFragment.java",
+    "contents_url": "https://api.github.com/repos/AndreyCas91/Memo/contents/app/src/main/java/ru/geekbrains/memo/MemoFragment.java?ref=1164edeb41aa8a4cb3bcd740caa5b5277d454d1c",
+    "patch": "@@ -1,29 +1,28 @@\n package ru.geekbrains.memo;\n \n-import android.content.res.Configuration;\n import android.os.Bundle;\n import android.view.LayoutInflater;\n import android.view.View;\n import android.view.ViewGroup;\n-import android.widget.LinearLayout;\n-import android.widget.TextView;\n \n import androidx.annotation.NonNull;\n import androidx.annotation.Nullable;\n import androidx.fragment.app.Fragment;\n+import androidx.recyclerview.widget.LinearLayoutManager;\n+import androidx.recyclerview.widget.RecyclerView;\n \n import java.util.ArrayList;\n import java.util.Arrays;\n \n-public class MemoFragment extends Fragment {\n+public class MemoFragment extends Fragment implements MemoAdapterCallback {\n     public static final ArrayList<SimpleNote> SNote = new ArrayList<>(Arrays.asList(\n             new SimpleNote(\"Встреча (парк)\", \"В парке .....\", \"12.03\"),\n             new SimpleNote(\"Встреча (кино)\", \"В кино .......\", \"17.03\"),\n             new SimpleNote(\"Ужин\", \"В ресторане .....\", \"04.04\"),\n             new SimpleNote(\"Встреча (аэропорт)\", \"В аэропорту .......\", \"10.04\")\n     ));\n \n-    private boolean orientation;\n+    private final MemoAdapter adapter = new MemoAdapter(this);\n \n     @Nullable\n     @Override\n@@ -41,42 +40,13 @@ public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceStat\n     @Override\n     public void onActivityCreated(@Nullable Bundle savedInstanceState) {\n         super.onActivityCreated(savedInstanceState);\n-        orientation = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;\n+        adapter.setItems(SNote);\n     }\n \n     private void initList(View view) {\n-        LinearLayout linearLayout = (LinearLayout) view;\n-\n-        for (int i = 0; i < SNote.size(); i++) {\n-            String str = SNote.get(i).getTitle() + \".     \" + SNote.get(i).getData();\n-            TextView tv = new TextView(linearLayout.getContext());\n-            tv.setText(str);\n-            tv.setTextSize(20f);\n-            int index = i;\n-            tv.setOnClickListener(new View.OnClickListener() {\n-                @Override\n-                public void onClick(View v) {\n-                    chekOrintation(SNote.get(index).getDesk());\n-                }\n-            });\n-            linearLayout.addView(tv);\n-        }\n-    }\n-\n-    private void chekOrintation(String messeg) {\n-        if (orientation) {\n-            openNoteFragment(messeg);\n-        } else {\n-            startNoteFragment(messeg);\n-        }\n-    }\n-\n-    private void openNoteFragment(String messeg) {\n-        NoteFragment noteFragment = NoteFragment.newIstance(messeg);\n-        requireActivity().getSupportFragmentManager()\n-                .beginTransaction()\n-                .replace(R.id.layout_container, noteFragment)\n-                .commit();\n+        RecyclerView recyclerView = view.findViewById(R.id.rv_memo);\n+        recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));\n+        recyclerView.setAdapter(adapter);\n     }\n \n     private void startNoteFragment(String messeg) {\n@@ -87,4 +57,9 @@ private void startNoteFragment(String messeg) {\n                 .addToBackStack(null)\n                 .commit();\n     }\n+\n+    @Override\n+    public void onItemClicked(int position) {\n+        startNoteFragment(SNote.get(position).getDesk());\n+    }\n }"
+  },
+  {
+    "sha": "f488618411a60b08ebedb8b4ef8f080d5a1238bb",
+    "filename": "app/src/main/res/layout/fragment_memo.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 3,
+    "changes": 9,
+    "blob_url": "https://github.com/AndreyCas91/Memo/blob/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/res/layout/fragment_memo.xml",
+    "raw_url": "https://github.com/AndreyCas91/Memo/raw/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/res/layout/fragment_memo.xml",
+    "contents_url": "https://api.github.com/repos/AndreyCas91/Memo/contents/app/src/main/res/layout/fragment_memo.xml?ref=1164edeb41aa8a4cb3bcd740caa5b5277d454d1c",
+    "patch": "@@ -2,9 +2,12 @@\n <LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n     xmlns:tools=\"http://schemas.android.com/tools\"\n     android:layout_width=\"match_parent\"\n-    android:layout_height=\"match_parent\"\n-    android:orientation=\"vertical\"\n-    android:id=\"@+id/fragment_memo\"\n+    android:layout_height=\"wrap_content\"\n     tools:context=\".MemoFragment\">\n \n+    <androidx.recyclerview.widget.RecyclerView\n+        android:id=\"@+id/rv_memo\"\n+        android:layout_width=\"match_parent\"\n+        android:layout_height=\"wrap_content\"/>\n+\n </LinearLayout>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e1ed66ae9627597fb89631d102e437c07298af4b",
+    "filename": "app/src/main/res/layout/item_memo.xml",
+    "status": "added",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/AndreyCas91/Memo/blob/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/res/layout/item_memo.xml",
+    "raw_url": "https://github.com/AndreyCas91/Memo/raw/1164edeb41aa8a4cb3bcd740caa5b5277d454d1c/app/src/main/res/layout/item_memo.xml",
+    "contents_url": "https://api.github.com/repos/AndreyCas91/Memo/contents/app/src/main/res/layout/item_memo.xml?ref=1164edeb41aa8a4cb3bcd740caa5b5277d454d1c",
+    "patch": "@@ -0,0 +1,20 @@\n+<?xml version=\"1.0\" encoding=\"utf-8\"?>\n+<com.google.android.material.card.MaterialCardView xmlns:android=\"http://schemas.android.com/apk/res/android\"\n+    android:layout_width=\"match_parent\"\n+    android:layout_height=\"wrap_content\"\n+    xmlns:tools=\"http://schemas.android.com/tools\"\n+    android:minHeight=\"100dp\">\n+\n+    <com.google.android.material.textview.MaterialTextView\n+        android:id=\"@+id/tv_item_memo\"\n+        android:layout_width=\"wrap_content\"\n+        android:layout_height=\"wrap_content\"\n+        android:textSize=\"20sp\"\n+        android:layout_gravity=\"center\"\n+        android:singleLine=\"true\"\n+        android:layout_marginStart=\"20dp\"\n+        android:layout_marginEnd=\"20dp\"\n+\n+        tools:text=\"test test test test test test test test test test \"/>\n+\n+</com.google.android.material.card.MaterialCardView>\n\\ No newline at end of file"
+  }
+]

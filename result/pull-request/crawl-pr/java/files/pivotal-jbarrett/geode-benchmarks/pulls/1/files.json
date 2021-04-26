@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "713d987a35552cbd81722e8b717b46bf4a27a20e",
+    "filename": "geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/JedisClientManager.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/pivotal-jbarrett/geode-benchmarks/blob/cce20260dc6a0a7178d9d2cd88d5d279c7443e55/geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/JedisClientManager.java",
+    "raw_url": "https://github.com/pivotal-jbarrett/geode-benchmarks/raw/cce20260dc6a0a7178d9d2cd88d5d279c7443e55/geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/JedisClientManager.java",
+    "contents_url": "https://api.github.com/repos/pivotal-jbarrett/geode-benchmarks/contents/geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/JedisClientManager.java?ref=cce20260dc6a0a7178d9d2cd88d5d279c7443e55",
+    "patch": "@@ -72,7 +72,7 @@ public void flushdb() {\n   };\n \n   @Override\n-  public void connect(final Collection<InetSocketAddress> servers) {\n+  public void connect(final Collection<InetSocketAddress> servers) throws InterruptedException {\n     logger.info(\"Connect RedisClient on thread {}.\", currentThread());\n \n     final Set<HostAndPort> nodes = servers.stream()\n@@ -84,6 +84,7 @@ public void connect(final Collection<InetSocketAddress> servers) {\n     poolConfig.setLifo(false);\n     final JedisCluster jedisCluster = new JedisCluster(nodes, Integer.MAX_VALUE, poolConfig);\n \n+    long start = System.nanoTime();\n     while (true) {\n       try (final Jedis jedis = jedisCluster.getConnectionFromSlot(0)) {\n         logger.info(\"Waiting for cluster to come up.\");\n@@ -93,6 +94,10 @@ public void connect(final Collection<InetSocketAddress> servers) {\n         }\n         logger.debug(clusterInfo);\n       } catch (Exception e) {\n+        if(System.nanoTime() - start > CONNECT_TIMEOUT.toNanos()) {\n+          throw e;\n+        }\n+        Thread.sleep(50);\n         logger.info(\"Failed connecting.\", e);\n       }\n     }"
+  },
+  {
+    "sha": "df9b160a456d8a235638359ae3613f8164cb11c5",
+    "filename": "geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/LettuceClientManager.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/pivotal-jbarrett/geode-benchmarks/blob/cce20260dc6a0a7178d9d2cd88d5d279c7443e55/geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/LettuceClientManager.java",
+    "raw_url": "https://github.com/pivotal-jbarrett/geode-benchmarks/raw/cce20260dc6a0a7178d9d2cd88d5d279c7443e55/geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/LettuceClientManager.java",
+    "contents_url": "https://api.github.com/repos/pivotal-jbarrett/geode-benchmarks/contents/geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/LettuceClientManager.java?ref=cce20260dc6a0a7178d9d2cd88d5d279c7443e55",
+    "patch": "@@ -82,6 +82,7 @@ public void connect(final Collection<InetSocketAddress> servers) {\n \n     final RedisClusterClient redisClusterClient = RedisClusterClient.create(nodes);\n \n+    long start = System.nanoTime();\n     while (true) {\n       try (final StatefulRedisClusterConnection<String, String> connection =\n           redisClusterClient.connect()) {\n@@ -92,6 +93,9 @@ public void connect(final Collection<InetSocketAddress> servers) {\n         }\n         logger.debug(clusterInfo);\n       } catch (Exception e) {\n+        if(System.nanoTime() - start > CONNECT_TIMEOUT.toNanos()) {\n+          throw e;\n+        }\n         logger.info(\"Failed connecting.\", e);\n       }\n     }"
+  },
+  {
+    "sha": "91a6f21a175bc0c132e2e207265ff4c8a5c35731",
+    "filename": "geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/RedisClientManager.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/pivotal-jbarrett/geode-benchmarks/blob/cce20260dc6a0a7178d9d2cd88d5d279c7443e55/geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/RedisClientManager.java",
+    "raw_url": "https://github.com/pivotal-jbarrett/geode-benchmarks/raw/cce20260dc6a0a7178d9d2cd88d5d279c7443e55/geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/RedisClientManager.java",
+    "contents_url": "https://api.github.com/repos/pivotal-jbarrett/geode-benchmarks/contents/geode-benchmarks/src/main/java/org/apache/geode/benchmark/tasks/redis/RedisClientManager.java?ref=cce20260dc6a0a7178d9d2cd88d5d279c7443e55",
+    "patch": "@@ -17,10 +17,13 @@\n \n import java.io.Serializable;\n import java.net.InetSocketAddress;\n+import java.time.Duration;\n import java.util.Collection;\n \n public interface RedisClientManager extends Serializable {\n-  void connect(final Collection<InetSocketAddress> servers);\n+  Duration CONNECT_TIMEOUT = Duration.ofMinutes(1);\n+\n+  void connect(final Collection<InetSocketAddress> servers) throws InterruptedException;\n \n   void close();\n "
+  }
+]

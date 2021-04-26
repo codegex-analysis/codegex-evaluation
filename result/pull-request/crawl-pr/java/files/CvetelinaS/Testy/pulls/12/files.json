@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "a3bac719c61d9d384677ed174437572052174cc2",
+    "filename": "Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/Chapter1Page.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/CvetelinaS/Testy/blob/4801fadc0d96d99a641613951a6d873fafead4cc/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/Chapter1Page.java",
+    "raw_url": "https://github.com/CvetelinaS/Testy/raw/4801fadc0d96d99a641613951a6d873fafead4cc/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/Chapter1Page.java",
+    "contents_url": "https://api.github.com/repos/CvetelinaS/Testy/contents/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/Chapter1Page.java?ref=4801fadc0d96d99a641613951a6d873fafead4cc",
+    "patch": "@@ -28,7 +28,7 @@ public void beforeClassSetup() {\n         chapter1Link.click();\n         System.out.println(\"Redirects to the chapter1 page after click.\");\n         String URL = driver.getCurrentUrl();\n-        Assert.assertEquals(URL, UrlToChapter1.SUB_HEADING_CHAPTER1);\n+        Assert.assertEquals(URL, UrlsToChapters.URL_CHAPTER1);\n         driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);\n     }\n \n@@ -92,7 +92,7 @@ public void homePageLinkTest(){\n         Assert.assertEquals(redirectURL, expectedUrl);\n         driver.navigate().back();\n         String URL = driver.getCurrentUrl();\n-        Assert.assertEquals(URL, UrlToChapter1.SUB_HEADING_CHAPTER1);\n+        Assert.assertEquals(URL, UrlsToChapters.URL_CHAPTER1);\n     }\n \n     @Test"
+  },
+  {
+    "sha": "9a931e28ac194948b20b03fde460e1ee9e73ff3a",
+    "filename": "Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/Chapter2Page.java",
+    "status": "added",
+    "additions": 86,
+    "deletions": 0,
+    "changes": 86,
+    "blob_url": "https://github.com/CvetelinaS/Testy/blob/4801fadc0d96d99a641613951a6d873fafead4cc/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/Chapter2Page.java",
+    "raw_url": "https://github.com/CvetelinaS/Testy/raw/4801fadc0d96d99a641613951a6d873fafead4cc/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/Chapter2Page.java",
+    "contents_url": "https://api.github.com/repos/CvetelinaS/Testy/contents/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/Chapter2Page.java?ref=4801fadc0d96d99a641613951a6d873fafead4cc",
+    "patch": "@@ -0,0 +1,86 @@\n+package com.cvetelina.book.tools;\n+\n+\n+import java.util.concurrent.*;\n+import org.openqa.selenium.*;\n+import org.testng.*;\n+import org.testng.annotations.*;\n+\n+import static com.cvetelina.book.DriverInit.goToHomePage;\n+import static com.cvetelina.book.DriverInit.initializeDriver;\n+\n+public class Chapter2Page {\n+\n+    private static WebDriver driver;\n+    private static final String DIRECTIONS_ITEM_TEXT = \"This item div has the id of find\\n\" +\n+            \"put find into the target of Selenium IDE\\n\" +\n+            \"and click the find button\";\n+    private static final String CHANGING_ID_TEXT = \"This element has a ID that changes every time the page is loaded\";\n+\n+    @BeforeClass\n+    public void beforeClassSetup() {\n+        driver = initializeDriver();\n+        goToHomePage(driver);\n+\n+        WebElement chapter2Link = driver.findElement(By.linkText(\"Chapter2\"));\n+        chapter2Link.click();\n+        String URL = driver.getCurrentUrl();\n+        Assert.assertEquals(URL, UrlsToChapters.URL_CHAPTER2);\n+        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);\n+    }\n+\n+    @Test\n+    public void findAndClickIndexTest() {\n+        String expectedUrlToHome = \"http://book.theautomatedtester.co.uk/\";\n+        WebElement indexLink = driver.findElement(By.linkText(\"Index\"));\n+        indexLink.click();\n+        String redirectURL = driver.getCurrentUrl();\n+        Assert.assertEquals(redirectURL, expectedUrlToHome);\n+\n+        driver.navigate().back();\n+        String URL = driver.getCurrentUrl();\n+        Assert.assertEquals(URL, UrlsToChapters.URL_CHAPTER2);\n+    }\n+\n+    @Test\n+    public void itemWithDirectionsTest() {\n+        WebElement itemDivFind = driver.findElement(By.id(\"find\"));\n+        System.out.println(\"Actual text is:\" + itemDivFind.getText());\n+        Assert.assertEquals(DIRECTIONS_ITEM_TEXT, itemDivFind.getText());\n+    }\n+\n+    @Test\n+    public void btnWithNameTest() {\n+        WebElement btnThatComesFirst = driver.findElement(By.cssSelector(\"input[name*='but2']\"));\n+        String actualText = btnThatComesFirst.getAttribute(\"value\");\n+        Assert.assertEquals(\"Button with name\", actualText);\n+    }\n+\n+    @Test\n+    public void randomBtnTest() {\n+        WebElement btnThatComesSecond = driver.findElement(By.id(\"random\"));\n+        String actualText = btnThatComesSecond.getAttribute(\"value\");\n+        Assert.assertEquals(\"Random\", actualText);\n+    }\n+\n+    @Test\n+    public void chngIdDivTest() {\n+        WebElement divText = driver.findElement(By.xpath(\"//*[@id='divinthecenter']//following-sibling::div\"));\n+        String actualText = divText.getText();\n+        Assert.assertEquals(CHANGING_ID_TEXT, actualText);\n+    }\n+\n+    @Test\n+    public void btnWithIdTest() {\n+        WebElement firstBtnInTheMiddle = driver.findElement(By.id(\"but1\"));\n+        String actualText = firstBtnInTheMiddle.getAttribute(\"value\");\n+        Assert.assertEquals(\"Button with ID\", actualText);\n+    }\n+\n+    @Test\n+    public void siblingToBtnWithIdTest() {\n+        WebElement siblingBtn = driver.findElement(By.xpath(\"//*[@id='but1']//following-sibling::input\"));\n+        String actualText = siblingBtn.getAttribute(\"value\");\n+        Assert.assertEquals(\"Sibling Button\", actualText);\n+    }\n+}"
+  },
+  {
+    "sha": "dee2d73d313b4d0d07415aca0e8fd7374372332d",
+    "filename": "Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/UrlToChapter1.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 9,
+    "changes": 9,
+    "blob_url": "https://github.com/CvetelinaS/Testy/blob/a98e8c533f5892b74ed2b85d6e64d84dced8a5fd/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/UrlToChapter1.java",
+    "raw_url": "https://github.com/CvetelinaS/Testy/raw/a98e8c533f5892b74ed2b85d6e64d84dced8a5fd/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/UrlToChapter1.java",
+    "contents_url": "https://api.github.com/repos/CvetelinaS/Testy/contents/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/UrlToChapter1.java?ref=a98e8c533f5892b74ed2b85d6e64d84dced8a5fd",
+    "patch": "@@ -1,9 +0,0 @@\n-package com.cvetelina.book.tools;\n-\n-import java.net.*;\n-\n-public class UrlToChapter1 {\n-\n-    public static final String SUB_HEADING_CHAPTER1 = \"http://book.theautomatedtester.co.uk/chapter1\";\n-\n-}"
+  },
+  {
+    "sha": "88204a9d71cee6740a8f47bd734cef794cbc1e94",
+    "filename": "Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/UrlsToChapters.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/CvetelinaS/Testy/blob/4801fadc0d96d99a641613951a6d873fafead4cc/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/UrlsToChapters.java",
+    "raw_url": "https://github.com/CvetelinaS/Testy/raw/4801fadc0d96d99a641613951a6d873fafead4cc/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/UrlsToChapters.java",
+    "contents_url": "https://api.github.com/repos/CvetelinaS/Testy/contents/Domaci_ukol_Automatizovane_testovani_Cvetelina/src/main/java/com/cvetelina/book/tools/UrlsToChapters.java?ref=4801fadc0d96d99a641613951a6d873fafead4cc",
+    "patch": "@@ -0,0 +1,10 @@\n+package com.cvetelina.book.tools;\n+\n+import java.net.*;\n+\n+public class UrlsToChapters {\n+\n+    public static final String URL_CHAPTER1 = \"http://book.theautomatedtester.co.uk/chapter1\";\n+    public static final String URL_CHAPTER2 = \"http://book.theautomatedtester.co.uk/chapter2\";\n+\n+}"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "05ddbdbabfb16bcd8440b502e1e65dbc18960aae",
+    "filename": "src/main/java/dev/dirs/Util.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 7,
+    "changes": 29,
+    "blob_url": "https://github.com/dirs-dev/directories-jvm/blob/13b99f5a3a9441ec1491487328288cf3aca76403/src/main/java/dev/dirs/Util.java",
+    "raw_url": "https://github.com/dirs-dev/directories-jvm/raw/13b99f5a3a9441ec1491487328288cf3aca76403/src/main/java/dev/dirs/Util.java",
+    "contents_url": "https://api.github.com/repos/dirs-dev/directories-jvm/contents/src/main/java/dev/dirs/Util.java?ref=13b99f5a3a9441ec1491487328288cf3aca76403",
+    "patch": "@@ -222,14 +222,29 @@ private static void initBase64Encoding() {\n         File commandFile = new File(dir, command);\n         if (commandFile.exists()) {\n           try {\n-            return runCommands(guidsLength, Charset.forName(\"UTF-8\"),\n-                commandFile.toString(),\n-                \"-version\",\n-                \"2\",\n-                \"-NoProfile\",\n-                \"-EncodedCommand\",\n-                encodedCommand\n+            String[] stdout;\n+            // try to run using powershell V2 to bypass constrained language mode\n+            // note that this has been deprecated in new version of Windows\n+            // https://devblogs.microsoft.com/powershell/windows-powershell-2-0-deprecation/\n+            // for some set up, running this requires installation of extra dependency on Windows host\n+            stdout = runCommands(guidsLength, Charset.forName(\"UTF-8\"),\n+                    commandFile.toString(),\n+                    \"-version\",\n+                    \"2\",\n+                    \"-NoProfile\",\n+                    \"-EncodedCommand\",\n+                    encodedCommand\n             );\n+            if (stdout[0] != null) return stdout;\n+\n+            // fall-forward to higher version of powershell\n+            stdout = runCommands(guidsLength, Charset.forName(\"UTF-8\"),\n+                    commandFile.toString(),\n+                    \"-NoProfile\",\n+                    \"-EncodedCommand\",\n+                    encodedCommand\n+            );\n+            return stdout;\n           } catch (IOException e) {\n             firstException = firstException == null ? e : firstException;\n           }"
+  },
+  {
+    "sha": "e3c6908ba8ed4cb290f4fdef1db70a77e2b62ad9",
+    "filename": "src/test/java/dev/dirs/UtilTest.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 2,
+    "changes": 14,
+    "blob_url": "https://github.com/dirs-dev/directories-jvm/blob/13b99f5a3a9441ec1491487328288cf3aca76403/src/test/java/dev/dirs/UtilTest.java",
+    "raw_url": "https://github.com/dirs-dev/directories-jvm/raw/13b99f5a3a9441ec1491487328288cf3aca76403/src/test/java/dev/dirs/UtilTest.java",
+    "contents_url": "https://api.github.com/repos/dirs-dev/directories-jvm/contents/src/test/java/dev/dirs/UtilTest.java?ref=13b99f5a3a9441ec1491487328288cf3aca76403",
+    "patch": "@@ -2,8 +2,11 @@\n \n import org.junit.Test;\n \n-import static org.junit.Assert.assertEquals;\n-import static org.junit.Assert.assertFalse;\n+import java.util.Arrays;\n+import java.util.Objects;\n+\n+import static dev.dirs.Util.getWinDirs;\n+import static org.junit.Assert.*;\n \n public final class UtilTest {\n \n@@ -179,4 +182,11 @@ public void testPowershellBase64StringIsNotPadded() {\n     }\n   }\n \n+  @Test\n+  public void testPowershell() {\n+    if (Util.operatingSystem == 'w') {\n+      String[] winDirs = getWinDirs(\"3EB685DB-65F9-4CF6-A03A-E3EF65729F3D\", \"F1B32785-6FBA-4FCF-9D55-7B8E7F157091\");\n+      assertTrue(Arrays.stream(winDirs).allMatch(Objects::nonNull));\n+    }\n+  }\n }"
+  }
+]

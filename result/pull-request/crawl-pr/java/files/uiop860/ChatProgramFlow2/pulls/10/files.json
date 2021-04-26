@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "03c097e745270a20a4ad311f711567c3d1a15f1a",
+    "filename": "src/main/java/server/ClientHandler.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/uiop860/ChatProgramFlow2/blob/61c366fd92bdc0ec81158bc28076979f346c0922/src/main/java/server/ClientHandler.java",
+    "raw_url": "https://github.com/uiop860/ChatProgramFlow2/raw/61c366fd92bdc0ec81158bc28076979f346c0922/src/main/java/server/ClientHandler.java",
+    "contents_url": "https://api.github.com/repos/uiop860/ChatProgramFlow2/contents/src/main/java/server/ClientHandler.java?ref=61c366fd92bdc0ec81158bc28076979f346c0922",
+    "patch": "@@ -91,7 +91,7 @@ private boolean connectClient() {\n \n     }\n \n-    public void messageToAll(String message, String name) {\n+    public void message(String message, String name) {\n         pw.println(\"MESSAGE#\" + name + \"#\" + message);\n     }\n "
+  },
+  {
+    "sha": "b676f1e7c9567dcdc7e580cb36c9ab7ad95db0b8",
+    "filename": "src/main/java/server/MessageHandler.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 26,
+    "changes": 51,
+    "blob_url": "https://github.com/uiop860/ChatProgramFlow2/blob/61c366fd92bdc0ec81158bc28076979f346c0922/src/main/java/server/MessageHandler.java",
+    "raw_url": "https://github.com/uiop860/ChatProgramFlow2/raw/61c366fd92bdc0ec81158bc28076979f346c0922/src/main/java/server/MessageHandler.java",
+    "contents_url": "https://api.github.com/repos/uiop860/ChatProgramFlow2/contents/src/main/java/server/MessageHandler.java?ref=61c366fd92bdc0ec81158bc28076979f346c0922",
+    "patch": "@@ -1,8 +1,6 @@\n package server;\n \n \n-\n-\n import java.util.NoSuchElementException;\n import java.util.concurrent.ConcurrentHashMap;\n \n@@ -47,9 +45,6 @@ public boolean commandHandler(String msg, String myName) {\n                         }\n                         break;\n \n-\n-\n-\n                     }\n                 default:\n                     myClientHandler.writeToClient(\"unknown command\");\n@@ -59,35 +54,39 @@ public boolean commandHandler(String msg, String myName) {\n         }\n         return true;\n     }\n-        public void sendToUsers (String message, String sender, String[]receivers){\n \n-            for (int i = 0; i < receivers.length; i++) {\n-                if (userList.containsKey(receivers[i])) {\n+    public void sendToUsers(String message, String sender, String[] receivers) {\n+\n+        for (int i = 0; i < receivers.length; i++) {\n+            if (userList.containsKey(receivers[i])) {\n \n-                    userList.get(receivers[i]).messageToAll(message, sender);\n+                userList.get(receivers[i]).message(message, sender);\n \n-                }\n             }\n         }\n+        myClientHandler.writeToClient(\"Message Sent to \" + receivers.length + \"users.\");\n+    }\n \n-        public void sendToAllUser (String message, String name){\n-            userList.values().forEach(clientHandler -> {\n-                clientHandler.messageToAll(message, name);\n-            });\n-        }\n+    public void sendToAllUser(String message, String name) {\n+        userList.values().forEach(clientHandler -> {\n+            clientHandler.message(message, name);\n+        });\n+        myClientHandler.writeToClient(\"Message Sent to all users.\");\n+    }\n \n-        public void sendOnlineMessage () {\n+    public void sendOnlineMessage() {\n \n-            userList.values().forEach(clientHandler -> {\n-                clientHandler.sendOnlineMesage();\n-            });\n-        }\n+        userList.values().forEach(clientHandler -> {\n+            clientHandler.sendOnlineMesage();\n+        });\n+    }\n \n-        public void sendToSpecificUser (String message, String name, String user){\n-            if (userList.containsKey(user)) {\n-                userList.get(user).messageToAll(message, name);\n-            } else {\n-                throw new NoSuchElementException();\n-            }\n+    public void sendToSpecificUser(String message, String name, String user) {\n+        if (userList.containsKey(user)) {\n+            userList.get(user).message(message, name);\n+        } else {\n+            myClientHandler.writeToClient(\"User does not exist\");\n         }\n+        myClientHandler.writeToClient(\"Message Sent to \" + user);\n     }\n+}"
+  }
+]

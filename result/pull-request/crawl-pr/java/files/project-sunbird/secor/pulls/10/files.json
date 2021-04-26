@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "d3ecb987795d6d12106eddbca4de7cab2351c102",
+    "filename": "Dockerfile",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/project-sunbird/secor/blob/42a102af538ff08473b86a548da667d95ff26da6/Dockerfile",
+    "raw_url": "https://github.com/project-sunbird/secor/raw/42a102af538ff08473b86a548da667d95ff26da6/Dockerfile",
+    "contents_url": "https://api.github.com/repos/project-sunbird/secor/contents/Dockerfile?ref=42a102af538ff08473b86a548da667d95ff26da6",
+    "patch": "@@ -16,6 +16,7 @@ ADD target/secor-*-bin.tar.gz $SECOR_HOME\n \n COPY src/main/scripts/docker-entrypoint.sh /docker-entrypoint.sh\n RUN find $SECOR_HOME -type d -exec chown -R secor:secor {} \\;\n+RUN chown -R secor:secor /docker-entrypoint.sh\n RUN chmod +x /docker-entrypoint.sh\n \n USER secor"
+  },
+  {
+    "sha": "55b360cf87b651e4cf22eb224da8924201847a01",
+    "filename": "src/main/scripts/docker-entrypoint.sh",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 18,
+    "changes": 35,
+    "blob_url": "https://github.com/project-sunbird/secor/blob/42a102af538ff08473b86a548da667d95ff26da6/src/main/scripts/docker-entrypoint.sh",
+    "raw_url": "https://github.com/project-sunbird/secor/raw/42a102af538ff08473b86a548da667d95ff26da6/src/main/scripts/docker-entrypoint.sh",
+    "contents_url": "https://api.github.com/repos/project-sunbird/secor/contents/src/main/scripts/docker-entrypoint.sh?ref=42a102af538ff08473b86a548da667d95ff26da6",
+    "patch": "@@ -1,24 +1,24 @@\n #!/bin/sh\n set -e\n-​\n+\n # SECOR_CONFIG=''\n-​\n+\n # if [ -z \"$ZOOKEEPER_QUORUM\" ]; then\n #     echo \"ZOOKEEPER_QUORUM variable not set, launch with -e ZOOKEEPER_QUORUM=zookeeper:2181\"\n #     exit 1\n # else\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dzookeeper.quorum=$ZOOKEEPER_QUORUM\"\n #     echo \"zookeeper.quorum=$ZOOKEEPER_QUORUM\"\n # fi\n-​\n+\n # if [ -z \"$ZOOKEEPER_PATH\" ]; then\n #     echo \"ZOOKEEPER_PATH variable not set, launch with -e ZOOKEEPER_PATH=/\"\n #     exit 1\n # else\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dkafka.zookeeper.path=$ZOOKEEPER_PATH\"\n #     echo \"kafka.zookeeper.path=$ZOOKEEPER_PATH\"\n # fi\n-​\n+\n # if [ ! -z \"$KAFKA_SEED_BROKER_HOST\" ]; then\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dkafka.seed.broker.host=$KAFKA_SEED_BROKER_HOST\"\n #     echo \"kafka.seed.broker.host=$KAFKA_SEED_BROKER_HOST\"\n@@ -27,13 +27,13 @@ set -e\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dkafka.seed.broker.port=$KAFKA_SEED_BROKER_PORT\"\n #     echo \"kafka.seed.broker.port=$KAFKA_SEED_BROKER_PORT\"\n # fi\n-​\n+\n if [ ! -z \"$SECOR_GROUP\" ]; then\n     SECOR_CONFIG=\"$SECOR_CONFIG -Dsecor.kafka.group=$SECOR_GROUP\"\n     echo \"secor.kafka.group=$SECOR_GROUP\"\n fi\n-​\n-​\n+\n+\n # if [ ! -z \"$AWS_REGION\" ]; then\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Daws.region=$AWS_REGION\"\n #     echo \"aws.region=$AWS_REGION\"\n@@ -67,7 +67,7 @@ fi\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dschema.registry.url=$SECOR_SCHEMA_REGISTRY\"\n #     echo \"schema.registry.url=$SECOR_SCHEMA_REGISTRY\"\n # fi\n-​\n+\n # if [ ! -z \"$MESSAGE_TIMESTAMP_NAME\" ]; then\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dmessage.timestamp.name=$MESSAGE_TIMESTAMP_NAME\"\n #     echo \"message.timestamp.name=$MESSAGE_TIMESTAMP_NAME\"\n@@ -80,7 +80,7 @@ fi\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dsecor.parser.timezone=$SECOR_PARSER_TIMEZONE\"\n #     echo \"secor.parser.timezone=$SECOR_PARSER_TIMEZONE\"\n # fi\n-​\n+\n # if [ ! -z \"$CLOUD_SERVICE\" ]; then\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dcloud.service=$CLOUD_SERVICE\"\n #     echo \"cloud.service=$CLOUD_SERVICE\"\n@@ -97,7 +97,7 @@ fi\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dsecor.gs.path=$SECOR_GS_PATH\"\n #     echo \"secor.gs.path=$SECOR_GS_PATH\"\n # fi\n-​\n+\n # if [ ! -z \"$SECOR_MAX_FILE_BYTES\" ]; then\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dsecor.max.file.size.bytes=$SECOR_MAX_FILE_BYTES\"\n #     echo \"secor.max.file.size.bytes=$SECOR_MAX_FILE_BYTES\"\n@@ -106,8 +106,8 @@ fi\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dsecor.max.file.age.seconds=$SECOR_MAX_FILE_SECONDS\"\n #     echo \"secor.max.file.age.seconds=$SECOR_MAX_FILE_SECONDS\"\n # fi\n-​\n-​\n+\n+\n # if [ ! -z \"$SECOR_KAFKA_TOPIC_FILTER\" ]; then\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dsecor.kafka.topic_filter=$SECOR_KAFKA_TOPIC_FILTER\"\n #     echo \"secor.kafka.topic_filter=$SECOR_KAFKA_TOPIC_FILTER\"\n@@ -120,15 +120,14 @@ fi\n #     SECOR_CONFIG=\"$SECOR_CONFIG -Dsecor.message.parser.class=$SECOR_MESSAGE_PARSER\"\n #     echo \"secor.message.parser.class=$SECOR_MESSAGE_PARSER\"\n # fi\n-# SECOR_CONFIG=\"$SECOR_CONFIG $SECOR_EXTRA_OPTS\"\n-​\n-​\n+# SECOR_CONFIG=\"$SECOR_CONFIG $SECOR_EXTRA_OPTS\"​\n+\n cd /opt/secor\n-​\n-​\n+\n+\n DEFAULT_CLASSPATH=\"*:lib/*\"\n CLASSPATH=${CLASSPATH:-$DEFAULT_CLASSPATH}\n-​\n+\n # exec java -Xmx${JVM_MEMORY:-512m} $JAVA_OPTS -ea -Dsecor_group=${SECOR_GROUP:-partition} -Dlog4j.configuration=file:${LOG4J_CONFIGURATION:-log4j.docker.properties} \\\n #        -Dconfig=${CONFIG_FILE:-secor.prod.partition.properties} $SECOR_CONFIG \\\n #        -cp $CLASSPATH ${SECOR_MAIN_CLASS:-com.pinterest.secor.main.ConsumerMain}"
+  }
+]

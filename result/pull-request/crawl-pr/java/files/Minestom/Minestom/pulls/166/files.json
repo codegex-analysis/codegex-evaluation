@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "a84b25c600c3d6bfd64b8ca3cf35cc31e55847a5",
+    "filename": "src/main/java/net/minestom/server/Tickable.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/Minestom/Minestom/blob/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/Tickable.java",
+    "raw_url": "https://github.com/Minestom/Minestom/raw/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/Tickable.java",
+    "contents_url": "https://api.github.com/repos/Minestom/Minestom/contents/src/main/java/net/minestom/server/Tickable.java?ref=3ecace5bd62061ecf2371da7fca4f12ac3686827",
+    "patch": "@@ -0,0 +1,7 @@\n+package net.minestom.server;\n+\n+public interface Tickable {\n+\n+    void tick(long time);\n+\n+}"
+  },
+  {
+    "sha": "0d47beb2b11e6e8c5900818299d6df5f58177792",
+    "filename": "src/main/java/net/minestom/server/entity/Entity.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/Minestom/Minestom/blob/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/entity/Entity.java",
+    "raw_url": "https://github.com/Minestom/Minestom/raw/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/entity/Entity.java",
+    "contents_url": "https://api.github.com/repos/Minestom/Minestom/contents/src/main/java/net/minestom/server/entity/Entity.java?ref=3ecace5bd62061ecf2371da7fca4f12ac3686827",
+    "patch": "@@ -2,6 +2,7 @@\n \n import com.google.common.collect.Queues;\n import net.minestom.server.MinecraftServer;\n+import net.minestom.server.Tickable;\n import net.minestom.server.Viewable;\n import net.minestom.server.chat.JsonMessage;\n import net.minestom.server.collision.BoundingBox;\n@@ -52,7 +53,7 @@\n  * <p>\n  * To create your own entity you probably want to extends {@link ObjectEntity} or {@link EntityCreature} instead.\n  */\n-public class Entity implements Viewable, EventHandler, DataContainer, PermissionHandler {\n+public class Entity implements Viewable, Tickable, EventHandler, DataContainer, PermissionHandler {\n \n     private static final Map<Integer, Entity> entityById = new ConcurrentHashMap<>();\n     private static final Map<UUID, Entity> entityByUuid = new ConcurrentHashMap<>();\n@@ -426,6 +427,7 @@ public void setData(@Nullable Data data) {\n      *\n      * @param time the update time in milliseconds\n      */\n+    @Override\n     public void tick(long time) {\n         if (instance == null)\n             return;"
+  },
+  {
+    "sha": "c660397e51e5cd761887ab7d3984fd8afde16a44",
+    "filename": "src/main/java/net/minestom/server/instance/Chunk.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 8,
+    "changes": 30,
+    "blob_url": "https://github.com/Minestom/Minestom/blob/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/Chunk.java",
+    "raw_url": "https://github.com/Minestom/Minestom/raw/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/Chunk.java",
+    "contents_url": "https://api.github.com/repos/Minestom/Minestom/contents/src/main/java/net/minestom/server/instance/Chunk.java?ref=3ecace5bd62061ecf2371da7fca4f12ac3686827",
+    "patch": "@@ -1,6 +1,7 @@\n package net.minestom.server.instance;\n \n import net.minestom.server.MinecraftServer;\n+import net.minestom.server.Tickable;\n import net.minestom.server.Viewable;\n import net.minestom.server.data.Data;\n import net.minestom.server.data.DataContainer;\n@@ -50,7 +51,7 @@\n  * You generally want to avoid storing references of this object as this could lead to a huge memory leak,\n  * you should store the chunk coordinates instead.\n  */\n-public abstract class Chunk implements Viewable, DataContainer {\n+public abstract class Chunk implements Viewable, Tickable, DataContainer {\n \n     protected static final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();\n     protected static final BiomeManager BIOME_MANAGER = MinecraftServer.getBiomeManager();\n@@ -66,6 +67,7 @@\n \n     private final UUID identifier;\n \n+    protected Instance instance;\n     @NotNull\n     protected final Biome[] biomes;\n     protected final int chunkX, chunkZ;\n@@ -84,8 +86,9 @@\n     // Data\n     protected Data data;\n \n-    public Chunk(@Nullable Biome[] biomes, int chunkX, int chunkZ, boolean shouldGenerate) {\n+    public Chunk(@NotNull Instance instance, @Nullable Biome[] biomes, int chunkX, int chunkZ, boolean shouldGenerate) {\n         this.identifier = UUID.randomUUID();\n+        this.instance = instance;\n         this.chunkX = chunkX;\n         this.chunkZ = chunkZ;\n         this.shouldGenerate = shouldGenerate;\n@@ -125,10 +128,10 @@ public Chunk(@Nullable Biome[] biomes, int chunkX, int chunkZ, boolean shouldGen\n      * <p>\n      * WARNING: this method doesn't necessary have to be thread-safe, proceed with caution.\n      *\n-     * @param time     the time of the update in milliseconds\n-     * @param instance the {@link Instance} linked to this chunk\n+     * @param time the time of the update in milliseconds\n      */\n-    public abstract void tick(long time, @NotNull Instance instance);\n+    @Override\n+    public abstract void tick(long time);\n \n     /**\n      * Gets the block state id at a position.\n@@ -244,12 +247,13 @@ public Chunk(@Nullable Biome[] biomes, int chunkX, int chunkZ, boolean shouldGen\n      * <p>\n      * The chunk position (X/Z) can be modified using the given arguments.\n      *\n-     * @param chunkX the chunk X of the copy\n-     * @param chunkZ the chunk Z of the copy\n+     * @param instance the chunk owner\n+     * @param chunkX   the chunk X of the copy\n+     * @param chunkZ   the chunk Z of the copy\n      * @return a copy of this chunk with a potentially new instance and position\n      */\n     @NotNull\n-    public abstract Chunk copy(int chunkX, int chunkZ);\n+    public abstract Chunk copy(@NotNull Instance instance, int chunkX, int chunkZ);\n \n     /**\n      * Resets the chunk, this means clearing all the data making it empty.\n@@ -298,6 +302,16 @@ public UUID getIdentifier() {\n         return identifier;\n     }\n \n+    /**\n+     * Gets the instance where this chunk is stored\n+     *\n+     * @return the linked instance\n+     */\n+    @NotNull\n+    public Instance getInstance() {\n+        return instance;\n+    }\n+\n     public Biome[] getBiomes() {\n         return biomes;\n     }"
+  },
+  {
+    "sha": "20f595f1ac61f5d7e1a2bd2757ec858b3ed850f2",
+    "filename": "src/main/java/net/minestom/server/instance/DynamicChunk.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 8,
+    "changes": 15,
+    "blob_url": "https://github.com/Minestom/Minestom/blob/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/DynamicChunk.java",
+    "raw_url": "https://github.com/Minestom/Minestom/raw/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/DynamicChunk.java",
+    "contents_url": "https://api.github.com/repos/Minestom/Minestom/contents/src/main/java/net/minestom/server/instance/DynamicChunk.java?ref=3ecace5bd62061ecf2371da7fca4f12ac3686827",
+    "patch": "@@ -9,7 +9,6 @@\n import net.minestom.server.data.SerializableData;\n import net.minestom.server.data.SerializableDataImpl;\n import net.minestom.server.entity.pathfinding.PFBlockDescription;\n-import net.minestom.server.instance.block.Block;\n import net.minestom.server.instance.block.CustomBlock;\n import net.minestom.server.instance.palette.PaletteStorage;\n import net.minestom.server.network.packet.server.play.ChunkDataPacket;\n@@ -60,15 +59,15 @@\n \n     private long lastChangeTime;\n \n-    public DynamicChunk(@Nullable Biome[] biomes, int chunkX, int chunkZ,\n+    public DynamicChunk(@NotNull Instance instance, @Nullable Biome[] biomes, int chunkX, int chunkZ,\n                         @NotNull PaletteStorage blockPalette, @NotNull PaletteStorage customBlockPalette) {\n-        super(biomes, chunkX, chunkZ, true);\n+        super(instance, biomes, chunkX, chunkZ, true);\n         this.blockPalette = blockPalette;\n         this.customBlockPalette = customBlockPalette;\n     }\n \n-    public DynamicChunk(@Nullable Biome[] biomes, int chunkX, int chunkZ) {\n-        this(biomes, chunkX, chunkZ,\n+    public DynamicChunk(@NotNull Instance instance, @Nullable Biome[] biomes, int chunkX, int chunkZ) {\n+        this(instance, biomes, chunkX, chunkZ,\n                 new PaletteStorage(15, 2),\n                 new PaletteStorage(15, 2));\n     }\n@@ -129,7 +128,7 @@ public void UNSAFE_setBlock(int x, int y, int z, short blockStateId, short custo\n     }\n \n     @Override\n-    public void tick(long time, @NotNull Instance instance) {\n+    public void tick(long time) {\n         if (updatableBlocks.isEmpty())\n             return;\n \n@@ -397,8 +396,8 @@ protected ChunkDataPacket createFreshPacket() {\n \n     @NotNull\n     @Override\n-    public Chunk copy(int chunkX, int chunkZ) {\n-        DynamicChunk dynamicChunk = new DynamicChunk(biomes.clone(), chunkX, chunkZ);\n+    public Chunk copy(@NotNull Instance instance, int chunkX, int chunkZ) {\n+        DynamicChunk dynamicChunk = new DynamicChunk(instance, biomes.clone(), chunkX, chunkZ);\n         dynamicChunk.blockPalette = blockPalette.clone();\n         dynamicChunk.customBlockPalette = customBlockPalette.clone();\n         dynamicChunk.blocksData.putAll(blocksData);"
+  },
+  {
+    "sha": "7938ec0b92f0f25f2176d305fed4bd20ebf92413",
+    "filename": "src/main/java/net/minestom/server/instance/Instance.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/Minestom/Minestom/blob/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/Instance.java",
+    "raw_url": "https://github.com/Minestom/Minestom/raw/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/Instance.java",
+    "contents_url": "https://api.github.com/repos/Minestom/Minestom/contents/src/main/java/net/minestom/server/instance/Instance.java?ref=3ecace5bd62061ecf2371da7fca4f12ac3686827",
+    "patch": "@@ -5,6 +5,7 @@\n import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;\n import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;\n import net.minestom.server.MinecraftServer;\n+import net.minestom.server.Tickable;\n import net.minestom.server.UpdateManager;\n import net.minestom.server.data.Data;\n import net.minestom.server.data.DataContainer;\n@@ -56,7 +57,7 @@\n  * you need to be sure to signal the {@link UpdateManager} of the changes using\n  * {@link UpdateManager#signalChunkLoad(Instance, int, int)} and {@link UpdateManager#signalChunkUnload(Instance, int, int)}.\n  */\n-public abstract class Instance implements BlockModifier, EventHandler, DataContainer {\n+public abstract class Instance implements BlockModifier, Tickable, EventHandler, DataContainer {\n \n     protected static final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();\n     protected static final UpdateManager UPDATE_MANAGER = MinecraftServer.getUpdateManager();\n@@ -1034,6 +1035,7 @@ public void removeEntityFromChunk(@NotNull Entity entity, @NotNull Chunk chunk)\n      *\n      * @param time the tick time in milliseconds\n      */\n+    @Override\n     public void tick(long time) {\n         // Scheduled tasks\n         if (!nextTick.isEmpty()) {"
+  },
+  {
+    "sha": "06e119f26b2644bf5aa332ffc2246902040ecbbd",
+    "filename": "src/main/java/net/minestom/server/instance/InstanceContainer.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/Minestom/Minestom/blob/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/InstanceContainer.java",
+    "raw_url": "https://github.com/Minestom/Minestom/raw/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/InstanceContainer.java",
+    "contents_url": "https://api.github.com/repos/Minestom/Minestom/contents/src/main/java/net/minestom/server/instance/InstanceContainer.java?ref=3ecace5bd62061ecf2371da7fca4f12ac3686827",
+    "patch": "@@ -542,7 +542,7 @@ protected void createChunk(int chunkX, int chunkZ, @Nullable ChunkCallback callb\n             chunkGenerator.fillBiomes(biomes, chunkX, chunkZ);\n         }\n \n-        final Chunk chunk = chunkSupplier.createChunk(biomes, chunkX, chunkZ);\n+        final Chunk chunk = chunkSupplier.createChunk(this, biomes, chunkX, chunkZ);\n         Check.notNull(chunk, \"Chunks supplied by a ChunkSupplier cannot be null.\");\n \n         cacheChunk(chunk);\n@@ -636,7 +636,7 @@ protected void addSharedInstance(SharedInstance sharedInstance) {\n     /**\n      * Copies all the chunks of this instance and create a new instance container with all of them.\n      * <p>\n-     * Chunks are copied with {@link Chunk#copy(int, int)},\n+     * Chunks are copied with {@link Chunk#copy(Instance, int, int)},\n      * {@link UUID} is randomized, {@link DimensionType} is passed over and the {@link StorageLocation} is null.\n      *\n      * @return an {@link InstanceContainer} with the exact same chunks as 'this'\n@@ -651,7 +651,7 @@ public synchronized InstanceContainer copy() {\n             final int chunkX = chunk.getChunkX();\n             final int chunkZ = chunk.getChunkZ();\n \n-            final Chunk copiedChunk = chunk.copy(chunkX, chunkZ);\n+            final Chunk copiedChunk = chunk.copy(copiedInstance, chunkX, chunkZ);\n \n             copiedInstance.cacheChunk(copiedChunk);\n             UPDATE_MANAGER.signalChunkLoad(copiedInstance, chunkX, chunkZ);"
+  },
+  {
+    "sha": "b7beec13d6ea96a513b7049c62b8b314202a274d",
+    "filename": "src/main/java/net/minestom/server/instance/MinestomBasicChunkLoader.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Minestom/Minestom/blob/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/MinestomBasicChunkLoader.java",
+    "raw_url": "https://github.com/Minestom/Minestom/raw/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/instance/MinestomBasicChunkLoader.java",
+    "contents_url": "https://api.github.com/repos/Minestom/Minestom/contents/src/main/java/net/minestom/server/instance/MinestomBasicChunkLoader.java?ref=3ecace5bd62061ecf2371da7fca4f12ac3686827",
+    "patch": "@@ -77,7 +77,7 @@ public boolean loadChunk(@NotNull Instance instance, int chunkX, int chunkZ, @Nu\n             // Found, load from result bytes\n             BinaryReader reader = new BinaryReader(bytes);\n             // Create the chunk object using the instance's ChunkSupplier to support multiple implementations\n-            Chunk chunk = instanceContainer.getChunkSupplier().createChunk(null, chunkX, chunkZ);\n+            Chunk chunk = instanceContainer.getChunkSupplier().createChunk(instance, null, chunkX, chunkZ);\n             // Execute the callback once all blocks are placed (allow for multithreaded implementations)\n             chunk.readChunk(reader, callback);\n             return true;"
+  },
+  {
+    "sha": "0d8b0d8812c24411c10b10d01e7f594a30330f3b",
+    "filename": "src/main/java/net/minestom/server/thread/ThreadProvider.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Minestom/Minestom/blob/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/thread/ThreadProvider.java",
+    "raw_url": "https://github.com/Minestom/Minestom/raw/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/thread/ThreadProvider.java",
+    "contents_url": "https://api.github.com/repos/Minestom/Minestom/contents/src/main/java/net/minestom/server/thread/ThreadProvider.java?ref=3ecace5bd62061ecf2371da7fca4f12ac3686827",
+    "patch": "@@ -151,7 +151,7 @@ protected void updateInstance(@NotNull Instance instance, long time) {\n      * @param time     the current time in ms\n      */\n     protected void updateChunk(@NotNull Instance instance, @NotNull Chunk chunk, long time) {\n-        chunk.tick(time, instance);\n+        chunk.tick(time);\n     }\n \n     // ENTITY UPDATE"
+  },
+  {
+    "sha": "546bc9afcd8fd24523f5aa7598ad67c601610765",
+    "filename": "src/main/java/net/minestom/server/utils/chunk/ChunkSupplier.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 4,
+    "changes": 10,
+    "blob_url": "https://github.com/Minestom/Minestom/blob/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/utils/chunk/ChunkSupplier.java",
+    "raw_url": "https://github.com/Minestom/Minestom/raw/3ecace5bd62061ecf2371da7fca4f12ac3686827/src/main/java/net/minestom/server/utils/chunk/ChunkSupplier.java",
+    "contents_url": "https://api.github.com/repos/Minestom/Minestom/contents/src/main/java/net/minestom/server/utils/chunk/ChunkSupplier.java?ref=3ecace5bd62061ecf2371da7fca4f12ac3686827",
+    "patch": "@@ -1,6 +1,7 @@\n package net.minestom.server.utils.chunk;\n \n import net.minestom.server.instance.Chunk;\n+import net.minestom.server.instance.Instance;\n import net.minestom.server.world.biomes.Biome;\n import org.jetbrains.annotations.NotNull;\n import org.jetbrains.annotations.Nullable;\n@@ -14,11 +15,12 @@\n     /**\n      * Creates a {@link Chunk} object.\n      *\n-     * @param biomes the biomes of the chunk, can be null\n-     * @param chunkX the chunk X\n-     * @param chunkZ the chunk Z\n+     * @param instance the linked instance\n+     * @param biomes   the biomes of the chunk, can be null\n+     * @param chunkX   the chunk X\n+     * @param chunkZ   the chunk Z\n      * @return a newly {@link Chunk} object, cannot be null\n      */\n     @NotNull\n-    Chunk createChunk(@Nullable Biome[] biomes, int chunkX, int chunkZ);\n+    Chunk createChunk(@NotNull Instance instance, @Nullable Biome[] biomes, int chunkX, int chunkZ);\n }"
+  }
+]

@@ -1,0 +1,87 @@
+[
+  {
+    "sha": "5f6055f9d1fb021563ac852dc8a2b7943128d02f",
+    "filename": "src/main/java/edu/kpi/testcourse/Utils.java",
+    "status": "added",
+    "additions": 59,
+    "deletions": 0,
+    "changes": 59,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-virginia/blob/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/Utils.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-virginia/raw/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/Utils.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-virginia/contents/src/main/java/edu/kpi/testcourse/Utils.java?ref=9e07c4520cb492783cf33f405b64adf0382f2348",
+    "patch": "@@ -0,0 +1,59 @@\n+package edu.kpi.testcourse;\n+\n+import edu.kpi.testcourse.auth.Url;\n+import java.security.SecureRandom;\n+import java.util.Base64;\n+import java.util.Map;\n+\n+\n+public class Utils {\n+  /**\n+   * Candidate characters for random selection\n+   */\n+  private static final String symbols = \"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\";\n+  static SecureRandom random = new SecureRandom();\n+\n+  /**\n+   * Generates random alphanumeric String.\n+   *\n+   * @param len length of a generated string\n+   * @return random alphanumeric string for given length\n+   */\n+  public static String generateRandomString(Integer len) {\n+    StringBuilder sb = new StringBuilder(len);\n+    for (int i = 0; i < len; i++)\n+      sb.append(symbols.charAt(random.nextInt(symbols.length())));\n+\n+    return sb.toString();\n+  }\n+\n+  /**\n+   * Example: {\"success\":\"false\",\"description\":\"Account with that ID already exists.\"}\n+   *\n+   * @return Json response as String for Account.\n+   */\n+  public static String generateAccountResponse(boolean success, String message, String password) {\n+    return \"{\\\"success\\\":\\\"\" + success + \"\\\",\" +\n+      \"\\\"description\\\":\\\"\" + message + \"\\\"\" +\n+      (success ? \",\\\"password\\\":\\\"\" + password + \"\\\"}\" : \"}\");\n+  }\n+\n+\n+  /**\n+   * Generates json object. Example {\"shortUrl\":\"http://localhost:8080/xYswlE\"}\n+   *\n+   * @return json object as String with parameter shortUrl\n+   */\n+  public static String generateURLResponse(String shortUrl) {\n+    return \"{\\\"shortUrl\\\":\\\"\" + shortUrl + \"\\\"}\";\n+  }\n+\n+  /**\n+   * Decodes Authorization header in a request.\n+   *\n+   * @return decoded header, should be in format \"account:password\"\n+   */\n+  public static String decodeHeader(String header) {\n+    return new String(Base64.getDecoder().decode(header.substring(6).getBytes()));\n+  }\n+}"
+  },
+  {
+    "sha": "fc3b7778bb2b8fb551e057ee71fb8563e2402a68",
+    "filename": "src/main/java/edu/kpi/testcourse/auth/AuthenticationProviderUserPassword.java",
+    "status": "renamed",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-virginia/blob/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/auth/AuthenticationProviderUserPassword.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-virginia/raw/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/auth/AuthenticationProviderUserPassword.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-virginia/contents/src/main/java/edu/kpi/testcourse/auth/AuthenticationProviderUserPassword.java?ref=9e07c4520cb492783cf33f405b64adf0382f2348",
+    "patch": "@@ -1,4 +1,4 @@\n-package edu.kpi.testcourse.rest;\n+package edu.kpi.testcourse.auth;\n \n import edu.umd.cs.findbugs.annotations.Nullable;\n import io.micronaut.http.HttpRequest;",
+    "previous_filename": "src/main/java/edu/kpi/testcourse/rest/AuthenticationProviderUserPassword.java"
+  },
+  {
+    "sha": "030ed1f87bfe4b2ab6791db849eeb0cd0abb09c7",
+    "filename": "src/main/java/edu/kpi/testcourse/auth/Url.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-virginia/blob/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/auth/Url.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-virginia/raw/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/auth/Url.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-virginia/contents/src/main/java/edu/kpi/testcourse/auth/Url.java?ref=9e07c4520cb492783cf33f405b64adf0382f2348",
+    "patch": "@@ -9,7 +9,7 @@\n public class Url {\n   private String shortUrl;\n   private String url;\n-  private User user;\n+  private User userID;\n \n   /**\n    * Constructor.\n@@ -21,7 +21,7 @@\n   public Url(String shortUrl, String url, User user) {\n     this.shortUrl = shortUrl;\n     this.url = url;\n-    this.user = user;\n+    this.userID = user;\n   }\n \n   public String getAlias() {\n@@ -33,6 +33,6 @@ public String getUrl() {\n   }\n \n   public User getUser() {\n-    return user;\n+    return userID;\n   }\n }"
+  },
+  {
+    "sha": "bfa25c7f013bbca7f193d87915b12933ec855211",
+    "filename": "src/main/java/edu/kpi/testcourse/auth/User.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 5,
+    "changes": 15,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-virginia/blob/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/auth/User.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-virginia/raw/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/auth/User.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-virginia/contents/src/main/java/edu/kpi/testcourse/auth/User.java?ref=9e07c4520cb492783cf33f405b64adf0382f2348",
+    "patch": "@@ -8,17 +8,18 @@\n public class User {\n   private String email;\n   private String hash;\n-  private int id;\n+  private int userID;\n \n   /**\n    *  Constructor.\n    *\n    * @param email unique string, email of user\n    * @param hash hash of the password\n    */\n-  public User(String email, String hash) {\n+  public User(String email, String hash, int userID) {\n     this.email = email;\n     this.hash = hash;\n+    this.userID = userID;\n   }\n \n   public String getUserEmail() {\n@@ -29,11 +30,15 @@ public String getUserHash() {\n     return hash;\n   }\n \n-  public void setId(int i) {\n-    this.id = i;\n+  public void setId(int id) {\n+    this.userID = id;\n   }\n \n   public int getId() {\n-    return id;\n+    return userID;\n+  }\n+\n+  public void setHash(String hash) {\n+    this.hash = hash;\n   }\n }"
+  },
+  {
+    "sha": "3b41be5c20cfe36044675432f6f7aa3999c311e6",
+    "filename": "src/main/java/edu/kpi/testcourse/logic/UserLogic.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 6,
+    "changes": 18,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-virginia/blob/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/logic/UserLogic.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-virginia/raw/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/logic/UserLogic.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-virginia/contents/src/main/java/edu/kpi/testcourse/logic/UserLogic.java?ref=9e07c4520cb492783cf33f405b64adf0382f2348",
+    "patch": "@@ -17,28 +17,34 @@ public UserLogic() {\n     store = new DataStore();\n   }\n \n-  public void createUser() {\n-    User user1 = new User(\"test1@mail.com\", \"hjhfdks\");\n+  public void createUser(String email, String hash, int id) {\n+    User user1 = new User(email, hash, id);\n     store.addUser(user1);\n   }\n \n   /**\n    * LogIn.\n    * function deactivation token\n    */\n-  public boolean logIn() {\n+  public boolean logIn(String email, String hash, int id) {\n     // generate a token\n-    User user1 = new User(\"test1@mail.com\", \"hjhfdks\");\n+    User user1 = new User(email, hash, id);\n     return true;\n   }\n \n   /**\n    * Logout.\n    * function deactivation token\n    */\n-  public boolean logOut() {\n-    User user1 = new User(\"test1@mail.com\", \"hjhfdks\");\n+  public boolean logOut(String email, String hash, int id) {\n+    User user1 = new User(email, hash, id);\n     // delete token\n     return true;\n   }\n+\n+  public boolean userIDExists(int userID) {\n+    //...\n+    //...\n+    return true;\n+  }\n }"
+  },
+  {
+    "sha": "23e8617aa4bd6b373ed4acfb0776d99009fde07a",
+    "filename": "src/main/java/edu/kpi/testcourse/rest/ApiController.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 1,
+    "changes": 26,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-virginia/blob/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/rest/ApiController.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-virginia/raw/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/rest/ApiController.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-virginia/contents/src/main/java/edu/kpi/testcourse/rest/ApiController.java?ref=9e07c4520cb492783cf33f405b64adf0382f2348",
+    "patch": "@@ -1,5 +1,9 @@\n package edu.kpi.testcourse.rest;\n \n+import edu.kpi.testcourse.Utils;\n+import edu.kpi.testcourse.auth.User;\n+import edu.kpi.testcourse.logic.UserLogic;\n+import edu.kpi.testcourse.store.DataStore;\n import io.micronaut.http.HttpResponse;\n import io.micronaut.http.MediaType;\n import io.micronaut.http.annotation.Body;\n@@ -18,9 +22,29 @@\n @Controller\n public class ApiController {\n \n+  private UserLogic userLogic = new UserLogic();\n \n   @Post(value = \"/signup\", consumes = MediaType.APPLICATION_JSON)\n-  public HttpResponse<Object> signUp(@Body String string) {\n+  public HttpResponse<Object> signUp(@Body User user) {\n+    boolean success = true;\n+    String description = \"Account is created\";\n+    int status = 201;\n+    user.setId(user.getId());\n+    if(\"\".equals(user.getId())) {\n+      success = false;\n+      status = 415;\n+      description = \"Couldn't find a value for parameter 'userID'\";\n+    } else if (userLogic.userIDExists(user.getId())) {\n+      success = false;\n+      status = 409;\n+      description = \"User exists\";\n+    }\n+    else {\n+      user.setHash(Utils.generateRandomString(12));\n+      userLogic.createUser(user.getUserEmail(), user.getUserHash(), user.getId());\n+    }\n+\n+    String response = Utils.generateAccountResponse(success, description, user.getUserHash());\n     return HttpResponse.ok();\n   }\n "
+  },
+  {
+    "sha": "a56eb2011131f6450e63c41c0f551a2fd6a67823",
+    "filename": "src/main/java/edu/kpi/testcourse/store/DataStore.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-virginia/blob/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/store/DataStore.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-virginia/raw/9e07c4520cb492783cf33f405b64adf0382f2348/src/main/java/edu/kpi/testcourse/store/DataStore.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-virginia/contents/src/main/java/edu/kpi/testcourse/store/DataStore.java?ref=9e07c4520cb492783cf33f405b64adf0382f2348",
+    "patch": "@@ -46,7 +46,7 @@ public boolean addUser(User user) {\n   public boolean addShortUrl(Url url) {\n     JSONObject newLink = new JSONObject();\n     newLink.put(\"id\", linksList.size());\n-    newLink.put(\"userId\", url.getUser().getId());\n+    newLink.put(\"userID\", url.getUser().getId());\n     newLink.put(\"link\", url.getUrl());\n     newLink.put(\"short_link\", url.getAlias());\n     linksList.add(newLink);\n@@ -80,4 +80,6 @@ private boolean saveToFile() {\n       return false;\n     }\n   }\n+\n+\n }"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "fa825d56f0d9942fe99ce13fe402b941231e0713",
+    "filename": "src/jdk.jpackage/macosx/classes/jdk/jpackage/internal/MacDmgBundler.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/openjdk/jdk/blob/fc3ef96349f19770724eb71dbbe39f7a0bd8f998/src/jdk.jpackage/macosx/classes/jdk/jpackage/internal/MacDmgBundler.java",
+    "raw_url": "https://github.com/openjdk/jdk/raw/fc3ef96349f19770724eb71dbbe39f7a0bd8f998/src/jdk.jpackage/macosx/classes/jdk/jpackage/internal/MacDmgBundler.java",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/jdk.jpackage/macosx/classes/jdk/jpackage/internal/MacDmgBundler.java?ref=fc3ef96349f19770724eb71dbbe39f7a0bd8f998",
+    "patch": "@@ -126,7 +126,14 @@ private void prepareDMGSetupScript(Map<String, ? super Object> params)\n         data.put(\"DEPLOY_VOLUME_PATH\", volumePath.toString());\n         data.put(\"DEPLOY_APPLICATION_NAME\", APP_NAME.fetchFrom(params));\n \n-        data.put(\"DEPLOY_INSTALL_LOCATION\", getInstallDir(params));\n+        // installDir (actual location) needs to be different than installName\n+        // (the label on target folder), so we just omit the leading slash.\n+        String installDir = getInstallDir(params);\n+        int idx = installDir.indexOf(\"/\");\n+        String installName = ((idx >= 0) && (idx < installDir.length() - 1)) ?\n+            installDir.substring(idx + 1) : installDir;\n+        data.put(\"DEPLOY_INSTALL_LOCATION\", installDir);\n+        data.put(\"DEPLOY_INSTALL_NAME\", installName);\n \n         createResource(DEFAULT_DMG_SETUP_SCRIPT, params)\n                 .setCategory(I18N.getString(\"resource.dmg-setup-script\"))"
+  },
+  {
+    "sha": "f9f977c0a70a0ee36794a1fbd13701bfd8eafe62",
+    "filename": "src/jdk.jpackage/macosx/classes/jdk/jpackage/internal/resources/DMGsetup.scpt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/openjdk/jdk/blob/fc3ef96349f19770724eb71dbbe39f7a0bd8f998/src/jdk.jpackage/macosx/classes/jdk/jpackage/internal/resources/DMGsetup.scpt",
+    "raw_url": "https://github.com/openjdk/jdk/raw/fc3ef96349f19770724eb71dbbe39f7a0bd8f998/src/jdk.jpackage/macosx/classes/jdk/jpackage/internal/resources/DMGsetup.scpt",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/jdk.jpackage/macosx/classes/jdk/jpackage/internal/resources/DMGsetup.scpt?ref=fc3ef96349f19770724eb71dbbe39f7a0bd8f998",
+    "patch": "@@ -17,13 +17,13 @@ tell application \"Finder\"\n   set background picture of theViewOptions to POSIX file \"DEPLOY_BG_FILE\"\n \n   -- Create alias for install location\n-  make new alias file at POSIX file \"DEPLOY_VOLUME_PATH\" to POSIX file \"DEPLOY_INSTALL_LOCATION\" with properties {name:\"DEPLOY_INSTALL_LOCATION\"}\n+  make new alias file at POSIX file \"DEPLOY_VOLUME_PATH\" to POSIX file \"DEPLOY_INSTALL_LOCATION\" with properties {name:\"DEPLOY_INSTALL_NAME\"}\n \n   set allTheFiles to the name of every item of theWindow\n   repeat with theFile in allTheFiles\n     set theFilePath to POSIX path of theFile\n-    if theFilePath is \"DEPLOY_INSTALL_LOCATION\" then\n-      -- Position install location\n+    if theFilePath is DEPLOY_INSTALL_NAME then\n+      -- Position install folder\n       set position of item theFile of theWindow to {390, 130}\n     else\n       -- Position application or runtime"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "c190d77ddf0db8c37883212d5ddba3d817add29b",
+    "filename": ".github/workflows/post-commit.yml",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 21,
+    "changes": 21,
+    "blob_url": "https://github.com/apache/ozone/blob/2233c1d4e8831cc339554c11af8ea18c51274398/.github/workflows/post-commit.yml",
+    "raw_url": "https://github.com/apache/ozone/raw/2233c1d4e8831cc339554c11af8ea18c51274398/.github/workflows/post-commit.yml",
+    "contents_url": "https://api.github.com/repos/apache/ozone/contents/.github/workflows/post-commit.yml?ref=2233c1d4e8831cc339554c11af8ea18c51274398",
+    "patch": "@@ -67,12 +67,6 @@ jobs:\n     steps:\n       - name: Checkout project\n         uses: actions/checkout@v2\n-      - name: Install bats\n-        run: |\n-          cd /tmp\n-          curl -LSs https://github.com/bats-core/bats-core/archive/v1.2.1.tar.gz | tar xzf -\n-          cd bats-core-1.2.1\n-          sudo ./install.sh /usr/local\n       - name: Execute tests\n         run: ./hadoop-ozone/dev-support/checks/${{ github.job }}.sh\n       - name: Summary of failures\n@@ -309,21 +303,6 @@ jobs:\n         run: |\n           mkdir -p /mnt/ozone/hadoop-ozone/dist/target\n           tar xzvf hadoop-ozone*.tar.gz -C /mnt/ozone/hadoop-ozone/dist/target\n-      - name: Install robotframework\n-        run: sudo pip install robotframework\n-      - name: Install k3s\n-        run: curl -sfL https://get.k3s.io | sh -\n-      - name: Copy Kubernetes config file\n-        run: |\n-          sudo mkdir ~/.kube\n-          sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config\n-          sudo chown $(id -u) ~/.kube/config\n-      - name: Install flekszible\n-        run: |\n-          cd /tmp\n-          wget https://github.com/elek/flekszible/releases/download/v1.8.1/flekszible_1.8.1_Linux_x86_64.tar.gz -O - | tar -zx\n-          chmod +x flekszible\n-          sudo mv flekszible /usr/bin/flekszible\n       - name: Execute tests\n         run: |\n           cd /mnt/ozone/hadoop-ozone/dist/target/ozone-* && sudo mkdir .aws && sudo chmod 777 .aws && sudo chown 1000 .aws"
+  },
+  {
+    "sha": "f8a3a7db516ab1a50794271faddd423b75e49682",
+    "filename": "hadoop-ozone/dev-support/checks/_lib.sh",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/apache/ozone/blob/2233c1d4e8831cc339554c11af8ea18c51274398/hadoop-ozone/dev-support/checks/_lib.sh",
+    "raw_url": "https://github.com/apache/ozone/raw/2233c1d4e8831cc339554c11af8ea18c51274398/hadoop-ozone/dev-support/checks/_lib.sh",
+    "contents_url": "https://api.github.com/repos/apache/ozone/contents/hadoop-ozone/dev-support/checks/_lib.sh?ref=2233c1d4e8831cc339554c11af8ea18c51274398",
+    "patch": "@@ -0,0 +1,30 @@\n+#!/usr/bin/env bash\n+# Licensed to the Apache Software Foundation (ASF) under one or more\n+# contributor license agreements.  See the NOTICE file distributed with\n+# this work for additional information regarding copyright ownership.\n+# The ASF licenses this file to You under the Apache License, Version 2.0\n+# (the \"License\"); you may not use this file except in compliance with\n+# the License.  You may obtain a copy of the License at\n+#\n+#     http://www.apache.org/licenses/LICENSE-2.0\n+#\n+# Unless required by applicable law or agreed to in writing, software\n+# distributed under the License is distributed on an \"AS IS\" BASIS,\n+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+# See the License for the specific language governing permissions and\n+# limitations under the License.\n+\n+check_name=\"$(basename \"${BASH_SOURCE[1]}\")\"\n+check_name=\"${check_name%.sh}\"\n+\n+install_tool() {\n+  if [[ ! -d ${TOOL_DIR} ]]; then\n+    mkdir -pv \"${TOOL_DIR}\"\n+    pushd \"${TOOL_DIR}\"\n+    _install_tool_callback\n+    popd\n+  fi\n+}\n+\n+: ${TOOLS_DIR:=$(pwd)/.dev-tools}\n+: ${TOOL_DIR:=${TOOLS_DIR}/${check_name}}"
+  },
+  {
+    "sha": "f977d6c4644938f83028a121bf46ab3347b08c69",
+    "filename": "hadoop-ozone/dev-support/checks/bats.sh",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/apache/ozone/blob/2233c1d4e8831cc339554c11af8ea18c51274398/hadoop-ozone/dev-support/checks/bats.sh",
+    "raw_url": "https://github.com/apache/ozone/raw/2233c1d4e8831cc339554c11af8ea18c51274398/hadoop-ozone/dev-support/checks/bats.sh",
+    "contents_url": "https://api.github.com/repos/apache/ozone/contents/hadoop-ozone/dev-support/checks/bats.sh?ref=2233c1d4e8831cc339554c11af8ea18c51274398",
+    "patch": "@@ -13,9 +13,18 @@\n # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n # See the License for the specific language governing permissions and\n # limitations under the License.\n+\n DIR=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" >/dev/null 2>&1 && pwd )\"\n cd \"${DIR}/../../..\" || exit 1\n \n+_install_tool_callback() {\n+  curl -LSs https://github.com/bats-core/bats-core/archive/v1.2.1.tar.gz | tar xzf -\n+}\n+\n+source \"${DIR}/_lib.sh\"\n+install_tool\n+export PATH=\"${PATH}:${TOOL_DIR}/bats-core-1.2.1/bin\"\n+\n REPORT_DIR=${OUTPUT_DIR:-\"${DIR}/../../../target/bats\"}\n mkdir -p \"${REPORT_DIR}\"\n REPORT_FILE=\"${REPORT_DIR}/summary.txt\""
+  },
+  {
+    "sha": "649171e0de50b5e05aa0025f4dd706074750803f",
+    "filename": "hadoop-ozone/dev-support/checks/kubernetes.sh",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/apache/ozone/blob/2233c1d4e8831cc339554c11af8ea18c51274398/hadoop-ozone/dev-support/checks/kubernetes.sh",
+    "raw_url": "https://github.com/apache/ozone/raw/2233c1d4e8831cc339554c11af8ea18c51274398/hadoop-ozone/dev-support/checks/kubernetes.sh",
+    "contents_url": "https://api.github.com/repos/apache/ozone/contents/hadoop-ozone/dev-support/checks/kubernetes.sh?ref=2233c1d4e8831cc339554c11af8ea18c51274398",
+    "patch": "@@ -13,9 +13,37 @@\n # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n # See the License for the specific language governing permissions and\n # limitations under the License.\n+\n DIR=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" >/dev/null 2>&1 && pwd )\"\n cd \"$DIR/../../..\" || exit 1\n \n+if [[ \"$(uname -s)\" = \"Darwin\" ]]; then\n+  echo \"k3s is not supported on Mac\" >&2\n+  exit 1\n+fi\n+\n+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml\n+\n+_install_tool_callback() {\n+  # Install k3s\n+  curl -sfL https://get.k3s.io | sh -\n+\n+  sudo chmod a+r $KUBECONFIG\n+\n+  # Install flekszible\n+  wget https://github.com/elek/flekszible/releases/download/v1.8.1/flekszible_1.8.1_Linux_x86_64.tar.gz -O - | tar -zx\n+  chmod +x flekszible\n+  mkdir -p ${TOOL_DIR}/bin\n+  mv -iv flekszible ${TOOL_DIR}/bin/\n+\n+  # Install robotframework\n+  sudo pip install robotframework\n+}\n+\n+source \"${DIR}/_lib.sh\"\n+install_tool\n+export PATH=\"${PATH}:${TOOL_DIR}/bin\"\n+\n REPORT_DIR=${OUTPUT_DIR:-\"$DIR/../../../target/kubernetes\"}\n \n OZONE_VERSION=$(mvn help:evaluate -Dexpression=ozone.version -q -DforceStdout)"
+  }
+]

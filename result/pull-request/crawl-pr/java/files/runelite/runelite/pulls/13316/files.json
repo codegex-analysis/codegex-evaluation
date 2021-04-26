@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "31366c08dc2e717d0972cbd08b46901044171814",
+    "filename": "runelite-client/src/main/java/net/runelite/client/plugins/hiscore/HiscorePlugin.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 3,
+    "changes": 17,
+    "blob_url": "https://github.com/runelite/runelite/blob/d5d02cde019d68fbb2d006ed86a6fdc9931d8aa6/runelite-client/src/main/java/net/runelite/client/plugins/hiscore/HiscorePlugin.java",
+    "raw_url": "https://github.com/runelite/runelite/raw/d5d02cde019d68fbb2d006ed86a6fdc9931d8aa6/runelite-client/src/main/java/net/runelite/client/plugins/hiscore/HiscorePlugin.java",
+    "contents_url": "https://api.github.com/repos/runelite/runelite/contents/runelite-client/src/main/java/net/runelite/client/plugins/hiscore/HiscorePlugin.java?ref=d5d02cde019d68fbb2d006ed86a6fdc9931d8aa6",
+    "patch": "@@ -36,6 +36,7 @@\n import javax.swing.SwingUtilities;\n import net.runelite.api.ChatMessageType;\n import net.runelite.api.Client;\n+import net.runelite.api.IconID;\n import net.runelite.api.MenuAction;\n import net.runelite.api.MenuEntry;\n import net.runelite.api.Player;\n@@ -67,6 +68,7 @@\n \tprivate static final String KICK_OPTION = \"Kick\";\n \tprivate static final ImmutableList<String> AFTER_OPTIONS = ImmutableList.of(\"Message\", \"Add ignore\", \"Remove friend\", \"Delete\", KICK_OPTION);\n \tprivate static final Pattern BOUNTY_PATTERN = Pattern.compile(\"<col=ff0000>You've been assigned a target: (.*)</col>\");\n+\tprivate static final Pattern BOUNTY_EMBLEM_TAG_AND_TIER_REGEXP = Pattern.compile(String.format(\"%s[1-9]0?\", IconID.BOUNTY_HUNTER_EMBLEM.toString()));\n \n \t@Inject\n \t@Nullable\n@@ -186,12 +188,21 @@ public void onMenuOptionClicked(MenuOptionClicked event)\n \t\t\t\t// The player id is included in the event, so we can use that to get the player name,\n \t\t\t\t// which avoids having to parse out the combat level and any icons preceding the name.\n \t\t\t\tPlayer player = client.getCachedPlayers()[event.getId()];\n-\t\t\t\tif (player == null)\n+\t\t\t\tif (player != null)\n \t\t\t\t{\n-\t\t\t\t\treturn;\n+\t\t\t\t\ttarget = player.getName();\n \t\t\t\t}\n+\t\t\t\t// If the player is no longer cached (e.g. moved out of view), fallback to parsing.\n+\t\t\t\telse\n+\t\t\t\t{\n+\t\t\t\t\t// removes bounty hunter emblem tag and tier from player name, e.g:\n+\t\t\t\t\t// \"username<img=20>5<col=40ff00>  (level-42)\" -> \"username<col=40ff00>  (level-42)\"\n+\t\t\t\t\tString menuEntry = BOUNTY_EMBLEM_TAG_AND_TIER_REGEXP.matcher(event.getMenuTarget()).replaceAll(\"\");\n \n-\t\t\t\ttarget = player.getName();\n+\t\t\t\t\t// removes tags and level from player names for example:\n+\t\t\t\t\t// <col=ffffff>username<col=40ff00>  (level-42) or <col=ffffff><img=2>username</col>\n+\t\t\t\t\ttarget = Text.removeTags(menuEntry).split(\"[(]\")[0].trim();\n+\t\t\t\t}\n \t\t\t}\n \t\t\telse\n \t\t\t{"
+  }
+]

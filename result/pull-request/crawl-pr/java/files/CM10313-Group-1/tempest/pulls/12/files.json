@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "a147d3717906974a6037b222dea4cd04cdeaad84",
+    "filename": ".github/workflows/maven.yml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/CM10313-Group-1/tempest/blob/7a9c268361dabf555fbcb24790b389b74acee4ef/.github/workflows/maven.yml",
+    "raw_url": "https://github.com/CM10313-Group-1/tempest/raw/7a9c268361dabf555fbcb24790b389b74acee4ef/.github/workflows/maven.yml",
+    "contents_url": "https://api.github.com/repos/CM10313-Group-1/tempest/contents/.github/workflows/maven.yml?ref=7a9c268361dabf555fbcb24790b389b74acee4ef",
+    "patch": "@@ -6,7 +6,9 @@ on:\n   push:\n     branches: [ main ]\n   pull_request:\n-    branches: [ main ]\n+    branches:\n+    - main\n+    - sprint*\n \n jobs:\n   build:"
+  },
+  {
+    "sha": "de44d742a1c94a0a2dbba3732eb5b85cf3e1b2e6",
+    "filename": "src/main/java/tempest/ModuleView.java",
+    "status": "modified",
+    "additions": 48,
+    "deletions": 7,
+    "changes": 55,
+    "blob_url": "https://github.com/CM10313-Group-1/tempest/blob/7a9c268361dabf555fbcb24790b389b74acee4ef/src/main/java/tempest/ModuleView.java",
+    "raw_url": "https://github.com/CM10313-Group-1/tempest/raw/7a9c268361dabf555fbcb24790b389b74acee4ef/src/main/java/tempest/ModuleView.java",
+    "contents_url": "https://api.github.com/repos/CM10313-Group-1/tempest/contents/src/main/java/tempest/ModuleView.java?ref=7a9c268361dabf555fbcb24790b389b74acee4ef",
+    "patch": "@@ -21,6 +21,12 @@\n import javax.swing.JPanel;\n import javax.swing.JTextField;\n \n+//TODO:\n+// - Change the code to be dynamic\n+// - Add a check so the user can't enter a session > 24hrs\n+// - Add a check so the user can't enter study sessions in a day which add up to be > 24hrs\n+// -\n+\n /**\n  * ModuleView is responsible for creating the GUIs for the home page, adding a\n  * module page and adding studying sessions page.\n@@ -313,16 +319,51 @@ private void handleAddingSession() {\n         String hours = hoursInput.getText();\n         String minutes = minutesInput.getText();\n \n-        int hoursInt;\n-        int minutesInt;\n+        int hoursInt = 0;\n+        int minutesInt = 0;\n+\n \n-        try {\n-            hoursInt = Integer.parseInt(hours);\n-            minutesInt = Integer.parseInt(minutes);\n-        } catch (NumberFormatException e) {\n-            System.out.println(\"Invalid hours/minutes entered\");\n+        if (hours.strip().equals(\"\") && minutes.strip().equals(\"\")) { // Empty hours and minutes\n+            System.out.println(\"A session needs to be longer >= 1 minute\");\n             return;\n         }\n+        else if (hours.strip().equals(\"\")) { // Only minutes have been entered\n+            try {\n+                minutesInt = Integer.parseInt(minutes);\n+\n+                if (minutesInt <= 0) {\n+                    throw new NumberFormatException(); // Negative minutes\n+                }\n+            } catch (NumberFormatException e) {\n+                System.out.println(\"Invalid minutes entered\");\n+                return;\n+            }\n+        }\n+        else if (minutes.strip().equals(\"\")) { // Only hours have been entered\n+            try {\n+                hoursInt = Integer.parseInt(hours);\n+\n+                if (hoursInt <= 0) {\n+                    throw new NumberFormatException(); // Negative hours\n+                }\n+            } catch (NumberFormatException e) {\n+                System.out.println(\"Invalid hours entered\");\n+                return;\n+            }\n+        }\n+        else { // Hours and minutes have been entered\n+            try {\n+                minutesInt = Integer.parseInt(minutes);\n+                hoursInt = Integer.parseInt(hours);\n+\n+                if (hoursInt <= 0 || minutesInt <= 0) {\n+                    throw new NumberFormatException();\n+                }\n+            } catch (NumberFormatException e) {\n+                System.out.println(\"Invalid time entered\");\n+                return;\n+            }\n+        }\n \n         Duration time = Duration.ofMinutes(hoursInt * 60L + minutesInt);\n "
+  },
+  {
+    "sha": "60fe3702224c3bdfb3cac5a86b7f5fa57b8723de",
+    "filename": "src/main/java/tempest/Supervisor.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 6,
+    "changes": 8,
+    "blob_url": "https://github.com/CM10313-Group-1/tempest/blob/7a9c268361dabf555fbcb24790b389b74acee4ef/src/main/java/tempest/Supervisor.java",
+    "raw_url": "https://github.com/CM10313-Group-1/tempest/raw/7a9c268361dabf555fbcb24790b389b74acee4ef/src/main/java/tempest/Supervisor.java",
+    "contents_url": "https://api.github.com/repos/CM10313-Group-1/tempest/contents/src/main/java/tempest/Supervisor.java?ref=7a9c268361dabf555fbcb24790b389b74acee4ef",
+    "patch": "@@ -10,20 +10,16 @@\n     private static State state; // Static so the state made in onStart can be used in onClose\n     private CSVInterface csvInterface = new CSVInterface();\n \n-    // TODO UserInterface\n+    // TODO:\n \n     private void onStart() {\n         try {\n             state = csvInterface.getState(STORE);\n         } catch (IOException | ParseException e) {\n-            System.err.println(\"Failed to retrieve state\");\n+            System.err.println(\"Failed to retrieve state\"); // Want to print an error, what if just the 1st time?\n             state = new State();\n         }\n \n-        // Run CSV code first\n-        // - Check if CSV empty/nothing to load ?\n-        // - Load all the study session for these modules\n-        // Start GUI last - by calling new ModuleView()\n         new ModuleView(state, this);\n     }\n "
+  },
+  {
+    "sha": "06ec361eae73585038d753938416e17639f7f542",
+    "filename": "src/test/java/tempest/ModuleViewTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/CM10313-Group-1/tempest/blob/7a9c268361dabf555fbcb24790b389b74acee4ef/src/test/java/tempest/ModuleViewTest.java",
+    "raw_url": "https://github.com/CM10313-Group-1/tempest/raw/7a9c268361dabf555fbcb24790b389b74acee4ef/src/test/java/tempest/ModuleViewTest.java",
+    "contents_url": "https://api.github.com/repos/CM10313-Group-1/tempest/contents/src/test/java/tempest/ModuleViewTest.java?ref=7a9c268361dabf555fbcb24790b389b74acee4ef",
+    "patch": "@@ -5,6 +5,9 @@\n import org.junit.Before;\n import org.junit.Test;\n \n+//TODO:\n+// - Check if headless mode is needed to pass maven tests\n+\n public class ModuleViewTest {\n     State state = new State();\n     ModuleView gui = new ModuleView(state, new Supervisor());"
+  }
+]

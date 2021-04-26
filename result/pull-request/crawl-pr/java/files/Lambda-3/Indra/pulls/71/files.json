@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "32a0561fe8aefa574b68507ccf65625195f9daf9",
+    "filename": "indra-mongo/pom.xml",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 15,
+    "changes": 15,
+    "blob_url": "https://github.com/Lambda-3/Indra/blob/15c5002be1d5f4992215749ac4f08847e59f4491/indra-mongo/pom.xml",
+    "raw_url": "https://github.com/Lambda-3/Indra/raw/15c5002be1d5f4992215749ac4f08847e59f4491/indra-mongo/pom.xml",
+    "contents_url": "https://api.github.com/repos/Lambda-3/Indra/contents/indra-mongo/pom.xml?ref=15c5002be1d5f4992215749ac4f08847e59f4491",
+    "patch": "@@ -26,21 +26,6 @@\n                 <artifactId>maven-jar-plugin</artifactId>\n             </plugin>\n \n-            <plugin>\n-                <groupId>org.apache.maven.plugins</groupId>\n-                <artifactId>maven-surefire-plugin</artifactId>\n-            </plugin>\n-\n-            <plugin>\n-                <groupId>org.apache.maven.plugins</groupId>\n-                <artifactId>maven-failsafe-plugin</artifactId>\n-                <configuration>\n-                    <systemPropertyVariables>\n-                        <indra.mongoURI>localhost:27017</indra.mongoURI>\n-                    </systemPropertyVariables>\n-                </configuration>\n-            </plugin>\n-\n             <plugin>\n                 <groupId>org.apache.maven.plugins</groupId>\n                 <artifactId>maven-source-plugin</artifactId>"
+  },
+  {
+    "sha": "fed3c926d0d8c8b2492d510c40a696cbbd56bf7d",
+    "filename": "indra-service/README.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Lambda-3/Indra/blob/15c5002be1d5f4992215749ac4f08847e59f4491/indra-service/README.md",
+    "raw_url": "https://github.com/Lambda-3/Indra/raw/15c5002be1d5f4992215749ac4f08847e59f4491/indra-service/README.md",
+    "contents_url": "https://api.github.com/repos/Lambda-3/Indra/contents/indra-service/README.md?ref=15c5002be1d5f4992215749ac4f08847e59f4491",
+    "patch": "@@ -20,4 +20,4 @@ This is a REST Service that interfaces with the Java Indra Client.\n \t\t\"t2\": \"car\",\n \t\t\"t1\": \"engine\"\n \t}]\n-    }' \"http://localhost:8916/indra/v1/relatedness\"\n\\ No newline at end of file\n+    }' \"http://localhost:8916/relatedness\"\n\\ No newline at end of file"
+  },
+  {
+    "sha": "792a41fd3e1816e7a2cfd4d09fb54543002546f1",
+    "filename": "indra-service/pom.xml",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/Lambda-3/Indra/blob/15c5002be1d5f4992215749ac4f08847e59f4491/indra-service/pom.xml",
+    "raw_url": "https://github.com/Lambda-3/Indra/raw/15c5002be1d5f4992215749ac4f08847e59f4491/indra-service/pom.xml",
+    "contents_url": "https://api.github.com/repos/Lambda-3/Indra/contents/indra-service/pom.xml?ref=15c5002be1d5f4992215749ac4f08847e59f4491",
+    "patch": "@@ -181,12 +181,23 @@\n             <artifactId>indra-core</artifactId>\n             <version>${project.version}</version>\n         </dependency>\n+\n         <dependency>\n             <groupId>org.lambda3.indra</groupId>\n             <artifactId>indra-mongo</artifactId>\n             <version>${project.version}</version>\n         </dependency>\n \n+        <dependency>\n+            <groupId>jakarta.xml.bind</groupId>\n+            <artifactId>jakarta.xml.bind-api</artifactId>\n+        </dependency>\n+\n+        <dependency>\n+            <groupId>org.glassfish.jaxb</groupId>\n+            <artifactId>jaxb-runtime</artifactId>\n+        </dependency>\n+\n         <dependency>\n             <groupId>ch.qos.logback</groupId>\n             <artifactId>logback-classic</artifactId>"
+  },
+  {
+    "sha": "7ddb3faa9102a731bb1a3f14de17b0959890ef93",
+    "filename": "indra-service/src/main/java/org/lambda3/indra/service/Server.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 6,
+    "changes": 12,
+    "blob_url": "https://github.com/Lambda-3/Indra/blob/15c5002be1d5f4992215749ac4f08847e59f4491/indra-service/src/main/java/org/lambda3/indra/service/Server.java",
+    "raw_url": "https://github.com/Lambda-3/Indra/raw/15c5002be1d5f4992215749ac4f08847e59f4491/indra-service/src/main/java/org/lambda3/indra/service/Server.java",
+    "contents_url": "https://api.github.com/repos/Lambda-3/Indra/contents/indra-service/src/main/java/org/lambda3/indra/service/Server.java?ref=15c5002be1d5f4992215749ac4f08847e59f4491",
+    "patch": "@@ -138,19 +138,19 @@ public synchronized void stop() {\n         logger.info(\"Terminating Indra Service.\");\n         httpServer.shutdownNow();\n         try {\n-            spaceFactory.close();\n+            if (spaceFactory != null) {\n+                spaceFactory.close();\n+            }\n         } catch (IOException e) {\n             logger.error(\"error closing the vector space factory.\");\n-            e.printStackTrace();\n         } finally {\n             try {\n-                translatorFactory.close();\n+                if (translatorFactory != null) {\n+                    translatorFactory.close();\n+                }\n             } catch (IOException e) {\n                 logger.error(\"error closing the translator factory.\");\n-                e.printStackTrace();\n             }\n         }\n     }\n-\n-\n }"
+  },
+  {
+    "sha": "60a485c06b2bcf9f16026b06c7c4b6b5a326c5a5",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 14,
+    "changes": 27,
+    "blob_url": "https://github.com/Lambda-3/Indra/blob/15c5002be1d5f4992215749ac4f08847e59f4491/pom.xml",
+    "raw_url": "https://github.com/Lambda-3/Indra/raw/15c5002be1d5f4992215749ac4f08847e59f4491/pom.xml",
+    "contents_url": "https://api.github.com/repos/Lambda-3/Indra/contents/pom.xml?ref=15c5002be1d5f4992215749ac4f08847e59f4491",
+    "patch": "@@ -46,6 +46,8 @@\n         <slf4j-version>1.7.12</slf4j-version>\n         <lucene.version>7.1.0</lucene.version>\n         <license.licenseName>mit</license.licenseName>\n+        <jackson.version>2.9.7</jackson.version>\n+        <jaxb.version>2.3.2</jaxb.version>\n     </properties>\n \n     <profiles>\n@@ -182,20 +184,6 @@\n                     <version>2.20</version>\n                 </plugin>\n \n-                <plugin>\n-                    <groupId>org.apache.maven.plugins</groupId>\n-                    <artifactId>maven-failsafe-plugin</artifactId>\n-                    <version>2.20</version>\n-                    <executions>\n-                        <execution>\n-                            <goals>\n-                                <goal>integration-test</goal>\n-                                <goal>verify</goal>\n-                            </goals>\n-                        </execution>\n-                    </executions>\n-                </plugin>\n-\n                 <plugin>\n                     <groupId>org.apache.maven.plugins</groupId>\n                     <artifactId>maven-assembly-plugin</artifactId>\n@@ -249,6 +237,17 @@\n                 <version>${lucene.version}</version>\n             </dependency>\n \n+            <dependency>\n+                <groupId>jakarta.xml.bind</groupId>\n+                <artifactId>jakarta.xml.bind-api</artifactId>\n+                <version>${jaxb.version}</version>\n+            </dependency>\n+\n+            <dependency>\n+                <groupId>org.glassfish.jaxb</groupId>\n+                <artifactId>jaxb-runtime</artifactId>\n+                <version>${jaxb.version}</version>\n+            </dependency>\n         </dependencies>\n     </dependencyManagement>\n "
+  }
+]

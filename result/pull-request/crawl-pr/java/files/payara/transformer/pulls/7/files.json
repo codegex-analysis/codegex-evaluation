@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "c3042b4c8a679fbf6dc56d235ce952b50e99016b",
+    "filename": "org.eclipse.transformer.cli/src/main/resources/org/eclipse/transformer/jakarta/jakarta-text-master.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/payara/transformer/blob/7d53068bed26ca138c84737d29cf428d84659332/org.eclipse.transformer.cli/src/main/resources/org/eclipse/transformer/jakarta/jakarta-text-master.properties",
+    "raw_url": "https://github.com/payara/transformer/raw/7d53068bed26ca138c84737d29cf428d84659332/org.eclipse.transformer.cli/src/main/resources/org/eclipse/transformer/jakarta/jakarta-text-master.properties",
+    "contents_url": "https://api.github.com/repos/payara/transformer/contents/org.eclipse.transformer.cli/src/main/resources/org/eclipse/transformer/jakarta/jakarta-text-master.properties?ref=7d53068bed26ca138c84737d29cf428d84659332",
+    "patch": "@@ -61,6 +61,7 @@\n # server.xml=jakarta-server-xml.properties\n #\n \n+*.jsp=jakarta-renames.properties\n application.xml=jakarta-xml-dd.properties\n application-client.xml=jakarta-xml-dd.properties\n ejb-jar.xml=jakarta-xml-dd.properties"
+  },
+  {
+    "sha": "6df8175ea9d9979180fbd41ddcd567b66072134b",
+    "filename": "org.eclipse.transformer/src/main/java/org/eclipse/transformer/Transformer.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/payara/transformer/blob/7d53068bed26ca138c84737d29cf428d84659332/org.eclipse.transformer/src/main/java/org/eclipse/transformer/Transformer.java",
+    "raw_url": "https://github.com/payara/transformer/raw/7d53068bed26ca138c84737d29cf428d84659332/org.eclipse.transformer/src/main/java/org/eclipse/transformer/Transformer.java",
+    "contents_url": "https://api.github.com/repos/payara/transformer/contents/org.eclipse.transformer/src/main/java/org/eclipse/transformer/Transformer.java?ref=7d53068bed26ca138c84737d29cf428d84659332",
+    "patch": "@@ -63,6 +63,7 @@\n import aQute.lib.utf8properties.UTF8Properties;\n import aQute.libg.uri.URIUtil;\n import java.util.logging.Level;\n+import org.eclipse.transformer.action.impl.JSPActionImpl;\n \n public class Transformer {\n \t// TODO: Make this an enum?\n@@ -1252,6 +1253,7 @@ public CompositeActionImpl getRootAction() {\n \n \t\t\t\tClassActionImpl classAction = useRootAction.addUsing(ClassActionImpl::new);\n \t\t\t\tJavaActionImpl javaAction = useRootAction.addUsing(JavaActionImpl::new);\n+\t\t\t\tJSPActionImpl jspAction = useRootAction.addUsing(JSPActionImpl::new);\n \t\t\t\tServiceLoaderConfigActionImpl serviceConfigAction = useRootAction\n \t\t\t\t\t.addUsing(ServiceLoaderConfigActionImpl::new);\n \t\t\t\tManifestActionImpl manifestAction = useRootAction.addUsing(ManifestActionImpl::newManifestAction);\n@@ -1276,6 +1278,7 @@ public CompositeActionImpl getRootAction() {\n \n \t\t\t\tdirectoryAction.addAction(classAction);\n \t\t\t\tdirectoryAction.addAction(javaAction);\n+\t\t\t\tdirectoryAction.addAction(jspAction);\n \t\t\t\tdirectoryAction.addAction(serviceConfigAction);\n \t\t\t\tdirectoryAction.addAction(manifestAction);\n \t\t\t\tdirectoryAction.addAction(featureAction);\n@@ -1298,6 +1301,7 @@ public CompositeActionImpl getRootAction() {\n \n \t\t\t\twarAction.addAction(classAction);\n \t\t\t\twarAction.addAction(javaAction);\n+\t\t\t\twarAction.addAction(jspAction);\n \t\t\t\twarAction.addAction(serviceConfigAction);\n \t\t\t\twarAction.addAction(manifestAction);\n \t\t\t\twarAction.addAction(featureAction);\n@@ -1323,6 +1327,7 @@ public CompositeActionImpl getRootAction() {\n \n \t\t\t\tzipAction.addAction(classAction);\n \t\t\t\tzipAction.addAction(javaAction);\n+\t\t\t\tzipAction.addAction(jspAction);\n \t\t\t\tzipAction.addAction(serviceConfigAction);\n \t\t\t\tzipAction.addAction(manifestAction);\n \t\t\t\tzipAction.addAction(featureAction);"
+  },
+  {
+    "sha": "cdb0a02fa5365f5bccf2d3156c9ab217a0f7d91d",
+    "filename": "org.eclipse.transformer/src/main/java/org/eclipse/transformer/action/ActionType.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/payara/transformer/blob/7d53068bed26ca138c84737d29cf428d84659332/org.eclipse.transformer/src/main/java/org/eclipse/transformer/action/ActionType.java",
+    "raw_url": "https://github.com/payara/transformer/raw/7d53068bed26ca138c84737d29cf428d84659332/org.eclipse.transformer/src/main/java/org/eclipse/transformer/action/ActionType.java",
+    "contents_url": "https://api.github.com/repos/payara/transformer/contents/org.eclipse.transformer/src/main/java/org/eclipse/transformer/action/ActionType.java?ref=7d53068bed26ca138c84737d29cf428d84659332",
+    "patch": "@@ -27,6 +27,7 @@\n \tRAR,\n \tEAR,\n \tJAVA,\n+\tJSP,\n \tDIRECTORY,\n \tPROPERTIES;\n "
+  },
+  {
+    "sha": "b6e2f00f6efc7e3f9922b696e47121b6593909ef",
+    "filename": "org.eclipse.transformer/src/main/java/org/eclipse/transformer/action/impl/JSPActionImpl.java",
+    "status": "added",
+    "additions": 46,
+    "deletions": 0,
+    "changes": 46,
+    "blob_url": "https://github.com/payara/transformer/blob/7d53068bed26ca138c84737d29cf428d84659332/org.eclipse.transformer/src/main/java/org/eclipse/transformer/action/impl/JSPActionImpl.java",
+    "raw_url": "https://github.com/payara/transformer/raw/7d53068bed26ca138c84737d29cf428d84659332/org.eclipse.transformer/src/main/java/org/eclipse/transformer/action/impl/JSPActionImpl.java",
+    "contents_url": "https://api.github.com/repos/payara/transformer/contents/org.eclipse.transformer/src/main/java/org/eclipse/transformer/action/impl/JSPActionImpl.java?ref=7d53068bed26ca138c84737d29cf428d84659332",
+    "patch": "@@ -0,0 +1,46 @@\n+/** ******************************************************************************\n+ * Copyright (c) 2021 Contributors to the Eclipse Foundation\n+ *\n+ * This program and the accompanying materials are made available under the\n+ * terms of the Eclipse Public License 2.0 which is available at\n+ * http://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0\n+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.\n+ *\n+ * SPDX-License-Identifier: (EPL-2.0 OR Apache-2.0)\n+ ******************************************************************************* */\n+package org.eclipse.transformer.action.impl;\n+\n+import java.io.File;\n+import org.eclipse.transformer.action.ActionType;\n+import java.util.logging.Logger;\n+\n+public class JSPActionImpl extends TextActionImpl {\n+\n+    public JSPActionImpl(Logger logger, boolean isTerse, boolean isVerbose, InputBufferImpl buffer,\n+            SelectionRuleImpl selectionRule, SignatureRuleImpl signatureRule) {\n+\n+        super(logger, isTerse, isVerbose, buffer, selectionRule, signatureRule);\n+    }\n+\n+    @Override\n+    public String getName() {\n+        return \"JSP Action\";\n+    }\n+\n+    @Override\n+    public ActionType getActionType() {\n+        return ActionType.JSP;\n+    }\n+\n+    @Override\n+    public String getAcceptExtension() {\n+        return \".jsp\";\n+    }\n+\n+    @Override\n+    public boolean accept(String resourceName, File resourceFile) {\n+        return resourceName.toLowerCase()\n+                .endsWith(getAcceptExtension());\n+    }\n+\n+}"
+  }
+]

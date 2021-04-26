@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "5fbe8c4b5a7b71443a9a7126ed9552af2875aef5",
+    "filename": ".github/workflows/dashboard.yaml",
+    "status": "modified",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/googleapis/java-cloud-bom/blob/858e83ef7dcebda5c9e07e11749a56a02c1be805/.github/workflows/dashboard.yaml",
+    "raw_url": "https://github.com/googleapis/java-cloud-bom/raw/858e83ef7dcebda5c9e07e11749a56a02c1be805/.github/workflows/dashboard.yaml",
+    "contents_url": "https://api.github.com/repos/googleapis/java-cloud-bom/contents/.github/workflows/dashboard.yaml?ref=858e83ef7dcebda5c9e07e11749a56a02c1be805",
+    "patch": "@@ -13,4 +13,41 @@ jobs:\n       with:\n         java-version: 8\n     - run: java -version\n+    - run: .kokoro/dashboard.sh\n+\n+  converge:\n+    runs-on: ubuntu-latest\n+    if: github.repository_owner == 'googleapis' && github.head_ref == 'release-please/branches/master'\n+    steps:\n+    - uses: actions/checkout@v2\n+    - uses: actions/setup-java@v1\n+      with:\n+        java-version: 8\n+      script: |\n+        // only approve PRs from release-please\n+        if (context.payload.pull_request.user.login !== \"release-please\") {\n+          return;\n+        }\n+\n+        // only approve PRs like \"chore: release <release version>\"\n+        if (!(/^chore: release.*$/.test(context.payload.pull_request.title))) {\n+          return;\n+        }\n+\n+        // only approve PRs with README.md, CHANGELOG.md, pom.xml and versions.txt changes\n+        const files = new Set(\n+          (\n+            await github.paginate(\n+              github.pulls.listFiles.endpoint({\n+                owner: context.repo.owner,\n+                repo: context.repo.repo,\n+                pull_number: context.payload.pull_request.number,\n+              })\n+            )\n+          ).map(file => file.filename)\n+        );\n+        if (files.size != 4 || !files.has(\"README.md\") || !files.has(\"CHANGELOG.md\") || !files.has(\"pom.xml\") || !files.has(\"versions.txt\")) {\n+          return;\n+        }\n+    - run: java -version\n     - run: .kokoro/dashboard.sh\n\\ No newline at end of file"
+  },
+  {
+    "sha": "272278bf836c2364b87cc2a4564382870b6d28c7",
+    "filename": ".kokoro/dashboard.sh",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/googleapis/java-cloud-bom/blob/858e83ef7dcebda5c9e07e11749a56a02c1be805/.kokoro/dashboard.sh",
+    "raw_url": "https://github.com/googleapis/java-cloud-bom/raw/858e83ef7dcebda5c9e07e11749a56a02c1be805/.kokoro/dashboard.sh",
+    "contents_url": "https://api.github.com/repos/googleapis/java-cloud-bom/contents/.kokoro/dashboard.sh?ref=858e83ef7dcebda5c9e07e11749a56a02c1be805",
+    "patch": "@@ -26,3 +26,19 @@ cd dashboard/\n echo -e \"\\n******************** BUILDING THE DASHBOARD ********************\"\n \n mvn --fail-at-end clean install\n+INSTALL_RETURN_CODE=$?\n+RETURN_CODE=${INSTALL_RETURN_CODE}\n+\n+case ${JOB_TYPE} in\n+converge)\n+    mvn exec:java -Dexec.args=\"-f ../pom.xml --report\"\n+    CONVERGE_RETURN_CODE=$?\n+    if [[ $INSTALL_RETURN_CODE -eq 0 ]]\n+    then\n+      RETURN_CODE=${CONVERGE_RETURN_CODE}\n+    fi\n+    ;;\n+esac\n+\n+echo \"exiting with ${RETURN_CODE}\"\n+exit ${RETURN_CODE}"
+  }
+]

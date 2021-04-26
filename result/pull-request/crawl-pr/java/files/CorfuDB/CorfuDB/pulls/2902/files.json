@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "9eae802cf53edafa3b60534ab65a6784ab3d6053",
+    "filename": ".github/workflows/publish-corfu-artifacts.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 32,
+    "changes": 32,
+    "blob_url": "https://github.com/CorfuDB/CorfuDB/blob/096ff776e89fd714a66b11e85be64a70bdb18bc3/.github/workflows/publish-corfu-artifacts.yml",
+    "raw_url": "https://github.com/CorfuDB/CorfuDB/raw/096ff776e89fd714a66b11e85be64a70bdb18bc3/.github/workflows/publish-corfu-artifacts.yml",
+    "contents_url": "https://api.github.com/repos/CorfuDB/CorfuDB/contents/.github/workflows/publish-corfu-artifacts.yml?ref=096ff776e89fd714a66b11e85be64a70bdb18bc3",
+    "patch": "@@ -1,32 +0,0 @@\n-name: CorfDb Artifacts\n-\n-on:\n-  push:\n-    branches:\n-      - master\n-\n-jobs:\n-  publish_corfu_db_artifacts:\n-\n-    runs-on: ubuntu-latest\n-    if: github.event_name == 'push'\n-\n-    steps:\n-      - uses: actions/checkout@v2\n-\n-      - name: Set up JDK\n-        uses: actions/setup-java@v1\n-        with:\n-          java-version: 1.8\n-\n-      - name: Cache local Maven repository\n-        uses: actions/cache@v2\n-        with:\n-          path: ~/.m2\n-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}\n-          restore-keys: |\n-            ${{ runner.os }}-maven-\n-\n-      - name: Publish corfu artifacts\n-        working-directory: ./\n-        run: ./mvnw clean deploy -s ./.mvn/settings.xml -DskipTests -Dmaven.javadoc.skip=true -T 1C"
+  },
+  {
+    "sha": "0251aadfdbf04a020670f20b6bb484b05256f3a5",
+    "filename": ".github/workflows/publish-corfu.yml",
+    "status": "added",
+    "additions": 51,
+    "deletions": 0,
+    "changes": 51,
+    "blob_url": "https://github.com/CorfuDB/CorfuDB/blob/68c0ced7cf210179cc5c3c5ec8856b041d0e4452/.github/workflows/publish-corfu.yml",
+    "raw_url": "https://github.com/CorfuDB/CorfuDB/raw/68c0ced7cf210179cc5c3c5ec8856b041d0e4452/.github/workflows/publish-corfu.yml",
+    "contents_url": "https://api.github.com/repos/CorfuDB/CorfuDB/contents/.github/workflows/publish-corfu.yml?ref=68c0ced7cf210179cc5c3c5ec8856b041d0e4452",
+    "patch": "@@ -0,0 +1,51 @@\n+name: CorfDb Artifacts\n+\n+on:\n+  push:\n+    branches:\n+      - master\n+\n+jobs:\n+  publish_corfu_db_artifacts:\n+\n+    runs-on: ubuntu-latest\n+    if: github.event_name == 'push'\n+\n+    steps:\n+      - uses: actions/checkout@v2\n+\n+      - name: Cancel Previous Runs\n+        uses: styfle/cancel-workflow-action@0.6.0\n+        with:\n+          access_token: ${{ github.token }}\n+\n+      - name: Set up JDK\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: 1.8\n+\n+      - name: Cache local Maven repository\n+        uses: actions/cache@v2\n+        with:\n+          path: ~/.m2\n+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}\n+          restore-keys: |\n+            ${{ runner.os }}-maven-\n+\n+      - uses: satackey/action-docker-layer-caching@v0.0.11\n+        continue-on-error: true\n+\n+      - name: Prepare Corfu\n+        run: ./mvnw clean install -Pdocker -DskipTests -Dmaven.javadoc.skip=true -Dcheckstyle.skip -T 1C\n+\n+      - name: Publish corfu artifacts\n+        working-directory: ./\n+        run: ./mvnw clean deploy -s ./.mvn/settings.xml -DskipTests -Dmaven.javadoc.skip=true -Dcheckstyle.skip -T 1C\n+\n+      - name: Publish Corfu infrastructure container\n+        working-directory: ./\n+        run: ./mvnw -pl infrastructure clean deploy -Pdocker -DskipTests -Dmaven.javadoc.skip=true -Dcheckstyle.skip -T 1C\n+\n+      - name: Publish Corfu generator container\n+        working-directory: ./\n+        run: ./mvnw -pl generator clean deploy -Pdocker -DskipTests -Dmaven.javadoc.skip=true -Dcheckstyle.skip -T 1C"
+  },
+  {
+    "sha": "dfcff9969ed7305403c49025b433982bcc344ead",
+    "filename": ".github/workflows/pull_request.yml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/CorfuDB/CorfuDB/blob/68c0ced7cf210179cc5c3c5ec8856b041d0e4452/.github/workflows/pull_request.yml",
+    "raw_url": "https://github.com/CorfuDB/CorfuDB/raw/68c0ced7cf210179cc5c3c5ec8856b041d0e4452/.github/workflows/pull_request.yml",
+    "contents_url": "https://api.github.com/repos/CorfuDB/CorfuDB/contents/.github/workflows/pull_request.yml?ref=68c0ced7cf210179cc5c3c5ec8856b041d0e4452",
+    "patch": "@@ -86,11 +86,11 @@ jobs:\n         with:\n           java-version: 1.8\n \n-      - uses: satackey/action-docker-layer-caching@v0.0.8\n+      - uses: satackey/action-docker-layer-caching@v0.0.11\n         continue-on-error: true\n \n-      - name: Prepare docker image\n-        run: ./mvnw clean install -DskipTests -Pdocker -Dmaven.javadoc.skip=true -T 1C\n+      - name: Prepare Corfu\n+        run: ./mvnw clean install -Pdocker -DskipTests -Dmaven.javadoc.skip=true -Dcheckstyle.skip -T 1C\n \n       - name: Run universe tests\n         run: ./mvnw -pl :universe verify -Puniverse -DskipTests -Dmaven.javadoc.skip=true"
+  }
+]

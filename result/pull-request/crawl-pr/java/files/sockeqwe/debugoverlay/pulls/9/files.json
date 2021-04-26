@@ -1,0 +1,60 @@
+[
+  {
+    "sha": "add049bd63e601a39bdb57380ddfa22e2c50ffe7",
+    "filename": "overlay/src/main/java/com/hannesdorfmann/debugoverlay/DebugOverlayView.java",
+    "status": "modified",
+    "additions": 34,
+    "deletions": 4,
+    "changes": 38,
+    "blob_url": "https://github.com/sockeqwe/debugoverlay/blob/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/java/com/hannesdorfmann/debugoverlay/DebugOverlayView.java",
+    "raw_url": "https://github.com/sockeqwe/debugoverlay/raw/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/java/com/hannesdorfmann/debugoverlay/DebugOverlayView.java",
+    "contents_url": "https://api.github.com/repos/sockeqwe/debugoverlay/contents/overlay/src/main/java/com/hannesdorfmann/debugoverlay/DebugOverlayView.java?ref=4fb1b82a101ec222c60c3c84e1c080d7aa32a174",
+    "patch": "@@ -23,6 +23,8 @@\n class DebugOverlayView extends FrameLayout {\n \n   private ImageView closeButton;\n+  private ImageView upButton;\n+  private ImageView downButton;\n   private WindowManager windowManager;\n   private LoggingAdapter adapter;\n   private ListView listView;\n@@ -34,16 +36,23 @@ public DebugOverlayView(Context context) {\n     Point windowDimen = new Point();\n     windowManager.getDefaultDisplay().getSize(windowDimen);\n \n-    int desiredLayoutHeight = dpToPx(context, 100);\n-    int layoutHeight = desiredLayoutHeight < windowDimen.y ? desiredLayoutHeight : windowDimen.y;\n+    // Use 1/2 of screen height for overlay\n+    int desiredLayoutHeight = windowDimen.y / 2;\n+    int layoutHeight = Math.min(desiredLayoutHeight, windowDimen.y);\n \n     // Setup the GUI\n \n-    // Close Button\n+    // Buttons\n     int buttonHeight = dpToPx(context, 40);\n     closeButton = new ImageView(context);\n     closeButton.setImageResource(R.drawable.ic_close_circle);\n     closeButton.setLayoutParams(new FrameLayout.LayoutParams(buttonHeight, buttonHeight, Gravity.TOP | Gravity.END));\n+    upButton = new ImageView(context);\n+    upButton.setImageResource(R.drawable.ic_up_circle);\n+    upButton.setLayoutParams(new FrameLayout.LayoutParams(buttonHeight, buttonHeight, Gravity.CENTER | Gravity.END));\n+    downButton = new ImageView(context);\n+    downButton.setImageResource(R.drawable.ic_down_circle);\n+    downButton.setLayoutParams(new FrameLayout.LayoutParams(buttonHeight, buttonHeight, Gravity.BOTTOM | Gravity.END));\n \n     // Logging Console\n     adapter = new LoggingAdapter(context);\n@@ -60,6 +69,27 @@ public DebugOverlayView(Context context) {\n     // Add views\n     addView(listView);\n     addView(closeButton);\n+    addView(upButton);\n+    addView(downButton);\n+\n+    upButton.setOnClickListener(new View.OnClickListener() {\n+        @Override\n+        public void onClick(View view) {\n+          int firstVisiblePosition = listView.getFirstVisiblePosition();\n+          int lastVisiblePosition = listView.getLastVisiblePosition();\n+            listView.smoothScrollToPosition(firstVisiblePosition - (lastVisiblePosition - firstVisiblePosition));\n+        }\n+      }\n+    );\n+\n+    downButton.setOnClickListener(new View.OnClickListener() {\n+        @Override\n+        public void onClick(View view) {\n+          int lastVisiblePosition = listView.getLastVisiblePosition();\n+          listView.smoothScrollToPosition(lastVisiblePosition+1);\n+        }\n+      }\n+    );\n \n     // Set View parameters\n     WindowManager.LayoutParams windowParams;\n@@ -74,7 +104,7 @@ public DebugOverlayView(Context context) {\n \n     windowParams.gravity = Gravity.TOP | Gravity.START;\n     windowParams.x = 0;\n-    windowParams.y = windowDimen.y - layoutHeight;\n+    windowParams.y = 100;\n \n     // Attach and display View\n     windowManager.addView(this, windowParams);"
+  },
+  {
+    "sha": "62266efe9a1197bf43931793edb9edc0876b1179",
+    "filename": "overlay/src/main/res/drawable-mdpi/ic_down.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/sockeqwe/debugoverlay/blob/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/res/drawable-mdpi/ic_down.png",
+    "raw_url": "https://github.com/sockeqwe/debugoverlay/raw/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/res/drawable-mdpi/ic_down.png",
+    "contents_url": "https://api.github.com/repos/sockeqwe/debugoverlay/contents/overlay/src/main/res/drawable-mdpi/ic_down.png?ref=4fb1b82a101ec222c60c3c84e1c080d7aa32a174"
+  },
+  {
+    "sha": "6e38f86b01083448ede6154020f0999df2093053",
+    "filename": "overlay/src/main/res/drawable-mdpi/ic_up.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/sockeqwe/debugoverlay/blob/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/res/drawable-mdpi/ic_up.png",
+    "raw_url": "https://github.com/sockeqwe/debugoverlay/raw/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/res/drawable-mdpi/ic_up.png",
+    "contents_url": "https://api.github.com/repos/sockeqwe/debugoverlay/contents/overlay/src/main/res/drawable-mdpi/ic_up.png?ref=4fb1b82a101ec222c60c3c84e1c080d7aa32a174"
+  },
+  {
+    "sha": "6f185e68824a1da07556bb020466cdaeeb719af0",
+    "filename": "overlay/src/main/res/drawable/ic_down_circle.xml",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/sockeqwe/debugoverlay/blob/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/res/drawable/ic_down_circle.xml",
+    "raw_url": "https://github.com/sockeqwe/debugoverlay/raw/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/res/drawable/ic_down_circle.xml",
+    "contents_url": "https://api.github.com/repos/sockeqwe/debugoverlay/contents/overlay/src/main/res/drawable/ic_down_circle.xml?ref=4fb1b82a101ec222c60c3c84e1c080d7aa32a174",
+    "patch": "@@ -0,0 +1,14 @@\n+<?xml version=\"1.0\" encoding=\"utf-8\"?>\n+<layer-list xmlns:android=\"http://schemas.android.com/apk/res/android\">\n+  <item>\n+    <shape\n+        xmlns:android=\"http://schemas.android.com/apk/res/android\"\n+        android:shape=\"oval\"\n+        >\n+      <solid\n+          android:color=\"#666\"/>\n+    </shape>\n+  </item>\n+\n+  <item android:drawable=\"@drawable/ic_down\"/>\n+</layer-list>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "700669c5440a546c7371158aef21715311ddebad",
+    "filename": "overlay/src/main/res/drawable/ic_up_circle.xml",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/sockeqwe/debugoverlay/blob/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/res/drawable/ic_up_circle.xml",
+    "raw_url": "https://github.com/sockeqwe/debugoverlay/raw/4fb1b82a101ec222c60c3c84e1c080d7aa32a174/overlay/src/main/res/drawable/ic_up_circle.xml",
+    "contents_url": "https://api.github.com/repos/sockeqwe/debugoverlay/contents/overlay/src/main/res/drawable/ic_up_circle.xml?ref=4fb1b82a101ec222c60c3c84e1c080d7aa32a174",
+    "patch": "@@ -0,0 +1,14 @@\n+<?xml version=\"1.0\" encoding=\"utf-8\"?>\n+<layer-list xmlns:android=\"http://schemas.android.com/apk/res/android\">\n+  <item>\n+    <shape\n+        xmlns:android=\"http://schemas.android.com/apk/res/android\"\n+        android:shape=\"oval\"\n+        >\n+      <solid\n+          android:color=\"#666\"/>\n+    </shape>\n+  </item>\n+\n+  <item android:drawable=\"@drawable/ic_up\"/>\n+</layer-list>\n\\ No newline at end of file"
+  }
+]

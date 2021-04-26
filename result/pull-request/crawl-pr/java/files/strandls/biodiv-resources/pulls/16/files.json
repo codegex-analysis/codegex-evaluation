@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "1a2dc1109796cd0a36993861d574c5c85d8bbc39",
+    "filename": "src/main/java/com/strandls/resource/ApiConstants.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/strandls/biodiv-resources/blob/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/ApiConstants.java",
+    "raw_url": "https://github.com/strandls/biodiv-resources/raw/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/ApiConstants.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-resources/contents/src/main/java/com/strandls/resource/ApiConstants.java?ref=425af0aa46625fc7c4d2e7ac18fa91c1e0013952",
+    "patch": "@@ -20,6 +20,7 @@\n \tpublic static final String UPDATE = \"/update\";\n \tpublic static final String LICENSE = \"/lisence\";\n \tpublic static final String RATING = \"/rating\";\n+\tpublic static final String ALL = \"/all\";\n \tpublic static final String REMOVE = \"/remove\";\n \tpublic static final String UFILE = \"/ufile\";\n "
+  },
+  {
+    "sha": "00a0f02e5fd438ce33e983f9ed66d6b11f1f094f",
+    "filename": "src/main/java/com/strandls/resource/controllers/LicenseController.java",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/strandls/biodiv-resources/blob/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/controllers/LicenseController.java",
+    "raw_url": "https://github.com/strandls/biodiv-resources/raw/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/controllers/LicenseController.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-resources/contents/src/main/java/com/strandls/resource/controllers/LicenseController.java?ref=425af0aa46625fc7c4d2e7ac18fa91c1e0013952",
+    "patch": "@@ -0,0 +1,40 @@\n+package com.strandls.resource.controllers;\n+\n+import com.strandls.resource.ApiConstants;\n+import com.strandls.resource.pojo.License;\n+import com.strandls.resource.services.LicenseServices;\n+import io.swagger.annotations.Api;\n+import io.swagger.annotations.ApiOperation;\n+import io.swagger.annotations.ApiResponse;\n+import io.swagger.annotations.ApiResponses;\n+\n+import javax.inject.Inject;\n+import javax.ws.rs.Consumes;\n+import javax.ws.rs.GET;\n+import javax.ws.rs.Path;\n+import javax.ws.rs.Produces;\n+import javax.ws.rs.core.MediaType;\n+import javax.ws.rs.core.Response;\n+import javax.ws.rs.core.Response.Status;\n+\n+@Api(\"License Controller\")\n+@Path(ApiConstants.V1 + ApiConstants.LICENSE)\n+public class LicenseController {\n+\n+    @Inject\n+    LicenseServices licenseServices;\n+\n+    @GET\n+    @Path(ApiConstants.ALL)\n+    @Consumes(MediaType.APPLICATION_JSON)\n+    @Produces(MediaType.APPLICATION_JSON)\n+    @ApiOperation(value = \"Fetch all licenses\", notes = \"Returns all licenses\", response = License.class, responseContainer = \"List\")\n+    @ApiResponses(value = {@ApiResponse(code = 400, message = \"Could not fetch licenses\", response = String.class)})\n+    public Response getAllLicenses() {\n+        try {\n+            return Response.status(Status.OK).entity(licenseServices.getAllLicenses()).build();\n+        } catch (Exception ex) {\n+            return Response.status(Status.BAD_REQUEST).entity(ex.getMessage()).build();\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "63c30651b7c40d8c0ffe96a5ad579f09ff6303fd",
+    "filename": "src/main/java/com/strandls/resource/controllers/ResourceControllerModule.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 7,
+    "changes": 12,
+    "blob_url": "https://github.com/strandls/biodiv-resources/blob/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/controllers/ResourceControllerModule.java",
+    "raw_url": "https://github.com/strandls/biodiv-resources/raw/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/controllers/ResourceControllerModule.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-resources/contents/src/main/java/com/strandls/resource/controllers/ResourceControllerModule.java?ref=425af0aa46625fc7c4d2e7ac18fa91c1e0013952",
+    "patch": "@@ -1,6 +1,3 @@\n-/**\n- * \n- */\n package com.strandls.resource.controllers;\n \n import com.google.inject.AbstractModule;\n@@ -12,9 +9,10 @@\n  */\n public class ResourceControllerModule extends AbstractModule {\n \n-\t@Override\n-\tprotected void configure() {\n+    @Override\n+    protected void configure() {\n \n-\t\tbind(ResourceController.class).in(Scopes.SINGLETON);\n-\t}\n+        bind(ResourceController.class).in(Scopes.SINGLETON);\n+        bind(LicenseController.class).in(Scopes.SINGLETON);\n+    }\n }"
+  },
+  {
+    "sha": "7ee3ca9341de66831700eec7961c35d8b305bc65",
+    "filename": "src/main/java/com/strandls/resource/services/Impl/LicenseServicesImpl.java",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/strandls/biodiv-resources/blob/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/services/Impl/LicenseServicesImpl.java",
+    "raw_url": "https://github.com/strandls/biodiv-resources/raw/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/services/Impl/LicenseServicesImpl.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-resources/contents/src/main/java/com/strandls/resource/services/Impl/LicenseServicesImpl.java?ref=425af0aa46625fc7c4d2e7ac18fa91c1e0013952",
+    "patch": "@@ -0,0 +1,19 @@\n+package com.strandls.resource.services.Impl;\n+\n+import com.strandls.resource.dao.LicenseDao;\n+import com.strandls.resource.pojo.License;\n+import com.strandls.resource.services.LicenseServices;\n+\n+import javax.inject.Inject;\n+import java.util.List;\n+\n+public class LicenseServicesImpl implements LicenseServices {\n+\n+    @Inject\n+    LicenseDao licenseDao;\n+\n+    @Override\n+    public List<License> getAllLicenses() {\n+        return licenseDao.findAll();\n+    }\n+}"
+  },
+  {
+    "sha": "279d57360a15674f013cf8031434e2e45c391f9c",
+    "filename": "src/main/java/com/strandls/resource/services/Impl/ResourceServicesModule.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/strandls/biodiv-resources/blob/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/services/Impl/ResourceServicesModule.java",
+    "raw_url": "https://github.com/strandls/biodiv-resources/raw/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/services/Impl/ResourceServicesModule.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-resources/contents/src/main/java/com/strandls/resource/services/Impl/ResourceServicesModule.java?ref=425af0aa46625fc7c4d2e7ac18fa91c1e0013952",
+    "patch": "@@ -5,6 +5,7 @@\n \n import com.google.inject.AbstractModule;\n import com.google.inject.Scopes;\n+import com.strandls.resource.services.LicenseServices;\n import com.strandls.resource.services.ResourceServices;\n \n /**\n@@ -16,5 +17,6 @@\n \t@Override\n \tprotected void configure() {\n \t\tbind(ResourceServices.class).to(ResourceServicesImpl.class).in(Scopes.SINGLETON);\n+\t\tbind(LicenseServices.class).to(LicenseServicesImpl.class).in(Scopes.SINGLETON);\n \t}\n }"
+  },
+  {
+    "sha": "9c023a9f0cc7d791adca6d038651609ddf58b029",
+    "filename": "src/main/java/com/strandls/resource/services/LicenseServices.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/strandls/biodiv-resources/blob/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/services/LicenseServices.java",
+    "raw_url": "https://github.com/strandls/biodiv-resources/raw/425af0aa46625fc7c4d2e7ac18fa91c1e0013952/src/main/java/com/strandls/resource/services/LicenseServices.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-resources/contents/src/main/java/com/strandls/resource/services/LicenseServices.java?ref=425af0aa46625fc7c4d2e7ac18fa91c1e0013952",
+    "patch": "@@ -0,0 +1,10 @@\n+package com.strandls.resource.services;\n+\n+import com.strandls.resource.pojo.License;\n+\n+import java.util.List;\n+\n+public interface LicenseServices {\n+\n+    List<License> getAllLicenses();\n+}"
+  }
+]

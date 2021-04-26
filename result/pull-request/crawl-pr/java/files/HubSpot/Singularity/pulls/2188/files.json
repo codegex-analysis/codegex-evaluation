@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "e80c3bb4718922436bd98cd10b83ccc20883bab3",
+    "filename": "SingularityService/src/main/java/com/hubspot/singularity/SingularityManagedThreadPoolFactory.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/HubSpot/Singularity/blob/2de124f8550938d5dd1c0864396f0b7008ae411a/SingularityService/src/main/java/com/hubspot/singularity/SingularityManagedThreadPoolFactory.java",
+    "raw_url": "https://github.com/HubSpot/Singularity/raw/2de124f8550938d5dd1c0864396f0b7008ae411a/SingularityService/src/main/java/com/hubspot/singularity/SingularityManagedThreadPoolFactory.java",
+    "contents_url": "https://api.github.com/repos/HubSpot/Singularity/contents/SingularityService/src/main/java/com/hubspot/singularity/SingularityManagedThreadPoolFactory.java?ref=2de124f8550938d5dd1c0864396f0b7008ae411a",
+    "patch": "@@ -48,8 +48,12 @@ public synchronized ExecutorService get(String name) {\n \n   public synchronized ExecutorService get(String name, int maxSize) {\n     checkState(!stopped.get(), \"already stopped\");\n-    ExecutorService service = Executors.newFixedThreadPool(\n+    ExecutorService service = new ThreadPoolExecutor(\n+      1,\n       maxSize,\n+      60L,\n+      TimeUnit.SECONDS,\n+      new LinkedBlockingQueue<>(),\n       new ThreadFactoryBuilder().setNameFormat(name + \"-%d\").build()\n     );\n     executorPools.add(service);"
+  },
+  {
+    "sha": "a0d48a4e711a702a8ec006476c766941084d818c",
+    "filename": "SingularityService/src/main/java/com/hubspot/singularity/resources/TaskResource.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/HubSpot/Singularity/blob/2de124f8550938d5dd1c0864396f0b7008ae411a/SingularityService/src/main/java/com/hubspot/singularity/resources/TaskResource.java",
+    "raw_url": "https://github.com/HubSpot/Singularity/raw/2de124f8550938d5dd1c0864396f0b7008ae411a/SingularityService/src/main/java/com/hubspot/singularity/resources/TaskResource.java",
+    "contents_url": "https://api.github.com/repos/HubSpot/Singularity/contents/SingularityService/src/main/java/com/hubspot/singularity/resources/TaskResource.java?ref=2de124f8550938d5dd1c0864396f0b7008ae411a",
+    "patch": "@@ -1395,6 +1395,10 @@ public void write(OutputStream output) throws WebApplicationException, IOExcepti\n           requestBuilder.execute(this).get();\n         } catch (ExecutionException | InterruptedException e) {\n           LOG.error(\"Failed or interrupted while proxying a download from Mesos\", e);\n+        } finally {\n+          if (wrappedOutputStream != null) {\n+            wrappedOutputStream.close();\n+          }\n         }\n       }\n     }"
+  }
+]

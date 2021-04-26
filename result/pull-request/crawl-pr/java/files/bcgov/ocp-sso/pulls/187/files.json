@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "a86a6df5d486e9fe036d7a83f8963337af38e4f3",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 3,
+    "changes": 5,
+    "blob_url": "https://github.com/bcgov/ocp-sso/blob/1a2f7ae37668e49a47364d1c15906c59f99d7780/README.md",
+    "raw_url": "https://github.com/bcgov/ocp-sso/raw/1a2f7ae37668e49a47364d1c15906c59f99d7780/README.md",
+    "contents_url": "https://api.github.com/repos/bcgov/ocp-sso/contents/README.md?ref=1a2f7ae37668e49a47364d1c15906c59f99d7780",
+    "patch": "@@ -44,9 +44,8 @@ If you are just looking for quickly spin up an instance of RH-SSO\n # 6d70e7-* are the namespaces for SSO in ocp4\n # 3d5c3f-* are the sandbox namespaces for SSO in ocp4\n \n-# Create Network Security Policy\n-oc -n 6d70e7-tools process -f openshift/nsp.yaml -p 'NAMESPACE=6d70e7-tools' | oc -n 6d70e7-tools create -f -\n-oc -n 3d5c3f-dev process -f openshift/nsp.yaml -p 'NAMESPACE=3d5c3f-dev' | oc -n 3d5c3f-dev create -f -\n+# Create Kubernetes Network Security Policy\n+oc process -f openshift/knp.yaml -p NAMESPACE=3d5c3f -p ENVIRONMENT=dev | oc apply -f -\n ```\n \n 2. Import Images"
+  },
+  {
+    "sha": "64ad7f5c026752a918685381a3b824b52046c9a1",
+    "filename": "openshift/knp.yaml",
+    "status": "added",
+    "additions": 100,
+    "deletions": 0,
+    "changes": 100,
+    "blob_url": "https://github.com/bcgov/ocp-sso/blob/1a2f7ae37668e49a47364d1c15906c59f99d7780/openshift/knp.yaml",
+    "raw_url": "https://github.com/bcgov/ocp-sso/raw/1a2f7ae37668e49a47364d1c15906c59f99d7780/openshift/knp.yaml",
+    "contents_url": "https://api.github.com/repos/bcgov/ocp-sso/contents/openshift/knp.yaml?ref=1a2f7ae37668e49a47364d1c15906c59f99d7780",
+    "patch": "@@ -0,0 +1,100 @@\n+apiVersion: template.openshift.io/v1\n+kind: Template\n+metadata:\n+  name: ${NAME}-nsp\n+objects:\n+  - kind: NetworkPolicy\n+    apiVersion: networking.k8s.io/v1\n+    metadata:\n+        name: deny-by-default\n+    spec:\n+        # The default posture for a security first namespace is to deny all traffic.\n+      podSelector: {}\n+      ingress: []\n+  - apiVersion: networking.k8s.io/v1\n+    kind: NetworkPolicy\n+    metadata:\n+        name: intra-namespace-comms\n+    spec:\n+        # \"allow ${NAMESPACE}-${ENVIRONMENT} namespace to talk to itself\"\n+        ingress:\n+        - from:\n+          - namespaceSelector:\n+              matchLabels:\n+                name: ${NAMESPACE}\n+                environment: ${ENVIRONMENT}\n+        podSelector: {}\n+        policyTypes:\n+            - Ingress\n+  - apiVersion: networking.k8s.io/v1\n+    kind: NetworkPolicy\n+    metadata:\n+        namespace: ${NAMESPACE}-${ENVIRONMENT}\n+        name: int-cluster-k8s-api-comms\n+    spec:\n+        # \"allow ${NAMESPACE}-${ENVIRONMENT} pods to talk to the k8s api\"\n+        podSelector:\n+          matchLabels:\n+            app: sso\n+        ingress:\n+        - from:\n+          - namespaceSelector: {}\n+  - apiVersion: networking.k8s.io/v1\n+    kind: NetworkPolicy\n+    metadata:\n+      name: allow-from-openshift-ingress\n+    spec:\n+        # This policy allows any pod with a route & service combination\n+        # to accept traffic from the OpenShift router pods. This is\n+        # required for things outside of OpenShift (like the Internet)\n+        # to reach your pods.\n+        ingress:\n+          - from:\n+              - namespaceSelector:\n+                  matchLabels:\n+                    network.openshift.io/policy-group: ingress\n+        podSelector: {}\n+        policyTypes:\n+          - Ingress\n+  - apiVersion: security.devops.gov.bc.ca/v1alpha1\n+    kind: NetworkSecurityPolicy\n+    metadata:\n+      name: any-to-any\n+    spec:\n+      description: |\n+        allow all pods to communicate\n+      source:\n+        - - \"$namespace=${NAMESPACE}-${ENVIRONMENT}\"\n+      destination:\n+        - - \"$namespace=*\"\n+  - apiVersion: security.devops.gov.bc.ca/v1alpha1\n+    kind: NetworkSecurityPolicy\n+    metadata:\n+      name: any-to-external\n+    spec:\n+      description: |\n+        Allow all pods to talk to external systems\n+      source:\n+        - - \"$namespace=${NAMESPACE}-${ENVIRONMENT}\"\n+      destination:\n+        - - \"ext:network=any\"\n+parameters:\n+  - description: The name for the application.\n+    displayName: Application Name\n+    name: NAME\n+    required: true\n+    value: sso\n+  - description: A suffix appended to most objects\n+    displayName: Application Suffix\n+    name: SUFFIX\n+    value: \"\"\n+  - description: The namespace\n+    displayName: Namespace\n+    name: NAMESPACE\n+    required: true\n+    value: sso-tools\n+  - description: The environment\n+    displayName: environment\n+    name: ENVIRONMENT\n+    required: true\n+    value: \"\""
+  }
+]

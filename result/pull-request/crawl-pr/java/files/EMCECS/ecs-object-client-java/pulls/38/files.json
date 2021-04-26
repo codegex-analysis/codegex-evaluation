@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "4c69891a043747f6a4561d3ec38f12f53a2c7826",
+    "filename": "src/main/java/com/emc/object/s3/S3Client.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/EMCECS/ecs-object-client-java/blob/3c493500b8b98e4dec61aac4c21cbf8bd00f2a98/src/main/java/com/emc/object/s3/S3Client.java",
+    "raw_url": "https://github.com/EMCECS/ecs-object-client-java/raw/3c493500b8b98e4dec61aac4c21cbf8bd00f2a98/src/main/java/com/emc/object/s3/S3Client.java",
+    "contents_url": "https://api.github.com/repos/EMCECS/ecs-object-client-java/contents/src/main/java/com/emc/object/s3/S3Client.java?ref=3c493500b8b98e4dec61aac4c21cbf8bd00f2a98",
+    "patch": "@@ -390,6 +390,13 @@\n \n     AccessControlList getObjectAcl(GetObjectAclRequest request);\n \n+    /**\n+     * Extend retention <code>period</code>(seconds) on object <code>key</code> in bucket <code>bucketName</code>. NOTE:\n+     * New retention period value can only be increased. That is, it can be the same as the current or greater value.\n+     * If the new retention period value is -1, infinite retention applies on that object.\n+     */\n+    void extendRetentionPeriod(String bucketName, String key, Long period);\n+\n     ListMultipartUploadsResult listMultipartUploads(String bucketName);\n \n     ListMultipartUploadsResult listMultipartUploads(ListMultipartUploadsRequest request);"
+  },
+  {
+    "sha": "359a30ecadecb39161df8e2819872556b0c9990f",
+    "filename": "src/main/java/com/emc/object/s3/S3Constants.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/EMCECS/ecs-object-client-java/blob/3c493500b8b98e4dec61aac4c21cbf8bd00f2a98/src/main/java/com/emc/object/s3/S3Constants.java",
+    "raw_url": "https://github.com/EMCECS/ecs-object-client-java/raw/3c493500b8b98e4dec61aac4c21cbf8bd00f2a98/src/main/java/com/emc/object/s3/S3Constants.java",
+    "contents_url": "https://api.github.com/repos/EMCECS/ecs-object-client-java/contents/src/main/java/com/emc/object/s3/S3Constants.java?ref=3c493500b8b98e4dec61aac4c21cbf8bd00f2a98",
+    "patch": "@@ -81,6 +81,7 @@\n     public static final String PARAM_UPLOAD_ID_MARKER = \"upload-id-marker\";\n     public static final String PARAM_VERSION_ID = \"versionId\";\n     public static final String PARAM_VERSION_ID_MARKER = \"version-id-marker\";\n+    public static final String PARAM_RETENTION_UPDATE = \"retentionUpdate\";\n \n     public static final String PROPERTY_BUCKET_NAME = \"com.emc.object.s3.bucketName\";\n     public static final String PROPERTY_OBJECT_KEY = \"com.emc.object.s3.objectKey\";"
+  },
+  {
+    "sha": "22dfabcdc0e9c9c9ef9f36405c416d35add761a4",
+    "filename": "src/main/java/com/emc/object/s3/jersey/S3JerseyClient.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/EMCECS/ecs-object-client-java/blob/3c493500b8b98e4dec61aac4c21cbf8bd00f2a98/src/main/java/com/emc/object/s3/jersey/S3JerseyClient.java",
+    "raw_url": "https://github.com/EMCECS/ecs-object-client-java/raw/3c493500b8b98e4dec61aac4c21cbf8bd00f2a98/src/main/java/com/emc/object/s3/jersey/S3JerseyClient.java",
+    "contents_url": "https://api.github.com/repos/EMCECS/ecs-object-client-java/contents/src/main/java/com/emc/object/s3/jersey/S3JerseyClient.java?ref=3c493500b8b98e4dec61aac4c21cbf8bd00f2a98",
+    "patch": "@@ -676,6 +676,13 @@ public AccessControlList getObjectAcl(GetObjectAclRequest request) {\n         return executeRequest(client, request, AccessControlList.class);\n     }\n \n+    @Override\n+    public void extendRetentionPeriod(String bucketName, String key, Long period){\n+        ObjectRequest request = new S3ObjectRequest(Method.PUT, bucketName, key, S3Constants.PARAM_RETENTION_UPDATE);\n+        request.addCustomHeader(RestUtil.EMC_RETENTION_PERIOD, period);\n+        executeAndClose(client, request);\n+    }\n+\n     @Override\n     public ListMultipartUploadsResult listMultipartUploads(String bucketName) {\n         return listMultipartUploads(new ListMultipartUploadsRequest(bucketName));"
+  },
+  {
+    "sha": "603bd6ea8f54b6eccfb5777aa928cefb8984c8f3",
+    "filename": "src/test/java/com/emc/object/s3/S3JerseyClientTest.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/EMCECS/ecs-object-client-java/blob/3c493500b8b98e4dec61aac4c21cbf8bd00f2a98/src/test/java/com/emc/object/s3/S3JerseyClientTest.java",
+    "raw_url": "https://github.com/EMCECS/ecs-object-client-java/raw/3c493500b8b98e4dec61aac4c21cbf8bd00f2a98/src/test/java/com/emc/object/s3/S3JerseyClientTest.java",
+    "contents_url": "https://api.github.com/repos/EMCECS/ecs-object-client-java/contents/src/test/java/com/emc/object/s3/S3JerseyClientTest.java?ref=3c493500b8b98e4dec61aac4c21cbf8bd00f2a98",
+    "patch": "@@ -2174,6 +2174,33 @@ public void testSetObjectAclRequestCanned() {\n         //TODO - need to verify the returned acl is comparable to the canned acl\n     }\n \n+    @Test\n+    public void testExtendObjectRetentionPeriod() throws Exception {\n+        String key = \"object-extend-retention\";\n+        String content = \"Hello Extend Retention!\";\n+        Long retentionPeriod = 2L;\n+        Long newRetentionPeriod = 5L;\n+\n+        String version = client.listDataNodes().getVersionInfo();\n+        if (version.compareTo(\"3.6\") < 0){\n+            l4j.warn(\"Skip the extending retention period test. ECS test bed needs to be 3.6 or later, current version: \" + version);\n+            return;\n+        }\n+\n+        String bucket = getTestBucket();\n+        PutObjectRequest request = new PutObjectRequest(bucket, key, content);\n+        request.withObjectMetadata(new S3ObjectMetadata().withRetentionPeriod(retentionPeriod));\n+        client.putObject(request);\n+        Assert.assertEquals(content, client.readObject(bucket, key, String.class));\n+        Assert.assertEquals(retentionPeriod, client.getObject(bucket, key).getObjectMetadata().getRetentionPeriod());\n+\n+        client.extendRetentionPeriod(bucket, key, newRetentionPeriod);\n+        //Verify retention period has been extended as expected.\n+        Assert.assertEquals(newRetentionPeriod, client.getObject(bucket, key).getObjectMetadata().getRetentionPeriod());\n+\n+        Thread.sleep(5000); // allow retention to expire\n+    }\n+\n     @Test\n     public void testPreSignedUrl() throws Exception {\n         S3Client tempClient = new S3JerseyClient(new S3Config(new URI(\"https://s3.amazonaws.com\")).withUseVHost(true)"
+  }
+]

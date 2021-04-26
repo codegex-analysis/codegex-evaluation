@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "7794aab88aac43292801624712d0ceda94212185",
+    "filename": "Insights/src/main/java/dev/frankheijden/insights/Insights.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 13,
+    "changes": 31,
+    "blob_url": "https://github.com/InsightsPlugin/Insights/blob/10920b391355fd503a1dd3c9512813e00bc5e95d/Insights/src/main/java/dev/frankheijden/insights/Insights.java",
+    "raw_url": "https://github.com/InsightsPlugin/Insights/raw/10920b391355fd503a1dd3c9512813e00bc5e95d/Insights/src/main/java/dev/frankheijden/insights/Insights.java",
+    "contents_url": "https://api.github.com/repos/InsightsPlugin/Insights/contents/Insights/src/main/java/dev/frankheijden/insights/Insights.java?ref=10920b391355fd503a1dd3c9512813e00bc5e95d",
+    "patch": "@@ -40,6 +40,7 @@\n import dev.frankheijden.insights.listeners.BlockListener;\n import dev.frankheijden.insights.listeners.ChunkListener;\n import dev.frankheijden.insights.listeners.EntityListener;\n+import dev.frankheijden.insights.listeners.PaperBlockListener;\n import dev.frankheijden.insights.listeners.PaperEntityListener;\n import dev.frankheijden.insights.listeners.PistonListener;\n import dev.frankheijden.insights.listeners.PlayerListener;\n@@ -80,6 +81,9 @@\n         List<Method> listenerMethods = new ArrayList<>();\n         listenerMethods.addAll(ReflectionUtils.getAnnotatedMethods(BlockListener.class, AllowDisabling.class));\n         listenerMethods.addAll(ReflectionUtils.getAnnotatedMethods(WorldListener.class, AllowDisabling.class));\n+        if (PaperLib.isPaper()) {\n+            listenerMethods.addAll(ReflectionUtils.getAnnotatedMethods(PaperBlockListener.class, AllowDisabling.class));\n+        }\n \n         for (Method method : listenerMethods) {\n             Class<?>[] params = method.getParameterTypes();\n@@ -151,31 +155,32 @@ public void onEnable() {\n \n         loadCommands();\n \n-        InsightsListener[] disableListeners = new InsightsListener[] {\n-                new BlockListener(this),\n-                new WorldListener(this)\n-        };\n-\n-        registerEvents(disableListeners);\n+        List<InsightsListener> listeners = new ArrayList<>();\n         playerListener = new PlayerListener(this);\n-        registerEvents(\n-                new ChunkListener(this),\n-                playerListener\n-        );\n+        listeners.add(playerListener);\n+        listeners.add(new ChunkListener(this));\n+\n+        List<InsightsListener> disableListeners = new ArrayList<>();\n+        disableListeners.add(new BlockListener(this));\n+        disableListeners.add(new WorldListener(this));\n \n         if (PaperLib.isPaper()) {\n-            registerEvents(new PaperEntityListener(this));\n+            listeners.add(new PaperEntityListener(this));\n+            disableListeners.add(new PaperBlockListener(this));\n         } else {\n-            registerEvents(new EntityListener(this));\n+            listeners.add(new EntityListener(this));\n             entityTrackerTask = new EntityTrackerTask(this);\n             int interval = settings.SPIGOT_ENTITY_TRACKER_INTERVAL_TICKS;\n             Bukkit.getScheduler().runTaskTimer(this, entityTrackerTask, 0, interval);\n         }\n \n         if (settings.APPLY_PISTON_LIMITS) {\n-            registerEvents(new PistonListener(this));\n+            listeners.add(new PistonListener(this));\n         }\n \n+        registerEvents(listeners.toArray(new InsightsListener[0]));\n+        registerEvents(disableListeners.toArray(new InsightsListener[0]));\n+\n         for (Class<?> clazz : settings.DISABLED_EVENTS) {\n             HandlerList list = MinecraftReflection.of(clazz).invoke(null, \"getHandlerList\");\n             for (InsightsListener listener : disableListeners) {"
+  },
+  {
+    "sha": "83ad99faf2866876abfef5dec262fc82c49046f9",
+    "filename": "Insights/src/main/java/dev/frankheijden/insights/listeners/BlockListener.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/InsightsPlugin/Insights/blob/10920b391355fd503a1dd3c9512813e00bc5e95d/Insights/src/main/java/dev/frankheijden/insights/listeners/BlockListener.java",
+    "raw_url": "https://github.com/InsightsPlugin/Insights/raw/10920b391355fd503a1dd3c9512813e00bc5e95d/Insights/src/main/java/dev/frankheijden/insights/listeners/BlockListener.java",
+    "contents_url": "https://api.github.com/repos/InsightsPlugin/Insights/contents/Insights/src/main/java/dev/frankheijden/insights/listeners/BlockListener.java?ref=10920b391355fd503a1dd3c9512813e00bc5e95d",
+    "patch": "@@ -120,6 +120,11 @@ public void onBlockBreak(BlockBreakEvent event) {\n \n         // Handle the removal\n         handleRemoval(player, location, ScanObject.of(material), 1, false);\n+\n+        // Reschedule the chunk for scanning\n+        // Hacky way of allowing indirect block breaks,\n+        // such as redstone wire popping off when the block below it is being broken.\n+        plugin.getChunkContainerExecutor().submit(block.getChunk());\n     }\n \n     @AllowDisabling"
+  },
+  {
+    "sha": "46b8de1f533e08fc037dd763319c2d6a7e8bd865",
+    "filename": "Insights/src/main/java/dev/frankheijden/insights/listeners/PaperBlockListener.java",
+    "status": "added",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/InsightsPlugin/Insights/blob/10920b391355fd503a1dd3c9512813e00bc5e95d/Insights/src/main/java/dev/frankheijden/insights/listeners/PaperBlockListener.java",
+    "raw_url": "https://github.com/InsightsPlugin/Insights/raw/10920b391355fd503a1dd3c9512813e00bc5e95d/Insights/src/main/java/dev/frankheijden/insights/listeners/PaperBlockListener.java",
+    "contents_url": "https://api.github.com/repos/InsightsPlugin/Insights/contents/Insights/src/main/java/dev/frankheijden/insights/listeners/PaperBlockListener.java?ref=10920b391355fd503a1dd3c9512813e00bc5e95d",
+    "patch": "@@ -0,0 +1,23 @@\n+package dev.frankheijden.insights.listeners;\n+\n+import com.destroystokyo.paper.event.block.BlockDestroyEvent;\n+import dev.frankheijden.insights.api.InsightsPlugin;\n+import dev.frankheijden.insights.api.annotations.AllowDisabling;\n+import dev.frankheijden.insights.api.listeners.InsightsListener;\n+import org.bukkit.block.Block;\n+import org.bukkit.event.EventHandler;\n+import org.bukkit.event.EventPriority;\n+\n+public class PaperBlockListener extends InsightsListener {\n+\n+    public PaperBlockListener(InsightsPlugin plugin) {\n+        super(plugin);\n+    }\n+\n+    @AllowDisabling\n+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)\n+    public void onBlockDestroy(BlockDestroyEvent event) {\n+        Block block = event.getBlock();\n+        handleModification(block.getLocation(), block.getType(), event.getNewState().getMaterial(), 1);\n+    }\n+}"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "caad5c998d5915aa64fc343b5a0aef68b728503c",
+    "filename": "CHANGELOG.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/retest/recheck/blob/ab15d5562f70ae6e82af81f1273afeeee875d1aa/CHANGELOG.md",
+    "raw_url": "https://github.com/retest/recheck/raw/ab15d5562f70ae6e82af81f1273afeeee875d1aa/CHANGELOG.md",
+    "contents_url": "https://api.github.com/repos/retest/recheck/contents/CHANGELOG.md?ref=ab15d5562f70ae6e82af81f1273afeeee875d1aa",
+    "patch": "@@ -26,6 +26,7 @@ Table of Contents\n ### Breaking Changes\n \n * Since 01.12.2020 this project is owned and developed by [UBS Hainer GmbH](https://ubs-hainer.com/).\n+* Update the storage library used for reports (kryo 4 -> 5), it's possible that older test reports can't longer be read.\n \n ### Bug Fixes\n "
+  },
+  {
+    "sha": "19c4fe30833f0f0debdd1dc6bbfe13b0aa835a8a",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 5,
+    "changes": 9,
+    "blob_url": "https://github.com/retest/recheck/blob/ab15d5562f70ae6e82af81f1273afeeee875d1aa/pom.xml",
+    "raw_url": "https://github.com/retest/recheck/raw/ab15d5562f70ae6e82af81f1273afeeee875d1aa/pom.xml",
+    "contents_url": "https://api.github.com/repos/retest/recheck/contents/pom.xml?ref=ab15d5562f70ae6e82af81f1273afeeee875d1aa",
+    "patch": "@@ -97,16 +97,15 @@\n \t\t</dependency>\n \n \t\t<dependency>\n-\t\t\t<groupId>com.esotericsoftware</groupId>\n-\t\t\t<artifactId>kryo</artifactId>\n-\t\t\t<version>4.0.2</version>\n+\t\t\t<groupId>com.esotericsoftware.kryo</groupId>\n+\t\t\t<artifactId>kryo5</artifactId>\n+\t\t\t<version>5.0.3</version>\n \t\t</dependency>\n \n \t\t<dependency>\n \t\t\t<groupId>de.javakaffee</groupId>\n \t\t\t<artifactId>kryo-serializers</artifactId>\n-\t\t\t<!-- last version compatible with Kryo v4.0.2 -->\n-\t\t\t<version>0.43</version>\n+\t\t\t<version>0.45</version>\n \t\t</dependency>\n \n \t\t<dependency>"
+  },
+  {
+    "sha": "ec49cb485d9b5e2d66787bf68c0b2e5da9c5d0ff",
+    "filename": "src/main/java/de/retest/recheck/persistence/bin/KryoPersistence.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 2,
+    "changes": 14,
+    "blob_url": "https://github.com/retest/recheck/blob/ab15d5562f70ae6e82af81f1273afeeee875d1aa/src/main/java/de/retest/recheck/persistence/bin/KryoPersistence.java",
+    "raw_url": "https://github.com/retest/recheck/raw/ab15d5562f70ae6e82af81f1273afeeee875d1aa/src/main/java/de/retest/recheck/persistence/bin/KryoPersistence.java",
+    "contents_url": "https://api.github.com/repos/retest/recheck/contents/src/main/java/de/retest/recheck/persistence/bin/KryoPersistence.java?ref=ab15d5562f70ae6e82af81f1273afeeee875d1aa",
+    "patch": "@@ -11,6 +11,7 @@\n import java.nio.file.NoSuchFileException;\n import java.nio.file.Path;\n import java.nio.file.Paths;\n+import java.util.ArrayList;\n import java.util.HashMap;\n import java.util.Map;\n import java.util.regex.Matcher;\n@@ -29,7 +30,9 @@\n import de.retest.recheck.persistence.IncompatibleReportVersionException;\n import de.retest.recheck.persistence.Persistable;\n import de.retest.recheck.persistence.Persistence;\n+import de.retest.recheck.report.SuiteReplayResult;\n import de.retest.recheck.report.TestReport;\n+import de.retest.recheck.ui.review.GoldenMasterSource;\n import de.retest.recheck.util.FileUtil;\n import de.retest.recheck.util.VersionProvider;\n import lombok.extern.slf4j.Slf4j;\n@@ -74,10 +77,17 @@ public KryoPersistence() {\n \n \tprivate static Kryo createKryo() {\n \t\tfinal Kryo kryo = new Kryo();\n+\t\tkryo.setInstantiatorStrategy( new StdInstantiatorStrategy() );\n \n-\t\tkryo.setInstantiatorStrategy( new Kryo.DefaultInstantiatorStrategy( new StdInstantiatorStrategy() ) );\n+\t\tkryo.setRegistrationRequired( false ); // TODO remove, see #836\n \n-\t\tfinal Registration registration = kryo.getRegistration( TreeMultiset.class );\n+\t\tkryo.register( TestReport.class );\n+\t\tkryo.register( GoldenMasterSource.class );\n+\t\tkryo.register( SuiteReplayResult.class );\n+\t\tkryo.register( ArrayList.class );\n+\t\t// TODO add more, see #836\n+\n+\t\tfinal Registration registration = kryo.register( TreeMultiset.class );\n \t\tregistration.setInstantiator( TreeMultiset::create );\n \n \t\tUnmodifiableCollectionsSerializer.registerSerializers( kryo );"
+  },
+  {
+    "sha": "55244801402e4a9617ac95e96bf5af91920a1779",
+    "filename": "src/test/java/de/retest/recheck/persistence/bin/KryoPersistenceTest.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 14,
+    "changes": 26,
+    "blob_url": "https://github.com/retest/recheck/blob/ab15d5562f70ae6e82af81f1273afeeee875d1aa/src/test/java/de/retest/recheck/persistence/bin/KryoPersistenceTest.java",
+    "raw_url": "https://github.com/retest/recheck/raw/ab15d5562f70ae6e82af81f1273afeeee875d1aa/src/test/java/de/retest/recheck/persistence/bin/KryoPersistenceTest.java",
+    "contents_url": "https://api.github.com/repos/retest/recheck/contents/src/test/java/de/retest/recheck/persistence/bin/KryoPersistenceTest.java?ref=ab15d5562f70ae6e82af81f1273afeeee875d1aa",
+    "patch": "@@ -14,7 +14,6 @@\n import java.nio.file.NoSuchFileException;\n import java.nio.file.Path;\n import java.nio.file.Paths;\n-import java.util.ArrayList;\n \n import org.junit.jupiter.api.Test;\n import org.junit.jupiter.api.io.TempDir;\n@@ -24,6 +23,7 @@\n \n import de.retest.recheck.persistence.IncompatibleReportVersionException;\n import de.retest.recheck.persistence.Persistable;\n+import de.retest.recheck.report.SuiteReplayResult;\n import de.retest.recheck.report.TestReport;\n import de.retest.recheck.util.VersionProvider;\n \n@@ -35,18 +35,18 @@ void roundtrip_should_work( @TempDir final Path temp ) throws IOException {\n \t\tFiles.createFile( file );\n \t\tfinal URI identifier = file.toUri();\n \n-\t\tfinal KryoPersistence<de.retest.recheck.test.Test> kryoPersistence = new KryoPersistence<>();\n-\t\tfinal de.retest.recheck.test.Test persisted = createDummyTest();\n+\t\tfinal KryoPersistence<TestReport> kryoPersistence = new KryoPersistence<>();\n+\t\tfinal TestReport persisted = createDummyTest();\n \t\tkryoPersistence.save( identifier, persisted );\n-\t\tfinal de.retest.recheck.test.Test loaded = kryoPersistence.load( identifier );\n+\t\tfinal TestReport loaded = kryoPersistence.load( identifier );\n \n-\t\tassertThat( persisted.getRelativeActionSequencePaths() ).isEqualTo( loaded.getRelativeActionSequencePaths() );\n+\t\tassertThat( loaded.getSuiteReplayResults().get( 0 ).getName() )\n+\t\t\t\t.isEqualTo( persisted.getSuiteReplayResults().get( 0 ).getName() );\n \t}\n \n-\tpublic de.retest.recheck.test.Test createDummyTest() {\n-\t\tfinal ArrayList<String> tests = new ArrayList<>();\n-\t\ttests.add( \"../test.test\" );\n-\t\treturn new de.retest.recheck.test.Test( tests );\n+\tpublic TestReport createDummyTest() {\n+\t\tfinal SuiteReplayResult suite = new SuiteReplayResult( \"test\", 23, null, \"00\", null );\n+\t\treturn new TestReport( suite );\n \t}\n \n \t@Test\n@@ -55,13 +55,12 @@ void incompatible_version_should_give_persisting_version( @TempDir final Path te\n \t\tFiles.createFile( file );\n \t\tfinal URI identifier = file.toUri();\n \n-\t\tfinal KryoPersistence<de.retest.recheck.test.Test> kryoPersistence = new KryoPersistence<>();\n+\t\tfinal KryoPersistence<TestReport> kryoPersistence = new KryoPersistence<>();\n \t\tkryoPersistence.save( identifier, createDummyTest() );\n \n \t\tfinal Kryo kryoMock = mock( Kryo.class );\n \t\twhen( kryoMock.readClassAndObject( any() ) ).thenThrow( KryoException.class );\n-\t\tfinal KryoPersistence<de.retest.recheck.test.Test> differentKryoPersistence =\n-\t\t\t\tnew KryoPersistence<>( kryoMock, \"old Version\" );\n+\t\tfinal KryoPersistence<TestReport> differentKryoPersistence = new KryoPersistence<>( kryoMock, \"old Version\" );\n \n \t\tassertThatThrownBy( () -> differentKryoPersistence.load( identifier ) )\n \t\t\t\t.isInstanceOf( IncompatibleReportVersionException.class )\n@@ -99,8 +98,7 @@ void on_error_file_should_be_deleted() throws IOException {\n \t\tfinal File nonexistent = new File( \"nonexistent.report\" );\n \t\tfinal Kryo kryoMock = mock( Kryo.class );\n \t\tdoThrow( KryoException.class ).when( kryoMock ).writeClassAndObject( any(), any() );\n-\t\tfinal KryoPersistence<de.retest.recheck.test.Test> persistence =\n-\t\t\t\tnew KryoPersistence<>( kryoMock, \"some version\" );\n+\t\tfinal KryoPersistence<TestReport> persistence = new KryoPersistence<>( kryoMock, \"some version\" );\n \t\tassertThatThrownBy( () -> persistence.save( nonexistent.toURI(), createDummyTest() ) )\n \t\t\t\t.isInstanceOf( KryoException.class );\n \t\tassertThat( nonexistent ).doesNotExist();"
+  }
+]

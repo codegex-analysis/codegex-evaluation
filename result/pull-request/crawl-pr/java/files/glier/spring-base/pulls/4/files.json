@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "e72fa8a6627391d5d7dbac40fe509d97094d05aa",
+    "filename": "src/main/java/ru/gb/springbase/controller/CartController.java",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/glier/spring-base/blob/5fc301af3c54995f4cfdc089562c6b6a9ed3e84f/src/main/java/ru/gb/springbase/controller/CartController.java",
+    "raw_url": "https://github.com/glier/spring-base/raw/5fc301af3c54995f4cfdc089562c6b6a9ed3e84f/src/main/java/ru/gb/springbase/controller/CartController.java",
+    "contents_url": "https://api.github.com/repos/glier/spring-base/contents/src/main/java/ru/gb/springbase/controller/CartController.java?ref=5fc301af3c54995f4cfdc089562c6b6a9ed3e84f",
+    "patch": "@@ -0,0 +1,48 @@\n+package ru.gb.springbase.controller;\n+\n+import lombok.RequiredArgsConstructor;\n+import org.springframework.web.bind.annotation.GetMapping;\n+import org.springframework.web.bind.annotation.PathVariable;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RestController;\n+import ru.gb.springbase.model.CartElement;\n+import ru.gb.springbase.model.dtos.ProductDto;\n+import ru.gb.springbase.service.ProductService;\n+\n+import java.util.*;\n+\n+@RestController\n+@RequestMapping(\"/api/v1/cart\")\n+@RequiredArgsConstructor\n+public class CartController {\n+\n+    private final ProductService productService;\n+\n+    private final List<CartElement> cart = new ArrayList<>();\n+\n+    @GetMapping(\"/add/{id}\")\n+    public void addProductToCart(@PathVariable Long id) {\n+        ProductDto product = productService.findById(id);\n+\n+        cart.stream()\n+                .filter(cartElement -> cartElement.product.equals(product))\n+                .findFirst()\n+                .ifPresentOrElse(el -> el.count++, () -> cart.add(new CartElement(product, 1)));\n+    }\n+\n+    @GetMapping(\"/remove/{id}\")\n+    public void removeProductFromCart(@PathVariable Long id) {\n+        ProductDto product = productService.findById(id);\n+\n+        cart.stream()\n+                .filter(cartElement -> cartElement.product.equals(product))\n+                .findFirst()\n+                .ifPresent(el -> el.count--);\n+        cart.removeIf(el -> el.count < 1);\n+    }\n+\n+    @GetMapping\n+    public List<CartElement> getCart() {\n+        return cart;\n+    }\n+}"
+  },
+  {
+    "sha": "3bc0fe343da2d86d9b11226fcba6a0c0c274d8cd",
+    "filename": "src/main/java/ru/gb/springbase/model/CartElement.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/glier/spring-base/blob/5fc301af3c54995f4cfdc089562c6b6a9ed3e84f/src/main/java/ru/gb/springbase/model/CartElement.java",
+    "raw_url": "https://github.com/glier/spring-base/raw/5fc301af3c54995f4cfdc089562c6b6a9ed3e84f/src/main/java/ru/gb/springbase/model/CartElement.java",
+    "contents_url": "https://api.github.com/repos/glier/spring-base/contents/src/main/java/ru/gb/springbase/model/CartElement.java?ref=5fc301af3c54995f4cfdc089562c6b6a9ed3e84f",
+    "patch": "@@ -0,0 +1,12 @@\n+package ru.gb.springbase.model;\n+\n+import lombok.AllArgsConstructor;\n+import ru.gb.springbase.model.dtos.ProductDto;\n+\n+import java.io.Serializable;\n+\n+@AllArgsConstructor\n+public class CartElement implements Serializable {\n+    public ProductDto product;\n+    public Integer count;\n+}"
+  }
+]

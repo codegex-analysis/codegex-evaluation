@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "b8aadfaf05ee5d5999133c94771526149861bcbd",
+    "filename": "client/src/main/java/com/vesoft/nebula/client/graph/data/Node.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/vesoft-inc/nebula-java/blob/3dd6e5a3bbb8d08eb76a52aa0ec0dcdac7bdd512/client/src/main/java/com/vesoft/nebula/client/graph/data/Node.java",
+    "raw_url": "https://github.com/vesoft-inc/nebula-java/raw/3dd6e5a3bbb8d08eb76a52aa0ec0dcdac7bdd512/client/src/main/java/com/vesoft/nebula/client/graph/data/Node.java",
+    "contents_url": "https://api.github.com/repos/vesoft-inc/nebula-java/contents/client/src/main/java/com/vesoft/nebula/client/graph/data/Node.java?ref=3dd6e5a3bbb8d08eb76a52aa0ec0dcdac7bdd512",
+    "patch": "@@ -46,7 +46,7 @@ public ValueWrapper getId() {\n      * get all tag name from the node\n      * @return the list of tag name\n      */\n-    public List<String> labels() {\n+    public List<String> tagNames() {\n         return tagNames;\n     }\n \n@@ -55,7 +55,7 @@ public ValueWrapper getId() {\n      * @param tagName the tag name\n      * @return boolean\n      */\n-    public boolean hasLabel(String tagName) {\n+    public boolean hasTagName(String tagName) {\n         return tagNames.contains(tagName);\n     }\n \n@@ -138,7 +138,7 @@ public String toString() {\n         try {\n             List<String> tagsStr = new ArrayList<>();\n             List<String> propStrs = new ArrayList<>();\n-            for (String name : labels()) {\n+            for (String name : tagNames()) {\n                 Map<String, ValueWrapper> props = properties(name);\n                 for (String key : props.keySet()) {\n                     propStrs.add(key + \": \" + props.get(key).toString());"
+  },
+  {
+    "sha": "4ed2b8b12b501ca3bed33f2eae7ede06b66fcce9",
+    "filename": "client/src/test/java/com/vesoft/nebula/client/graph/data/TestData.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/vesoft-inc/nebula-java/blob/3dd6e5a3bbb8d08eb76a52aa0ec0dcdac7bdd512/client/src/test/java/com/vesoft/nebula/client/graph/data/TestData.java",
+    "raw_url": "https://github.com/vesoft-inc/nebula-java/raw/3dd6e5a3bbb8d08eb76a52aa0ec0dcdac7bdd512/client/src/test/java/com/vesoft/nebula/client/graph/data/TestData.java",
+    "contents_url": "https://api.github.com/repos/vesoft-inc/nebula-java/contents/client/src/test/java/com/vesoft/nebula/client/graph/data/TestData.java?ref=3dd6e5a3bbb8d08eb76a52aa0ec0dcdac7bdd512",
+    "patch": "@@ -142,7 +142,7 @@ public void testNode() {\n         try {\n             Node node = new Node(getVertex(new String(\"Tom\")));\n             assert Objects.equals(node.getId().asString(), \"Tom\");\n-            assert node.hasLabel(\"tag1\");\n+            assert node.hasTagName(\"tag1\");\n             List<String> names = Arrays.asList(\"prop0\", \"prop1\", \"prop2\", \"prop3\", \"prop4\");\n             assert Objects.equals(\n                     node.keys(\"tag0\").stream().sorted().collect(Collectors.toList()),"
+  },
+  {
+    "sha": "2510ff152fa9c1c1b19c89b2e71863c670786cc6",
+    "filename": "client/src/test/java/com/vesoft/nebula/client/graph/data/TestDataFromServer.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/vesoft-inc/nebula-java/blob/3dd6e5a3bbb8d08eb76a52aa0ec0dcdac7bdd512/client/src/test/java/com/vesoft/nebula/client/graph/data/TestDataFromServer.java",
+    "raw_url": "https://github.com/vesoft-inc/nebula-java/raw/3dd6e5a3bbb8d08eb76a52aa0ec0dcdac7bdd512/client/src/test/java/com/vesoft/nebula/client/graph/data/TestDataFromServer.java",
+    "contents_url": "https://api.github.com/repos/vesoft-inc/nebula-java/contents/client/src/test/java/com/vesoft/nebula/client/graph/data/TestDataFromServer.java?ref=3dd6e5a3bbb8d08eb76a52aa0ec0dcdac7bdd512",
+    "patch": "@@ -137,7 +137,7 @@ public void testAllSchemaType() {\n             Assert.assertTrue(result.rowValues(0).get(0).isVertex());\n             Node node = result.rowValues(0).get(0).asNode();\n             Assert.assertEquals(\"Bob\", node.getId().asString());\n-            Assert.assertEquals(Arrays.asList(\"person\"), node.labels());\n+            Assert.assertEquals(Arrays.asList(\"person\"), node.tagNames());\n             HashMap<String, ValueWrapper> properties = node.properties(\"person\");\n             Assert.assertEquals(\"Bob\", properties.get(\"name\").asString());\n             Assert.assertEquals(10, properties.get(\"age\").asLong());\n@@ -248,11 +248,11 @@ public void testNode() {\n             Assert.assertTrue(result.rowValues(0).get(0).isVertex());\n             Node node = result.rowValues(0).get(0).asNode();\n             Assert.assertEquals(\"Bob\", node.getId().asString());\n-            Assert.assertTrue(node.hasLabel(\"person\"));\n-            Assert.assertTrue(node.hasLabel(\"student\"));\n+            Assert.assertTrue(node.hasTagName(\"person\"));\n+            Assert.assertTrue(node.hasTagName(\"student\"));\n             Assert.assertEquals(Arrays.asList(\"person\", \"student\")\n                             .stream().sorted().collect(Collectors.toList()),\n-                    node.labels().stream().sorted().collect(Collectors.toList()));\n+                    node.tagNames().stream().sorted().collect(Collectors.toList()));\n             Assert.assertEquals(\n                     Arrays.asList(\"name\").stream().sorted().collect(Collectors.toList()),\n                     node.keys(\"student\").stream().sorted().collect(Collectors.toList()));"
+  }
+]

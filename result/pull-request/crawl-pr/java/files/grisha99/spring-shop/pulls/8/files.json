@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "eb118d3eea8cb327f784d55aea25b77aa6ee2a10",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/grisha99/spring-shop/blob/6c53e510c996748d686dba6e133aeaa0086882ad/pom.xml",
+    "raw_url": "https://github.com/grisha99/spring-shop/raw/6c53e510c996748d686dba6e133aeaa0086882ad/pom.xml",
+    "contents_url": "https://api.github.com/repos/grisha99/spring-shop/contents/pom.xml?ref=6c53e510c996748d686dba6e133aeaa0086882ad",
+    "patch": "@@ -41,6 +41,12 @@\n \t\t\t<groupId>org.springframework.boot</groupId>\n \t\t\t<artifactId>spring-boot-starter-security</artifactId>\n \t\t</dependency>\n+\n+\t\t<dependency>\n+\t\t\t<groupId>org.springframework.boot</groupId>\n+\t\t\t<artifactId>spring-boot-starter-web-services</artifactId>\n+\t\t</dependency>\n+\n \t\t<dependency>\n \t\t\t<groupId>org.flywaydb</groupId>\n \t\t\t<artifactId>flyway-core</artifactId>\n@@ -72,6 +78,22 @@\n \t\t\t<artifactId>aspectjweaver</artifactId>\n \t\t\t<version>1.9.2</version>\n \t\t</dependency>\n+\n+\t\t<dependency>\n+\t\t\t<groupId>javax.xml.bind</groupId>\n+\t\t\t<artifactId>jaxb-api</artifactId>\n+\t\t\t<version>2.3.1</version>\n+\t\t</dependency>\n+\t\t<dependency>\n+\t\t\t<groupId>org.glassfish.jaxb</groupId>\n+\t\t\t<artifactId>jaxb-runtime</artifactId>\n+\t\t\t<version>2.3.1</version>\n+\t\t</dependency>\n+\t\t<dependency>\n+\t\t\t<groupId>wsdl4j</groupId>\n+\t\t\t<artifactId>wsdl4j</artifactId>\n+\t\t\t<version>1.6.2</version>\n+\t\t</dependency>\n \t</dependencies>\n \n \t<build>\n@@ -88,6 +110,29 @@\n \t\t\t\t\t</excludes>\n \t\t\t\t</configuration>\n \t\t\t</plugin>\n+\n+\t\t\t<plugin>\n+\t\t\t\t<groupId>org.codehaus.mojo</groupId>\n+\t\t\t\t<artifactId>jaxb2-maven-plugin</artifactId>\n+\t\t\t\t<version>2.5.0</version>\n+\t\t\t\t<executions>\n+\t\t\t\t\t<execution>\n+\t\t\t\t\t\t<id>xjc</id>\n+\t\t\t\t\t\t<goals>\n+\t\t\t\t\t\t\t<goal>xjc</goal>\n+\t\t\t\t\t\t</goals>\n+\t\t\t\t\t</execution>\n+\t\t\t\t</executions>\n+\t\t\t\t<configuration>\n+\t\t\t\t\t<sources>\n+\t\t\t\t\t\t<source>${project.basedir}/src/main/resources/products.xsd</source>\n+<!--\t\t\t\t\t\t<source>${project.basedir}/src/main/resources/students.xsd</source>-->\n+\t\t\t\t\t</sources>\n+\t\t\t\t\t<!--\t\t\t\t\t<packageName>soap</packageName>-->\n+\t\t\t\t\t<!--\t\t\t\t\t<outputDirectory>${project.basedir}/src/main/java/com/flamexander/spring/ws/soap</outputDirectory>-->\n+\t\t\t\t\t<!--\t\t\t\t\t<clearOutputDir>false</clearOutputDir>-->\n+\t\t\t\t</configuration>\n+\t\t\t</plugin>\n \t\t</plugins>\n \t</build>\n "
+  },
+  {
+    "sha": "fe8328fe49ae28f0fec2f7db676ab919e93dabe3",
+    "filename": "src/main/java/ru/grishchenko/mymarket/configs/WebServiceConfig.java",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/grisha99/spring-shop/blob/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/configs/WebServiceConfig.java",
+    "raw_url": "https://github.com/grisha99/spring-shop/raw/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/configs/WebServiceConfig.java",
+    "contents_url": "https://api.github.com/repos/grisha99/spring-shop/contents/src/main/java/ru/grishchenko/mymarket/configs/WebServiceConfig.java?ref=6c53e510c996748d686dba6e133aeaa0086882ad",
+    "patch": "@@ -0,0 +1,41 @@\n+package ru.grishchenko.mymarket.configs;\n+\n+import org.springframework.boot.web.servlet.ServletRegistrationBean;\n+import org.springframework.context.ApplicationContext;\n+import org.springframework.context.annotation.Bean;\n+import org.springframework.context.annotation.Configuration;\n+import org.springframework.core.io.ClassPathResource;\n+import org.springframework.ws.config.annotation.EnableWs;\n+import org.springframework.ws.config.annotation.WsConfigurerAdapter;\n+import org.springframework.ws.transport.http.MessageDispatcherServlet;\n+import org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition;\n+import org.springframework.xml.xsd.SimpleXsdSchema;\n+import org.springframework.xml.xsd.XsdSchema;\n+\n+@EnableWs\n+@Configuration\n+public class WebServiceConfig extends WsConfigurerAdapter {\n+    @Bean\n+    public ServletRegistrationBean messageDispatcherServlet(ApplicationContext applicationContext) {\n+        MessageDispatcherServlet servlet = new MessageDispatcherServlet();\n+        servlet.setApplicationContext(applicationContext);\n+        servlet.setTransformWsdlLocations(true);\n+        return new ServletRegistrationBean(servlet, \"/ws/*\");\n+    }\n+\n+    // http://localhost:8189/ws/products.wsdl\n+    @Bean(name = \"products\")\n+    public DefaultWsdl11Definition studentsWsdl11Definition(XsdSchema productsSchema) {\n+        DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();\n+        wsdl11Definition.setPortTypeName(\"ProductsPort\");\n+        wsdl11Definition.setLocationUri(\"/ws\");\n+        wsdl11Definition.setTargetNamespace(\"http://www.grishenko.ru/ws/products\");\n+        wsdl11Definition.setSchema(productsSchema);\n+        return wsdl11Definition;\n+    }\n+\n+    @Bean\n+    public XsdSchema studentsSchema() {\n+        return new SimpleXsdSchema(new ClassPathResource(\"products.xsd\"));\n+    }\n+}"
+  },
+  {
+    "sha": "c6d065f0de3515179fe1d414e2db5ffb43b5118c",
+    "filename": "src/main/java/ru/grishchenko/mymarket/controllers/endpoints/ProductEndPoint.java",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/grisha99/spring-shop/blob/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/controllers/endpoints/ProductEndPoint.java",
+    "raw_url": "https://github.com/grisha99/spring-shop/raw/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/controllers/endpoints/ProductEndPoint.java",
+    "contents_url": "https://api.github.com/repos/grisha99/spring-shop/contents/src/main/java/ru/grishchenko/mymarket/controllers/endpoints/ProductEndPoint.java?ref=6c53e510c996748d686dba6e133aeaa0086882ad",
+    "patch": "@@ -0,0 +1,37 @@\n+package ru.grishchenko.mymarket.controllers.endpoints;\n+\n+import lombok.RequiredArgsConstructor;\n+import org.springframework.ws.server.endpoint.annotation.Endpoint;\n+import org.springframework.ws.server.endpoint.annotation.PayloadRoot;\n+import org.springframework.ws.server.endpoint.annotation.RequestPayload;\n+import org.springframework.ws.server.endpoint.annotation.ResponsePayload;\n+import ru.grishchenko.mymarket.services.ProductService;\n+import ru.grishchenko.mymarket.soap.GetAllProductsRequest;\n+import ru.grishchenko.mymarket.soap.GetAllProductsResponse;\n+import ru.grishchenko.mymarket.soap.ProductSoap;\n+\n+@Endpoint\n+@RequiredArgsConstructor\n+public class ProductEndPoint {\n+    private static final String NAMESPACE_URI = \"http://www.grishenko.ru/ws/products\";\n+    private final ProductService productService;\n+\n+    /*\n+        Пример запроса: POST http://localhost:8189/ws\n+\n+        <soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:f=\"http://www.grishenko.ru/ws/products\">\n+            <soapenv:Header/>\n+            <soapenv:Body>\n+                <f:getAllProductsRequest/>\n+            </soapenv:Body>\n+        </soapenv:Envelope>\n+     */\n+\n+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = \"getAllProductsRequest\")\n+    @ResponsePayload\n+    public GetAllProductsResponse getAllProducts(@RequestPayload GetAllProductsRequest request) {\n+        GetAllProductsResponse response = new GetAllProductsResponse();\n+        productService.getAllProducts().stream().map(ProductSoap::new).forEach(response.getProducts()::add);\n+        return response;\n+    }\n+}"
+  },
+  {
+    "sha": "633535a3d7c4b83a08ddaf9d3ce0129e6afcedd5",
+    "filename": "src/main/java/ru/grishchenko/mymarket/services/ProductService.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/grisha99/spring-shop/blob/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/services/ProductService.java",
+    "raw_url": "https://github.com/grisha99/spring-shop/raw/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/services/ProductService.java",
+    "contents_url": "https://api.github.com/repos/grisha99/spring-shop/contents/src/main/java/ru/grishchenko/mymarket/services/ProductService.java?ref=6c53e510c996748d686dba6e133aeaa0086882ad",
+    "patch": "@@ -10,6 +10,8 @@\n import ru.grishchenko.mymarket.models.Product;\n import ru.grishchenko.mymarket.repositories.ProductRepository;\n \n+import java.util.Collections;\n+import java.util.List;\n import java.util.Optional;\n \n @Service\n@@ -32,6 +34,10 @@\n \n     }\n \n+    public List<Product> getAllProducts() {\n+        return Collections.unmodifiableList(productRepository.findAll());\n+    }\n+\n     public ProductDto saveOrUpdate(ProductDto productDto) {\n         Product p = modelMapper.map(productDto, Product.class);\n         return modelMapper.map(productRepository.save(p), ProductDto.class);\n@@ -40,4 +46,5 @@ public ProductDto saveOrUpdate(ProductDto productDto) {\n     public void deleteProductById(Long id) {\n         productRepository.deleteById(id);\n     }\n+\n }"
+  },
+  {
+    "sha": "aeed59579d70a15c4aaf64f82533b01b48929527",
+    "filename": "src/main/java/ru/grishchenko/mymarket/soap/GetAllProductsRequest.java",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/grisha99/spring-shop/blob/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/soap/GetAllProductsRequest.java",
+    "raw_url": "https://github.com/grisha99/spring-shop/raw/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/soap/GetAllProductsRequest.java",
+    "contents_url": "https://api.github.com/repos/grisha99/spring-shop/contents/src/main/java/ru/grishchenko/mymarket/soap/GetAllProductsRequest.java?ref=6c53e510c996748d686dba6e133aeaa0086882ad",
+    "patch": "@@ -0,0 +1,13 @@\n+package ru.grishchenko.mymarket.soap;\n+\n+import javax.xml.bind.annotation.XmlAccessType;\n+import javax.xml.bind.annotation.XmlAccessorType;\n+import javax.xml.bind.annotation.XmlRootElement;\n+import javax.xml.bind.annotation.XmlType;\n+\n+@XmlAccessorType(XmlAccessType.FIELD)\n+@XmlType(name = \"\")\n+@XmlRootElement(namespace = \"http://www.grishenko.ru/ws/products\", name = \"getAllProductsRequest\")\n+public class GetAllProductsRequest {\n+\n+}"
+  },
+  {
+    "sha": "c6cfbb473195bab8ea3d275b3dec957e23ee72b1",
+    "filename": "src/main/java/ru/grishchenko/mymarket/soap/GetAllProductsResponse.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/grisha99/spring-shop/blob/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/soap/GetAllProductsResponse.java",
+    "raw_url": "https://github.com/grisha99/spring-shop/raw/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/soap/GetAllProductsResponse.java",
+    "contents_url": "https://api.github.com/repos/grisha99/spring-shop/contents/src/main/java/ru/grishchenko/mymarket/soap/GetAllProductsResponse.java?ref=6c53e510c996748d686dba6e133aeaa0086882ad",
+    "patch": "@@ -0,0 +1,24 @@\n+package ru.grishchenko.mymarket.soap;\n+\n+\n+import javax.xml.bind.annotation.*;\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+@XmlAccessorType(XmlAccessType.FIELD)\n+@XmlType(name = \"\", propOrder = {\n+        \"products\"\n+})\n+@XmlRootElement(name = \"getAllProductsResponse\")\n+public class GetAllProductsResponse {\n+\n+    @XmlElement(required = true)\n+    protected List<ProductSoap> products;\n+\n+    public List<ProductSoap> getProducts() {\n+        if (products == null) {\n+            products = new ArrayList<>();\n+        }\n+        return products;\n+    }\n+}"
+  },
+  {
+    "sha": "ca6515431325e51b9cd45498aa37af36fcc0a167",
+    "filename": "src/main/java/ru/grishchenko/mymarket/soap/ProductSoap.java",
+    "status": "added",
+    "additions": 60,
+    "deletions": 0,
+    "changes": 60,
+    "blob_url": "https://github.com/grisha99/spring-shop/blob/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/soap/ProductSoap.java",
+    "raw_url": "https://github.com/grisha99/spring-shop/raw/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/java/ru/grishchenko/mymarket/soap/ProductSoap.java",
+    "contents_url": "https://api.github.com/repos/grisha99/spring-shop/contents/src/main/java/ru/grishchenko/mymarket/soap/ProductSoap.java?ref=6c53e510c996748d686dba6e133aeaa0086882ad",
+    "patch": "@@ -0,0 +1,60 @@\n+package ru.grishchenko.mymarket.soap;\n+\n+import ru.grishchenko.mymarket.models.Product;\n+\n+import javax.xml.bind.annotation.XmlAccessType;\n+import javax.xml.bind.annotation.XmlAccessorType;\n+import javax.xml.bind.annotation.XmlElement;\n+import javax.xml.bind.annotation.XmlType;\n+\n+@XmlAccessorType(XmlAccessType.FIELD)\n+@XmlType(name = \"product\", propOrder = {\n+        \"id\",\n+        \"title\",\n+        \"price\"\n+})\n+public class ProductSoap {\n+\n+    @XmlElement(required = true)\n+    protected Long id;\n+\n+    @XmlElement(required = true)\n+    protected String title;\n+\n+    @XmlElement(required = true)\n+    protected Integer price;\n+\n+    public ProductSoap() {\n+\n+    }\n+\n+    public ProductSoap(Product product) {\n+        this.id = product.getId();\n+        this.title = product.getTitle();\n+        this.price = product.getPrice();\n+    }\n+\n+    public Long getId() {\n+        return id;\n+    }\n+\n+    public void setId(Long id) {\n+        this.id = id;\n+    }\n+\n+    public String getTitle() {\n+        return title;\n+    }\n+\n+    public void setTitle(String title) {\n+        this.title = title;\n+    }\n+\n+    public Integer getPrice() {\n+        return price;\n+    }\n+\n+    public void setPrice(Integer price) {\n+        this.price = price;\n+    }\n+}"
+  },
+  {
+    "sha": "f8ce0b6c73f90b0486c47fdac1850aa5508838a2",
+    "filename": "src/main/resources/products.xsd",
+    "status": "added",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/grisha99/spring-shop/blob/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/resources/products.xsd",
+    "raw_url": "https://github.com/grisha99/spring-shop/raw/6c53e510c996748d686dba6e133aeaa0086882ad/src/main/resources/products.xsd",
+    "contents_url": "https://api.github.com/repos/grisha99/spring-shop/contents/src/main/resources/products.xsd?ref=6c53e510c996748d686dba6e133aeaa0086882ad",
+    "patch": "@@ -0,0 +1,26 @@\n+<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n+<xs:schema\n+        xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n+        xmlns:tns=\"http://www.grishenko.ru/ws/products\"\n+        targetNamespace=\"http://www.grishenko.ru/ws/products\" elementFormDefault=\"qualified\">\n+\n+    <xs:element name=\"getAllProductsRequest\">\n+        <xs:complexType/>\n+    </xs:element>\n+\n+    <xs:element name=\"getAllProductsResponse\">\n+        <xs:complexType>\n+            <xs:sequence>\n+                <xs:element name=\"products\" maxOccurs=\"unbounded\" type=\"tns:product\"/>\n+            </xs:sequence>\n+        </xs:complexType>\n+    </xs:element>\n+\n+    <xs:complexType name=\"product\">\n+        <xs:sequence>\n+            <xs:element name=\"id\" type=\"xs:long\"/>\n+            <xs:element name=\"title\" type=\"xs:string\"/>\n+            <xs:element name=\"price\" type=\"xs:int\"/>\n+        </xs:sequence>\n+    </xs:complexType>\n+</xs:schema>\n\\ No newline at end of file"
+  }
+]

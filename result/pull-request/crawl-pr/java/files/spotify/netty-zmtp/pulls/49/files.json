@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "8825b0ed62513e5ab4138f4cec590caef218833a",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 5,
+    "changes": 11,
+    "blob_url": "https://github.com/spotify/netty-zmtp/blob/392c5bef72a8698b6be30e6571c9cc3b6a9078be/pom.xml",
+    "raw_url": "https://github.com/spotify/netty-zmtp/raw/392c5bef72a8698b6be30e6571c9cc3b6a9078be/pom.xml",
+    "contents_url": "https://api.github.com/repos/spotify/netty-zmtp/contents/pom.xml?ref=392c5bef72a8698b6be30e6571c9cc3b6a9078be",
+    "patch": "@@ -33,8 +33,8 @@\n \n   <properties>\n     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n-    <maven.compiler.target>1.6</maven.compiler.target>\n-    <maven.compiler.source>1.6</maven.compiler.source>\n+    <maven.compiler.target>1.7</maven.compiler.target>\n+    <maven.compiler.source>1.7</maven.compiler.source>\n   </properties>\n \n   <developers>\n@@ -49,10 +49,11 @@\n     <dependency>\n       <groupId>io.netty</groupId>\n       <artifactId>netty-all</artifactId>\n-      <version>4.0.34.Final</version>\n+      <version>4.1.60.Final</version>\n       <!-- the user of this lib should already have a dependency on netty -->\n       <scope>provided</scope>\n     </dependency>\n+\n     <dependency>\n       <groupId>com.google.code.findbugs</groupId>\n       <artifactId>jsr305</artifactId>\n@@ -125,8 +126,8 @@\n         <version>3.3</version>\n         <configuration>\n           <useIncrementalCompilation>false</useIncrementalCompilation>\n-          <source>1.6</source>\n-          <target>1.6</target>\n+          <source>1.7</source>\n+          <target>1.7</target>\n         </configuration>\n       </plugin>\n       <plugin>"
+  },
+  {
+    "sha": "9819963795ea646a8eab674458cd7e83ddad3594",
+    "filename": "src/main/java/com/spotify/netty4/handler/codec/zmtp/ZMTPMessage.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/spotify/netty-zmtp/blob/392c5bef72a8698b6be30e6571c9cc3b6a9078be/src/main/java/com/spotify/netty4/handler/codec/zmtp/ZMTPMessage.java",
+    "raw_url": "https://github.com/spotify/netty-zmtp/raw/392c5bef72a8698b6be30e6571c9cc3b6a9078be/src/main/java/com/spotify/netty4/handler/codec/zmtp/ZMTPMessage.java",
+    "contents_url": "https://api.github.com/repos/spotify/netty-zmtp/contents/src/main/java/com/spotify/netty4/handler/codec/zmtp/ZMTPMessage.java?ref=392c5bef72a8698b6be30e6571c9cc3b6a9078be",
+    "patch": "@@ -27,6 +27,7 @@\n import io.netty.buffer.ByteBuf;\n import io.netty.buffer.ByteBufAllocator;\n import io.netty.util.AbstractReferenceCounted;\n+import io.netty.util.ReferenceCounted;\n import io.netty.util.internal.RecyclableArrayList;\n \n import static com.spotify.netty4.handler.codec.zmtp.ZMTPUtils.checkNotNull;\n@@ -54,6 +55,11 @@ public ZMTPMessage retain(final int increment) {\n     return this;\n   }\n \n+  @Override\n+  public ReferenceCounted touch(Object hint) {\n+    return this;\n+  }\n+\n   /**\n    * Create a new message from a string frames, using UTF-8 encoding.\n    */"
+  },
+  {
+    "sha": "95c832e474316260803e6f3edbe392d6489e6a6f",
+    "filename": "src/test/java/com/spotify/netty4/handler/codec/zmtp/ZMTPFramingEncoderTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/spotify/netty-zmtp/blob/392c5bef72a8698b6be30e6571c9cc3b6a9078be/src/test/java/com/spotify/netty4/handler/codec/zmtp/ZMTPFramingEncoderTest.java",
+    "raw_url": "https://github.com/spotify/netty-zmtp/raw/392c5bef72a8698b6be30e6571c9cc3b6a9078be/src/test/java/com/spotify/netty4/handler/codec/zmtp/ZMTPFramingEncoderTest.java",
+    "contents_url": "https://api.github.com/repos/spotify/netty-zmtp/contents/src/test/java/com/spotify/netty4/handler/codec/zmtp/ZMTPFramingEncoderTest.java?ref=392c5bef72a8698b6be30e6571c9cc3b6a9078be",
+    "patch": "@@ -2,6 +2,7 @@\n \n import com.google.common.base.Strings;\n \n+import io.netty.channel.Channel;\n import org.junit.Before;\n import org.junit.Test;\n import org.junit.runner.RunWith;\n@@ -36,6 +37,7 @@\n   private final static ByteBufAllocator ALLOC = new UnpooledByteBufAllocator(false);\n \n   @Mock ChannelHandlerContext ctx;\n+  @Mock Channel channel;\n   @Mock ChannelPromise promise;\n   @Mock EventExecutor executor;\n \n@@ -48,6 +50,7 @@ public void setUp() {\n     when(ctx.write(bufCaptor.capture(), any(ChannelPromise.class))).thenReturn(promise);\n     when(ctx.alloc()).thenReturn(ByteBufAllocator.DEFAULT);\n     when(ctx.executor()).thenReturn(executor);\n+    when(ctx.channel()).thenReturn(channel);\n   }\n \n   @Test"
+  },
+  {
+    "sha": "8d83f287d7af5fbf7c4ac06745bae92ead786b58",
+    "filename": "src/test/java/com/spotify/netty4/handler/codec/zmtp/benchmarks/CustomReqRepBenchmark.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/spotify/netty-zmtp/blob/392c5bef72a8698b6be30e6571c9cc3b6a9078be/src/test/java/com/spotify/netty4/handler/codec/zmtp/benchmarks/CustomReqRepBenchmark.java",
+    "raw_url": "https://github.com/spotify/netty-zmtp/raw/392c5bef72a8698b6be30e6571c9cc3b6a9078be/src/test/java/com/spotify/netty4/handler/codec/zmtp/benchmarks/CustomReqRepBenchmark.java",
+    "contents_url": "https://api.github.com/repos/spotify/netty-zmtp/contents/src/test/java/com/spotify/netty4/handler/codec/zmtp/benchmarks/CustomReqRepBenchmark.java?ref=392c5bef72a8698b6be30e6571c9cc3b6a9078be",
+    "patch": "@@ -37,6 +37,7 @@\n import java.util.List;\n import java.util.Map;\n import java.util.concurrent.Executor;\n+import java.util.concurrent.ForkJoinPool;\n \n import io.netty.bootstrap.Bootstrap;\n import io.netty.bootstrap.ServerBootstrap;\n@@ -54,7 +55,6 @@\n import io.netty.channel.nio.NioEventLoopGroup;\n import io.netty.channel.socket.nio.NioServerSocketChannel;\n import io.netty.channel.socket.nio.NioSocketChannel;\n-import io.netty.util.internal.chmv8.ForkJoinPool;\n \n import static com.spotify.netty4.handler.codec.zmtp.ZMTPSocketType.DEALER;\n import static com.spotify.netty4.handler.codec.zmtp.ZMTPSocketType.ROUTER;"
+  }
+]

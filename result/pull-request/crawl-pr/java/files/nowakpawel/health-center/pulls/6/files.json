@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "5b4ff90b57cdab7873f3c95d97b32b40cff9eb7b",
+    "filename": "src/main/java/pl/nowak/pawel/healthcenter/service/DoctorService.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 5,
+    "changes": 13,
+    "blob_url": "https://github.com/nowakpawel/health-center/blob/40872d02e152431274c7a22b76819ef2565bf8bd/src/main/java/pl/nowak/pawel/healthcenter/service/DoctorService.java",
+    "raw_url": "https://github.com/nowakpawel/health-center/raw/40872d02e152431274c7a22b76819ef2565bf8bd/src/main/java/pl/nowak/pawel/healthcenter/service/DoctorService.java",
+    "contents_url": "https://api.github.com/repos/nowakpawel/health-center/contents/src/main/java/pl/nowak/pawel/healthcenter/service/DoctorService.java?ref=40872d02e152431274c7a22b76819ef2565bf8bd",
+    "patch": "@@ -38,12 +38,11 @@ public DoctorModel create(DoctorModel doctorModel) throws DoctorNotFoundExceptio\n             throw new DoctorNotFoundException(\"Doctor is null!\");\n         }\n \n-        //TODO: implement DoctorMapper's methods\n         DoctorEntity doctorEntity = doctorMapper.from(doctorModel);\n         DoctorEntity createdDoctor = doctorRepository.save(doctorEntity);\n-        DoctorModel returneDoctor = doctorMapper.from(createdDoctor);\n+        DoctorModel returnedDoctor = doctorMapper.from(createdDoctor);\n \n-        return returneDoctor;\n+        return returnedDoctor;\n     }\n \n     public DoctorModel read(Long id) throws DoctorNotFoundException {\n@@ -53,8 +52,12 @@ public DoctorModel read(Long id) throws DoctorNotFoundException {\n     }\n \n     public DoctorModel update(Long id, DoctorModel doctorToUpdate) throws DoctorNotFoundException {\n-        DoctorEntity doctorEntity = doctorMapper.from(read(id));\n-        return null;\n+        DoctorEntity doctorEntity = doctorRepository.getOne(id);\n+        doctorEntity.setFirstName(doctorToUpdate.getFirstName());\n+        doctorEntity.setLastName(doctorToUpdate.getLastName());\n+        DoctorModel model = doctorMapper.from(doctorRepository.save(doctorEntity));\n+\n+        return model;\n     }\n \n     public void delete() {"
+  },
+  {
+    "sha": "e1fc1f51f42107dc6c8e8d345ce3940e4bfc16ab",
+    "filename": "src/test/java/pl/nowak/pawel/healthcenter/service/DoctorServiceTest.java",
+    "status": "added",
+    "additions": 64,
+    "deletions": 0,
+    "changes": 64,
+    "blob_url": "https://github.com/nowakpawel/health-center/blob/40872d02e152431274c7a22b76819ef2565bf8bd/src/test/java/pl/nowak/pawel/healthcenter/service/DoctorServiceTest.java",
+    "raw_url": "https://github.com/nowakpawel/health-center/raw/40872d02e152431274c7a22b76819ef2565bf8bd/src/test/java/pl/nowak/pawel/healthcenter/service/DoctorServiceTest.java",
+    "contents_url": "https://api.github.com/repos/nowakpawel/health-center/contents/src/test/java/pl/nowak/pawel/healthcenter/service/DoctorServiceTest.java?ref=40872d02e152431274c7a22b76819ef2565bf8bd",
+    "patch": "@@ -0,0 +1,64 @@\n+package pl.nowak.pawel.healthcenter.service;\n+\n+import org.aspectj.lang.annotation.Before;\n+import org.junit.jupiter.api.AfterEach;\n+import org.junit.jupiter.api.BeforeEach;\n+import org.junit.jupiter.api.Test;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.boot.test.context.SpringBootTest;\n+import pl.nowak.pawel.healthcenter.core.exception.DoctorNotFoundException;\n+import pl.nowak.pawel.healthcenter.repository.entity.DoctorEntity;\n+import pl.nowak.pawel.healthcenter.web.model.DoctorModel;\n+\n+import static org.junit.jupiter.api.Assertions.*;\n+\n+\n+class DoctorServiceTest {\n+    @Test\n+    void create() {\n+        //Given\n+        DoctorService doctorService = new DoctorService();\n+        DoctorModel doctorModel = new DoctorModel(1L, \"Pawel\", \"Nowak\");\n+\n+        //When\n+        try {\n+            doctorService.create(doctorModel);\n+        } catch (DoctorNotFoundException e) {\n+            e.printStackTrace();\n+        }\n+\n+        //Then\n+        try {\n+            assertNotNull(doctorService.read(1L), \"Repository.get() is null!\");\n+        } catch (DoctorNotFoundException e) {\n+            e.printStackTrace();\n+        }\n+        //TODO: create tests for exceptions\n+    }\n+\n+    @Test\n+    void update() {\n+        //Given\n+        DoctorService doctorService = new DoctorService();\n+        DoctorModel doctor = new DoctorModel(4L, \"Pawel\", \"Nowak\");\n+        DoctorModel updateDoctor = new DoctorModel(null, \"John\", \"Doe\");\n+\n+        try {\n+            doctorService.create(doctor);\n+        } catch (DoctorNotFoundException e) {\n+            e.printStackTrace();\n+        }\n+\n+        //When\n+        try {\n+            doctorService.update(4L, updateDoctor);\n+        } catch (DoctorNotFoundException e) {\n+            e.printStackTrace();\n+        }\n+        //TODO: create tests for exceptions\n+\n+        //Then\n+        assertEquals(doctor.getFirstName(), \"John\");\n+        assertEquals(doctor.getLastName(), \"Doe\");\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

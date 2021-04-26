@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "5477c089aaafc79a4b5ed1ef45acd17e69bcf272",
+    "filename": "src/main/java/com/bharatpe/projectalpha/projectalpha/controller/ExpenseLedgerController.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/ankit-bharatepe/project-alpha/blob/0d267125fa7459b5ddc0378db8beba2e828d1804/src/main/java/com/bharatpe/projectalpha/projectalpha/controller/ExpenseLedgerController.java",
+    "raw_url": "https://github.com/ankit-bharatepe/project-alpha/raw/0d267125fa7459b5ddc0378db8beba2e828d1804/src/main/java/com/bharatpe/projectalpha/projectalpha/controller/ExpenseLedgerController.java",
+    "contents_url": "https://api.github.com/repos/ankit-bharatepe/project-alpha/contents/src/main/java/com/bharatpe/projectalpha/projectalpha/controller/ExpenseLedgerController.java?ref=0d267125fa7459b5ddc0378db8beba2e828d1804",
+    "patch": "@@ -0,0 +1,28 @@\n+package com.bharatpe.projectalpha.projectalpha.controller;\n+\n+import com.bharatpe.projectalpha.projectalpha.entity.ExpenseLedger;\n+import com.bharatpe.projectalpha.projectalpha.manager.ExpenseLedgerManager;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.http.ResponseEntity;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RequestMethod;\n+import org.springframework.web.bind.annotation.RequestParam;\n+import org.springframework.web.bind.annotation.RestController;\n+\n+@RestController\n+public class ExpenseLedgerController {\n+\n+    @Autowired\n+    ExpenseLedgerManager expenseLedgerManager;\n+\n+    @RequestMapping(value = \"/merchant-expense-ledger\" , method = RequestMethod.GET)\n+    public ResponseEntity<Object> getMerchantExpense(@RequestParam(required = true) String merchantId){\n+        return expenseLedgerManager.getExpenseDetail(merchantId);\n+    }\n+\n+    @RequestMapping(value = \"/merchant-expense-ledger-detail\" , method = RequestMethod.GET)\n+    public ResponseEntity<Object> getDetail(@RequestParam(required = true) String merchantId ,@RequestParam(required = true) Long aggregatorId){\n+        return expenseLedgerManager.getDetail(merchantId,aggregatorId);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "33ea3010e6498b0b1474b4af0ddd500d5ef0b730",
+    "filename": "src/main/java/com/bharatpe/projectalpha/projectalpha/dao/ExpenseLedgerDao.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/ankit-bharatepe/project-alpha/blob/0d267125fa7459b5ddc0378db8beba2e828d1804/src/main/java/com/bharatpe/projectalpha/projectalpha/dao/ExpenseLedgerDao.java",
+    "raw_url": "https://github.com/ankit-bharatepe/project-alpha/raw/0d267125fa7459b5ddc0378db8beba2e828d1804/src/main/java/com/bharatpe/projectalpha/projectalpha/dao/ExpenseLedgerDao.java",
+    "contents_url": "https://api.github.com/repos/ankit-bharatepe/project-alpha/contents/src/main/java/com/bharatpe/projectalpha/projectalpha/dao/ExpenseLedgerDao.java?ref=0d267125fa7459b5ddc0378db8beba2e828d1804",
+    "patch": "@@ -1,13 +1,17 @@\n package com.bharatpe.projectalpha.projectalpha.dao;\n \n import com.bharatpe.projectalpha.projectalpha.entity.ExpenseLedger;\n+import org.springframework.data.jpa.repository.Query;\n import org.springframework.data.repository.CrudRepository;\n+import org.springframework.stereotype.Repository;\n \n import java.util.List;\n \n+@Repository\n public interface ExpenseLedgerDao extends CrudRepository<ExpenseLedger, Long> {\n \n-    List<ExpenseLedger> findBYMerchantId(Long merchantId);\n+    @Query(nativeQuery = true , value = \"select * from expense_ledger where merchant_id=:merchantId\")\n+    List<ExpenseLedger> findBYMerchantId(String merchantId);\n \n-    List<ExpenseLedger> findByMerchantIdAndMerchantExpenseAggId(Long merchantId, Long merchantExpenseAggId);\n+    List<ExpenseLedger> findByMerchantIdAndMerchantExpenseAggId(String merchantId, Long merchantExpenseAggId);\n }"
+  },
+  {
+    "sha": "7d17bfa1b5c5967b3828edd1b5d84840c03977b5",
+    "filename": "src/main/java/com/bharatpe/projectalpha/projectalpha/entity/ExpenseLedger.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 10,
+    "changes": 13,
+    "blob_url": "https://github.com/ankit-bharatepe/project-alpha/blob/0d267125fa7459b5ddc0378db8beba2e828d1804/src/main/java/com/bharatpe/projectalpha/projectalpha/entity/ExpenseLedger.java",
+    "raw_url": "https://github.com/ankit-bharatepe/project-alpha/raw/0d267125fa7459b5ddc0378db8beba2e828d1804/src/main/java/com/bharatpe/projectalpha/projectalpha/entity/ExpenseLedger.java",
+    "contents_url": "https://api.github.com/repos/ankit-bharatepe/project-alpha/contents/src/main/java/com/bharatpe/projectalpha/projectalpha/entity/ExpenseLedger.java?ref=0d267125fa7459b5ddc0378db8beba2e828d1804",
+    "patch": "@@ -9,7 +9,7 @@\n public class ExpenseLedger  extends BaseEntity {\n \n     @Column(name = \"merchant_id\")\n-    private Long merchantId;\n+    private String merchantId;\n \n     @Column(name = \"txn_id\")\n     private String txnId;\n@@ -23,19 +23,12 @@\n     @Column(name = \"merchant_expense_agg_id\")\n     private Long merchantExpenseAggId;\n \n-    public Long getId() {\n-        return id;\n-    }\n-\n-    public void setId(Long id) {\n-        this.id = id;\n-    }\n \n-    public Long getMerchantId() {\n+    public String getMerchantId() {\n         return merchantId;\n     }\n \n-    public void setMerchantId(Long merchantId) {\n+    public void setMerchantId(String merchantId) {\n         this.merchantId = merchantId;\n     }\n "
+  },
+  {
+    "sha": "1e027a7dd39067695eaab4f5de238fbb4e911859",
+    "filename": "src/main/java/com/bharatpe/projectalpha/projectalpha/manager/ExpenseLedgerManager.java",
+    "status": "added",
+    "additions": 59,
+    "deletions": 0,
+    "changes": 59,
+    "blob_url": "https://github.com/ankit-bharatepe/project-alpha/blob/0d267125fa7459b5ddc0378db8beba2e828d1804/src/main/java/com/bharatpe/projectalpha/projectalpha/manager/ExpenseLedgerManager.java",
+    "raw_url": "https://github.com/ankit-bharatepe/project-alpha/raw/0d267125fa7459b5ddc0378db8beba2e828d1804/src/main/java/com/bharatpe/projectalpha/projectalpha/manager/ExpenseLedgerManager.java",
+    "contents_url": "https://api.github.com/repos/ankit-bharatepe/project-alpha/contents/src/main/java/com/bharatpe/projectalpha/projectalpha/manager/ExpenseLedgerManager.java?ref=0d267125fa7459b5ddc0378db8beba2e828d1804",
+    "patch": "@@ -0,0 +1,59 @@\n+package com.bharatpe.projectalpha.projectalpha.manager;\n+\n+import com.bharatpe.projectalpha.projectalpha.dao.ExpenseLedgerDao;\n+import com.bharatpe.projectalpha.projectalpha.dao.MerchantExpensesAggregatorDao;\n+import com.bharatpe.projectalpha.projectalpha.entity.ExpenseLedger;\n+import com.bharatpe.projectalpha.projectalpha.entity.MerchantExpensesAggregator;\n+import com.fasterxml.jackson.databind.ObjectMapper;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.http.HttpStatus;\n+import org.springframework.http.ResponseEntity;\n+import org.springframework.stereotype.Component;\n+\n+import java.util.ArrayList;\n+import java.util.HashMap;\n+import java.util.List;\n+import java.util.Map;\n+\n+@Component\n+public class ExpenseLedgerManager {\n+\n+    Logger logger = LoggerFactory.getLogger(ExpenseManager.class);\n+    @Autowired\n+    ExpenseLedgerDao expenseLedgerDao;\n+\n+    @Autowired\n+    ObjectMapper mapper;\n+\n+    @Autowired\n+    MerchantExpensesAggregatorDao merchantExpensesAggregatorDao;\n+\n+    public ResponseEntity<Object> getExpenseDetail(String merchantId){\n+        try {\n+            List<ExpenseLedger> expenseLedgers = expenseLedgerDao.findBYMerchantId(merchantId);\n+            if (expenseLedgers.size()==0)\n+                return new ResponseEntity<>(\"not found\",HttpStatus.BAD_REQUEST);\n+\n+            return new ResponseEntity<>(mapper.writeValueAsString(expenseLedgers) , HttpStatus.OK);\n+        }catch (Exception e){\n+            logger.info(e.getMessage());\n+        }\n+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);\n+    }\n+\n+    public ResponseEntity<Object> getDetail(String MerchantId , Long expenseAggId ){\n+        try {\n+            List<ExpenseLedger> expenseLedger = expenseLedgerDao.findByMerchantIdAndMerchantExpenseAggId(MerchantId,expenseAggId);\n+            if (expenseLedger.size()==0)\n+                return new ResponseEntity<>(\"not found\",HttpStatus.BAD_REQUEST);\n+\n+            return new ResponseEntity<>(mapper.writeValueAsString(expenseLedger),HttpStatus.OK);\n+\n+        }catch (Exception e){\n+            logger.info(e.getMessage());\n+        }\n+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);\n+    }\n+}"
+  }
+]

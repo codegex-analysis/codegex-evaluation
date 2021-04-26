@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "8ea3459162c82be8316c083bd80b110eb93a37f5",
+    "filename": "blogPessoal/src/main/java/org/generation/blogPessoal/controller/PostagemController.java",
+    "status": "added",
+    "additions": 61,
+    "deletions": 0,
+    "changes": 61,
+    "blob_url": "https://github.com/MariaNazar/blogPessoal/blob/8f926dad25ee4d7303c16875ce088ee73ace650d/blogPessoal/src/main/java/org/generation/blogPessoal/controller/PostagemController.java",
+    "raw_url": "https://github.com/MariaNazar/blogPessoal/raw/8f926dad25ee4d7303c16875ce088ee73ace650d/blogPessoal/src/main/java/org/generation/blogPessoal/controller/PostagemController.java",
+    "contents_url": "https://api.github.com/repos/MariaNazar/blogPessoal/contents/blogPessoal/src/main/java/org/generation/blogPessoal/controller/PostagemController.java?ref=8f926dad25ee4d7303c16875ce088ee73ace650d",
+    "patch": "@@ -0,0 +1,61 @@\n+package org.generation.blogPessoal.controller;\n+\n+import java.util.List;\n+\n+import org.generation.blogPessoal.model.Postagem;\n+import org.generation.blogPessoal.repository.PostagemRepository;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.http.HttpStatus;\n+import org.springframework.http.ResponseEntity;\n+import org.springframework.web.bind.annotation.CrossOrigin;\n+import org.springframework.web.bind.annotation.DeleteMapping;\n+import org.springframework.web.bind.annotation.GetMapping;\n+import org.springframework.web.bind.annotation.PathVariable;\n+import org.springframework.web.bind.annotation.PostMapping;\n+import org.springframework.web.bind.annotation.PutMapping;\n+import org.springframework.web.bind.annotation.RequestBody;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RestController;\n+\n+@RestController\n+@RequestMapping (\"/postagens\")\n+@CrossOrigin (\"*\")\n+\n+public class PostagemController {\n+\n+\t@Autowired\n+\tprivate PostagemRepository repository;\n+ \n+\t@GetMapping\n+    public ResponseEntity<List<Postagem>> GetAll(){ // pega tudo que tem no DB\n+        return ResponseEntity.ok(repository.findAll());\n+    }\n+\n+    @GetMapping(\"/{id}\")\n+    public ResponseEntity<Postagem> GetById(@PathVariable long id){ // pega tudo atraves de id(a partir da chave principal)\n+        return repository.findById(id)\n+                .map(resp -> ResponseEntity.ok(resp))\n+                .orElse(ResponseEntity.notFound().build());\n+    }\n+\n+    @GetMapping(\"/titulo/{titulo}\")\n+    public ResponseEntity<List<Postagem>> GetByTitulo(@PathVariable String titulo){ // mesmo caso que id, mas pelo titulo, tipo like Mysql\n+        return ResponseEntity.ok(repository.findAllByTituloContainingIgnoreCase(titulo));\n+    }\n+\n+    @PostMapping\n+    public ResponseEntity<Postagem> post (@RequestBody Postagem postagem){ // POST INICIAL\n+        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(postagem));\n+    }\n+\n+    @PutMapping\n+    public ResponseEntity<Postagem> put (@RequestBody Postagem postagem){ // PRA ATUALIZAR UM POST INICIAL\n+        return ResponseEntity.status(HttpStatus.OK).body(repository.save(postagem));\n+    }\n+\n+    @DeleteMapping(\"/{id}\")\n+    public void delete (@PathVariable long id){ //Deletar atraves de um id (apaga tudo de uma unica linha)\n+        repository.deleteById(id);;\n+    } \n+}"
+  },
+  {
+    "sha": "2a9d939312e63a42b8b8f8c4b82bf82302b2e0a2",
+    "filename": "blogPessoal/src/main/java/org/generation/blogPessoal/model/Postagem.java",
+    "status": "added",
+    "additions": 62,
+    "deletions": 0,
+    "changes": 62,
+    "blob_url": "https://github.com/MariaNazar/blogPessoal/blob/8f926dad25ee4d7303c16875ce088ee73ace650d/blogPessoal/src/main/java/org/generation/blogPessoal/model/Postagem.java",
+    "raw_url": "https://github.com/MariaNazar/blogPessoal/raw/8f926dad25ee4d7303c16875ce088ee73ace650d/blogPessoal/src/main/java/org/generation/blogPessoal/model/Postagem.java",
+    "contents_url": "https://api.github.com/repos/MariaNazar/blogPessoal/contents/blogPessoal/src/main/java/org/generation/blogPessoal/model/Postagem.java?ref=8f926dad25ee4d7303c16875ce088ee73ace650d",
+    "patch": "@@ -0,0 +1,62 @@\n+package org.generation.blogPessoal.model;\n+\n+import java.util.Date;\n+\n+import javax.persistence.Entity;\n+import javax.persistence.GeneratedValue;\n+import javax.persistence.GenerationType;\n+import javax.persistence.Id;\n+import javax.persistence.Table;\n+import javax.persistence.Temporal;\n+import javax.persistence.TemporalType;\n+import javax.validation.constraints.NotNull;\n+import javax.validation.constraints.Size;\n+import javax.xml.crypto.Data;\n+\n+@Entity\n+@Table(name= \"Postagem\")\n+public class Postagem {\n+    \n+\t@Id\n+\t@GeneratedValue(strategy= GenerationType.IDENTITY)//esse atributo vira uma chave primaria\n+\tprivate long id; \n+\t\n+\t@NotNull\n+\t@Size(min=5, max=100)\n+\tprivate String titulo;\n+\t\n+\t@NotNull\n+\t@Size(min=10, max=500)\n+\tprivate String texto;\n+\t\n+\t@Temporal(TemporalType.TIMESTAMP)\n+\tprivate Date date= new java.sql.Date(System.currentTimeMillis());\n+\t\n+\t\n+\t\n+\tpublic long getId() {\n+\t\treturn id;\n+\t}\n+\tpublic void setId(long id) {\n+\t\tthis.id = id;\n+\t}\n+\tpublic String getTitulo() {\n+\t\treturn titulo;\n+\t}\n+\tpublic void setTitulo(String titulo) {\n+\t\tthis.titulo = titulo;\n+\t}\n+\tpublic String getTexto() {\n+\t\treturn texto;\n+\t}\n+\tpublic void setTexto(String texto) {\n+\t\tthis.texto = texto;\n+\t}\n+\tpublic Date getDate() {\n+\t\treturn date;\n+\t}\n+\tpublic void setDate(Date date) {\n+\t\tthis.date = date;\n+\t}\n+\n+}"
+  },
+  {
+    "sha": "195e75056de8a42a059ba8f7fedaed6a8835faa8",
+    "filename": "blogPessoal/src/main/java/org/generation/blogPessoal/model/UserLogin.java",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/MariaNazar/blogPessoal/blob/8f926dad25ee4d7303c16875ce088ee73ace650d/blogPessoal/src/main/java/org/generation/blogPessoal/model/UserLogin.java",
+    "raw_url": "https://github.com/MariaNazar/blogPessoal/raw/8f926dad25ee4d7303c16875ce088ee73ace650d/blogPessoal/src/main/java/org/generation/blogPessoal/model/UserLogin.java",
+    "contents_url": "https://api.github.com/repos/MariaNazar/blogPessoal/contents/blogPessoal/src/main/java/org/generation/blogPessoal/model/UserLogin.java?ref=8f926dad25ee4d7303c16875ce088ee73ace650d",
+    "patch": "@@ -0,0 +1,45 @@\n+package org.generation.blogPessoal.model;\n+\n+public class UserLogin {\n+\n+\t private String nome;\n+\t \n+\t private String usuario;\n+\t \n+\t private String senha;\n+\t \n+\t private String token;\n+\n+\tpublic String getNome() {\n+\t\treturn nome;\n+\t}\n+\n+\tpublic void setNome(String nome) {\n+\t\tthis.nome = nome;\n+\t}\n+\n+\tpublic String getUsuario() {\n+\t\treturn usuario;\n+\t}\n+\n+\tpublic void setUsuario(String usuario) {\n+\t\tthis.usuario = usuario;\n+\t}\n+\n+\tpublic String getSenha() {\n+\t\treturn senha;\n+\t}\n+\n+\tpublic void setSenha(String senha) {\n+\t\tthis.senha = senha;\n+\t}\n+\n+\tpublic String getToken() {\n+\t\treturn token;\n+\t}\n+\n+\tpublic void setToken(String token) {\n+\t\tthis.token = token;\n+\t}\n+\t \n+}"
+  },
+  {
+    "sha": "12933132cb587797de0d80ebe1ca38d2db6e9956",
+    "filename": "blogPessoal/src/main/java/org/generation/blogPessoal/model/Usuario.java",
+    "status": "added",
+    "additions": 65,
+    "deletions": 0,
+    "changes": 65,
+    "blob_url": "https://github.com/MariaNazar/blogPessoal/blob/8f926dad25ee4d7303c16875ce088ee73ace650d/blogPessoal/src/main/java/org/generation/blogPessoal/model/Usuario.java",
+    "raw_url": "https://github.com/MariaNazar/blogPessoal/raw/8f926dad25ee4d7303c16875ce088ee73ace650d/blogPessoal/src/main/java/org/generation/blogPessoal/model/Usuario.java",
+    "contents_url": "https://api.github.com/repos/MariaNazar/blogPessoal/contents/blogPessoal/src/main/java/org/generation/blogPessoal/model/Usuario.java?ref=8f926dad25ee4d7303c16875ce088ee73ace650d",
+    "patch": "@@ -0,0 +1,65 @@\n+package org.generation.blogPessoal.model;\n+\n+import javax.persistence.Entity;\n+import javax.persistence.GeneratedValue;\n+import javax.persistence.GenerationType;\n+import javax.persistence.Id;\n+import javax.persistence.Table;\n+import javax.validation.constraints.Size;\n+\n+import org.springframework.lang.NonNull;\n+\n+@Entity\n+@Table(name= \"tb_usuario\")\n+public class Usuario {\n+     \n+\t@Id\n+\t@GeneratedValue(strategy= GenerationType.IDENTITY)\n+\tprivate long id; \n+\t\n+\t@NonNull\n+\t@Size(min=2, max=100)\n+\tprivate String nome;\n+\t\n+\t@NonNull\n+\t@Size(min=5,max=100)\n+\tprivate String usuario;\n+\t\n+\t@NonNull\n+\t@Size(min=5,max=100)\n+\tprivate String senha;\n+\t\n+\t\n+\tpublic long getId() {\n+\t\treturn id;\n+\t}\n+\n+\tpublic void setId(long id) {\n+\t\tthis.id = id;\n+\t}\n+\n+\tpublic String getNome() {\n+\t\treturn nome;\n+\t}\n+\n+\tpublic void setNome(String nome) {\n+\t\tthis.nome = nome;\n+\t}\n+\n+\tpublic String getUsuario() {\n+\t\treturn usuario;\n+\t}\n+\n+\tpublic void setUsuario(String usuario) {\n+\t\tthis.usuario = usuario;\n+\t}\n+\n+\tpublic String getSenha() {\n+\t\treturn senha;\n+\t}\n+\n+\tpublic void setSenha(String senha) {\n+\t\tthis.senha = senha;\n+\t}\n+\n+}"
+  }
+]

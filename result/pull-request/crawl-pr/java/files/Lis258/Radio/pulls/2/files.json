@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "8f7e8aa1ac9ecbddfce6fb97e149ff4fb6f6599e",
+    "filename": "lombok.config",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/Lis258/Radio/blob/06c2aa41944d10b571942028c06f5d7be13b6f70/lombok.config",
+    "raw_url": "https://github.com/Lis258/Radio/raw/06c2aa41944d10b571942028c06f5d7be13b6f70/lombok.config",
+    "contents_url": "https://api.github.com/repos/Lis258/Radio/contents/lombok.config?ref=06c2aa41944d10b571942028c06f5d7be13b6f70",
+    "patch": "@@ -0,0 +1 @@\n+lombok.addLombokGeneratedAnnotation = true\n\\ No newline at end of file"
+  },
+  {
+    "sha": "c802b84b6933b4a34743e3501d1e613c92d44a87",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/Lis258/Radio/blob/06c2aa41944d10b571942028c06f5d7be13b6f70/pom.xml",
+    "raw_url": "https://github.com/Lis258/Radio/raw/06c2aa41944d10b571942028c06f5d7be13b6f70/pom.xml",
+    "contents_url": "https://api.github.com/repos/Lis258/Radio/contents/pom.xml?ref=06c2aa41944d10b571942028c06f5d7be13b6f70",
+    "patch": "@@ -21,6 +21,12 @@\n             <version>5.4.2</version>\n             <scope>test</scope>\n         </dependency>\n+        <dependency>\n+            <groupId>org.projectlombok</groupId>\n+            <artifactId>lombok</artifactId>\n+            <version>1.18.16</version>\n+            <scope>provided</scope>\n+        </dependency>\n     </dependencies>\n \n     <build>"
+  },
+  {
+    "sha": "25ea5bb4e9cb9be5e5c2b3158de9b238d832ab4a",
+    "filename": "src/main/java/ru/netology/domain/Radio.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 4,
+    "changes": 15,
+    "blob_url": "https://github.com/Lis258/Radio/blob/06c2aa41944d10b571942028c06f5d7be13b6f70/src/main/java/ru/netology/domain/Radio.java",
+    "raw_url": "https://github.com/Lis258/Radio/raw/06c2aa41944d10b571942028c06f5d7be13b6f70/src/main/java/ru/netology/domain/Radio.java",
+    "contents_url": "https://api.github.com/repos/Lis258/Radio/contents/src/main/java/ru/netology/domain/Radio.java?ref=06c2aa41944d10b571942028c06f5d7be13b6f70",
+    "patch": "@@ -1,12 +1,19 @@\n package ru.netology.domain;\n \n+import lombok.AllArgsConstructor;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+\n+@NoArgsConstructor\n+@AllArgsConstructor\n+@Data\n public class Radio {\n     private int currentRadioStation;\n-    private int firstRadioStation = 0;\n-    private int endRadioStation = 9;\n+    private int firstRadioStation;\n+    private int endRadioStation;\n     private int currentVolume;\n-    private int minVolume = 0;\n-    private int maxVolume = 10;\n+    private int minVolume;\n+    private int maxVolume;\n \n     public int getCurrentRadioStation() {\n         return currentRadioStation;"
+  },
+  {
+    "sha": "8cc7dbae827ea1273ffbd71c19f5be48ddf9a0ba",
+    "filename": "src/test/java/ru/netology/domain/RadioTest.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 8,
+    "changes": 16,
+    "blob_url": "https://github.com/Lis258/Radio/blob/06c2aa41944d10b571942028c06f5d7be13b6f70/src/test/java/ru/netology/domain/RadioTest.java",
+    "raw_url": "https://github.com/Lis258/Radio/raw/06c2aa41944d10b571942028c06f5d7be13b6f70/src/test/java/ru/netology/domain/RadioTest.java",
+    "contents_url": "https://api.github.com/repos/Lis258/Radio/contents/src/test/java/ru/netology/domain/RadioTest.java?ref=06c2aa41944d10b571942028c06f5d7be13b6f70",
+    "patch": "@@ -6,19 +6,19 @@\n \n public class RadioTest {\n \n-    Radio radio = new Radio();\n+    Radio radio = new Radio(0, 0, 10, 0, 0, 100);\n \n     @Test\n     public void pressNextStationIfCurrentMax() {\n-        int currentRadioStation = 9;\n+        int currentRadioStation = 10;\n         radio.setCurrentRadioStation(currentRadioStation);\n         radio.nextRadioStation();\n         assertEquals(0, radio.getCurrentRadioStation());\n     }\n \n     @Test\n     public void pressNextStationIfCurrentOverMax() {\n-        int currentRadioStation = 10;\n+        int currentRadioStation = 11;\n         radio.setCurrentRadioStation(currentRadioStation);\n         radio.nextRadioStation();\n         assertEquals(1, radio.getCurrentRadioStation());\n@@ -29,7 +29,7 @@ public void pressPrevStationIfCurrentUnderMin() {\n         int currentRadioStation = -1;\n         radio.setCurrentRadioStation(currentRadioStation);\n         radio.prevRadioStation();\n-        assertEquals(9, radio.getCurrentRadioStation());\n+        assertEquals(10, radio.getCurrentRadioStation());\n     }\n \n     @Test\n@@ -51,7 +51,7 @@ public void setUpStationValidValue() {\n \n     @Test\n     public void setUpStationOverMax() {\n-        int radioStation = 10;\n+        int radioStation = 11;\n         int currentRadioStation = 5;\n         radio.setCurrentRadioStation(currentRadioStation);\n         radio.putRadioStation(radioStation);\n@@ -69,15 +69,15 @@ public void setUpStationUnderMin() {\n \n     @Test\n     public void makeLouderIfCurrentMax() {\n-        int currentVolume = 10;\n+        int currentVolume = 100;\n         radio.setCurrentVolume(currentVolume);\n         radio.plusVolume();\n-        assertEquals(10, radio.getCurrentVolume());\n+        assertEquals(100, radio.getCurrentVolume());\n     }\n \n     @Test\n     public void makeLouderIfCurrentOverMax() {\n-        int currentVolume = 15;\n+        int currentVolume = 105;\n         radio.setCurrentVolume(currentVolume);\n         radio.plusVolume();\n         assertEquals(1, radio.getCurrentVolume());"
+  }
+]

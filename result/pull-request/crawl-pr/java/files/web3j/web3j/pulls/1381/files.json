@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "4e2f126813e27936b971931725f7ff9f93e04f6e",
+    "filename": "codegen/src/main/java/org/web3j/codegen/SolidityFunctionWrapper.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/web3j/web3j/blob/8bdd4036ddfc4ca236cc21bba90f05793354ef0f/codegen/src/main/java/org/web3j/codegen/SolidityFunctionWrapper.java",
+    "raw_url": "https://github.com/web3j/web3j/raw/8bdd4036ddfc4ca236cc21bba90f05793354ef0f/codegen/src/main/java/org/web3j/codegen/SolidityFunctionWrapper.java",
+    "contents_url": "https://api.github.com/repos/web3j/web3j/contents/codegen/src/main/java/org/web3j/codegen/SolidityFunctionWrapper.java?ref=8bdd4036ddfc4ca236cc21bba90f05793354ef0f",
+    "patch": "@@ -476,6 +476,21 @@ private String buildEventDefinitionName(String eventName) {\n         return structs;\n     }\n \n+    private NamedType normalizeNamedType(NamedType namedType) {\n+        if (namedType.getType().endsWith(\"[]\") && namedType.getInternalType().endsWith(\"[]\")) {\n+            return new NamedType(\n+                    namedType.getName(),\n+                    namedType.getType().substring(0, namedType.getType().length() - 2),\n+                    namedType.getComponents(),\n+                    namedType\n+                            .getInternalType()\n+                            .substring(0, namedType.getInternalType().length() - 2),\n+                    namedType.isIndexed());\n+        } else {\n+            return namedType;\n+        }\n+    }\n+\n     @NotNull\n     private List<AbiDefinition.NamedType> extractStructs(\n             final List<AbiDefinition> functionDefinitions) {\n@@ -487,6 +502,7 @@ private String buildEventDefinitionName(String eventName) {\n                             parameters.addAll(definition.getInputs());\n                             parameters.addAll(definition.getOutputs());\n                             return parameters.stream()\n+                                    .map(this::normalizeNamedType)\n                                     .filter(namedType -> namedType.getType().equals(\"tuple\"));\n                         })\n                 .forEach("
+  },
+  {
+    "sha": "d2c1ac5e89675d72dddec73f7ea1d49f991ecc70",
+    "filename": "codegen/src/test/java/org/web3j/codegen/SolidityFunctionWrapperGeneratorTest.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/web3j/web3j/blob/8bdd4036ddfc4ca236cc21bba90f05793354ef0f/codegen/src/test/java/org/web3j/codegen/SolidityFunctionWrapperGeneratorTest.java",
+    "raw_url": "https://github.com/web3j/web3j/raw/8bdd4036ddfc4ca236cc21bba90f05793354ef0f/codegen/src/test/java/org/web3j/codegen/SolidityFunctionWrapperGeneratorTest.java",
+    "contents_url": "https://api.github.com/repos/web3j/web3j/contents/codegen/src/test/java/org/web3j/codegen/SolidityFunctionWrapperGeneratorTest.java?ref=8bdd4036ddfc4ca236cc21bba90f05793354ef0f",
+    "patch": "@@ -119,6 +119,11 @@ public void testComplexStorage() throws Exception {\n         testCodeGenerationSolidityTypes(\"complexstorage\", \"ComplexStorage\");\n     }\n \n+    @Test\n+    public void testStructOnlyInArray() throws Exception {\n+        testCodeGeneration(\"onlyinarraystruct\", \"OnlyInArrayStruct\", JAVA_TYPES_ARG, false);\n+    }\n+\n     @Test\n     public void testDuplicateField() throws Exception {\n         PrintStream console = System.out;"
+  },
+  {
+    "sha": "909118c0e7a7c1759b04631db61babbc9ada01af",
+    "filename": "codegen/src/test/resources/solidity/onlyinarraystruct/build/OnlyInArrayStruct.abi",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/web3j/web3j/blob/8bdd4036ddfc4ca236cc21bba90f05793354ef0f/codegen/src/test/resources/solidity/onlyinarraystruct/build/OnlyInArrayStruct.abi",
+    "raw_url": "https://github.com/web3j/web3j/raw/8bdd4036ddfc4ca236cc21bba90f05793354ef0f/codegen/src/test/resources/solidity/onlyinarraystruct/build/OnlyInArrayStruct.abi",
+    "contents_url": "https://api.github.com/repos/web3j/web3j/contents/codegen/src/test/resources/solidity/onlyinarraystruct/build/OnlyInArrayStruct.abi?ref=8bdd4036ddfc4ca236cc21bba90f05793354ef0f",
+    "patch": "@@ -0,0 +1 @@\n+[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"getFoo\",\"outputs\":[{\"components\":[{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"internalType\":\"struct ArrayWithStruct.Foo[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"string\",\"name\":\"id\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"internalType\":\"struct ArrayWithStruct.Foo[]\",\"name\":\"foo\",\"type\":\"tuple[]\"}],\"name\":\"setFoo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]\n\\ No newline at end of file"
+  }
+]

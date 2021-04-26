@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "b6721d8cc9b0ddaed8385988d34e73c28ff6a8c1",
+    "filename": "pgjdbc/src/main/java/org/postgresql/jdbc/PgResultSet.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/pgjdbc/pgjdbc/blob/553cf2e0753f1be5a1a5ccf3883354c6d238465d/pgjdbc/src/main/java/org/postgresql/jdbc/PgResultSet.java",
+    "raw_url": "https://github.com/pgjdbc/pgjdbc/raw/553cf2e0753f1be5a1a5ccf3883354c6d238465d/pgjdbc/src/main/java/org/postgresql/jdbc/PgResultSet.java",
+    "contents_url": "https://api.github.com/repos/pgjdbc/pgjdbc/contents/pgjdbc/src/main/java/org/postgresql/jdbc/PgResultSet.java?ref=553cf2e0753f1be5a1a5ccf3883354c6d238465d",
+    "patch": "@@ -1667,7 +1667,7 @@ boolean isUpdateable() throws SQLException {\n     /*\n     it is only updatable if the primary keys are available in the resultset\n      */\n-    updateable = (i == numPKcolumns);\n+    updateable = (i == numPKcolumns) && (numPKcolumns > 0);\n \n     connection.getLogger().log(Level.FINE, \"checking primary key {0}\", updateable);\n "
+  },
+  {
+    "sha": "5dbbc946263951fd80c3854d4e53a0917b9b1754",
+    "filename": "pgjdbc/src/test/java/org/postgresql/test/jdbc2/UpdateableResultTest.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/pgjdbc/pgjdbc/blob/553cf2e0753f1be5a1a5ccf3883354c6d238465d/pgjdbc/src/test/java/org/postgresql/test/jdbc2/UpdateableResultTest.java",
+    "raw_url": "https://github.com/pgjdbc/pgjdbc/raw/553cf2e0753f1be5a1a5ccf3883354c6d238465d/pgjdbc/src/test/java/org/postgresql/test/jdbc2/UpdateableResultTest.java",
+    "contents_url": "https://api.github.com/repos/pgjdbc/pgjdbc/contents/pgjdbc/src/test/java/org/postgresql/test/jdbc2/UpdateableResultTest.java?ref=553cf2e0753f1be5a1a5ccf3883354c6d238465d",
+    "patch": "@@ -46,6 +46,7 @@ public void setUp() throws Exception {\n     TestUtil.execute( \"alter table compositepktable add primary key ( gen_id, dec_id )\", con);\n     TestUtil.createTable(con, \"stream\", \"id int primary key, asi text, chr text, bin bytea\");\n     TestUtil.createTable(con, \"multicol\", \"id1 int not null, id2 int not null, val text\");\n+    TestUtil.createTable(con, \"nopkmulticol\", \"id1 int not null, id2 int not null, val text\");\n     TestUtil.createTable(con, \"booltable\", \"id int not null primary key, b boolean default false\");\n     TestUtil.execute( \"insert into booltable (id) values (1)\", con);\n \n@@ -65,6 +66,7 @@ public void tearDown() throws SQLException {\n     TestUtil.dropTable(con, \"serialtable\");\n     TestUtil.dropTable(con, \"compositepktable\");\n     TestUtil.dropTable(con, \"stream\");\n+    TestUtil.dropTable(con, \"nopkmulticol\");\n     TestUtil.dropTable(con, \"booltable\");\n     super.tearDown();\n   }\n@@ -594,6 +596,23 @@ public void testMultiColumnUpdateWithoutAllColumns() throws Exception {\n     }\n   }\n \n+  @Test\n+  public void testMultiColumnUpdateWithoutPrimaryKey() throws Exception {\n+    Statement st =\n+        con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);\n+    ResultSet rs = st.executeQuery(\"select * from nopkmulticol\");\n+    try {\n+      rs.moveToInsertRow();\n+      fail(\"Move to insert row succeeded. It should not\");\n+    } catch (SQLException sqle) {\n+      // Ensure we're reporting that the RS is not updatable.\n+      assertEquals(\"24000\", sqle.getSQLState());\n+    } finally {\n+      TestUtil.closeQuietly(rs);\n+      TestUtil.closeQuietly(st);\n+    }\n+  }\n+\n   @Test\n   public void testMultiColumnUpdate() throws Exception {\n     Statement st ="
+  }
+]

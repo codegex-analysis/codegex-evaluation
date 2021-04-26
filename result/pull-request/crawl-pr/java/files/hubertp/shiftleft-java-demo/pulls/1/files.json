@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "79695c9704c945cb2c5d68018ebd666d203a3727",
+    "filename": ".github/workflows/shiftleft.yml",
+    "status": "added",
+    "additions": 59,
+    "deletions": 0,
+    "changes": 59,
+    "blob_url": "https://github.com/hubertp/shiftleft-java-demo/blob/bfee4b274172d8a869c6eb2f9ee91055010d9ef8/.github/workflows/shiftleft.yml",
+    "raw_url": "https://github.com/hubertp/shiftleft-java-demo/raw/bfee4b274172d8a869c6eb2f9ee91055010d9ef8/.github/workflows/shiftleft.yml",
+    "contents_url": "https://api.github.com/repos/hubertp/shiftleft-java-demo/contents/.github/workflows/shiftleft.yml?ref=bfee4b274172d8a869c6eb2f9ee91055010d9ef8",
+    "patch": "@@ -0,0 +1,59 @@\n+---\n+# This workflow integrates ShiftLeft NG SAST with GitHub\n+# Visit https://docs.shiftleft.io for help\n+name: ShiftLeft\n+\n+on:\n+  pull_request:\n+  workflow_dispatch:\n+\n+jobs:\n+  NextGen-Static-Analysis:\n+    runs-on: ubuntu-latest\n+    steps:\n+    - uses: actions/checkout@v2\n+    # We are building this application with Java 11\n+    - name: Setup Java JDK\n+      uses: actions/setup-java@v1.4.3\n+      with:\n+        java-version: 11.0.x\n+    - name: Package with maven\n+      run: mvn compile package\n+    - name: Download ShiftLeft CLI\n+      run: |\n+        curl https://cdn.shiftleft.io/download/sl > ${GITHUB_WORKSPACE}/sl && chmod a+rx ${GITHUB_WORKSPACE}/sl\n+    # ShiftLeft requires Java 1.8. Post the package step override the version\n+    - name: Setup Java JDK\n+      uses: actions/setup-java@v1.4.3\n+      with:\n+        java-version: 1.8\n+    - name: Extract branch name\n+      shell: bash\n+      run: echo \"##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})\"\n+      id: extract_branch\n+    - name: NextGen Static Analysis\n+      run: ${GITHUB_WORKSPACE}/sl analyze --wait --app shiftleft-java-demo --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --vcs-prefix-correction \"io/shiftleft=src/main/java/\" --java --cpg target/hello-shiftleft-0.0.1.jar\n+      env:\n+        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}\n+        \n+  Build-Rules: \n+    runs-on: ubuntu-latest\n+    needs: NextGen-Static-Analysis\n+    steps:\n+    - uses: actions/checkout@v2\n+    - name: Download ShiftLeft CLI\n+      run: |\n+        curl https://cdn.shiftleft.io/download/sl > ${GITHUB_WORKSPACE}/sl && chmod a+rx ${GITHUB_WORKSPACE}/sl\n+    - name: Validate Build Rules\n+      run: |\n+        ${GITHUB_WORKSPACE}/sl check-analysis --app shiftleft-java-demo \\\n+            --branch \"${{ github.head_ref || steps.extract_branch.outputs.branch }}\" \\\n+            --report \\\n+            --github-pr-number=${{github.event.number}} \\\n+            --github-pr-user=${{ github.repository_owner }} \\\n+            --github-pr-repo=${{ github.event.repository.name }} \\\n+            --github-token=${{ secrets.GITHUB_TOKEN }}\n+      env:\n+        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}\n+         \n+  \n\\ No newline at end of file"
+  },
+  {
+    "sha": "220d4baf42f981e72b61c5c28a614d63404024dc",
+    "filename": "shiftleft.yml",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/hubertp/shiftleft-java-demo/blob/bfee4b274172d8a869c6eb2f9ee91055010d9ef8/shiftleft.yml",
+    "raw_url": "https://github.com/hubertp/shiftleft-java-demo/raw/bfee4b274172d8a869c6eb2f9ee91055010d9ef8/shiftleft.yml",
+    "contents_url": "https://api.github.com/repos/hubertp/shiftleft-java-demo/contents/shiftleft.yml?ref=bfee4b274172d8a869c6eb2f9ee91055010d9ef8",
+    "patch": "@@ -0,0 +1,12 @@\n+build_rules:\n+  - id: allow-zero-findings\n+    finding_types:\n+      - vuln\n+      - secret\n+      - insight\n+      - \"*\"\n+    severity:\n+      - SEVERITY_MEDIUM_IMPACT\n+      - SEVERITY_HIGH_IMPACT\n+      - SEVERITY_LOW_IMPACT\n+    threshold: 0\n\\ No newline at end of file"
+  }
+]

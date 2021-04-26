@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "8118504d6f0925e912fc830ef2fee6c024352a8b",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/mto-2021-pn/lab1_2/blob/6ceb9a6be56b2c1e98799a73cee01d65964dd010/.gitignore",
+    "raw_url": "https://github.com/mto-2021-pn/lab1_2/raw/6ceb9a6be56b2c1e98799a73cee01d65964dd010/.gitignore",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab1_2/contents/.gitignore?ref=6ceb9a6be56b2c1e98799a73cee01d65964dd010",
+    "patch": "@@ -2,3 +2,5 @@\n /.classpath\n /.project\n /.settings/\n+/.idea\n+*.iml"
+  },
+  {
+    "sha": "cf2c47722733080c19e6c25cf5e040c7f8934a7a",
+    "filename": "src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/BookKeeper.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 30,
+    "changes": 35,
+    "blob_url": "https://github.com/mto-2021-pn/lab1_2/blob/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/BookKeeper.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab1_2/raw/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/BookKeeper.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab1_2/contents/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/BookKeeper.java?ref=6ceb9a6be56b2c1e98799a73cee01d65964dd010",
+    "patch": "@@ -21,38 +21,13 @@\n \n public class BookKeeper {\n \n-    public Invoice issuance(ClientData client, List<RequestItem> items) {\n-        Invoice invoice = new Invoice(Id.generate(), client);\n+    public Invoice issuance(InvoiceRequest invoiceRequest, TaxPolicy taxPolicy) {\n+        Invoice invoice = Invoice.create(invoiceRequest.getClient());\n \n-        for (RequestItem item : items) {\n+        for (RequestItem item : invoiceRequest.getItems()) {\n             Money net = item.getTotalCost();\n-            BigDecimal ratio = null;\n-            String desc = null;\n-\n-            switch (item.getProductData().getType()) {\n-                case DRUG:\n-                    ratio = BigDecimal.valueOf(0.05);\n-                    desc = \"5% (D)\";\n-                    break;\n-                case FOOD:\n-                    ratio = BigDecimal.valueOf(0.07);\n-                    desc = \"7% (F)\";\n-                    break;\n-                case STANDARD:\n-                    ratio = BigDecimal.valueOf(0.23);\n-                    desc = \"23%\";\n-                    break;\n-\n-                default:\n-                    throw new IllegalArgumentException(item.getProductData().getType() + \" not handled\");\n-            }\n-\n-            Money taxValue = net.multiplyBy(ratio);\n-\n-            Tax tax = new Tax(taxValue, desc);\n-\n-            InvoiceLine invoiceLine = new InvoiceLine(item.getProductData(), item.getQuantity(), net, tax);\n-            invoice.addItem(invoiceLine);\n+            Tax tax = taxPolicy.calculateTax(item.getProductData().getType(), net);\n+            invoice.addItem(new InvoiceLine(item.getProductData(), item.getQuantity(), net, tax));\n         }\n \n         return invoice;"
+  },
+  {
+    "sha": "a3c94dd6feeb6915812fa111966b95d94c585983",
+    "filename": "src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/DefaultTaxPolicy.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/mto-2021-pn/lab1_2/blob/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/DefaultTaxPolicy.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab1_2/raw/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/DefaultTaxPolicy.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab1_2/contents/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/DefaultTaxPolicy.java?ref=6ceb9a6be56b2c1e98799a73cee01d65964dd010",
+    "patch": "@@ -0,0 +1,35 @@\n+package pl.com.bottega.ecommerce.sales.domain.invoicing;\n+\n+import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductType;\n+import pl.com.bottega.ecommerce.sharedkernel.Money;\n+\n+import java.math.BigDecimal;\n+\n+public class DefaultTaxPolicy implements TaxPolicy {\n+\n+    @Override\n+    public Tax calculateTax(ProductType productType, Money net) throws IllegalArgumentException {\n+        BigDecimal ratio;\n+        String desc;\n+\n+        switch (productType) {\n+            case DRUG:\n+                ratio = BigDecimal.valueOf(0.05);\n+                desc = \"5% (D)\";\n+                break;\n+            case FOOD:\n+                ratio = BigDecimal.valueOf(0.07);\n+                desc = \"7% (F)\";\n+                break;\n+            case STANDARD:\n+                ratio = BigDecimal.valueOf(0.23);\n+                desc = \"23%\";\n+                break;\n+            default:\n+                throw new IllegalArgumentException(productType + \" not handled\");\n+        }\n+\n+        Money taxValue = net.multiplyBy(ratio);\n+        return new Tax(taxValue, desc);\n+    }\n+}"
+  },
+  {
+    "sha": "da2a675bbfce79d65f4f78f2e26a6315b9d0bf44",
+    "filename": "src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/Invoice.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/mto-2021-pn/lab1_2/blob/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/Invoice.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab1_2/raw/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/Invoice.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab1_2/contents/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/Invoice.java?ref=6ceb9a6be56b2c1e98799a73cee01d65964dd010",
+    "patch": "@@ -32,7 +32,7 @@\n \n     private Id id;\n \n-    Invoice(Id invoiceId, ClientData client) {\n+    private Invoice(Id invoiceId, ClientData client) {\n         this.id = invoiceId;\n         this.client = client;\n         this.items = new ArrayList<InvoiceLine>();\n@@ -48,6 +48,10 @@ public void addItem(InvoiceLine item) {\n         gros = gros.add(item.getGros());\n     }\n \n+    public static Invoice create(ClientData client) {\n+        return new Invoice(Id.generate(), client);\n+    }\n+\n     /**\n      * \n      * @return immutable projection"
+  },
+  {
+    "sha": "c65bb14a8c043b806a3a89b85b99b398847ff0cd",
+    "filename": "src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/TaxPolicy.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/mto-2021-pn/lab1_2/blob/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/TaxPolicy.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab1_2/raw/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/TaxPolicy.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab1_2/contents/src/main/java/pl/com/bottega/ecommerce/sales/domain/invoicing/TaxPolicy.java?ref=6ceb9a6be56b2c1e98799a73cee01d65964dd010",
+    "patch": "@@ -0,0 +1,9 @@\n+package pl.com.bottega.ecommerce.sales.domain.invoicing;\n+\n+import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductType;\n+import pl.com.bottega.ecommerce.sharedkernel.Money;\n+\n+public interface TaxPolicy {\n+\n+    Tax calculateTax(ProductType productType, Money net);\n+}"
+  },
+  {
+    "sha": "8c0cbe91638131aa9105db52bc7b266888070d78",
+    "filename": "src/main/java/pl/com/bottega/ecommerce/sales/domain/payment/Payment.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/mto-2021-pn/lab1_2/blob/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/payment/Payment.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab1_2/raw/6ceb9a6be56b2c1e98799a73cee01d65964dd010/src/main/java/pl/com/bottega/ecommerce/sales/domain/payment/Payment.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab1_2/contents/src/main/java/pl/com/bottega/ecommerce/sales/domain/payment/Payment.java?ref=6ceb9a6be56b2c1e98799a73cee01d65964dd010",
+    "patch": "@@ -24,12 +24,16 @@\n \n     private Id aggregateId;\n \n-    public Payment(Id aggregateId, ClientData clientData, Money amount) {\n+    private Payment(Id aggregateId, ClientData clientData, Money amount) {\n         this.aggregateId = aggregateId;\n         this.clientData = clientData;\n         this.amount = amount;\n     }\n \n+    public static Payment create(ClientData clientData, Money amount) {\n+        return new Payment(Id.generate(), clientData, amount);\n+    }\n+\n     public Payment rollBack() {\n         Id id = Id.generate();\n "
+  }
+]

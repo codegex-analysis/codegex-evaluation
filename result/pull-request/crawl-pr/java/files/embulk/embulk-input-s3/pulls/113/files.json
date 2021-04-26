@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "69b4065075b23f808e00dfbcf7229729d4371701",
+    "filename": "embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3NameOrderPrefixFileExplorer.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/embulk/embulk-input-s3/blob/a20e9d3bf7907aaac1687470d13495941316e1b0/embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3NameOrderPrefixFileExplorer.java",
+    "raw_url": "https://github.com/embulk/embulk-input-s3/raw/a20e9d3bf7907aaac1687470d13495941316e1b0/embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3NameOrderPrefixFileExplorer.java",
+    "contents_url": "https://api.github.com/repos/embulk/embulk-input-s3/contents/embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3NameOrderPrefixFileExplorer.java?ref=a20e9d3bf7907aaac1687470d13495941316e1b0",
+    "patch": "@@ -17,8 +17,10 @@\n package org.embulk.input.s3.explorer;\n \n import com.amazonaws.services.s3.AmazonS3;\n+import com.amazonaws.services.s3.model.GetObjectMetadataRequest;\n import com.amazonaws.services.s3.model.ListObjectsRequest;\n import com.amazonaws.services.s3.model.ObjectListing;\n+import com.amazonaws.services.s3.model.ObjectMetadata;\n import com.amazonaws.services.s3.model.S3ObjectSummary;\n import org.embulk.input.s3.DefaultRetryable;\n import org.embulk.util.retryhelper.RetryExecutor;\n@@ -53,6 +55,17 @@ public ObjectListing call()\n         return ol.getObjectSummaries();\n     }\n \n+    @Override\n+    protected ObjectMetadata fetchObjectMetadata(S3ObjectSummary obj) {\n+        final GetObjectMetadataRequest req = new GetObjectMetadataRequest(obj.getBucketName(), obj.getKey());\n+\n+        return new DefaultRetryable<ObjectMetadata>(\"Get object metadata\")\n+        {\n+            @Override\n+            public ObjectMetadata call() { return s3Client.getObjectMetadata(req); }\n+        }.executeWith(retryExecutor);\n+    }\n+\n     @Override\n     protected boolean hasNext()\n     {"
+  },
+  {
+    "sha": "5759d03c2955583998552e4c1d6ea0ae5d427c48",
+    "filename": "embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3PrefixFileExplorer.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 1,
+    "changes": 11,
+    "blob_url": "https://github.com/embulk/embulk-input-s3/blob/a20e9d3bf7907aaac1687470d13495941316e1b0/embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3PrefixFileExplorer.java",
+    "raw_url": "https://github.com/embulk/embulk-input-s3/raw/a20e9d3bf7907aaac1687470d13495941316e1b0/embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3PrefixFileExplorer.java",
+    "contents_url": "https://api.github.com/repos/embulk/embulk-input-s3/contents/embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3PrefixFileExplorer.java?ref=a20e9d3bf7907aaac1687470d13495941316e1b0",
+    "patch": "@@ -17,6 +17,7 @@\n package org.embulk.input.s3.explorer;\n \n import com.amazonaws.services.s3.AmazonS3;\n+import com.amazonaws.services.s3.model.ObjectMetadata;\n import com.amazonaws.services.s3.model.S3ObjectSummary;\n import com.amazonaws.services.s3.model.StorageClass;\n import org.embulk.config.ConfigException;\n@@ -54,7 +55,13 @@ public void addToBuilder(final FileList.Builder builder)\n                         LOGGER.warn(\"Skipped \\\"s3://{}/{}\\\" that stored at Glacier.\", bucketName, s.getKey());\n                         continue;\n                     }\n-                    throw new ConfigException(\"Detected an object stored at Glacier. Set \\\"skip_glacier_objects\\\" option to \\\"true\\\" to skip this.\");\n+\n+                    ObjectMetadata objectMetadata = fetchObjectMetadata(s);\n+                    if (objectMetadata != null && objectMetadata.getRestoreExpirationTime() != null) {\n+                        LOGGER.info(\"Restored Glacier object \\\"s3://{}/{}\\\" found\", bucketName, s.getKey());\n+                    } else {\n+                        throw new ConfigException(\"Detected an object stored at Glacier. Set \\\"skip_glacier_objects\\\" option to \\\"true\\\" to skip this.\");\n+                    }\n                 }\n                 if (s.getSize() > 0) {\n                     builder.add(s.getKey(), s.getSize());\n@@ -69,5 +76,7 @@ public void addToBuilder(final FileList.Builder builder)\n \n     protected abstract List<S3ObjectSummary> fetch();\n \n+    protected abstract ObjectMetadata fetchObjectMetadata(final S3ObjectSummary obj);\n+\n     protected abstract boolean hasNext();\n }"
+  },
+  {
+    "sha": "207d42ed13d8de9c2954d00d6482a9603ea50504",
+    "filename": "embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3TimeOrderPrefixFileExplorer.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/embulk/embulk-input-s3/blob/a20e9d3bf7907aaac1687470d13495941316e1b0/embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3TimeOrderPrefixFileExplorer.java",
+    "raw_url": "https://github.com/embulk/embulk-input-s3/raw/a20e9d3bf7907aaac1687470d13495941316e1b0/embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3TimeOrderPrefixFileExplorer.java",
+    "contents_url": "https://api.github.com/repos/embulk/embulk-input-s3/contents/embulk-input-s3/src/main/java/org/embulk/input/s3/explorer/S3TimeOrderPrefixFileExplorer.java?ref=a20e9d3bf7907aaac1687470d13495941316e1b0",
+    "patch": "@@ -17,8 +17,10 @@\n package org.embulk.input.s3.explorer;\n \n import com.amazonaws.services.s3.AmazonS3;\n+import com.amazonaws.services.s3.model.GetObjectMetadataRequest;\n import com.amazonaws.services.s3.model.ListObjectsRequest;\n import com.amazonaws.services.s3.model.ObjectListing;\n+import com.amazonaws.services.s3.model.ObjectMetadata;\n import com.amazonaws.services.s3.model.S3ObjectSummary;\n import org.embulk.input.s3.DefaultRetryable;\n import org.embulk.util.retryhelper.RetryExecutor;\n@@ -72,6 +74,17 @@ public ObjectListing call()\n                 .collect(Collectors.toList());\n     }\n \n+    @Override\n+    protected ObjectMetadata fetchObjectMetadata(S3ObjectSummary obj) {\n+        final GetObjectMetadataRequest req = new GetObjectMetadataRequest(obj.getBucketName(), obj.getKey());\n+\n+        return new DefaultRetryable<ObjectMetadata>(\"Get object metadata\")\n+        {\n+            @Override\n+            public ObjectMetadata call() { return s3Client.getObjectMetadata(req); }\n+        }.executeWith(retryExecutor);\n+    }\n+\n     @Override\n     public boolean hasNext()\n     {"
+  },
+  {
+    "sha": "97d498fc20d6ab5df51d495c2d672026ff45b018",
+    "filename": "embulk-input-s3/src/test/java/org/embulk/input/s3/explorer/TestS3PrefixFileExplorer.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/embulk/embulk-input-s3/blob/a20e9d3bf7907aaac1687470d13495941316e1b0/embulk-input-s3/src/test/java/org/embulk/input/s3/explorer/TestS3PrefixFileExplorer.java",
+    "raw_url": "https://github.com/embulk/embulk-input-s3/raw/a20e9d3bf7907aaac1687470d13495941316e1b0/embulk-input-s3/src/test/java/org/embulk/input/s3/explorer/TestS3PrefixFileExplorer.java",
+    "contents_url": "https://api.github.com/repos/embulk/embulk-input-s3/contents/embulk-input-s3/src/test/java/org/embulk/input/s3/explorer/TestS3PrefixFileExplorer.java?ref=a20e9d3bf7907aaac1687470d13495941316e1b0",
+    "patch": "@@ -17,6 +17,7 @@\n package org.embulk.input.s3.explorer;\n \n import com.amazonaws.services.s3.AmazonS3;\n+import com.amazonaws.services.s3.model.ObjectMetadata;\n import com.amazonaws.services.s3.model.S3ObjectSummary;\n import com.amazonaws.services.s3.model.StorageClass;\n import org.embulk.EmbulkTestRuntime;\n@@ -31,6 +32,7 @@\n import org.mockito.runners.MockitoJUnitRunner;\n \n import java.util.Collections;\n+import java.util.Date;\n import java.util.List;\n \n import static org.mockito.Mockito.doReturn;\n@@ -75,6 +77,20 @@ public void addToBuilder_should_throw_exception_if_notskipped_glacier_storage()\n         s3PrefixFileExplorer.addToBuilder(builder);\n     }\n \n+    @Test\n+    public void addToBuilder_should_not_throw_exception_if_restored_glacier_object()\n+    {\n+        when(s3ObjectSummary.getStorageClass()).thenReturn(StorageClass.Glacier.toString());\n+        when(s3ObjectSummary.getKey()).thenReturn(PATH_PREFIX + OBJECT_KEY);\n+        when(s3ObjectSummary.getSize()).thenReturn(1L);\n+        ObjectMetadata objectMetadata = new ObjectMetadata();\n+        objectMetadata.setRestoreExpirationTime(new Date());\n+        doReturn(objectMetadata).when(s3PrefixFileExplorer).fetchObjectMetadata(s3ObjectSummary);\n+        doReturn(true).when(s3PrefixFileExplorer).hasNext();\n+        s3PrefixFileExplorer.addToBuilder(builder);\n+        verify(builder).add(PATH_PREFIX + OBJECT_KEY, 1);\n+    }\n+\n     @Test\n     public void addToBuilder_should_skip_glacier_storage_if_allowed()\n     {\n@@ -132,6 +148,9 @@ private S3PrefixFileExplorer spyS3PrefixFileExplorer(final String bucketName, fi\n                 return null;\n             }\n \n+            @Override\n+            protected ObjectMetadata fetchObjectMetadata(S3ObjectSummary obj) { return null; }\n+\n             @Override\n             protected boolean hasNext()\n             {"
+  }
+]

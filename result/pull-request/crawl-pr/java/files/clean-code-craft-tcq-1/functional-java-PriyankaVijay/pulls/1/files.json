@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "77dec791560c711de34d13fa1847f247dff8914c",
+    "filename": ".github/workflows/main-workflow.yml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/blob/a9708a05185f22be70e58b03525984da10256184/.github/workflows/main-workflow.yml",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/raw/a9708a05185f22be70e58b03525984da10256184/.github/workflows/main-workflow.yml",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-PriyankaVijay/contents/.github/workflows/main-workflow.yml?ref=a9708a05185f22be70e58b03525984da10256184",
+    "patch": "@@ -17,6 +17,6 @@ jobs:\n       with:\n         java-version: 1.8\n     - name: Build\n-      run: javac vitals/Main.java\n+      run: javac vitals/BMS.java\n     - name: Verify\n-      run: java -ea -classpath . vitals.Main\n+      run: java -ea -classpath . vitals.BMS"
+  },
+  {
+    "sha": "37fad0cdc99b0f3fb5e15124da22a290c187c7a1",
+    "filename": "vitals/BMS.java",
+    "status": "added",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/blob/a9708a05185f22be70e58b03525984da10256184/vitals/BMS.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/raw/a9708a05185f22be70e58b03525984da10256184/vitals/BMS.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-PriyankaVijay/contents/vitals/BMS.java?ref=a9708a05185f22be70e58b03525984da10256184",
+    "patch": "@@ -0,0 +1,21 @@\n+package vitals;\n+\n+public class BMS {\n+\tstatic boolean batteryIsOk(float temperature, float soc, float chargeRate) {       \n+        Battery battery = new Battery(temperature, soc, chargeRate);\n+        return battery.isBatteryOk();\n+    }\n+    public static void main(String[] args) {\n+        assert(batteryIsOk(25, 70, 0.7f) == true);\n+        assert(batteryIsOk(50, 85, 0.0f) == false);\n+        assert(batteryIsOk(45, 80, 0.8f) == true);\n+        assert(batteryIsOk(50 , 90, 0.9f) == false);\n+        assert(batteryIsOk(-1 , 40, 0.6f) == false);\n+        assert(batteryIsOk(25 , 15, 0.9f) == false);\n+        assert(batteryIsOk(25 , 65, 0.9f) == false);\n+        assert(batteryIsOk(50, 65, 0.7f) == false);\n+        assert(batteryIsOk(15, 85, 0.7f) == false);\n+        assert(batteryIsOk(15, 15, 0.7f) == false);\n+        assert(batteryIsOk(15, 25, 0.9f) == false);\n+    }\n+}"
+  },
+  {
+    "sha": "7b91ec84fdc7e76407bb47dc971736522cadf8e9",
+    "filename": "vitals/Battery.java",
+    "status": "added",
+    "additions": 46,
+    "deletions": 0,
+    "changes": 46,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/blob/a9708a05185f22be70e58b03525984da10256184/vitals/Battery.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/raw/a9708a05185f22be70e58b03525984da10256184/vitals/Battery.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-PriyankaVijay/contents/vitals/Battery.java?ref=a9708a05185f22be70e58b03525984da10256184",
+    "patch": "@@ -0,0 +1,46 @@\n+package vitals;\n+\n+public class Battery {\n+\tfloat temperature;\n+\tfloat soc;\n+\tfloat chargeRate;\n+\n+\tpublic Battery(float temperature, float soc, float chargeRate) {\n+\t\tthis.temperature = temperature;\n+\t\tthis.soc = soc;\n+\t\tthis.chargeRate = chargeRate;\n+\t}\n+\tpublic boolean isBatteryOk() {\n+\t\treturn (isTemperatureOk() && isSocOk()) && isChargeRateOk();\n+\t}\n+\tpublic boolean isTemperatureOk() {\t\t\n+\t\tif(!isFactorOk(Constants.TEMPERATURE_MIN_THRESHOLD, Constants.TEMPERATURE_MAX_THRESHOLD, temperature))\n+\t\t{\n+\t\t\tSystem.out.println(\"Temperature is out of range and is \" + isFactorHigh(Constants.TEMPERATURE_MAX_THRESHOLD , temperature) + \"!\");\n+\t\t\treturn false;\n+\t\t}\t\n+\t\treturn true;\n+\t}\n+\tpublic boolean isSocOk() {\n+\t\tif(!isFactorOk(Constants.SOC_MIN_THRESHOLD, Constants.SOC_MAX_THRESHOLD, soc))\n+\t\t{\n+\t\t\tSystem.out.println(\"State of charge is out of range and is \" + isFactorHigh(Constants.SOC_MAX_THRESHOLD , soc) + \"!\");\n+\t\t\treturn false;\n+\t\t}\t\n+\t\treturn true;\n+\t}\n+\tpublic boolean isChargeRateOk() {\n+\t\tif(isFactorHigh(Constants.CHARGE_RATE_MAX_THRESHOLD, chargeRate).equals(\"high\"))\n+\t\t{\n+\t\t\tSystem.out.println(\"Charge Rate is out of range!\");\n+            return false;\n+\t\t}\n+\t\treturn true;\n+\t}\n+\tprivate String isFactorHigh(float max, float factor) {\n+\t\treturn (factor>max) ? \"high\" : \"low\"; \n+\t}\n+\tprivate boolean isFactorOk(float min, float max, float value) {\n+\t\treturn !(value < min || value > max); \n+\t}\n+}"
+  },
+  {
+    "sha": "e1e4ff6dbace7ff7703b4f62b61f5d15fce07cf4",
+    "filename": "vitals/Constants.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/blob/a9708a05185f22be70e58b03525984da10256184/vitals/Constants.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/raw/a9708a05185f22be70e58b03525984da10256184/vitals/Constants.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-PriyankaVijay/contents/vitals/Constants.java?ref=a9708a05185f22be70e58b03525984da10256184",
+    "patch": "@@ -0,0 +1,9 @@\n+package vitals;\n+\n+public class Constants {\n+\tpublic static float TEMPERATURE_MAX_THRESHOLD = 45;\n+\tpublic static float TEMPERATURE_MIN_THRESHOLD = 0;\n+\tpublic static float SOC_MAX_THRESHOLD = 80;\n+\tpublic static float SOC_MIN_THRESHOLD = 20;\n+\tpublic static float CHARGE_RATE_MAX_THRESHOLD = 0.8f;\n+}"
+  },
+  {
+    "sha": "7833f94d0a1d6cbaa29822e4add4f5317834c3a8",
+    "filename": "vitals/Main.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 23,
+    "changes": 23,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/blob/64397f22cd4f2c53058dab052c37d61fb5256e87/vitals/Main.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-PriyankaVijay/raw/64397f22cd4f2c53058dab052c37d61fb5256e87/vitals/Main.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-PriyankaVijay/contents/vitals/Main.java?ref=64397f22cd4f2c53058dab052c37d61fb5256e87",
+    "patch": "@@ -1,23 +0,0 @@\n-package vitals;\n-\n-public class Main {\n-    static boolean batteryIsOk(float temperature, float soc, float chargeRate) {\n-        if(temperature < 0 || temperature > 45) {\n-            System.out.println(\"Temperature is out of range!\");\n-            return false;\n-        } else if(soc < 20 || soc > 80) {\n-            System.out.println(\"State of Charge is out of range!\");\n-            return false;\n-        } else if(chargeRate > 0.8) {\n-            System.out.println(\"Charge Rate is out of range!\");\n-            return false;\n-        }\n-        return true;\n-    }\n-\n-    public static void main(String[] args) {\n-        assert(batteryIsOk(25, 70, 0.7f) == true);\n-        assert(batteryIsOk(50, 85, 0.0f) == false);\n-        System.out.println(\"Some more tests needed\");\n-    }\n-}"
+  }
+]

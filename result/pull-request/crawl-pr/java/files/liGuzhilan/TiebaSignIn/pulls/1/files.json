@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "3217097400124eaec9187f77aab95ad0c405688d",
+    "filename": "src/main/java/top/srcrs/Run.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 5,
+    "changes": 11,
+    "blob_url": "https://github.com/liGuzhilan/TiebaSignIn/blob/1665b54b000b0ba6d23fc6d80d436ccc429654ac/src/main/java/top/srcrs/Run.java",
+    "raw_url": "https://github.com/liGuzhilan/TiebaSignIn/raw/1665b54b000b0ba6d23fc6d80d436ccc429654ac/src/main/java/top/srcrs/Run.java",
+    "contents_url": "https://api.github.com/repos/liGuzhilan/TiebaSignIn/contents/src/main/java/top/srcrs/Run.java?ref=1665b54b000b0ba6d23fc6d80d436ccc429654ac",
+    "patch": "@@ -92,7 +92,7 @@ public void getFollow(){\n             for (Object array : jsonArray) {\n                 if(\"0\".equals(((JSONObject) array).getString(\"is_sign\"))){\n                     // 将为签到的贴吧加入到 follow 中，待签到\n-                    follow.add(((JSONObject) array).getString(\"forum_name\"));\n+                    follow.add(((JSONObject) array).getString(\"forum_name\").replace(\"+\",\"%2B\"));\n                 } else{\n                     // 将已经成功签到的贴吧，加入到 success\n                     success.add(((JSONObject) array).getString(\"forum_name\"));\n@@ -119,14 +119,15 @@ public void runSign(){\n                 Iterator<String> iterator = follow.iterator();\n                 while(iterator.hasNext()){\n                     String s = iterator.next();\n-                    String body = \"kw=\"+s+\"&tbs=\"+tbs+\"&sign=\"+ Encryption.enCodeMd5(\"kw=\"+s+\"tbs=\"+tbs+\"tiebaclient!!!\");\n+                    String rotation = s.replace(\"%2B\",\"+\");\n+                    String body = \"kw=\"+s+\"&tbs=\"+tbs+\"&sign=\"+ Encryption.enCodeMd5(\"kw=\"+rotation+\"tbs=\"+tbs+\"tiebaclient!!!\");\n                     JSONObject post = Request.post(SIGN_URL, body);\n                     if(\"0\".equals(post.getString(\"error_code\"))){\n                         iterator.remove();\n-                        success.add(s);\n-                        LOGGER.info(s + \": \" + \"签到成功\");\n+                        success.add(rotation);\n+                        LOGGER.info(rotation + \": \" + \"签到成功\");\n                     } else {\n-                        LOGGER.warn(s + \": \" + \"签到失败\");\n+                        LOGGER.warn(rotation + \": \" + \"签到失败\");\n                     }\n                 }\n                 if (success.size() != followNum){"
+  }
+]

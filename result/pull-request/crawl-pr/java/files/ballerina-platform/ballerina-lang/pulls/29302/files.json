@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "32d712c7fc773b03a82b9ba7a65a1fb911f8aa59",
+    "filename": "bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/api/values/BXml.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/api/values/BXml.java",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/api/values/BXml.java",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/api/values/BXml.java?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -232,6 +232,13 @@\n      */\n     BXml descendants(List<String> qnames);\n \n+    /**\n+     * Searches in children recursively for elements and returns a sequence containing them all.\n+     *\n+     * @return All the descendants, as a sequence\n+     */\n+    BXml descendants();\n+\n     /**\n      * Get an item from the XML sequence, at the given index.\n      * "
+  },
+  {
+    "sha": "220f6e83b094fd8d9d9522f0546873a55885c478",
+    "filename": "bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlItem.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlItem.java",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlItem.java",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlItem.java?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -416,6 +416,13 @@ public XmlValue descendants(List<String> qnames) {\n         return children.descendants(qnames);\n     }\n \n+    @Override\n+    public XmlValue descendants() {\n+        List<BXml> descendants = new ArrayList<>();\n+        addDescendants(descendants, this);\n+        return new XmlSequence(descendants);\n+    }\n+\n     /**\n      * {@inheritDoc}\n      */"
+  },
+  {
+    "sha": "4f9888dc619ae6be9986711475407552a26f5530",
+    "filename": "bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlNonElementItem.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlNonElementItem.java",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlNonElementItem.java",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlNonElementItem.java?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -128,6 +128,11 @@ public BXml descendants(List<String> qnames) {\n         return new XmlSequence();\n     }\n \n+    @Override\n+    public BXml descendants() {\n+        return new XmlSequence();\n+    }\n+\n     @Override\n     public XmlValue getItem(int index) {\n         if (index == 0) {"
+  },
+  {
+    "sha": "914a80d283b0691128766d3df918256badba0988",
+    "filename": "bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlSequence.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlSequence.java",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlSequence.java",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlSequence.java?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -393,6 +393,18 @@ public XmlValue descendants(List<String> qnames) {\n         return new XmlSequence(descendants);\n     }\n \n+    public XmlValue descendants() {\n+        List<BXml> descendants = new ArrayList<>();\n+        for (BXml child : children) {\n+            if (child.getNodeType() == XmlNodeType.ELEMENT) {\n+                XmlItem element = (XmlItem) child;\n+                descendants.add(element);\n+                addDescendants(descendants, element);\n+            }\n+        }\n+        return new XmlSequence(descendants);\n+    }\n+\n     /**\n      * {@inheritDoc}\n      */"
+  },
+  {
+    "sha": "2700d0288bb4a5e25ab0ed629d787e488cb53ec7",
+    "filename": "bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlValue.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlValue.java",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlValue.java",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/bvm/ballerina-runtime/src/main/java/io/ballerina/runtime/internal/values/XmlValue.java?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -186,6 +186,15 @@ protected void addDescendants(List<BXml> descendants, XmlItem currentElement, Li\n         }\n     }\n \n+    protected void addDescendants(List<BXml> descendants, XmlItem currentElement) {\n+        for (BXml child : currentElement.getChildrenSeq().getChildrenList()) {\n+            if (child.getNodeType() == XmlNodeType.ELEMENT) {\n+                descendants.add(child);\n+                addDescendants(descendants, (XmlItem) child);\n+            }\n+        }\n+    }\n+\n     // TODO: These are bridge methods to invoke methods in BXML interface\n     // Fix in the JVM code gen to directly call overridden BXML methods\n     public void addChildren(XmlValue seq) {"
+  },
+  {
+    "sha": "4b5c8e3d615881520b506c503bdee52ec7ee39bc",
+    "filename": "langlib/lang.xml/src/main/ballerina/xml.bal",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 8,
+    "changes": 32,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/lang.xml/src/main/ballerina/xml.bal",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/lang.xml/src/main/ballerina/xml.bal",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/langlib/lang.xml/src/main/ballerina/xml.bal?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -123,6 +123,17 @@ public isolated function setName(Element elem, string xName) = @java:Method {\n     name: \"setName\"\n } external;\n \n+# Returns the map representing the attributes of `elem`.\n+# This includes namespace attributes.\n+# The keys in the map are the expanded names of the attributes.\n+#\n+# + x - xml element\n+# + return - attributes of `x`\n+public isolated function getAttributes(Element x) returns map<string> = @java:Method {\n+    'class: \"org.ballerinalang.langlib.xml.GetAttributes\",\n+    name: \"getAttributes\"\n+} external;\n+\n # Returns the children of `elem`.\n #\n # + elem - xml element\n@@ -143,15 +154,20 @@ public isolated function setChildren(Element elem, xml|string children) = @java:\n     name: \"setChildren\"\n } external;\n \n-# Returns the map representing the attributes of `elem`.\n-# This includes namespace attributes.\n-# The keys in the map are the expanded names of the attributes.\n+# Returns the descendants of `elem`.\n #\n-# + x - xml element\n-# + return - attributes of `x`\n-public isolated function getAttributes(Element x) returns map<string> = @java:Method {\n-    'class: \"org.ballerinalang.langlib.xml.GetAttributes\",\n-    name: \"getAttributes\"\n+# + elem - xml element\n+# + return - descendants of `elem`\n+# The descendants of an element are the children of the element\n+# together with, for each of those children that is an element,\n+# the descendants of that element, ordered so that\n+# each element immediately precedes all its descendants.\n+# The order of the items in the returned sequence will thus correspond\n+# to the order in which the first character of the representation\n+# of the item would occur in the representation of the element in XML syntax.\n+public isolated function getDescendants(Element elem) returns xml = @java:Method {\n+    'class: \"org.ballerinalang.langlib.xml.GetDescendants\",\n+    name: \"getDescendants\"\n } external;\n \n # Returns the target part of the processing instruction."
+  },
+  {
+    "sha": "1dc7747bcf6343e2c321192250b925b40421c8d8",
+    "filename": "langlib/lang.xml/src/main/java/org/ballerinalang/langlib/xml/GetDescendants.java",
+    "status": "added",
+    "additions": 38,
+    "deletions": 0,
+    "changes": 38,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/lang.xml/src/main/java/org/ballerinalang/langlib/xml/GetDescendants.java",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/lang.xml/src/main/java/org/ballerinalang/langlib/xml/GetDescendants.java",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/langlib/lang.xml/src/main/java/org/ballerinalang/langlib/xml/GetDescendants.java?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -0,0 +1,38 @@\n+/*\n+ *   Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.\n+ *\n+ *  WSO2 Inc. licenses this file to you under the Apache License,\n+ *  Version 2.0 (the \"License\"); you may not use this file except\n+ *  in compliance with the License.\n+ *  You may obtain a copy of the License at\n+ *\n+ *    http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Unless required by applicable law or agreed to in writing,\n+ * software distributed under the License is distributed on an\n+ * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n+ * KIND, either express or implied.  See the License for the\n+ * specific language governing permissions and limitations\n+ * under the License.\n+ */\n+package org.ballerinalang.langlib.xml;\n+\n+import io.ballerina.runtime.api.values.BXml;\n+import io.ballerina.runtime.internal.util.exceptions.BLangExceptionHelper;\n+import io.ballerina.runtime.internal.util.exceptions.RuntimeErrors;\n+\n+/**\n+ * Returns the descendants of xml element.\n+ *\n+ * @since 2.0.0\n+ */\n+public class GetDescendants {\n+\n+    public static BXml getDescendants(BXml element) {\n+        if (!IsElement.isElement(element)) {\n+            throw BLangExceptionHelper.getRuntimeException(RuntimeErrors.XML_FUNC_TYPE_ERROR,\n+                    \"getDescendants\", \"element\");\n+        }\n+        return element.descendants();\n+    }\n+}"
+  },
+  {
+    "sha": "59ba7437b78297c7e68c3a46602789d963dad90a",
+    "filename": "langlib/langlib-test/src/test/java/org/ballerinalang/langlib/test/LangLibXMLTest.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/langlib-test/src/test/java/org/ballerinalang/langlib/test/LangLibXMLTest.java",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/langlib-test/src/test/java/org/ballerinalang/langlib/test/LangLibXMLTest.java",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/langlib/langlib-test/src/test/java/org/ballerinalang/langlib/test/LangLibXMLTest.java?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -281,6 +281,11 @@ public void testSelectingTextFromXml() {\n         BRunUtil.invoke(compileResult, \"testSelectingTextFromXml\");\n     }\n \n+    @Test\n+    public void testGetDescendants() {\n+        BRunUtil.invoke(compileResult, \"testGetDescendants\");\n+    }\n+\n     @Test\n     public void testNegativeCases() {\n         negativeResult = BCompileUtil.compile(\"test-src/xmllib_test_negative.bal\");\n@@ -294,6 +299,7 @@ public void testNegativeCases() {\n                 56, 8);\n         validateError(negativeResult, i++, \"incompatible types: expected \" +\n                 \"'(xml:Text|xml:ProcessingInstruction|xml:Comment)', found 'xml:Element'\", 61, 12);\n+        validateError(negativeResult, i++, \"incompatible types: expected 'xml:Element', found 'xml'\", 69, 13);\n         assertEquals(negativeResult.getErrorCount(), i);\n     }\n "
+  },
+  {
+    "sha": "5292b3abcdfb120a3c346139d03d9bebc15e112a",
+    "filename": "langlib/langlib-test/src/test/resources/test-src/xmllib_test.bal",
+    "status": "modified",
+    "additions": 67,
+    "deletions": 0,
+    "changes": 67,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/langlib-test/src/test/resources/test-src/xmllib_test.bal",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/langlib-test/src/test/resources/test-src/xmllib_test.bal",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/langlib/langlib-test/src/test/resources/test-src/xmllib_test.bal?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -472,6 +472,73 @@ function testSelectingTextFromXml() {\n     assert(textValues2.toString(), textValues.toString());\n }\n \n+function testGetDescendants() {\n+    getDescendantsSimpleElement();\n+    getDescendantsWithNS();\n+    getDescendantsFilterNonElements();\n+}\n+\n+function getDescendantsSimpleElement() {\n+    xml:Element bookCatalog = xml `<CATALOG><CD><TITLE>Empire Burlesque</TITLE><ARTIST>Bob Dylan</ARTIST></CD>\n+                           <CD><TITLE>Hide your heart</TITLE><ARTIST>Bonnie Tyler</ARTIST></CD></CATALOG>`;\n+\n+    xml descendantSeq  = bookCatalog.getDescendants();\n+\n+    xml:Element e1 = xml `<CD><TITLE>Empire Burlesque</TITLE><ARTIST>Bob Dylan</ARTIST></CD>`;\n+    xml:Element e2 = xml `<TITLE>Empire Burlesque</TITLE>`;\n+    xml:Element e3 = xml `<ARTIST>Bob Dylan</ARTIST>`;\n+    xml:Element e4 = xml `<CD><TITLE>Hide your heart</TITLE><ARTIST>Bonnie Tyler</ARTIST></CD>`;\n+    xml:Element e5 = xml `<TITLE>Hide your heart</TITLE>`;\n+    xml:Element e6 = xml `<ARTIST>Bonnie Tyler</ARTIST>`;\n+\n+    assert(descendantSeq.length(), 6);\n+    assert(descendantSeq[0], e1);\n+    assert(descendantSeq[1], e2);\n+    assert(descendantSeq[2], e3);\n+    assert(descendantSeq[3], e4);\n+    assert(descendantSeq[4], e5);\n+    assert(descendantSeq[5], e6);\n+}\n+\n+function getDescendantsWithNS() {\n+    xmlns \"foo\" as ns;\n+    xml:Element presidents = xml `<Leaders><!-- Comment --><ns:US><fn>Obama</fn></ns:US><US><fn>Trump</fn></US></Leaders>`;\n+    xml descendants = presidents.getDescendants();\n+\n+    xml usNs = descendants.elements(\"{foo}US\");\n+    assert(usNs.length(), 1);\n+    assert(usNs.toString(), \"<ns:US xmlns:ns=\\\"foo\\\"><fn>Obama</fn></ns:US>\");\n+\n+    xml:Element e1 = xml `<ns:US><fn>Obama</fn></ns:US>`;\n+    xml:Element e2 = xml `<fn>Obama</fn>`;\n+    xml:Element e3 = xml `<US><fn>Trump</fn></US>`;\n+    xml:Element e4 = xml `<fn>Trump</fn>`;\n+\n+    assert(descendants.length(), 4);\n+    assert(descendants[0], e1);\n+    assert(descendants[1], e2);\n+    assert(descendants[2], e3);\n+    assert(descendants[3], e4);\n+}\n+\n+function getDescendantsFilterNonElements() {\n+    xml:Element books = xml\n+    `<bs><?xml-stylesheet type=\"text/xsl\"?><bk><t><en><!-- english --><txt>Everyday Italian</txt></en></t></bk></bs>`;\n+\n+    xml descendants = books.getDescendants();\n+\n+    xml:Element e1 = xml `<bk><t><en><!-- english --><txt>Everyday Italian</txt></en></t></bk>`;\n+    xml:Element e2 = xml `<t><en><!-- english --><txt>Everyday Italian</txt></en></t>`;\n+    xml:Element e3 = xml `<en><!-- english --><txt>Everyday Italian</txt></en>`;\n+    xml:Element e4 = xml `<txt>Everyday Italian</txt>`;\n+\n+    assert(descendants.length(), 4);\n+    assert(descendants[0], e1);\n+    assert(descendants[1], e2);\n+    assert(descendants[2], e3);\n+    assert(descendants[3], e4);\n+}\n+\n function assert(anydata actual, anydata expected) {\n     if (expected != actual) {\n         typedesc<anydata> expT = typeof expected;"
+  },
+  {
+    "sha": "acb5c2b9f721e09b20ac13eb59608b55901c56dc",
+    "filename": "langlib/langlib-test/src/test/resources/test-src/xmllib_test_negative.bal",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 1,
+    "changes": 11,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/langlib-test/src/test/resources/test-src/xmllib_test_negative.bal",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/38c66608c6c28c6f6b0262b22ab214d8bcc24779/langlib/langlib-test/src/test/resources/test-src/xmllib_test_negative.bal",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/langlib/langlib-test/src/test/resources/test-src/xmllib_test_negative.bal?ref=38c66608c6c28c6f6b0262b22ab214d8bcc24779",
+    "patch": "@@ -59,4 +59,13 @@ function testGetTargetNegative() {\n function testGetContentNegative() returns string {\n     xmllib:Element element = <xmllib:Element> xml `<elem attr=\"attr1\">content</elem>`;\n     return element.getContent();\n-}\n\\ No newline at end of file\n+}\n+\n+xml theXml = xml `<book>the book</book>`;\n+xml bitOfText = xml `bit of text\\u2702\\u2705`;\n+xml compositeXml = theXml + bitOfText;\n+\n+function testGetDescendantsFromSeq() returns xml {\n+   xml x4 = compositeXml.getDescendants();\n+   return x4;\n+}"
+  }
+]

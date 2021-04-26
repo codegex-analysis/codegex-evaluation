@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "da45f12287eed0fbd5954ce1cd565cfe0ab456b8",
+    "filename": "dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/BootstrapLoadedPackages.java",
+    "status": "added",
+    "additions": 47,
+    "deletions": 0,
+    "changes": 47,
+    "blob_url": "https://github.com/DataDog/dd-trace-java/blob/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/BootstrapLoadedPackages.java",
+    "raw_url": "https://github.com/DataDog/dd-trace-java/raw/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/BootstrapLoadedPackages.java",
+    "contents_url": "https://api.github.com/repos/DataDog/dd-trace-java/contents/dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/BootstrapLoadedPackages.java?ref=3c23cca57a9083ec87155ac569ef8f3b6ea59272",
+    "patch": "@@ -0,0 +1,47 @@\n+package datadog.trace.bootstrap;\n+\n+/**\n+ * Enforces loading of certain packages from the bootstrap Classloader.\n+ *\n+ * <p>The idea here is to keep this class safe to inject into client's class loader.\n+ */\n+public final class BootstrapLoadedPackages {\n+\n+  /**\n+   * packages which will be loaded on the bootstrap classloader\n+   *\n+   * <p>Updates should be mirrored in\n+   * datadog.trace.agent.test.SpockRunner#BOOTSTRAP_PACKAGE_PREFIXES_COPY\n+   *\n+   * <p>If a prefix not prefixed by \"datadog.\" is added here, the short-circuit in {@code\n+   * datadog.trace.instrumentation.classloading.ClassLoadingInstrumentation} must be updated.\n+   */\n+  public static final String[] BOOTSTRAP_PACKAGE_PREFIXES = {\n+    \"datadog.slf4j\",\n+    \"datadog.trace.api\",\n+    \"datadog.trace.bootstrap\",\n+    \"datadog.trace.context\",\n+    \"datadog.trace.instrumentation.api\",\n+    \"datadog.trace.logging\",\n+    \"datadog.trace.util\",\n+  };\n+\n+  public static boolean mayForceLoadWithBootstrapClassLoader(String name) {\n+    return name.startsWith(\"datadog.\");\n+  }\n+\n+  public static Class<?> forceLoadWithBootstrapClassLoaderIfNecessary(String name) {\n+    for (String prefix : BootstrapLoadedPackages.BOOTSTRAP_PACKAGE_PREFIXES) {\n+      if (name.startsWith(prefix)) {\n+        try {\n+          return Class.forName(name, false, null);\n+        } catch (ClassNotFoundException e) {\n+          // didn't work, revert to regular loading\n+        }\n+      }\n+    }\n+    return null;\n+  }\n+\n+  private BootstrapLoadedPackages() {}\n+}"
+  },
+  {
+    "sha": "eee93219cc70c6265eada1119a8e1a8d41a94bf1",
+    "filename": "dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/Constants.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 27,
+    "changes": 27,
+    "blob_url": "https://github.com/DataDog/dd-trace-java/blob/482b080a6a9d8a77ec03e2ca8e5697099313f525/dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/Constants.java",
+    "raw_url": "https://github.com/DataDog/dd-trace-java/raw/482b080a6a9d8a77ec03e2ca8e5697099313f525/dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/Constants.java",
+    "contents_url": "https://api.github.com/repos/DataDog/dd-trace-java/contents/dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/Constants.java?ref=482b080a6a9d8a77ec03e2ca8e5697099313f525",
+    "patch": "@@ -1,27 +0,0 @@\n-package datadog.trace.bootstrap;\n-\n-/**\n- * Some useful constants.\n- *\n- * <p>The idea here is to keep this class safe to inject into client's class loader.\n- */\n-public final class Constants {\n-\n-  /**\n-   * packages which will be loaded on the bootstrap classloader\n-   *\n-   * <p>Updates should be mirrored in\n-   * datadog.trace.agent.test.SpockRunner#BOOTSTRAP_PACKAGE_PREFIXES_COPY\n-   */\n-  public static final String[] BOOTSTRAP_PACKAGE_PREFIXES = {\n-    \"datadog.slf4j\",\n-    \"datadog.trace.api\",\n-    \"datadog.trace.bootstrap\",\n-    \"datadog.trace.context\",\n-    \"datadog.trace.instrumentation.api\",\n-    \"datadog.trace.logging\",\n-    \"datadog.trace.util\",\n-  };\n-\n-  private Constants() {}\n-}"
+  },
+  {
+    "sha": "3d9429a7c90d6eca2c02a6f1b415d08ad847e227",
+    "filename": "dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/DatadogClassLoader.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/DataDog/dd-trace-java/blob/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/DatadogClassLoader.java",
+    "raw_url": "https://github.com/DataDog/dd-trace-java/raw/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/DatadogClassLoader.java",
+    "contents_url": "https://api.github.com/repos/DataDog/dd-trace-java/contents/dd-java-agent/agent-bootstrap/src/main/java/datadog/trace/bootstrap/DatadogClassLoader.java?ref=3c23cca57a9083ec87155ac569ef8f3b6ea59272",
+    "patch": "@@ -1,5 +1,8 @@\n package datadog.trace.bootstrap;\n \n+import static datadog.trace.bootstrap.BootstrapLoadedPackages.forceLoadWithBootstrapClassLoaderIfNecessary;\n+import static datadog.trace.bootstrap.BootstrapLoadedPackages.mayForceLoadWithBootstrapClassLoader;\n+\n import java.net.MalformedURLException;\n import java.net.URL;\n import java.net.URLClassLoader;\n@@ -167,6 +170,10 @@ public DelegateClassLoader(\n     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {\n       String packageName = shared.getPackageName(name);\n       if (internalJarURLHandler.hasPackage(packageName)) {\n+        Class<?> bootstrapLoaded = loadWithBootstrapClassLoaderIfNecessary(name);\n+        if (null != bootstrapLoaded) {\n+          return bootstrapLoaded;\n+        }\n         synchronized (getClassLoadingLock(name)) {\n           Class<?> loaded = findLoadedClass(name);\n           if (loaded != null) {\n@@ -180,4 +187,10 @@ public DelegateClassLoader(\n       return shared.loadFromPackage(packageName, name);\n     }\n   }\n+\n+  static Class<?> loadWithBootstrapClassLoaderIfNecessary(String name) {\n+    return mayForceLoadWithBootstrapClassLoader(name)\n+        ? forceLoadWithBootstrapClassLoaderIfNecessary(name)\n+        : null;\n+  }\n }"
+  },
+  {
+    "sha": "8ffdc5a7adce3e463cf31ad66d5971f08d3416ed",
+    "filename": "dd-java-agent/instrumentation/classloading/src/main/java/datadog/trace/instrumentation/classloading/ClassloadingInstrumentation.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 13,
+    "changes": 27,
+    "blob_url": "https://github.com/DataDog/dd-trace-java/blob/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/instrumentation/classloading/src/main/java/datadog/trace/instrumentation/classloading/ClassloadingInstrumentation.java",
+    "raw_url": "https://github.com/DataDog/dd-trace-java/raw/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/instrumentation/classloading/src/main/java/datadog/trace/instrumentation/classloading/ClassloadingInstrumentation.java",
+    "contents_url": "https://api.github.com/repos/DataDog/dd-trace-java/contents/dd-java-agent/instrumentation/classloading/src/main/java/datadog/trace/instrumentation/classloading/ClassloadingInstrumentation.java?ref=3c23cca57a9083ec87155ac569ef8f3b6ea59272",
+    "patch": "@@ -3,6 +3,8 @@\n import static datadog.trace.agent.tooling.bytebuddy.matcher.DDElementMatchers.extendsClass;\n import static datadog.trace.agent.tooling.bytebuddy.matcher.NameMatchers.named;\n import static datadog.trace.agent.tooling.bytebuddy.matcher.NameMatchers.namedNoneOf;\n+import static datadog.trace.bootstrap.BootstrapLoadedPackages.forceLoadWithBootstrapClassLoaderIfNecessary;\n+import static datadog.trace.bootstrap.BootstrapLoadedPackages.mayForceLoadWithBootstrapClassLoader;\n import static java.util.Collections.singletonMap;\n import static net.bytebuddy.matcher.ElementMatchers.isMethod;\n import static net.bytebuddy.matcher.ElementMatchers.isProtected;\n@@ -15,7 +17,6 @@\n import com.google.auto.service.AutoService;\n import datadog.trace.agent.tooling.Instrumenter;\n import datadog.trace.bootstrap.CallDepthThreadLocalMap;\n-import datadog.trace.bootstrap.Constants;\n import java.util.Map;\n import net.bytebuddy.asm.Advice;\n import net.bytebuddy.description.method.MethodDescription;\n@@ -42,7 +43,11 @@ public ClassloadingInstrumentation() {\n   public ElementMatcher<TypeDescription> typeMatcher() {\n     // just an optimization to exclude common class loaders that are known to delegate to the\n     // bootstrap loader (or happen to _be_ the bootstrap loader)\n-    return namedNoneOf(\"java.lang.ClassLoader\", \"com.ibm.oti.vm.BootstrapClassLoader\")\n+    return namedNoneOf(\n+            \"java.lang.ClassLoader\",\n+            \"com.ibm.oti.vm.BootstrapClassLoader\",\n+            \"datadog.trace.bootstrap.DatadogClassLoader\",\n+            \"datadog.trace.bootstrap.DatadogClassLoader$DelegateClassLoader\")\n         .and(extendsClass(named(\"java.lang.ClassLoader\")));\n   }\n \n@@ -66,9 +71,12 @@ public ClassloadingInstrumentation() {\n   public static class LoadClassAdvice {\n     @Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class, suppress = Throwable.class)\n     public static Class<?> onEnter(@Advice.Argument(0) final String name) {\n-      // we must access agent types used in the call-depth block like 'Constants' before entering it\n-      // - otherwise we risk loading these agent types with a non-zero call-depth, which will fail\n-      final String[] bootstrapPrefixes = Constants.BOOTSTRAP_PACKAGE_PREFIXES;\n+      // optimisation to avoid incrementing the call depth on every load\n+      // this call also ensures that the BootstrapLoadedPackages class\n+      // must have already been loaded whenever the call depth is > 0\n+      if (!mayForceLoadWithBootstrapClassLoader(name)) {\n+        return null;\n+      }\n \n       // need to use call depth here to prevent re-entry from call to Class.forName() below\n       // because on some JVMs (e.g. IBM's, though IBM bootstrap loader is explicitly excluded above)\n@@ -79,13 +87,7 @@ public ClassloadingInstrumentation() {\n         return null;\n       }\n       try {\n-        for (final String prefix : bootstrapPrefixes) {\n-          if (name.startsWith(prefix)) {\n-            return Class.forName(name, false, null);\n-          }\n-        }\n-      } catch (final ClassNotFoundException e) {\n-        // bootstrap class not found, fall-back to original behaviour\n+        return forceLoadWithBootstrapClassLoaderIfNecessary(name);\n       } finally {\n         // need to reset it right away, not waiting until onExit()\n         // otherwise it will prevent this instrumentation from being applied when loadClass()\n@@ -94,7 +96,6 @@ public ClassloadingInstrumentation() {\n         // the nested loadClass instrumentation)\n         CallDepthThreadLocalMap.reset(ClassLoader.class);\n       }\n-      return null;\n     }\n \n     @Advice.OnMethodExit(onThrowable = Throwable.class)"
+  },
+  {
+    "sha": "b4596152849b68c815669c0dfab9ae8997cb749c",
+    "filename": "dd-java-agent/instrumentation/glassfish/src/main/java/datadog/trace/instrumentation/glassfish/GlassFishInstrumentation.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/DataDog/dd-trace-java/blob/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/instrumentation/glassfish/src/main/java/datadog/trace/instrumentation/glassfish/GlassFishInstrumentation.java",
+    "raw_url": "https://github.com/DataDog/dd-trace-java/raw/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/instrumentation/glassfish/src/main/java/datadog/trace/instrumentation/glassfish/GlassFishInstrumentation.java",
+    "contents_url": "https://api.github.com/repos/DataDog/dd-trace-java/contents/dd-java-agent/instrumentation/glassfish/src/main/java/datadog/trace/instrumentation/glassfish/GlassFishInstrumentation.java?ref=3c23cca57a9083ec87155ac569ef8f3b6ea59272",
+    "patch": "@@ -7,7 +7,7 @@\n \n import com.google.auto.service.AutoService;\n import datadog.trace.agent.tooling.Instrumenter;\n-import datadog.trace.bootstrap.Constants;\n+import datadog.trace.bootstrap.BootstrapLoadedPackages;\n import java.util.Map;\n import net.bytebuddy.asm.Advice;\n import net.bytebuddy.description.method.MethodDescription;\n@@ -46,7 +46,7 @@ public GlassFishInstrumentation() {\n     @Advice.OnMethodEnter(suppress = Throwable.class)\n     public static void preventBlockingOfTracerClasses(\n         @Advice.Argument(value = 0, readOnly = false) String name) {\n-      for (final String prefix : Constants.BOOTSTRAP_PACKAGE_PREFIXES) {\n+      for (final String prefix : BootstrapLoadedPackages.BOOTSTRAP_PACKAGE_PREFIXES) {\n         if (name.startsWith(prefix)) {\n           name = \"__datadog_no_block.\" + name;\n           break;"
+  },
+  {
+    "sha": "7dcc8699f236d523c9ecd8ad00585815bd51a843",
+    "filename": "dd-java-agent/src/test/java/datadog/trace/agent/test/IntegrationTestUtils.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/DataDog/dd-trace-java/blob/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/src/test/java/datadog/trace/agent/test/IntegrationTestUtils.java",
+    "raw_url": "https://github.com/DataDog/dd-trace-java/raw/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/src/test/java/datadog/trace/agent/test/IntegrationTestUtils.java",
+    "contents_url": "https://api.github.com/repos/DataDog/dd-trace-java/contents/dd-java-agent/src/test/java/datadog/trace/agent/test/IntegrationTestUtils.java?ref=3c23cca57a9083ec87155ac569ef8f3b6ea59272",
+    "patch": "@@ -130,7 +130,7 @@ public static String getResourceName(final String className) {\n   public static String[] getBootstrapPackagePrefixes() throws Exception {\n     final Field f =\n         getAgentClassLoader()\n-            .loadClass(\"datadog.trace.bootstrap.Constants\")\n+            .loadClass(\"datadog.trace.bootstrap.BootstrapLoadedPackages\")\n             .getField(\"BOOTSTRAP_PACKAGE_PREFIXES\");\n     return (String[]) f.get(null);\n   }"
+  },
+  {
+    "sha": "89378d63507954eab98039a449a4b2c8fbbdcb9a",
+    "filename": "dd-java-agent/testing/src/main/groovy/datadog/trace/agent/test/SpockRunner.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/DataDog/dd-trace-java/blob/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/testing/src/main/groovy/datadog/trace/agent/test/SpockRunner.java",
+    "raw_url": "https://github.com/DataDog/dd-trace-java/raw/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/testing/src/main/groovy/datadog/trace/agent/test/SpockRunner.java",
+    "contents_url": "https://api.github.com/repos/DataDog/dd-trace-java/contents/dd-java-agent/testing/src/main/groovy/datadog/trace/agent/test/SpockRunner.java?ref=3c23cca57a9083ec87155ac569ef8f3b6ea59272",
+    "patch": "@@ -2,6 +2,7 @@\n \n import com.google.common.reflect.ClassPath;\n import datadog.trace.agent.test.utils.ClasspathUtils;\n+import datadog.trace.bootstrap.BootstrapLoadedPackages;\n import datadog.trace.bootstrap.DatadogClassLoader.BootstrapClassLoaderProxy;\n import java.io.File;\n import java.io.IOException;\n@@ -26,7 +27,7 @@\n  */\n public class SpockRunner extends Sputnik {\n   /**\n-   * An exact copy of {@link datadog.trace.bootstrap.Constants#BOOTSTRAP_PACKAGE_PREFIXES}.\n+   * An exact copy of {@link BootstrapLoadedPackages#BOOTSTRAP_PACKAGE_PREFIXES}.\n    *\n    * <p>This list is needed to initialize the bootstrap classpath because Utils' static initializer\n    * references bootstrap classes (e.g. DatadogClassLoader)."
+  },
+  {
+    "sha": "95cf688bcbb29f062d85f4d8c497c334574795dd",
+    "filename": "dd-java-agent/testing/src/test/groovy/AgentTestRunnerTest.groovy",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/DataDog/dd-trace-java/blob/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/testing/src/test/groovy/AgentTestRunnerTest.groovy",
+    "raw_url": "https://github.com/DataDog/dd-trace-java/raw/3c23cca57a9083ec87155ac569ef8f3b6ea59272/dd-java-agent/testing/src/test/groovy/AgentTestRunnerTest.groovy",
+    "contents_url": "https://api.github.com/repos/DataDog/dd-trace-java/contents/dd-java-agent/testing/src/test/groovy/AgentTestRunnerTest.groovy?ref=3c23cca57a9083ec87155ac569ef8f3b6ea59272",
+    "patch": "@@ -3,7 +3,7 @@ import datadog.trace.agent.test.AgentTestRunner\n import datadog.trace.agent.test.SpockRunner\n import datadog.trace.agent.test.utils.ClasspathUtils\n import datadog.trace.api.GlobalTracer\n-import datadog.trace.bootstrap.Constants\n+import datadog.trace.bootstrap.BootstrapLoadedPackages\n import datadog.trace.bootstrap.instrumentation.api.AgentScope\n import datadog.trace.bootstrap.instrumentation.api.AgentSpan\n import datadog.trace.bootstrap.instrumentation.api.AgentTracer\n@@ -34,16 +34,16 @@ class AgentTestRunnerTest extends AgentTestRunner {\n \n   def \"spock runner bootstrap prefixes correct for test setup\"() {\n     expect:\n-    SpockRunner.BOOTSTRAP_PACKAGE_PREFIXES_COPY == Constants.BOOTSTRAP_PACKAGE_PREFIXES\n+    SpockRunner.BOOTSTRAP_PACKAGE_PREFIXES_COPY == BootstrapLoadedPackages.BOOTSTRAP_PACKAGE_PREFIXES\n   }\n \n   def \"classpath setup\"() {\n     setup:\n     boolean jfrSupported = isJFRSupported()\n     final List<String> bootstrapClassesIncorrectlyLoaded = []\n     for (ClassPath.ClassInfo info : ClasspathUtils.getTestClasspath().getAllClasses()) {\n-      for (int i = 0; i < Constants.BOOTSTRAP_PACKAGE_PREFIXES.length; ++i) {\n-        if (info.getName().startsWith(Constants.BOOTSTRAP_PACKAGE_PREFIXES[i])) {\n+      for (int i = 0; i < BootstrapLoadedPackages.BOOTSTRAP_PACKAGE_PREFIXES.length; ++i) {\n+        if (info.getName().startsWith(BootstrapLoadedPackages.BOOTSTRAP_PACKAGE_PREFIXES[i])) {\n           if (!jfrSupported && info.getName().startsWith(\"datadog.trace.bootstrap.instrumentation.exceptions.\")) {\n             continue // skip exception-profiling classes - they won't load if JFR is not available\n           }"
+  }
+]

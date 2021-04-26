@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "494e2602c337e95ed6c2dd0512813cd7259be9eb",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/asdfjkl/jerry/blob/c875c6469a097869b86c5e9935007f486408eb77/pom.xml",
+    "raw_url": "https://github.com/asdfjkl/jerry/raw/c875c6469a097869b86c5e9935007f486408eb77/pom.xml",
+    "contents_url": "https://api.github.com/repos/asdfjkl/jerry/contents/pom.xml?ref=c875c6469a097869b86c5e9935007f486408eb77",
+    "patch": "@@ -2,7 +2,7 @@\n   xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n     <modelVersion>4.0.0</modelVersion>\n     <groupId>org.asdfjkl.jerryfx</groupId>\n-    <artifactId>jerryfx</artifactId>\n+    <artifactId>JerryFork</artifactId>\n     <version>4.1</version>\n     <packaging>jar</packaging>\n     <properties>\n@@ -106,4 +106,5 @@\n             </plugin>\n         </plugins>\n     </build>\n+    <name>JerryFork</name>\n </project>"
+  },
+  {
+    "sha": "1fbfa6b89730059940fd0dc08fa2a59380b67689",
+    "filename": "src/main/java/org/asdfjkl/jerryfx/gui/ModeMenuController.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/asdfjkl/jerry/blob/c875c6469a097869b86c5e9935007f486408eb77/src/main/java/org/asdfjkl/jerryfx/gui/ModeMenuController.java",
+    "raw_url": "https://github.com/asdfjkl/jerry/raw/c875c6469a097869b86c5e9935007f486408eb77/src/main/java/org/asdfjkl/jerryfx/gui/ModeMenuController.java",
+    "contents_url": "https://api.github.com/repos/asdfjkl/jerry/contents/src/main/java/org/asdfjkl/jerryfx/gui/ModeMenuController.java?ref=c875c6469a097869b86c5e9935007f486408eb77",
+    "patch": "@@ -523,14 +523,15 @@ public void stateChange() {\n         boolean isCheckmate = board.isCheckmate();\n         boolean isStalemate = board.isStalemate();\n         boolean isThreefoldRepetition = gameModel.getGame().isThreefoldRepetition();\n+        boolean isInsufficientMaterial = gameModel.getGame().isInsufficientMaterial();\n \n         boolean abort = false;\n \n         // if we change from e.g. play white to enter moves, the state change would trigger\n         // the notification again in enter moves mode after the state change. thus,\n         // also check if\n-        if((isCheckmate || isStalemate || isThreefoldRepetition) && !gameModel.doNotNotifyAboutResult) {\n-\n+        if((isCheckmate || isStalemate || isThreefoldRepetition || isInsufficientMaterial)\n+                && !gameModel.doNotNotifyAboutResult) {\n             String message = \"\";\n             if(isCheckmate) {\n                 message = \"     Checkmate.     \";\n@@ -541,6 +542,9 @@ public void stateChange() {\n             if(isThreefoldRepetition) {\n                 message = \"Draw (Threefold Repetition)\";\n             }\n+            if(isInsufficientMaterial) {\n+                message = \"Draw (Insufficient material for checkmate)\";\n+            }\n             if(mode != GameModel.MODE_GAME_ANALYSIS) {\n                 DialogSimpleAlert dlg = new DialogSimpleAlert();\n                 dlg.show(message);"
+  },
+  {
+    "sha": "4cdd322645c2f6e54492711b4477286d6e69a80a",
+    "filename": "src/main/java/org/asdfjkl/jerryfx/lib/Board.java",
+    "status": "modified",
+    "additions": 88,
+    "deletions": 0,
+    "changes": 88,
+    "blob_url": "https://github.com/asdfjkl/jerry/blob/c875c6469a097869b86c5e9935007f486408eb77/src/main/java/org/asdfjkl/jerryfx/lib/Board.java",
+    "raw_url": "https://github.com/asdfjkl/jerry/raw/c875c6469a097869b86c5e9935007f486408eb77/src/main/java/org/asdfjkl/jerryfx/lib/Board.java",
+    "contents_url": "https://api.github.com/repos/asdfjkl/jerry/contents/src/main/java/org/asdfjkl/jerryfx/lib/Board.java?ref=c875c6469a097869b86c5e9935007f486408eb77",
+    "patch": "@@ -2148,5 +2148,93 @@ private void initPieceList() {\n             }\n         }\n     }\n+    \n+    public int getPieceType(int piece)\n+    {\n+      return piece & 0x0000000F;\n+    }\n+\n+    public int getSquareColorAt(int x, int y)\n+    {\n+      // optional TODO: Check that x and y values are within range 0..7.\n+      if ((x+y)%2 == 0) {\n+          return CONSTANTS.IBLACK;\n+      }\n+      return CONSTANTS.IWHITE;\n+    }\n+    \n+    public boolean isInsufficientMaterial() {\n+        int pCounter = 0;\n+        int lastPiece = CONSTANTS.EMPTY;\n+        int lastPieceSquareColor = CONSTANTS.IWHITE; // just default\n+        \n+        // Scan the board:\n+        for(int x=0;x<8;x++) {\n+            for(int y=0;y<8;y++) {\n+                int piece = getPieceAt(x,y);\n+                if (piece == CONSTANTS.EMPTY)\n+                    continue;\n+                \n+                switch (getPieceType(piece)) {\n+                    case CONSTANTS.KING:\n+                        continue;\n+\n+                    case CONSTANTS.PAWN:\n+                    case CONSTANTS.QUEEN:\n+                    case CONSTANTS.ROOK:\n+                        // Possible to force mate.\n+                        return false;\n+\n+                    case CONSTANTS.KNIGHT:\n+                        if(++pCounter > 1) {\n+                            // More than a knight:\n+                            // Theoretically possible to mate or to force mate,\n+                            // depending on the color of the pieces.\n+                            return false;\n+                        }\n+                        // This is the first knight that we find:\n+                        // Save it. (not necessary)\n+                        lastPiece = piece;\n+                        break;\n \n+                    case CONSTANTS.BISHOP:\n+                        if(++pCounter > 2) {\n+                            // More than two bishops):\n+                            // Theroetically possible to mate or to force mate.\n+                            return false;\n+                        }\n+                        else if (pCounter > 1)\n+                        {\n+                            // We hsve found another piece (knight or bishop) \n+                            // before this one:\n+                            if (getPieceType(lastPiece) != CONSTANTS.BISHOP)\n+                                // A knight and a bishop:\n+                                // Theoretically possible to mate\n+                                // or to force mate.\n+                                return false;\n+                            \n+                            // Two bishops:\n+                            if (getPieceAt(x,y) == lastPiece)\n+                                // Two Bishops with the same \"pieceColor\":\n+                                // Possible to force checkmate.\n+                                return false;\n+                            \n+                            // One bishop each:\n+                            if (getSquareColorAt(x,y) != lastPieceSquareColor)\n+                                // One bishop each on squares of different\n+                                // colors: Theoretically Possible to mate.\n+                                return false;\n+                        }\n+                        else\n+                        {\n+                            // This is the first piece (bishop) that we find: Save it.\n+                            lastPieceSquareColor = getSquareColorAt(x,y);\n+                            lastPiece = piece;\n+                        }\n+                        break;\n+                }\n+            }\n+        }\n+        return true;\n+    }\n }"
+  },
+  {
+    "sha": "3a22371ae7432c5e44ea411acbfad5cf09c9489a",
+    "filename": "src/main/java/org/asdfjkl/jerryfx/lib/Game.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/asdfjkl/jerry/blob/c875c6469a097869b86c5e9935007f486408eb77/src/main/java/org/asdfjkl/jerryfx/lib/Game.java",
+    "raw_url": "https://github.com/asdfjkl/jerry/raw/c875c6469a097869b86c5e9935007f486408eb77/src/main/java/org/asdfjkl/jerryfx/lib/Game.java",
+    "contents_url": "https://api.github.com/repos/asdfjkl/jerry/contents/src/main/java/org/asdfjkl/jerryfx/lib/Game.java?ref=c875c6469a097869b86c5e9935007f486408eb77",
+    "patch": "@@ -379,5 +379,10 @@ public boolean isThreefoldRepetition() {\n         return false;\n     }\n \n+    public boolean isInsufficientMaterial() {\n+        if (current != null && current.getBoard() != null)\n+            return current.getBoard().isInsufficientMaterial();\n+        return false;\n+    }\n \n }"
+  }
+]

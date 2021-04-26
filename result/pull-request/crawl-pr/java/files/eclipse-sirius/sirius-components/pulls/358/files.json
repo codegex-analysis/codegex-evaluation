@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "657b816d13e42638df364bd6cccb2441088404fd",
+    "filename": "backend/sirius-web-emf/src/main/java/org/eclipse/sirius/web/emf/compatibility/AQLInterpreterFactory.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 1,
+    "changes": 13,
+    "blob_url": "https://github.com/eclipse-sirius/sirius-components/blob/99348ce0c907f4b6812945358f3c3799d762b424/backend/sirius-web-emf/src/main/java/org/eclipse/sirius/web/emf/compatibility/AQLInterpreterFactory.java",
+    "raw_url": "https://github.com/eclipse-sirius/sirius-components/raw/99348ce0c907f4b6812945358f3c3799d762b424/backend/sirius-web-emf/src/main/java/org/eclipse/sirius/web/emf/compatibility/AQLInterpreterFactory.java",
+    "contents_url": "https://api.github.com/repos/eclipse-sirius/sirius-components/contents/backend/sirius-web-emf/src/main/java/org/eclipse/sirius/web/emf/compatibility/AQLInterpreterFactory.java?ref=99348ce0c907f4b6812945358f3c3799d762b424",
+    "patch": "@@ -15,10 +15,12 @@\n import java.util.ArrayList;\n import java.util.Collection;\n import java.util.List;\n+import java.util.Objects;\n import java.util.Optional;\n import java.util.stream.Collectors;\n \n import org.eclipse.emf.common.util.BasicEList;\n+import org.eclipse.emf.ecore.EObject;\n import org.eclipse.emf.ecore.EPackage;\n import org.eclipse.sirius.diagram.description.DiagramDescription;\n import org.eclipse.sirius.properties.ViewExtensionDescription;\n@@ -41,6 +43,12 @@\n \n     private final Logger logger = LoggerFactory.getLogger(AQLInterpreterFactory.class);\n \n+    private final List<EPackage> contributedEPackages;\n+\n+    public AQLInterpreterFactory(List<EPackage> contributedEPackages) {\n+        this.contributedEPackages = List.copyOf(Objects.requireNonNull(contributedEPackages));\n+    }\n+\n     @Override\n     public AQLInterpreter create(DiagramDescription diagramDescription) {\n         // @formatter:off\n@@ -52,6 +60,8 @@ public AQLInterpreter create(DiagramDescription diagramDescription) {\n         // @formatter:on\n \n         List<EPackage> ePackages = diagramDescription.getMetamodel();\n+        ePackages.addAll(this.contributedEPackages);\n+        ePackages.removeIf(EObject::eIsProxy);\n         return new AQLInterpreter(javaClasses, ePackages);\n     }\n \n@@ -71,7 +81,8 @@ public AQLInterpreter create(ViewExtensionDescription viewExtensionDescription)\n         // @formatter:on\n \n         List<EPackage> ePackages = viewExtensionDescription.getMetamodels();\n-\n+        ePackages.addAll(this.contributedEPackages);\n+        ePackages.removeIf(EObject::eIsProxy);\n         return new AQLInterpreter(javaClasses, ePackages);\n     }\n "
+  },
+  {
+    "sha": "095348054a906ead7e9c1c4fc6a6bab2b78d7c06",
+    "filename": "backend/sirius-web-emf/src/main/java/org/eclipse/sirius/web/emf/services/EditingContextSearchService.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/eclipse-sirius/sirius-components/blob/99348ce0c907f4b6812945358f3c3799d762b424/backend/sirius-web-emf/src/main/java/org/eclipse/sirius/web/emf/services/EditingContextSearchService.java",
+    "raw_url": "https://github.com/eclipse-sirius/sirius-components/raw/99348ce0c907f4b6812945358f3c3799d762b424/backend/sirius-web-emf/src/main/java/org/eclipse/sirius/web/emf/services/EditingContextSearchService.java",
+    "contents_url": "https://api.github.com/repos/eclipse-sirius/sirius-components/contents/backend/sirius-web-emf/src/main/java/org/eclipse/sirius/web/emf/services/EditingContextSearchService.java?ref=99348ce0c907f4b6812945358f3c3799d762b424",
+    "patch": "@@ -93,10 +93,10 @@ public boolean existsById(UUID editingContextId) {\n             URI uri = URI.createURI(documentEntity.getId().toString());\n             JsonResource resource = new SiriusWebJSONResourceFactoryImpl().createResource(uri);\n             try (var inputStream = new ByteArrayInputStream(documentEntity.getContent().getBytes())) {\n+                resourceSet.getResources().add(resource);\n                 resource.load(inputStream, null);\n \n                 resource.eAdapters().add(new DocumentMetadataAdapter(documentEntity.getName()));\n-                resourceSet.getResources().add(resource);\n             } catch (IOException exception) {\n                 this.logger.error(exception.getMessage(), exception);\n             }"
+  },
+  {
+    "sha": "afe46badf2931a072ce890bc6b87bfbfc67aff5c",
+    "filename": "backend/sirius-web-emf/src/test/java/org/eclipse/sirius/web/emf/compatibility/properties/FormRendererTestCases.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/eclipse-sirius/sirius-components/blob/99348ce0c907f4b6812945358f3c3799d762b424/backend/sirius-web-emf/src/test/java/org/eclipse/sirius/web/emf/compatibility/properties/FormRendererTestCases.java",
+    "raw_url": "https://github.com/eclipse-sirius/sirius-components/raw/99348ce0c907f4b6812945358f3c3799d762b424/backend/sirius-web-emf/src/test/java/org/eclipse/sirius/web/emf/compatibility/properties/FormRendererTestCases.java",
+    "contents_url": "https://api.github.com/repos/eclipse-sirius/sirius-components/contents/backend/sirius-web-emf/src/test/java/org/eclipse/sirius/web/emf/compatibility/properties/FormRendererTestCases.java?ref=99348ce0c907f4b6812945358f3c3799d762b424",
+    "patch": "@@ -63,7 +63,8 @@\n     public void testEcoreModel() {\n         ViewExtensionDescription viewExtensionDescription = this.createSiriusProperties();\n \n-        AQLInterpreterFactory interpreterFactory = new AQLInterpreterFactory() {\n+        AQLInterpreterFactory interpreterFactory = new AQLInterpreterFactory(List.of()) {\n+\n             @Override\n             public AQLInterpreter create(ViewExtensionDescription viewExtensionDescription) {\n                 return new AQLInterpreter(List.of(), List.of(EcorePackage.eINSTANCE));"
+  }
+]

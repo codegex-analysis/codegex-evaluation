@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "81dbb6c3b961fda7ff89ccec9cf59d71f8daa3c1",
+    "filename": "Dockerfile",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/srcrs/BilibiliTask/blob/072fe3250da22ed0835f15bb24c7912eb0f94b9a/Dockerfile",
+    "raw_url": "https://github.com/srcrs/BilibiliTask/raw/072fe3250da22ed0835f15bb24c7912eb0f94b9a/Dockerfile",
+    "contents_url": "https://api.github.com/repos/srcrs/BilibiliTask/contents/Dockerfile?ref=072fe3250da22ed0835f15bb24c7912eb0f94b9a",
+    "patch": "@@ -3,7 +3,7 @@ FROM anapsix/alpine-java:8u201b09_jdk_unlimited\n WORKDIR /app\n COPY . /app\n \n-RUN crontab -l | { cat; echo \"1 8 * * * java -jar /app/BilibiliTask-1.0.9-all.jar >> /var/log/bilibili_task.log 2>&1\"; } | crontab -\n+RUN crontab -l | { cat; echo \"40 10 * * * java -jar /app/BilibiliTask-1.0.9-all.jar >> /var/log/bilibili_task.log 2>&1\"; } | crontab -\n RUN touch /var/log/bilibili_task.log\n \n RUN sh gradlew clean build"
+  },
+  {
+    "sha": "aac24e57cbdb7bdeff24c7f25fa592ab07a2cee6",
+    "filename": "src/main/java/top/srcrs/task/bigvip/CollectVipGift.java",
+    "status": "modified",
+    "additions": 61,
+    "deletions": 14,
+    "changes": 75,
+    "blob_url": "https://github.com/srcrs/BilibiliTask/blob/072fe3250da22ed0835f15bb24c7912eb0f94b9a/src/main/java/top/srcrs/task/bigvip/CollectVipGift.java",
+    "raw_url": "https://github.com/srcrs/BilibiliTask/raw/072fe3250da22ed0835f15bb24c7912eb0f94b9a/src/main/java/top/srcrs/task/bigvip/CollectVipGift.java",
+    "contents_url": "https://api.github.com/repos/srcrs/BilibiliTask/contents/src/main/java/top/srcrs/task/bigvip/CollectVipGift.java?ref=072fe3250da22ed0835f15bb24c7912eb0f94b9a",
+    "patch": "@@ -1,13 +1,14 @@\n package top.srcrs.task.bigvip;\n \n+import com.alibaba.fastjson.JSONArray;\n import com.alibaba.fastjson.JSONObject;\n import lombok.extern.slf4j.Slf4j;\n import top.srcrs.Task;\n import top.srcrs.domain.UserData;\n import top.srcrs.util.Request;\n \n-import java.util.Calendar;\n-import java.util.TimeZone;\n+import java.util.Map;\n+import java.util.stream.Collectors;\n \n /**\n  * 每个月 1 号，年度大会员领取 B 币卷，领取会员权益。\n@@ -29,24 +30,16 @@\n     @Override\n     public void run() {\n         try{\n-            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(\"GMT+8\"));\n-            int day = cal.get(Calendar.DATE);\n             String vipType = queryVipStatusType();\n             if(!(YEAR_VIP.equals(vipType))){\n                 log.info(\"【年度大会员领取福利】: \" + \"不是年度大会员,无法领取❌\");\n                 return ;\n             }\n-            /* 是年度大会员的朋友可以帮忙测一测\n-               有没有判断该用户是否领取了年度大会员权益\n-               我这现在只能给写死，每个月1号领取\n-            */\n-            if(day!=1){\n-                log.info(\"【年度大会员领取福利】: \" + \"今日不是月初(1号)❌\");\n-                return;\n+            for (int i = 1; i <= 2; i++) {\n+                if (checkVipPrivilege(i)) {\n+                    vipPrivilege(i);\n+                }\n             }\n-            /* 每个月1号，年度大会员领取权益 */\n-            vipPrivilege(1);\n-            vipPrivilege(2);\n \n         } catch (Exception e){\n             log.error(\"💔领取年度大会员礼包错误 : \", e);\n@@ -90,4 +83,58 @@ public String queryVipStatusType() {\n             return NOT_VIP;\n         }\n     }\n+\n+    /**\n+     * 判断是否已领取领取年度大会员B卷和大会员福利/权益\n+     * @param type [{1,大会员B币卷}, {2,大会员福利}]\n+     * @author zhule\n+     * @Time 2021-03-11\n+     */\n+    public boolean checkVipPrivilege(Integer type) {\n+        JSONObject jsonObject = Request.get(\"https://api.bilibili.com/x/vip/privilege/my\");\n+        Integer code = jsonObject.getInteger(\"code\");\n+        if (0 == code) {\n+            JSONObject data = jsonObject.getJSONObject(\"data\");\n+            if (data != null) {\n+                JSONArray list = data.getJSONArray(\"list\");\n+                Map<Integer, Integer> cache = list.toJavaList(Privilege.class).stream()\n+                        .collect(Collectors.toMap(Privilege::getType, Privilege::getState));\n+                if (type == 1) {\n+                    log.info(\"【大会员B币卷】状态: \");\n+                } else {\n+                    log.info(\"【大会员福利】状态: \");\n+                }\n+                if (cache.get(type) == 0) {\n+                    log.info(\"未领取❌\");\n+                } else {\n+                    log.info(\"已领取\");\n+                }\n+                return cache.get(type) == 0;\n+            }\n+        } else {\n+            log.warn(\"【检查年度大会员每月赠送的B币券/大会员福利状态】: 失败, 原因: {}❌\", jsonObject.getString(\"message\"));\n+        }\n+        return false;\n+    }\n+\n+    static class Privilege{\n+        Integer type;\n+        Integer state;\n+\n+        public Integer getType() {\n+            return type;\n+        }\n+\n+        public void setType(Integer type) {\n+            this.type = type;\n+        }\n+\n+        public Integer getState() {\n+            return state;\n+        }\n+\n+        public void setState(Integer state) {\n+            this.state = state;\n+        }\n+    }\n }"
+  },
+  {
+    "sha": "81fac0fb41a4cfc49b4f12baf97adc77d77a5747",
+    "filename": "src/main/java/top/srcrs/util/Request.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/srcrs/BilibiliTask/blob/072fe3250da22ed0835f15bb24c7912eb0f94b9a/src/main/java/top/srcrs/util/Request.java",
+    "raw_url": "https://github.com/srcrs/BilibiliTask/raw/072fe3250da22ed0835f15bb24c7912eb0f94b9a/src/main/java/top/srcrs/util/Request.java",
+    "contents_url": "https://api.github.com/repos/srcrs/BilibiliTask/contents/src/main/java/top/srcrs/util/Request.java?ref=072fe3250da22ed0835f15bb24c7912eb0f94b9a",
+    "patch": "@@ -33,7 +33,8 @@\n      */\n     private static final UserData USER_DATA = UserData.getInstance();\n \n-    public static String UserAgent = \"\";\n+    // mac chrome user agent\n+    public static String UserAgent = \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.192 Safari/537.36\";\n \n     private Request() {}\n \n@@ -125,7 +126,7 @@ public static JSONObject clientExe(HttpUriRequest request) {\n      */\n     public static void waitFor() {\n         try{\n-            Thread.sleep(new Random().nextInt(4)*1000);\n+            Thread.sleep(new Random().nextInt(10)*1000);\n         } catch (Exception e){\n             log.warn(\"等待过程中出错\",e);\n         }"
+  },
+  {
+    "sha": "9b4cbc714483327bf0fb640a3e70a2ed4b11c04c",
+    "filename": "src/main/resources/config.yml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/srcrs/BilibiliTask/blob/072fe3250da22ed0835f15bb24c7912eb0f94b9a/src/main/resources/config.yml",
+    "raw_url": "https://github.com/srcrs/BilibiliTask/raw/072fe3250da22ed0835f15bb24c7912eb0f94b9a/src/main/resources/config.yml",
+    "contents_url": "https://api.github.com/repos/srcrs/BilibiliTask/contents/src/main/resources/config.yml?ref=072fe3250da22ed0835f15bb24c7912eb0f94b9a",
+    "patch": "@@ -7,7 +7,7 @@ s2c: true\n #月底自动使用B币卷 [{0,自己会使用},{1,给自己充电},{2,兑换成金瓜子}]\n autoBiCoin: 1\n #用户设备的标识 [android,ios]\n-platform: android\n+platform: ios\n #自定义优先给这些 up 的视频投币 , 以yml数组的形式 , 填写其 uid (mid)\n upList:\n #进行漫画签到任务 [true,false]"
+  }
+]

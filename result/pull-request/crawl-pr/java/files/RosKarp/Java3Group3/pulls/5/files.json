@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "e55e524c9c717ba5b36d291449aadbde1bed0e14",
+    "filename": "src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Car.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/RosKarp/Java3Group3/blob/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Car.java",
+    "raw_url": "https://github.com/RosKarp/Java3Group3/raw/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Car.java",
+    "contents_url": "https://api.github.com/repos/RosKarp/Java3Group3/contents/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Car.java?ref=82680137d4f3ab3b23faf5046dc09ac6746c7d47",
+    "patch": "@@ -0,0 +1,44 @@\n+package ru.GeekBrains.Rostislav.Java3Group3.Lesson5;\n+\n+public class Car implements Runnable {\n+    private static int CARS_COUNT;\n+    static {\n+        CARS_COUNT = 0;\n+    }\n+    private Race race;\n+    private int speed;\n+    private String name;\n+    public String getName() {\n+        return name;\n+    }\n+    public int getSpeed() {\n+        return speed;\n+    }\n+    public Car(Race race, int speed) {\n+        this.race = race;\n+        this.speed = speed;\n+        CARS_COUNT++;\n+        this.name = \"Участник #\" + CARS_COUNT;\n+    }\n+    @Override\n+    public void run() {\n+        try {\n+            System.out.println(this.name + \" готовится\");\n+            Thread.sleep(500 + (int)(Math.random() * 800));\n+            System.out.println(this.name + \" готов\");\n+            MainClass.cyclicBarrier.await();        // все собираются на старте\n+            MainClass.cyclicBarrier.await();        // старт, чтобы никто досрочно не стартовал\n+\n+        for (int i = 0; i < race.getStages().size(); i++) {\n+            race.getStages().get(i).go(this);\n+        }\n+        if(!MainClass.isWinner) {       // проверка наличия победителя, и печать чемпиона\n+            MainClass.isWinner = true;\n+            System.out.println(this.name + \" победил!\");\n+        }\n+        MainClass.countDownLatch.countDown(); // подсчет финишировавших\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "5f92f7408d00c6ea4da17c727d164e1c1682d837",
+    "filename": "src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/MainClass.java",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/RosKarp/Java3Group3/blob/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/MainClass.java",
+    "raw_url": "https://github.com/RosKarp/Java3Group3/raw/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/MainClass.java",
+    "contents_url": "https://api.github.com/repos/RosKarp/Java3Group3/contents/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/MainClass.java?ref=82680137d4f3ab3b23faf5046dc09ac6746c7d47",
+    "patch": "@@ -0,0 +1,36 @@\n+package ru.GeekBrains.Rostislav.Java3Group3.Lesson5;\n+\n+import java.util.concurrent.BrokenBarrierException;\n+import java.util.concurrent.CountDownLatch;\n+import java.util.concurrent.CyclicBarrier;\n+import java.util.concurrent.Semaphore;\n+\n+public class MainClass {\n+    static final int CARS_COUNT = 4;\n+    static CyclicBarrier cyclicBarrier = new CyclicBarrier(CARS_COUNT+1); // + main поток для объявлений\n+    static Semaphore semaphore = new Semaphore((int)CARS_COUNT/2); // в тоннеле не более половины машин\n+    static CountDownLatch countDownLatch = new CountDownLatch(CARS_COUNT); // подсчет финишировавших\n+    static boolean isWinner = false; // для объявления чемпиона\n+\n+    public static void main(String[] args) {\n+\n+        System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Подготовка!!!\");\n+        Race race = new Race(new Road(60), new Tunnel(), new Road(40));\n+        Car[] cars = new Car[CARS_COUNT];\n+        for (int i = 0; i < cars.length; i++) {\n+            cars[i] = new Car(race, 20 + (int) (Math.random() * 10));\n+        }\n+        try {\n+            for (Car car : cars) {\n+                new Thread(car).start();\n+            }\n+            cyclicBarrier.await(); // ожидание подготовки\n+            System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка началась!!!\");\n+            cyclicBarrier.await(); // общий старт\n+            countDownLatch.await(); // ожидание финиша всех машин\n+            System.out.println(\"ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка закончилась!!!\");\n+        } catch (InterruptedException | BrokenBarrierException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "16d703878910ec8f787ec62e37b98383b8cd4d17",
+    "filename": "src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Race.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/RosKarp/Java3Group3/blob/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Race.java",
+    "raw_url": "https://github.com/RosKarp/Java3Group3/raw/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Race.java",
+    "contents_url": "https://api.github.com/repos/RosKarp/Java3Group3/contents/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Race.java?ref=82680137d4f3ab3b23faf5046dc09ac6746c7d47",
+    "patch": "@@ -0,0 +1,12 @@\n+package ru.GeekBrains.Rostislav.Java3Group3.Lesson5;\n+\n+import java.util.ArrayList;\n+import java.util.Arrays;\n+\n+public class Race {\n+    private ArrayList<Stage> stages;\n+    public ArrayList<Stage> getStages() { return stages; }\n+    public Race(Stage... stages) {\n+        this.stages = new ArrayList<>(Arrays.asList(stages));\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e39eb79dba1adf67d6055263ca1bd9c5095bcbb8",
+    "filename": "src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Road.java",
+    "status": "added",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/RosKarp/Java3Group3/blob/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Road.java",
+    "raw_url": "https://github.com/RosKarp/Java3Group3/raw/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Road.java",
+    "contents_url": "https://api.github.com/repos/RosKarp/Java3Group3/contents/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Road.java?ref=82680137d4f3ab3b23faf5046dc09ac6746c7d47",
+    "patch": "@@ -0,0 +1,18 @@\n+package ru.GeekBrains.Rostislav.Java3Group3.Lesson5;\n+\n+public class Road extends Stage{\n+    public Road(int length) {\n+        this.length = length;\n+        this.description = \"Дорога \" + length + \" метров\";\n+    }\n+    @Override\n+    public void go(Car c) {\n+        try {\n+            System.out.println(c.getName() + \" начал этап: \" + description);\n+            Thread.sleep(length / c.getSpeed() * 1000);\n+            System.out.println(c.getName() + \" закончил этап: \" + description);\n+        } catch (InterruptedException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "3883d3b87a6c4076467366d1d336dfdba018d38e",
+    "filename": "src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Stage.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/RosKarp/Java3Group3/blob/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Stage.java",
+    "raw_url": "https://github.com/RosKarp/Java3Group3/raw/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Stage.java",
+    "contents_url": "https://api.github.com/repos/RosKarp/Java3Group3/contents/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Stage.java?ref=82680137d4f3ab3b23faf5046dc09ac6746c7d47",
+    "patch": "@@ -0,0 +1,10 @@\n+package ru.GeekBrains.Rostislav.Java3Group3.Lesson5;\n+\n+public abstract class Stage {\n+    protected int length;\n+    protected String description;\n+    public String getDescription() {\n+        return description;\n+    }\n+    public abstract void go(Car c);\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "2a858345c70a8d8dcb198fc965a0548ac386d1a4",
+    "filename": "src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Tunnel.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/RosKarp/Java3Group3/blob/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Tunnel.java",
+    "raw_url": "https://github.com/RosKarp/Java3Group3/raw/82680137d4f3ab3b23faf5046dc09ac6746c7d47/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Tunnel.java",
+    "contents_url": "https://api.github.com/repos/RosKarp/Java3Group3/contents/src/ru/GeekBrains/Rostislav/Java3Group3/Lesson5/Tunnel.java?ref=82680137d4f3ab3b23faf5046dc09ac6746c7d47",
+    "patch": "@@ -0,0 +1,28 @@\n+package ru.GeekBrains.Rostislav.Java3Group3.Lesson5;\n+\n+public class Tunnel extends Stage{\n+    public Tunnel() {\n+        this.length = 80;\n+        this.description = \"Тоннель \" + length + \" метров\";\n+    }\n+    @Override\n+    public void go(Car c) {\n+        try {\n+            try {\n+                if(MainClass.semaphore.getQueueLength() > 0) { // если можно, едет в тоннель без ожидания\n+                    System.out.println(c.getName() + \" готовится к этапу(ждет): \" + description);\n+                }\n+                MainClass.semaphore.acquire(); // в тоннеле\n+                System.out.println(c.getName() + \" начал этап: \" + description);\n+                Thread.sleep(length / c.getSpeed() * 1000);\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            } finally {\n+                System.out.println(c.getName() + \" закончил этап: \" + description);\n+                MainClass.semaphore.release(); // выехал из тоннеля\n+            }\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "32620f75a81c63b7c7937e0340fcc721cb089d1c",
+    "filename": "src/main/java/core/basesyntax/FileWork.java",
+    "status": "modified",
+    "additions": 41,
+    "deletions": 1,
+    "changes": 42,
+    "blob_url": "https://github.com/mate-academy/jv-read-from-file/blob/10a328c0ac9a7e26fa6f37de3dd2e0c7cc12d6f3/src/main/java/core/basesyntax/FileWork.java",
+    "raw_url": "https://github.com/mate-academy/jv-read-from-file/raw/10a328c0ac9a7e26fa6f37de3dd2e0c7cc12d6f3/src/main/java/core/basesyntax/FileWork.java",
+    "contents_url": "https://api.github.com/repos/mate-academy/jv-read-from-file/contents/src/main/java/core/basesyntax/FileWork.java?ref=10a328c0ac9a7e26fa6f37de3dd2e0c7cc12d6f3",
+    "patch": "@@ -1,7 +1,47 @@\n package core.basesyntax;\n \n+import java.io.BufferedReader;\n+import java.io.File;\n+import java.io.FileReader;\n+import java.io.IOException;\n+import java.util.Arrays;\n+\n public class FileWork {\n     public String[] readFromFile(String fileName) {\n-        return null;\n+        File file = new File(fileName);\n+        StringBuilder stringBuilder = new StringBuilder();\n+        String[] resultList = new String[]{};\n+\n+        try {\n+            BufferedReader reader = new BufferedReader(new FileReader(file));\n+            String readerValue = reader.readLine();\n+            String regex = \"[?.:!;]\";\n+\n+            if (readerValue == null) {\n+                return new String[]{};\n+            }\n+\n+            while (readerValue != null) {\n+                String[] readerValueList = readerValue.split(\" \");\n+\n+                for (String value : readerValueList) {\n+                    if (value.toLowerCase().startsWith(\"w\")) {\n+                        stringBuilder.append(value.toLowerCase().replaceAll(regex, \"\")).append(\" \");\n+                    }\n+                }\n+\n+                readerValue = reader.readLine();\n+            }\n+\n+        } catch (IOException e) {\n+            throw new RuntimeException(\"Can't read a file\", e);\n+        }\n+\n+        if (stringBuilder.length() > 0) {\n+            resultList = stringBuilder.toString().split(\" \");\n+            Arrays.sort(resultList);\n+        }\n+\n+        return resultList;\n     }\n }"
+  }
+]

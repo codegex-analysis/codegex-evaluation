@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "74fe2cb1d0af6fbce4643adead3752b50d56030b",
+    "filename": "src/main/java/org/springframework/boot/test/mock/mockito/InBeanDefinitionsParser.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 12,
+    "changes": 21,
+    "blob_url": "https://github.com/antoinemeyer/mock-in-bean/blob/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/main/java/org/springframework/boot/test/mock/mockito/InBeanDefinitionsParser.java",
+    "raw_url": "https://github.com/antoinemeyer/mock-in-bean/raw/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/main/java/org/springframework/boot/test/mock/mockito/InBeanDefinitionsParser.java",
+    "contents_url": "https://api.github.com/repos/antoinemeyer/mock-in-bean/contents/src/main/java/org/springframework/boot/test/mock/mockito/InBeanDefinitionsParser.java?ref=a31b6e8e2aad3dd42477d14a1b06c06506b7db4b",
+    "patch": "@@ -1,12 +1,12 @@\n package org.springframework.boot.test.mock.mockito;\n \n import com.teketik.test.mockinbean.MockInBean;\n+import com.teketik.test.mockinbean.MockInBeans;\n import com.teketik.test.mockinbean.SpyInBean;\n+import com.teketik.test.mockinbean.SpyInBeans;\n \n import org.springframework.core.ResolvableType;\n-import org.springframework.core.annotation.MergedAnnotation;\n-import org.springframework.core.annotation.MergedAnnotations;\n-import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;\n+import org.springframework.core.annotation.AnnotationUtils;\n import org.springframework.util.Assert;\n import org.springframework.util.ReflectionUtils;\n import org.springframework.util.StringUtils;\n@@ -36,15 +36,12 @@ void parse(Class<?> source) {\n     }\n \n     private void parseField(Field element, Class<?> source) {\n-        final MergedAnnotations annotations = MergedAnnotations.from(element, SearchStrategy.SUPERCLASS);\n-        annotations\n-            .stream(MockInBean.class)\n-            .map(MergedAnnotation::synthesize)\n-            .forEach((annotation) -> parseMockInBeanAnnotation(annotation, element, source));\n-        annotations\n-            .stream(SpyInBean.class)\n-            .map(MergedAnnotation::synthesize)\n-            .forEach((annotation) -> parseSpyInBeanAnnotation(annotation, element, source));\n+        for (MockInBean annotation: AnnotationUtils.getRepeatableAnnotations(element, MockInBean.class, MockInBeans.class)) {\n+            parseMockInBeanAnnotation(annotation, element, source);\n+        }\n+        for (SpyInBean annotation: AnnotationUtils.getRepeatableAnnotations(element, SpyInBean.class, SpyInBeans.class)) {\n+            parseSpyInBeanAnnotation(annotation, element, source);\n+        }\n     }\n \n     private void parseMockInBeanAnnotation(MockInBean annotation, Field field, Class<?> source) {"
+  },
+  {
+    "sha": "f16cf7001d77b4b4cf057a75d194f5d4ea4c441c",
+    "filename": "src/test/java/com/teketik/mockinbean/InvalidBeanNameUnResolvedTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/antoinemeyer/mock-in-bean/blob/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/test/java/com/teketik/mockinbean/InvalidBeanNameUnResolvedTest.java",
+    "raw_url": "https://github.com/antoinemeyer/mock-in-bean/raw/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/test/java/com/teketik/mockinbean/InvalidBeanNameUnResolvedTest.java",
+    "contents_url": "https://api.github.com/repos/antoinemeyer/mock-in-bean/contents/src/test/java/com/teketik/mockinbean/InvalidBeanNameUnResolvedTest.java?ref=a31b6e8e2aad3dd42477d14a1b06c06506b7db4b",
+    "patch": "@@ -24,7 +24,7 @@\n         public void beforeTestClass(TestContext testContext) throws Exception {\n             try {\n                 super.beforeTestClass(testContext);\n-                Assertions.fail();\n+                Assertions.fail(\"should have thrown exception\");\n             } catch (IllegalArgumentException e) {\n                 Assertions.assertEquals(\n                     \"No beans of type class com.teketik.mockinbean.components.TestComponent3 and name invalid name\","
+  },
+  {
+    "sha": "4c87376363e66c6ff45fa49a42574d6ff1ca3b26",
+    "filename": "src/test/java/com/teketik/mockinbean/MultipleMockDefinitionForAFieldTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/antoinemeyer/mock-in-bean/blob/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/test/java/com/teketik/mockinbean/MultipleMockDefinitionForAFieldTest.java",
+    "raw_url": "https://github.com/antoinemeyer/mock-in-bean/raw/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/test/java/com/teketik/mockinbean/MultipleMockDefinitionForAFieldTest.java",
+    "contents_url": "https://api.github.com/repos/antoinemeyer/mock-in-bean/contents/src/test/java/com/teketik/mockinbean/MultipleMockDefinitionForAFieldTest.java?ref=a31b6e8e2aad3dd42477d14a1b06c06506b7db4b",
+    "patch": "@@ -25,7 +25,7 @@\n         public void beforeTestClass(TestContext testContext) throws Exception {\n             try {\n                 super.beforeTestClass(testContext);\n-                Assertions.fail();\n+                Assertions.fail(\"should have thrown exception\");\n             } catch (IllegalArgumentException e) {\n                 Assertions.assertEquals(\n                     \"private com.teketik.mockinbean.components.MockableComponent1 com.teketik.mockinbean.components.TestComponentBase.mockableComponent1 can only be mapped once, as a mock or a spy, not both!\","
+  },
+  {
+    "sha": "a0f701bcc56a7f99bcbfc8c0b173b84f61a175ea",
+    "filename": "src/test/java/org/springframework/boot/test/mock/mockito/BeanUtils_FindBeanTest.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 5,
+    "changes": 10,
+    "blob_url": "https://github.com/antoinemeyer/mock-in-bean/blob/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/test/java/org/springframework/boot/test/mock/mockito/BeanUtils_FindBeanTest.java",
+    "raw_url": "https://github.com/antoinemeyer/mock-in-bean/raw/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/test/java/org/springframework/boot/test/mock/mockito/BeanUtils_FindBeanTest.java",
+    "contents_url": "https://api.github.com/repos/antoinemeyer/mock-in-bean/contents/src/test/java/org/springframework/boot/test/mock/mockito/BeanUtils_FindBeanTest.java?ref=a31b6e8e2aad3dd42477d14a1b06c06506b7db4b",
+    "patch": "@@ -43,7 +43,7 @@ Integer int2() {\n     public void testFindBean_notFound() {\n         try {\n             BeanUtils.findBean(Long.class, \"does not matter\", applicationContext);\n-            Assertions.fail();\n+            Assertions.fail(\"should have thrown exception\");\n         } catch (IllegalArgumentException e) {\n             Assertions.assertEquals(\"No beans of type class java.lang.Long\", e.getMessage());\n         }\n@@ -69,23 +69,23 @@ public void testFindBean_invalidType() {\n     public void testFindBean_noName() {\n         try {\n             BeanUtils.findBean(Integer.class, null, applicationContext);\n-            Assertions.fail();\n+            Assertions.fail(\"should have thrown exception\");\n         } catch (IllegalArgumentException e) {\n             Assertions.assertEquals(\"Multiple beans of type class java.lang.Integer. A name must be provided\", e.getMessage());\n         }\n     }\n \n     @Test\n     public void testFindBean_multiTypeAndName() {\n-        Assertions.assertEquals(FindBeanTestConfig.INT_1, BeanUtils.findBean(Integer.class, \"int1\", applicationContext));\n-        Assertions.assertEquals(FindBeanTestConfig.INT_2, BeanUtils.findBean(Integer.class, \"int2\", applicationContext));\n+        Assertions.assertEquals(FindBeanTestConfig.INT_1, BeanUtils.findBean(Integer.class, \"int1\", applicationContext).intValue());\n+        Assertions.assertEquals(FindBeanTestConfig.INT_2, BeanUtils.findBean(Integer.class, \"int2\", applicationContext).intValue());\n     }\n \n     @Test\n     public void testFindBean_multiTypeAndNameNotFound() {\n         try {\n             BeanUtils.findBean(Integer.class, \"int3\", applicationContext);\n-            Assertions.fail();\n+            Assertions.fail(\"should have thrown exception\");\n         } catch (IllegalArgumentException e) {\n             Assertions.assertEquals(\"No beans of type class java.lang.Integer and name int3\", e.getMessage());\n         }"
+  },
+  {
+    "sha": "1944b43eb18cfe5a8e19bdb587e679cd2780f5f0",
+    "filename": "src/test/java/org/springframework/boot/test/mock/mockito/BeanUtils_findFieldTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/antoinemeyer/mock-in-bean/blob/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/test/java/org/springframework/boot/test/mock/mockito/BeanUtils_findFieldTest.java",
+    "raw_url": "https://github.com/antoinemeyer/mock-in-bean/raw/a31b6e8e2aad3dd42477d14a1b06c06506b7db4b/src/test/java/org/springframework/boot/test/mock/mockito/BeanUtils_findFieldTest.java",
+    "contents_url": "https://api.github.com/repos/antoinemeyer/mock-in-bean/contents/src/test/java/org/springframework/boot/test/mock/mockito/BeanUtils_findFieldTest.java?ref=a31b6e8e2aad3dd42477d14a1b06c06506b7db4b",
+    "patch": "@@ -26,19 +26,19 @@ public void testFindField_oneMatch() {\n     public void testFindField_multiMatch() {\n         try {\n             BeanUtils.findField(Clazz1.class, null, String.class).getName();\n-            Assertions.fail();\n+            Assertions.fail(\"should have thrown exception\");\n         } catch (IllegalArgumentException e) {\n             Assertions.assertEquals(\"Multiple fields of type class java.lang.String in class org.springframework.boot.test.mock.mockito.BeanUtils_findFieldTest$Clazz1. Please specify a name.\", e.getMessage());\n         }\n         try {\n             BeanUtils.findField(Clazz1.class, \"baseField\", String.class).getName();\n-            Assertions.fail();\n+            Assertions.fail(\"should have thrown exception\");\n         } catch (IllegalArgumentException e) {\n             Assertions.assertEquals(\"Multiple fields of type class java.lang.String in class org.springframework.boot.test.mock.mockito.BeanUtils_findFieldTest$Clazz1 with name baseField\", e.getMessage());\n         }\n         try {\n             BeanUtils.findField(Clazz1.class, \"no match\", String.class).getName();\n-            Assertions.fail();\n+            Assertions.fail(\"should have thrown exception\");\n         } catch (IllegalArgumentException e) {\n             Assertions.assertEquals(\"Multiple fields of type class java.lang.String in class org.springframework.boot.test.mock.mockito.BeanUtils_findFieldTest$Clazz1 and none with name no match\", e.getMessage());\n         }"
+  }
+]

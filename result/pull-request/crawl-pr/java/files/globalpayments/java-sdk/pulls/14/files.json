@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "bff8228f1b4773b540bd6a62d222723f870b356e",
+    "filename": "src/main/java/com/global/api/gateways/Gateway.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 2,
+    "changes": 13,
+    "blob_url": "https://github.com/globalpayments/java-sdk/blob/db4bc2a2163a343955edb58cb28f04fb7014a501/src/main/java/com/global/api/gateways/Gateway.java",
+    "raw_url": "https://github.com/globalpayments/java-sdk/raw/db4bc2a2163a343955edb58cb28f04fb7014a501/src/main/java/com/global/api/gateways/Gateway.java",
+    "contents_url": "https://api.github.com/repos/globalpayments/java-sdk/contents/src/main/java/com/global/api/gateways/Gateway.java?ref=db4bc2a2163a343955edb58cb28f04fb7014a501",
+    "patch": "@@ -13,6 +13,7 @@\n import java.io.*;\n import java.lang.reflect.Field;\n import java.net.HttpURLConnection;\n+import java.net.Proxy;\n import java.net.URL;\n import java.net.URLEncoder;\n import java.util.*;\n@@ -24,6 +25,7 @@\n     protected HashMap<String, String> headers;\n     protected int timeout;\n     protected String serviceUrl;\n+    protected Proxy proxy;\n \n     // ----------------------------------------------------------------------\n     // TODO: Remove if it is not more useful\n@@ -57,6 +59,9 @@ public String getServiceUrl() {\n     public void setServiceUrl(String serviceUrl) {\n         this.serviceUrl = serviceUrl;\n     }\n+    public void setProxy(Proxy proxy) {\n+        this.proxy = proxy;\n+    }\n \n     public Gateway(String contentType) {\n         headers = new HashMap<String, String>();\n@@ -73,7 +78,11 @@ protected GatewayResponse sendRequest(String verb, String endpoint, String data,\n         HttpsURLConnection conn = null;\n         try{\n             String queryString = buildQueryString(queryStringParams);\n-            conn = (HttpsURLConnection)new URL((serviceUrl + endpoint + queryString).trim()).openConnection();\n+            if(proxy != null) {\n+                conn = (HttpsURLConnection)new URL((serviceUrl + endpoint + queryString).trim()).openConnection(proxy);\n+            } else {\n+                conn = (HttpsURLConnection)new URL((serviceUrl + endpoint + queryString).trim()).openConnection();\n+            }\n             conn.setSSLSocketFactory(new SSLSocketFactoryEx());\n             conn.setConnectTimeout(timeout);\n             conn.setDoInput(true);\n@@ -297,4 +306,4 @@ private boolean contentTypeNotAllowedEndpoints(String verb, String endpoint) {\n                 );\n     }\n \n-}\n\\ No newline at end of file\n+}"
+  },
+  {
+    "sha": "6d39f2eeb85507ff6e82df6f74c0a0ea6ab45fce",
+    "filename": "src/main/java/com/global/api/serviceConfigs/Configuration.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/globalpayments/java-sdk/blob/db4bc2a2163a343955edb58cb28f04fb7014a501/src/main/java/com/global/api/serviceConfigs/Configuration.java",
+    "raw_url": "https://github.com/globalpayments/java-sdk/raw/db4bc2a2163a343955edb58cb28f04fb7014a501/src/main/java/com/global/api/serviceConfigs/Configuration.java",
+    "contents_url": "https://api.github.com/repos/globalpayments/java-sdk/contents/src/main/java/com/global/api/serviceConfigs/Configuration.java?ref=db4bc2a2163a343955edb58cb28f04fb7014a501",
+    "patch": "@@ -6,13 +6,15 @@\n import com.global.api.entities.enums.HostError;\n import com.global.api.entities.exceptions.ConfigurationException;\n \n+import java.net.Proxy;\n import java.util.ArrayList;\n import java.util.HashMap;\n \n public abstract class Configuration {\n     protected boolean enableLogging = false;\n     protected Environment environment = Environment.TEST;\n     protected String serviceUrl;\n+    protected Proxy proxy;\n     protected HashMap<Host, ArrayList<HostError>> simulatedHostErrors;\n     protected int timeout = 30000;\n     protected boolean validated;\n@@ -31,6 +33,10 @@ public void setServiceUrl(String serviceUrl) {\n         this.serviceUrl = serviceUrl;\n     }\n \n+    public void setProxy(Proxy proxy) {\n+        this.proxy = proxy;\n+    }\n+\n     public boolean isEnableLogging() {\n         return enableLogging;\n     }"
+  },
+  {
+    "sha": "4e39bf52f4d293dc9338a70f7f1b89b9a52e037a",
+    "filename": "src/main/java/com/global/api/serviceConfigs/GatewayConfig.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/globalpayments/java-sdk/blob/db4bc2a2163a343955edb58cb28f04fb7014a501/src/main/java/com/global/api/serviceConfigs/GatewayConfig.java",
+    "raw_url": "https://github.com/globalpayments/java-sdk/raw/db4bc2a2163a343955edb58cb28f04fb7014a501/src/main/java/com/global/api/serviceConfigs/GatewayConfig.java",
+    "contents_url": "https://api.github.com/repos/globalpayments/java-sdk/contents/src/main/java/com/global/api/serviceConfigs/GatewayConfig.java?ref=db4bc2a2163a343955edb58cb28f04fb7014a501",
+    "patch": "@@ -184,6 +184,7 @@ public void configureContainer(ConfiguredServices services) {\n             gateway.setRefundPassword(refundPassword);\n             gateway.setTimeout(timeout);\n             gateway.setServiceUrl(serviceUrl);\n+            gateway.setProxy(proxy);\n             gateway.setHostedPaymentConfig(hostedPaymentConfig);\n             gateway.setEnableLogging(enableLogging);\n "
+  }
+]

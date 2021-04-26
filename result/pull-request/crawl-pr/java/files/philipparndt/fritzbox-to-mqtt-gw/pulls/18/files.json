@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "78f95a9d236046c006ca3f7630ce40d8aac59ba0",
+    "filename": "build.sh",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/blob/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/build.sh",
+    "raw_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/raw/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/build.sh",
+    "contents_url": "https://api.github.com/repos/philipparndt/fritzbox-to-mqtt-gw/contents/build.sh?ref=4ea453588bc0efd0b29cf9c77b07c0119a9152e0",
+    "patch": "@@ -1,2 +1,2 @@\n #!/bin/bash\n-docker build -t pharndt/fritzboxmqtt .\n\\ No newline at end of file\n+docker build -t pharndt/fritzboxmqtt ."
+  },
+  {
+    "sha": "5d7cf98619e9bc6490c1ada5c4dc817b567af608",
+    "filename": "config-example.json",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/blob/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/config-example.json",
+    "raw_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/raw/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/config-example.json",
+    "contents_url": "https://api.github.com/repos/philipparndt/fritzbox-to-mqtt-gw/contents/config-example.json?ref=4ea453588bc0efd0b29cf9c77b07c0119a9152e0",
+    "patch": "@@ -11,6 +11,7 @@\n     \"fritzbox\": {\n         \"host\": \"192.168.2.1\",\n         \"username\": \"fritzbox-username\",\n-        \"password\": \"fritzbox-password\"\n+        \"password\": \"fritzbox-password\",\n+        \"box-type\": \"cable\"\n     }\n }"
+  },
+  {
+    "sha": "8013f8ed04b12f5e9f8b2094060c5ddba9142524",
+    "filename": "deploy.sh",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/blob/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/deploy.sh",
+    "raw_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/raw/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/deploy.sh",
+    "contents_url": "https://api.github.com/repos/philipparndt/fritzbox-to-mqtt-gw/contents/deploy.sh?ref=4ea453588bc0efd0b29cf9c77b07c0119a9152e0",
+    "patch": "@@ -1,2 +1,2 @@\n #!/bin/bash\n-docker push pharndt/fritzboxmqtt:latest\n\\ No newline at end of file\n+docker push pharndt/fritzboxmqtt:latest"
+  },
+  {
+    "sha": "73ebbfcd6cdf8ee3d11c30d1abddba27bb6e61ac",
+    "filename": "src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/Main.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 1,
+    "changes": 12,
+    "blob_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/blob/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/Main.java",
+    "raw_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/raw/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/Main.java",
+    "contents_url": "https://api.github.com/repos/philipparndt/fritzbox-to-mqtt-gw/contents/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/Main.java?ref=4ea453588bc0efd0b29cf9c77b07c0119a9152e0",
+    "patch": "@@ -2,9 +2,12 @@\n \n import java.io.File;\n import java.io.IOException;\n+import java.util.EnumSet;\n \n import de.rnd7.mqttgateway.GwMqttClient;\n import de.rnd7.mqttgateway.config.ConfigParser;\n+import de.rnd7.fritzboxmqttgw.config.BoxType;\n+\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n \n@@ -37,7 +40,14 @@ public static void main(final String[] args) {\n         }\n \n         try {\n-            new Main(ConfigParser.parse(new File(args[0]), Config.class));\n+            final Config config = ConfigParser.parse(new File(args[0]), Config.class);\n+\n+            if (EnumSet.of(BoxType.dsl, BoxType.cable).contains(config.getFritzbox().getBoxType())) {\n+                new Main(config);\n+            }\n+            else {\n+                LOGGER.error(\"BoxType <\" + config.getFritzbox().getBoxType() + \"> not supported\", new Throwable());\n+            }\n         } catch (final IOException e) {\n             LOGGER.error(e.getMessage(), e);\n         }"
+  },
+  {
+    "sha": "593d25e90fd2588654c41b3cb9793543c6c98961",
+    "filename": "src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/config/BoxType.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/blob/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/config/BoxType.java",
+    "raw_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/raw/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/config/BoxType.java",
+    "contents_url": "https://api.github.com/repos/philipparndt/fritzbox-to-mqtt-gw/contents/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/config/BoxType.java?ref=4ea453588bc0efd0b29cf9c77b07c0119a9152e0",
+    "patch": "@@ -0,0 +1,9 @@\n+package de.rnd7.fritzboxmqttgw.config;\n+\n+public enum BoxType {\n+    dsl,\n+    cable,\n+    fiber,\n+    lte,\n+    modem\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "cc93524684e5db7f9d2222ca6b1821ce5970b90a",
+    "filename": "src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/config/ConfigFritzbox.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/blob/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/config/ConfigFritzbox.java",
+    "raw_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/raw/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/config/ConfigFritzbox.java",
+    "contents_url": "https://api.github.com/repos/philipparndt/fritzbox-to-mqtt-gw/contents/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/config/ConfigFritzbox.java?ref=4ea453588bc0efd0b29cf9c77b07c0119a9152e0",
+    "patch": "@@ -5,10 +5,14 @@\n import java.time.Duration;\n \n public class ConfigFritzbox {\n+\n     private String host;\n     private String username;\n     private String password;\n \n+    @SerializedName(\"box-type\")\n+    private BoxType boxType = BoxType.dsl;\n+\n     @SerializedName(\"polling-interval\")\n     private Duration pollingInterval = Duration.ofSeconds(60);\n \n@@ -27,4 +31,8 @@ public String getPassword() {\n     public Duration getPollingInterval() {\n         return pollingInterval;\n     }\n+\n+    public BoxType getBoxType() {\n+        return boxType;\n+    }\n }"
+  },
+  {
+    "sha": "d770eef5ddde1987cf7815e5c9b398e3e07c037b",
+    "filename": "src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/fritzbox/FritzboxDownloader.java",
+    "status": "modified",
+    "additions": 47,
+    "deletions": 10,
+    "changes": 57,
+    "blob_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/blob/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/fritzbox/FritzboxDownloader.java",
+    "raw_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/raw/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/fritzbox/FritzboxDownloader.java",
+    "contents_url": "https://api.github.com/repos/philipparndt/fritzbox-to-mqtt-gw/contents/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/fritzbox/FritzboxDownloader.java?ref=4ea453588bc0efd0b29cf9c77b07c0119a9152e0",
+    "patch": "@@ -4,6 +4,8 @@\n import de.bausdorf.avm.tr064.FritzConnection;\n import de.bausdorf.avm.tr064.Response;\n import de.bausdorf.avm.tr064.Service;\n+import de.rnd7.fritzboxmqttgw.config.BoxType;\n+\n import org.json.JSONObject;\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n@@ -16,11 +18,13 @@\n     private final String host;\n     private final String username;\n     private final String password;\n+    private final BoxType type;\n \n-    FritzboxDownloader(final String host, final String username, final String password) {\n+    FritzboxDownloader(final String host, final String username, final String password, final BoxType type) {\n         this.host = host;\n         this.username = username;\n         this.password = password;\n+        this.type = type;\n     }\n \n     public JSONObject downloadInfo() throws IOException {\n@@ -30,8 +34,21 @@ public JSONObject downloadInfo() throws IOException {\n             connection.init(null);\n \n             final JSONObject result = new JSONObject();\n-            wanDSLIfConfig(connection, result);\n-            linkConfig(connection, result);\n+\n+            switch (type) {\n+                case dsl: {\n+                    wanDSLIfConfig(connection, result);\n+                    linkConfig(connection, result);\n+                    break;\n+                }\n+                case cable: {\n+                    wanIpConfig(connection, result);\n+                    break;\n+                }\n+                default:\n+                    throw new UnsupportedOperationException(\"BoxType <\" + type + \"> not supported\");\n+            }\n+\n             ethernetInterfaceConfig(connection, result);\n             wanInterfaceConfig(connection, result);\n \n@@ -50,7 +67,6 @@ private void wanDSLIfConfig(final FritzConnection connection, final JSONObject r\n         result.put(\"NewUpstreamCurrRate\", response.getValueAsLong(\"NewUpstreamCurrRate\"));\n     }\n \n-\n     private void linkConfig(final FritzConnection connection, final JSONObject result) throws IOException, NoSuchFieldException {\n         final Response response = get(connection, \"WANDSLLinkConfig:1\", \"GetStatistics\");\n         result.put(\"NewATMCRCErrors\", response.getValueAsLong(\"NewATMCRCErrors\"));\n@@ -59,6 +75,27 @@ private void linkConfig(final FritzConnection connection, final JSONObject resul\n         result.put(\"NewAAL5CRCErrors\", response.getValueAsLong(\"NewAAL5CRCErrors\"));\n     }\n \n+    private void wanIpConfig(final FritzConnection connection, final JSONObject result) throws IOException, NoSuchFieldException {\n+        final Response response = get(connection, \"WANIPConnection:1\", \"GetInfo\");\n+\n+        result.put(\"NewEnable\", response.getValueAsBoolean(\"NewEnable\"));\n+        result.put(\"NewConnectionStatus\", response.getValueAsString(\"NewConnectionStatus\"));\n+        result.put(\"NewPossibleConnectionTypes\", response.getValueAsString(\"NewPossibleConnectionTypes\"));\n+        result.put(\"NewConnectionType\", response.getValueAsString(\"NewConnectionType\"));\n+        result.put(\"NewName\", response.getValueAsString(\"NewName\"));\n+        result.put(\"NewUptime\", response.getValueAsLong(\"NewUptime\"));\n+        result.put(\"NewLastConnectionError\", response.getValueAsString(\"NewLastConnectionError\"));\n+        result.put(\"NewRSIPAvailable\", response.getValueAsBoolean(\"NewRSIPAvailable\"));\n+        result.put(\"NewNATEnabled\", response.getValueAsBoolean(\"NewNATEnabled\"));\n+        result.put(\"NewExternalIPAddress\", response.getValueAsString(\"NewExternalIPAddress\"));\n+        result.put(\"NewDNSServers\", response.getValueAsString(\"NewDNSServers\"));\n+        result.put(\"NewMACAddress\", response.getValueAsString(\"NewMACAddress\"));\n+        result.put(\"NewConnectionTrigger\", response.getValueAsString(\"NewConnectionTrigger\"));\n+        result.put(\"NewRouteProtocolRx\", response.getValueAsString(\"NewRouteProtocolRx\"));\n+        result.put(\"NewDNSEnabled\", response.getValueAsBoolean(\"NewDNSEnabled\"));\n+        result.put(\"NewDNSOverrideAllowed\", response.getValueAsBoolean(\"NewDNSOverrideAllowed\"));\n+    }\n+\n     private void ethernetInterfaceConfig(final FritzConnection connection, final JSONObject result) throws IOException, NoSuchFieldException {\n         final Response response = get(connection, \"LANEthernetInterfaceConfig:1\", \"GetStatistics\");\n         result.put(\"NewBytesReceived\", response.getValueAsLong(\"NewBytesReceived\"));\n@@ -79,11 +116,12 @@ private void wanInterfaceConfig(final FritzConnection connection, final JSONObje\n         response = get(connection, \"WANCommonInterfaceConfig:1\", \"GetTotalBytesReceived\");\n         result.put(\"NewTotalBytesReceived\", response.getValueAsLong(\"NewTotalBytesReceived\"));\n \n-        response = get(connection, \"WANPPPConnection:1\", \"GetInfo\");\n-        result.put(\"NewConnectionStatus\", response.getValueAsString(\"NewConnectionStatus\").equalsIgnoreCase(\"connected\") ? 1 : 0);\n-        result.put(\"NewUptime\", response.getValueAsLong(\"NewUptime\"));\n-        result.put(\"NewExternalIPAddress\", response.getValueAsString(\"NewExternalIPAddress\"));\n-\n+        if (type == BoxType.dsl) {\n+            response = get(connection, \"WANPPPConnection:1\", \"GetInfo\");\n+            result.put(\"NewConnectionStatus\", response.getValueAsString(\"NewConnectionStatus\").equalsIgnoreCase(\"connected\") ? 1 : 0);\n+            result.put(\"NewUptime\", response.getValueAsLong(\"NewUptime\"));\n+            result.put(\"NewExternalIPAddress\", response.getValueAsString(\"NewExternalIPAddress\"));\n+        }\n     }\n \n     private Response get(final FritzConnection connection, final String serviceName, final String actionName) throws IOException {\n@@ -92,5 +130,4 @@ private Response get(final FritzConnection connection, final String serviceName,\n         final Action action = service.getAction(actionName);\n         return action.execute();\n     }\n-\n }"
+  },
+  {
+    "sha": "66cdf114bf9ddf3c1f6233bcd9335b3d62d9f4b3",
+    "filename": "src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/fritzbox/FritzboxService.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/blob/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/fritzbox/FritzboxService.java",
+    "raw_url": "https://github.com/philipparndt/fritzbox-to-mqtt-gw/raw/4ea453588bc0efd0b29cf9c77b07c0119a9152e0/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/fritzbox/FritzboxService.java",
+    "contents_url": "https://api.github.com/repos/philipparndt/fritzbox-to-mqtt-gw/contents/src/de.rnd7.fritzboxmqttgw/src/main/java/de/rnd7/fritzboxmqttgw/fritzbox/FritzboxService.java?ref=4ea453588bc0efd0b29cf9c77b07c0119a9152e0",
+    "patch": "@@ -33,10 +33,11 @@ private void exec() {\n         try {\n             final FritzboxDownloader downloader = new FritzboxDownloader(config.getHost(),\n                     config.getUsername(),\n-                    config.getPassword());\n+                    config.getPassword(),\n+                    config.getBoxType());\n \n             final String message = downloader.downloadInfo().toString();\n-            Events.post(PublishMessage.relative(\"dsl\",\n+            Events.post(PublishMessage.relative(config.getBoxType().toString(),\n                     message));\n         } catch (final IOException e) {\n             LOGGER.error(e.getMessage(), e);"
+  }
+]

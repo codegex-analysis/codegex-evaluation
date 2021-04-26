@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "cea457d7ae46866a9182d7dee9d0273d06b73aef",
+    "filename": "pythoncode/deadlock2.py",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/morganwillisaws/codeguru/blob/40a4991c052ced42437c95b5ca07e957830d9dfc/pythoncode/deadlock2.py",
+    "raw_url": "https://github.com/morganwillisaws/codeguru/raw/40a4991c052ced42437c95b5ca07e957830d9dfc/pythoncode/deadlock2.py",
+    "contents_url": "https://api.github.com/repos/morganwillisaws/codeguru/contents/pythoncode/deadlock2.py?ref=40a4991c052ced42437c95b5ca07e957830d9dfc",
+    "patch": "@@ -0,0 +1,45 @@\n+import threading\n+import time\n+\n+class MyThread1(threading.Thread):\n+    def run(self):\n+        # Lock mutexA\n+        mutexA.acquire()\n+\n+        # After mutex A is locked, delay for 1 second and wait for another thread to lock mutex B\n+        print(self.name+'----do1---up----')\n+        time.sleep(1)\n+\n+        # This is blocked because the mutex B has been preempted by another thread\n+        mutexB.acquire()\n+        print(self.name+'----do1---down----')\n+        mutexB.release()\n+\n+        # Unlock mutexA\n+        mutexA.release()\n+\n+class MyThread2(threading.Thread):\n+    def run(self):\n+        # Lock mutex B\n+        mutexB.acquire()\n+\n+        # After mutex B is locked, delay for 1 second and wait for another thread to lock mutex a\n+        print(self.name+'----do2---up----')\n+        time.sleep(1)\n+\n+        # This is blocked because the mutexA has been preempted by another thread\n+        mutexA.acquire()\n+        print(self.name+'----do2---down----')\n+        mutexA.release()\n+\n+        # Unlock mutexB\n+        mutexB.release()\n+\n+mutexA = threading.Lock()\n+mutexB = threading.Lock()\n+\n+if __name__ == '__main__':\n+    t1 = MyThread1()\n+    t2 = MyThread2()\n+    t1.start()\n+    t2.start()\n\\ No newline at end of file"
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "709423cf7f8d190915ce7190804bc9bfe4ad984d",
+    "filename": "src/main/java/com/epam/multithreading/route/Bus.java",
+    "status": "added",
+    "additions": 53,
+    "deletions": 0,
+    "changes": 53,
+    "blob_url": "https://github.com/Stanly0407/epam-task-multithreading/blob/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/java/com/epam/multithreading/route/Bus.java",
+    "raw_url": "https://github.com/Stanly0407/epam-task-multithreading/raw/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/java/com/epam/multithreading/route/Bus.java",
+    "contents_url": "https://api.github.com/repos/Stanly0407/epam-task-multithreading/contents/src/main/java/com/epam/multithreading/route/Bus.java?ref=af8ebb0a436282e134c75c0545fc54ce3a42ca43",
+    "patch": "@@ -0,0 +1,53 @@\n+package com.epam.multithreading.route;\n+\n+import com.fasterxml.jackson.annotation.JsonCreator;\n+import com.fasterxml.jackson.annotation.JsonProperty;\n+import org.apache.logging.log4j.LogManager;\n+import org.apache.logging.log4j.Logger;\n+\n+import java.util.List;\n+\n+\n+public class Bus implements Runnable {\n+\n+    private static final Logger LOGGER = LogManager.getLogger(Bus.class);\n+\n+    private int busNumber;\n+    private int busPassengers;\n+    private List<Integer> routePlan;\n+\n+    @JsonCreator\n+    public Bus(@JsonProperty(\"busNumber\") int busNumber,\n+               @JsonProperty(\"busPassengers\") int busPassengers,\n+               @JsonProperty(\"routePlan\") List<Integer> routePlan) {\n+        this.busNumber = busNumber;\n+        this.busPassengers = busPassengers;\n+        this.routePlan = routePlan;\n+    }\n+\n+    @Override\n+    public void run() {\n+        BusStopsPool busStopsPool = BusStopsPool.INSTANCE;\n+\n+        // the bus makes stops according to the route plan\n+        for (Integer busStopNumber : routePlan) {\n+            LOGGER.debug(\"The BUS No.\" + getBusNumber() + \" DRIVES UP to the BUS STOP No.-----> \" + busStopNumber);\n+\n+            busStopsPool.getBusStop(busStopNumber).makeStop(this);\n+        }\n+        LOGGER.debug(\"The BUS No.\" + getBusNumber() + \" FINISHED the route!\");\n+    }\n+\n+    public int getBusNumber() {\n+        return busNumber;\n+    }\n+\n+    public int getBusPassengers() {\n+        return busPassengers;\n+    }\n+\n+    public void setBusPassengers(int busPassengers) {\n+        this.busPassengers = busPassengers;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "06f7f01ae9f810fb7efc84418bab6449aaa95203",
+    "filename": "src/main/java/com/epam/multithreading/route/BusRouteRunner.java",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/Stanly0407/epam-task-multithreading/blob/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/java/com/epam/multithreading/route/BusRouteRunner.java",
+    "raw_url": "https://github.com/Stanly0407/epam-task-multithreading/raw/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/java/com/epam/multithreading/route/BusRouteRunner.java",
+    "contents_url": "https://api.github.com/repos/Stanly0407/epam-task-multithreading/contents/src/main/java/com/epam/multithreading/route/BusRouteRunner.java?ref=af8ebb0a436282e134c75c0545fc54ce3a42ca43",
+    "patch": "@@ -0,0 +1,42 @@\n+package com.epam.multithreading.route;\n+\n+import com.fasterxml.jackson.core.type.TypeReference;\n+import com.fasterxml.jackson.databind.ObjectMapper;\n+import org.apache.logging.log4j.LogManager;\n+import org.apache.logging.log4j.Logger;\n+\n+import java.io.File;\n+import java.io.IOException;\n+import java.util.List;\n+import java.util.Map;\n+import java.util.concurrent.ExecutorService;\n+import java.util.concurrent.Executors;\n+\n+public class BusRouteRunner {\n+\n+    private static final Logger LOGGER = LogManager.getLogger(BusRouteRunner.class);\n+    private static final File BUSES_RESOURCE = new File(\"src/main/resources/buses.json\");\n+    private static final File BUS_STOPS_RESOURCE = new File(\"src/main/resources/busstops.json\");\n+\n+    public static void main(String[] args) throws IOException {\n+\n+        ObjectMapper objectMapper = new ObjectMapper();\n+\n+        List<Bus> buses = objectMapper.readValue(BUSES_RESOURCE, new TypeReference<>() {});\n+        Map<Integer, BusStop> busStops = objectMapper.readValue(BUS_STOPS_RESOURCE, new TypeReference<>() {});\n+\n+        BusStopsPool busStopsPool = BusStopsPool.INSTANCE;\n+        busStopsPool.setBusStopsPool(busStops);\n+\n+        int busQuantity = buses.size();\n+        ExecutorService executorService = Executors.newFixedThreadPool(busQuantity);\n+\n+        for (Bus bus : buses) {\n+            executorService.submit(bus);\n+            LOGGER.debug(\"The Bus No. \" + bus.getBusNumber() + \" started!\");\n+        }\n+\n+        executorService.shutdown();\n+    }\n+\n+}"
+  },
+  {
+    "sha": "17bd9843adf578d1a4079eda34364dce0f4c6f84",
+    "filename": "src/main/java/com/epam/multithreading/route/BusStop.java",
+    "status": "added",
+    "additions": 80,
+    "deletions": 0,
+    "changes": 80,
+    "blob_url": "https://github.com/Stanly0407/epam-task-multithreading/blob/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/java/com/epam/multithreading/route/BusStop.java",
+    "raw_url": "https://github.com/Stanly0407/epam-task-multithreading/raw/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/java/com/epam/multithreading/route/BusStop.java",
+    "contents_url": "https://api.github.com/repos/Stanly0407/epam-task-multithreading/contents/src/main/java/com/epam/multithreading/route/BusStop.java?ref=af8ebb0a436282e134c75c0545fc54ce3a42ca43",
+    "patch": "@@ -0,0 +1,80 @@\n+package com.epam.multithreading.route;\n+\n+import com.fasterxml.jackson.annotation.JsonCreator;\n+import com.fasterxml.jackson.annotation.JsonProperty;\n+import org.apache.logging.log4j.LogManager;\n+import org.apache.logging.log4j.Logger;\n+\n+import java.util.concurrent.Semaphore;\n+import java.util.concurrent.locks.ReentrantLock;\n+\n+public class BusStop {\n+\n+    private static final Logger LOGGER = LogManager.getLogger(BusStop.class);\n+\n+    private int busStopNumber;\n+    private int busStopPassengers;\n+    private Semaphore busStopSemaphore;\n+    private ReentrantLock locking = new ReentrantLock(true);\n+\n+    @JsonCreator\n+    public BusStop(@JsonProperty(\"busStopNumber\") int busStopNumber,\n+                   @JsonProperty(\"maxAvailableBusCapacity\") int maxAvailableBusCapacity,\n+                   @JsonProperty(\"busStopPassengers\") int busStopPassengers) {\n+        this.busStopNumber = busStopNumber;\n+        this.busStopPassengers = busStopPassengers;\n+        this.busStopSemaphore = new Semaphore(maxAvailableBusCapacity, true);\n+    }\n+\n+    public void makeStop(Bus bus) {\n+        try {\n+            busStopSemaphore.acquire();\n+\n+            LOGGER.debug(\"The Bus No. \" + bus.getBusNumber() + \" pull into the bus stop No. \" + busStopNumber);\n+\n+            transferPassengers(bus);\n+\n+        } catch (InterruptedException e) {\n+            LOGGER.error(e.getMessage(), e);\n+        } finally {\n+\n+            busStopSemaphore.release();\n+\n+            LOGGER.debug(\"\\nThe Bus No. \" + bus.getBusNumber() + \" left the bus stop No. \" + busStopNumber + \"\\n\" +\n+                    \"At the bus stop No.\" + busStopNumber + \" ===> \" + busStopPassengers + \" waiting passengers \\n\" +\n+                    \"The bus stop No. \" + bus.getBusNumber() + \" ===> carries \" + bus.getBusPassengers() + \" passengers\");\n+        }\n+    }\n+\n+    public void transferPassengers(Bus bus) {\n+        try {\n+            locking.lock();\n+            \n+            LOGGER.debug(\"The Bus No. \" + bus.getBusNumber() + \" STARTED TRANSFER  passengers at the bus stop No. \" + busStopNumber);\n+            int busPassengers = bus.getBusPassengers();\n+            int busStopPassengers = this.getBusStopPassengers();\n+            int leftBusPassengers = (int) (Math.random() * busPassengers);\n+            int enteredBusPassengers = (int) (Math.random() * busStopPassengers);\n+            bus.setBusPassengers(busPassengers - leftBusPassengers + enteredBusPassengers);\n+            int leftBusStopPassengers = (int) (Math.random() * leftBusPassengers);\n+            this.setBusStopPassengers(busStopPassengers + leftBusPassengers - leftBusStopPassengers - enteredBusPassengers);\n+\n+        } finally {\n+            locking.unlock();\n+            LOGGER.debug(\"The Bus No. \" + bus.getBusNumber() + \" FINISHED LOADING passengers at the bus stop No. \" + busStopNumber);\n+        }\n+    }\n+\n+    public int getBusStopPassengers() {\n+        return busStopPassengers;\n+    }\n+\n+    public void setBusStopPassengers(int busStopPassengers) {\n+        this.busStopPassengers = busStopPassengers;\n+    }\n+\n+    public int getBusStopNumber() {\n+        return busStopNumber;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "d8fd93769b60a3d515993a8be7885356ec29f6cb",
+    "filename": "src/main/java/com/epam/multithreading/route/BusStopsPool.java",
+    "status": "added",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/Stanly0407/epam-task-multithreading/blob/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/java/com/epam/multithreading/route/BusStopsPool.java",
+    "raw_url": "https://github.com/Stanly0407/epam-task-multithreading/raw/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/java/com/epam/multithreading/route/BusStopsPool.java",
+    "contents_url": "https://api.github.com/repos/Stanly0407/epam-task-multithreading/contents/src/main/java/com/epam/multithreading/route/BusStopsPool.java?ref=af8ebb0a436282e134c75c0545fc54ce3a42ca43",
+    "patch": "@@ -0,0 +1,20 @@\n+package com.epam.multithreading.route;\n+\n+import java.util.Map;\n+\n+\n+public enum BusStopsPool {\n+\n+    INSTANCE;\n+\n+    private Map<Integer, BusStop> busStopsPool;\n+\n+    public BusStop getBusStop(int busStopNumber) {\n+        return busStopsPool.get(busStopNumber);\n+    }\n+\n+    public void setBusStopsPool(Map<Integer, BusStop> busStopsPool) {\n+        this.busStopsPool = busStopsPool;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "46f4ecbe3ea76b40d742ab173143bceade85ece0",
+    "filename": "src/main/java/com/epam/multithreading/route/RouteRunner.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 12,
+    "changes": 12,
+    "blob_url": "https://github.com/Stanly0407/epam-task-multithreading/blob/ea77c08a1ca0c553d83d530572ca019d6f819d67/src/main/java/com/epam/multithreading/route/RouteRunner.java",
+    "raw_url": "https://github.com/Stanly0407/epam-task-multithreading/raw/ea77c08a1ca0c553d83d530572ca019d6f819d67/src/main/java/com/epam/multithreading/route/RouteRunner.java",
+    "contents_url": "https://api.github.com/repos/Stanly0407/epam-task-multithreading/contents/src/main/java/com/epam/multithreading/route/RouteRunner.java?ref=ea77c08a1ca0c553d83d530572ca019d6f819d67",
+    "patch": "@@ -1,12 +0,0 @@\n-package com.epam.multithreading.route;\n-\n-public class RouteRunner {\n-\n-\n-    public static void main(String[] args) {\n-\n-    }\n-\n-\n-\n-}"
+  },
+  {
+    "sha": "b69f4bc1aa352b96921373fc37ce7a57058ff054",
+    "filename": "src/main/resources/buses.json",
+    "status": "added",
+    "additions": 89,
+    "deletions": 0,
+    "changes": 89,
+    "blob_url": "https://github.com/Stanly0407/epam-task-multithreading/blob/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/resources/buses.json",
+    "raw_url": "https://github.com/Stanly0407/epam-task-multithreading/raw/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/resources/buses.json",
+    "contents_url": "https://api.github.com/repos/Stanly0407/epam-task-multithreading/contents/src/main/resources/buses.json?ref=af8ebb0a436282e134c75c0545fc54ce3a42ca43",
+    "patch": "@@ -0,0 +1,89 @@\n+[\n+  {\n+    \"busNumber\": 1,\n+    \"busPassengers\": 5,\n+    \"routePlan\": [\n+      1001,\n+      2002\n+    ]\n+  },\n+  {\n+    \"busNumber\": 2,\n+    \"busPassengers\": 6,\n+    \"routePlan\": [\n+      4004,\n+      5005,\n+      3003\n+    ]\n+  },\n+  {\n+    \"busNumber\": 3,\n+    \"busPassengers\": 8,\n+    \"routePlan\": [\n+      1001,\n+      2002,\n+      3003,\n+      2002\n+    ]\n+  },\n+  {\n+    \"busNumber\": 4,\n+    \"busPassengers\": 5,\n+    \"routePlan\": [\n+      1001,\n+      5005,\n+      4004,\n+      5005,\n+      2002\n+    ]\n+  },\n+  {\n+    \"busNumber\": 5,\n+    \"busPassengers\": 6,\n+    \"routePlan\": [\n+      4004,\n+      5005,\n+      3003,\n+      2002,\n+      5005,\n+      1001\n+    ]\n+  },\n+  {\n+    \"busNumber\": 6,\n+    \"busPassengers\": 8,\n+    \"routePlan\": [\n+      1001,\n+      2002,\n+      3003,\n+      5005\n+    ]\n+  },\n+  {\n+    \"busNumber\": 7,\n+    \"busPassengers\": 5,\n+    \"routePlan\": [\n+      1001,\n+      5005,\n+      2002,\n+      3003\n+    ]\n+  },\n+  {\n+    \"busNumber\": 8,\n+    \"busPassengers\": 6,\n+    \"routePlan\": [\n+      4004,\n+      5005,\n+      3003\n+    ]\n+  },\n+  {\n+    \"busNumber\": 9,\n+    \"busPassengers\": 8,\n+    \"routePlan\": [\n+      1001,\n+      5005\n+    ]\n+  }\n+]\n\\ No newline at end of file"
+  },
+  {
+    "sha": "bc1687f4c03b451d7aaceb5b847a6c2dee71525a",
+    "filename": "src/main/resources/busstops.json",
+    "status": "added",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/Stanly0407/epam-task-multithreading/blob/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/resources/busstops.json",
+    "raw_url": "https://github.com/Stanly0407/epam-task-multithreading/raw/af8ebb0a436282e134c75c0545fc54ce3a42ca43/src/main/resources/busstops.json",
+    "contents_url": "https://api.github.com/repos/Stanly0407/epam-task-multithreading/contents/src/main/resources/busstops.json?ref=af8ebb0a436282e134c75c0545fc54ce3a42ca43",
+    "patch": "@@ -0,0 +1,27 @@\n+{\n+  \"2002\": {\n+    \"busStopNumber\": 2002,\n+    \"maxAvailableBusCapacity\": 3,\n+    \"busStopPassengers\": 9\n+  },\n+  \"4004\": {\n+    \"busStopNumber\": 4004,\n+    \"maxAvailableBusCapacity\": 2,\n+    \"busStopPassengers\": 25\n+  },\n+  \"1001\": {\n+    \"busStopNumber\": 1001,\n+    \"maxAvailableBusCapacity\": 2,\n+    \"busStopPassengers\": 15\n+  },\n+  \"3003\": {\n+    \"busStopNumber\": 3003,\n+    \"maxAvailableBusCapacity\": 2,\n+    \"busStopPassengers\": 17\n+  },\n+  \"5005\": {\n+    \"busStopNumber\": 5005,\n+    \"maxAvailableBusCapacity\": 3,\n+    \"busStopPassengers\": 7\n+  }\n+}\n\\ No newline at end of file"
+  }
+]

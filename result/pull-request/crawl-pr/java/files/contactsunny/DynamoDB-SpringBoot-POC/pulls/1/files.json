@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "8fda7080afca264e53cabed13f48ad3590b8f1b5",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 19,
+    "changes": 21,
+    "blob_url": "https://github.com/contactsunny/DynamoDB-SpringBoot-POC/blob/2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73/pom.xml",
+    "raw_url": "https://github.com/contactsunny/DynamoDB-SpringBoot-POC/raw/2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73/pom.xml",
+    "contents_url": "https://api.github.com/repos/contactsunny/DynamoDB-SpringBoot-POC/contents/pom.xml?ref=2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73",
+    "patch": "@@ -13,7 +13,7 @@\n     <parent>\n         <groupId>org.springframework.boot</groupId>\n         <artifactId>spring-boot-starter-parent</artifactId>\n-        <version>2.1.5.RELEASE</version>\n+        <version>2.4.0</version>\n         <relativePath/>\n     </parent>\n     <properties>\n@@ -41,37 +41,20 @@\n     </build>\n \n     <dependencies>\n-\n         <dependency>\n             <groupId>org.springframework.boot</groupId>\n             <artifactId>spring-boot-starter</artifactId>\n         </dependency>\n         <dependency>\n             <groupId>com.amazonaws</groupId>\n             <artifactId>aws-java-sdk-dynamodb</artifactId>\n-            <version>1.11.573</version>\n+            <version>1.11.974</version>\n         </dependency>\n         <dependency>\n             <groupId>com.github.derjust</groupId>\n             <artifactId>spring-data-dynamodb</artifactId>\n             <version>5.1.0</version>\n         </dependency>\n-        <dependency>\n-            <groupId>com.google.code.gson</groupId>\n-            <artifactId>gson</artifactId>\n-            <version>2.8.5</version>\n-        </dependency>\n-        <dependency>\n-            <groupId>org.springframework.data</groupId>\n-            <artifactId>spring-data-commons</artifactId>\n-            <version>2.1.9.RELEASE</version>\n-        </dependency>\n-        <dependency>\n-            <groupId>org.apache.logging.log4j</groupId>\n-            <artifactId>log4j</artifactId>\n-            <version>2.11.2</version>\n-        </dependency>\n-\n     </dependencies>\n \n </project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "3f1cc38bd4044b9e12708f72c71ffe6213f4cff9",
+    "filename": "src/main/java/com/contactsunny/poc/DynamoDBSpringBootPOC/App.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 7,
+    "changes": 16,
+    "blob_url": "https://github.com/contactsunny/DynamoDB-SpringBoot-POC/blob/2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73/src/main/java/com/contactsunny/poc/DynamoDBSpringBootPOC/App.java",
+    "raw_url": "https://github.com/contactsunny/DynamoDB-SpringBoot-POC/raw/2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73/src/main/java/com/contactsunny/poc/DynamoDBSpringBootPOC/App.java",
+    "contents_url": "https://api.github.com/repos/contactsunny/DynamoDB-SpringBoot-POC/contents/src/main/java/com/contactsunny/poc/DynamoDBSpringBootPOC/App.java?ref=2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73",
+    "patch": "@@ -7,7 +7,8 @@\n import com.amazonaws.services.dynamodbv2.util.TableUtils;\n import com.contactsunny.poc.DynamoDBSpringBootPOC.models.AwsService;\n import com.contactsunny.poc.DynamoDBSpringBootPOC.repositories.AwsServiceRepository;\n-import com.google.gson.Gson;\n+import com.fasterxml.jackson.databind.ObjectMapper;\n+\n import org.apache.logging.log4j.LogManager;\n import org.apache.logging.log4j.Logger;\n import org.springframework.beans.factory.annotation.Autowired;\n@@ -21,6 +22,7 @@\n public class App implements CommandLineRunner {\n \n     private DynamoDBMapper dynamoDBMapper;\n+    private ObjectMapper objectMapper;\n \n     @Autowired\n     private AmazonDynamoDB amazonDynamoDB;\n@@ -38,14 +40,14 @@ public static void main(String[] args) {\n     public void run(String... strings) throws Exception {\n \n         dynamoDBMapper = new DynamoDBMapper(amazonDynamoDB);\n-\n-\n+        objectMapper = new ObjectMapper();\n \n         CreateTableRequest tableRequest = dynamoDBMapper\n                 .generateCreateTableRequest(AwsService.class);\n \n         tableRequest.setProvisionedThroughput(\n                 new ProvisionedThroughput(1L, 1L));\n+        \n \n         TableUtils.createTableIfNotExists(amazonDynamoDB, tableRequest);\n \n@@ -56,22 +58,22 @@ public void run(String... strings) throws Exception {\n \n         awsService = awsServiceRepository.save(awsService);\n \n-        logger.info(\"Saved AwsService object: \" + new Gson().toJson(awsService));\n+        logger.info(\"Saved AwsService object: \" + objectMapper.writeValueAsString(awsService));\n \n         String awsServiceId = awsService.getId();\n \n         logger.info(\"AWS Service ID: \" + awsServiceId);\n \n         Optional<AwsService> awsServiceQueried = awsServiceRepository.findById(awsServiceId);\n \n-        if (awsServiceQueried.get() != null) {\n-            logger.info(\"Queried object: \" + new Gson().toJson(awsServiceQueried.get()));\n+        if (awsServiceQueried.isPresent()) {\n+            logger.info(\"Queried object: \" + objectMapper.writeValueAsString(awsServiceQueried.get()));\n         }\n \n         Iterable<AwsService> awsServices = awsServiceRepository.findAll();\n \n         for (AwsService awsServiceObject : awsServices) {\n-            logger.info(\"List object: \" + new Gson().toJson(awsServiceObject));\n+            logger.info(\"List object: \" + objectMapper.writeValueAsString(awsServiceObject));\n         }\n     }\n }"
+  },
+  {
+    "sha": "fc952e2e32d18e0790fd2ef9c5ef6d6f5b622c7a",
+    "filename": "src/main/java/com/contactsunny/poc/DynamoDBSpringBootPOC/configuration/DynamoDBConfig.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 18,
+    "changes": 44,
+    "blob_url": "https://github.com/contactsunny/DynamoDB-SpringBoot-POC/blob/2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73/src/main/java/com/contactsunny/poc/DynamoDBSpringBootPOC/configuration/DynamoDBConfig.java",
+    "raw_url": "https://github.com/contactsunny/DynamoDB-SpringBoot-POC/raw/2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73/src/main/java/com/contactsunny/poc/DynamoDBSpringBootPOC/configuration/DynamoDBConfig.java",
+    "contents_url": "https://api.github.com/repos/contactsunny/DynamoDB-SpringBoot-POC/contents/src/main/java/com/contactsunny/poc/DynamoDBSpringBootPOC/configuration/DynamoDBConfig.java?ref=2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73",
+    "patch": "@@ -1,14 +1,16 @@\n package com.contactsunny.poc.DynamoDBSpringBootPOC.configuration;\n \n-import com.amazonaws.auth.AWSCredentials;\n-import com.amazonaws.auth.BasicAWSCredentials;\n-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;\n-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;\n import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;\n import org.springframework.beans.factory.annotation.Value;\n import org.springframework.context.annotation.Bean;\n import org.springframework.context.annotation.Configuration;\n-import org.springframework.util.StringUtils;\n+\n+import com.amazonaws.auth.AWSCredentialsProvider;\n+import com.amazonaws.auth.AWSStaticCredentialsProvider;\n+import com.amazonaws.auth.BasicAWSCredentials;\n+import com.amazonaws.client.builder.AwsClientBuilder;\n+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;\n+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;\n \n @Configuration\n @EnableDynamoDBRepositories\n@@ -23,21 +25,27 @@\n \n     @Value(\"${amazon.aws.secretKey}\")\n     private String awsSecretKey;\n-\n+    \n+    @Value(\"${amazon.aws.region}\")\n+    private String awsRegion;\n+    \n+   \n     @Bean\n-    public AmazonDynamoDB amazonDynamoDB() {\n-        AmazonDynamoDB amazonDynamoDB\n-                = new AmazonDynamoDBClient(amazonAWSCredentials());\n-\n-        if (!StringUtils.isEmpty(dynamoDbEndpoint)) {\n-            amazonDynamoDB.setEndpoint(dynamoDbEndpoint);\n-        }\n-\n-        return amazonDynamoDB;\n+    public AWSCredentialsProvider awsCredentialsProvider() {\n+        return new AWSStaticCredentialsProvider(new BasicAWSCredentials(awsAccessKey, awsSecretKey));\n     }\n-\n+ \n     @Bean\n-    public AWSCredentials amazonAWSCredentials() {\n-        return new BasicAWSCredentials(awsAccessKey, awsSecretKey);\n+    public AmazonDynamoDB amazonDynamoDB() {\n+        return AmazonDynamoDBClientBuilder\n+                .standard()\n+                .withEndpointConfiguration(endpointConfiguration())\n+                .withCredentials(awsCredentialsProvider())\n+                .build();\n+    }\n+    \n+   \n+    private AwsClientBuilder.EndpointConfiguration endpointConfiguration() {\n+        return new AwsClientBuilder.EndpointConfiguration(dynamoDbEndpoint, awsRegion);\n     }\n }"
+  },
+  {
+    "sha": "8fccbfa31dc1b1b6ed33b978d60196d910de04a0",
+    "filename": "src/main/resources/application.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/contactsunny/DynamoDB-SpringBoot-POC/blob/2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73/src/main/resources/application.properties",
+    "raw_url": "https://github.com/contactsunny/DynamoDB-SpringBoot-POC/raw/2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73/src/main/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/contactsunny/DynamoDB-SpringBoot-POC/contents/src/main/resources/application.properties?ref=2202359b1f9afb6ec0b723f8b7b20d0de6e5ff73",
+    "patch": "@@ -1,3 +1,4 @@\n amazon.dynamodb.endpoint=http://localhost:8000/\n+amazon.aws.region=\n amazon.aws.accessKey=accessKey\n amazon.aws.secretKey=secretKey\n\\ No newline at end of file"
+  }
+]

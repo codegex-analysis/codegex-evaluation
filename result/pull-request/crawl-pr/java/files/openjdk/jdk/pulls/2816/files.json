@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "749d6ff447395171de93200ff0bf689ca249f060",
+    "filename": "src/java.base/unix/classes/sun/nio/fs/UnixFileStore.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/openjdk/jdk/blob/6bd45eceb5ca054e449cabc28cccf75c3a74faff/src/java.base/unix/classes/sun/nio/fs/UnixFileStore.java",
+    "raw_url": "https://github.com/openjdk/jdk/raw/6bd45eceb5ca054e449cabc28cccf75c3a74faff/src/java.base/unix/classes/sun/nio/fs/UnixFileStore.java",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/java.base/unix/classes/sun/nio/fs/UnixFileStore.java?ref=6bd45eceb5ca054e449cabc28cccf75c3a74faff",
+    "patch": "@@ -179,6 +179,11 @@ public Object getAttribute(String attribute) throws IOException {\n      * @return <code>true</code> if enabled, <code>false</code> if disabled or unable to determine\n      */\n     protected boolean isExtendedAttributesEnabled(UnixPath path) {\n+        if (!UnixNativeDispatcher.xattrSupported()) {\n+            // avoid I/O if native code doesn't support xattr\n+            return false;\n+        }\n+\n         int fd = -1;\n         try {\n             fd = path.openForAttributeAccess(false);"
+  },
+  {
+    "sha": "90be5cefae32fc9632bcf6b0c8b296c088ef89ae",
+    "filename": "src/java.base/unix/classes/sun/nio/fs/UnixNativeDispatcher.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 2,
+    "changes": 12,
+    "blob_url": "https://github.com/openjdk/jdk/blob/6bd45eceb5ca054e449cabc28cccf75c3a74faff/src/java.base/unix/classes/sun/nio/fs/UnixNativeDispatcher.java",
+    "raw_url": "https://github.com/openjdk/jdk/raw/6bd45eceb5ca054e449cabc28cccf75c3a74faff/src/java.base/unix/classes/sun/nio/fs/UnixNativeDispatcher.java",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/java.base/unix/classes/sun/nio/fs/UnixNativeDispatcher.java?ref=6bd45eceb5ca054e449cabc28cccf75c3a74faff",
+    "patch": "@@ -614,8 +614,9 @@ static native int flistxattr(int filedes, long listAddress, int size)\n      */\n     private static final int SUPPORTS_OPENAT        = 1 << 1;  // syscalls\n     private static final int SUPPORTS_FUTIMES       = 1 << 2;\n-    private static final int SUPPORTS_FUTIMENS      = 1 << 4;\n-    private static final int SUPPORTS_LUTIMES       = 1 << 8;\n+    private static final int SUPPORTS_FUTIMENS      = 1 << 3;\n+    private static final int SUPPORTS_LUTIMES       = 1 << 4;\n+    private static final int SUPPORTS_XATTR         = 1 << 5;\n     private static final int SUPPORTS_BIRTHTIME     = 1 << 16; // other features\n     private static final int capabilities;\n \n@@ -654,6 +655,13 @@ static boolean birthtimeSupported() {\n         return (capabilities & SUPPORTS_BIRTHTIME) != 0;\n     }\n \n+    /**\n+     * Supports extended attributes\n+     */\n+    static boolean xattrSupported() {\n+        return (capabilities & SUPPORTS_XATTR) != 0;\n+    }\n+\n     private static native int init();\n     static {\n         jdk.internal.loader.BootLoader.loadLibrary(\"nio\");"
+  },
+  {
+    "sha": "9df8be1e62c21b5d059f1354e699679c26596fa0",
+    "filename": "src/java.base/unix/native/libnio/fs/UnixNativeDispatcher.c",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/openjdk/jdk/blob/6bd45eceb5ca054e449cabc28cccf75c3a74faff/src/java.base/unix/native/libnio/fs/UnixNativeDispatcher.c",
+    "raw_url": "https://github.com/openjdk/jdk/raw/6bd45eceb5ca054e449cabc28cccf75c3a74faff/src/java.base/unix/native/libnio/fs/UnixNativeDispatcher.c",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/java.base/unix/native/libnio/fs/UnixNativeDispatcher.c?ref=6bd45eceb5ca054e449cabc28cccf75c3a74faff",
+    "patch": "@@ -315,6 +315,12 @@ Java_sun_nio_fs_UnixNativeDispatcher_init(JNIEnv* env, jclass this)\n     capabilities |= sun_nio_fs_UnixNativeDispatcher_SUPPORTS_BIRTHTIME;\n #endif\n \n+    /* supports extended attributes */\n+\n+#ifdef _SYS_XATTR_H_\n+    capabilities |= sun_nio_fs_UnixNativeDispatcher_SUPPORTS_XATTR;\n+#endif\n+\n     return capabilities;\n }\n "
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "26874bbf0a39299224eb82d2b8fc5e18d4d53a77",
+    "filename": "myconditinal-and-property/src/main/java/ru/itsjava/service/CoffeeServiceImpl.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/Petr-create/conditinal/blob/ecaec4e3b94632cf28762f615026b66f45c4e3e1/myconditinal-and-property/src/main/java/ru/itsjava/service/CoffeeServiceImpl.java",
+    "raw_url": "https://github.com/Petr-create/conditinal/raw/ecaec4e3b94632cf28762f615026b66f45c4e3e1/myconditinal-and-property/src/main/java/ru/itsjava/service/CoffeeServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/Petr-create/conditinal/contents/myconditinal-and-property/src/main/java/ru/itsjava/service/CoffeeServiceImpl.java?ref=ecaec4e3b94632cf28762f615026b66f45c4e3e1",
+    "patch": "@@ -9,9 +9,10 @@\n     private final MenuReaderService bufferedReaderService;\n     private final ScannerService scannerService;\n \n+\n     @Override\n     public void getCoffeeByPrice() {\n-        bufferedReaderService.menuReader(\"/menu.txt\");\n+        //bufferedReaderService.menuReader(\"/menu.txt\");\n         int price = scannerService.readPrice();\n         Coffee coffee = null;\n         if(price == 60){"
+  },
+  {
+    "sha": "67a4e17ddbbf7cf5d0ea061da0d2c7b732203aeb",
+    "filename": "myconditinal-and-property/src/test/java/ru/itsjava/service/CoffeeServiceImplTest.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 5,
+    "changes": 33,
+    "blob_url": "https://github.com/Petr-create/conditinal/blob/ecaec4e3b94632cf28762f615026b66f45c4e3e1/myconditinal-and-property/src/test/java/ru/itsjava/service/CoffeeServiceImplTest.java",
+    "raw_url": "https://github.com/Petr-create/conditinal/raw/ecaec4e3b94632cf28762f615026b66f45c4e3e1/myconditinal-and-property/src/test/java/ru/itsjava/service/CoffeeServiceImplTest.java",
+    "contents_url": "https://api.github.com/repos/Petr-create/conditinal/contents/myconditinal-and-property/src/test/java/ru/itsjava/service/CoffeeServiceImplTest.java?ref=ecaec4e3b94632cf28762f615026b66f45c4e3e1",
+    "patch": "@@ -1,19 +1,42 @@\n package ru.itsjava.service;\n \n-import org.junit.Test;\n+import org.junit.jupiter.api.*;\n import org.springframework.beans.factory.annotation.Autowired;\n import org.springframework.boot.test.context.SpringBootTest;\n+import org.springframework.boot.test.mock.mockito.MockBean;\n+\n+import java.io.ByteArrayOutputStream;\n+import java.io.PrintStream;\n+\n+import static org.mockito.Mockito.when;\n \n @SpringBootTest\n+@DisplayName(\"Класс CoffeeServiceImpl должен: \")\n public class CoffeeServiceImplTest {\n \n-    @Autowired\n-    MenuReaderService bufferedReaderService;\n-    @Autowired\n+    ByteArrayOutputStream output = new ByteArrayOutputStream();\n+    @MockBean\n     ScannerService scannerService;\n \n+    @Autowired\n+    CoffeeService coffeeService;\n+\n+    @BeforeEach\n+    public void setUpStreams() {\n+        System.setOut(new PrintStream(output));\n+    }\n+\n     @Test\n-    public void getCoffeeByPrice(){\n+    @DisplayName(\"иметь корректный метод getCoffeeByPrice\")\n+    public void shouldHaveCorrectChooseCoffee(){\n+        when(scannerService.readPrice()).thenReturn(60);\n+        coffeeService.getCoffeeByPrice();\n+        Assertions.assertEquals(\"Ваш выбор: Coffee(name=Эспрессо)\\n\", output.toString());\n+    }\n \n+    @AfterEach\n+    public void cleanUpStreams() {\n+        System.setOut(null);\n     }\n+\n }"
+  }
+]

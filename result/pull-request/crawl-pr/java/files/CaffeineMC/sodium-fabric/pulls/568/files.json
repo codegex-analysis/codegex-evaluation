@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c7d93a9a042eebdf70f8b569b5b220fce12c9b68",
+    "filename": "src/main/java/me/jellysquid/mods/sodium/client/gui/options/OptionImpl.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/CaffeineMC/sodium-fabric/blob/1970cc2074f12c1236d4adab8172ded78279eb34/src/main/java/me/jellysquid/mods/sodium/client/gui/options/OptionImpl.java",
+    "raw_url": "https://github.com/CaffeineMC/sodium-fabric/raw/1970cc2074f12c1236d4adab8172ded78279eb34/src/main/java/me/jellysquid/mods/sodium/client/gui/options/OptionImpl.java",
+    "contents_url": "https://api.github.com/repos/CaffeineMC/sodium-fabric/contents/src/main/java/me/jellysquid/mods/sodium/client/gui/options/OptionImpl.java?ref=1970cc2074f12c1236d4adab8172ded78279eb34",
+    "patch": "@@ -100,7 +100,7 @@ public boolean isAvailable() {\n \n     @Override\n     public boolean hasChanged() {\n-        return this.value != this.modifiedValue;\n+        return !this.value.equals(this.modifiedValue);\n     }\n \n     @Override"
+  },
+  {
+    "sha": "72edfc4c2d36117d046edccbf4047313b4cbedb0",
+    "filename": "src/main/java/me/jellysquid/mods/sodium/client/gui/options/control/CyclingControl.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/CaffeineMC/sodium-fabric/blob/1970cc2074f12c1236d4adab8172ded78279eb34/src/main/java/me/jellysquid/mods/sodium/client/gui/options/control/CyclingControl.java",
+    "raw_url": "https://github.com/CaffeineMC/sodium-fabric/raw/1970cc2074f12c1236d4adab8172ded78279eb34/src/main/java/me/jellysquid/mods/sodium/client/gui/options/control/CyclingControl.java",
+    "contents_url": "https://api.github.com/repos/CaffeineMC/sodium-fabric/contents/src/main/java/me/jellysquid/mods/sodium/client/gui/options/control/CyclingControl.java?ref=1970cc2074f12c1236d4adab8172ded78279eb34",
+    "patch": "@@ -96,7 +96,7 @@ public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta)\n         @Override\n         public boolean mouseClicked(double mouseX, double mouseY, int button) {\n             if (this.option.isAvailable() && button == 0 && this.dim.containsCursor(mouseX, mouseY)) {\n-                this.currentIndex = (this.currentIndex + 1) % this.allowedValues.length;\n+                this.currentIndex = (this.option.getValue().ordinal() + 1) % this.allowedValues.length;\n                 this.option.setValue(this.allowedValues[this.currentIndex]);\n                 this.playClickSound();\n "
+  },
+  {
+    "sha": "42df67b4245f0e1a9dd16cae6255619874163cd8",
+    "filename": "src/main/java/me/jellysquid/mods/sodium/client/gui/options/control/SliderControl.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/CaffeineMC/sodium-fabric/blob/1970cc2074f12c1236d4adab8172ded78279eb34/src/main/java/me/jellysquid/mods/sodium/client/gui/options/control/SliderControl.java",
+    "raw_url": "https://github.com/CaffeineMC/sodium-fabric/raw/1970cc2074f12c1236d4adab8172ded78279eb34/src/main/java/me/jellysquid/mods/sodium/client/gui/options/control/SliderControl.java",
+    "contents_url": "https://api.github.com/repos/CaffeineMC/sodium-fabric/contents/src/main/java/me/jellysquid/mods/sodium/client/gui/options/control/SliderControl.java?ref=1970cc2074f12c1236d4adab8172ded78279eb34",
+    "patch": "@@ -95,7 +95,9 @@ private void renderSlider(MatrixStack matrixStack) {\n             int sliderWidth = this.sliderBounds.getWidth();\n             int sliderHeight = this.sliderBounds.getHeight();\n \n-            int thumbOffset = (int) Math.floor((double) (this.getIntValue() - this.min) / this.range * sliderWidth);\n+            this.thumbPosition = this.getThumbPositionForValue(option.getValue());\n+\n+            int thumbOffset = MathHelper.clamp((int) Math.floor((double) (this.getIntValue() - this.min) / this.range * sliderWidth), 0, sliderWidth);\n \n             int thumbX = sliderX + thumbOffset - THUMB_WIDTH;\n             int trackY = sliderY + (sliderHeight / 2) - TRACK_HEIGHT;\n@@ -134,7 +136,7 @@ public boolean mouseClicked(double mouseX, double mouseY, int button) {\n         }\n \n         private void setValueFromMouse(double d) {\n-            this.setValue((d - (double) (this.sliderBounds.getX() + 4)) / (double) (this.sliderBounds.getWidth() - 8));\n+            this.setValue((d - (double) this.sliderBounds.getX()) / (double) this.sliderBounds.getWidth());\n         }\n \n         private void setValue(double d) {"
+  }
+]

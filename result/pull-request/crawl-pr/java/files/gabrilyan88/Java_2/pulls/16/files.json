@@ -1,0 +1,49 @@
+[
+  {
+    "sha": "da5b1f390619d4919d9818c6d19e80aa7c8b5174",
+    "filename": "lesson6/client_/src/main/java/client/Controller.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 3,
+    "changes": 12,
+    "blob_url": "https://github.com/gabrilyan88/Java_2/blob/149137e760a9d06ca2937686fdc50c72d85b522a/lesson6/client_/src/main/java/client/Controller.java",
+    "raw_url": "https://github.com/gabrilyan88/Java_2/raw/149137e760a9d06ca2937686fdc50c72d85b522a/lesson6/client_/src/main/java/client/Controller.java",
+    "contents_url": "https://api.github.com/repos/gabrilyan88/Java_2/contents/lesson6/client_/src/main/java/client/Controller.java?ref=149137e760a9d06ca2937686fdc50c72d85b522a",
+    "patch": "@@ -29,9 +29,8 @@\n import java.util.ResourceBundle;\n \n public class Controller implements Initializable {\n+    private String login;\n     private final int PORT = 8189;\n-\n-\n     private Socket socket;\n     DataInputStream in;\n     DataOutputStream out;\n@@ -54,6 +53,7 @@ public void setEntering(boolean entering) {\n \n         if (!entering) {\n             nick = \"\";\n+            History.stop();\n         }\n         textArea.clear();\n         setTitle(nick);\n@@ -111,6 +111,9 @@ private void connect() {\n                                 String[] token = str.split(\"\\\\s\");\n                                 nick = token[1];\n                                 setEntering(true);\n+                                textArea.appendText(History.lastmsg(login));\n+\n+                                History.Start(login);\n                                 break;\n                             }\n                             if (str.equals(Command.REG_OK)) {\n@@ -121,7 +124,8 @@ private void connect() {\n                             }\n                         } else {\n                             textArea.appendText(str + \"\\n\");\n-                            }\n+                       //     History.line(str);\n+                        }\n                     }\n                     while (true) {\n \n@@ -143,6 +147,7 @@ private void connect() {\n                             }\n                         } else {\n                             textArea.appendText(str + \"\\n\");\n+                            History.line(str);\n                         }\n                     }\n                 } catch (RuntimeException e) {\n@@ -185,6 +190,7 @@ public void tryToEnter(ActionEvent actionEvent) {\n         if (socket == null || socket.isClosed()) {\n             connect();\n         }\n+        login = loginField.getText().trim();\n         try {\n             out.writeUTF(String.format(\"%s %s %s\", Command.ENTER, loginField.getText().trim(), passField.getText().trim()));\n "
+  },
+  {
+    "sha": "2b1a07337baca2ca43b2c6b09599631327e1de38",
+    "filename": "lesson6/client_/src/main/java/client/History.java",
+    "status": "added",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/gabrilyan88/Java_2/blob/149137e760a9d06ca2937686fdc50c72d85b522a/lesson6/client_/src/main/java/client/History.java",
+    "raw_url": "https://github.com/gabrilyan88/Java_2/raw/149137e760a9d06ca2937686fdc50c72d85b522a/lesson6/client_/src/main/java/client/History.java",
+    "contents_url": "https://api.github.com/repos/gabrilyan88/Java_2/contents/lesson6/client_/src/main/java/client/History.java?ref=149137e760a9d06ca2937686fdc50c72d85b522a",
+    "patch": "@@ -0,0 +1,58 @@\n+package client;\n+\n+import java.io.*;\n+import java.nio.file.Files;\n+import java.nio.file.Path;\n+import java.nio.file.Paths;\n+import java.util.List;\n+\n+public class History {\n+    private static PrintWriter out;\n+\n+    public static String HistorybyLogin(String login) {\n+        return \"history/history_\" + login + \".txt\";\n+    }\n+\n+    public static void Start(String login) {\n+        try {\n+            out = new PrintWriter(new FileOutputStream(HistorybyLogin(login), true), true);\n+        } catch (FileNotFoundException e) {\n+            e.printStackTrace();\n+        }\n+\n+    }\n+\n+    public static void stop() {\n+        if (out != null) {\n+            out.close();\n+        }\n+    }\n+\n+    public static void line(String msg) {\n+        out.println(msg);\n+    }\n+\n+    public static String lastmsg(String login) {\n+        if (!Files.exists(Paths.get(HistorybyLogin(login)))) {\n+            return \"\";\n+        }\n+\n+        StringBuilder sb = new StringBuilder();\n+        try {\n+            List<String> history = Files.readAllLines(Paths.get(HistorybyLogin(login)));\n+            int start = 0;\n+            if (history.size() > 100) {\n+                start = history.size() - 100;\n+            }\n+            for (int i = start; i < history.size(); i++) {\n+                sb.append(history.get(i)).append(System.lineSeparator());\n+            }\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+        return sb.toString();\n+\n+    }\n+}\n+\n+"
+  },
+  {
+    "sha": "0f64f3f791b5759ae270c44430fd27ce5a052918",
+    "filename": "lesson6/history/history_111.txt",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/gabrilyan88/Java_2/blob/149137e760a9d06ca2937686fdc50c72d85b522a/lesson6/history/history_111.txt",
+    "raw_url": "https://github.com/gabrilyan88/Java_2/raw/149137e760a9d06ca2937686fdc50c72d85b522a/lesson6/history/history_111.txt",
+    "contents_url": "https://api.github.com/repos/gabrilyan88/Java_2/contents/lesson6/history/history_111.txt?ref=149137e760a9d06ca2937686fdc50c72d85b522a",
+    "patch": "@@ -0,0 +1,4 @@\n+[ 111 ]: sdfgh\n+[ 111 ]: sdfgn\n+[ 111 ]: sdfgh\n+[ 111 ]: sdfghj"
+  },
+  {
+    "sha": "6ba994d0a4b412de9b6f89fc05a9bb31a46e9493",
+    "filename": "lesson6/main.db",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/gabrilyan88/Java_2/blob/149137e760a9d06ca2937686fdc50c72d85b522a/lesson6/main.db",
+    "raw_url": "https://github.com/gabrilyan88/Java_2/raw/149137e760a9d06ca2937686fdc50c72d85b522a/lesson6/main.db",
+    "contents_url": "https://api.github.com/repos/gabrilyan88/Java_2/contents/lesson6/main.db?ref=149137e760a9d06ca2937686fdc50c72d85b522a"
+  }
+]

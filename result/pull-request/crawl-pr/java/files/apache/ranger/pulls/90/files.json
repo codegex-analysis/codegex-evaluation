@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "2ebecfecd4424ffab9b5c7c8bb3a9e93ba99b589",
+    "filename": "agents-common/src/main/java/org/apache/ranger/plugin/util/RangerCommonConstants.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/ranger/blob/3dad6c2d27643c8c3d288e75273057b422f58dec/agents-common/src/main/java/org/apache/ranger/plugin/util/RangerCommonConstants.java",
+    "raw_url": "https://github.com/apache/ranger/raw/3dad6c2d27643c8c3d288e75273057b422f58dec/agents-common/src/main/java/org/apache/ranger/plugin/util/RangerCommonConstants.java",
+    "contents_url": "https://api.github.com/repos/apache/ranger/contents/agents-common/src/main/java/org/apache/ranger/plugin/util/RangerCommonConstants.java?ref=3dad6c2d27643c8c3d288e75273057b422f58dec",
+    "patch": "@@ -23,6 +23,7 @@\n \n \tpublic static final String PROP_COOKIE_NAME                             = \"ranger.admin.cookie.name\";\n \tpublic static final String DEFAULT_COOKIE_NAME                          = \"RANGERADMINSESSIONID\";\n+    public static final String CURRENT_USER_IDENTIFIER                      = \"{USER}\";\n \tpublic static final String PLUGIN_CONFIG_SUFFIX_POLICY_DELTA            = \".policy.rest.supports.policy.deltas\";\n \tpublic static final String PLUGIN_CONFIG_SUFFIX_TAG_DELTA               = \".tag.rest.supports.policy.deltas\";\n \tpublic static final String PLUGIN_CONFIG_SUFFIX_IN_PLACE_POLICY_UPDATES = \".supports.in.place.policy.updates\";\n@@ -41,5 +42,4 @@\n \tpublic static final boolean RANGER_ADMIN_SUFFIX_IN_PLACE_POLICY_UPDATES_DEFAULT  = false;\n \tpublic static final boolean RANGER_ADMIN_SUFFIX_IN_PLACE_TAG_UPDATES_DEFAULT     = false;\n \n-\n }"
+  },
+  {
+    "sha": "4594a16bbf1b1ec25241470fcfa65ede8026422d",
+    "filename": "hive-agent/src/main/java/org/apache/ranger/authorization/hive/authorizer/RangerHiveAuthorizer.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 5,
+    "changes": 9,
+    "blob_url": "https://github.com/apache/ranger/blob/3dad6c2d27643c8c3d288e75273057b422f58dec/hive-agent/src/main/java/org/apache/ranger/authorization/hive/authorizer/RangerHiveAuthorizer.java",
+    "raw_url": "https://github.com/apache/ranger/raw/3dad6c2d27643c8c3d288e75273057b422f58dec/hive-agent/src/main/java/org/apache/ranger/authorization/hive/authorizer/RangerHiveAuthorizer.java",
+    "contents_url": "https://api.github.com/repos/apache/ranger/contents/hive-agent/src/main/java/org/apache/ranger/authorization/hive/authorizer/RangerHiveAuthorizer.java?ref=3dad6c2d27643c8c3d288e75273057b422f58dec",
+    "patch": "@@ -80,13 +80,9 @@\n import org.apache.ranger.plugin.policyengine.RangerResourceACLs;\n import org.apache.ranger.plugin.policyevaluator.RangerPolicyEvaluator;\n import org.apache.ranger.plugin.service.RangerBasePlugin;\n-import org.apache.ranger.plugin.util.GrantRevokeRequest;\n-import org.apache.ranger.plugin.util.RangerAccessRequestUtil;\n-import org.apache.ranger.plugin.util.GrantRevokeRoleRequest;\n+import org.apache.ranger.plugin.util.*;\n \n import com.google.common.collect.Sets;\n-import org.apache.ranger.plugin.util.RangerPerfTracer;\n-import org.apache.ranger.plugin.util.RangerRequestedResources;\n \n public class RangerHiveAuthorizer extends RangerHiveAuthorizerBase {\n \tprivate static final Log LOG = LogFactory.getLog(RangerHiveAuthorizer.class);\n@@ -1261,6 +1257,9 @@ private String getRowFilterExpression(HiveAuthzContext context, String databaseN\n \n \t\t\tif(isRowFilterEnabled(result)) {\n \t\t\t\tret = result.getFilterExpr();\n+\t\t\t\tif(StringUtils.isNotBlank(ret)){\n+\t\t\t\t\tret = ret.replace(RangerCommonConstants.CURRENT_USER_IDENTIFIER, ugi.getUserName());\n+\t\t\t\t}\n \t\t\t}\n \t\t} finally {\n \t\t\tauditHandler.flushAudit();"
+  },
+  {
+    "sha": "29d114c20ca3a7b9061b950f34cb13fa8736c578",
+    "filename": "hive-agent/src/test/java/org/apache/ranger/services/hive/HIVERangerAuthorizerTest.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/apache/ranger/blob/3dad6c2d27643c8c3d288e75273057b422f58dec/hive-agent/src/test/java/org/apache/ranger/services/hive/HIVERangerAuthorizerTest.java",
+    "raw_url": "https://github.com/apache/ranger/raw/3dad6c2d27643c8c3d288e75273057b422f58dec/hive-agent/src/test/java/org/apache/ranger/services/hive/HIVERangerAuthorizerTest.java",
+    "contents_url": "https://api.github.com/repos/apache/ranger/contents/hive-agent/src/test/java/org/apache/ranger/services/hive/HIVERangerAuthorizerTest.java?ref=3dad6c2d27643c8c3d288e75273057b422f58dec",
+    "patch": "@@ -50,6 +50,7 @@\n  * e) \"jane\" can do a select on the table \"words\", but only get a \"hash\" of the word, and not the word itself.\n  * f) \"da_test_user\" is delegate admin for rangerauthz database.\n  * g) \"tom\" has all permissions on database \"test1\" and has all permissions on all databases with regard to UDF\n+ * h) \"Murray\" can do a select on the table \"words\" but only if the \"word\" is same as its username i.e. Murray\n  *\n  * In addition we have some TAG based policies created in Atlas and synced into Ranger:\n  *\n@@ -608,6 +609,32 @@ public void testHiveRowFilter() throws Exception {\n         connection.close();\n     }\n \n+    @Test\n+    public void testHiveRowFilterWithCurrentUserTransformation() throws Exception {\n+\n+        // Murray can do a select where the word is Murray\n+        String url = \"jdbc:hive2://localhost:\" + port + \"/rangerauthz\";\n+        Connection connection = DriverManager.getConnection(url, \"dave\", \"dave\");\n+        Statement statement = connection.createStatement();\n+\n+        // \"Murray\" can select where word = \"Murray\"\n+        ResultSet resultSet = statement.executeQuery(\"SELECT * FROM words where word == 'Murray'\");\n+        if (resultSet.next()) {\n+            Assert.assertEquals(\"Murray\", resultSet.getString(1));\n+            Assert.assertEquals(3, resultSet.getInt(2));\n+        } else {\n+            Assert.fail(\"No ResultSet found\");\n+        }\n+\n+        resultSet = statement.executeQuery(\"SELECT * FROM words where word == 'Mr.'\");\n+        if (resultSet.next()) {\n+            Assert.fail(\"Authorization should not be granted for count < 80\");\n+        }\n+\n+        statement.close();\n+        connection.close();\n+    }\n+\n     @Test\n     public void testHiveDataMasking() throws Exception {\n "
+  },
+  {
+    "sha": "b35e93ecf793be469fd050e2cde30ebd72407389",
+    "filename": "hive-agent/src/test/resources/hive-policies.json",
+    "status": "modified",
+    "additions": 64,
+    "deletions": 0,
+    "changes": 64,
+    "blob_url": "https://github.com/apache/ranger/blob/3dad6c2d27643c8c3d288e75273057b422f58dec/hive-agent/src/test/resources/hive-policies.json",
+    "raw_url": "https://github.com/apache/ranger/raw/3dad6c2d27643c8c3d288e75273057b422f58dec/hive-agent/src/test/resources/hive-policies.json",
+    "contents_url": "https://api.github.com/repos/apache/ranger/contents/hive-agent/src/test/resources/hive-policies.json?ref=3dad6c2d27643c8c3d288e75273057b422f58dec",
+    "patch": "@@ -66,6 +66,20 @@\n           \"conditions\": [],\n           \"delegateAdmin\": false\n         },\n+        {\n+          \"accesses\": [\n+            {\n+              \"type\": \"select\",\n+              \"isAllowed\": true\n+            }\n+          ],\n+          \"users\": [\n+            \"Murray\"\n+          ],\n+          \"groups\": [],\n+          \"conditions\": [],\n+          \"delegateAdmin\": false\n+        },\n         {\n           \"accesses\": [\n             {\n@@ -1853,6 +1867,56 @@\n         \"id\": 31,\n         \"isEnabled\": true,\n         \"version\": 1\n+      },\n+      {\n+        \"service\": \"cl1_hive\",\n+        \"name\": \"MurrayPolicy\",\n+        \"policyType\": 2,\n+        \"description\": \"\",\n+        \"isAuditEnabled\": true,\n+        \"resources\": {\n+          \"database\": {\n+            \"values\": [\n+              \"rangerauthz\"\n+            ],\n+            \"isExcludes\": false,\n+            \"isRecursive\": false\n+          },\n+          \"table\": {\n+            \"values\": [\n+              \"words\"\n+            ],\n+            \"isExcludes\": false,\n+            \"isRecursive\": false\n+          }\n+        },\n+        \"policyItems\": [],\n+        \"denyPolicyItems\": [],\n+        \"allowExceptions\": [],\n+        \"denyExceptions\": [],\n+        \"dataMaskPolicyItems\": [],\n+        \"rowFilterPolicyItems\": [\n+          {\n+            \"rowFilterInfo\": {\n+              \"filterExpr\": \"word \\u003d \\u0027{USER}\\u0027\"\n+            },\n+            \"accesses\": [\n+              {\n+                \"type\": \"select\",\n+                \"isAllowed\": true\n+              }\n+            ],\n+            \"users\": [\n+              \"Murray\"\n+            ],\n+            \"groups\": [],\n+            \"conditions\": [],\n+            \"delegateAdmin\": false\n+          }\n+        ],\n+        \"id\": 32,\n+        \"isEnabled\": true,\n+        \"version\": 1\n       }\n     ],\n     \"serviceDef\": {"
+  }
+]

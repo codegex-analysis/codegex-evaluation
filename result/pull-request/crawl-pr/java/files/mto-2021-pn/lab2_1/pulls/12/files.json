@@ -1,0 +1,71 @@
+[
+  {
+    "sha": "173454beec63af77d03833217787118750116428",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 4,
+    "changes": 13,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/.gitignore",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/.gitignore",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/.gitignore?ref=1e83044a76c3db8287a078e9d6991a8bbc1dcf5f",
+    "patch": "@@ -1,4 +1,9 @@\n-/target/\n-/.settings/\n-/.classpath\n-/.project\n+# Created by .ignore support plugin (hsz.mobi)\n+### Example user template template\n+### Example user template\n+\n+# IntelliJ project files\n+.idea\n+*.iml\n+out\n+gen"
+  },
+  {
+    "sha": "76384e15652edae7345889f661840991a9819ebc",
+    "filename": "src/main/java/edu/iis/mto/bsearch/BinarySearch.java",
+    "status": "modified",
+    "additions": 43,
+    "deletions": 0,
+    "changes": 43,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/src/main/java/edu/iis/mto/bsearch/BinarySearch.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/src/main/java/edu/iis/mto/bsearch/BinarySearch.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/main/java/edu/iis/mto/bsearch/BinarySearch.java?ref=1e83044a76c3db8287a078e9d6991a8bbc1dcf5f",
+    "patch": "@@ -3,6 +3,9 @@\n  */\n package edu.iis.mto.bsearch;\n \n+import java.util.HashSet;\n+import java.util.Set;\n+\n /**\n  * Klasa implementująca wyszukiwanie binarne\n  *\n@@ -22,9 +25,20 @@ private BinarySearch() {}\n      *         sekwencji, jezeli nie znaleziony -1)\n      */\n     public static SearchResult search(int key, int[] seq) {\n+        if(seq.length == 0){\n+            throw new IllegalArgumentException(\"Sequence is empty\");\n+        }\n+        if(checkDuplicates(seq)){\n+            throw new IllegalArgumentException(\"Sequence contains duplicate values\");\n+        }\n+\n+        if (! checkSorted(seq)){\n+            throw new IllegalArgumentException(\"Sequence must be sorted \");\n+        }\n         int start = 0;\n         int end = seq.length - 1;\n         int center;\n+\n         SearchResult result = new SearchResult();\n \n         while (start <= end) {\n@@ -43,4 +57,33 @@ public static SearchResult search(int key, int[] seq) {\n         return result;\n     }\n \n+    /**\n+     * Metoda sprawdza czy podana tablica zawiera duplikaty\n+     * @param seq tablica\n+     * @return true - jezeli zawiera; false - jeżeli nie\n+     */\n+    private  static boolean checkDuplicates(int [] seq){\n+        Set<Integer> set = new HashSet<>();\n+        for (int i=0; i<seq.length; i++){\n+            if( ! set.add(seq[i])){\n+                return true;\n+            }\n+        }\n+        return false;\n+    }\n+\n+    /***\n+     * Metoda sprawdza czy tablica jest posortowana\n+     * @param seq tablica\n+     * @return true - jeżeli jest posortowana; false jeżeli nie\n+     */\n+    private static boolean checkSorted(int [] seq){\n+        for (int i = 0; i < seq.length - 1; i++) {\n+            if (seq[i] > seq[i + 1])\n+                return false;\n+        }\n+        return true;\n+    }\n }\n+\n+"
+  },
+  {
+    "sha": "c4ff2f0ee3dd74c4a47f4c8ddf5cab13e429984b",
+    "filename": "src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java",
+    "status": "modified",
+    "additions": 95,
+    "deletions": 3,
+    "changes": 98,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/src/test/java/edu/iis/mto/bsearch/BinarySearchTest.java?ref=1e83044a76c3db8287a078e9d6991a8bbc1dcf5f",
+    "patch": "@@ -5,15 +5,107 @@\n import org.junit.jupiter.api.BeforeEach;\n import org.junit.jupiter.api.Test;\n \n+import java.nio.Buffer;\n+\n \n class BinarySearchTest {\n \n     @BeforeEach\n-    void setUp() throws Exception {}\n+    void setUp() throws Exception {\n+    }\n+\n+    @Test\n+    void oneElementSeqFoundTest() {\n+        int key = 10;\n+        int seq [] = {10};\n+        SearchResult search = BinarySearch.search(key, seq);\n+        assertTrue(search.isFound());\n+        assertEquals(search.getPosition(), 1);\n+    }\n+\n+    @Test\n+    void oneElementSeqNotFoundTest(){\n+        int key = 100;\n+        int seq [] = {10};\n+        SearchResult searchResult = BinarySearch.search(key, seq);\n+        assertFalse(searchResult.isFound());\n+        assertEquals(searchResult.getPosition(), -1);\n+\n+    }\n+\n+    @Test\n+    void firstElementTest(){\n+        int key = 10;\n+        int seq [] = {10, 12, 89, 124, 400};\n+        SearchResult searchResult = BinarySearch.search(key, seq);\n+        assertTrue(searchResult.isFound());\n+        assertEquals(searchResult.getPosition(), 1);\n+    }\n+\n+    @Test\n+    void lastElementTest(){\n+        int key = 10;\n+        int seq [] = {-40, 3, 5, 8, 10};\n+        SearchResult searchResult = BinarySearch.search(key, seq);\n+        assertTrue(searchResult.isFound());\n+        assertEquals(searchResult.getPosition(), 5);\n+    }\n+\n+    @Test\n+    void centerElementTest(){\n+        int key = 10;\n+        int seq [] = {-4, 0, 1, 4, 5, 10, 14, 214, 500};\n+        SearchResult searchResult = BinarySearch.search(key, seq);\n+        assertTrue(searchResult.isFound());\n+        assertEquals(searchResult.getPosition(), 6);\n+    }\n+\n+    @Test\n+    void emptySeqTest(){\n+        int key = 10;\n+        int seq [] = {};\n+        try {\n+            SearchResult searchResult = BinarySearch.search(key, seq);\n+            fail(\"Expected exception\");\n+\n+        } catch (IllegalArgumentException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+    @Test\n+    void longSeqNotFoundTest(){\n+        int key = 10;\n+        int seq [] = {-120, 30, 102, 405, 555, 1244, 9054, 10000, 12000, 4567890, 44444444};\n+        SearchResult searchResult = BinarySearch.search(key, seq);\n+        assertFalse(searchResult.isFound());\n+        assertEquals(searchResult.getPosition(), -1);\n+\n+    }\n+\n+    @Test\n+    void sequenceWithDuplicatesTest(){\n+        int key = 10;\n+        int seq [] = {102, 103, 400, 400};\n+        try {\n+            SearchResult searchResult = BinarySearch.search(key, seq);\n+            fail(\"Expected exception\");\n+\n+        } catch (IllegalArgumentException e) {\n+            e.printStackTrace();\n+        }\n+    }\n \n     @Test\n-    void test() {\n-        fail(\"Not yet implemented\");\n+    void notSortedSequence(){\n+        int key = 10;\n+        int seq [] = {-2, 10, 0, 34};\n+        try {\n+            SearchResult searchResult = BinarySearch.search(key, seq);\n+            fail(\"Excepted exception\");\n+        } catch (IllegalArgumentException e) {\n+            e.printStackTrace();\n+        }\n     }\n \n }"
+  },
+  {
+    "sha": "0dc0de9d5447ce54e4c3a76d1557b4268c14264e",
+    "filename": "target/classes/edu/iis/mto/bsearch/BinarySearch.class",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/target/classes/edu/iis/mto/bsearch/BinarySearch.class",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/target/classes/edu/iis/mto/bsearch/BinarySearch.class",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/target/classes/edu/iis/mto/bsearch/BinarySearch.class?ref=1e83044a76c3db8287a078e9d6991a8bbc1dcf5f"
+  },
+  {
+    "sha": "3aff971462dd19bbe286fc744777bcf470b837a2",
+    "filename": "target/classes/edu/iis/mto/bsearch/SearchResult.class",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/target/classes/edu/iis/mto/bsearch/SearchResult.class",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/target/classes/edu/iis/mto/bsearch/SearchResult.class",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/target/classes/edu/iis/mto/bsearch/SearchResult.class?ref=1e83044a76c3db8287a078e9d6991a8bbc1dcf5f"
+  },
+  {
+    "sha": "625b89e3d578ef00e57182a439a89d83b910c54e",
+    "filename": "target/test-classes/edu/iis/mto/bsearch/BinarySearchTest.class",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/mto-2021-pn/lab2_1/blob/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/target/test-classes/edu/iis/mto/bsearch/BinarySearchTest.class",
+    "raw_url": "https://github.com/mto-2021-pn/lab2_1/raw/1e83044a76c3db8287a078e9d6991a8bbc1dcf5f/target/test-classes/edu/iis/mto/bsearch/BinarySearchTest.class",
+    "contents_url": "https://api.github.com/repos/mto-2021-pn/lab2_1/contents/target/test-classes/edu/iis/mto/bsearch/BinarySearchTest.class?ref=1e83044a76c3db8287a078e9d6991a8bbc1dcf5f"
+  }
+]

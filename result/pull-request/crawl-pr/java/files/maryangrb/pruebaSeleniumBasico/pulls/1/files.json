@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "7b0d23f229cd48c1bd870e39715544711deffc7e",
+    "filename": "src/test/java/dataProvider.java",
+    "status": "added",
+    "additions": 68,
+    "deletions": 0,
+    "changes": 68,
+    "blob_url": "https://github.com/maryangrb/pruebaSeleniumBasico/blob/2b8583164e82615d5badb3640e2087ea6b98e677/src/test/java/dataProvider.java",
+    "raw_url": "https://github.com/maryangrb/pruebaSeleniumBasico/raw/2b8583164e82615d5badb3640e2087ea6b98e677/src/test/java/dataProvider.java",
+    "contents_url": "https://api.github.com/repos/maryangrb/pruebaSeleniumBasico/contents/src/test/java/dataProvider.java?ref=2b8583164e82615d5badb3640e2087ea6b98e677",
+    "patch": "@@ -0,0 +1,68 @@\n+import org.openqa.selenium.By;\n+import org.openqa.selenium.WebDriver;\n+import org.openqa.selenium.WebElement;\n+import org.openqa.selenium.chrome.ChromeDriver;\n+import org.testng.Assert;\n+import org.testng.annotations.AfterMethod;\n+import org.testng.annotations.BeforeMethod;\n+import org.testng.annotations.DataProvider;\n+import org.testng.annotations.Test;\n+import utilities.GetProperties;\n+\n+import java.util.concurrent.TimeUnit;\n+\n+public class dataProvider {\n+    public static String MAILCHIMP_URL = \"https://login.mailchimp.com/\";\n+    WebDriver driver;\n+\n+    @BeforeMethod\n+    public void setUp() throws InterruptedException {\n+        GetProperties properties = new GetProperties();\n+        String chromeDriverUrl = properties.getString(\"CHROMEDRIVER_PATH\");\n+        System.setProperty(\"webdriver.chrome.driver\", chromeDriverUrl);\n+        driver = new ChromeDriver();\n+        driver.get(MAILCHIMP_URL);\n+        driver.manage().timeouts().implicitlyWait(18, TimeUnit.SECONDS);\n+        driver.manage().window().maximize();\n+\n+        WebElement cookies = driver.findElement (By.id(\"onetrust-accept-btn-handler\"));\n+        cookies.click();\n+        Thread.sleep(2000);\n+    }\n+\n+    @AfterMethod\n+    public void tearDown(){\n+        driver.close();\n+    }\n+    @DataProvider(name = \"emails\")\n+    public Object[][] crearEmails(){\n+        return new Object[][]{\n+                {\"test@test.com\"},\n+                {\"1234@gmail.com\"},\n+                {\"pepe@hotmail.com\"}\n+        };\n+    }\n+\n+    //Caso de prueba 5:\n+    @Test(dataProvider = \"emails\")\n+    public void dataProviderEmailTest (String email) throws InterruptedException {\n+\n+        WebElement usernameLoginField = driver.findElement(By.id(\"username\"));\n+        usernameLoginField.sendKeys(email);\n+\n+        WebElement passwordLoginField = driver.findElement(By.id(\"password\"));\n+        passwordLoginField.sendKeys(\"holamundo”.\");\n+\n+        WebElement buttonLoginIn = driver.findElement(By.xpath(\"//*[@id=\\\"login-form\\\"]/fieldset/div[5]/button\"));\n+        buttonLoginIn.click();\n+\n+        Thread.sleep(2000);\n+\n+        WebElement smsError = driver.findElement(By.xpath(\"//*[@id=\\\"login-form\\\"]/fieldset/div[1]/div/div/div[2]/p\"));\n+        Assert.assertTrue(smsError.getText().contains(\"Can we help you recover\\n\" +\n+                \"your username ?”\"), \"El mensaje de error contiene el texto\");\n+\n+    }\n+\n+\n+}"
+  },
+  {
+    "sha": "f1d3632f8904a4c3dd396af707080439415f8777",
+    "filename": "src/test/java/factory.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/maryangrb/pruebaSeleniumBasico/blob/2b8583164e82615d5badb3640e2087ea6b98e677/src/test/java/factory.java",
+    "raw_url": "https://github.com/maryangrb/pruebaSeleniumBasico/raw/2b8583164e82615d5badb3640e2087ea6b98e677/src/test/java/factory.java",
+    "contents_url": "https://api.github.com/repos/maryangrb/pruebaSeleniumBasico/contents/src/test/java/factory.java?ref=2b8583164e82615d5badb3640e2087ea6b98e677",
+    "patch": "@@ -0,0 +1,11 @@\n+import org.testng.annotations.Factory;\n+\n+public class factory {\n+    @Factory\n+    public Object[] factoryMethod(){\n+        return new Object[]{\n+                new prueba_mailchimp(),\n+                new prueba_mailchimp()\n+        };\n+    }\n+}"
+  },
+  {
+    "sha": "149e3242779a08242043eca28af284fac5afbcbd",
+    "filename": "src/test/java/prueba_mailchimp.java",
+    "status": "added",
+    "additions": 91,
+    "deletions": 0,
+    "changes": 91,
+    "blob_url": "https://github.com/maryangrb/pruebaSeleniumBasico/blob/2b8583164e82615d5badb3640e2087ea6b98e677/src/test/java/prueba_mailchimp.java",
+    "raw_url": "https://github.com/maryangrb/pruebaSeleniumBasico/raw/2b8583164e82615d5badb3640e2087ea6b98e677/src/test/java/prueba_mailchimp.java",
+    "contents_url": "https://api.github.com/repos/maryangrb/pruebaSeleniumBasico/contents/src/test/java/prueba_mailchimp.java?ref=2b8583164e82615d5badb3640e2087ea6b98e677",
+    "patch": "@@ -0,0 +1,91 @@\n+import com.github.javafaker.Faker;\n+import org.openqa.selenium.By;\n+import org.openqa.selenium.WebDriver;\n+import org.openqa.selenium.WebElement;\n+import org.openqa.selenium.chrome.ChromeDriver;\n+import org.testng.Assert;\n+import org.testng.annotations.AfterMethod;\n+import org.testng.annotations.BeforeMethod;\n+import org.testng.annotations.Test;\n+import utilities.GetProperties;\n+\n+import java.util.concurrent.TimeUnit;\n+\n+public class prueba_mailchimp {\n+    public static String MAILCHIMP_URL = \"https://login.mailchimp.com/\";\n+    WebDriver driver;\n+\n+    @BeforeMethod\n+    public void setUp() throws InterruptedException {\n+        GetProperties properties = new GetProperties();\n+        String chromeDriverUrl = properties.getString(\"CHROMEDRIVER_PATH\");\n+        System.setProperty(\"webdriver.chrome.driver\", chromeDriverUrl);\n+        driver = new ChromeDriver();\n+        driver.get(MAILCHIMP_URL);\n+        driver.manage().timeouts().implicitlyWait(18, TimeUnit.SECONDS);\n+        driver.manage().window().maximize();\n+\n+        WebElement cookies = driver.findElement (By.id(\"onetrust-accept-btn-handler\"));\n+        cookies.click();\n+        Thread.sleep(2000);\n+    }\n+\n+    @AfterMethod\n+    public void tearDown(){\n+        driver.close();\n+    }\n+\n+    //Caso de prueba 1:\n+    @Test (priority = 1)\n+    public void validarTituloTest(){\n+        String expectedTitle = \"Login | Mailchimp\";\n+        String actualTitle = driver.getTitle();\n+        Assert.assertEquals(actualTitle, expectedTitle);\n+    }\n+\n+    //Caso de prueba 2:\n+    @Test (priority = 2)\n+    public void iniciarSesionPageTest(){\n+\n+        WebElement titulo = driver.findElement(By.xpath(\"//*[@id=\\\"login-form\\\"]/div/h1\"));\n+        WebElement texto = driver.findElement(By.xpath(\"//*[@id=\\\"login-form\\\"]/div/p/span\"));\n+\n+        Assert.assertTrue((titulo.getText().contains(\"Log In\")), \"El sitio contiene el texto\");\n+        Assert.assertTrue((texto.getText().contains(\"Need a Mailchimp account?\")), \"El sitio contiene el texto\");\n+    }\n+\n+    //Caso de prueba 3:\n+    @Test (priority = 3)\n+    public void loginErrorTest(){\n+        WebElement usernameLoginField = driver.findElement(By.id(\"username\"));\n+        usernameLoginField.sendKeys(\"XXXXX@gmail.com\");\n+\n+        WebElement buttonLoginIn = driver.findElement(By.xpath(\"//*[@id=\\\"login-form\\\"]/fieldset/div[4]/button\"));\n+        buttonLoginIn.click();\n+\n+        WebElement smsError = driver.findElement(By.xpath(\"//*[@id=\\\"empty-error\\\"]/div/div/div[2]/p\"));\n+        Assert.assertEquals(smsError.getText(), \"Looks like you forgot your password there, XXXXX@gmail.com.\");\n+\n+        WebElement checkBox = driver.findElement(By.name(\"stay-signed-in\"));\n+        System.out.println(checkBox.isSelected());\n+        Assert.assertTrue(!checkBox.isSelected());\n+    }\n+\n+    //Caso de prueba 4:\n+    @Test (priority = 4)\n+    public void fakeEmailTest() throws InterruptedException {\n+        driver .navigate().to( \"https://login.mailchimp.com/signup/\" );\n+        WebElement cookies = driver.findElement (By.id(\"onetrust-accept-btn-handler\"));\n+        cookies.click();\n+        Thread.sleep(2000);\n+\n+        Faker fake = new Faker();\n+        WebElement emailAddress = driver.findElement(By.id(\"email\"));\n+        String email = fake.internet().emailAddress();\n+        emailAddress.sendKeys(email);\n+\n+        Assert.assertTrue(driver.getCurrentUrl().contains(\"signup\"), \"La url contiene la palabra\");\n+\n+    }\n+\n+}"
+  },
+  {
+    "sha": "57083a565fef58fbe0ea60e604479c0c2ed12d3e",
+    "filename": "src/test/java/testng.xml",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/maryangrb/pruebaSeleniumBasico/blob/2b8583164e82615d5badb3640e2087ea6b98e677/src/test/java/testng.xml",
+    "raw_url": "https://github.com/maryangrb/pruebaSeleniumBasico/raw/2b8583164e82615d5badb3640e2087ea6b98e677/src/test/java/testng.xml",
+    "contents_url": "https://api.github.com/repos/maryangrb/pruebaSeleniumBasico/contents/src/test/java/testng.xml?ref=2b8583164e82615d5badb3640e2087ea6b98e677",
+    "patch": "@@ -0,0 +1,13 @@\n+<suite name =\"Prueba - tests\">\n+    <test name =\"Ejercicios\" >\n+\n+        <classes>\n+\n+            <class name = \"prueba_mailchimp\"/>\n+            <class name = \"dataProvider\"/>\n+\n+        </classes>\n+\n+    </test>\n+\n+</suite>\n\\ No newline at end of file"
+  }
+]

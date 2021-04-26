@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "80e0585c71c2a2a2a32d62b3190402189a8b1ef6",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/.gitignore",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/.gitignore",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/.gitignore?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -15,6 +15,7 @@ pickle-email-*.html\n *.class\n /.idea\n /idea\n+*.xml\n \n # TODO Comment out these rules if you are OK with secrets being uploaded to the repo\n config/initializers/secret_token.rb"
+  },
+  {
+    "sha": "bd4336583386702858a0e3f4b3deaafd3a083123",
+    "filename": "Client/Client.iml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/Client.iml",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/Client.iml",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/Client/Client.iml?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -11,5 +11,7 @@\n     </content>\n     <orderEntry type=\"inheritedJdk\" />\n     <orderEntry type=\"sourceFolder\" forTests=\"false\" />\n+    <orderEntry type=\"library\" name=\"lib\" level=\"project\" />\n+    <orderEntry type=\"library\" name=\"Maven: io.netty:netty-all:4.1.60.Final\" level=\"project\" />\n   </component>\n </module>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "df4e01e08764dce2c8c68e3e1c5a0252dcec4474",
+    "filename": "Client/pom.xml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/pom.xml",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/pom.xml",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/Client/pom.xml?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -10,6 +10,14 @@\n     <modelVersion>4.0.0</modelVersion>\n \n     <artifactId>Client</artifactId>\n+    <dependencies>\n+        <dependency>\n+            <groupId>io.netty</groupId>\n+            <artifactId>netty-all</artifactId>\n+            <version>4.1.60.Final</version>\n+            <scope>compile</scope>\n+        </dependency>\n+    </dependencies>\n \n     <properties>\n         <maven.compiler.source>15</maven.compiler.source>"
+  },
+  {
+    "sha": "311984c25ee897b8760ef6a3f933e01db48ce507",
+    "filename": "Client/src/main/java/Controller.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 6,
+    "changes": 21,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/src/main/java/Controller.java",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/src/main/java/Controller.java",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/Client/src/main/java/Controller.java?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -1,33 +1,42 @@\n-\n import javafx.application.Platform;\n import javafx.event.ActionEvent;\n import javafx.fxml.FXML;\n+import javafx.fxml.Initializable;\n import javafx.scene.control.Alert;\n import javafx.scene.control.ButtonType;\n import javafx.scene.control.TableView;\n import javafx.scene.layout.VBox;\n+import java.net.URL;\n+import java.util.ResourceBundle;\n \n-public class Controller {\n+public class Controller implements Initializable {\n \n     @FXML\n     private TableView filesOnServerTable;\n \n     @FXML\n     VBox leftPanel, rightPanel;\n \n+\n     public void btnExitAction(ActionEvent actionEvent) {\n         Platform.exit();\n     }\n \n-    public void copyBtnAction (ActionEvent actionEvent){ //копирования файла\n-        LeftPanelController leftPC = (LeftPanelController) leftPanel.getProperties().get(\"ctrl\");\n+    public void copyBtnAction(ActionEvent actionEvent) { //кнопка копирования файла\n+        LeftPanelController leftPC = (LeftPanelController) leftPanel.getProperties().get(\"ctrl\"); //из левой панели достали ссылку на контроллер левой панели\n         LeftPanelController rightPC = (LeftPanelController) rightPanel.getProperties().get(\"ctrl\");\n \n-        if (leftPC.getSelectedFilename() == null && rightPC.getSelectedFilename() == null){ //если ни в левой ни вправой панели файл не выбран\n+        if (leftPC.getSelectedFilename() == null && rightPC.getSelectedFilename() == null) { //если ни в левой ни вправой панели файл не выбран\n             Alert alert = new Alert(Alert.AlertType.ERROR, \"Ни один файл не был выбран\", ButtonType.OK);\n             alert.showAndWait();\n             return;\n         }\n+\n     }\n \n-}\n+    @Override\n+    public void initialize(URL location, ResourceBundle resources) {\n+        Network.start();\n+        System.out.println(\"Network starter\");\n+    }\n+} \n\\ No newline at end of file"
+  },
+  {
+    "sha": "ff756f334db0ce00a8bfbcda3e1a79c046ead0dc",
+    "filename": "Client/src/main/java/Main.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/src/main/java/Main.java",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/src/main/java/Main.java",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/Client/src/main/java/Main.java?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -10,13 +10,10 @@\n     @Override\n     public void start(Stage primaryStage) throws Exception{\n         Parent root = FXMLLoader.load(getClass().getResource(\"sample.fxml\"));\n-        primaryStage.setTitle(\"File Manager\");\n+        primaryStage.setTitle(\"BlackBox\");\n         primaryStage.setScene(new Scene(root, 1000, 600));\n         primaryStage.show();\n-        primaryStage.setOnCloseRequest(event -> {\n-            // Controller.stop();\n-            Platform.exit();\n-        });\n+        primaryStage.setOnCloseRequest(event -> Platform.exit());\n     }\n \n     public static void main(String[] args) {"
+  },
+  {
+    "sha": "b23b438e196c01f8f2938bdf106d472fb4b17bb5",
+    "filename": "Client/src/main/java/Network.java",
+    "status": "modified",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/src/main/java/Network.java",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/Client/src/main/java/Network.java",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/Client/src/main/java/Network.java?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -0,0 +1,39 @@\n+\n+import io.netty.handler.codec.serialization.ObjectDecoderInputStream;\n+import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;\n+import java.io.IOException;\n+import java.net.Socket;\n+\n+public class Network {\n+    private static Socket socket;\n+    private static ObjectEncoderOutputStream out;\n+    public static ObjectDecoderInputStream in;\n+\n+    public static void start() {\n+        try {\n+            socket = new Socket(\"localhost\", 8189);\n+            out = new ObjectEncoderOutputStream(socket.getOutputStream());\n+            in = new ObjectDecoderInputStream(socket.getInputStream(), 50 * 1024 * 1024);\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+    public static void stop() {\n+        try {\n+            out.close();\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+        try {\n+            in.close();\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+        try {\n+            socket.close();\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "4e2ae4b27a5c58cbc2672a176ed73f93d484448a",
+    "filename": "Server/Server.iml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/Server/Server.iml",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/Server/Server.iml",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/Server/Server.iml?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -6,9 +6,11 @@\n     <content url=\"file://$MODULE_DIR$\">\n       <sourceFolder url=\"file://$MODULE_DIR$/src/main/resources\" type=\"java-resource\" />\n       <sourceFolder url=\"file://$MODULE_DIR$/src/test/java\" isTestSource=\"true\" />\n+      <sourceFolder url=\"file://$MODULE_DIR$/src/main/java\" isTestSource=\"false\" />\n       <excludeFolder url=\"file://$MODULE_DIR$/target\" />\n     </content>\n     <orderEntry type=\"inheritedJdk\" />\n     <orderEntry type=\"sourceFolder\" forTests=\"false\" />\n+    <orderEntry type=\"library\" name=\"Maven: io.netty:netty-all:4.1.60.Final\" level=\"project\" />\n   </component>\n </module>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "545c6ce6cbf2a3ff52661eb2b49e0b94e622ab2a",
+    "filename": "Server/pom.xml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/Server/pom.xml",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/Server/pom.xml",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/Server/pom.xml?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -10,6 +10,13 @@\n     <modelVersion>4.0.0</modelVersion>\n \n     <artifactId>Server</artifactId>\n+    <dependencies>\n+        <dependency>\n+            <groupId>io.netty</groupId>\n+            <artifactId>netty-all</artifactId>\n+            <version>4.1.60.Final</version>\n+        </dependency>\n+    </dependencies>\n \n     <properties>\n         <maven.compiler.source>15</maven.compiler.source>"
+  },
+  {
+    "sha": "fe87ae52cc99062fe3d22b3bcaf37e36f570510a",
+    "filename": "Server/src/main/java/MainHandler.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/Server/src/main/java/MainHandler.java",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/Server/src/main/java/MainHandler.java",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/Server/src/main/java/MainHandler.java?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -0,0 +1,34 @@\n+import io.netty.channel.ChannelHandlerContext;\n+import io.netty.channel.ChannelInboundHandlerAdapter;\n+import io.netty.util.ReferenceCountUtil;\n+\n+import java.io.File;\n+\n+\n+public class MainHandler extends ChannelInboundHandlerAdapter {\n+    private String userFolder;\n+    private String root;\n+\n+    public MainHandler(String userFolder) {\n+        this.userFolder = userFolder;\n+        this.root = new StringBuilder(\"Server\").append(File.separator).append(\"ServerStorage\").toString();\n+    }\n+\n+    @Override\n+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {\n+        try {\n+            if (msg == null) {\n+                return;\n+            }\n+\n+        } finally {\n+            ReferenceCountUtil.release(msg);\n+        }\n+    }\n+\n+    @Override\n+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {\n+        cause.printStackTrace();\n+        ctx.close();\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "6c4cd72f406ae2cc1b79febe6c5ad527a9be9ef9",
+    "filename": "Server/src/main/java/NettyServer.java",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/Strelok90/Cloud/blob/a1353ba84734cd936f6f4409198e635cee6ff2f8/Server/src/main/java/NettyServer.java",
+    "raw_url": "https://github.com/Strelok90/Cloud/raw/a1353ba84734cd936f6f4409198e635cee6ff2f8/Server/src/main/java/NettyServer.java",
+    "contents_url": "https://api.github.com/repos/Strelok90/Cloud/contents/Server/src/main/java/NettyServer.java?ref=a1353ba84734cd936f6f4409198e635cee6ff2f8",
+    "patch": "@@ -0,0 +1,45 @@\n+import io.netty.bootstrap.ServerBootstrap;\n+import io.netty.channel.*;\n+import io.netty.channel.nio.NioEventLoopGroup;\n+import io.netty.channel.socket.SocketChannel;\n+import io.netty.channel.socket.nio.NioServerSocketChannel;\n+import io.netty.handler.codec.serialization.ClassResolvers;\n+import io.netty.handler.codec.serialization.ObjectDecoder;\n+import io.netty.handler.codec.serialization.ObjectEncoder;\n+\n+\n+public class NettyServer {\n+\n+    public void run() {\n+        EventLoopGroup auth = new NioEventLoopGroup(1);\n+        EventLoopGroup worker = new NioEventLoopGroup();\n+        try {\n+            ServerBootstrap bootstrap = new ServerBootstrap();\n+            bootstrap.group(auth, worker)\n+                    .channel(NioServerSocketChannel.class)\n+                    .childHandler(new ChannelInitializer<SocketChannel>() {\n+                        @Override\n+                        protected void initChannel(SocketChannel socketChannel) {\n+                            socketChannel.pipeline().addLast(\n+                                    new ObjectDecoder(50 * 1024 * 1024, ClassResolvers.cacheDisabled(null)),\n+                                    new ObjectEncoder()\n+                            );\n+                        }\n+                    });\n+\n+            ChannelFuture future = bootstrap.bind(8189).sync();\n+            System.out.println(\"Server started\");\n+            future.channel().closeFuture().sync();\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        } finally {\n+            worker.shutdownGracefully();\n+            auth.shutdownGracefully();\n+        }\n+    }\n+\n+\n+    public static void main(String[] args) {\n+        new NettyServer().run();\n+    }\n+} \n\\ No newline at end of file"
+  }
+]

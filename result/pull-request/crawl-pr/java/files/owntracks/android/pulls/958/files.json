@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "740edcd6ebdb35a0daf563683d86f88eba672e67",
+    "filename": "CHANGELOG.md",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/owntracks/android/blob/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/CHANGELOG.md",
+    "raw_url": "https://github.com/owntracks/android/raw/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/CHANGELOG.md",
+    "contents_url": "https://api.github.com/repos/owntracks/android/contents/CHANGELOG.md?ref=3ffbaf605ead1b87b96535da4f19c64eb6b33a83",
+    "patch": "@@ -1,5 +1,15 @@\n # Changelog\n \n+## Version 2.3.1\n+\n+### New features\n+\n+* The welcome screen is now swipey!\n+\n+### Bug fixes\n+\n+* Lower notification priority of geocoder error notifications to make them a bit less present / shouty\n+\n ## Version 2.3.0\n \n ### New features"
+  },
+  {
+    "sha": "332840df37ad5ee0ea8c8e8053efa2f04a736273",
+    "filename": "project/app/build.gradle.kts",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/owntracks/android/blob/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/build.gradle.kts",
+    "raw_url": "https://github.com/owntracks/android/raw/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/build.gradle.kts",
+    "contents_url": "https://api.github.com/repos/owntracks/android/contents/project/app/build.gradle.kts?ref=3ffbaf605ead1b87b96535da4f19c64eb6b33a83",
+    "patch": "@@ -10,7 +10,7 @@ plugins {\n \n val versionMajor = 2\n val versionMinor = 3\n-val versionPatch = 0\n+val versionPatch = 1\n //TODO need to increment this manually at the moment, as GPP is broken\n val versionBuild = 0 // This value is managed by the gradle publisher plugin. Build numbers get incremented on publish\n val googleMapsAPIKey = extra.get(\"google_maps_api_key\")?.toString() ?: \"PLACEHOLDER_API_KEY\""
+  },
+  {
+    "sha": "5ddd0ef3af9c5c20236808446b0a145c38ce6403",
+    "filename": "project/app/src/main/java/org/owntracks/android/geocoding/GeocoderProvider.kt",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/owntracks/android/blob/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/src/main/java/org/owntracks/android/geocoding/GeocoderProvider.kt",
+    "raw_url": "https://github.com/owntracks/android/raw/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/src/main/java/org/owntracks/android/geocoding/GeocoderProvider.kt",
+    "contents_url": "https://api.github.com/repos/owntracks/android/contents/project/app/src/main/java/org/owntracks/android/geocoding/GeocoderProvider.kt?ref=3ffbaf605ead1b87b96535da4f19c64eb6b33a83",
+    "patch": "@@ -8,6 +8,7 @@ import android.content.Intent\n import android.content.SharedPreferences\n import android.widget.TextView\n import androidx.core.app.NotificationCompat\n+import androidx.core.app.NotificationCompat.PRIORITY_LOW\n import androidx.core.app.NotificationManagerCompat\n import kotlinx.coroutines.Dispatchers\n import kotlinx.coroutines.GlobalScope\n@@ -96,6 +97,8 @@ class GeocoderProvider @Inject constructor(@AppContext val context: Context, val\n                 .setSmallIcon(R.drawable.ic_owntracks_80)\n                 .setStyle(NotificationCompat.BigTextStyle().bigText(errorNotificationText))\n                 .setContentIntent(PendingIntent.getActivity(context, 0, activityLaunchIntent, PendingIntent.FLAG_UPDATE_CURRENT))\n+                .setPriority(PRIORITY_LOW)\n+                .setNotificationSilent()\n                 .build()\n \n         notificationManager.notify(GEOCODE_ERROR_NOTIFICATION_TAG, 0, notification)\n@@ -151,7 +154,7 @@ class GeocoderProvider @Inject constructor(@AppContext val context: Context, val\n         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {\n             val channelName = if (context.getString(R.string.notificationChannelErrors).trim().isNotEmpty()) context.getString(R.string.notificationChannelErrors) else \"Errors\"\n             notificationManager.createNotificationChannel(\n-                    NotificationChannel(ERROR_NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT)\n+                    NotificationChannel(ERROR_NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW)\n             )\n         }\n     }"
+  },
+  {
+    "sha": "b8bd7a37a2d63035e9069bfa3c6e276c2c06b25a",
+    "filename": "project/app/src/main/java/org/owntracks/android/ui/welcome/WelcomeActivity.kt",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 20,
+    "changes": 35,
+    "blob_url": "https://github.com/owntracks/android/blob/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/src/main/java/org/owntracks/android/ui/welcome/WelcomeActivity.kt",
+    "raw_url": "https://github.com/owntracks/android/raw/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/src/main/java/org/owntracks/android/ui/welcome/WelcomeActivity.kt",
+    "contents_url": "https://api.github.com/repos/owntracks/android/contents/project/app/src/main/java/org/owntracks/android/ui/welcome/WelcomeActivity.kt?ref=3ffbaf605ead1b87b96535da4f19c64eb6b33a83",
+    "patch": "@@ -5,6 +5,8 @@ import android.os.Bundle\n import android.view.ViewGroup\n import android.widget.ImageView\n import androidx.core.content.ContextCompat\n+import androidx.viewpager2.widget.ViewPager2\n+import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING\n import org.owntracks.android.R\n import org.owntracks.android.databinding.UiWelcomeBinding\n import org.owntracks.android.support.RequirementsChecker\n@@ -44,8 +46,16 @@ class WelcomeActivity : BaseActivity<UiWelcomeBinding?, WelcomeViewModel?>(), We\n         playFragment = PlayFragment()\n         welcomeAdapter!!.setupFragments(IntroFragment(), VersionFragment(), playFragment!!, PermissionFragment(), FinishFragment())\n \n-        binding!!.viewPager.isUserInputEnabled = false\n+        binding!!.viewPager.isUserInputEnabled = true\n         binding!!.viewPager.adapter = welcomeAdapter\n+        binding!!.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {\n+            override fun onPageSelected(position: Int) {\n+                binding!!.vm!!.currentFragmentPosition.value=position\n+                setPagerIndicator(position)\n+                refreshNextDoneButtons()\n+                super.onPageSelected(position)\n+            }\n+        })\n \n         binding!!.vm!!.currentFragmentPosition.observe({ this.lifecycle }, { fragmentPosition: Int ->\n             showFragment(fragmentPosition)\n@@ -57,13 +67,7 @@ class WelcomeActivity : BaseActivity<UiWelcomeBinding?, WelcomeViewModel?>(), We\n     }\n \n     override fun showNextFragment() {\n-        val currentItem = binding!!.viewPager.currentItem\n-        if (currentItem == welcomeAdapter!!.lastItemPosition) {\n-            Timber.e(\"viewPager is at the end\")\n-            setNextEnabled(false)\n-            return\n-        }\n-        showFragment(currentItem + 1)\n+        showFragment(binding!!.viewPager.currentItem + 1)\n     }\n \n     override fun setPagerIndicator(index: Int) {\n@@ -79,25 +83,16 @@ class WelcomeActivity : BaseActivity<UiWelcomeBinding?, WelcomeViewModel?>(), We\n         }\n     }\n \n-    private fun setNextEnabled(enabled: Boolean) {\n-        viewModel!!.nextEnabled = enabled\n-    }\n-\n-    private fun setDoneEnabled(enabled: Boolean) {\n-        viewModel!!.doneEnabled = enabled\n-    }\n-\n     private fun showFragment(position: Int) {\n         binding!!.viewPager.currentItem = position\n         welcomeAdapter!!.getFragment(binding!!.viewPager.currentItem).onShowFragment()\n-        refreshNextDoneButtons()\n-        setPagerIndicator(position)\n     }\n \n     // TODO I really feel like we can replace this to auto refresh when the VM changes. Somehow.\n     override fun refreshNextDoneButtons() {\n-        setNextEnabled(welcomeAdapter!!.getFragment(binding!!.viewPager.currentItem).isNextEnabled)\n-        setDoneEnabled(binding!!.viewPager.currentItem == welcomeAdapter!!.lastItemPosition)\n+        viewModel!!.nextEnabled = welcomeAdapter!!.getFragment(binding!!.viewPager.currentItem).isNextEnabled\n+        binding!!.viewPager.isUserInputEnabled = viewModel!!.nextEnabled\n+        viewModel!!.doneEnabled = binding!!.viewPager.currentItem == welcomeAdapter!!.lastItemPosition\n     }\n \n     private fun buildPagerIndicator() {"
+  },
+  {
+    "sha": "8bcd0b310ff1ed272a8c4c678c1166a66213bdf8",
+    "filename": "project/app/src/main/java/org/owntracks/android/ui/welcome/permission/PermissionFragment.kt",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/owntracks/android/blob/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/src/main/java/org/owntracks/android/ui/welcome/permission/PermissionFragment.kt",
+    "raw_url": "https://github.com/owntracks/android/raw/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/src/main/java/org/owntracks/android/ui/welcome/permission/PermissionFragment.kt",
+    "contents_url": "https://api.github.com/repos/owntracks/android/contents/project/app/src/main/java/org/owntracks/android/ui/welcome/permission/PermissionFragment.kt?ref=3ffbaf605ead1b87b96535da4f19c64eb6b33a83",
+    "patch": "@@ -1,10 +1,12 @@\n package org.owntracks.android.ui.welcome.permission\n \n import android.Manifest\n+import android.content.Context\n import android.content.DialogInterface\n import android.content.pm.PackageManager\n import android.os.Build\n import android.os.Bundle\n+import android.util.AttributeSet\n import android.view.LayoutInflater\n import android.view.View\n import android.view.ViewGroup\n@@ -17,6 +19,7 @@ import org.owntracks.android.databinding.UiWelcomePermissionsBinding\n import org.owntracks.android.support.Events.PermissionGranted\n import org.owntracks.android.ui.base.BaseSupportFragment\n import org.owntracks.android.ui.welcome.WelcomeMvvm\n+import timber.log.Timber\n import javax.inject.Inject\n \n class PermissionFragment : BaseSupportFragment<UiWelcomePermissionsBinding?, PermissionFragmentViewModel>(), PermissionFragmentMvvm.View {\n@@ -76,6 +79,6 @@ class PermissionFragment : BaseSupportFragment<UiWelcomePermissionsBinding?, Per\n     override fun onShowFragment() {}\n \n     companion object {\n-        private  const val PERMISSIONS_REQUEST_CODE = 1\n+        private const val PERMISSIONS_REQUEST_CODE = 1\n     }\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "6d42238245fdd93cf8b784c3360d5196016f060e",
+    "filename": "project/app/src/main/java/org/owntracks/android/ui/welcome/permission/PermissionFragmentViewModel.kt",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 5,
+    "changes": 5,
+    "blob_url": "https://github.com/owntracks/android/blob/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/src/main/java/org/owntracks/android/ui/welcome/permission/PermissionFragmentViewModel.kt",
+    "raw_url": "https://github.com/owntracks/android/raw/3ffbaf605ead1b87b96535da4f19c64eb6b33a83/project/app/src/main/java/org/owntracks/android/ui/welcome/permission/PermissionFragmentViewModel.kt",
+    "contents_url": "https://api.github.com/repos/owntracks/android/contents/project/app/src/main/java/org/owntracks/android/ui/welcome/permission/PermissionFragmentViewModel.kt?ref=3ffbaf605ead1b87b96535da4f19c64eb6b33a83",
+    "patch": "@@ -1,6 +1,5 @@\n package org.owntracks.android.ui.welcome.permission\n \n-import android.os.Bundle\n import org.owntracks.android.injection.scopes.PerActivity\n import org.owntracks.android.ui.base.viewmodel.BaseViewModel\n import javax.inject.Inject\n@@ -13,10 +12,6 @@ class PermissionFragmentViewModel @Inject internal constructor() : BaseViewModel\n             notifyChange()\n         }\n \n-    override fun attachView(savedInstanceState: Bundle?, view: PermissionFragmentMvvm.View) {\n-        super.attachView(savedInstanceState, view)\n-    }\n-\n     fun onFixClicked() {\n         view!!.requestFix()\n     }"
+  }
+]

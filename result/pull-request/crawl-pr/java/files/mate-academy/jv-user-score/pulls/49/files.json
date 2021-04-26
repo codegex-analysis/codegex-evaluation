@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "b55244114a83a04295647167bfda92a0dc478743",
+    "filename": "src/main/java/core/basesyntax/UserService.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 2,
+    "changes": 23,
+    "blob_url": "https://github.com/mate-academy/jv-user-score/blob/8f10b7c13270ba304ca02e01d1ab7e58a1db6447/src/main/java/core/basesyntax/UserService.java",
+    "raw_url": "https://github.com/mate-academy/jv-user-score/raw/8f10b7c13270ba304ca02e01d1ab7e58a1db6447/src/main/java/core/basesyntax/UserService.java",
+    "contents_url": "https://api.github.com/repos/mate-academy/jv-user-score/contents/src/main/java/core/basesyntax/UserService.java?ref=8f10b7c13270ba304ca02e01d1ab7e58a1db6447",
+    "patch": "@@ -1,8 +1,27 @@\n package core.basesyntax;\n \n-public class UserService {\n+import core.basesyntax.exception.UserNotFoundException;\n \n+public class UserService {\n     public int getUserScore(String[] records, String email) {\n-        return 0;\n+        String userScore = null;\n+        for (String record : records) {\n+            String[] recordParts = record.split(\":\");\n+\n+            if (isUserExist(recordParts[0], email)) {\n+                userScore = recordParts[1];\n+                break;\n+            }\n+        }\n+\n+        if (userScore == null) {\n+            throw new UserNotFoundException(\"User with given email doesn't exist\");\n+        }\n+\n+        return Integer.parseInt(userScore);\n+    }\n+\n+    private boolean isUserExist(String userEmail, String email) {\n+        return userEmail.equals(email);\n     }\n }"
+  },
+  {
+    "sha": "7e4816bf136d42e21a7099790352a77a12a870d3",
+    "filename": "src/main/java/core/basesyntax/exception/UserNotFoundException.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/mate-academy/jv-user-score/blob/8f10b7c13270ba304ca02e01d1ab7e58a1db6447/src/main/java/core/basesyntax/exception/UserNotFoundException.java",
+    "raw_url": "https://github.com/mate-academy/jv-user-score/raw/8f10b7c13270ba304ca02e01d1ab7e58a1db6447/src/main/java/core/basesyntax/exception/UserNotFoundException.java",
+    "contents_url": "https://api.github.com/repos/mate-academy/jv-user-score/contents/src/main/java/core/basesyntax/exception/UserNotFoundException.java?ref=8f10b7c13270ba304ca02e01d1ab7e58a1db6447",
+    "patch": "@@ -0,0 +1,7 @@\n+package core.basesyntax.exception;\n+\n+public class UserNotFoundException extends RuntimeException {\n+    public UserNotFoundException(String message) {\n+        super(message);\n+    }\n+}"
+  }
+]

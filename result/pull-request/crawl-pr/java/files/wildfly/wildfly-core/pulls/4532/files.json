@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "ede8863a38e3424471f6624bd3f3ffac4db638b5",
+    "filename": "testsuite/manualmode/src/test/java/org/jboss/as/test/manualmode/vault/VaultPasswordsInCLITestCase.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/wildfly/wildfly-core/blob/fc2be03216a896b9801364893aef8c56af719e6b/testsuite/manualmode/src/test/java/org/jboss/as/test/manualmode/vault/VaultPasswordsInCLITestCase.java",
+    "raw_url": "https://github.com/wildfly/wildfly-core/raw/fc2be03216a896b9801364893aef8c56af719e6b/testsuite/manualmode/src/test/java/org/jboss/as/test/manualmode/vault/VaultPasswordsInCLITestCase.java",
+    "contents_url": "https://api.github.com/repos/wildfly/wildfly-core/contents/testsuite/manualmode/src/test/java/org/jboss/as/test/manualmode/vault/VaultPasswordsInCLITestCase.java?ref=fc2be03216a896b9801364893aef8c56af719e6b",
+    "patch": "@@ -30,6 +30,8 @@\n import java.io.IOException;\n import java.net.InetAddress;\n import java.net.UnknownHostException;\n+import java.security.AccessController;\n+import java.security.PrivilegedAction;\n \n import javax.inject.Inject;\n \n@@ -48,6 +50,7 @@\n import org.jboss.dmr.ModelNode;\n import org.jboss.logging.Logger;\n import org.junit.AfterClass;\n+import org.junit.Assume;\n import org.junit.BeforeClass;\n import org.junit.Test;\n import org.junit.runner.RunWith;\n@@ -94,12 +97,20 @@\n     private static final ManagementInterfacesSetup managementInterfacesSetup = new ManagementInterfacesSetup();\n     private static final ManagemenCLIRealmSetup managementCLICliRealmSetup = new ManagemenCLIRealmSetup();\n \n+    private static final boolean isElytronSetup = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {\n+        @Override\n+        public Boolean run() {\n+            return System.getProperty(\"elytron\") != null;\n+        }\n+    });\n+\n     @Inject\n     private static ServerController containerController;\n \n \n     @BeforeClass\n     public static void prepareServer() throws Exception {\n+        Assume.assumeFalse(\"Assume elytron setup is not in place\", isElytronSetup);\n \n         LOGGER.trace(\"*** starting server\");\n         containerController.startInAdminMode();\n@@ -145,6 +156,11 @@ public void testRightVaultPassword() throws InterruptedException, IOException {\n     @AfterClass\n     public static void resetConfigurationForNativeInterface() throws Exception {\n \n+        if (isElytronSetup) {\n+            // do nothing, skipped test\n+            return;\n+        }\n+\n         LOGGER.info(\"*** reseting test configuration\");\n \n         resetHttpInterfaceConfiguration(getNativeModelControllerClient());"
+  }
+]

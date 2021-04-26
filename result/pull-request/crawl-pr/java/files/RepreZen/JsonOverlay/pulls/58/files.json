@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c0110b273c375661e41531159ebdd076bd30dbb4",
+    "filename": ".travis.yml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/RepreZen/JsonOverlay/blob/904f31d7eac3e3d6cecc1f48c71c7807716dce4a/.travis.yml",
+    "raw_url": "https://github.com/RepreZen/JsonOverlay/raw/904f31d7eac3e3d6cecc1f48c71c7807716dce4a/.travis.yml",
+    "contents_url": "https://api.github.com/repos/RepreZen/JsonOverlay/contents/.travis.yml?ref=904f31d7eac3e3d6cecc1f48c71c7807716dce4a",
+    "patch": "@@ -1,4 +1,6 @@\n language: java\n+jdk:\n+  - openjdk8\n script: mvn -f json-overlay/pom.xml test\n cache:\n   directories:"
+  },
+  {
+    "sha": "64b2d7aabd12cc4ee85a1291ca1ec54fd8f8c6e4",
+    "filename": "json-overlay/src/main/java/com/reprezen/jsonoverlay/ListOverlay.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/RepreZen/JsonOverlay/blob/904f31d7eac3e3d6cecc1f48c71c7807716dce4a/json-overlay/src/main/java/com/reprezen/jsonoverlay/ListOverlay.java",
+    "raw_url": "https://github.com/RepreZen/JsonOverlay/raw/904f31d7eac3e3d6cecc1f48c71c7807716dce4a/json-overlay/src/main/java/com/reprezen/jsonoverlay/ListOverlay.java",
+    "contents_url": "https://api.github.com/repos/RepreZen/JsonOverlay/contents/json-overlay/src/main/java/com/reprezen/jsonoverlay/ListOverlay.java?ref=904f31d7eac3e3d6cecc1f48c71c7807716dce4a",
+    "patch": "@@ -36,9 +36,14 @@ private ListOverlay(JsonNode json, JsonOverlay<?> parent, OverlayFactory<List<V>\n \n \tprivate ListOverlay(List<V> value, JsonOverlay<?> parent, OverlayFactory<List<V>> factory,\n \t\t\tReferenceManager refMgr) {\n-\t\tsuper(new ArrayList<>(value), parent, factory, refMgr);\n+\t\tsuper(copyValue(value), parent, factory, refMgr);\n \t\tthis.itemFactory = ((ListOverlayFactory<V>) factory).getItemFactory();\n \t}\n+\tstatic <T> List<T> copyValue(List<T> src) {\n+\t\tif (src == null)\n+\t\t\treturn null;\n+\t\treturn new ArrayList<>(src);\n+\t}\n \n \t@Override\n \tprotected JsonOverlay<?> _findInternal(JsonPointer path) {"
+  },
+  {
+    "sha": "3023f05049d2efe68cd09b4fc459e8959556080b",
+    "filename": "json-overlay/src/main/java/com/reprezen/jsonoverlay/MapOverlay.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/RepreZen/JsonOverlay/blob/904f31d7eac3e3d6cecc1f48c71c7807716dce4a/json-overlay/src/main/java/com/reprezen/jsonoverlay/MapOverlay.java",
+    "raw_url": "https://github.com/RepreZen/JsonOverlay/raw/904f31d7eac3e3d6cecc1f48c71c7807716dce4a/json-overlay/src/main/java/com/reprezen/jsonoverlay/MapOverlay.java",
+    "contents_url": "https://api.github.com/repos/RepreZen/JsonOverlay/contents/json-overlay/src/main/java/com/reprezen/jsonoverlay/MapOverlay.java?ref=904f31d7eac3e3d6cecc1f48c71c7807716dce4a",
+    "patch": "@@ -43,13 +43,19 @@ private MapOverlay(JsonNode json, JsonOverlay<?> parent, OverlayFactory<Map<Stri\n \n \tprivate MapOverlay(Map<String, V> value, JsonOverlay<?> parent, OverlayFactory<Map<String, V>> factory,\n \t\t\tReferenceManager refMgr) {\n-\t\tsuper(new LinkedHashMap<>(value), parent, factory, refMgr);\n+\t\tsuper(copyValue(value), parent, factory, refMgr);\n \t\tMapOverlayFactory<V> mapOverlayFactory = (MapOverlayFactory<V>) factory;\n \t\tthis.valueFactory = mapOverlayFactory.getValueFactory();\n \t\tString keyPattern = mapOverlayFactory.getKeyPattern();\n \t\tthis.keyPattern = keyPattern != null ? Pattern.compile(keyPattern) : null;\n \t}\n \n+\tstatic <T> Map<String, T> copyValue(Map<String, T> src) {\n+\t\tif (src == null)\n+\t\t\treturn null;\n+\t\treturn new LinkedHashMap<>(src);\n+\t}\n+\n \t@Override\n \tprotected JsonOverlay<?> _findInternal(JsonPointer path) {\n \t\tString key = path.getMatchingProperty();"
+  }
+]

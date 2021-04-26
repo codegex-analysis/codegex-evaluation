@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "7b6d9c9e47567e8cddbd5ffbf6f4dd6fccf3c9b0",
+    "filename": "src/ru/geekbrains/HomeWork_2_5/Main.java",
+    "status": "modified",
+    "additions": 60,
+    "deletions": 1,
+    "changes": 61,
+    "blob_url": "https://github.com/AlexVenediktov12/HomeWork_2_5/blob/a439d5ba8ff3eac870f27e1638c9a2477971dccf/src/ru/geekbrains/HomeWork_2_5/Main.java",
+    "raw_url": "https://github.com/AlexVenediktov12/HomeWork_2_5/raw/a439d5ba8ff3eac870f27e1638c9a2477971dccf/src/ru/geekbrains/HomeWork_2_5/Main.java",
+    "contents_url": "https://api.github.com/repos/AlexVenediktov12/HomeWork_2_5/contents/src/ru/geekbrains/HomeWork_2_5/Main.java?ref=a439d5ba8ff3eac870f27e1638c9a2477971dccf",
+    "patch": "@@ -3,6 +3,65 @@\n public class Main {\n \n     public static void main(String[] args) {\n-\t// write your code here\n+        firstMethod();\n+        secondMethod();\n+\n+    }\n+    public static void firstMethod() {\n+        final int SIZE = 10000000;\n+        float[] arr = new float[SIZE];\n+\n+        for (int i = 0; i < SIZE; i++) {\n+            arr[i] = 1;\n+        }\n+\n+        long a = System.currentTimeMillis();\n+        for (int i = 0; i < arr.length; i++) {\n+            arr[i] = (float)(arr[i] * Math.sin(0.2f + i / 5) *\n+                    Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));\n+        }\n+\n+        System.out.println(\"Первый вариант отработал за:\");\n+        System.out.println(System.currentTimeMillis() - a);\n+    }\n+\n+    public static void secondMethod() {\n+        final int SIZE = 10000000;\n+        final int HALF = SIZE / 2;\n+        float[] arr = new float[SIZE];\n+\n+        for (int i = 0; i < SIZE; i++) {\n+            arr[i] = 1;\n+        }\n+        float[] a1 = new float[HALF];\n+        float[] a2 = new float[HALF];\n+\n+        long a = System.currentTimeMillis();\n+\n+        System.arraycopy(arr, 0, a1, 0, HALF);\n+        System.arraycopy(arr, HALF, a2, 0, HALF);\n+\n+\n+        MyThread thread1 = new MyThread(\"a1\");\n+        MyThread thread2 = new MyThread(\"a2\");\n+\n+        thread1.start();\n+        thread2.start();\n+        thread1.firstHalf(a1);\n+        thread2.secondHalf(a2);\n+\n+        try {\n+            thread1.join();\n+            thread2.join();\n+        } catch (InterruptedException e) {\n+            e.printStackTrace();\n+        }\n+\n+        System.arraycopy(a1, 0, arr, 0, HALF);\n+        System.arraycopy(a2, 0, arr, HALF, HALF);\n+\n+        System.out.println(\"Второй вариант отработал за:\");\n+        System.out.println(System.currentTimeMillis() - a);\n+\n     }\n }"
+  },
+  {
+    "sha": "6a422c57fc13e3103bad4d69d2240fcebde15429",
+    "filename": "src/ru/geekbrains/HomeWork_2_5/MyThread.java",
+    "status": "added",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/AlexVenediktov12/HomeWork_2_5/blob/a439d5ba8ff3eac870f27e1638c9a2477971dccf/src/ru/geekbrains/HomeWork_2_5/MyThread.java",
+    "raw_url": "https://github.com/AlexVenediktov12/HomeWork_2_5/raw/a439d5ba8ff3eac870f27e1638c9a2477971dccf/src/ru/geekbrains/HomeWork_2_5/MyThread.java",
+    "contents_url": "https://api.github.com/repos/AlexVenediktov12/HomeWork_2_5/contents/src/ru/geekbrains/HomeWork_2_5/MyThread.java?ref=a439d5ba8ff3eac870f27e1638c9a2477971dccf",
+    "patch": "@@ -0,0 +1,21 @@\n+package ru.geekbrains.HomeWork_2_5;\n+\n+public class MyThread extends Thread{\n+    public MyThread(String name) {\n+        super(name);\n+    }\n+    public void firstHalf(float a1[]) {\n+        for (int i = 0; i < a1.length; i++) {\n+            a1[i] = (float)(a1[i] * Math.sin(0.2f + i / 5) *\n+                    Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));\n+        }\n+    }\n+\n+    public void secondHalf(float a2[]) {\n+        for (int i = 0; i < a2.length; i++) {\n+            a2[i] = (float)(a2[i] * Math.sin(0.2f + (i + 5000000) / 5) *\n+                    Math.cos(0.2f + (i + 5000000) / 5) * Math.cos(0.4f + (i + 5000000) / 2));\n+        }\n+    }\n+\n+}"
+  }
+]

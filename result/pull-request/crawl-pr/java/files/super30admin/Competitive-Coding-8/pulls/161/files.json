@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "158ded0bdcdc45ea4839f11d6a33c07dc42789ba",
+    "filename": "Problem1.java",
+    "status": "added",
+    "additions": 43,
+    "deletions": 0,
+    "changes": 43,
+    "blob_url": "https://github.com/super30admin/Competitive-Coding-8/blob/48818534a2ac551b62603307ba2580a975505338/Problem1.java",
+    "raw_url": "https://github.com/super30admin/Competitive-Coding-8/raw/48818534a2ac551b62603307ba2580a975505338/Problem1.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Competitive-Coding-8/contents/Problem1.java?ref=48818534a2ac551b62603307ba2580a975505338",
+    "patch": "@@ -0,0 +1,43 @@\n+// Time Complexity :O(n)\n+// Space Complexity :O(max depth)\n+// Did this code successfully run on Leetcode :Yes\n+// Any problem you faced while coding this :No\n+\n+\n+// Your code here along with comments explaining your approach-\n+/**\n+ * Definition for a binary tree node.\n+ * public class TreeNode {\n+ *     int val;\n+ *     TreeNode left;\n+ *     TreeNode right;\n+ *     TreeNode() {}\n+ *     TreeNode(int val) { this.val = val; }\n+ *     TreeNode(int val, TreeNode left, TreeNode right) {\n+ *         this.val = val;\n+ *         this.left = left;\n+ *         this.right = right;\n+ *     }\n+ * }\n+ */\n+class Solution {\n+    public void flatten(TreeNode root) {\n+        if(root==null)\n+            return ;\n+        TreeNode start = root;\n+        while(start!=null){\n+            if(start.left!=null){//traversing left subtree and finding the right most in left subtree.\n+                TreeNode p=start.left;\n+                while(p.right!=null){\n+                    p=p.right;\n+                }\n+                TreeNode temp=start.right;\n+                start.right=start.left;\n+                p.right=temp;\n+                start.left=null;\n+            }\n+            start=start.right;//traversing to the right\n+        }\n+  \n+    }\n+}"
+  },
+  {
+    "sha": "de74d9b833590a2cec04ba6a06d3ba4fea3b47af",
+    "filename": "Problem2.java",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/super30admin/Competitive-Coding-8/blob/48818534a2ac551b62603307ba2580a975505338/Problem2.java",
+    "raw_url": "https://github.com/super30admin/Competitive-Coding-8/raw/48818534a2ac551b62603307ba2580a975505338/Problem2.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Competitive-Coding-8/contents/Problem2.java?ref=48818534a2ac551b62603307ba2580a975505338",
+    "patch": "@@ -0,0 +1,52 @@\n+// Time Complexity :O(s+t)\n+// Space Complexity :O(s+t)\n+// Did this code successfully run on Leetcode :Yes\n+// Any problem you faced while coding this :No\n+\n+\n+// Your code here along with comments explaining your approach-\n+class Solution {\n+    public String minWindow(String s, String t) {\n+        if(t.length()== 0 || s.length()== 0)\n+             return \"\";\n+        HashMap<Character,Integer> orig= new HashMap<>();\n+        for (int i=0;i<t.length();i++){\n+            orig.put(t.charAt(i),orig.getOrDefault(t.charAt(i),0)+1);//adding the t string into map\n+        }\n+        HashMap<Character,Integer> window= new HashMap<>();\n+        int req=orig.size();\n+        int formed=0;\n+        int start=0;\n+        int end=0;\n+        int len=-1;\n+        int[] ans= new int[]{len,start,end};\n+        while(end<s.length()){\n+           \n+            char ch= s.charAt(end);\n+            window.put(ch,window.getOrDefault(ch,0)+1);\n+            if(orig.containsKey(ch) && window.get(ch).intValue()==orig.get(ch).intValue()){//if char in original map then increase formed \n+                formed++;\n+            }\n+            while(start<=end && formed==req){\n+                //System.out.println(formed+\"second loop\");\n+                ch=s.charAt(start);\n+                if(ans[0]==-1 || end-start+1<ans[0]){\n+                    ans[0]=end-start+1;\n+                    ans[1]=start;\n+                    ans[2]=end;\n+                }\n+                \n+                window.put(ch,window.get(ch)-1);\n+                if(orig.containsKey(ch) && window.get(ch).intValue()<orig.get(ch).intValue()){\n+                    formed--;\n+                }\n+                start++;\n+            }\n+            end++;\n+        }\n+      \n+        \n+        return (ans[0]==-1)?\"\":s.substring(ans[1],ans[2]+1);\n+        \n+    }\n+}\n\\ No newline at end of file"
+  }
+]

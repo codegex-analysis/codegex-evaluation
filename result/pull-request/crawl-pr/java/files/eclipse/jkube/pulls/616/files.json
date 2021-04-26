@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "9a61ddd8448f25c21c9770b6f43459c64ba946b7",
+    "filename": "jkube-kit/enricher/generic/src/main/java/org/eclipse/jkube/enricher/generic/openshift/RouteEnricher.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/eclipse/jkube/blob/1b7d0678350745acaa473deeee0c376add6768e3/jkube-kit/enricher/generic/src/main/java/org/eclipse/jkube/enricher/generic/openshift/RouteEnricher.java",
+    "raw_url": "https://github.com/eclipse/jkube/raw/1b7d0678350745acaa473deeee0c376add6768e3/jkube-kit/enricher/generic/src/main/java/org/eclipse/jkube/enricher/generic/openshift/RouteEnricher.java",
+    "contents_url": "https://api.github.com/repos/eclipse/jkube/contents/jkube-kit/enricher/generic/src/main/java/org/eclipse/jkube/enricher/generic/openshift/RouteEnricher.java?ref=1b7d0678350745acaa473deeee0c376add6768e3",
+    "patch": "@@ -41,6 +41,7 @@\n import lombok.Getter;\n import org.apache.commons.lang3.StringUtils;\n \n+import static org.eclipse.jkube.kit.enricher.api.util.KubernetesResourceUtil.containsLabelInMetadata;\n import static org.eclipse.jkube.kit.enricher.api.util.KubernetesResourceUtil.isExposedService;\n import static org.eclipse.jkube.kit.enricher.api.util.KubernetesResourceUtil.mergeMetadata;\n import static org.eclipse.jkube.kit.enricher.api.util.KubernetesResourceUtil.mergeSimpleFields;\n@@ -94,6 +95,11 @@ public void create(PlatformMode platformMode, final KubernetesListBuilder listBu\n \n                 @Override\n                 public void visit(ServiceBuilder serviceBuilder) {\n+                    ObjectMeta serviceMetadata = serviceBuilder.buildMetadata();\n+                    // Add expose=true label if not explicitly set to false\n+                    if (! containsLabelInMetadata(serviceMetadata, EXPOSE_LABEL, \"false\")) {\n+                        serviceBuilder = serviceBuilder.editMetadata().addToLabels(EXPOSE_LABEL, \"true\").endMetadata();\n+                    }\n                     addRoute(listBuilder, serviceBuilder);\n                 }\n             });"
+  }
+]

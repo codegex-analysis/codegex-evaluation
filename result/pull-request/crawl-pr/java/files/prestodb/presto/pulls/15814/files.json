@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "da7f2f0eec40ee042f7bc757dc510d549ab3d2a4",
+    "filename": "presto-docs/src/main/sphinx/functions/math.rst",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 1,
+    "changes": 14,
+    "blob_url": "https://github.com/prestodb/presto/blob/427babcad9b9a00a8d2a293c17aef72d739f7edb/presto-docs/src/main/sphinx/functions/math.rst",
+    "raw_url": "https://github.com/prestodb/presto/raw/427babcad9b9a00a8d2a293c17aef72d739f7edb/presto-docs/src/main/sphinx/functions/math.rst",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-docs/src/main/sphinx/functions/math.rst?ref=427babcad9b9a00a8d2a293c17aef72d739f7edb",
+    "patch": "@@ -85,6 +85,18 @@ Mathematical Functions\n     The a, b parameters must be positive real numbers and value v must be a real value.\n     The value v must lie on the interval [0, 1].\n \n+.. function:: inverse_poisson_cdf(lambda, p) -> double\n+\n+    Compute the inverse of the Poisson cdf with given lmabda (mean) parameter for the cumulative\n+    probability (p): P(N < n). The the lmabda parameter must be positive real values.\n+    The probability p must lie on the interval [0, 1].\n+\n+.. function:: poisson_cdf(lambda, value) -> double\n+\n+    Compute the Poisson cdf with given lmabda (mean) parameter:  P(N < value; df).\n+    The lmabda parameter must be positive real numbers and value must be a real value.\n+    The value must be non-negative.\n+\n .. function:: ln(x) -> double\n \n     Returns the natural logarithm of ``x``.\n@@ -166,7 +178,7 @@ Mathematical Functions\n .. function:: truncate(x, n) -> double\n \n     Returns ``x`` truncated to ``n`` decimal places.\n-    ``n`` can be negative to truncate ``n`` digits left of the decimal point. \n+    ``n`` can be negative to truncate ``n`` digits left of the decimal point.\n \n     Example:\n     ``truncate(REAL '12.333', -1)`` -> result is 10.0"
+  },
+  {
+    "sha": "f0e59604f3a4cbc6e07dfae70221a2d80f9e851a",
+    "filename": "presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/prestodb/presto/blob/427babcad9b9a00a8d2a293c17aef72d739f7edb/presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/427babcad9b9a00a8d2a293c17aef72d739f7edb/presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java?ref=427babcad9b9a00a8d2a293c17aef72d739f7edb",
+    "patch": "@@ -31,6 +31,7 @@\n import com.google.common.primitives.Doubles;\n import io.airlift.slice.Slice;\n import org.apache.commons.math3.distribution.BetaDistribution;\n+import org.apache.commons.math3.distribution.PoissonDistribution;\n import org.apache.commons.math3.special.Erf;\n \n import java.math.BigDecimal;\n@@ -704,6 +705,32 @@ public static double betaCdf(\n         return distribution.cumulativeProbability(value);\n     }\n \n+    @Description(\"Inverse of Poisson cdf given lambda (mean) parameter and probability\")\n+    @ScalarFunction\n+    @SqlType(StandardTypes.DOUBLE)\n+    public static double inversePoissonCdf(\n+            @SqlType(StandardTypes.DOUBLE) double lambda,\n+            @SqlType(StandardTypes.DOUBLE) double p)\n+    {\n+        checkCondition(p >= 0 && p <= 1, INVALID_FUNCTION_ARGUMENT, \"p must be in the interval [0, 1]\");\n+        checkCondition(lambda > 0, INVALID_FUNCTION_ARGUMENT, \"lambda must be > 0\");\n+        PoissonDistribution distribution = new PoissonDistribution(lambda);\n+        return distribution.inverseCumulativeProbability(p);\n+    }\n+\n+    @Description(\"Poisson cdf given the lambda (mean) parameter and value\")\n+    @ScalarFunction\n+    @SqlType(StandardTypes.DOUBLE)\n+    public static double poissonCdf(\n+            @SqlType(StandardTypes.DOUBLE) double lambda,\n+            @SqlType(StandardTypes.DOUBLE) double value)\n+    {\n+        checkCondition(value >= 0, INVALID_FUNCTION_ARGUMENT, \"value must non-negative\");\n+        checkCondition(lambda > 0, INVALID_FUNCTION_ARGUMENT, \"lambda must be > 0\");\n+        PoissonDistribution distribution = new PoissonDistribution(lambda);\n+        return distribution.cumulativeProbability(value);\n+    }\n+\n     @Description(\"round to nearest integer\")\n     @ScalarFunction(\"round\")\n     @SqlType(StandardTypes.TINYINT)"
+  },
+  {
+    "sha": "d13e10bd3741e7140c1424778b58d25fa955157d",
+    "filename": "presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/prestodb/presto/blob/427babcad9b9a00a8d2a293c17aef72d739f7edb/presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/427babcad9b9a00a8d2a293c17aef72d739f7edb/presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java?ref=427babcad9b9a00a8d2a293c17aef72d739f7edb",
+    "patch": "@@ -1372,6 +1372,32 @@ public void testBetaCdf()\n         assertInvalidFunction(\"beta_cdf(3, 5, 1.1)\", \"value must be in the interval [0, 1]\");\n     }\n \n+    @Test\n+    public void testInversePoissonCdf()\n+    {\n+        assertFunction(\"inverse_poisson_cdf(3, 0.0)\", DOUBLE, 0.0);\n+        assertFunction(\"inverse_poisson_cdf(3, 1.0)\", DOUBLE, 1.0);\n+        assertFunction(\"inverse_poisson_cdf(3, 0.3)\", DOUBLE, 2.0);\n+        assertFunction(\"inverse_poisson_cdf(3, 0.95)\", DOUBLE, 6.0);\n+\n+        assertInvalidFunction(\"inverse_poisson_cdf(-3, 0.3)\", \"lambda must be > 0\");\n+        assertInvalidFunction(\"inverse_poisson_cdf(3, -0.1)\", \"p must be in the interval [0, 1]\");\n+        assertInvalidFunction(\"inverse_poisson_cdf(3, 1.1)\", \"p must be in the interval [0, 1]\");\n+    }\n+\n+    @Test\n+    public void testPoissonCdf()\n+            throws Exception\n+    {\n+        assertFunction(\"poisson_cdf(3, 0.0)\", DOUBLE, 0.0);\n+        assertFunction(\"poisson_cdf(3, 1.0)\", DOUBLE, 1.0);\n+        assertFunction(\"round(poisson_cdf(3, 2.5), 2)\", DOUBLE, 0.42);\n+        assertFunction(\"round(poisson_cdf(3, 5), 2)\", DOUBLE, 0.92);\n+\n+        assertInvalidFunction(\"poisson_cdf(-3, 0.3)\", \"lambda must be > 0\");\n+        assertInvalidFunction(\"poisson_cdf(3, -10)\", \"value must non-negative\");\n+    }\n+\n     @Test\n     public void testWilsonInterval()\n     {"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "3e5ea34e4aaf47adc6db201a410f805d2005d375",
+    "filename": "TAB2MXL/src/main/java/TAB2MXL/NoteUtility.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/kaazii/EECS2311/blob/0789741f481ad87fe7d0ad77f997558d1e4a6596/TAB2MXL/src/main/java/TAB2MXL/NoteUtility.java",
+    "raw_url": "https://github.com/kaazii/EECS2311/raw/0789741f481ad87fe7d0ad77f997558d1e4a6596/TAB2MXL/src/main/java/TAB2MXL/NoteUtility.java",
+    "contents_url": "https://api.github.com/repos/kaazii/EECS2311/contents/TAB2MXL/src/main/java/TAB2MXL/NoteUtility.java?ref=0789741f481ad87fe7d0ad77f997558d1e4a6596",
+    "patch": "@@ -21,6 +21,11 @@ public void initializeDrum() {\n \t\t//Low Tom\n \t\t//drumNotes.put(\"MT\", new DrumNote(\"D\", 5, \"P1-I46\"));\n \t\t//\n+\t\tdrumNotes.put(\"RC\", new DrumNote(\"F\", 5, \"P1-I52\"));\n+\t\tdrumNotes.put(\"CC\", new DrumNote(\"A\", 5, \"P1-I50\"));\n+\t\tdrumNotes.put(\"HT\", new DrumNote(\"E\", 5, \"P1-I48\"));\n+\t\tdrumNotes.put(\"MT\", new DrumNote(\"D\", 5, \"P1-I46\"));\n+\t\tdrumNotes.put(\"FT\", new DrumNote(\"A\", 4, \"P1-I42\"));\n \t}\n \t\n \t"
+  },
+  {
+    "sha": "924285ed5918f7577fdc1664b8e2208f1c33f48b",
+    "filename": "TAB2MXL/src/main/java/View/StringParserUtilityDrum.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 3,
+    "changes": 11,
+    "blob_url": "https://github.com/kaazii/EECS2311/blob/0789741f481ad87fe7d0ad77f997558d1e4a6596/TAB2MXL/src/main/java/View/StringParserUtilityDrum.java",
+    "raw_url": "https://github.com/kaazii/EECS2311/raw/0789741f481ad87fe7d0ad77f997558d1e4a6596/TAB2MXL/src/main/java/View/StringParserUtilityDrum.java",
+    "contents_url": "https://api.github.com/repos/kaazii/EECS2311/contents/TAB2MXL/src/main/java/View/StringParserUtilityDrum.java?ref=0789741f481ad87fe7d0ad77f997558d1e4a6596",
+    "patch": "@@ -3,6 +3,7 @@\n import java.util.ArrayList;\n import java.util.Arrays;\n \n+import TAB2MXL.DrumNote;\n import TAB2MXL.Measure;\n import TAB2MXL.Note;\n import TAB2MXL.NoteUtility;\n@@ -52,7 +53,7 @@\n \t\t//call measureParser\n \t\tfor (int i = 0; i < measureArray.length; i++) {\n \t\t\t// Pass on measure array and also the instrument to be parsed returns a measure object/\n-\t\t\tmeasureList.add(measureParser(measureArray[i], splitLines[i][0]));\n+\t\t\tmeasureList.add(measureParser(measureArray[i], splitLines));\n \t\t\t\n \t\t\tsetChord(measureList.get(i).getNoteList());\n \t\t\tmeasureList.get(i).measureNumber = i + 1;\n@@ -87,7 +88,7 @@ public static void setChord(ArrayList<Note> noteList) {\n \t\t}\n \t}\n \t\n-\tpublic static Measure measureParser(String measureString, String instrument) {\n+\tpublic static Measure measureParser(String measureString, String[][] splitLines) {\n \t\tMeasure measure = new Measure(getDivison(measureString));\n \t\tMeasure.divisions = getDivison(measureString);\n \t\t\n@@ -96,12 +97,14 @@ public static Measure measureParser(String measureString, String instrument) {\n \t\tfor (int i = 0; i < lines[0].length() - 1; i++) { // i are the columns\n \t\t\tfor (int j = 0; j < lines.length; j++) { // j are the rows\n \t\t\t\t//String instrument = getInstrument(lines, i);\n+\t\t\t\tString instrument = splitLines[j][0];\n \t\t\t\tString curr = lines[j].substring(i, i + 1); //this is the current character that we are parsing\n \t\t\t\tif (!(curr.equals(\"-\"))) { // this must be a note!\n \t\t\t\t\tNote note = getNote(instrument);\n+\t\t\t\t\tif(curr.equals(\"x\")) ((DrumNote) note).setNotehead(\"x\");\n \t\t\t\t\tnote.setColumn(i);\n \t\t\t\t\tnote.duration = getDuration(lines, i); //pass the current column index\n-\t\t\t\t\tnote.setType(NoteUtility.getNoteType((float) note.getDuration() / (float) measure.getDivision()));\n+\t\t\t\t\tnote.setType(NoteUtility.getNoteType((float) note.getDuration() / (float) Measure.divisions));\n \t\t\t\t\tSystem.out.println(\"instrument \" + instrument + \" string: \" + note.string + \" duration: \" + note.duration + \" type: \" + note.getType()); // for testing\n \t\t\t\t\tmeasure.noteList.add(note);\n \t\t\t\t}\n@@ -116,8 +119,10 @@ public static int getDivison(String measure) { //returns the division of a measu\n \t\tString lines[] = measure.split(\"\\\\r?\\\\n\");\n \t\t\n \t\tfor (int i = 0; i < lines[0].length() - 1; i++) { // i are the columns\n+\t\t\t\n \t\t\tfor (int j = 0; j < lines.length; j++) { // j are the rows\n \t\t\t\tString curr = lines[j].substring(i, i + 1);\n+\t\t\t\t\n \t\t\t\tif (!(curr.equals(\"-\"))) { // does this work once we get holding/pulling?\n \t\t\t\t\tdivision = lines[j].length() - i;\n \t\t\t\t\tSystem.out.println(\"division: \" + division);"
+  },
+  {
+    "sha": "dfdd955b5de5785e144b49aae323299ebe6ccef2",
+    "filename": "TAB2MXL/src/main/resources/View/Alert.fxml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/kaazii/EECS2311/blob/0789741f481ad87fe7d0ad77f997558d1e4a6596/TAB2MXL/src/main/resources/View/Alert.fxml",
+    "raw_url": "https://github.com/kaazii/EECS2311/raw/0789741f481ad87fe7d0ad77f997558d1e4a6596/TAB2MXL/src/main/resources/View/Alert.fxml",
+    "contents_url": "https://api.github.com/repos/kaazii/EECS2311/contents/TAB2MXL/src/main/resources/View/Alert.fxml?ref=0789741f481ad87fe7d0ad77f997558d1e4a6596",
+    "patch": "@@ -13,7 +13,7 @@\n    <children>\n       <VBox prefHeight=\"140.0\" prefWidth=\"322.0\">\n          <children>\n-            <Label prefHeight=\"32.0\" prefWidth=\"322.0\" text=\"Are you sure you would like to clear the display content?\" textFill=\"#828f9c\">\n+            <Label prefHeight=\"32.0\" prefWidth=\"322.0\" text=\"   Are you sure you would like to clear the display content?\" textFill=\"#828f9c\">\n                <VBox.margin>\n                   <Insets left=\"15.0\" top=\"20.0\" />\n                </VBox.margin>"
+  },
+  {
+    "sha": "de93e7f64ab5b7929ef1bc6812cdee95684336b9",
+    "filename": "TAB2MXL/src/main/resources/View/SaveOption.fxml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/kaazii/EECS2311/blob/0789741f481ad87fe7d0ad77f997558d1e4a6596/TAB2MXL/src/main/resources/View/SaveOption.fxml",
+    "raw_url": "https://github.com/kaazii/EECS2311/raw/0789741f481ad87fe7d0ad77f997558d1e4a6596/TAB2MXL/src/main/resources/View/SaveOption.fxml",
+    "contents_url": "https://api.github.com/repos/kaazii/EECS2311/contents/TAB2MXL/src/main/resources/View/SaveOption.fxml?ref=0789741f481ad87fe7d0ad77f997558d1e4a6596",
+    "patch": "@@ -24,7 +24,7 @@\n                   <Insets left=\"15.0\" />\n                </VBox.margin>\n             </Label>\n-            <Label prefHeight=\"32.0\" prefWidth=\"322.0\" text=\"What format would you like to save the content as?\" textFill=\"#828f9c\">\n+            <Label prefHeight=\"32.0\" prefWidth=\"322.0\" text=\"      What format would you like to save the content as?\" textFill=\"#828f9c\">\n                <VBox.margin>\n                   <Insets left=\"20.0\" />\n                </VBox.margin>"
+  }
+]

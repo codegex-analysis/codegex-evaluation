@@ -1,0 +1,75 @@
+[
+  {
+    "sha": "9dcdc31b0fbcea50c37a32de62d5bf7e3948678e",
+    "filename": ".circleci/choose-e2e-env.sh",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 8,
+    "changes": 14,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/choose-e2e-env.sh",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/choose-e2e-env.sh",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/.circleci/choose-e2e-env.sh?ref=b515bf44808e907fadbedf7c0ff717a63094def3",
+    "patch": "@@ -1,15 +1,13 @@\n #!/bin/bash\n set -xv\n \n+# PR branch only\n if [[ ! -z $CIRCLE_PULL_REQUEST ]]; then\n-  # Count total number of files changed\n-  CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | wc -l | xargs)\n-\n-  # Count total number of e2e files\n-  E2E_CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e | wc -l | xargs)\n-\n-  # If e2e files are the only files that have changed, update WORKBENCH_ENV to \"test\"\n-  if [ $E2E_CHANGED_COUNT -gt 0 ] && [ $E2E_CHANGED_COUNT -eq $CHANGED_COUNT ]; then\n+  # Count total number of changed files that are not e2e and circleci\n+  CHANGES=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- . ':!e2e' ':!.circleci' | wc -l | xargs)\n+  # If count is zero, update WORKBENCH_ENV to \"test\"\n+  if [[ \"$CHANGES\" -eq 0 ]]; then\n+    echo \"Set WORKBENCH_ENV=test\"\n     echo \"export WORKBENCH_ENV=test\" >> $BASH_ENV\n     echo \"export USER_NAME=${PUPPETEER_USER_TEST}@fake-research-aou.org\" >> $BASH_ENV\n     source $BASH_ENV"
+  },
+  {
+    "sha": "8396941d46ba63825e7a3f0348a049758ae12b5f",
+    "filename": ".circleci/config.yml",
+    "status": "modified",
+    "additions": 57,
+    "deletions": 14,
+    "changes": 71,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/config.yml",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/config.yml",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/.circleci/config.yml?ref=b515bf44808e907fadbedf7c0ff717a63094def3",
+    "patch": "@@ -183,7 +183,31 @@ commands:\n                 fi\n               fi\n             fi\n-          name: \"Halt job if code in '<< parameters.dir_names >>' directories are not changed\"\n+          name: \"On PR branch, halt job if code in '<< parameters.dir_names >>' dir are not changed in last commit\"\n+\n+  halt-test-if-e2e:\n+    description: \"Skip non-e2e test if e2e test files are the only changed files in last commit on PR and master branch\"\n+    steps:\n+      - run:\n+          command: |\n+            # Always run test on tag builds. Check is done on PR and master branch\n+            if [[ -z \"$CIRCLE_TAG\" ]]; then\n+              if [[ \"$CIRCLE_BRANCH\" == \"master\" ]]; then\n+                # if no changes, exit 0. otherwise, exit 1\n+                CHANGES=$(git diff HEAD~1 --quiet --name-only -- . ':!e2e')\n+                if [[ \"$CHANGES\" == 0 ]]; then\n+                  echo \"non-e2e files are not changed in last commit on master branch. Exiting job.\"\n+                  circleci-agent step halt\n+                fi\n+              else\n+                CHANGES=$(git diff-tree --no-commit-id --name-only -r origin/master..HEAD -- . ':!e2e')\n+                if [[ \"$CHANGES\" == 0 ]]; then\n+                  echo \"non-e2e files are not changed on PR branch. Exiting job.\"\n+                  circleci-agent step halt\n+                fi\n+              fi\n+            fi\n+          name: \"On PR and master branch, halt non-e2e test if e2e files are the only changed files in last commit\"\n \n   launch-local-api:\n     description: \"Launch local API server\"\n@@ -244,6 +268,7 @@ commands:\n         default: []\n     steps:\n       - checkout-code\n+      - halt-test-if-e2e\n       - halt-test-check:\n           dir_names: \"api\"\n       - restore_cache:\n@@ -295,14 +320,27 @@ commands:\n           when: always\n \n   halt-puppeteer-check:\n-    description: \"Stop running Puppeteer end-to-end test if conditions are met\"\n+    description: \"Determine whether to skip puppeteer test.\"\n+    parameters:\n+      branch:\n+        type: string\n+        default: 'pr' # pr or master\n     steps:\n-      - run:\n-          name: \"Check commit message and find changed file names that do not match ignore patterns\"\n-          command: bash .circleci/skip-e2e-pr-checks.sh\n-      - halt-test-check:\n-          # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.\n-          dir_names: \"ui e2e .circleci\"\n+      - when:\n+          condition:\n+            equal: [ \"pr\", << parameters.branch >> ]\n+          steps:\n+            - run:\n+                name: \"Check commit message and find changed file names that do not match ignore patterns on PR branch.\"\n+                command: bash .circleci/skip-e2e-pr-checks.sh\n+      - when:\n+          condition:\n+            equal: [ \"master\", << parameters.branch >> ]\n+          steps:\n+            - run:\n+                name: \"Check for any non-e2e files that were changed in last commit on master branch.\"\n+                command: bash .circleci/skip-e2e-master-checks.sh\n+\n \n # -------------------------\n #        JOBS\n@@ -408,6 +446,7 @@ jobs:\n     executor: workbench-executor\n     steps:\n       - checkout-code\n+      - halt-test-if-e2e\n       - halt-test-check:\n           dir_names: \"ui\"\n       - run:\n@@ -498,12 +537,12 @@ jobs:\n     executor: puppeteer-executor\n     parameters:\n       env_name:\n-        description: The target environment for run Puppeteer end-to-end test. Must be one of \"test\", \"staging\", \"local\".\n+        description: \"The target environment for run Puppeteer end-to-end test. Must be one of 'test', 'staging', 'local'.\"\n         default: \"test\"\n         type: enum\n         enum: [\"test\", \"staging\", \"local\"]\n       test_mode:\n-        description: Switching between \"nightly-integration\" and normal \"integration\" test mode\n+        description: \"Set TEST_MODE: 'nightly-integration' or 'integration'.\"\n         default: \"integration\"\n         type: enum\n         enum: [ \"integration\", \"nightly-integration\" ]\n@@ -529,9 +568,9 @@ jobs:\n             equal: [ \"local\", << parameters.env_name >> ]\n           steps:\n             - run:\n-                name: Change WORKBENCH_ENV to \"test\" if needed\n+                name: \"Override WORKBENCH_ENV to 'test' from 'local' if needed\"\n                 command: bash .circleci/choose-e2e-env.sh\n-            # Local UI server is started but unused if WORKBENCH_ENV reset to \"test\" value in above step\n+            # Local UI server is started but is unused if WORKBENCH_ENV reset to \"test\" value in step above\n             - launch-local-ui\n       - run:\n           name: \"echo WORKBENCH_ENV & TEST_MODE\"\n@@ -621,14 +660,18 @@ workflows:\n           env_name: \"local\"\n           parallel_num: 4\n           optional_steps:\n-            - halt-puppeteer-check\n+            - halt-puppeteer-check:\n+                branch: \"pr\"\n           requires:\n             - puppeteer-env-setup\n       # On master branch merges, run Puppeteer tests after ui and api deployed to \"test\" env successfully\n       - puppeteer-test:\n+          <<: *filter-master-branch\n           parallel_num: 4\n           env_name: \"test\"\n-          <<: *filter-master-branch\n+          optional_steps:\n+            - halt-puppeteer-check:\n+                branch: \"master\"\n           requires:\n             - puppeteer-env-setup\n             - api-deploy-to-test"
+  },
+  {
+    "sha": "77a7897cef0b244a7ce18e0f653d39d35b623e7d",
+    "filename": ".circleci/master-e2e-ignore-patterns.txt",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/master-e2e-ignore-patterns.txt",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/master-e2e-ignore-patterns.txt",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/.circleci/master-e2e-ignore-patterns.txt?ref=b515bf44808e907fadbedf7c0ff717a63094def3",
+    "patch": "@@ -0,0 +1,19 @@\n+.md\n+.jpg\n+.png\n+.jpeg\n+.svg\n+.mp4\n+.log\n+.pdf\n+.gitignore\n+Test.java\n+Test.kt\n+.spec.tsx\n+.git\n+LICENSE.txt\n+tslint.json\n+.eslintignore\n+.eslintrc.js\n+.prettierignore\n+.prettierrc.js"
+  },
+  {
+    "sha": "aa81affe9e51b3d8d1527266b0a04a7e68243116",
+    "filename": ".circleci/pr-e2e-ignore-patterns.txt",
+    "status": "renamed",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/pr-e2e-ignore-patterns.txt",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/pr-e2e-ignore-patterns.txt",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/.circleci/pr-e2e-ignore-patterns.txt?ref=b515bf44808e907fadbedf7c0ff717a63094def3",
+    "patch": "@@ -1,6 +1,7 @@\n .md\n .jpg\n .png\n+.jpeg\n .svg\n .mp4\n .log\n@@ -12,3 +13,8 @@\n .spec.tsx\n .git\n LICENSE.txt\n+tslint.json\n+.eslintignore\n+.eslintrc.js\n+.prettierignore\n+.prettierrc.js",
+    "previous_filename": ".circleci/e2e-job-ignore-patterns.txt"
+  },
+  {
+    "sha": "1d504c3f6a45c22c6421c647c3f3256eafd9d966",
+    "filename": ".circleci/skip-e2e-master-checks.sh",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/skip-e2e-master-checks.sh",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/skip-e2e-master-checks.sh",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/.circleci/skip-e2e-master-checks.sh?ref=b515bf44808e907fadbedf7c0ff717a63094def3",
+    "patch": "@@ -0,0 +1,29 @@\n+#!/bin/bash\n+set -xv\n+\n+if [[ -z \"$CIRCLE_BRANCH\" ]]; then\n+  exit 0\n+fi\n+\n+# Applying to master branch only: Exiting Puppeteer job early if certain conditions are met.\n+if [[ \"$CIRCLE_BRANCH\" != \"master\" ]]; then\n+  exit 0\n+fi\n+\n+# On master branch, exiting CI job when all (changed) file names matches the ignore patterns.\n+# The grep command exits with '0' status when it's successful (match were found).\n+# While it exits with status '1' when no match was found.\n+git diff HEAD~1 --quiet --name-only | grep -qvFf .circleci/master-e2e-ignore-patterns.txt\n+STATUS=$?\n+if [[ \"$STATUS\" -eq 1 ]]; then\n+  echo \"Files matching ignore patterns are the only changed files made in last commit on master branch. Exiting job.\"\n+  circleci-agent step halt\n+fi\n+\n+# if no changes, exit 0. otherwise, exit 1\n+git diff HEAD~1 --quiet --name-only -- . ':!e2e'\n+STATUS=$?\n+if [[ \"$STATUS\" -eq 0 ]]; then\n+  echo \"non-e2e application code are not changed in last commit on master branch. Exiting job.\"\n+  circleci-agent step halt\n+fi"
+  },
+  {
+    "sha": "fdc60a5b24e627829ecb804235df6376ce014335",
+    "filename": ".circleci/skip-e2e-pr-checks.sh",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 8,
+    "changes": 16,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/skip-e2e-pr-checks.sh",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b515bf44808e907fadbedf7c0ff717a63094def3/.circleci/skip-e2e-pr-checks.sh",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/.circleci/skip-e2e-pr-checks.sh?ref=b515bf44808e907fadbedf7c0ff717a63094def3",
+    "patch": "@@ -17,26 +17,26 @@ COMMIT_MESSAGE=$(git log -1 --pretty=format:\"%s\")\n \n # Double comma is \"Parameter Expansion\". It converts string to lowercase letters.\n if [[ \"${COMMIT_MESSAGE,,}\" == *\"skip e2e\"* ]]; then\n-  echo \"Skip e2e text found in commit message\"\n+  echo \"'skip e2e' text was found in commit message\"\n   circleci-agent step halt\n else\n-  echo \"not found skip e2e text\"\n+  echo \"'skip e2e' text was not found in commit message.\"\n fi\n \n-# Exiting CI job when files matching ignore patterns are the only changed files in the last commit.\n+# On PR branch, exiting CI job when files matching ignore patterns are the only changed files in last commit.\n # The grep command exits with '0' status when it's successful (match were found).\n # While it exits with status '1' when no match was found.\n-git diff --name-only HEAD^ HEAD | grep -qvFf .circleci/e2e-job-ignore-patterns.txt\n+git diff --name-only HEAD^ HEAD | grep -qvFf .circleci/pr-e2e-ignore-patterns.txt\n STATUS=$?\n if [[ \"$STATUS\" -eq 1 ]]; then\n-  echo \"Files matching ignore patterns are the only changed files made in the last commit. Exiting job.\"\n+  echo \"Files matching ignore patterns are the only changed files made in last commit. Exiting job.\"\n   circleci-agent step halt\n fi\n \n-# Exiting on PR branch when all (changed) file names matched ignore pattern.\n-git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt\n+# On PR branch, exiting CI job when all (changed) file names matches the ignore patterns.\n+git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/pr-e2e-ignore-patterns.txt\n STATUS=$?\n if [[ \"$STATUS\" -eq 1 ]]; then\n-  echo \"Workbench application code were not changed. Exiting job.\"\n+  echo \"non-e2e application code are not changed in last commit. Exiting job.\"\n   circleci-agent step halt\n fi"
+  }
+]

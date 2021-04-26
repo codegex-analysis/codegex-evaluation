@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "1b9131e7e6984befcfcc629f1a1db7924d5f62c0",
+    "filename": "Houseclub/src/main/java/me/grishka/houseclub/api/methods/GetMutualFollowers.java",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/bit-world/Houseclub/blob/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/java/me/grishka/houseclub/api/methods/GetMutualFollowers.java",
+    "raw_url": "https://github.com/bit-world/Houseclub/raw/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/java/me/grishka/houseclub/api/methods/GetMutualFollowers.java",
+    "contents_url": "https://api.github.com/repos/bit-world/Houseclub/contents/Houseclub/src/main/java/me/grishka/houseclub/api/methods/GetMutualFollowers.java?ref=b157f685533cd851a4464bbf2ad121c735ba8bac",
+    "patch": "@@ -0,0 +1,22 @@\n+package me.grishka.houseclub.api.methods;\n+\n+import java.util.HashMap;\n+import java.util.List;\n+\n+import me.grishka.houseclub.api.ClubhouseAPIRequest;\n+import me.grishka.houseclub.api.model.FullUser;\n+\n+public class GetMutualFollowers extends ClubhouseAPIRequest<GetMutualFollowers.Response>{\n+\tpublic GetMutualFollowers(int userID, int pageSize, int page){\n+\t\tsuper(\"GET\", \"get_mutual_follows\", Response.class);\n+\t\tqueryParams=new HashMap<>();\n+\t\tqueryParams.put(\"user_id\", userID+\"\");\n+\t\tqueryParams.put(\"page_size\", pageSize+\"\");\n+\t\tqueryParams.put(\"page\", page+\"\");\n+\t}\n+\n+\tpublic static class Response{\n+\t\tpublic List<FullUser> users;\n+\t\tpublic int count;\n+\t}\n+}"
+  },
+  {
+    "sha": "b0c763c4575a4bcfdba606499290b3da37bbc0d7",
+    "filename": "Houseclub/src/main/java/me/grishka/houseclub/fragments/MutualFollowersFragment.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/bit-world/Houseclub/blob/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/java/me/grishka/houseclub/fragments/MutualFollowersFragment.java",
+    "raw_url": "https://github.com/bit-world/Houseclub/raw/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/java/me/grishka/houseclub/fragments/MutualFollowersFragment.java",
+    "contents_url": "https://api.github.com/repos/bit-world/Houseclub/contents/Houseclub/src/main/java/me/grishka/houseclub/fragments/MutualFollowersFragment.java?ref=b157f685533cd851a4464bbf2ad121c735ba8bac",
+    "patch": "@@ -0,0 +1,29 @@\n+package me.grishka.houseclub.fragments;\n+\n+import android.app.Activity;\n+\n+import me.grishka.appkit.api.SimpleCallback;\n+import me.grishka.houseclub.R;\n+import me.grishka.houseclub.api.methods.GetMutualFollowers;\n+\n+public class MutualFollowersFragment extends UserListFragment{\n+\n+\t@Override\n+\tpublic void onAttach(Activity activity){\n+\t\tsuper.onAttach(activity);\n+\t\tsetTitle(R.string.mutual_followers_title);\n+\t}\n+\n+\t@Override\n+\tprotected void doLoadData(int offset, int count){\n+\t\tcurrentRequest=new GetMutualFollowers(getArguments().getInt(\"id\"), 50, offset/50+1)\n+\t\t\t\t.setCallback(new SimpleCallback<GetMutualFollowers.Response>(this){\n+\t\t\t\t\t@Override\n+\t\t\t\t\tpublic void onSuccess(GetMutualFollowers.Response result){\n+\t\t\t\t\t\tcurrentRequest=null;\n+\t\t\t\t\t\tonDataLoaded(result.users, data.size()+preloadedData.size()+result.users.size()<result.count);\n+\t\t\t\t\t}\n+\t\t\t\t})\n+\t\t\t\t.exec();\n+\t}\n+}"
+  },
+  {
+    "sha": "97bdc64128584123448e23c5ab8d846704ccbe33",
+    "filename": "Houseclub/src/main/java/me/grishka/houseclub/fragments/ProfileFragment.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/bit-world/Houseclub/blob/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/java/me/grishka/houseclub/fragments/ProfileFragment.java",
+    "raw_url": "https://github.com/bit-world/Houseclub/raw/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/java/me/grishka/houseclub/fragments/ProfileFragment.java",
+    "contents_url": "https://api.github.com/repos/bit-world/Houseclub/contents/Houseclub/src/main/java/me/grishka/houseclub/fragments/ProfileFragment.java?ref=b157f685533cd851a4464bbf2ad121c735ba8bac",
+    "patch": "@@ -53,7 +53,7 @@\n \tprivate FullUser user;\n \n \tprivate TextView name, username, followers, following, followsYou, bio, inviteInfo, twitter, instagram,\n-\t\t\tinvites;\n+\t\t\tinvites, mutualfollowers;\n \tprivate ImageView photo, inviterPhoto;\n \tprivate Button followBtn, inviteButton;\n \tprivate EditText invitePhoneNum;\n@@ -76,6 +76,7 @@ public View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bu\n \t\tname=v.findViewById(R.id.name);\n \t\tusername=v.findViewById(R.id.username);\n \t\tfollowers=v.findViewById(R.id.followers);\n+\t\tmutualfollowers=v.findViewById(R.id.mutualfollowers);\n \t\tfollowing=v.findViewById(R.id.following);\n \t\tfollowsYou=v.findViewById(R.id.follows_you);\n \t\tbio=v.findViewById(R.id.bio);\n@@ -95,6 +96,7 @@ public View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bu\n \t\tinstagram.setOnClickListener(this::onInstagramClick);\n \t\ttwitter.setOnClickListener(this::onTwitterClick);\n \t\tfollowers.setOnClickListener(this::onFollowersClick);\n+\t\tmutualfollowers.setOnClickListener(this::onMutualFollowersClick);\n \t\tfollowing.setOnClickListener(this::onFollowingClick);\n \t\tv.findViewById(R.id.inviter_btn).setOnClickListener(this::onInviterClick);\n \t\tif(self){\n@@ -127,6 +129,7 @@ public void onSuccess(GetProfile.Response result){\n \n \t\t\t\t\t\tfollowsYou.setVisibility(user.followsMe ? View.VISIBLE : View.GONE);\n \t\t\t\t\t\tfollowers.setText(getResources().getQuantityString(R.plurals.followers, user.numFollowers, user.numFollowers));\n+\t\t\t\t\t\tmutualfollowers.setText(R.string.mutual_followers_title);\n \t\t\t\t\t\tfollowing.setText(getResources().getQuantityString(R.plurals.following, user.numFollowing, user.numFollowing));\n \t\t\t\t\t\tbio.setText(user.bio);\n \t\t\t\t\t\tif(TextUtils.isEmpty(user.bio) && self)\n@@ -300,6 +303,11 @@ private void onFollowersClick(View v){\n \t\targs.putInt(\"id\", user.userId);\n \t\tNav.go(getActivity(), FollowersFragment.class, args);\n \t}\n+\tprivate void onMutualFollowersClick(View v){\n+\t\tBundle args=new Bundle();\n+\t\targs.putInt(\"id\", user.userId);\n+\t\tNav.go(getActivity(), MutualFollowersFragment.class, args);\n+\t}\n \n \tprivate void onFollowingClick(View v){\n \t\tBundle args=new Bundle();"
+  },
+  {
+    "sha": "a77d248cc50899bc70464f90f01bf99770bac8f0",
+    "filename": "Houseclub/src/main/res/layout/profile.xml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 2,
+    "changes": 10,
+    "blob_url": "https://github.com/bit-world/Houseclub/blob/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/res/layout/profile.xml",
+    "raw_url": "https://github.com/bit-world/Houseclub/raw/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/res/layout/profile.xml",
+    "contents_url": "https://api.github.com/repos/bit-world/Houseclub/contents/Houseclub/src/main/res/layout/profile.xml?ref=b157f685533cd851a4464bbf2ad121c735ba8bac",
+    "patch": "@@ -88,7 +88,13 @@\n \t\t\t\tandroid:layout_marginLeft=\"16dp\"\n \t\t\t\tandroid:textSize=\"13dp\"\n \t\t\t\ttools:text=\"25 following\"/>\n-\n+\t\t\t<TextView\n+\t\t\t\tandroid:id=\"@+id/mutualfollowers\"\n+\t\t\t\tandroid:layout_width=\"wrap_content\"\n+\t\t\t\tandroid:layout_height=\"wrap_content\"\n+\t\t\t\tandroid:layout_marginLeft=\"16dp\"\n+\t\t\t\tandroid:textSize=\"13dp\"\n+\t\t\t\ttools:text=\"25 mutual followers\"/>\n \t\t</LinearLayout>\n \n \t\t<TextView\n@@ -190,4 +196,4 @@\n \n \t</LinearLayout>\n \n-</ScrollView>\n\\ No newline at end of file\n+</ScrollView>"
+  },
+  {
+    "sha": "02b21d5041f8d1cb7b0dfb3b85a1a8c900b7662c",
+    "filename": "Houseclub/src/main/res/values/strings.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/bit-world/Houseclub/blob/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/res/values/strings.xml",
+    "raw_url": "https://github.com/bit-world/Houseclub/raw/b157f685533cd851a4464bbf2ad121c735ba8bac/Houseclub/src/main/res/values/strings.xml",
+    "contents_url": "https://api.github.com/repos/bit-world/Houseclub/contents/Houseclub/src/main/res/values/strings.xml?ref=b157f685533cd851a4464bbf2ad121c735ba8bac",
+    "patch": "@@ -64,7 +64,7 @@\n \t<string name=\"event_expired\">This event has already ended</string>\n \t<string name=\"log_in_to_activate\">Please log in again to activate your account.</string>\n \t<string name=\"ok\">OK</string>\n-\n+    <string name=\"mutual_followers_title\">Mutual Followers</string>\n \t<string name=\"search_people_hint\">Find people</string>\n \t<string name=\"search_clubs_hint\">Find clubs</string>\n \t<string name=\"search_btn_cancel\">Cancel</string>"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "2becaec005a276629e2b4248b26fb295b3b881fc",
+    "filename": "src/main/java/com/strandls/file/ApiContants.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/strandls/biodiv-files/blob/061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe/src/main/java/com/strandls/file/ApiContants.java",
+    "raw_url": "https://github.com/strandls/biodiv-files/raw/061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe/src/main/java/com/strandls/file/ApiContants.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-files/contents/src/main/java/com/strandls/file/ApiContants.java?ref=061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe",
+    "patch": "@@ -20,5 +20,6 @@\n \tpublic static final String LOGO = \"/logo\";\n \tpublic static final String RESOURCE_UPLOAD = \"/resource-upload\";\n \tpublic static final String BULK_UPLOAD = \"/bulk-upload\";\n+\tpublic static final String FILES_PATH = \"/files-path\";\n \tpublic static final String ICON = \"/icon\";\n }"
+  },
+  {
+    "sha": "3706225a3b4975feac0fddc82dd2d45df7e3891b",
+    "filename": "src/main/java/com/strandls/file/api/FileUploadApi.java",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/strandls/biodiv-files/blob/061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe/src/main/java/com/strandls/file/api/FileUploadApi.java",
+    "raw_url": "https://github.com/strandls/biodiv-files/raw/061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe/src/main/java/com/strandls/file/api/FileUploadApi.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-files/contents/src/main/java/com/strandls/file/api/FileUploadApi.java?ref=061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe",
+    "patch": "@@ -217,6 +217,38 @@ public Response handleBulkUpload(@Context HttpServletRequest httpServletRequest,\n \t\t\treturn Response.status(Status.BAD_REQUEST).entity(ex.getMessage()).build();\n \t\t}\n \t}\n+\t\n+\t\n+\n+\t@POST\n+\t@Path(ApiContants.BULK + ApiContants.FILES_PATH)\n+\t@ValidateUser\n+\t@Consumes(MediaType.APPLICATION_JSON)\n+\t@Produces(MediaType.APPLICATION_JSON)\n+\t@ApiOperation(value = \"Provides cononical hash map list of all files from myUploads for a given userId and Module \", notes = \"Returns uploaded file data\", response = Map.class)\n+\tpublic Response getAllFilePathsByUser(@Context HttpServletRequest request,\n+\t\t\t@ApiParam(\"filesDTO\") FilesDTO filesDTO) {\n+\t\t\n+\t\ttry {\n+\t\t\tCommonProfile profile = AuthUtil.getProfileFromRequest(request);\n+\t\t\tLong userId = Long.parseLong(profile.getId());\n+\t\t\tBASE_FOLDERS folder = AppUtil.getFolder(filesDTO.getFolder());\n+\t\t\tif (folder == null) {\n+\t\t\t\tthrow new Exception(\"Invalid folder\");\n+\t\t\t}\n+\t\t\tMODULE module = AppUtil.getModule(filesDTO.getModule());\n+\t\t\tif (module == null) {\n+\t\t\t\tthrow new Exception(\"Invalid module\");\n+\t\t\t}\n+\t\t\tMap<String, String> files = fileUploadService.getAllFilePathsByUser(userId, folder,\n+\t\t\t\t\tmodule);\n+\t\t\treturn Response.ok().entity(files).build();\n+\t\t} catch (Exception ex) {\n+\t\t\treturn Response.status(Status.BAD_REQUEST).entity(ex.getMessage()).build();\n+\t\t}\n+\t\t\n+\t}\n+\t\n \n \t@POST\n \t@Path(ApiContants.BULK + ApiContants.MOVE_FILES)"
+  },
+  {
+    "sha": "b2027b3edc0476dd5c19f1f17f6b9337cc500e71",
+    "filename": "src/main/java/com/strandls/file/service/FileUploadService.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 17,
+    "changes": 44,
+    "blob_url": "https://github.com/strandls/biodiv-files/blob/061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe/src/main/java/com/strandls/file/service/FileUploadService.java",
+    "raw_url": "https://github.com/strandls/biodiv-files/raw/061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe/src/main/java/com/strandls/file/service/FileUploadService.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-files/contents/src/main/java/com/strandls/file/service/FileUploadService.java?ref=061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe",
+    "patch": "@@ -433,6 +433,7 @@ public boolean deleteFilesFromMyUploads(Long userId, String fileName) throws IOE\n \t\t\t\tFile folderFile = new File(folderBasePath + file);\n \t\t\t\tif (file.startsWith(File.separatorChar + \"ibpmu-\")) {\n \t\t\t\t\tFile f = new File(basePath + file);\n+\t\t\t\t\tSystem.out.println(\"Folder base path\" + f.exists());\n \t\t\t\t\tif (f.exists()) {\n \t\t\t\t\t\tString fileSize = String.valueOf(java.nio.file.Files.size(f.toPath()));\n \t\t\t\t\t\tString fileName = f.getName();\n@@ -529,28 +530,37 @@ private boolean writeToFile(InputStream inputStream, String fileLocation) {\n \t\treturn savedFiles;\n \t}\n \n+\tpublic Map<String, String> getAllFilePathsByUser(Long userId, BASE_FOLDERS folder,\n+\t\t\tMODULE module) throws IOException {\n+\t\tMap<String, String> filesMap = new HashMap<>();\n+\n+\t\tString basePath = storageBasePath + File.separatorChar + BASE_FOLDERS.myUploads.getFolder() + File.separatorChar\n+\t\t\t\t+ userId;\n+\t\tTika tika = new Tika();\n+\n+\t\t// stream the user directory and prepare a map of file and file path\n+\t\tjava.nio.file.Files.find(java.nio.file.Paths.get(basePath), Integer.MAX_VALUE, (f, bfa) -> {\n+\t\t\tString type = tika.detect(f.getFileName().toString());\n+\t\t\treturn java.nio.file.Files.isRegularFile(f) && AppUtil.filterFileTypeForModule(type, module);\n+\t\t}).forEach(file -> {\n+\t\t\tFile f = file.toFile();\n+\t\t\ttry {\n+\t\t\t\tfilesMap.put(f.getName(), f.getCanonicalPath().substring(basePath.length()));\n+\t\t\t} catch (IOException e) {\n+\t\t\t\te.printStackTrace();\n+\t\t\t}\n+\t\t});\n+\n+\t\treturn filesMap;\n+\n+\t}\n+\n \tpublic Map<String, Object> moveFilesFromUploads(Long userId, List<String> fileList, BASE_FOLDERS folder,\n \t\t\tMODULE module) {\n \t\tMap<String, Object> finalPaths = new HashMap<>();\n \t\ttry {\n-\t\t\tString basePath = storageBasePath + File.separatorChar + BASE_FOLDERS.myUploads.getFolder()\n-\t\t\t\t\t+ File.separatorChar + userId;\n \t\t\tMap<String, String> files = new HashMap<>();\n-\t\t\tTika tika = new Tika();\n-\n-\t\t\t// stream the user directory and prepare a map of file and file path\n-\t\t\tjava.nio.file.Files.find(java.nio.file.Paths.get(basePath), Integer.MAX_VALUE, (f, bfa) -> {\n-\t\t\t\tString type = tika.detect(f.getFileName().toString());\n-\t\t\t\treturn java.nio.file.Files.isRegularFile(f) && AppUtil.filterFileTypeForModule(type, module);\n-\t\t\t}).forEach(file -> {\n-\t\t\t\tFile f = file.toFile();\n-\t\t\t\ttry {\n-\t\t\t\t\tfiles.put(f.getName(), f.getCanonicalPath().substring(basePath.length()));\n-\t\t\t\t} catch (IOException e) {\n-\t\t\t\t\te.printStackTrace();\n-\t\t\t\t}\n-\t\t\t});\n-\n+\t\t\tfiles = getAllFilePathsByUser(userId, folder, module);\n \t\t\tSystem.out.println(\"\\n\\n***** All files in User \" + userId + \": \" + files + \" *****\\n\\n\");\n \n \t\t\tList<String> filesWithPath = new ArrayList<>();"
+  },
+  {
+    "sha": "1dd1fa06d10b35befc8dd85bde25772f0403490a",
+    "filename": "src/main/java/com/strandls/file/util/AppUtil.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 2,
+    "changes": 13,
+    "blob_url": "https://github.com/strandls/biodiv-files/blob/061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe/src/main/java/com/strandls/file/util/AppUtil.java",
+    "raw_url": "https://github.com/strandls/biodiv-files/raw/061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe/src/main/java/com/strandls/file/util/AppUtil.java",
+    "contents_url": "https://api.github.com/repos/strandls/biodiv-files/contents/src/main/java/com/strandls/file/util/AppUtil.java?ref=061c8ae7cb0ded6f95f43ed497fb1c4de3f5d6fe",
+    "patch": "@@ -115,13 +115,14 @@ public static MODULE getModule(String moduleName) {\n \t\t\tList<FileHeader> headers = zipFile.getFileHeaders();\n \t\t\tIterator<FileHeader> it = headers.iterator();\n \t\t\tTika tika = new Tika();\n+\t\t\tString hash = String.join(\"\", \"ibpmu-\", UUID.randomUUID().toString());\n+\t\t\tSystem.out.println(\"==================Bulk Upload for Unzip started==================\");\n \t\t\twhile (it.hasNext()) {\n-\t\t\t\tString hash = String.join(\"\", \"ibpmu-\", UUID.randomUUID().toString());\n \t\t\t\tString destinationPath = storageBasePath + File.separatorChar + hash + File.separatorChar;\n \t\t\t\tFileHeader header = it.next();\n \t\t\t\tfinal String contentType = tika.detect(header.getFileName());\n \t\t\t\tboolean allowedType = ALLOWED_CONTENT_TYPES.get(module).stream()\n-\t\t\t\t\t\t.allMatch((type) -> contentType.toLowerCase().startsWith(type)\n+\t\t\t\t\t\t.anyMatch((type) -> contentType.toLowerCase().startsWith(type)\n \t\t\t\t\t\t\t\t|| contentType.toLowerCase().endsWith(type));\n \t\t\t\tif (!allowedType) {\n \t\t\t\t\tcontinue;\n@@ -136,6 +137,7 @@ public static MODULE getModule(String moduleName) {\n \t\t\t\tupload.setHashKey(hash);\n \t\t\t\tfiles.add(upload);\n \t\t\t}\n+\t\t\tSystem.out.println(\"=====================Completed UnZip bulk Uploads=================\");\n \t\t} catch (ZipException ex) {\n \t\t\tlogger.error(ex.getMessage());\n \t\t} catch (Exception ex) {\n@@ -155,6 +157,13 @@ public static boolean filterFileTypeForModule(String contentType, MODULE module)\n \t\treturn addToList;\n \t}\n \n+\tpublic static boolean filterFileByName(String filename, List<String> fileList) {\n+\t\tif (fileList.size() > 1) {\n+\t\t\treturn true;\n+\t\t}\n+\t\treturn filename.contains(fileList.get(0));\n+\t}\n+\n \tpublic static CacheControl getCacheControl() {\n \t\tCacheControl cache = new CacheControl();\n \t\tcache.setMaxAge(365 * 24 * 60 * 60);"
+  }
+]

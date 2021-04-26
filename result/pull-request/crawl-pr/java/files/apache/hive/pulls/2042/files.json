@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "37dba79e62bb6e59c743c819eb49a44de0edfac6",
+    "filename": "ql/src/java/org/apache/hadoop/hive/ql/parse/ParseUtils.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 9,
+    "changes": 37,
+    "blob_url": "https://github.com/apache/hive/blob/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/java/org/apache/hadoop/hive/ql/parse/ParseUtils.java",
+    "raw_url": "https://github.com/apache/hive/raw/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/java/org/apache/hadoop/hive/ql/parse/ParseUtils.java",
+    "contents_url": "https://api.github.com/repos/apache/hive/contents/ql/src/java/org/apache/hadoop/hive/ql/parse/ParseUtils.java?ref=22a338ade2eaf4b35283352377ab0cf8a221eefd",
+    "patch": "@@ -451,9 +451,17 @@ private static void processSetColsNode(ASTNode setCols, ASTSearcher searcher, Co\n         Tree selExpr = select.getChild(i);\n         if (selExpr.getType() == HiveParser.QUERY_HINT) continue;\n         assert selExpr.getType() == HiveParser.TOK_SELEXPR;\n-        assert selExpr.getChildCount() > 0;\n-        // Examine the last child. It could be an alias.\n-        Tree child = selExpr.getChild(selExpr.getChildCount() - 1);\n+\n+        if (selExpr.getChildCount() > 1) {\n+          if (addAliases(selExpr, alias, newChildren, aliases, ctx)) {\n+            continue;\n+          }\n+          setCols.token.setType(HiveParser.TOK_ALLCOLREF);\n+          return;\n+        }\n+\n+        assert selExpr.getChildCount() == 1;\n+        Tree child = selExpr.getChild(0);\n         switch (child.getType()) {\n         case HiveParser.TOK_SETCOLREF:\n           // We have a nested setcolref. Process that and start from scratch TODO: use stack?\n@@ -474,12 +482,6 @@ private static void processSetColsNode(ASTNode setCols, ASTSearcher searcher, Co\n             return;\n           }\n           break;\n-        case HiveParser.Identifier:\n-          if (!createChildColumnRef(child, alias, newChildren, aliases, ctx)) {\n-            setCols.token.setType(HiveParser.TOK_ALLCOLREF);\n-            return;\n-          }\n-          break;\n         case HiveParser.DOT: {\n           Tree colChild = child.getChild(child.getChildCount() - 1);\n           assert colChild.getType() == HiveParser.Identifier : colChild;\n@@ -510,6 +512,23 @@ private static void processSetColsNode(ASTNode setCols, ASTSearcher searcher, Co\n       }\n     }\n \n+  /**\n+   * In most cases, selExpr has only one alias.\n+   * Some UDTFs can accept multiple aliases like `stack(1, 'a', 'b', 'c') AS (c1, c2, c3)`.\n+   */\n+  private static boolean addAliases(Tree selExpr, String alias, List<ASTNode> newChildren, HashSet<String> aliases,\n+      Context ctx) {\n+    // Skip the first child since it's an expression tagged by aliases.\n+    for (int i = 1; i < selExpr.getChildCount(); ++i) {\n+      final Tree child = selExpr.getChild(i);\n+      assert child.getType() == HiveParser.Identifier : child;\n+      if (!createChildColumnRef(child, alias, newChildren, aliases, ctx)) {\n+        return false;\n+      }\n+    }\n+    return true;\n+  }\n+\n     private static boolean createChildColumnRef(Tree child, String alias,\n         List<ASTNode> newChildren, HashSet<String> aliases, Context ctx) {\n       String colAlias = child.getText();"
+  },
+  {
+    "sha": "66b96a2b0961b10e0fa1c9f05a0cd81353713d6e",
+    "filename": "ql/src/test/queries/clientnegative/udf_multiple_aliases.q",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/hive/blob/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/test/queries/clientnegative/udf_multiple_aliases.q",
+    "raw_url": "https://github.com/apache/hive/raw/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/test/queries/clientnegative/udf_multiple_aliases.q",
+    "contents_url": "https://api.github.com/repos/apache/hive/contents/ql/src/test/queries/clientnegative/udf_multiple_aliases.q?ref=22a338ade2eaf4b35283352377ab0cf8a221eefd",
+    "patch": "@@ -0,0 +1 @@\n+SELECT isnull(null) AS (c1, c2);"
+  },
+  {
+    "sha": "9fa883a076388d1ba1d033b38fabd74647ae7f78",
+    "filename": "ql/src/test/queries/clientpositive/udtf_multiple_aliases.q",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/hive/blob/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/test/queries/clientpositive/udtf_multiple_aliases.q",
+    "raw_url": "https://github.com/apache/hive/raw/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/test/queries/clientpositive/udtf_multiple_aliases.q",
+    "contents_url": "https://api.github.com/repos/apache/hive/contents/ql/src/test/queries/clientpositive/udtf_multiple_aliases.q?ref=22a338ade2eaf4b35283352377ab0cf8a221eefd",
+    "patch": "@@ -0,0 +1,8 @@\n+EXPLAIN\n+SELECT stack(1, 'a', 'b', 'c') AS (c1, c2, c3)\n+UNION ALL\n+SELECT stack(1, 'd', 'e', 'f') AS (c1, c2, c3);\n+\n+SELECT stack(1, 'a', 'b', 'c') AS (c1, c2, c3)\n+UNION ALL\n+SELECT stack(1, 'd', 'e', 'f') AS (c1, c2, c3);"
+  },
+  {
+    "sha": "1a99ebfd4ff4154a60a6ac28f1568d1dc32c4073",
+    "filename": "ql/src/test/results/clientnegative/udf_multiple_aliases.q.out",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/hive/blob/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/test/results/clientnegative/udf_multiple_aliases.q.out",
+    "raw_url": "https://github.com/apache/hive/raw/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/test/results/clientnegative/udf_multiple_aliases.q.out",
+    "contents_url": "https://api.github.com/repos/apache/hive/contents/ql/src/test/results/clientnegative/udf_multiple_aliases.q.out?ref=22a338ade2eaf4b35283352377ab0cf8a221eefd",
+    "patch": "@@ -0,0 +1 @@\n+FAILED: SemanticException 1:28 AS clause has an invalid number of aliases. Error encountered near token 'c2'"
+  },
+  {
+    "sha": "4e236541df9387dfef9a3b42b2eebf1a11842bf1",
+    "filename": "ql/src/test/results/clientpositive/llap/udtf_multiple_aliases.q.out",
+    "status": "added",
+    "additions": 102,
+    "deletions": 0,
+    "changes": 102,
+    "blob_url": "https://github.com/apache/hive/blob/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/test/results/clientpositive/llap/udtf_multiple_aliases.q.out",
+    "raw_url": "https://github.com/apache/hive/raw/22a338ade2eaf4b35283352377ab0cf8a221eefd/ql/src/test/results/clientpositive/llap/udtf_multiple_aliases.q.out",
+    "contents_url": "https://api.github.com/repos/apache/hive/contents/ql/src/test/results/clientpositive/llap/udtf_multiple_aliases.q.out?ref=22a338ade2eaf4b35283352377ab0cf8a221eefd",
+    "patch": "@@ -0,0 +1,102 @@\n+PREHOOK: query: EXPLAIN\n+SELECT stack(1, 'a', 'b', 'c') AS (c1, c2, c3)\n+UNION ALL\n+SELECT stack(1, 'd', 'e', 'f') AS (c1, c2, c3)\n+PREHOOK: type: QUERY\n+PREHOOK: Input: _dummy_database@_dummy_table\n+#### A masked pattern was here ####\n+POSTHOOK: query: EXPLAIN\n+SELECT stack(1, 'a', 'b', 'c') AS (c1, c2, c3)\n+UNION ALL\n+SELECT stack(1, 'd', 'e', 'f') AS (c1, c2, c3)\n+POSTHOOK: type: QUERY\n+POSTHOOK: Input: _dummy_database@_dummy_table\n+#### A masked pattern was here ####\n+STAGE DEPENDENCIES:\n+  Stage-1 is a root stage\n+  Stage-0 depends on stages: Stage-1\n+\n+STAGE PLANS:\n+  Stage: Stage-1\n+    Tez\n+#### A masked pattern was here ####\n+      Edges:\n+        Map 1 <- Union 2 (CONTAINS)\n+        Map 3 <- Union 2 (CONTAINS)\n+#### A masked pattern was here ####\n+      Vertices:\n+        Map 1 \n+            Map Operator Tree:\n+                TableScan\n+                  alias: _dummy_table\n+                  Row Limit Per Split: 1\n+                  Statistics: Num rows: 1 Data size: 10 Basic stats: COMPLETE Column stats: COMPLETE\n+                  Select Operator\n+                    expressions: 1 (type: int), 'a' (type: string), 'b' (type: string), 'c' (type: string)\n+                    outputColumnNames: _col0, _col1, _col2, _col3\n+                    Statistics: Num rows: 1 Data size: 259 Basic stats: COMPLETE Column stats: COMPLETE\n+                    UDTF Operator\n+                      Statistics: Num rows: 1 Data size: 259 Basic stats: COMPLETE Column stats: COMPLETE\n+                      function name: stack\n+                      Select Operator\n+                        expressions: col0 (type: string), col1 (type: string), col2 (type: string)\n+                        outputColumnNames: _col0, _col1, _col2\n+                        Statistics: Num rows: 1 Data size: 8 Basic stats: COMPLETE Column stats: COMPLETE\n+                        File Output Operator\n+                          compressed: false\n+                          Statistics: Num rows: 2 Data size: 16 Basic stats: COMPLETE Column stats: COMPLETE\n+                          table:\n+                              input format: org.apache.hadoop.mapred.SequenceFileInputFormat\n+                              output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat\n+                              serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe\n+            Execution mode: llap\n+            LLAP IO: no inputs\n+        Map 3 \n+            Map Operator Tree:\n+                TableScan\n+                  alias: _dummy_table\n+                  Row Limit Per Split: 1\n+                  Statistics: Num rows: 1 Data size: 10 Basic stats: COMPLETE Column stats: COMPLETE\n+                  Select Operator\n+                    expressions: 1 (type: int), 'd' (type: string), 'e' (type: string), 'f' (type: string)\n+                    outputColumnNames: _col0, _col1, _col2, _col3\n+                    Statistics: Num rows: 1 Data size: 259 Basic stats: COMPLETE Column stats: COMPLETE\n+                    UDTF Operator\n+                      Statistics: Num rows: 1 Data size: 259 Basic stats: COMPLETE Column stats: COMPLETE\n+                      function name: stack\n+                      Select Operator\n+                        expressions: col0 (type: string), col1 (type: string), col2 (type: string)\n+                        outputColumnNames: _col0, _col1, _col2\n+                        Statistics: Num rows: 1 Data size: 8 Basic stats: COMPLETE Column stats: COMPLETE\n+                        File Output Operator\n+                          compressed: false\n+                          Statistics: Num rows: 2 Data size: 16 Basic stats: COMPLETE Column stats: COMPLETE\n+                          table:\n+                              input format: org.apache.hadoop.mapred.SequenceFileInputFormat\n+                              output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat\n+                              serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe\n+            Execution mode: llap\n+            LLAP IO: no inputs\n+        Union 2 \n+            Vertex: Union 2\n+\n+  Stage: Stage-0\n+    Fetch Operator\n+      limit: -1\n+      Processor Tree:\n+        ListSink\n+\n+PREHOOK: query: SELECT stack(1, 'a', 'b', 'c') AS (c1, c2, c3)\n+UNION ALL\n+SELECT stack(1, 'd', 'e', 'f') AS (c1, c2, c3)\n+PREHOOK: type: QUERY\n+PREHOOK: Input: _dummy_database@_dummy_table\n+#### A masked pattern was here ####\n+POSTHOOK: query: SELECT stack(1, 'a', 'b', 'c') AS (c1, c2, c3)\n+UNION ALL\n+SELECT stack(1, 'd', 'e', 'f') AS (c1, c2, c3)\n+POSTHOOK: type: QUERY\n+POSTHOOK: Input: _dummy_database@_dummy_table\n+#### A masked pattern was here ####\n+a\tb\tc\n+d\te\tf"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "c61bb53cf8b37439c36ce6c625988d902e0fd394",
+    "filename": "TODO.md",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/CodeSoom/spring-week8-assignment-1/blob/a9f36d193b17c1df295a9c8e8e814fd4ab4d7404/TODO.md",
+    "raw_url": "https://github.com/CodeSoom/spring-week8-assignment-1/raw/a9f36d193b17c1df295a9c8e8e814fd4ab4d7404/TODO.md",
+    "contents_url": "https://api.github.com/repos/CodeSoom/spring-week8-assignment-1/contents/TODO.md?ref=a9f36d193b17c1df295a9c8e8e814fd4ab4d7404",
+    "patch": "@@ -0,0 +1,4 @@\n+# TODO-LIST\n+## MON\n+-[ ]  8-1강 'Javadoc' 학습\n+-[ ]  8-2강 'REST Docs HTML로 만들기' 학습"
+  },
+  {
+    "sha": "579c09a3fc3ed72e8ddba146f011e8b381f871e7",
+    "filename": "app/build.gradle",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/CodeSoom/spring-week8-assignment-1/blob/a9f36d193b17c1df295a9c8e8e814fd4ab4d7404/app/build.gradle",
+    "raw_url": "https://github.com/CodeSoom/spring-week8-assignment-1/raw/a9f36d193b17c1df295a9c8e8e814fd4ab4d7404/app/build.gradle",
+    "contents_url": "https://api.github.com/repos/CodeSoom/spring-week8-assignment-1/contents/app/build.gradle?ref=a9f36d193b17c1df295a9c8e8e814fd4ab4d7404",
+    "patch": "@@ -13,9 +13,12 @@ plugins {\n     // Spring\n     id 'org.springframework.boot' version '2.3.5.RELEASE'\n     id 'io.spring.dependency-management' version '1.0.10.RELEASE'\n+\n+    //Asciidoctor\n+    id 'org.asciidoctor.convert' version '2.4.0'\n }\n \n-sourceCompatibility = '1.8'\n+sourceCompatibility = '11'\n \n configurations {\n     developmentOnly\n@@ -78,6 +81,11 @@ dependencies {\n     testImplementation('org.springframework.boot:spring-boot-starter-test') {\n         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'\n     }\n+\n+    // Spring REST Docs\n+    asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor'\n+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'\n+\n }\n \n application {"
+  },
+  {
+    "sha": "7769144062de164e35dd536babf35e9099331327",
+    "filename": "app/src/main/java/com/codesoom/assignment/application/ProductService.java",
+    "status": "modified",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/CodeSoom/spring-week8-assignment-1/blob/a9f36d193b17c1df295a9c8e8e814fd4ab4d7404/app/src/main/java/com/codesoom/assignment/application/ProductService.java",
+    "raw_url": "https://github.com/CodeSoom/spring-week8-assignment-1/raw/a9f36d193b17c1df295a9c8e8e814fd4ab4d7404/app/src/main/java/com/codesoom/assignment/application/ProductService.java",
+    "contents_url": "https://api.github.com/repos/CodeSoom/spring-week8-assignment-1/contents/app/src/main/java/com/codesoom/assignment/application/ProductService.java?ref=a9f36d193b17c1df295a9c8e8e814fd4ab4d7404",
+    "patch": "@@ -10,6 +10,9 @@\n import javax.transaction.Transactional;\n import java.util.List;\n \n+/**\n+ * Product 서비스 클래스\n+ */\n @Service\n @Transactional\n public class ProductService {\n@@ -24,19 +27,39 @@ public ProductService(\n         this.productRepository = productRepository;\n     }\n \n+    /**\n+     * 모든 Product를 반환한다.\n+     * @return 모든 Product\n+     */\n     public List<Product> getProducts() {\n         return productRepository.findAll();\n     }\n \n+    /**\n+     * Product를 반환한다.\n+     * @param id Product의 신원을 확인\n+     * @return id에 따른 Product\n+     */\n     public Product getProduct(Long id) {\n         return findProduct(id);\n     }\n \n+    /**\n+     * Product를 생성한다.\n+     * @param productData 생성할 Product\n+     * @return 생성된 Product\n+     */\n     public Product createProduct(ProductData productData) {\n         Product product = mapper.map(productData, Product.class);\n         return productRepository.save(product);\n     }\n \n+    /**\n+     * Product를 수정한다.\n+     * @param id Product의 신원을 확인\n+     * @param productData 변경할 Product\n+     * @return 변경된 Product\n+     */\n     public Product updateProduct(Long id, ProductData productData) {\n         Product product = findProduct(id);\n \n@@ -45,6 +68,11 @@ public Product updateProduct(Long id, ProductData productData) {\n         return product;\n     }\n \n+    /**\n+     * Product를 삭제한다.\n+     * @param id Product의 신원을 확인\n+     * @return 삭제된 Product\n+     */\n     public Product deleteProduct(Long id) {\n         Product product = findProduct(id);\n \n@@ -53,6 +81,12 @@ public Product deleteProduct(Long id) {\n         return product;\n     }\n \n+    /**\n+     * Product가 존재하면 반환하고 없으면 Exception이 발생한다.\n+     * @param id Product의 신원을 확인\n+     * @return 주어진 id에 따른 Product\n+     * @throws ProductNotFoundException 주어진 id에 따른 Product가 존재하지 않을때 발생\n+     */\n     private Product findProduct(Long id) {\n         return productRepository.findById(id)\n                 .orElseThrow(() -> new ProductNotFoundException(id));"
+  },
+  {
+    "sha": "7d2b9962ffae23c0039718158da5109385211680",
+    "filename": "app/src/test/java/com/codesoom/assignment/controllers/ProductControllerTest.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 2,
+    "changes": 9,
+    "blob_url": "https://github.com/CodeSoom/spring-week8-assignment-1/blob/a9f36d193b17c1df295a9c8e8e814fd4ab4d7404/app/src/test/java/com/codesoom/assignment/controllers/ProductControllerTest.java",
+    "raw_url": "https://github.com/CodeSoom/spring-week8-assignment-1/raw/a9f36d193b17c1df295a9c8e8e814fd4ab4d7404/app/src/test/java/com/codesoom/assignment/controllers/ProductControllerTest.java",
+    "contents_url": "https://api.github.com/repos/CodeSoom/spring-week8-assignment-1/contents/app/src/test/java/com/codesoom/assignment/controllers/ProductControllerTest.java?ref=a9f36d193b17c1df295a9c8e8e814fd4ab4d7404",
+    "patch": "@@ -10,6 +10,7 @@\n import org.junit.jupiter.api.BeforeEach;\n import org.junit.jupiter.api.Test;\n import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;\n import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;\n import org.springframework.boot.test.mock.mockito.MockBean;\n import org.springframework.http.MediaType;\n@@ -23,11 +24,13 @@\n import static org.mockito.ArgumentMatchers.eq;\n import static org.mockito.BDDMockito.given;\n import static org.mockito.Mockito.verify;\n+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;\n import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;\n import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;\n import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;\n \n @WebMvcTest(ProductController.class)\n+@AutoConfigureRestDocs\n class ProductControllerTest {\n     private static final String VALID_TOKEN = \"eyJhbGciOiJIUzI1NiJ9.\" +\n             \"eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk\";\n@@ -96,7 +99,8 @@ void list() throws Exception {\n                         .accept(MediaType.APPLICATION_JSON_UTF8)\n         )\n                 .andExpect(status().isOk())\n-                .andExpect(content().string(containsString(\"쥐돌이\")));\n+                .andExpect(content().string(containsString(\"쥐돌이\")))\n+                .andDo(document(\"get-products\"));\n     }\n \n     @Test\n@@ -106,7 +110,8 @@ void deatilWithExsitedProduct() throws Exception {\n                         .accept(MediaType.APPLICATION_JSON_UTF8)\n         )\n                 .andExpect(status().isOk())\n-                .andExpect(content().string(containsString(\"쥐돌이\")));\n+                .andExpect(content().string(containsString(\"쥐돌이\")))\n+                .andDo(document(\"get-product\"));\n     }\n \n     @Test"
+  }
+]

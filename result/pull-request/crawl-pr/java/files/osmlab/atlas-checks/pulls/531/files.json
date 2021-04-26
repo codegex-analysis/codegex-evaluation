@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "33053d94a439f1d60c2a4605f58ba924c83d77ba",
+    "filename": "src/main/java/org/openstreetmap/atlas/checks/maproulette/serializer/ChallengeDeserializer.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/osmlab/atlas-checks/blob/63658ba9a0200169df3b999df5f8fc70243cad1e/src/main/java/org/openstreetmap/atlas/checks/maproulette/serializer/ChallengeDeserializer.java",
+    "raw_url": "https://github.com/osmlab/atlas-checks/raw/63658ba9a0200169df3b999df5f8fc70243cad1e/src/main/java/org/openstreetmap/atlas/checks/maproulette/serializer/ChallengeDeserializer.java",
+    "contents_url": "https://api.github.com/repos/osmlab/atlas-checks/contents/src/main/java/org/openstreetmap/atlas/checks/maproulette/serializer/ChallengeDeserializer.java?ref=63658ba9a0200169df3b999df5f8fc70243cad1e",
+    "patch": "@@ -1,13 +1,16 @@\n package org.openstreetmap.atlas.checks.maproulette.serializer;\n \n import java.lang.reflect.Type;\n+import java.util.ArrayList;\n \n import org.openstreetmap.atlas.checks.maproulette.data.Challenge;\n import org.openstreetmap.atlas.checks.maproulette.data.ChallengeDifficulty;\n import org.openstreetmap.atlas.checks.maproulette.data.ChallengePriority;\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n \n+import com.google.gson.Gson;\n+import com.google.gson.JsonArray;\n import com.google.gson.JsonDeserializationContext;\n import com.google.gson.JsonDeserializer;\n import com.google.gson.JsonElement;\n@@ -84,6 +87,28 @@ private String getStringValue(final JsonObject object, final String key,\n     {\n         if (object.has(key))\n         {\n+            if (object.get(key) instanceof JsonArray)\n+            {\n+                try\n+                {\n+                    final StringBuilder stringBuilder = new StringBuilder();\n+                    final Gson googleJson = new Gson();\n+                    final ArrayList<String> jsonObjectList = googleJson\n+                            .fromJson(object.get(key).getAsJsonArray(), ArrayList.class);\n+                    for (final Object jsonObject : jsonObjectList)\n+                    {\n+                        stringBuilder.append(jsonObject).append(\" \");\n+                    }\n+                    return stringBuilder.toString().trim();\n+                }\n+                catch (final Exception jsonException)\n+                {\n+                    logger.warn(String.format(\"Failed to process configuration key %s.\", key),\n+                            jsonException);\n+                    return defaultValue;\n+                }\n+            }\n+\n             return object.get(key).getAsString();\n         }\n         else"
+  },
+  {
+    "sha": "2a7a34a96223176dfb8002da01ba0490a4e1ed2f",
+    "filename": "src/test/java/org/openstreetmap/atlas/checks/maproulette/data/ChallengeSerializationTest.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 1,
+    "changes": 17,
+    "blob_url": "https://github.com/osmlab/atlas-checks/blob/63658ba9a0200169df3b999df5f8fc70243cad1e/src/test/java/org/openstreetmap/atlas/checks/maproulette/data/ChallengeSerializationTest.java",
+    "raw_url": "https://github.com/osmlab/atlas-checks/raw/63658ba9a0200169df3b999df5f8fc70243cad1e/src/test/java/org/openstreetmap/atlas/checks/maproulette/data/ChallengeSerializationTest.java",
+    "contents_url": "https://api.github.com/repos/osmlab/atlas-checks/contents/src/test/java/org/openstreetmap/atlas/checks/maproulette/data/ChallengeSerializationTest.java?ref=63658ba9a0200169df3b999df5f8fc70243cad1e",
+    "patch": "@@ -40,7 +40,7 @@ public void serializationNoDefaultPrioritySpecified()\n     }\n \n     /**\n-     * Test if a challange can be deserialized from a test JSON file. The challenge resource json\n+     * Test if a challenge can be deserialized from a test JSON file. The challenge resource json\n      * contains no MapRoulette priority information.\n      */\n     @Test\n@@ -59,6 +59,21 @@ public void serializationNoPriorityTest()\n         Assert.assertNull(deserializedChallenge.getLowPriorityRule());\n     }\n \n+    /**\n+     * Test if a challenge configuration contains String Array.\n+     */\n+    @Test\n+    public void serializationStringArray()\n+    {\n+        final Challenge deserializedChallenge = this.getChallenge(\"challenges/testChallenge5.json\");\n+\n+        Assert.assertEquals(\"DESCRIPTION1. DESCRIPTION2.\", deserializedChallenge.getDescription());\n+        Assert.assertEquals(BLURB, deserializedChallenge.getBlurb());\n+        Assert.assertEquals(\"INSTRUCTION1. INSTRUCTION2.\", deserializedChallenge.getInstruction());\n+        Assert.assertEquals(ChallengeDifficulty.NORMAL, deserializedChallenge.getDifficulty());\n+        Assert.assertEquals(ChallengePriority.LOW, deserializedChallenge.getDefaultPriority());\n+    }\n+\n     /**\n      * Test if a challenge can be deserialized from a test JSON file. The challenge contains\n      * MapRoulette priority information for high and medium priority but not for low priority."
+  },
+  {
+    "sha": "316a6474b7b21bb84e4b69ea989c43661972fc6f",
+    "filename": "src/test/resources/challenges/testChallenge5.json",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/osmlab/atlas-checks/blob/63658ba9a0200169df3b999df5f8fc70243cad1e/src/test/resources/challenges/testChallenge5.json",
+    "raw_url": "https://github.com/osmlab/atlas-checks/raw/63658ba9a0200169df3b999df5f8fc70243cad1e/src/test/resources/challenges/testChallenge5.json",
+    "contents_url": "https://api.github.com/repos/osmlab/atlas-checks/contents/src/test/resources/challenges/testChallenge5.json?ref=63658ba9a0200169df3b999df5f8fc70243cad1e",
+    "patch": "@@ -0,0 +1,9 @@\n+{\n+  \"name\": \"TEST_CHALLENGE\",\n+  \"description\": [\"DESCRIPTION1.\",\n+                  \"DESCRIPTION2.\"],\n+  \"blurb\": \"BLURB\",\n+  \"instruction\": [\"INSTRUCTION1.\",\n+                  \"INSTRUCTION2.\"],\n+  \"difficulty\": \"NORMAL\"\n+}\n\\ No newline at end of file"
+  }
+]

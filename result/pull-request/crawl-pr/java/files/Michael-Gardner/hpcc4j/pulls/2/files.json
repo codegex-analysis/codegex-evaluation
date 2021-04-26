@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "4abc83ac8979e4eead29d3a7e117c270df208979",
+    "filename": ".github/workflows/remoteUnitTests.yml",
+    "status": "added",
+    "additions": 61,
+    "deletions": 0,
+    "changes": 61,
+    "blob_url": "https://github.com/Michael-Gardner/hpcc4j/blob/6371375e9c102f5fe577113271e14677e3159e78/.github/workflows/remoteUnitTests.yml",
+    "raw_url": "https://github.com/Michael-Gardner/hpcc4j/raw/6371375e9c102f5fe577113271e14677e3159e78/.github/workflows/remoteUnitTests.yml",
+    "contents_url": "https://api.github.com/repos/Michael-Gardner/hpcc4j/contents/.github/workflows/remoteUnitTests.yml?ref=6371375e9c102f5fe577113271e14677e3159e78",
+    "patch": "@@ -0,0 +1,61 @@\n+name: remote unit tests\n+\n+on: \n+  pull_request:\n+    branches:\n+      - \"master\"\n+      - \"candidate-*\"\n+\n+jobs:\n+  test-against-platform:\n+    runs-on: ubuntu-latest\n+\n+    services:\n+      hpccsystems-platform:\n+        image: hpccsystemslegacy/platform\n+        ports:\n+          - 8510:8510\n+          - 8010:8010\n+\n+    steps:\n+      \n+    - uses: actions/checkout@v2\n+\n+    - name: Setup JDK 1.8\n+      uses: actions/setup-java@v1\n+      with:\n+        java-version: 1.8\n+\n+    - name: Fetch hpccsystems-platform docker container name\n+      run: |\n+        echo \"PLATFORM_CONTAINER_NAME=$(docker ps --format \\\"{{.Names}}\\\")\"  >> $GITHUB_ENV\n+\n+    - name: Get HPCCSystems Platform version\n+      run: |\n+        docker exec ${{ env.PLATFORM_CONTAINER_NAME }} cat /etc/HPCCSystems/version\n+\n+    - name: HPCCSystems Startup\n+      run: |\n+        docker exec ${{ env.PLATFORM_CONTAINER_NAME }} /etc/init.d/hpcc-init start\n+    \n+    - name: HPCCSystems Certificate Setup\n+      run: |\n+        docker exec ${{ env.PLATFORM_CONTAINER_NAME }} /opt/HPCCSystems/etc/init.d/distributePKI\n+\n+    - name: HPCCSystems Datafile Setup\n+      run: |\n+        wget -q https://raw.githubusercontent.com/Michael-Gardner/hpccsystems-java-project-testbed/main/generatedata.sh\n+        chmod +x generatedata.sh\n+        docker cp generatedata.sh ${{ env.PLATFORM_CONTAINER_NAME }}:/home/hpcc/generatedata.sh\n+        docker exec ${{ env.PLATFORM_CONTAINER_NAME }} /home/hpcc/generatedata.sh\n+    \n+    # speed things up with caching from https://docs.github.com/en/actions/guides/building-and-testing-java-with-maven\n+    - name: Cashe Maven packages\n+      uses: actions/cache@v2\n+      with:\n+        path: ~/.m2\n+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}\n+        restore-keys: ${{ runner.os }}-m2\n+  \n+    - name: Build with Maven\n+      run: mvn -B --activate-profiles jenkins-on-demand -Dmaven.gpg.skip=true -Dmaven.javadoc.skip=true -Dmaven.test.failure.ignore=false install"
+  },
+  {
+    "sha": "ee20709bb012dbdd5ab4ba8f369b288fd05e7104",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Michael-Gardner/hpcc4j/blob/6371375e9c102f5fe577113271e14677e3159e78/README.md",
+    "raw_url": "https://github.com/Michael-Gardner/hpcc4j/raw/6371375e9c102f5fe577113271e14677e3159e78/README.md",
+    "contents_url": "https://api.github.com/repos/Michael-Gardner/hpcc4j/contents/README.md?ref=6371375e9c102f5fe577113271e14677e3159e78",
+    "patch": "@@ -10,7 +10,7 @@ This repository contains multiple Java-based libraries/tools which can be utiliz\n Feature and change requests are tracked via [JIRA](https://track.hpccsystems.com/secure/Dashboard.jspa).\n Everybody is encouraged to report issues and contribute to the project. When opening JIRA tickets, make sure to set the project as \"hpcc4j\".\n \n-#### Projects contained within:\n+#### Projects contained within: test\n - WsClient (./wsclient)\n   - Set of APIs which Standardize and facilitate interaction with HPCC Web based Services. [README](https://github.com/hpcc-systems/hpcc4j/blob/master/wsclient/README.md)\n   - The project is based on stub code generated from WSDLs using Eclipse tools based on Apache Axis and JSch(Java Secure Channel) for secure ftp transfers"
+  }
+]

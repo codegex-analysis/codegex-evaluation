@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "ec4a1e99a3b55a9b56aa7f4a2b44288be8f0a4f4",
+    "filename": "extensions/src/main/java/org/mapstruct/extensions/spring/converter/ConversionServiceAdapterGenerator.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/mapstruct/mapstruct-spring-extensions/blob/82f9f5739e10afa2ddd63e2a2a0de17bda86e237/extensions/src/main/java/org/mapstruct/extensions/spring/converter/ConversionServiceAdapterGenerator.java",
+    "raw_url": "https://github.com/mapstruct/mapstruct-spring-extensions/raw/82f9f5739e10afa2ddd63e2a2a0de17bda86e237/extensions/src/main/java/org/mapstruct/extensions/spring/converter/ConversionServiceAdapterGenerator.java",
+    "contents_url": "https://api.github.com/repos/mapstruct/mapstruct-spring-extensions/contents/extensions/src/main/java/org/mapstruct/extensions/spring/converter/ConversionServiceAdapterGenerator.java?ref=82f9f5739e10afa2ddd63e2a2a0de17bda86e237",
+    "patch": "@@ -56,6 +56,7 @@ private static ParameterSpec buildConstructorParameterSpec(final ConversionServi\n         if (StringUtils.isNotEmpty(descriptor.getConversionServiceBeanName())) {\n             parameterBuilder.addAnnotation(buildQualifierANnotation(descriptor));\n         }\n+        parameterBuilder.addAnnotation(buildLazyAnnotation());\n         return parameterBuilder.build();\n     }\n \n@@ -66,6 +67,12 @@ private static AnnotationSpec buildQualifierANnotation(ConversionServiceAdapterD\n                 .build();\n     }\n \n+    private static AnnotationSpec buildLazyAnnotation() {\n+        return AnnotationSpec\n+                .builder(ClassName.get(\"org.springframework.context.annotation\",\"Lazy\"))\n+                .build();\n+    }\n+\n     private static String simpleName(final TypeName typeName) {\n         return rawType(typeName).simpleName();\n     }"
+  },
+  {
+    "sha": "5661e87ea716f147bede372d1121ac67da94e411",
+    "filename": "extensions/src/test/java/org/mapstruct/extensions/spring/converter/ConverterMapperProcessorTest.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/mapstruct/mapstruct-spring-extensions/blob/82f9f5739e10afa2ddd63e2a2a0de17bda86e237/extensions/src/test/java/org/mapstruct/extensions/spring/converter/ConverterMapperProcessorTest.java",
+    "raw_url": "https://github.com/mapstruct/mapstruct-spring-extensions/raw/82f9f5739e10afa2ddd63e2a2a0de17bda86e237/extensions/src/test/java/org/mapstruct/extensions/spring/converter/ConverterMapperProcessorTest.java",
+    "contents_url": "https://api.github.com/repos/mapstruct/mapstruct-spring-extensions/contents/extensions/src/test/java/org/mapstruct/extensions/spring/converter/ConverterMapperProcessorTest.java?ref=82f9f5739e10afa2ddd63e2a2a0de17bda86e237",
+    "patch": "@@ -99,6 +99,11 @@ static void setupCommonSourceFiles() {\n                 .skipJavaLangImports(true)\n                 .build()\n                 .toJavaFileObject(),\n+                JavaFile.builder(\n+                        \"org.springframework.context.annotation\", buildSimpleAnnotationTypeSpec(\"Lazy\"))\n+                 .skipJavaLangImports(true)\n+                 .build()\n+                 .toJavaFileObject(),\n             JavaFile.builder(PACKAGE_NAME, buildConfigClass(\"MyMappingConfig\"))\n                 .skipJavaLangImports(true)\n                 .build()"
+  },
+  {
+    "sha": "d2c027ab46a162997109e158247f54048fabc4bd",
+    "filename": "extensions/src/test/resources/ConversionServiceAdapter.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/mapstruct/mapstruct-spring-extensions/blob/82f9f5739e10afa2ddd63e2a2a0de17bda86e237/extensions/src/test/resources/ConversionServiceAdapter.java",
+    "raw_url": "https://github.com/mapstruct/mapstruct-spring-extensions/raw/82f9f5739e10afa2ddd63e2a2a0de17bda86e237/extensions/src/test/resources/ConversionServiceAdapter.java",
+    "contents_url": "https://api.github.com/repos/mapstruct/mapstruct-spring-extensions/contents/extensions/src/test/resources/ConversionServiceAdapter.java?ref=82f9f5739e10afa2ddd63e2a2a0de17bda86e237",
+    "patch": "@@ -1,6 +1,7 @@\n package org.mapstruct.extensions.spring.converter;\n \n import javax.annotation.Generated;\n+import org.springframework.context.annotation.Lazy;\n import org.springframework.core.convert.ConversionService;\n import org.springframework.stereotype.Component;\n import test.Car;\n@@ -13,7 +14,7 @@\n public class ConversionServiceAdapter {\n   private final ConversionService conversionService;\n \n-  public ConversionServiceAdapter(final ConversionService conversionService) {\n+  public ConversionServiceAdapter(@Lazy final ConversionService conversionService) {\n     this.conversionService = conversionService;\n   }\n "
+  },
+  {
+    "sha": "a0168fc4453df704c1b50d68ad441b8c5e64c058",
+    "filename": "extensions/src/test/resources/ConversionServiceAdapterCustomBean.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/mapstruct/mapstruct-spring-extensions/blob/82f9f5739e10afa2ddd63e2a2a0de17bda86e237/extensions/src/test/resources/ConversionServiceAdapterCustomBean.java",
+    "raw_url": "https://github.com/mapstruct/mapstruct-spring-extensions/raw/82f9f5739e10afa2ddd63e2a2a0de17bda86e237/extensions/src/test/resources/ConversionServiceAdapterCustomBean.java",
+    "contents_url": "https://api.github.com/repos/mapstruct/mapstruct-spring-extensions/contents/extensions/src/test/resources/ConversionServiceAdapterCustomBean.java?ref=82f9f5739e10afa2ddd63e2a2a0de17bda86e237",
+    "patch": "@@ -2,6 +2,7 @@\n \n import javax.annotation.Generated;\n import org.springframework.beans.factory.annotation.Qualifier;\n+import org.springframework.context.annotation.Lazy;\n import org.springframework.core.convert.ConversionService;\n import org.springframework.stereotype.Component;\n import test.Car;\n@@ -15,7 +16,7 @@\n   private final ConversionService conversionService;\n \n   public ConversionServiceAdapter(\n-      @Qualifier(\"myConversionService\") final ConversionService conversionService) {\n+          @Qualifier(\"myConversionService\") @Lazy final ConversionService conversionService) {\n     this.conversionService = conversionService;\n   }\n "
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "df5159bb02517270970dfce883b4b4551d1ee110",
+    "filename": "src/main/java/frc/robot/BoostInput.java",
+    "status": "added",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/RAR1741/RA21_RobotCode/blob/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/BoostInput.java",
+    "raw_url": "https://github.com/RAR1741/RA21_RobotCode/raw/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/BoostInput.java",
+    "contents_url": "https://api.github.com/repos/RAR1741/RA21_RobotCode/contents/src/main/java/frc/robot/BoostInput.java?ref=b4fea2aceed69f914ca0dcf86fa412ae825f1282",
+    "patch": "@@ -0,0 +1,20 @@\n+package frc.robot;\n+\n+public class BoostInput implements InputScaler\n+{\n+  private final double powerCap;\n+  private boolean enabled;\n+\n+  public BoostInput(double powerCap) {\n+    this.powerCap = powerCap;\n+    this.enabled = false;\n+  }\n+\n+  public double scale(double input) {\n+    return enabled ? input : input * powerCap;\n+  }\n+\n+  public void setEnabled(boolean enabled) {\n+    this.enabled = enabled;\n+  }\n+}"
+  },
+  {
+    "sha": "201e0bf5827a64947f1d6a8acfbe7358c5cac862",
+    "filename": "src/main/java/frc/robot/Deadband.java",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/RAR1741/RA21_RobotCode/blob/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/Deadband.java",
+    "raw_url": "https://github.com/RAR1741/RA21_RobotCode/raw/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/Deadband.java",
+    "contents_url": "https://api.github.com/repos/RAR1741/RA21_RobotCode/contents/src/main/java/frc/robot/Deadband.java?ref=b4fea2aceed69f914ca0dcf86fa412ae825f1282",
+    "patch": "@@ -0,0 +1,13 @@\n+package frc.robot;\n+\n+public class Deadband implements InputScaler {\n+  private final double deadbandLimit;\n+\n+  public Deadband(double deadbandLimit) {\n+    this.deadbandLimit = deadbandLimit;\n+  }\n+\n+  public double scale(double input) {\n+    return Math.abs(input) > deadbandLimit ? input : 0;\n+  }\n+}"
+  },
+  {
+    "sha": "4d4ce5b83782749242bfba5b40d5783b076ef920",
+    "filename": "src/main/java/frc/robot/InputScaler.java",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/RAR1741/RA21_RobotCode/blob/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/InputScaler.java",
+    "raw_url": "https://github.com/RAR1741/RA21_RobotCode/raw/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/InputScaler.java",
+    "contents_url": "https://api.github.com/repos/RAR1741/RA21_RobotCode/contents/src/main/java/frc/robot/InputScaler.java?ref=b4fea2aceed69f914ca0dcf86fa412ae825f1282",
+    "patch": "@@ -0,0 +1,5 @@\n+package frc.robot;\n+\n+public interface InputScaler {\n+  public double scale(double input);\n+}"
+  },
+  {
+    "sha": "831201d29c58cafe4a25e362bcf7b882bd59fbf6",
+    "filename": "src/main/java/frc/robot/Robot.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/RAR1741/RA21_RobotCode/blob/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/Robot.java",
+    "raw_url": "https://github.com/RAR1741/RA21_RobotCode/raw/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/Robot.java",
+    "contents_url": "https://api.github.com/repos/RAR1741/RA21_RobotCode/contents/src/main/java/frc/robot/Robot.java?ref=b4fea2aceed69f914ca0dcf86fa412ae825f1282",
+    "patch": "@@ -13,6 +13,18 @@\n  * project.\n  */\n public class Robot extends TimedRobot {\n+  \n+  private static final double DEADBAND_LIMIT = 0.01;\n+  private static final double SPEED_CAP = 1.0; //TODO: Determine Speed Cap\n+  InputScaler joystickDeadband = new Deadband(DEADBAND_LIMIT);\n+  InputScaler joystickSquared = new SquaredInput(DEADBAND_LIMIT);\n+  BoostInput boost = new BoostInput(SPEED_CAP);\n+\n+  public double deadband(double in) {\n+    double out = joystickSquared.scale(in);\n+    return joystickDeadband.scale(out);\n+  }\n+\n   /**\n    * This function is run when the robot is first started up and should be used for any\n    * initialization code."
+  },
+  {
+    "sha": "4b55037fc79fb71b47f8c0177d28c4fa6d61d106",
+    "filename": "src/main/java/frc/robot/SquaredInput.java",
+    "status": "added",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/RAR1741/RA21_RobotCode/blob/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/SquaredInput.java",
+    "raw_url": "https://github.com/RAR1741/RA21_RobotCode/raw/b4fea2aceed69f914ca0dcf86fa412ae825f1282/src/main/java/frc/robot/SquaredInput.java",
+    "contents_url": "https://api.github.com/repos/RAR1741/RA21_RobotCode/contents/src/main/java/frc/robot/SquaredInput.java?ref=b4fea2aceed69f914ca0dcf86fa412ae825f1282",
+    "patch": "@@ -0,0 +1,17 @@\n+package frc.robot;\n+\n+public class SquaredInput implements InputScaler {\n+  private final double deadbandLimit;\n+\n+  public SquaredInput(double deadbandLimit) {\n+    this.deadbandLimit = deadbandLimit;\n+  }\n+\n+  public double scale(double input) {\n+    double numeratorFactor = (Math.abs(input) - deadbandLimit);\n+    double denominatorFactor = 1 - deadbandLimit;\n+    double sign = (input >= 0 ? 1 : -1);\n+\n+    return sign * ((numeratorFactor * numeratorFactor) / (denominatorFactor * denominatorFactor));\n+  }\n+}\n\\ No newline at end of file"
+  }
+]

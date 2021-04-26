@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "bd8289c8094535a525f2de4b03d02b01c240dd8c",
+    "filename": "DBMS - GET/Assignment 4/Question1.sql",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/meta-chinmay-jain/GET2021/blob/727c0589719fc076e6091cd7b501a2f64890e6d1/DBMS%20-%20GET/Assignment%204/Question1.sql",
+    "raw_url": "https://github.com/meta-chinmay-jain/GET2021/raw/727c0589719fc076e6091cd7b501a2f64890e6d1/DBMS%20-%20GET/Assignment%204/Question1.sql",
+    "contents_url": "https://api.github.com/repos/meta-chinmay-jain/GET2021/contents/DBMS%20-%20GET/Assignment%204/Question1.sql?ref=727c0589719fc076e6091cd7b501a2f64890e6d1",
+    "patch": "@@ -0,0 +1,45 @@\n+# Create a function to calculate number of orders in a month.\n+# Month and year will be input parameter to function.\n+Delimiter \n+//\n+CREATE function NumberOfOrders(month INT, year INT) returns INT DETERMINISTIC\n+BEGIN\n+DECLARE orderCount INT;\n+SELECT COUNT(ID) \n+FROM orders \n+WHERE month(OrderTime) = month \n+AND year(OrderTime) = year\n+INTO orderCount;\n+RETURN orderCount;\n+END\n+// \n+Delimiter;\n+\n+SELECT NumberOfOrders(3, 2021) AS 'Number of Orders';\n+\n+# Create a function to return month in a year having maximum orders.\n+# Year will be input parameter.\n+Delimiter \n+//\n+CREATE function MaximumOrderMonth(year INT) returns VARCHAR(20) DETERMINISTIC\n+begin\n+DECLARE maxOrderMonth VARCHAR(20);\n+SELECT MONTHNAME(OrderTime)\n+FROM orders\n+WHERE year(OrderTime) = year\n+GROUP BY month(OrderTime)\n+HAVING COUNT(*) = \n+    (SELECT MAX(totalOrdersOfMonth)\n+     FROM \n+        (SELECT OrderTime, COUNT(*) totalOrdersOfMonth\n+         FROM orders\n+         WHERE year(OrderTime) = year\n+         GROUP BY month(OrderTime)) \n+     AS maxOrderMonth)\n+INTO maxOrderMonth;\n+RETURN maxOrderMonth;\n+END\n+// \n+Delimiter ;\n+\n+SELECT MaximumOrderMonth(2021) AS 'Maximum Orders Month';\n\\ No newline at end of file"
+  },
+  {
+    "sha": "0455da014a82fd4c5dc823d35e85ceaf96b3103c",
+    "filename": "DBMS - GET/Assignment 4/Question2.sql",
+    "status": "added",
+    "additions": 46,
+    "deletions": 0,
+    "changes": 46,
+    "blob_url": "https://github.com/meta-chinmay-jain/GET2021/blob/727c0589719fc076e6091cd7b501a2f64890e6d1/DBMS%20-%20GET/Assignment%204/Question2.sql",
+    "raw_url": "https://github.com/meta-chinmay-jain/GET2021/raw/727c0589719fc076e6091cd7b501a2f64890e6d1/DBMS%20-%20GET/Assignment%204/Question2.sql",
+    "contents_url": "https://api.github.com/repos/meta-chinmay-jain/GET2021/contents/DBMS%20-%20GET/Assignment%204/Question2.sql?ref=727c0589719fc076e6091cd7b501a2f64890e6d1",
+    "patch": "@@ -0,0 +1,46 @@\n+# Create a Stored procedure to retrieve average sales of each product in a month. \n+# Month and year will be input parameter to function.\n+DELIMITER //\n+CREATE PROCEDURE AverageSales (month INT, year INT)\n+BEGIN\n+  SELECT \n+        Product.ID, \n+        Product.Title,\n+        ROUND (AVG(ProductQuantity), 2) AS `Monthly Sales Average`\n+  FROM \n+        orders\n+            JOIN\n+        order_detail ON order_detail.OrderID = orders.ID\n+            JOIN\n+        product ON product.ID = order_detail.ProductID\n+  WHERE MONTH(OrderTime) = month AND year = YEAR(OrderTime)\n+  GROUP BY product.ID;\n+END \n+//\n+DELIMITER ;\n+\n+CALL AverageSales(3, 2021);\n+\n+DROP PROCEDURE AverageSales;\n+\n+# Create a stored procedure to retrieve table having order detail with \n+# status for a given period. Start date and end date will be input parameter. \n+# Put validation on input dates like start date is less than end date. \n+# If start date is greater than end date take first date of month as start date.\n+DELIMITER //\n+CREATE PROCEDURE OrderInformation (startDate DATE, endDate DATE)\n+BEGIN\n+IF startDate > endDate THEN SET startDate = DATE_FORMAT(endDate, '%Y-%m-01');\n+END IF;\n+SELECT OrderID, ProductID, Status\n+  FROM order_detail \n+  JOIN orders ON orders.ID = order_detail.OrderID\n+  WHERE OrderTime BETWEEN startDate AND endDate;\n+END //\n+DELIMITER ;\n+\n+CALL OrderInformation('2021-03-18', '2021-03-05');\n+\n+CALL OrderInformation('2021-03-04', '2021-03-18');\n+\n+DROP PROCEDURE OrderInformation;\n\\ No newline at end of file"
+  },
+  {
+    "sha": "85d5fc076afc2dd31f6290723b36855e953bcdf6",
+    "filename": "DBMS - GET/Assignment 4/Question3.sql",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/meta-chinmay-jain/GET2021/blob/727c0589719fc076e6091cd7b501a2f64890e6d1/DBMS%20-%20GET/Assignment%204/Question3.sql",
+    "raw_url": "https://github.com/meta-chinmay-jain/GET2021/raw/727c0589719fc076e6091cd7b501a2f64890e6d1/DBMS%20-%20GET/Assignment%204/Question3.sql",
+    "contents_url": "https://api.github.com/repos/meta-chinmay-jain/GET2021/contents/DBMS%20-%20GET/Assignment%204/Question3.sql?ref=727c0589719fc076e6091cd7b501a2f64890e6d1",
+    "patch": "@@ -0,0 +1,29 @@\n+# Identify the columns require indexing in order, product, category tables and create indexes.\n+\n+# Already present indexes:\n+-- orders    - ID, UserID\n+-- product   - ID, CategoryID\n+-- category  - ID, ParentID\n+\n+# Creating Indexes:\n+\n+# category\n+ALTER TABLE category\n+ADD INDEX Title (Title);\n+\n+# orders\n+ALTER TABLE orders\n+ADD INDEX OrderTime (OrderTime);\n+\n+# product\n+ALTER TABLE product\n+ADD INDEX Title (Title);\n+\n+ALTER TABLE product\n+ADD INDEX Price (Price);\n+\n+ALTER TABLE product\n+ADD INDEX TimeAdded (TimeAdded);\n+\n+ALTER TABLE product\n+ADD INDEX Status (Status);\n\\ No newline at end of file"
+  }
+]

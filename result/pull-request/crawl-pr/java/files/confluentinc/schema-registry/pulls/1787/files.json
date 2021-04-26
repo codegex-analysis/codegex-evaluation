@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "56717f94a7c70cc8204cf88698fa27e937b749ba",
+    "filename": "client/src/main/java/io/confluent/kafka/schemaregistry/client/SchemaRegistryClientConfig.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/confluentinc/schema-registry/blob/e26e1fc619cf016283956ec23f2a1035a6ba9652/client/src/main/java/io/confluent/kafka/schemaregistry/client/SchemaRegistryClientConfig.java",
+    "raw_url": "https://github.com/confluentinc/schema-registry/raw/e26e1fc619cf016283956ec23f2a1035a6ba9652/client/src/main/java/io/confluent/kafka/schemaregistry/client/SchemaRegistryClientConfig.java",
+    "contents_url": "https://api.github.com/repos/confluentinc/schema-registry/contents/client/src/main/java/io/confluent/kafka/schemaregistry/client/SchemaRegistryClientConfig.java?ref=e26e1fc619cf016283956ec23f2a1035a6ba9652",
+    "patch": "@@ -34,6 +34,8 @@\n   public static final String PROXY_HOST = \"proxy.host\";\n   public static final String PROXY_PORT = \"proxy.port\";\n \n+  public static final String SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG = \"ssl.endpoint.identification.algorithm\";\n+\n   public static void withClientSslSupport(ConfigDef configDef, String namespace) {\n     org.apache.kafka.common.config.ConfigDef sslConfigDef = new org.apache.kafka.common.config\n         .ConfigDef();"
+  },
+  {
+    "sha": "b8a839099cc75b2eb4bf2a981a6e69f32802ec7a",
+    "filename": "client/src/main/java/io/confluent/kafka/schemaregistry/client/rest/RestService.java",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/confluentinc/schema-registry/blob/e26e1fc619cf016283956ec23f2a1035a6ba9652/client/src/main/java/io/confluent/kafka/schemaregistry/client/rest/RestService.java",
+    "raw_url": "https://github.com/confluentinc/schema-registry/raw/e26e1fc619cf016283956ec23f2a1035a6ba9652/client/src/main/java/io/confluent/kafka/schemaregistry/client/rest/RestService.java",
+    "contents_url": "https://api.github.com/repos/confluentinc/schema-registry/contents/client/src/main/java/io/confluent/kafka/schemaregistry/client/rest/RestService.java?ref=e26e1fc619cf016283956ec23f2a1035a6ba9652",
+    "patch": "@@ -183,6 +183,8 @@ public void configure(Map<String, ?> configs) {\n         (String) configs.get(SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE);\n     String bearerCredentialsSource =\n         (String) configs.get(SchemaRegistryClientConfig.BEARER_AUTH_CREDENTIALS_SOURCE);\n+    String sslEndpointIdentificationAlgo =\n+            (String) configs.get(SchemaRegistryClientConfig.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG);\n \n     if (isNonEmpty(basicCredentialsSource) && isNonEmpty(bearerCredentialsSource)) {\n       throw new ConfigException(String.format(\n@@ -217,6 +219,8 @@ public void configure(Map<String, ?> configs) {\n     if (isValidProxyConfig(proxyHost, proxyPort)) {\n       setProxy(proxyHost, proxyPort);\n     }\n+\n+    setHostnameVerifier(getHostnameVerifier(sslEndpointIdentificationAlgo));\n   }\n \n   private static boolean isNonEmpty(String s) {\n@@ -1036,4 +1040,23 @@ public void setHttpHeaders(Map<String, String> httpHeaders) {\n   public void setProxy(String proxyHost, int proxyPort) {\n     this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));\n   }\n+\n+  private HostnameVerifier getHostnameVerifier(String sslEndpointIdentificationAlgo) {\n+\n+    if (sslEndpointIdentificationAlgo != null) {\n+      if (sslEndpointIdentificationAlgo.equals(\"none\")\n+              || sslEndpointIdentificationAlgo.isEmpty()) {\n+        return (hostname, session) -> true;\n+      } else if (sslEndpointIdentificationAlgo.equalsIgnoreCase(\"https\")) {\n+        return null;\n+      } else {\n+        log.warn(\"Endpoint Identification Algorithm: \" + sslEndpointIdentificationAlgo + \" not supported.\");\n+        log.warn(\"Falling back to https\");\n+        return null;\n+      }\n+    }\n+\n+    // Default\n+    return null;\n+  }\n }"
+  }
+]

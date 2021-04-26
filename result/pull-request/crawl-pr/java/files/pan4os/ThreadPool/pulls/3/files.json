@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "444f6c85119aa1bce085573e2654db5a6f06446e",
+    "filename": "src/main/java/com/griddynamics/oshevchenko/thread/App.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 8,
+    "changes": 28,
+    "blob_url": "https://github.com/pan4os/ThreadPool/blob/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/App.java",
+    "raw_url": "https://github.com/pan4os/ThreadPool/raw/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/App.java",
+    "contents_url": "https://api.github.com/repos/pan4os/ThreadPool/contents/src/main/java/com/griddynamics/oshevchenko/thread/App.java?ref=d47c476166cf706aa047e35cd6759a553212a4b0",
+    "patch": "@@ -1,15 +1,27 @@\n package com.griddynamics.oshevchenko.thread;\n \n+import java.util.HashMap;\n+import java.util.Map;\n \n public class App {\n-    public static void main(String[] args) throws InterruptedException {\n-        final int timeout = 30000;\n-        CustomThreadPool threadPool = new CustomThreadPool(3, 2, timeout);\n-\n-        for (int taskId = 1; taskId <= 5; taskId++) {\n-            Task task = new Task(taskId);\n-            threadPool.submit(task, timeout);\n-        }\n+    public static void main(String[] args) {\n+        Map<Integer, Integer> map = new HashMap() {{\n+            put(1, 3000);\n+            put(2, 5000);\n+            put(3, 10300);\n+            put(4, 10300);\n+            put(5, 1000);\n+        }};\n+        CustomThreadPool threadPool = new CustomThreadPool(10, 2);\n+\n+        map.forEach((key, value) -> {\n+            try {\n+                threadPool.submit(new Task(key), value);\n+                Thread.sleep(50);\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            }\n+        });\n \n     }\n }"
+  },
+  {
+    "sha": "6959e6282299f5f42e6d9dc38af2d7ca4bc87f70",
+    "filename": "src/main/java/com/griddynamics/oshevchenko/thread/BlockingQueue.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 18,
+    "changes": 34,
+    "blob_url": "https://github.com/pan4os/ThreadPool/blob/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/BlockingQueue.java",
+    "raw_url": "https://github.com/pan4os/ThreadPool/raw/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/BlockingQueue.java",
+    "contents_url": "https://api.github.com/repos/pan4os/ThreadPool/contents/src/main/java/com/griddynamics/oshevchenko/thread/BlockingQueue.java?ref=d47c476166cf706aa047e35cd6759a553212a4b0",
+    "patch": "@@ -1,11 +1,9 @@\n package com.griddynamics.oshevchenko.thread;\n \n-import java.util.ArrayDeque;\n-import java.util.Objects;\n-import java.util.Queue;\n+import java.util.*;\n \n-public class BlockingQueue<T> {\n-    private final Queue<T> queue = new ArrayDeque<>();\n+public class BlockingQueue {\n+    private final Queue<RunnableTask> queue = new PriorityQueue<>();\n     private final int MAX_TASKS_QUANTITY;\n     private final int EMPTY = 0;\n \n@@ -14,8 +12,7 @@\n         this.MAX_TASKS_QUANTITY = capacity;\n     }\n \n-    public synchronized void offer(T task) throws InterruptedException {\n-\n+    public synchronized void offer(RunnableTask task) throws InterruptedException {\n         while (this.queue.size() == this.MAX_TASKS_QUANTITY) {\n             wait();\n             if (this.queue.size() < this.MAX_TASKS_QUANTITY) {\n@@ -31,22 +28,23 @@ public synchronized void offer(T task) throws InterruptedException {\n     }\n \n \n-    public synchronized T poll() throws InterruptedException {\n-        T result = null;\n-        while (this.queue.size() == this.EMPTY) {\n-            wait();\n+    public synchronized RunnableTask poll() throws InterruptedException {\n+        while ((this.queue.size() == this.EMPTY) || (this.queue.peek().getTimeToExecute() > System.currentTimeMillis())) {\n             if (this.queue.size() != this.EMPTY) {\n-                result = this.queue.poll();\n-                break;\n+                long delay = queue.peek().getTimeToExecute() - System.currentTimeMillis();\n+                if (delay > 0) {\n+                    wait(delay);\n+                }\n+            } else {\n+                wait();\n             }\n         }\n-        if (Objects.isNull(result)) {\n-            result = this.queue.poll();\n-        }\n         notifyAll();\n-        return result;\n+        return this.queue.poll();\n     }\n-    public synchronized int getSize(){\n+\n+    public synchronized int getSize() {\n         return this.queue.size();\n     }\n+\n }"
+  },
+  {
+    "sha": "4bc2ef984b0eccc700a668439c40f9fda6546bf7",
+    "filename": "src/main/java/com/griddynamics/oshevchenko/thread/CustomThreadPool.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 15,
+    "changes": 29,
+    "blob_url": "https://github.com/pan4os/ThreadPool/blob/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/CustomThreadPool.java",
+    "raw_url": "https://github.com/pan4os/ThreadPool/raw/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/CustomThreadPool.java",
+    "contents_url": "https://api.github.com/repos/pan4os/ThreadPool/contents/src/main/java/com/griddynamics/oshevchenko/thread/CustomThreadPool.java?ref=d47c476166cf706aa047e35cd6759a553212a4b0",
+    "patch": "@@ -1,41 +1,40 @@\n package com.griddynamics.oshevchenko.thread;\n \n-\n import java.util.ArrayList;\n import java.util.List;\n \n public class CustomThreadPool {\n     private List<String> threadNames;\n-    private final BlockingQueue<Runnable> queue;\n-    private  int timeout;\n-    public CustomThreadPool(int queueSize, int numberOfThreads,int timeout) {\n-        queue = new BlockingQueue<>(queueSize);\n+    private final BlockingQueue queue;\n+\n+    public CustomThreadPool(int queueSize, int numberOfThreads) {\n+        queue = new BlockingQueue(queueSize);\n         threadNames = new ArrayList<>();\n-        this.timeout =timeout;\n         for (int count = 1; count <= numberOfThreads; count++) {\n             String threadName = \"Thread-\" + count;\n-            TaskExecutor task = new TaskExecutor(queue,timeout);\n+            TaskExecutor task = new TaskExecutor(queue);\n             Thread thread = new Thread(task, threadName);\n             threadNames.add(threadName);\n             thread.start();\n         }\n     }\n \n-    public void submit(Runnable task,int timeout) throws InterruptedException {\n-        this.timeout = timeout;\n-        queue.offer(task);\n+    public void submit(Runnable task, int delay) throws InterruptedException {\n+        RunnableTask executedTask = new RunnableTask((Task) task, delay);\n+        queue.offer(executedTask);\n     }\n-    public void interruptThreadByName(String name){\n-        for(Thread t : Thread.getAllStackTraces().keySet()) {\n-            if(t.getName().equals(name)) {\n+\n+    public void interruptThreadByName(String name) {\n+        for (Thread t : Thread.getAllStackTraces().keySet()) {\n+            if (t.getName().equals(name)) {\n                 t.interrupt();\n                 break;\n             }\n         }\n     }\n \n-    public void interruptThreads(){\n-        for(var name : this.threadNames){\n+    public void interruptThreads() {\n+        for (var name : this.threadNames) {\n             interruptThreadByName(name);\n         }\n     }"
+  },
+  {
+    "sha": "237953f28ed356ef1589d395c0b0c66de05a0e3b",
+    "filename": "src/main/java/com/griddynamics/oshevchenko/thread/RunnableTask.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/pan4os/ThreadPool/blob/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/RunnableTask.java",
+    "raw_url": "https://github.com/pan4os/ThreadPool/raw/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/RunnableTask.java",
+    "contents_url": "https://api.github.com/repos/pan4os/ThreadPool/contents/src/main/java/com/griddynamics/oshevchenko/thread/RunnableTask.java?ref=d47c476166cf706aa047e35cd6759a553212a4b0",
+    "patch": "@@ -0,0 +1,25 @@\n+package com.griddynamics.oshevchenko.thread;\n+\n+\n+public class RunnableTask implements Comparable<RunnableTask> {\n+    private Runnable task;\n+    private long timeToExecute;\n+\n+    RunnableTask(Task task, int delay) {\n+        this.task = task;\n+        this.timeToExecute = System.currentTimeMillis() + delay;\n+    }\n+\n+    public long getTimeToExecute() {\n+        return this.timeToExecute;\n+    }\n+\n+    public Runnable getTask() {\n+        return this.task;\n+    }\n+\n+    @Override\n+    public int compareTo(RunnableTask o) {\n+        return o.timeToExecute < this.timeToExecute ? 1 : -1;\n+    }\n+}"
+  },
+  {
+    "sha": "fd219f35231ccb4c245d1e9d14a1e1dd207dafe3",
+    "filename": "src/main/java/com/griddynamics/oshevchenko/thread/Task.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/pan4os/ThreadPool/blob/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/Task.java",
+    "raw_url": "https://github.com/pan4os/ThreadPool/raw/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/Task.java",
+    "contents_url": "https://api.github.com/repos/pan4os/ThreadPool/contents/src/main/java/com/griddynamics/oshevchenko/thread/Task.java?ref=d47c476166cf706aa047e35cd6759a553212a4b0",
+    "patch": "@@ -1,18 +1,19 @@\n package com.griddynamics.oshevchenko.thread;\n \n public class Task implements Runnable {\n-    private final int id;\n+    private int id;\n \n     Task(int id) {\n         this.id = id;\n     }\n \n+\n     @Override\n     public void run() {\n         System.out.println(\"Start task with ID = \" + id);\n         try {\n \n-                Thread.sleep(2000);\n+            Thread.sleep(2000);\n \n         } catch (InterruptedException e) {\n             e.printStackTrace();"
+  },
+  {
+    "sha": "6a526a70e199965a52cc9864b3c9c4c10f88a845",
+    "filename": "src/main/java/com/griddynamics/oshevchenko/thread/TaskExecutor.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 18,
+    "changes": 24,
+    "blob_url": "https://github.com/pan4os/ThreadPool/blob/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/TaskExecutor.java",
+    "raw_url": "https://github.com/pan4os/ThreadPool/raw/d47c476166cf706aa047e35cd6759a553212a4b0/src/main/java/com/griddynamics/oshevchenko/thread/TaskExecutor.java",
+    "contents_url": "https://api.github.com/repos/pan4os/ThreadPool/contents/src/main/java/com/griddynamics/oshevchenko/thread/TaskExecutor.java?ref=d47c476166cf706aa047e35cd6759a553212a4b0",
+    "patch": "@@ -1,43 +1,31 @@\n package com.griddynamics.oshevchenko.thread;\n \n-import java.util.List;\n-import java.util.Timer;\n \n public class TaskExecutor implements Runnable {\n \n-    private final BlockingQueue<Runnable> queue;\n-    private final int timeout ;\n+    private final BlockingQueue queue;\n \n-    TaskExecutor(BlockingQueue<Runnable> queue, int timeout) {\n+    TaskExecutor(BlockingQueue queue) {\n         this.queue = queue;\n-        this.timeout = timeout;\n     }\n \n     @Override\n     public void run() {\n-\n         try {\n             while (!Thread.currentThread().isInterrupted()) {\n                 try {\n                     String threadName = Thread.currentThread().getName();\n-                    Runnable task = queue.poll();\n+                    RunnableTask runnableTask = queue.poll();\n+                    Runnable task = runnableTask.getTask();\n                     System.out.println(\"Run task by \" + threadName);\n-                    Thread thread = Thread.currentThread();\n-                    Timer timer = new Timer();\n-                    timer.schedule(new TimeOutTask(thread, timer), timeout);\n                     task.run();\n                     System.out.println(\"Task finished by \" + threadName);\n-                }\n-                catch (InterruptedException e1){\n+                } catch (InterruptedException e1) {\n                     e1.printStackTrace();\n                 }\n-\n             }\n-\n-        } catch ( Exception e) {\n+        } catch (Exception e) {\n             e.printStackTrace();\n-\n         }\n     }\n-\n }"
+  },
+  {
+    "sha": "48743391f14bbe9d255ff19eb43bc29311dcb8a7",
+    "filename": "src/main/java/com/griddynamics/oshevchenko/thread/TimeOutTask.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 22,
+    "changes": 22,
+    "blob_url": "https://github.com/pan4os/ThreadPool/blob/33d645e7e33d4690d8f0f60cad42df1d697d97f2/src/main/java/com/griddynamics/oshevchenko/thread/TimeOutTask.java",
+    "raw_url": "https://github.com/pan4os/ThreadPool/raw/33d645e7e33d4690d8f0f60cad42df1d697d97f2/src/main/java/com/griddynamics/oshevchenko/thread/TimeOutTask.java",
+    "contents_url": "https://api.github.com/repos/pan4os/ThreadPool/contents/src/main/java/com/griddynamics/oshevchenko/thread/TimeOutTask.java?ref=33d645e7e33d4690d8f0f60cad42df1d697d97f2",
+    "patch": "@@ -1,22 +0,0 @@\n-package com.griddynamics.oshevchenko.thread;\n-\n-import java.util.Timer;\n-import java.util.TimerTask;\n-\n-public class TimeOutTask extends TimerTask {\n-    private final Thread thread;\n-    private final Timer timer;\n-    TimeOutTask(Thread thread, Timer timer){\n-        if(thread ==null) throw new IllegalArgumentException(\"Thread cant be null\");\n-        this.thread = thread;\n-        this.timer = timer;\n-    }\n-    public  void run(){\n-        if( thread.isAlive()){\n-            timer.cancel();\n-            thread.interrupt();\n-\n-        }\n-    }\n-\n-}"
+  },
+  {
+    "sha": "808a6b5f12248bacedf4332443c651ea4b2a594f",
+    "filename": "src/test/java/com/griddynamics/oshevchenko/thread/AppTest.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 19,
+    "changes": 40,
+    "blob_url": "https://github.com/pan4os/ThreadPool/blob/d47c476166cf706aa047e35cd6759a553212a4b0/src/test/java/com/griddynamics/oshevchenko/thread/AppTest.java",
+    "raw_url": "https://github.com/pan4os/ThreadPool/raw/d47c476166cf706aa047e35cd6759a553212a4b0/src/test/java/com/griddynamics/oshevchenko/thread/AppTest.java",
+    "contents_url": "https://api.github.com/repos/pan4os/ThreadPool/contents/src/test/java/com/griddynamics/oshevchenko/thread/AppTest.java?ref=d47c476166cf706aa047e35cd6759a553212a4b0",
+    "patch": "@@ -9,34 +9,36 @@\n /**\n  * Unit test for simple App.\n  */\n-public class AppTest \n-{\n+public class AppTest {\n     /**\n      * Rigorous Test :-)\n      */\n     @Test(expected = IllegalArgumentException.class)\n-    public void throwExceptionAtCapacityLessOrEqualZero()\n-    {\n-         BlockingQueue<Runnable> queue = new BlockingQueue<>(-3);\n+    public void shouldBeThrowExceptionAtCapacityLessOrEqualZero() {\n+        BlockingQueue queue = new BlockingQueue(-3);\n \n     }\n+\n     @Test\n-    public void successAddingElement() throws InterruptedException {\n-        Runnable task = new Task(3);\n-        BlockingQueue<Runnable> queue = new BlockingQueue<>(4);\n-        queue.offer(task);\n-        assertEquals(1,queue.getSize());\n+    public void shouldBeSuccessAddingElement() throws InterruptedException {\n+        Task task = new Task(3);\n+        RunnableTask runnableTask = new RunnableTask(task, 1000);\n+        BlockingQueue queue = new BlockingQueue(4);\n+        queue.offer(runnableTask);\n+        assertEquals(1, queue.getSize());\n     }\n \n     @Test\n-    public void getOrderedTaskFromQueue() throws InterruptedException{\n-        Runnable firstTask = new Task(3);\n-        Runnable secondTask = new Task(1);\n-        BlockingQueue<Runnable> queue = new BlockingQueue<>(2);\n-        queue.offer(firstTask);\n-        queue.offer(secondTask);\n-        Runnable taskFromQueueShouldBeFirst = queue.poll();\n-        Runnable taskFromQueueShouldBeSecond = queue.poll();\n-        assertTrue(taskFromQueueShouldBeSecond.equals(secondTask));\n+    public void shouldBeGetSecondTaskFromQueue() throws InterruptedException {\n+        Task firstTask = new Task(3);\n+        Task secondTask = new Task(1);\n+        RunnableTask firstRunnableTask = new RunnableTask(firstTask, 3);\n+        RunnableTask secondRunnableTask = new RunnableTask(secondTask, 400);\n+        BlockingQueue queue = new BlockingQueue(2);\n+        queue.offer(firstRunnableTask);\n+        queue.offer(secondRunnableTask);\n+        RunnableTask taskFromQueueShouldBeFirst = queue.poll();\n+        RunnableTask taskFromQueueShouldBeSecond = queue.poll();\n+        assertTrue(taskFromQueueShouldBeSecond.equals(secondRunnableTask));\n     }\n }"
+  }
+]

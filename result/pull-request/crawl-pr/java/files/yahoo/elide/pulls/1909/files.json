@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "cd7967963b6bf599f30db3e5666d9469af37953a",
+    "filename": "elide-core/src/main/java/com/yahoo/elide/core/dictionary/EntityBinding.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/yahoo/elide/blob/63846ba981d23d14cbe39c340a9aec5ba13ff9cc/elide-core/src/main/java/com/yahoo/elide/core/dictionary/EntityBinding.java",
+    "raw_url": "https://github.com/yahoo/elide/raw/63846ba981d23d14cbe39c340a9aec5ba13ff9cc/elide-core/src/main/java/com/yahoo/elide/core/dictionary/EntityBinding.java",
+    "contents_url": "https://api.github.com/repos/yahoo/elide/contents/elide-core/src/main/java/com/yahoo/elide/core/dictionary/EntityBinding.java?ref=63846ba981d23d14cbe39c340a9aec5ba13ff9cc",
+    "patch": "@@ -20,6 +20,7 @@\n import com.yahoo.elide.core.exceptions.DuplicateMappingException;\n import com.yahoo.elide.core.lifecycle.LifeCycleHook;\n import com.yahoo.elide.core.type.AccessibleObject;\n+import com.yahoo.elide.core.type.ClassType;\n import com.yahoo.elide.core.type.Field;\n import com.yahoo.elide.core.type.Member;\n import com.yahoo.elide.core.type.Method;\n@@ -270,6 +271,18 @@ private void bindEntityFields(Type<?> cls, String type,\n                                   Collection<AccessibleObject> fieldOrMethodList,\n                                   Set<Class<? extends Annotation>> hiddenAnnotations) {\n         for (AccessibleObject fieldOrMethod : fieldOrMethodList) {\n+            // Special handling for Eclipse. Load missing annotations by reloading method\n+            if (fieldOrMethod.getAnnotations().length == 0 && fieldOrMethod instanceof Method) {\n+                Method m = (Method) fieldOrMethod;\n+                try {\n+                    fieldOrMethod = cls.getMethod(m.getName(),\n+                            Arrays.stream(m.getParameterTypes())\n+                            .map(ClassType::new)\n+                            .toArray(Type[]::new));\n+                } catch (NoSuchMethodException | SecurityException e) {\n+                    // Not expected, leave alone\n+                }\n+            }\n             bindTriggerIfPresent(fieldOrMethod);\n \n             if (fieldOrMethod.isAnnotationPresent(Id.class)) {"
+  }
+]

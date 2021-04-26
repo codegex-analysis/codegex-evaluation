@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "4777fbc48cb01ad3c35dc791f01616f4bc3124f9",
+    "filename": "src/main/Config/AppConfig.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/014084d802337f84daaee1e03990ff500ba53f5d/src/main/Config/AppConfig.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/014084d802337f84daaee1e03990ff500ba53f5d/src/main/Config/AppConfig.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/Config/AppConfig.java?ref=014084d802337f84daaee1e03990ff500ba53f5d",
+    "patch": "@@ -6,12 +6,15 @@\n import Database.Token.TokenDaoFactory;\n import Database.User.UserDao;\n import Database.User.UserDaoFactory;\n+import Database.VaccineRecord.VaccineRecordDao;\n+import Database.VaccineRecord.VaccineRecordDaoImpl;\n import Issue.IssueController;\n import Organization.OrganizationController;\n import PDF.PdfController;\n import Security.AccountSecurityController;\n import Security.EncryptionUtils;\n import User.UserController;\n+import VaccineRecord.VaccineRecordController;\n import com.mongodb.client.MongoDatabase;\n import io.javalin.Javalin;\n \n@@ -26,6 +29,7 @@ public static Javalin appFactory(DeploymentLevel deploymentLevel) {\n     MongoConfig.getMongoClient();\n     UserDao userDao = UserDaoFactory.create(deploymentLevel);\n     TokenDao tokenDao = TokenDaoFactory.create(deploymentLevel);\n+    VaccineRecordDao vaccineRecordDao = new VaccineRecordDaoImpl(deploymentLevel);\n     MongoDatabase db = MongoConfig.getDatabase(deploymentLevel);\n     setApplicationHeaders(app);\n \n@@ -47,6 +51,7 @@ public static Javalin appFactory(DeploymentLevel deploymentLevel) {\n     IssueController issueController = new IssueController(db);\n     ActivityController activityController = new ActivityController();\n     AdminController adminController = new AdminController(userDao, db);\n+    VaccineRecordController vaccineRecordController = new VaccineRecordController(vaccineRecordDao);\n     /* -------------- DUMMY PATHS ------------------------- */\n     app.get(\"/\", ctx -> ctx.result(\"Welcome to the Keep.id Server\"));\n \n@@ -99,6 +104,11 @@ public static Javalin appFactory(DeploymentLevel deploymentLevel) {\n     app.post(\"/get-all-orgs\", orgController.listOrgs);\n     app.post(\"/get-all-activities\", activityController.findMyActivities);\n \n+    /* --------------- VACCINE -------------- */\n+    app.post(\"/record-dose\", vaccineRecordController.recordDose);\n+    app.get(\"/notify\", vaccineRecordController.notify);\n+    app.get(\"/get-doses-org/:orgName\", vaccineRecordController.getDosesFromOrg);\n+\n     return app;\n   }\n "
+  },
+  {
+    "sha": "ad478f3890dba20394c5650ee491cd543404635a",
+    "filename": "src/main/Database/VaccineRecord/VaccineRecord.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/014084d802337f84daaee1e03990ff500ba53f5d/src/main/Database/VaccineRecord/VaccineRecord.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/014084d802337f84daaee1e03990ff500ba53f5d/src/main/Database/VaccineRecord/VaccineRecord.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/Database/VaccineRecord/VaccineRecord.java?ref=014084d802337f84daaee1e03990ff500ba53f5d",
+    "patch": "@@ -0,0 +1,35 @@\n+package Database.VaccineRecord;\n+\n+import lombok.*;\n+import org.bson.types.ObjectId;\n+\n+@NoArgsConstructor\n+@AllArgsConstructor\n+@Getter\n+@Setter\n+@Builder\n+public class VaccineRecord {\n+\n+  public enum Manufacturer {\n+    PFIZER,\n+    MODERNA,\n+    UNKNOWN\n+  }\n+\n+  public enum Dose {\n+    NONE,\n+    FIRST,\n+    SECOND,\n+    UNKNOWN\n+  }\n+\n+  private ObjectId id;\n+  @NonNull private ObjectId userId;\n+  @NonNull private String orgName;\n+  @NonNull private long dateOfDose;\n+  @NonNull private long dateOfNextDose;\n+  @NonNull private String provider;\n+  @NonNull private Manufacturer manufacturer;\n+  @NonNull private Dose dose;\n+  String providerAddress;\n+}"
+  },
+  {
+    "sha": "a79cff779717d5b239b606499bd6df9cab49f663",
+    "filename": "src/main/Database/VaccineRecord/VaccineRecordDao.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/014084d802337f84daaee1e03990ff500ba53f5d/src/main/Database/VaccineRecord/VaccineRecordDao.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/014084d802337f84daaee1e03990ff500ba53f5d/src/main/Database/VaccineRecord/VaccineRecordDao.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/Database/VaccineRecord/VaccineRecordDao.java?ref=014084d802337f84daaee1e03990ff500ba53f5d",
+    "patch": "@@ -0,0 +1,12 @@\n+package Database.VaccineRecord;\n+\n+import Database.Dao;\n+\n+import java.util.List;\n+\n+public interface VaccineRecordDao extends Dao<VaccineRecord> {\n+\n+  List<VaccineRecord> getAllBetween(long start, long end);\n+\n+  List<VaccineRecord> getAllFromOrg(String orgName);\n+}"
+  },
+  {
+    "sha": "ad93491b4f5262548a89f01d6e1f7a3cae94ceb5",
+    "filename": "src/main/Database/VaccineRecord/VaccineRecordDaoImpl.java",
+    "status": "added",
+    "additions": 75,
+    "deletions": 0,
+    "changes": 75,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/014084d802337f84daaee1e03990ff500ba53f5d/src/main/Database/VaccineRecord/VaccineRecordDaoImpl.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/014084d802337f84daaee1e03990ff500ba53f5d/src/main/Database/VaccineRecord/VaccineRecordDaoImpl.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/Database/VaccineRecord/VaccineRecordDaoImpl.java?ref=014084d802337f84daaee1e03990ff500ba53f5d",
+    "patch": "@@ -0,0 +1,75 @@\n+package Database.VaccineRecord;\n+\n+import Config.DeploymentLevel;\n+import Config.MongoConfig;\n+import com.mongodb.client.MongoCollection;\n+import com.mongodb.client.MongoDatabase;\n+import org.bson.types.ObjectId;\n+\n+import java.time.LocalDate;\n+import java.util.ArrayList;\n+import java.util.List;\n+import java.util.Optional;\n+\n+import static com.mongodb.client.model.Filters.*;\n+\n+public class VaccineRecordDaoImpl implements VaccineRecordDao {\n+  private final MongoCollection<VaccineRecord> vaccineRecordCollection;\n+\n+  public VaccineRecordDaoImpl(DeploymentLevel deploymentLevel) {\n+    MongoDatabase db = MongoConfig.getDatabase(deploymentLevel);\n+    if (db == null) {\n+      throw new IllegalStateException(\"DB cannot be null\");\n+    }\n+    vaccineRecordCollection = db.getCollection(\"vaccineRecord\", VaccineRecord.class);\n+  }\n+\n+  @Override\n+  public Optional<VaccineRecord> get(ObjectId id) {\n+    return Optional.ofNullable(vaccineRecordCollection.find(eq(\"_id\", id)).first());\n+  }\n+\n+  @Override\n+  public List<VaccineRecord> getAll() {\n+    return vaccineRecordCollection.find().into(new ArrayList<>());\n+  }\n+\n+  @Override\n+  public List<VaccineRecord> getAllBetween(long start, long end) {\n+    long today = LocalDate.now().toEpochDay();\n+    long week = today + 8 * 24 * 60 * 60 * 1000;\n+    return vaccineRecordCollection\n+        .find(or(gte(\"dateOfNextDose\", today), lte(\"dateOfNextDose\", week)))\n+        .into(new ArrayList<>());\n+  }\n+\n+  @Override\n+  public List<VaccineRecord> getAllFromOrg(String orgName) {\n+    return vaccineRecordCollection.find(eq(\"orgName\", orgName)).into(new ArrayList<>());\n+  }\n+\n+  @Override\n+  public int size() {\n+    return (int) vaccineRecordCollection.countDocuments();\n+  }\n+\n+  @Override\n+  public void delete(VaccineRecord record) {\n+    vaccineRecordCollection.deleteOne(eq(\"_id\", record.getId()));\n+  }\n+\n+  @Override\n+  public void clear() {\n+    vaccineRecordCollection.drop();\n+  }\n+\n+  @Override\n+  public void update(VaccineRecord record) {\n+    vaccineRecordCollection.replaceOne(eq(\"_id\", record.getId()), record);\n+  }\n+\n+  @Override\n+  public void save(VaccineRecord record) {\n+    vaccineRecordCollection.insertOne(record);\n+  }\n+}"
+  },
+  {
+    "sha": "fb8c3d028a56f182b09d94eb4eef68758d6daa41",
+    "filename": "src/main/VaccineRecord/DoseRequest.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/014084d802337f84daaee1e03990ff500ba53f5d/src/main/VaccineRecord/DoseRequest.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/014084d802337f84daaee1e03990ff500ba53f5d/src/main/VaccineRecord/DoseRequest.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/VaccineRecord/DoseRequest.java?ref=014084d802337f84daaee1e03990ff500ba53f5d",
+    "patch": "@@ -0,0 +1,24 @@\n+package VaccineRecord;\n+\n+import Database.VaccineRecord.VaccineRecord;\n+import lombok.*;\n+import org.bson.types.ObjectId;\n+\n+import java.util.Date;\n+\n+@NoArgsConstructor\n+@AllArgsConstructor\n+@Getter\n+@Setter\n+@Builder\n+@ToString\n+public class DoseRequest {\n+\n+  private ObjectId userId;\n+  private String orgName;\n+  private String provider;\n+  private VaccineRecord.Manufacturer manufacturer;\n+  private Date date;\n+  private VaccineRecord.Dose dose;\n+  private String providerAddress;\n+}"
+  },
+  {
+    "sha": "2eebbd96afaeccf9b085dc360682bdc20ef05235",
+    "filename": "src/main/VaccineRecord/VaccineRecordController.java",
+    "status": "added",
+    "additions": 64,
+    "deletions": 0,
+    "changes": 64,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/014084d802337f84daaee1e03990ff500ba53f5d/src/main/VaccineRecord/VaccineRecordController.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/014084d802337f84daaee1e03990ff500ba53f5d/src/main/VaccineRecord/VaccineRecordController.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/VaccineRecord/VaccineRecordController.java?ref=014084d802337f84daaee1e03990ff500ba53f5d",
+    "patch": "@@ -0,0 +1,64 @@\n+package VaccineRecord;\n+\n+import Database.VaccineRecord.VaccineRecord;\n+import Database.VaccineRecord.VaccineRecordDao;\n+import io.javalin.http.Handler;\n+import lombok.extern.slf4j.Slf4j;\n+import org.json.JSONObject;\n+\n+import java.time.Instant;\n+import java.util.Date;\n+\n+@Slf4j\n+public class VaccineRecordController {\n+\n+  private VaccineRecordDao recordDao;\n+\n+  public VaccineRecordController(VaccineRecordDao recordDao) {\n+    this.recordDao = recordDao;\n+  }\n+\n+  public Handler recordDose =\n+      ctx -> {\n+        DoseRequest doseRequest = ctx.bodyAsClass(DoseRequest.class);\n+        log.debug(\"Got a dose request {}\", doseRequest.toString());\n+\n+        Date dateOfDose = doseRequest.getDate();\n+        long dateTimeOfNextDose = dateOfDose.getTime() + 8 * 24 * 60 * 60 * 1000;\n+        Date dateOfNextDose = new Date(dateTimeOfNextDose);\n+        VaccineRecord record =\n+            VaccineRecord.builder()\n+                .userId(doseRequest.getUserId())\n+                .orgName(doseRequest.getOrgName())\n+                .provider(doseRequest.getProvider())\n+                .manufacturer(doseRequest.getManufacturer())\n+                .dose(doseRequest.getDose())\n+                .dateOfDose(doseRequest.getDate().toInstant().toEpochMilli())\n+                .dateOfNextDose(dateOfNextDose.toInstant().toEpochMilli())\n+                .build();\n+\n+        recordDao.save(record);\n+      };\n+\n+  public Handler notify =\n+      ctx -> {\n+        long startDate = Instant.now().toEpochMilli();\n+        long endDate = startDate + 8 * 24 * 60 * 60 * 1000;\n+        log.info(\n+            \"Notifying all records expiring between {} and {}\",\n+            new Date(startDate).toString(),\n+            new Date(endDate).toString());\n+      };\n+\n+  public Handler getDosesFromOrg =\n+      ctx -> {\n+        String orgName = ctx.pathParam(\"orgName\");\n+        orgName = orgName.replace('+', ' ');\n+        log.info(\"Getting doses from {}\", orgName);\n+\n+        JSONObject result = new JSONObject();\n+\n+        result.put(\"orgs\", recordDao.getAllFromOrg(orgName));\n+        ctx.result(result.toString());\n+      };\n+}"
+  }
+]

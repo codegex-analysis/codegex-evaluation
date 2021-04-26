@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "f67504f9d92a97dbd6fad37e30feceeadb11ab7f",
+    "filename": "src/main/java/io/gravitee/notifier/api/AbstractConfigurableNotifier.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 10,
+    "changes": 22,
+    "blob_url": "https://github.com/gravitee-io/gravitee-notifier-api/blob/cd8aac8813589f446dc888a422af2ab00e75c837/src/main/java/io/gravitee/notifier/api/AbstractConfigurableNotifier.java",
+    "raw_url": "https://github.com/gravitee-io/gravitee-notifier-api/raw/cd8aac8813589f446dc888a422af2ab00e75c837/src/main/java/io/gravitee/notifier/api/AbstractConfigurableNotifier.java",
+    "contents_url": "https://api.github.com/repos/gravitee-io/gravitee-notifier-api/contents/src/main/java/io/gravitee/notifier/api/AbstractConfigurableNotifier.java?ref=cd8aac8813589f446dc888a422af2ab00e75c837",
+    "patch": "@@ -33,23 +33,25 @@\n \n     protected C configuration;\n \n-    private static final Configuration CONFIGURATION;\n-\n-    static {\n-        CONFIGURATION =\n-                new freemarker.template.Configuration(Configuration.VERSION_2_3_28);\n-\n-        CONFIGURATION.setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);\n-        CONFIGURATION.setTemplateLoader(new StringTemplateLoader());\n-    }\n+    private Configuration templateConfiguration;\n \n     public AbstractConfigurableNotifier(String type, C configuration) {\n         super(type);\n         this.configuration = configuration;\n+\n+        Configuration defaultTemplateConfiguration = new freemarker.template.Configuration(Configuration.VERSION_2_3_28);\n+        defaultTemplateConfiguration.setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);\n+        defaultTemplateConfiguration.setTemplateLoader(new StringTemplateLoader());\n+        this.templateConfiguration = defaultTemplateConfiguration;\n+    }\n+\n+    public AbstractConfigurableNotifier(String type, C configuration, Configuration templateConfiguration) {\n+        this(type, configuration);\n+        this.templateConfiguration = templateConfiguration;\n     }\n \n     protected String templatize(String payload, Map<String, Object> parameters) throws IOException, TemplateException {\n-        final Template template = new Template(Integer.toString(payload.hashCode()), payload, CONFIGURATION);\n+        final Template template = new Template(Integer.toString(payload.hashCode()), payload, templateConfiguration);\n \n         StringWriter result = new StringWriter();\n         template.process(parameters, result);"
+  }
+]

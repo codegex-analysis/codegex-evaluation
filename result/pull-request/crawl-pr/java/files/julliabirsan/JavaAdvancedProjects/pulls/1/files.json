@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "b081c37d2c946f0c7555a13eba15cc7d0eb7daf4",
+    "filename": "oop_j/src/ATM/Cont.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/julliabirsan/JavaAdvancedProjects/blob/15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df/oop_j/src/ATM/Cont.java",
+    "raw_url": "https://github.com/julliabirsan/JavaAdvancedProjects/raw/15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df/oop_j/src/ATM/Cont.java",
+    "contents_url": "https://api.github.com/repos/julliabirsan/JavaAdvancedProjects/contents/oop_j/src/ATM/Cont.java?ref=15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df",
+    "patch": "@@ -36,7 +36,7 @@ public final void scadeSuma(double sum){\n         this.amount -=sum;\n     }\n \n-    public abstract void retragereBani(double sum, String valuta);\n+    public abstract void retragereBani(double sum, String valuta) throws FONDURI_INSUFICIENTE;\n     public abstract void depunereBani(double sum, String valuta);\n \n }"
+  },
+  {
+    "sha": "125dde47c0da8b64dfc0bf14e821c006e9124656",
+    "filename": "oop_j/src/ATM/ContEconomii.java",
+    "status": "added",
+    "additions": 38,
+    "deletions": 0,
+    "changes": 38,
+    "blob_url": "https://github.com/julliabirsan/JavaAdvancedProjects/blob/15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df/oop_j/src/ATM/ContEconomii.java",
+    "raw_url": "https://github.com/julliabirsan/JavaAdvancedProjects/raw/15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df/oop_j/src/ATM/ContEconomii.java",
+    "contents_url": "https://api.github.com/repos/julliabirsan/JavaAdvancedProjects/contents/oop_j/src/ATM/ContEconomii.java?ref=15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df",
+    "patch": "@@ -0,0 +1,38 @@\n+package ATM;\n+\n+public class ContEconomii  extends Cont{\n+    private final double rataEur = 4.9;\n+\n+\n+    public ContEconomii(String iban, String valuta){\n+        super.setIban(iban);\n+        super.setAmount(0);\n+        super.setValuta(valuta);\n+\n+    }\n+    @Override\n+    public void retragereBani(double suma, String valuta) throws FONDURI_INSUFICIENTE {\n+        if (suma > super.getAmount() || super.getAmount() <= 0) {\n+            throw new FONDURI_INSUFICIENTE(\"Fonduri Insuficiente!\");\n+        } else {\n+            double comision=suma*0.5/100;\n+\n+            if (super.getValuta().toLowerCase().equals(valuta.toLowerCase())) {\n+                super.scadeSuma(suma+comision);\n+\n+            } else if (valuta.toUpperCase().equals(\"EUR\")) {\n+                super.scadeSuma((suma * rataEur)+(suma*0.5)/100);\n+            }\n+        }\n+    }\n+\n+    @Override\n+    public void depunereBani(double suma, String valuta) {\n+        if (super.getValuta().toLowerCase().equals(valuta.toLowerCase())){\n+            adaugaSuma(suma);\n+        }else if (valuta.toUpperCase().equals(\"EUR\")){\n+            adaugaSuma(suma * rataEur);\n+        }\n+\n+    }\n+}"
+  },
+  {
+    "sha": "9b44ff0158b80ad9a4f3da3666707660dda0cb9e",
+    "filename": "oop_j/src/ATM/FONDURI_INSUFICIENTE.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/julliabirsan/JavaAdvancedProjects/blob/15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df/oop_j/src/ATM/FONDURI_INSUFICIENTE.java",
+    "raw_url": "https://github.com/julliabirsan/JavaAdvancedProjects/raw/15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df/oop_j/src/ATM/FONDURI_INSUFICIENTE.java",
+    "contents_url": "https://api.github.com/repos/julliabirsan/JavaAdvancedProjects/contents/oop_j/src/ATM/FONDURI_INSUFICIENTE.java?ref=15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df",
+    "patch": "@@ -0,0 +1,7 @@\n+package ATM;\n+\n+public class FONDURI_INSUFICIENTE extends Exception{\n+    public FONDURI_INSUFICIENTE(String message){\n+        super(message);\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "831e0a32fa79a19c5239937b6847a67eb81be257",
+    "filename": "oop_j/src/ATM/Main.java",
+    "status": "modified",
+    "additions": 50,
+    "deletions": 11,
+    "changes": 61,
+    "blob_url": "https://github.com/julliabirsan/JavaAdvancedProjects/blob/15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df/oop_j/src/ATM/Main.java",
+    "raw_url": "https://github.com/julliabirsan/JavaAdvancedProjects/raw/15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df/oop_j/src/ATM/Main.java",
+    "contents_url": "https://api.github.com/repos/julliabirsan/JavaAdvancedProjects/contents/oop_j/src/ATM/Main.java?ref=15d98a8c5077bc0d46dfa19ef9578dcb0eaee7df",
+    "patch": "@@ -3,10 +3,13 @@\n import java.util.Scanner;\n \n public class Main {\n-    public static void main(String[] args) {\n+    public static void main(String[] args) throws FONDURI_INSUFICIENTE {\n         ClientBancar client1 = new ClientBancar(\"Popescu\", \"Ana\", \"280767656545\", \"anapop\", \"1234\");\n         Cont cont1 = new ContCurent(\"123456\", \"RON\");\n+        Cont cont2 = new ContEconomii(\"RON1231412\", \"RON\");\n         client1.adaugaCont(cont1);\n+        client1.adaugaCont(cont2);\n+\n \n         Banca.adaugaClient(client1);\n         Scanner in = new Scanner(System.in);\n@@ -24,20 +27,56 @@ public static void main(String[] args) {\n                     int optiune = in.nextInt();\n                     switch (optiune){\n                         case 1:\n-                            System.out.println(\"Introdu suma si valuta pt retragere\");\n-                            double sumaRetragere = in.nextDouble();\n-                            String valutaRetragere = in.next();\n-                            client1.getContList().get(0).retragereBani(sumaRetragere,valutaRetragere);\n+                            System.out.println(\"Alege contul din care retragi:\");\n+                            System.out.println(\"1-Cont Curent\");\n+                            System.out.println(\"2-Cont Economii\");\n+                            optiune=in.nextInt();\n+                            if (optiune==1){\n+                                System.out.println(\"Introdu suma si valuta pt retragere\");\n+                                double sumaRetragere = in.nextDouble();\n+                                String valutaRetragere = in.next();\n+                                try {\n+                                    client1.getContList().get(0).retragereBani(sumaRetragere,valutaRetragere);\n+                                }catch (FONDURI_INSUFICIENTE e){\n+                                    System.out.println(e.getMessage());\n+                                }\n+                            }else if(optiune==2){\n+                                System.out.println(\"Introdu suma si valuta pt retragere\");\n+                                double sumaRetragere = in.nextDouble();\n+                                String valutaRetragere = in.next();\n+                               try {\n+                                   client1.getContList().get(1).retragereBani(sumaRetragere,valutaRetragere);\n+                               }catch (FONDURI_INSUFICIENTE e){\n+                                   System.out.println(e.getMessage());\n+                               }\n+\n+                            }\n+\n                             break;\n                         case 2:\n-                            System.out.println(\"Introdu suma si valuta pt depunere\");\n-                            double sumaDepunere = in.nextDouble();\n-                            String valutaDepunere = in.next();\n-                            client1.getContList().get(0).depunereBani(sumaDepunere,valutaDepunere);\n+                            System.out.println(\"Alege contul in care depui:\");\n+                            System.out.println(\"1-Cont Curent\");\n+                            System.out.println(\"2-Cont Economii\");\n+                            optiune=in.nextInt();\n+                            if (optiune==1){\n+                                System.out.println(\"Introdu suma si valuta pt depunere\");\n+                                double sumaDepunere = in.nextDouble();\n+                                String valutaDepunere = in.next();\n+                                client1.getContList().get(0).depunereBani(sumaDepunere,valutaDepunere);\n+\n+                            }else if (optiune==2){\n+                                System.out.println(\"Introdu suma si valuta pt depunere\");\n+                                double sumaDepunere = in.nextDouble();\n+                                String valutaDepunere = in.next();\n+                                client1.getContList().get(1).depunereBani(sumaDepunere,valutaDepunere);\n+                            }\n+\n                             break;\n                         case 3:\n-                            System.out.println(\"Soldul contului este: \");\n-                            System.out.println(client1.getContList().get(0).getAmount() + \" \" +client1.getContList().get(0).getValuta());\n+                            System.out.println(\"Soldul conturilor este: \");\n+                            System.out.println(\"Cont Curent - \"+client1.getContList().get(0).getAmount() + \" \" +client1.getContList().get(0).getValuta());\n+                            System.out.println(\"Cont Economii - \"+client1.getContList().get(1).getAmount() + \" \" +client1.getContList().get(0).getValuta());\n+\n                             break;\n                         default: System.out.println(\"Optiune invalida\");\n                     }"
+  }
+]

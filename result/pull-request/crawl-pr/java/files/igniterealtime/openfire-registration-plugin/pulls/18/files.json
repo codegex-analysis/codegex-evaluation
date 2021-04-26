@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "1496eaaf3a3fe482f3d796a5a704fb616cbf218f",
+    "filename": ".github/workflows/build.yml",
+    "status": "added",
+    "additions": 73,
+    "deletions": 0,
+    "changes": 73,
+    "blob_url": "https://github.com/igniterealtime/openfire-registration-plugin/blob/96c238d410fc7c2625002dbac2afb09c73a2fa71/.github/workflows/build.yml",
+    "raw_url": "https://github.com/igniterealtime/openfire-registration-plugin/raw/96c238d410fc7c2625002dbac2afb09c73a2fa71/.github/workflows/build.yml",
+    "contents_url": "https://api.github.com/repos/igniterealtime/openfire-registration-plugin/contents/.github/workflows/build.yml?ref=96c238d410fc7c2625002dbac2afb09c73a2fa71",
+    "patch": "@@ -0,0 +1,73 @@\n+# Version 2\n+name: Java CI\n+on: [push, pull_request]\n+\n+jobs:\n+  build:\n+    runs-on: ubuntu-latest\n+    strategy:\n+      matrix:\n+        java: [ \"1.8\", \"11\" ]\n+\n+    steps:\n+      # Checkout Repo\n+      - uses: actions/checkout@v2\n+\n+      # Create a variable with this plugin's name\n+      - id: get-id\n+        name: Compute needed variables\n+        run: |\n+          set -x\n+          id=$(echo ${{ github.repository }} | cut -d- -f2)\n+          echo \"::set-output name=id::$id\"\n+          echo \"id is '$id'\"\n+          tag=$(echo ${{ github.ref }} | cut -d '/' -f3)\n+          echo \"::set-output name=tag::$tag\"\n+          echo \"tag is '$tag'\"\n+          version=$(echo ${{ github.ref }} | cut -d '/' -f3 | cut -c 2-)\n+          echo \"::set-output name=version::$version\"\n+          echo \"version is '$version'\"\n+          rel_id=$(curl -sL https://api.github.com/repos/${{github.repository}}/releases?access_token=${{ secrets.GITHUB_TOKEN }} | jq -r --arg TAG \"$tag\" '.[] | select(.tag_name==$TAG) | .id')\n+          echo ::set-output name=rel_id::$rel_id\n+          echo \"rel_id is '$rel_id'\"\n+\n+      - name: Setup JDK ${{ matrix.java }}\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: ${{ matrix.java }}\n+\n+      - name: Cache Maven repository\n+        uses: actions/cache@v1\n+        with:\n+          path: ~/.m2/repository\n+          key: ${{ runner.os }}-java${{ matrix.java }}-maven-${{ hashFiles('**/pom.xml') }}\n+          restore-keys: |\n+            ${{ runner.os }}-java${{ matrix.java }}-maven-\n+            ${{ runner.os }}-\n+\n+      - name: Igniterealtime CI Tooling\n+        run: |\n+          git clone --depth 1 https://github.com/igniterealtime/ci-tooling.git target/ci-tooling\n+          cp target/ci-tooling/maven-settings-for-openfire-plugins.xml $HOME/.m2/settings.xml\n+\n+      - name: Build with Maven\n+        run:  mvn -B package\n+\n+      - name: Conditionally Deploy to Igniterealtime Archiva\n+        id: deploy\n+        if: ${{ contains(github.repository, 'igniterealtime/') && ( ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) || contains(github.ref, 'refs/tags/') ) && matrix.java == '1.8' }}\n+        run: mvn -B deploy --settings target/ci-tooling/maven-settings-for-openfire-plugins.xml\n+        env:\n+          CI_DEPLOY_USERNAME: ${{ secrets.IGNITE_REALTIME_MAVEN_USERNAME }}\n+          CI_DEPLOY_PASSWORD: ${{ secrets.IGNITE_REALTIME_MAVEN_PASSWORD }}\n+\n+      - name: Conditionally Push Artifact to Github Release\n+        uses: actions/upload-release-asset@v1\n+        if: ${{ contains(github.repository, 'igniterealtime/') && github.event_name == 'push' && contains(github.ref, 'refs/tags/') && matrix.java == '1.8' }}\n+        env:\n+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}\n+        with:\n+          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get-id.outputs.rel_id }}/assets?name=${{ steps.get-id.outputs.id }}.jar\n+          asset_path: target/${{ steps.get-id.outputs.id }}-openfire-plugin-assembly.jar\n+          asset_name: ${{ steps.get-id.outputs.id }}.jar\n+          asset_content_type: application/java-archive"
+  },
+  {
+    "sha": "ce898a42b2fb9e532541d90b0d5db831d2ebbded",
+    "filename": ".travis.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 19,
+    "changes": 19,
+    "blob_url": "https://github.com/igniterealtime/openfire-registration-plugin/blob/29d07633c96f70b4e4f123790a7f6f50bda9c3c1/.travis.yml",
+    "raw_url": "https://github.com/igniterealtime/openfire-registration-plugin/raw/29d07633c96f70b4e4f123790a7f6f50bda9c3c1/.travis.yml",
+    "contents_url": "https://api.github.com/repos/igniterealtime/openfire-registration-plugin/contents/.travis.yml?ref=29d07633c96f70b4e4f123790a7f6f50bda9c3c1",
+    "patch": "@@ -1,19 +0,0 @@\n-sudo: false\n-dist: trusty\n-language: java\n-jdk:\n-- oraclejdk8\n-before_install:\n-  - git clone --depth 1 https://github.com/igniterealtime/ci-tooling.git target/ci-tooling\n-  - cp target/ci-tooling/maven-settings-for-openfire-plugins.xml $HOME/.m2/settings.xml\n-deploy:\n-  provider: script\n-  script: mvn deploy --settings target/ci-tooling/maven-settings-for-openfire-plugins.xml\n-  skip_cleanup: true\n-  on:\n-    repo: igniterealtime/openfire-registration-plugin\n-    all_branches: true\n-env:\n-  global:\n-  - secure: MCxLSwB3ssL+MEaSCMhbX8pZ2hUanHBHhK0IF0gauGbSSI3QVGth99WWzC+zTbidQDyDeV3H/W1ezet+UC+bCp8FEmEoJ7Gn+tr8qJTkOF3aXreGP4jCkQ2WU3Ac2fGzDfMPH64x5hGrhVooZ864eGEFiOgf0c9rYHyBJ010UFGycjXVrcszC7A6HID8JJ36RMukC7b7KzrFDwdkv8tkW7IVMbMxKZF2doZCbKQOScxKdpHxSs8U1lTrT9JNcSUYhMDrnncCfSqz5e9KrCRr2VhE2RE6l71+dcWzixmNQOvhwP33XMjreaC16E+aSZ+ZbGuytmRXr3jyNKBPlY6O3elROJdFPJHGk3eXKVy5+ZzI8HgZPfVBbCj60cfQoNOsehoYsoqVdnQBi6+fap/Hy8WUL3/nvy+dTf6zGFb+eFtqvvp/ArK3NqF6u9mYYsJ4www+Ukrp5uGHaZt/2zdj3DAW9UYame2bndgHxRToO4TnFCHix/VUADvTXn9+ZlxYAhFoLmuqQTXnztC9ej1Lr7aNZnXfjV6Q9NgHoyhUeHe8SGZPaH6ThgSU4f0wgA+0X+2JuFtXoJmWQqRGpDGyq2iru1SUbTfJv5HGYUEePIYdwfoWUwny9QrbAHIo13H2Fnmg32oU7sEV4Sk1a+Sx+T0tkKbE6StruJbfFlEPunI=\n-  - secure: fZjyc7WU84SNKpREk7GzYlZuXygK0+sWamWhhpZGK4qPCXrwrxOP5ZPRsPevl11tzEMSNZieFKZr3YZ6ItOyZhu+nIivjDCFkdEQarTqmoxSrhcukwx0Jo72dtnGTGYR743MR4ARB9Tm2Xqp/SDHgXKdVvsimKUU/kQLA49+ROL1MPQuudXix3l/63sfw84EdIItEA4Y6F7FIOOufo930ifvQIJ5cwXTDLZUh8heGaF9ymaKP5QtRZxlGVM4Mh5oQ1+2pfHSBG+0rjcOlYtDdjESWhyLBw4xXmmJhVkGFul6ifk9PdpjidACCu2r3HxQRgi7GVYTT/ndeHUs4l/KTUdXEAh2Kd6TJMtF/OC53u+GHvjavSU5tRDdnfOiv/FYxEwYXZTauxKHsL2REtzNuBsPCNCE8swJl4u8Cnj0e9wqcaqbI7zy+VYYwI78Gkr4rzv08fge1Dwbysxb4+qLVzzM8m2VJ+k7qiNC3K1bhSa8X+WjNENRh0qK98CvbZVAcVAn3mrB/2MVbl2Efc/X/Z/O3LEIl0MoaNWJy069X/wGJixabTPmW7Yk4xsy/TIcYJVRMpKdB0IDCISOEb1hChMMaV6VeMqQZ/qxDhl6ifqk5rg9OFgz0tHbkqYXLRM2psUDXwh8hM6Z2jeM7CAF4iC04CzP1SCs0IlqV5WB04g="
+  },
+  {
+    "sha": "356ca7eb4ba317e8b518e073799ee1a0518e8f71",
+    "filename": "README.md",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/igniterealtime/openfire-registration-plugin/blob/96c238d410fc7c2625002dbac2afb09c73a2fa71/README.md",
+    "raw_url": "https://github.com/igniterealtime/openfire-registration-plugin/raw/96c238d410fc7c2625002dbac2afb09c73a2fa71/README.md",
+    "contents_url": "https://api.github.com/repos/igniterealtime/openfire-registration-plugin/contents/README.md?ref=96c238d410fc7c2625002dbac2afb09c73a2fa71",
+    "patch": "@@ -0,0 +1,13 @@\n+# Openfire Registration Plugin\n+\n+Allows admins to configure various actions whenever a new user creates an account.\n+\n+**Note for developers**, on 29 October 2020 this repository was rewritten to remove legacy and unrelated Openfire commit history.  See [forums post](https://discourse.igniterealtime.org/t/89049) for more details.  This repository was susquently rewritten again on 1 December 2020 to remove and additional bad commit circa 2013.\n+\n+## CI Build Status\n+\n+[![Build Status](https://github.com/igniterealtime/openfire-registration-plugin/workflows/Java%20CI/badge.svg)](https://github.com/igniterealtime/openfire-registration-plugin/actions)\n+\n+## Reporting Issues\n+\n+Issues may be reported to the [forums](https://discourse.igniterealtime.org) or via this repo's [Github Issues](https://github.com/igniterealtime/openfire-registration-plugin)."
+  },
+  {
+    "sha": "3bd736215dcacbb108009e380b917009450cfcc2",
+    "filename": "readme.html",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/igniterealtime/openfire-registration-plugin/blob/96c238d410fc7c2625002dbac2afb09c73a2fa71/readme.html",
+    "raw_url": "https://github.com/igniterealtime/openfire-registration-plugin/raw/96c238d410fc7c2625002dbac2afb09c73a2fa71/readme.html",
+    "contents_url": "https://api.github.com/repos/igniterealtime/openfire-registration-plugin/contents/readme.html?ref=96c238d410fc7c2625002dbac2afb09c73a2fa71",
+    "patch": "@@ -43,8 +43,6 @@ <h1>\n Registration Plugin Readme\n </h1>\n \n-<p>On 30 October 2020, the <a href=\"https://discourse.igniterealtime.org/t/89049\">git repository was rewritten</a> to remove unrelated content from this repository.</p>\n-\n <h2>Overview</h2>\n <p>\n The registration plugin allows admins to configure various actions whenever a new user creates an account."
+  }
+]

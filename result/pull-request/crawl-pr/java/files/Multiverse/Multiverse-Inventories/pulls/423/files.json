@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "7a3fd88c0928b3179fc7c310023e39a6fe164703",
+    "filename": "src/main/java/com/onarandombox/multiverseinventories/DataStrings.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/Multiverse/Multiverse-Inventories/blob/e74a928541a63ba1bada57fc78606710c8c0d033/src/main/java/com/onarandombox/multiverseinventories/DataStrings.java",
+    "raw_url": "https://github.com/Multiverse/Multiverse-Inventories/raw/e74a928541a63ba1bada57fc78606710c8c0d033/src/main/java/com/onarandombox/multiverseinventories/DataStrings.java",
+    "contents_url": "https://api.github.com/repos/Multiverse/Multiverse-Inventories/contents/src/main/java/com/onarandombox/multiverseinventories/DataStrings.java?ref=e74a928541a63ba1bada57fc78606710c8c0d033",
+    "patch": "@@ -73,6 +73,10 @@\n      * Player bed spawn location identifier.\n      */\n     public static final String PLAYER_PROFILE_TYPE = \"profileType\";\n+    /**\n+     * Player max health identifier.\n+     */\n+    public static final String PLAYER_MAX_HEALTH = \"mhp\";\n     /**\n      * Player health identifier.\n      */"
+  },
+  {
+    "sha": "541ef5f23e897e840c9bc789c5000e7bb80250e9",
+    "filename": "src/main/java/com/onarandombox/multiverseinventories/PlayerStats.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/Multiverse/Multiverse-Inventories/blob/e74a928541a63ba1bada57fc78606710c8c0d033/src/main/java/com/onarandombox/multiverseinventories/PlayerStats.java",
+    "raw_url": "https://github.com/Multiverse/Multiverse-Inventories/raw/e74a928541a63ba1bada57fc78606710c8c0d033/src/main/java/com/onarandombox/multiverseinventories/PlayerStats.java",
+    "contents_url": "https://api.github.com/repos/Multiverse/Multiverse-Inventories/contents/src/main/java/com/onarandombox/multiverseinventories/PlayerStats.java?ref=e74a928541a63ba1bada57fc78606710c8c0d033",
+    "patch": "@@ -21,6 +21,10 @@\n      * Default health value.\r\n      */\r\n     public static final int HEALTH = 20;\r\n+    /**\r\n+     * Default max health value.\r\n+     */\r\n+    public static final int MAX_HEALTH = 20;\r\n     /**\r\n      * Default experience value.\r\n      */\r"
+  },
+  {
+    "sha": "8f870c07a52810ecf767e8b04514e020109f18c5",
+    "filename": "src/main/java/com/onarandombox/multiverseinventories/share/Sharables.java",
+    "status": "modified",
+    "additions": 51,
+    "deletions": 2,
+    "changes": 53,
+    "blob_url": "https://github.com/Multiverse/Multiverse-Inventories/blob/e74a928541a63ba1bada57fc78606710c8c0d033/src/main/java/com/onarandombox/multiverseinventories/share/Sharables.java",
+    "raw_url": "https://github.com/Multiverse/Multiverse-Inventories/raw/e74a928541a63ba1bada57fc78606710c8c0d033/src/main/java/com/onarandombox/multiverseinventories/share/Sharables.java",
+    "contents_url": "https://api.github.com/repos/Multiverse/Multiverse-Inventories/contents/src/main/java/com/onarandombox/multiverseinventories/share/Sharables.java?ref=e74a928541a63ba1bada57fc78606710c8c0d033",
+    "patch": "@@ -13,6 +13,7 @@\n import org.bukkit.NamespacedKey;\n import org.bukkit.World;\n import org.bukkit.attribute.Attribute;\n+import org.bukkit.attribute.AttributeInstance;\n import org.bukkit.entity.Player;\n import org.bukkit.inventory.ItemStack;\n import org.bukkit.potion.PotionEffect;\n@@ -169,23 +170,71 @@ public void updateProfile(PlayerProfile profile, Player player) {\n \n                 @Override\n                 public boolean updatePlayer(Player player, PlayerProfile profile) {\n+                    AttributeInstance maxHealthAttr = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);\n+                    if (maxHealthAttr == null) {\n+                        Logging.warning(\"Unable to get max health attribute for %s.\", player.getName());\n+                        return false;\n+                    }\n+\n                     Double value = profile.get(HEALTH);\n                     if (value == null) {\n-                        player.setHealth(PlayerStats.HEALTH);\n+                        player.setHealth(maxHealthAttr.getValue());\n                         return false;\n                     }\n+\n+                    // This share may handled before MAX_HEALTH.\n+                    // Thus this is needed to ensure there is no loss in health stored.\n+                    if (value > maxHealthAttr.getValue()) {\n+                        maxHealthAttr.setBaseValue(value);\n+                    }\n+\n                     try {\n                         player.setHealth(value);\n                     } catch (IllegalArgumentException e) {\n                         Logging.fine(\"Invalid value '\" + value + \"': \" + e.getMessage());\n-                        player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());\n+                        player.setHealth(maxHealthAttr.getValue());\n                         return false;\n                     }\n                     return true;\n                 }\n             }).stringSerializer(new ProfileEntry(true, DataStrings.PLAYER_HEALTH))\n             .altName(\"health\").altName(\"hp\").altName(\"hitpoints\").build();\n \n+    /**\n+     * Sharing Max Health.\n+     */\n+    public static final Sharable<Double> MAX_HEALTH = new Sharable.Builder<Double>(\"max_hit_points\", Double.class,\n+            new SharableHandler<Double>() {\n+                @Override\n+                public void updateProfile(PlayerProfile profile, Player player) {\n+                    AttributeInstance maxHealthAttr = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);\n+                    if (maxHealthAttr == null) {\n+                        Logging.warning(\"Unable to get max health attribute for %s.\", player.getName());\n+                        return;\n+                    }\n+                    profile.set(MAX_HEALTH, maxHealthAttr.getValue());\n+                }\n+\n+                @Override\n+                public boolean updatePlayer(Player player, PlayerProfile profile) {\n+                    AttributeInstance maxHealthAttr = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);\n+                    if (maxHealthAttr == null) {\n+                        Logging.warning(\"Unable to get max health attribute for %s.\", player.getName());\n+                        return false;\n+                    }\n+\n+                    Double value = profile.get(MAX_HEALTH);\n+                    if (value == null) {\n+                        maxHealthAttr.setBaseValue(PlayerStats.MAX_HEALTH);\n+                        return false;\n+                    }\n+\n+                    maxHealthAttr.setBaseValue(value);\n+                    return true;\n+                }\n+            }).stringSerializer(new ProfileEntry(true, DataStrings.PLAYER_MAX_HEALTH))\n+            .altName(\"maxhealth\").altName(\"maxhp\").altName(\"maxhitpoints\").build();\n+\n     /**\n      * Sharing Remaining Air.\n      */"
+  }
+]

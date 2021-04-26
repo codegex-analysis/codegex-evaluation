@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "91c24de2c4b9e33006e933370cfe7dab555698e6",
+    "filename": "3Sum.java",
+    "status": "added",
+    "additions": 90,
+    "deletions": 0,
+    "changes": 90,
+    "blob_url": "https://github.com/super30admin/Two-Pointers-1/blob/2a4b8a89b966b5621b9a06255bb256fb0b7f5807/3Sum.java",
+    "raw_url": "https://github.com/super30admin/Two-Pointers-1/raw/2a4b8a89b966b5621b9a06255bb256fb0b7f5807/3Sum.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Two-Pointers-1/contents/3Sum.java?ref=2a4b8a89b966b5621b9a06255bb256fb0b7f5807",
+    "patch": "@@ -0,0 +1,90 @@\n+// TC - O(n^2), n --> length of nums array, SC - O(1)\n+\n+class Solution {\n+    public List<List<Integer>> threeSum(int[] nums) {\n+        // Sanity check, if nums is null or length is 0, return empty ArrayList\n+        if(nums == null || nums.length == 0){\n+            return new ArrayList<>();\n+        }\n+        // Sort nums array\n+        Arrays.sort(nums);\n+        List<List<Integer>> result = new ArrayList<>();\n+        \n+        // Iterating nums array from 0 to length - 1\n+        for(int i=0; i<nums.length-1; i++){\n+            // To avoid repetition of sultion lists in result list, we keep a check, if nums value at ith index is equal to nums value at i-1 st index and i > 0, then skip this iteration\n+            if(i > 0 && nums[i] == nums[i-1]){\n+                continue;\n+            }\n+            // As the array is sorted, if nums[i] > 0, there will be no numbers less than 0 to get a sum of 0\n+            if(nums[i] > 0){\n+                return result;\n+            }\n+            // Initializing 2 pointers l and h at 0 and height-1 respectively\n+            int l = i+1;\n+            int h = nums.length - 1;\n+            // Iterate till l < h\n+            while(l < h){\n+                // calculate sum from values at i, l and h indexes\n+                int sum = nums[i] + nums[l] + nums[h];\n+                // If sum equals 0, we found a resuling triplet, so we add it in result list, increment l and decrement h\n+                if(sum == 0){\n+                    List<Integer> subList = Arrays.asList(nums[i], nums[l], nums[h]);\n+                    result.add(subList);\n+                    l++;\n+                    h--;\n+                    // To avoid repetitions in inner loops, similar to what we have done in outer loop, if nums[l] == nums[l-1] increment l while l is still less than h, similarly for h, to avoid repetitions, if nums[h] == nums[h+1], h-- while l is still less than h\n+                    while(l < h && nums[l] == nums[l-1]){\n+                        l++;\n+                    }\n+                    while(l < h && nums[h] == nums[h+1]){\n+                        h--;\n+                    }\n+                // If sum < 0, increment l\n+                }else if(sum < 0){\n+                    l++;\n+                // If sum > 0 decrement h\n+                }else{\n+                    h--;\n+                }\n+            }\n+        }\n+        return result;\n+    }\n+}\n+\n+// Using HashSet\n+// class Solution {\n+//     public List<List<Integer>> threeSum(int[] nums) {\n+//         if(nums == null || nums.length == 0){\n+//             return new ArrayList<>();\n+//         }\n+//         Arrays.sort(nums);\n+//         List<List<Integer>> result = new ArrayList<>();\n+//         Set<List<Integer>> set = new HashSet<>();\n+//         for(int i=0; i<nums.length-1; i++){\n+//             if(nums[i] > 0){\n+//                 return result;\n+//             }\n+//             int l = i+1;\n+//             int h = nums.length - 1;\n+//             while(l < h){\n+//                 int sum = nums[i] + nums[l] + nums[h];\n+//                 if(sum == 0){\n+//                     List<Integer> subList = Arrays.asList(nums[i], nums[l], nums[h]);\n+//                     if(!set.contains(subList)){\n+//                         set.add(subList);\n+//                         result.add(subList);\n+//                     }\n+//                     l++;\n+//                     h--;\n+//                 }else if(sum < 0){\n+//                     l++;\n+//                 }else{\n+//                     h--;\n+//                 }\n+//             }\n+//         }\n+//         return result;\n+//     }\n+// }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "eab3910a485d1aa9cd2b465b1bb848da7d80d3c3",
+    "filename": "ContainerWithMostWater.java",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/super30admin/Two-Pointers-1/blob/2a4b8a89b966b5621b9a06255bb256fb0b7f5807/ContainerWithMostWater.java",
+    "raw_url": "https://github.com/super30admin/Two-Pointers-1/raw/2a4b8a89b966b5621b9a06255bb256fb0b7f5807/ContainerWithMostWater.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Two-Pointers-1/contents/ContainerWithMostWater.java?ref=2a4b8a89b966b5621b9a06255bb256fb0b7f5807",
+    "patch": "@@ -0,0 +1,41 @@\n+// TC - O(n), SC - O(1), Two Pointer approach\n+\n+class Solution {\n+    public int maxArea(int[] height) {\n+        // Storing array length in length variable\n+        int length = height.length;\n+        // Initializing 2 pointers, l and h to starting and ending index of height array\n+        int l=0;\n+        int h = length-1;\n+        //Initializing max value to Integer.MIN_VALUE\n+        int max = Integer.MIN_VALUE;\n+        // Iterating till l is less than h\n+        while(l<h){\n+            // Comparing current area of l and h by multiplying min of value of l, h of height array and h-l, previous max\n+            max = Math.max((Math.min(height[l], height[h]) * (h-l)), max);\n+            // Comparing values of l and h indexes from height array\n+            // If l is less, increment l else decrement h\n+            if(height[l] < height[h]){\n+                l++;\n+            }else{\n+                h--;\n+            }\n+        }\n+        return max;\n+    }\n+}\n+\n+\n+// BruteForce - O(n^2)\n+// class Solution {\n+//     public int maxArea(int[] height) {\n+//         int length = height.length;\n+//         int max = Integer.MIN_VALUE;\n+//         for(int i=0; i<length-1; i++){\n+//             for(int j=i+1; j<length; j++){\n+//                 max = Math.max(max, (Math.min(height[i], height[j]) * (j-i)));\n+//             }\n+//         }\n+//         return max;\n+//     }\n+// }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "be980c1f7c9801261349bab5688b29b3bfb3743c",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/super30admin/Two-Pointers-1/blob/2a4b8a89b966b5621b9a06255bb256fb0b7f5807/README.md",
+    "raw_url": "https://github.com/super30admin/Two-Pointers-1/raw/2a4b8a89b966b5621b9a06255bb256fb0b7f5807/README.md",
+    "contents_url": "https://api.github.com/repos/super30admin/Two-Pointers-1/contents/README.md?ref=2a4b8a89b966b5621b9a06255bb256fb0b7f5807",
+    "patch": "@@ -1,8 +1,10 @@\n # Two-Pointers-1\n \n ## Problem1 (https://leetcode.com/problems/sort-colors/)\n+## Leetcode - 75\n \n ## Problem2 (https://leetcode.com/problems/3sum/)\n+## Leetcode - 15\n \n ## Problem3 (https://leetcode.com/problems/container-with-most-water/)\n-\n+## Leetcode - 11"
+  },
+  {
+    "sha": "f5c45b5fea98d036342c0c758d3e9f09966f8f3a",
+    "filename": "Sample.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 7,
+    "changes": 7,
+    "blob_url": "https://github.com/super30admin/Two-Pointers-1/blob/eb822d590732487b579e1a3d59dd3b533f5a091c/Sample.java",
+    "raw_url": "https://github.com/super30admin/Two-Pointers-1/raw/eb822d590732487b579e1a3d59dd3b533f5a091c/Sample.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Two-Pointers-1/contents/Sample.java?ref=eb822d590732487b579e1a3d59dd3b533f5a091c",
+    "patch": "@@ -1,7 +0,0 @@\n-// Time Complexity :\r\n-// Space Complexity :\r\n-// Did this code successfully run on Leetcode :\r\n-// Any problem you faced while coding this :\r\n-\r\n-\r\n-// Your code here along with comments explaining your approach\n\\ No newline at end of file"
+  },
+  {
+    "sha": "a55b25b0c7326697d8e15f7e1f988ed2aa4fd68b",
+    "filename": "SortColours.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/super30admin/Two-Pointers-1/blob/2a4b8a89b966b5621b9a06255bb256fb0b7f5807/SortColours.java",
+    "raw_url": "https://github.com/super30admin/Two-Pointers-1/raw/2a4b8a89b966b5621b9a06255bb256fb0b7f5807/SortColours.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Two-Pointers-1/contents/SortColours.java?ref=2a4b8a89b966b5621b9a06255bb256fb0b7f5807",
+    "patch": "@@ -0,0 +1,35 @@\n+// TC - O(n), n --> length of nums, SC - O(1)\n+\n+class Solution {\n+    public void sortColors(int[] nums) {\n+        // Sanity check, if nums is null or length is 0, just return\n+        if(nums == null || nums.length == 0){\n+            return;\n+        }\n+        // Initializing 3 pointers, l, m to 0 and h to nums.length - 1\n+        // l --> 0's, m --> 1's and h --> 2's\n+        // Iterate till m <= h\n+        // If nums value at mth index is 2, swap values of m and h, decrement h by 1, we are sure at end of array we are only having 2's\n+        // If nums value at mth index is 0, swap values of m and l, increment l and m by 1 and if nums value at mth index is 1, just m++\n+        int l=0, m = 0, h = nums.length-1;\n+        while(m <= h){\n+            if(nums[m] == 2){\n+                swap(nums, m, h);\n+                h--;\n+            }else if(nums[m] == 0){\n+                swap(nums, l, m);\n+                l++;\n+                m++;\n+            }else if(nums[m] == 1){\n+                m++;\n+            }\n+        }\n+    }\n+    \n+    // Basic swap function using a temp variable\n+    private static void swap(int[] nums, int x, int y){\n+        int temp = nums[x];\n+        nums[x] = nums[y];\n+        nums[y] = temp;\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

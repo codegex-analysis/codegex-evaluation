@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "c29c57fb8bc0923ca2ad891e7ecbf31ccdcaf165",
+    "filename": "src/main/java/no/nav/pto/veilarbportefolje/admin/AdminController.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/navikt/veilarbportefolje/blob/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/admin/AdminController.java",
+    "raw_url": "https://github.com/navikt/veilarbportefolje/raw/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/admin/AdminController.java",
+    "contents_url": "https://api.github.com/repos/navikt/veilarbportefolje/contents/src/main/java/no/nav/pto/veilarbportefolje/admin/AdminController.java?ref=f603d006eb8360f8b8c11e9c00c924a0eee43e14",
+    "patch": "@@ -78,7 +78,7 @@ public String slettOppfolgingsbruker(@RequestBody String aktoerId) {\n     @SneakyThrows\n     public String fjernBrukerFraElastic(@RequestBody String aktoerId) {\n         authorizeAdmin();\n-        elasticServiceV2.delete(AktorId.of(aktoerId));\n+        elasticServiceV2.slettDokumenter(List.of(AktorId.of(aktoerId)));\n         return \"Slettet oppfølgingsbruker \" + aktoerId;\n     }\n "
+  },
+  {
+    "sha": "d1cc3dfe4eeaaf18e054097df0aafec075c2dc6a",
+    "filename": "src/main/java/no/nav/pto/veilarbportefolje/config/FeatureToggle.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/navikt/veilarbportefolje/blob/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/config/FeatureToggle.java",
+    "raw_url": "https://github.com/navikt/veilarbportefolje/raw/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/config/FeatureToggle.java",
+    "contents_url": "https://api.github.com/repos/navikt/veilarbportefolje/contents/src/main/java/no/nav/pto/veilarbportefolje/config/FeatureToggle.java?ref=f603d006eb8360f8b8c11e9c00c924a0eee43e14",
+    "patch": "@@ -7,4 +7,6 @@ private FeatureToggle() {\n     public static final String VEDTAKSTOTTE_PILOT = \"pto.vedtaksstotte.pilot\";\n \n     public static final String PDL = \"veilarbmaofs.personalia.pdl.persondata\";\n+\n+    public static final String AUTO_SLETT = \"pto.slett_gamle_aktorer_elastic\";\n }"
+  },
+  {
+    "sha": "64c325e5234fee7331899aba329355741d00ad6b",
+    "filename": "src/main/java/no/nav/pto/veilarbportefolje/database/BrukerRepository.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/navikt/veilarbportefolje/blob/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/database/BrukerRepository.java",
+    "raw_url": "https://github.com/navikt/veilarbportefolje/raw/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/database/BrukerRepository.java",
+    "contents_url": "https://api.github.com/repos/navikt/veilarbportefolje/contents/src/main/java/no/nav/pto/veilarbportefolje/database/BrukerRepository.java?ref=f603d006eb8360f8b8c11e9c00c924a0eee43e14",
+    "patch": "@@ -240,6 +240,17 @@ public Integer setGjeldeneFlaggTilNull(PersonId personId) {\n                 .execute();\n     }\n \n+    public Optional<List<AktorId>> hentGamleAktorIder(PersonId personId) {\n+        return Optional.ofNullable(SqlUtils\n+                .select(db, AKTOERID_TO_PERSONID.TABLE_NAME, rs -> rs == null ? null : AktorId.of(rs.getString(AKTOERID_TO_PERSONID.AKTOERID)))\n+                .column(AKTOERID_TO_PERSONID.AKTOERID)\n+                .where(\n+                    WhereClause.equals(AKTOERID_TO_PERSONID.PERSONID, personId.getValue())\n+                    .and(\n+                    WhereClause.equals(AKTOERID_TO_PERSONID.GJELDENE,0))\n+                ).executeToList());\n+    }\n+\n     public Try<PersonId> retrievePersonid(AktorId aktoerId) {\n         return Try.of(\n                 () -> select(db, AKTOERID_TO_PERSONID.TABLE_NAME, this::mapToPersonIdFromAktorIdToPersonId)"
+  },
+  {
+    "sha": "aba56680de326f275bcc1464a42ece2dbbd71e9e",
+    "filename": "src/main/java/no/nav/pto/veilarbportefolje/elastic/ElasticServiceV2.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 3,
+    "changes": 13,
+    "blob_url": "https://github.com/navikt/veilarbportefolje/blob/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/elastic/ElasticServiceV2.java",
+    "raw_url": "https://github.com/navikt/veilarbportefolje/raw/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/elastic/ElasticServiceV2.java",
+    "contents_url": "https://api.github.com/repos/navikt/veilarbportefolje/contents/src/main/java/no/nav/pto/veilarbportefolje/elastic/ElasticServiceV2.java?ref=f603d006eb8360f8b8c11e9c00c924a0eee43e14",
+    "patch": "@@ -9,7 +9,6 @@\n import no.nav.pto.veilarbportefolje.domene.value.VeilederId;\n import no.nav.pto.veilarbportefolje.sisteendring.SisteEndringDTO;\n import no.nav.pto.veilarbportefolje.sisteendring.SisteEndringsKategori;\n-import no.nav.pto.veilarbportefolje.sistelest.SistLestKafkaMelding;\n import org.elasticsearch.ElasticsearchException;\n import org.elasticsearch.action.delete.DeleteRequest;\n import org.elasticsearch.action.update.UpdateRequest;\n@@ -18,6 +17,7 @@\n import org.elasticsearch.rest.RestStatus;\n \n import java.io.IOException;\n+import java.util.List;\n import java.util.Optional;\n \n import static java.lang.String.format;\n@@ -186,6 +186,14 @@ public void slettArbeidsliste(AktorId aktoerId) {\n         update(aktoerId, content, \"Sletter arbeidsliste\");\n     }\n \n+    @SneakyThrows\n+    public void slettDokumenter(List<AktorId> aktorIds) {\n+        log.info(\"Sletter gamle aktorIder {}\", aktorIds);\n+        for (AktorId aktorId : aktorIds) {\n+            delete(aktorId);\n+        }\n+    }\n+\n     private void update(AktorId aktoerId, XContentBuilder content, String logInfo) throws IOException {\n         UpdateRequest updateRequest = new UpdateRequest();\n         updateRequest.index(indexName.getValue());\n@@ -207,8 +215,7 @@ private void update(AktorId aktoerId, XContentBuilder content, String logInfo) t\n         }\n     }\n \n-    @SneakyThrows\n-    public void delete(AktorId aktoerId) throws IOException {\n+    private void delete(AktorId aktoerId) throws IOException {\n         DeleteRequest deleteRequest = new DeleteRequest();\n         deleteRequest.index(indexName.getValue());\n         deleteRequest.type(\"_doc\");"
+  },
+  {
+    "sha": "0e865ab4c8b162ff28c29e01ea2c28f655263778",
+    "filename": "src/main/java/no/nav/pto/veilarbportefolje/service/BrukerService.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 9,
+    "changes": 20,
+    "blob_url": "https://github.com/navikt/veilarbportefolje/blob/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/service/BrukerService.java",
+    "raw_url": "https://github.com/navikt/veilarbportefolje/raw/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/service/BrukerService.java",
+    "contents_url": "https://api.github.com/repos/navikt/veilarbportefolje/contents/src/main/java/no/nav/pto/veilarbportefolje/service/BrukerService.java?ref=f603d006eb8360f8b8c11e9c00c924a0eee43e14",
+    "patch": "@@ -1,15 +1,17 @@\n package no.nav.pto.veilarbportefolje.service;\n \n import io.vavr.control.Try;\n+import lombok.RequiredArgsConstructor;\n import lombok.extern.slf4j.Slf4j;\n+import no.nav.common.featuretoggle.UnleashService;\n import no.nav.common.types.identer.Fnr;\n import no.nav.pto.veilarbportefolje.database.BrukerRepository;\n import no.nav.common.types.identer.AktorId;\n import no.nav.pto.veilarbportefolje.domene.AktorClient;\n import no.nav.pto.veilarbportefolje.domene.value.PersonId;\n import no.nav.pto.veilarbportefolje.domene.value.VeilederId;\n+import no.nav.pto.veilarbportefolje.elastic.ElasticServiceV2;\n import no.nav.pto.veilarbportefolje.elastic.domene.OppfolgingsBruker;\n-import org.springframework.beans.factory.annotation.Autowired;\n import org.springframework.stereotype.Service;\n import org.springframework.transaction.annotation.Transactional;\n \n@@ -19,19 +21,17 @@\n import java.util.Optional;\n \n import static java.util.stream.Collectors.toList;\n+import static no.nav.pto.veilarbportefolje.config.FeatureToggle.AUTO_SLETT;\n \n @Slf4j\n @Service\n+@RequiredArgsConstructor\n public class BrukerService {\n \n     private final BrukerRepository brukerRepository;\n     private final AktorClient aktorClient;\n-\n-    @Autowired\n-    public BrukerService(BrukerRepository brukerRepository, AktorClient aktorClient) {\n-        this.brukerRepository = brukerRepository;\n-        this.aktorClient = aktorClient;\n-    }\n+    private final ElasticServiceV2 elasticServiceV2;\n+    private final UnleashService unleashService;\n \n     public Optional<AktorId> hentAktorId(Fnr fnr) {\n         return brukerRepository.hentBrukerFraView(fnr)\n@@ -89,15 +89,17 @@ void updateGjeldeFlaggOgInsertAktoeridPaNyttMapping(AktorId aktoerId, PersonId p\n             brukerRepository.setGjeldeneFlaggTilNull(personId);\n             brukerRepository.insertAktoeridToPersonidMapping(aktoerId, personId);\n         }\n+        if(unleashService.isEnabled(AUTO_SLETT)) {\n+            brukerRepository.hentGamleAktorIder(personId).ifPresent(elasticServiceV2::slettDokumenter);\n+        }\n     }\n \n     public Optional<VeilederId> hentVeilederForBruker(AktorId aktoerId) {\n         return brukerRepository.hentVeilederForBruker(aktoerId);\n     }\n \n     private Optional<Fnr> hentFnrFraAktoerregister(AktorId aktoerId) {\n-            return Optional\n-                    .ofNullable(aktorClient.hentFnr(aktoerId));\n+            return Optional.ofNullable(aktorClient.hentFnr(aktoerId));\n     }\n \n }"
+  },
+  {
+    "sha": "e97dad9698b2c3814f22a82b5f516ff1ea949a1c",
+    "filename": "src/main/java/no/nav/pto/veilarbportefolje/sisteendring/SisteEndringRepository.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/navikt/veilarbportefolje/blob/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/sisteendring/SisteEndringRepository.java",
+    "raw_url": "https://github.com/navikt/veilarbportefolje/raw/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/main/java/no/nav/pto/veilarbportefolje/sisteendring/SisteEndringRepository.java",
+    "contents_url": "https://api.github.com/repos/navikt/veilarbportefolje/contents/src/main/java/no/nav/pto/veilarbportefolje/sisteendring/SisteEndringRepository.java?ref=f603d006eb8360f8b8c11e9c00c924a0eee43e14",
+    "patch": "@@ -41,7 +41,7 @@ public void upsert(SisteEndringDTO sisteEndringDTO) {\n                 )).execute();\n     }\n \n-    public void oppdaterHarSett(AktorId aktorId, SisteEndringsKategori kategori,boolean erSett) {\n+    public void oppdaterHarSett(AktorId aktorId, SisteEndringsKategori kategori, boolean erSett) {\n         String erSettChar = erSett ? \"J\" : \"N\";\n \n         SqlUtils.upsert(jdbcTemplate, TABLE_NAME)"
+  },
+  {
+    "sha": "6d047327f9d8cc356d1ee625002e14a71755f9a4",
+    "filename": "src/test/java/no/nav/pto/veilarbportefolje/service/BrukerServiceTest.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 2,
+    "changes": 19,
+    "blob_url": "https://github.com/navikt/veilarbportefolje/blob/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/test/java/no/nav/pto/veilarbportefolje/service/BrukerServiceTest.java",
+    "raw_url": "https://github.com/navikt/veilarbportefolje/raw/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/test/java/no/nav/pto/veilarbportefolje/service/BrukerServiceTest.java",
+    "contents_url": "https://api.github.com/repos/navikt/veilarbportefolje/contents/src/test/java/no/nav/pto/veilarbportefolje/service/BrukerServiceTest.java?ref=f603d006eb8360f8b8c11e9c00c924a0eee43e14",
+    "patch": "@@ -1,17 +1,22 @@\n package no.nav.pto.veilarbportefolje.service;\n \n import io.vavr.control.Try;\n+import no.nav.common.featuretoggle.UnleashService;\n import no.nav.common.types.identer.Fnr;\n+import no.nav.pto.veilarbportefolje.config.FeatureToggle;\n import no.nav.pto.veilarbportefolje.database.BrukerRepository;\n import no.nav.common.types.identer.AktorId;\n import no.nav.pto.veilarbportefolje.domene.AktorClient;\n import no.nav.pto.veilarbportefolje.domene.value.PersonId;\n+import no.nav.pto.veilarbportefolje.elastic.ElasticServiceV2;\n import org.junit.Before;\n import org.junit.Test;\n import org.junit.runner.RunWith;\n import org.springframework.jdbc.core.JdbcTemplate;\n import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;\n \n+import java.util.List;\n+\n import static no.nav.pto.veilarbportefolje.util.TestUtil.setupInMemoryDatabase;\n import static no.nav.sbl.sql.SqlUtils.insert;\n import static org.junit.Assert.assertEquals;\n@@ -33,8 +38,9 @@\n \n     private BrukerRepository brukerRepository;\n \n-    private AktorClient aktorClient;\n+    private ElasticServiceV2 elasticServiceV2;\n \n+    private AktorClient aktorClient;\n \n     private String FNR_FRA_SOAP_TJENESTE = \"11111111111\";\n     private String AKTOERID_FRA_SOAP_TJENESTE = \"2222\";\n@@ -45,7 +51,11 @@ public void setUp() {\n         db = new JdbcTemplate(setupInMemoryDatabase());\n         brukerRepository = new BrukerRepository(db, null);\n         aktorClient = mock(AktorClient.class);\n-        brukerService = new BrukerService(brukerRepository, aktorClient);\n+        UnleashService unleashService = mock(UnleashService.class);\n+        when(unleashService.isEnabled(FeatureToggle.AUTO_SLETT)).thenReturn(true);\n+\n+        elasticServiceV2 = mock(ElasticServiceV2.class);\n+        brukerService = new BrukerService(brukerRepository, aktorClient, elasticServiceV2, unleashService);\n \n         db.execute(\"TRUNCATE TABLE OPPFOLGINGSBRUKER\");\n         db.execute(\"truncate table AKTOERID_TO_PERSONID\");\n@@ -56,6 +66,7 @@ public void setUp() {\n                 .execute();\n     }\n \n+    @Test\n     public void skalFinnePersonIdFraDatabase() {\n         when(aktorClient.hentFnr(any(AktorId.class))).thenReturn(Fnr.ofValidFnr(FNR_FRA_SOAP_TJENESTE));\n         when(aktorClient.hentAktorId(any(Fnr.class))).thenReturn(AktorId.of(AKTOERID_FRA_SOAP_TJENESTE));\n@@ -72,6 +83,7 @@ public void skalFinnePersonIdFraDatabase() {\n \n         Try<PersonId> result = brukerService.hentPersonidFraAktoerid(aktoerId);\n         verify(aktorClient, never()).hentFnr(any(AktorId.class));\n+        verify(elasticServiceV2, never()).slettDokumenter(any());\n         assertTrue(result.isSuccess());\n         assertEquals(personId, result.get());\n     }\n@@ -98,6 +110,7 @@ public void skalSetteGamleAktorIdTilIkkeGjeldeOgSetteNyeAktorIdTilGjeldene() {\n         Try<String> resultatNyAktorId = getGjeldeneAktorId(PERSON_ID);\n         assertEquals(resultatNyAktorId.get(), nyAktorId.toString());\n \n+        verify(elasticServiceV2).slettDokumenter(List.of(AktorId.of(AKTOER_ID)));\n     }\n \n     @Test\n@@ -114,6 +127,8 @@ public void skalSetteGamleAktorIdTilIkkeGjeldene() {\n \n         Try<String> gamleAktorId = getGamleAktorId(PERSON_ID);\n         assertEquals(gamleAktorId.get(), aktoerId.toString());\n+\n+        verify(elasticServiceV2).slettDokumenter(List.of(aktoerId));\n     }\n \n     private Try<String> getGjeldeneAktorId(String personId) {"
+  },
+  {
+    "sha": "1e74e4ffacf23975c36915e41c866f58236b207c",
+    "filename": "src/test/java/no/nav/pto/veilarbportefolje/sisteendring/SisteEndringRepositoryTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/navikt/veilarbportefolje/blob/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/test/java/no/nav/pto/veilarbportefolje/sisteendring/SisteEndringRepositoryTest.java",
+    "raw_url": "https://github.com/navikt/veilarbportefolje/raw/f603d006eb8360f8b8c11e9c00c924a0eee43e14/src/test/java/no/nav/pto/veilarbportefolje/sisteendring/SisteEndringRepositoryTest.java",
+    "contents_url": "https://api.github.com/repos/navikt/veilarbportefolje/contents/src/test/java/no/nav/pto/veilarbportefolje/sisteendring/SisteEndringRepositoryTest.java?ref=f603d006eb8360f8b8c11e9c00c924a0eee43e14",
+    "patch": "@@ -45,16 +45,19 @@ public void mapDbTilOppfolgingsbruker() {\n                 .setAktoerId(AKTORID)\n                 .setAktivtetId(\"2\");\n \n+        sisteEndringRepository.oppdaterHarSett(dto_1.getAktoerId(), SisteEndringsKategori.NY_IJOBB,true);\n         sisteEndringRepository.upsert(dto_1);\n         sisteEndringRepository.upsert(dto_2);\n \n         OppfolgingsBruker bruker = new OppfolgingsBruker().setAktoer_id(AKTORID.get());\n         sisteEndringRepository.setAlleSisteEndringTidspunkter(List.of(bruker));\n \n         assertThat(bruker.getSiste_endringer().get(\"ny_ijobb\").getTidspunkt()).isEqualTo(toIsoUTC(ZonedDateTime.parse(tidspunkt_1)));\n+        assertThat(bruker.getSiste_endringer().get(\"ny_ijobb\").getEr_sett()).isEqualTo(\"J\");\n         assertThat(bruker.getSiste_endringer().get(\"ny_ijobb\").getAktivtetId()).isEqualTo(dto_1.getAktivtetId());\n         assertThat(bruker.getSiste_endringer().get(\"avbrutt_egen\").getTidspunkt()).isEqualTo(toIsoUTC(ZonedDateTime.parse(tidspunkt_2)));\n         assertThat(bruker.getSiste_endringer().get(\"avbrutt_egen\").getAktivtetId()).isEqualTo(dto_2.getAktivtetId());\n+        assertThat(bruker.getSiste_endringer().get(\"avbrutt_egen\").getEr_sett()).isEqualTo(\"N\");\n     }\n \n "
+  }
+]

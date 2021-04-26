@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "9c4c8bf4db12e152e603b02141f6cddd63118478",
+    "filename": ".ci/daily/Jenkinsfile",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/camunda/camunda-bpm-platform/blob/0f1c0f32759b2d5cd6a9d7c5f2a6526ba6001203/.ci/daily/Jenkinsfile",
+    "raw_url": "https://github.com/camunda/camunda-bpm-platform/raw/0f1c0f32759b2d5cd6a9d7c5f2a6526ba6001203/.ci/daily/Jenkinsfile",
+    "contents_url": "https://api.github.com/repos/camunda/camunda-bpm-platform/contents/.ci/daily/Jenkinsfile?ref=0f1c0f32759b2d5cd6a9d7c5f2a6526ba6001203",
+    "patch": "@@ -15,8 +15,8 @@ pipeline {\n   }\n   parameters {\n     booleanParam name: 'UPSTREAM_PR', defaultValue: false, description: 'Is the current build triggered in the scope of an upstream pull request'\n-    string name: 'UPSTREAM_PROJECT_NAME', defaultValue: 'cambpm-ce/cambpm-main/master'\n-    string name: 'UPSTREAM_BUILD_NUMBER', defaultValue: ''\n+    string name: 'UPSTREAM_PROJECT_NAME', defaultValue: '7.XX/cambpm-ce/cambpm-main/master', description: 'Not used on standalone runs. This property is passed by the upstream build that triggers this one.'\n+    string name: 'UPSTREAM_BUILD_NUMBER', defaultValue: '', description: 'Not used on standalone runs. This property is passed by the upstream build that triggers this one.'\n     string name: 'PR_LABELS', defaultValue: '', description: 'The labels assigned to the CE pull request'\n   }\n   options {"
+  },
+  {
+    "sha": "704b870c0173527c30c16b20b6bf9bbe3aaf76e0",
+    "filename": ".ci/sidetrack/Jenkinsfile",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/camunda/camunda-bpm-platform/blob/0f1c0f32759b2d5cd6a9d7c5f2a6526ba6001203/.ci/sidetrack/Jenkinsfile",
+    "raw_url": "https://github.com/camunda/camunda-bpm-platform/raw/0f1c0f32759b2d5cd6a9d7c5f2a6526ba6001203/.ci/sidetrack/Jenkinsfile",
+    "contents_url": "https://api.github.com/repos/camunda/camunda-bpm-platform/contents/.ci/sidetrack/Jenkinsfile?ref=0f1c0f32759b2d5cd6a9d7c5f2a6526ba6001203",
+    "patch": "@@ -41,8 +41,8 @@ pipeline {\n   }\n   parameters {\n     booleanParam name: 'UPSTREAM_PR', defaultValue: false, description: 'Is the current build triggered in the scope of an upstream pull request'\n-    string name: 'UPSTREAM_PROJECT_NAME', defaultValue: 'cambpm-ce/cambpm-main/master'\n-    string name: 'UPSTREAM_BUILD_NUMBER', defaultValue: ''\n+    string name: 'UPSTREAM_PROJECT_NAME', defaultValue: '7.XX/cambpm-ce/cambpm-main/master', description: 'Not used on standalone runs. This property is passed by the upstream build that triggers this one.'\n+    string name: 'UPSTREAM_BUILD_NUMBER', defaultValue: '', description: 'Not used on standalone runs. This property is passed by the upstream build that triggers this one.'\n     string name: 'PR_LABELS', defaultValue: '', description: 'The labels assigned to the CE pull request'\n   }\n   options {"
+  },
+  {
+    "sha": "7685c76ba7b37125def785270c7702a3adfdb967",
+    "filename": "Jenkinsfile",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 3,
+    "changes": 9,
+    "blob_url": "https://github.com/camunda/camunda-bpm-platform/blob/0f1c0f32759b2d5cd6a9d7c5f2a6526ba6001203/Jenkinsfile",
+    "raw_url": "https://github.com/camunda/camunda-bpm-platform/raw/0f1c0f32759b2d5cd6a9d7c5f2a6526ba6001203/Jenkinsfile",
+    "contents_url": "https://api.github.com/repos/camunda/camunda-bpm-platform/contents/Jenkinsfile?ref=0f1c0f32759b2d5cd6a9d7c5f2a6526ba6001203",
+    "patch": "@@ -68,9 +68,12 @@ pipeline {\n                 eeMainProjectBranch = params.EE_DOWNSTREAM\n               }\n \n+              // JOB_NAME, e.g.: '7.15/cambpm-ce/cambpm-main/PR-1373'\n+              platformVersion = env.JOB_NAME.split('/')[0]\n+\n               if (cambpmWithLabels('webapp-integration', 'all-as', 'h2', 'websphere', 'weblogic', 'jbosseap', 'run', 'spring-boot', 'authorizations', 'e2e')) {\n                 cambpmTriggerDownstream(\n-                  \"cambpm-ee/\" + eeMainProjectBranch,\n+                  platformVersion + \"/cambpm-ee/\" + eeMainProjectBranch,\n                   [string(name: 'UPSTREAM_PROJECT_NAME', value: env.JOB_NAME),\n                   string(name: 'UPSTREAM_BUILD_NUMBER', value: env.BUILD_NUMBER)],\n                   true, true, true\n@@ -79,15 +82,15 @@ pipeline {\n \n               if (cambpmWithLabels('all-db', 'cockroachdb', 'authorizations')) {\n                 cambpmTriggerDownstream(\n-                  \"cambpm-ce/cambpm-sidetrack/${env.BRANCH_NAME}\",\n+                  platformVersion + \"/cambpm-ce/cambpm-sidetrack/${env.BRANCH_NAME}\",\n                   [string(name: 'UPSTREAM_PROJECT_NAME', value: env.JOB_NAME),\n                   string(name: 'UPSTREAM_BUILD_NUMBER', value: env.BUILD_NUMBER)]\n                 )\n               }\n \n               if (cambpmWithLabels('daily', 'default-build', 'rolling-update', 'migration', 'all-db', 'h2', 'db2', 'mysql', 'oracle', 'mariadb', 'sqlserver', 'postgresql')) {\n                 cambpmTriggerDownstream(\n-                  \"cambpm-ce/cambpm-daily/${env.BRANCH_NAME}\",\n+                  platformVersion + \"/cambpm-ce/cambpm-daily/${env.BRANCH_NAME}\",\n                   [string(name: 'UPSTREAM_PROJECT_NAME', value: env.JOB_NAME),\n                   string(name: 'UPSTREAM_BUILD_NUMBER', value: env.BUILD_NUMBER)]\n                 )"
+  }
+]

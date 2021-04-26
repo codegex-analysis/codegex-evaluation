@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "afe25355011f43a4feeed9e6debb015b55e2bb33",
+    "filename": "cloneGraph.py",
+    "status": "added",
+    "additions": 43,
+    "deletions": 0,
+    "changes": 43,
+    "blob_url": "https://github.com/super30admin/BFS-3/blob/22989ed680c3dc7d6d6efde6e943397b5e50111f/cloneGraph.py",
+    "raw_url": "https://github.com/super30admin/BFS-3/raw/22989ed680c3dc7d6d6efde6e943397b5e50111f/cloneGraph.py",
+    "contents_url": "https://api.github.com/repos/super30admin/BFS-3/contents/cloneGraph.py?ref=22989ed680c3dc7d6d6efde6e943397b5e50111f",
+    "patch": "@@ -0,0 +1,43 @@\n+#TC: O(V + E)\n+#Space: O(N)\n+\n+class Solution:\n+    def cloneGraph(self, node: 'Node') -> 'Node':\n+        \n+        # 0: Check\n+        if not node:\n+            return None \n+\n+        # 1: find nodes\n+        nodes = self.find_nodes_by_bfs(node)\n+        # 2: copy nodes\n+        mapping = self.copy_nodes(nodes)\n+        # 3: copy edges\n+        self.copy_edges(nodes, mapping)\n+\n+        return mapping[node]\n+\n+    def find_nodes_by_bfs(self, node):\n+        queue = collections.deque([node])\n+        visited = set([node])\n+        while queue:\n+            cur_node = queue.popleft()\n+            for neighbor in cur_node.neighbors:\n+                if neighbor in visited:\n+                    continue\n+                visited.add(neighbor)\n+                queue.append(neighbor)\n+        return list(visited)\n+\n+    def copy_nodes(self, nodes):\n+        mapping = {}\n+        for node in nodes:\n+            mapping[node] = Node(node.val)\n+        return mapping\n+\n+    def copy_edges(self, nodes, mapping):\n+        for node in nodes:\n+            new_node = mapping[node]\n+            for neighbor in node.neighbors:\n+                new_neighbor = mapping[neighbor]\n+                new_node.neighbors.append(new_neighbor)\n\\ No newline at end of file"
+  },
+  {
+    "sha": "c936360aec9baa604a3ac5ebc9de452ee3101d94",
+    "filename": "removeParanthesis.py",
+    "status": "added",
+    "additions": 50,
+    "deletions": 0,
+    "changes": 50,
+    "blob_url": "https://github.com/super30admin/BFS-3/blob/22989ed680c3dc7d6d6efde6e943397b5e50111f/removeParanthesis.py",
+    "raw_url": "https://github.com/super30admin/BFS-3/raw/22989ed680c3dc7d6d6efde6e943397b5e50111f/removeParanthesis.py",
+    "contents_url": "https://api.github.com/repos/super30admin/BFS-3/contents/removeParanthesis.py?ref=22989ed680c3dc7d6d6efde6e943397b5e50111f",
+    "patch": "@@ -0,0 +1,50 @@\n+#Time complexity: Exponential\n+#space: O(N)\n+\n+class Solution(object):\n+    def removeInvalidParentheses(self, s):\n+        \"\"\"\n+        :type s: str\n+        :rtype: List[str]\n+        \"\"\"\n+        if len(s) == 0:\n+            return [\"\"]\n+        if len(s) == 1:\n+            if s == \"(\" or s == \")\":\n+                return [\"\"]\n+            else:\n+                return [s]\n+        if self.isValid(s):\n+            return [s]\n+        res = set()\n+        visited=set()\n+        queue = []\n+        step = 0\n+        queue.append(s)\n+        visited.add(s)\n+        while queue:\n+            size = len(queue)\n+            for item in queue:\n+                if self.isValid(item):\n+                    res.add(item)\n+            if len(res) > 0:\n+                return list(res)\n+            for _ in range(size):\n+                cur = queue.pop(0)\n+                for i in range(len(cur)):\n+                    tmp=cur[:i] + cur[i + 1:]\n+                    if tmp not in visited:\n+                        visited.add(tmp)\n+                        queue.append(tmp)\n+\n+    def isValid(self, s):\n+        stack = []\n+        for i in s:\n+            if i == \"(\":\n+                stack.append(\"(\")\n+            elif i == \")\":\n+                if not stack:\n+                    return False\n+                else:\n+                    stack.pop()\n+        return not stack\n\\ No newline at end of file"
+  }
+]

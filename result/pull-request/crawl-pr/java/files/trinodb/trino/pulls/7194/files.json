@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "d9adfbd7e6926884255c61b5df63ce722bdf5fa4",
+    "filename": "core/trino-main/src/main/java/io/trino/SessionRepresentation.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/trinodb/trino/blob/8c0afa2016d80dae68fda19c03457d8f2d1eff30/core/trino-main/src/main/java/io/trino/SessionRepresentation.java",
+    "raw_url": "https://github.com/trinodb/trino/raw/8c0afa2016d80dae68fda19c03457d8f2d1eff30/core/trino-main/src/main/java/io/trino/SessionRepresentation.java",
+    "contents_url": "https://api.github.com/repos/trinodb/trino/contents/core/trino-main/src/main/java/io/trino/SessionRepresentation.java?ref=8c0afa2016d80dae68fda19c03457d8f2d1eff30",
+    "patch": "@@ -80,7 +80,7 @@ public SessionRepresentation(\n             @JsonProperty(\"schema\") Optional<String> schema,\n             @JsonProperty(\"path\") SqlPath path,\n             @JsonProperty(\"traceToken\") Optional<String> traceToken,\n-            @JsonProperty(\"timeZoneKey\") TimeZoneKey timeZoneKey,\n+            @JsonProperty(\"timeZone\") TimeZoneKey timeZoneKey,\n             @JsonProperty(\"locale\") Locale locale,\n             @JsonProperty(\"remoteUserAddress\") Optional<String> remoteUserAddress,\n             @JsonProperty(\"userAgent\") Optional<String> userAgent,"
+  },
+  {
+    "sha": "58d1535118a0b2ae2b909f44428637bd85f62a4d",
+    "filename": "core/trino-spi/src/main/java/io/trino/spi/type/TimeZoneKey.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/trinodb/trino/blob/8c0afa2016d80dae68fda19c03457d8f2d1eff30/core/trino-spi/src/main/java/io/trino/spi/type/TimeZoneKey.java",
+    "raw_url": "https://github.com/trinodb/trino/raw/8c0afa2016d80dae68fda19c03457d8f2d1eff30/core/trino-spi/src/main/java/io/trino/spi/type/TimeZoneKey.java",
+    "contents_url": "https://api.github.com/repos/trinodb/trino/contents/core/trino-spi/src/main/java/io/trino/spi/type/TimeZoneKey.java?ref=8c0afa2016d80dae68fda19c03457d8f2d1eff30",
+    "patch": "@@ -153,7 +153,6 @@ public synchronized Object put(Object key, Object value)\n         return ZONE_KEYS;\n     }\n \n-    @JsonCreator\n     public static TimeZoneKey getTimeZoneKey(short timeZoneKey)\n     {\n         checkArgument(timeZoneKey < TIME_ZONE_KEYS.length && TIME_ZONE_KEYS[timeZoneKey] != null, \"Invalid time zone key %s\", timeZoneKey);\n@@ -163,6 +162,7 @@ public static TimeZoneKey getTimeZoneKey(short timeZoneKey)\n     /**\n      * @throws TimeZoneNotSupportedException when {@code zoneId} does not identity a time zone\n      */\n+    @JsonCreator\n     public static TimeZoneKey getTimeZoneKey(String zoneId)\n     {\n         requireNonNull(zoneId, \"Zone id is null\");\n@@ -207,6 +207,7 @@ public static TimeZoneKey getTimeZoneKeyForOffset(long offsetMinutes)\n         this.key = key;\n     }\n \n+    @JsonValue\n     public String getId()\n     {\n         return id;\n@@ -217,7 +218,6 @@ public ZoneId getZoneId()\n         return ZoneId.of(id);\n     }\n \n-    @JsonValue\n     public short getKey()\n     {\n         return key;"
+  },
+  {
+    "sha": "79d21bc2de3fcaa46ce1e2982dcedb015c000e85",
+    "filename": "core/trino-spi/src/test/java/io/trino/spi/type/TestTimeZoneKey.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/trinodb/trino/blob/8c0afa2016d80dae68fda19c03457d8f2d1eff30/core/trino-spi/src/test/java/io/trino/spi/type/TestTimeZoneKey.java",
+    "raw_url": "https://github.com/trinodb/trino/raw/8c0afa2016d80dae68fda19c03457d8f2d1eff30/core/trino-spi/src/test/java/io/trino/spi/type/TestTimeZoneKey.java",
+    "contents_url": "https://api.github.com/repos/trinodb/trino/contents/core/trino-spi/src/test/java/io/trino/spi/type/TestTimeZoneKey.java?ref=8c0afa2016d80dae68fda19c03457d8f2d1eff30",
+    "patch": "@@ -13,11 +13,13 @@\n  */\n package io.trino.spi.type;\n \n+import com.fasterxml.jackson.databind.ObjectMapper;\n import com.google.common.collect.ImmutableSortedSet;\n import com.google.common.hash.Hasher;\n import com.google.common.hash.Hashing;\n import org.testng.annotations.Test;\n \n+import java.io.IOException;\n import java.nio.charset.StandardCharsets;\n import java.util.SortedSet;\n \n@@ -221,6 +223,19 @@ public void testZoneKeyData()\n         assertEquals(hasher.hash().asLong(), 6334606028834602490L, \"zone-index.properties file contents changed!\");\n     }\n \n+    @Test\n+    public void testRoundTripSerialization()\n+            throws IOException\n+    {\n+        ObjectMapper mapper = new ObjectMapper();\n+\n+        for (TimeZoneKey zoneKey : TimeZoneKey.getTimeZoneKeys()) {\n+            String json = mapper.writeValueAsString(zoneKey);\n+            Object value = mapper.readValue(json, zoneKey.getClass());\n+            assertEquals(value, zoneKey);\n+        }\n+    }\n+\n     public void assertTimeZoneNotSupported(String zoneId)\n     {\n         try {"
+  }
+]

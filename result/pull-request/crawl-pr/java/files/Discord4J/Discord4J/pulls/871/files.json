@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "ebd43ae849209fcf1307c936ab118775c9f45f2c",
+    "filename": "core/src/main/java/discord4j/core/GatewayDiscordClient.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/Discord4J/Discord4J/blob/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/GatewayDiscordClient.java",
+    "raw_url": "https://github.com/Discord4J/Discord4J/raw/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/GatewayDiscordClient.java",
+    "contents_url": "https://api.github.com/repos/Discord4J/Discord4J/contents/core/src/main/java/discord4j/core/GatewayDiscordClient.java?ref=691edd952e389f2471cb33024bfaa81c4f7ea7d7",
+    "patch": "@@ -54,12 +54,14 @@\n import discord4j.voice.VoiceConnection;\n import discord4j.voice.VoiceConnectionFactory;\n import discord4j.voice.VoiceConnectionRegistry;\n+import io.netty.handler.timeout.TimeoutException;\n import org.reactivestreams.Publisher;\n import reactor.core.publisher.Flux;\n import reactor.core.publisher.Mono;\n import reactor.util.Logger;\n import reactor.util.Loggers;\n \n+import java.time.Duration;\n import java.time.ZonedDateTime;\n import java.time.format.DateTimeFormatter;\n import java.util.Collections;\n@@ -692,6 +694,11 @@ public EntityRetriever withRetrievalStrategy(EntityRetrievalStrategy retrievalSt\n         return entityRetriever.getSelf();\n     }\n \n+    @Override\n+    public Mono<Member> getSelfMember(Snowflake guildId) {\n+        return entityRetriever.getSelfMember(guildId);\n+    }\n+\n     @Override\n     public Flux<Member> getGuildMembers(Snowflake guildId) {\n         return entityRetriever.getGuildMembers(guildId);"
+  },
+  {
+    "sha": "83c89e2ee664bf7b310f24412d1708ded15b4b9b",
+    "filename": "core/src/main/java/discord4j/core/retriever/EntityRetriever.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/Discord4J/Discord4J/blob/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/retriever/EntityRetriever.java",
+    "raw_url": "https://github.com/Discord4J/Discord4J/raw/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/retriever/EntityRetriever.java",
+    "contents_url": "https://api.github.com/repos/Discord4J/Discord4J/contents/core/src/main/java/discord4j/core/retriever/EntityRetriever.java?ref=691edd952e389f2471cb33024bfaa81c4f7ea7d7",
+    "patch": "@@ -118,6 +118,14 @@\n      */\n     Mono<User> getSelf();\n \n+    /**\n+     * Requests to retrieve the bot user represented as a {@link Member member} of the guild with the supplied ID.\n+     * @param guildId The ID of the guild.\n+     * @return A {@link Mono} where, upon successful completion, emits the bot {@link Member member}. If an error is\n+     *         received, it is emitted through the {@code Mono}.\n+     */\n+    Mono<Member> getSelfMember(Snowflake guildId);\n+\n     /**\n      * Requests to retrieve the guild's members.\n      *"
+  },
+  {
+    "sha": "74bf207ddb927a99504094c250345d878d0ebbc9",
+    "filename": "core/src/main/java/discord4j/core/retriever/FallbackEntityRetriever.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/Discord4J/Discord4J/blob/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/retriever/FallbackEntityRetriever.java",
+    "raw_url": "https://github.com/Discord4J/Discord4J/raw/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/retriever/FallbackEntityRetriever.java",
+    "contents_url": "https://api.github.com/repos/Discord4J/Discord4J/contents/core/src/main/java/discord4j/core/retriever/FallbackEntityRetriever.java?ref=691edd952e389f2471cb33024bfaa81c4f7ea7d7",
+    "patch": "@@ -83,6 +83,11 @@ public FallbackEntityRetriever(EntityRetriever first, EntityRetriever fallback)\n         return first.getSelf().switchIfEmpty(fallback.getSelf());\n     }\n \n+    @Override\n+    public Mono<Member> getSelfMember(Snowflake guildId) {\n+        return first.getSelfMember(guildId).switchIfEmpty(fallback.getSelfMember(guildId));\n+    }\n+\n     @Override\n     public Flux<Member> getGuildMembers(Snowflake guildId) {\n         return first.getGuildMembers(guildId).switchIfEmpty(fallback.getGuildMembers(guildId));"
+  },
+  {
+    "sha": "f98d5206a9bec97c8f7fcc7e1a822f2315903afe",
+    "filename": "core/src/main/java/discord4j/core/retriever/RestEntityRetriever.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/Discord4J/Discord4J/blob/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/retriever/RestEntityRetriever.java",
+    "raw_url": "https://github.com/Discord4J/Discord4J/raw/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/retriever/RestEntityRetriever.java",
+    "contents_url": "https://api.github.com/repos/Discord4J/Discord4J/contents/core/src/main/java/discord4j/core/retriever/RestEntityRetriever.java?ref=691edd952e389f2471cb33024bfaa81c4f7ea7d7",
+    "patch": "@@ -112,6 +112,11 @@ public RestEntityRetriever(GatewayDiscordClient gateway) {\n         return rest.getUserService().getCurrentUser().map(data -> new User(gateway, data));\n     }\n \n+    @Override\n+    public Mono<Member> getSelfMember(Snowflake guildId) {\n+        return rest.getSelfMember(guildId).map(data -> new Member(gateway,data, guildId.asLong()));\n+    }\n+\n     @Override\n     public Flux<Member> getGuildMembers(Snowflake guildId) {\n         Function<Map<String, Object>, Flux<MemberData>> doRequest = params ->"
+  },
+  {
+    "sha": "022bb114ebf8056c061ab4086d7a19d34ffa7912",
+    "filename": "core/src/main/java/discord4j/core/retriever/StoreEntityRetriever.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/Discord4J/Discord4J/blob/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/retriever/StoreEntityRetriever.java",
+    "raw_url": "https://github.com/Discord4J/Discord4J/raw/691edd952e389f2471cb33024bfaa81c4f7ea7d7/core/src/main/java/discord4j/core/retriever/StoreEntityRetriever.java",
+    "contents_url": "https://api.github.com/repos/Discord4J/Discord4J/contents/core/src/main/java/discord4j/core/retriever/StoreEntityRetriever.java?ref=691edd952e389f2471cb33024bfaa81c4f7ea7d7",
+    "patch": "@@ -97,6 +97,11 @@ public StoreEntityRetriever(GatewayDiscordClient gateway) {\n         return getUserById(gateway.getSelfId());\n     }\n \n+    @Override\n+    public Mono<Member> getSelfMember(Snowflake guildId) {\n+        return getMemberById(guildId, gateway.getSelfId());\n+    }\n+\n     @Override\n     public Flux<Member> getGuildMembers(Snowflake guildId) {\n         return Flux.from(store.execute(ReadActions.getExactMembersInGuild(guildId.asLong())))"
+  },
+  {
+    "sha": "dac46f9c907dae3573bf4cccf1e17a2e27026ed1",
+    "filename": "rest/src/main/java/discord4j/rest/RestClient.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/Discord4J/Discord4J/blob/691edd952e389f2471cb33024bfaa81c4f7ea7d7/rest/src/main/java/discord4j/rest/RestClient.java",
+    "raw_url": "https://github.com/Discord4J/Discord4J/raw/691edd952e389f2471cb33024bfaa81c4f7ea7d7/rest/src/main/java/discord4j/rest/RestClient.java",
+    "contents_url": "https://api.github.com/repos/Discord4J/Discord4J/contents/rest/src/main/java/discord4j/rest/RestClient.java?ref=691edd952e389f2471cb33024bfaa81c4f7ea7d7",
+    "patch": "@@ -184,6 +184,16 @@ public RestMember restMember(Snowflake guildId, MemberData data) {\n         return RestMember.create(this, guildId, Snowflake.of(data.user().id()));\n     }\n \n+    /**\n+     * Requests to retrieve the bot member from the guild of the supplied ID\n+     *\n+     * @param guildId the ID of the guild.\n+     * @return A {@link RestMember} of the bot user as represented by the supplied ID.\n+     */\n+    public RestMember selfRestMember(Snowflake guildId) {\n+        return RestMember.create(this, guildId, restResources.getSelfId());\n+    }\n+\n     /**\n      * Requests to retrieve the message represented by the supplied IDs.\n      *\n@@ -312,6 +322,17 @@ public RestWebhook restWebhook(WebhookData data) {\n         return userService.getCurrentUser();\n     }\n \n+    /**\n+     * Requests to retrieve the bot user, represented as a member of the guild of the supplied ID\n+     *\n+     * @param guildId The ID of the guild\n+     * @return a {@link Mono} where, upon successful completion, emits the bot {@link MemberData member}. If an error is\n+     *         received, it is emitted through the {@code Mono}.\n+     */\n+    public Mono<MemberData> getSelfMember(Snowflake guildId) {\n+        return guildService.getGuildMember(guildId.asLong(), restResources.getSelfId().asLong());\n+    }\n+\n     /**\n      * Requests to create a guild.\n      *"
+  }
+]

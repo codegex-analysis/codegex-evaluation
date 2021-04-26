@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "2e54e0e8ef6a8fd58ec895884bcf6a572d340d16",
+    "filename": "dubbo-config/dubbo-config-spring/src/main/java/org/apache/dubbo/config/spring/context/DubboBootstrapApplicationListener.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/dubbo/blob/35d904ca3d3622b8ce6506b8ee6132f5d408f429/dubbo-config/dubbo-config-spring/src/main/java/org/apache/dubbo/config/spring/context/DubboBootstrapApplicationListener.java",
+    "raw_url": "https://github.com/apache/dubbo/raw/35d904ca3d3622b8ce6506b8ee6132f5d408f429/dubbo-config/dubbo-config-spring/src/main/java/org/apache/dubbo/config/spring/context/DubboBootstrapApplicationListener.java",
+    "contents_url": "https://api.github.com/repos/apache/dubbo/contents/dubbo-config/dubbo-config-spring/src/main/java/org/apache/dubbo/config/spring/context/DubboBootstrapApplicationListener.java?ref=35d904ca3d3622b8ce6506b8ee6132f5d408f429",
+    "patch": "@@ -16,6 +16,7 @@\n  */\n package org.apache.dubbo.config.spring.context;\n \n+import org.apache.dubbo.config.DubboShutdownHook;\n import org.apache.dubbo.config.bootstrap.DubboBootstrap;\n \n import com.alibaba.spring.context.OnceApplicationContextEventListener;\n@@ -64,6 +65,7 @@ private void onContextRefreshedEvent(ContextRefreshedEvent event) {\n \n     private void onContextClosedEvent(ContextClosedEvent event) {\n         dubboBootstrap.stop();\n+        DubboShutdownHook.getDubboShutdownHook().doDestroy();\n     }\n \n     @Override"
+  },
+  {
+    "sha": "de2aeee8b1320baf21089596114a08e0b6b62c62",
+    "filename": "dubbo-config/dubbo-config-spring/src/main/java/org/apache/dubbo/config/spring/extension/SpringExtensionFactory.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/apache/dubbo/blob/35d904ca3d3622b8ce6506b8ee6132f5d408f429/dubbo-config/dubbo-config-spring/src/main/java/org/apache/dubbo/config/spring/extension/SpringExtensionFactory.java",
+    "raw_url": "https://github.com/apache/dubbo/raw/35d904ca3d3622b8ce6506b8ee6132f5d408f429/dubbo-config/dubbo-config-spring/src/main/java/org/apache/dubbo/config/spring/extension/SpringExtensionFactory.java",
+    "contents_url": "https://api.github.com/repos/apache/dubbo/contents/dubbo-config/dubbo-config-spring/src/main/java/org/apache/dubbo/config/spring/extension/SpringExtensionFactory.java?ref=35d904ca3d3622b8ce6506b8ee6132f5d408f429",
+    "patch": "@@ -21,6 +21,7 @@\n import org.apache.dubbo.common.logger.Logger;\n import org.apache.dubbo.common.logger.LoggerFactory;\n import org.apache.dubbo.common.utils.ConcurrentHashSet;\n+import org.apache.dubbo.config.DubboShutdownHook;\n import org.springframework.context.ApplicationContext;\n import org.springframework.context.ConfigurableApplicationContext;\n \n@@ -40,6 +41,8 @@ public static void addApplicationContext(ApplicationContext context) {\n         CONTEXTS.add(context);\n         if (context instanceof ConfigurableApplicationContext) {\n             ((ConfigurableApplicationContext) context).registerShutdownHook();\n+            // see https://github.com/apache/dubbo/issues/7093\n+            DubboShutdownHook.getDubboShutdownHook().unregister();\n         }\n     }\n "
+  }
+]

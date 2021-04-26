@@ -1,0 +1,75 @@
+[
+  {
+    "sha": "1466a5903d4f4873f3d908aa6370dd28e97676b9",
+    "filename": "src/main/java/com/tracker/portfolio/mapper/UserMapper.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/blob/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/java/com/tracker/portfolio/mapper/UserMapper.java",
+    "raw_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/raw/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/java/com/tracker/portfolio/mapper/UserMapper.java",
+    "contents_url": "https://api.github.com/repos/JacekGajewski/portfolio-tracker-backend/contents/src/main/java/com/tracker/portfolio/mapper/UserMapper.java?ref=8c90c6f4b18962f1f94496c2cfe0a0c29159a268",
+    "patch": "@@ -5,6 +5,7 @@\n import com.tracker.portfolio.entity.User;\n import lombok.RequiredArgsConstructor;\n import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;\n+import org.springframework.security.crypto.password.PasswordEncoder;\n import org.springframework.stereotype.Component;\n \n import java.util.List;\n@@ -14,7 +15,7 @@\n @RequiredArgsConstructor\n public class UserMapper {\n \n-    private final BCryptPasswordEncoder bCryptPasswordEncoder;\n+    private final PasswordEncoder passwordEncoder;\n \n     public List<UserResponseDTO> usersListToUsersResponseDtoList(List<User> users) {\n         if (users == null) return null;\n@@ -35,7 +36,7 @@ public UserResponseDTO userToUserResponseDto(User user) {\n     public User userDtoToUserEntity(UserDTO userDTO) {\n         return new User(\n                 userDTO.getUsername(),\n-                bCryptPasswordEncoder.encode(userDTO.getPassword())\n+                passwordEncoder.encode(userDTO.getPassword())\n         );\n     }\n }"
+  },
+  {
+    "sha": "f63f50272305636dbf4727bd4b417b4306ae14e7",
+    "filename": "src/main/java/com/tracker/portfolio/service/AuthorityService.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 9,
+    "changes": 16,
+    "blob_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/blob/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/java/com/tracker/portfolio/service/AuthorityService.java",
+    "raw_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/raw/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/java/com/tracker/portfolio/service/AuthorityService.java",
+    "contents_url": "https://api.github.com/repos/JacekGajewski/portfolio-tracker-backend/contents/src/main/java/com/tracker/portfolio/service/AuthorityService.java?ref=8c90c6f4b18962f1f94496c2cfe0a0c29159a268",
+    "patch": "@@ -7,6 +7,7 @@\n import com.tracker.portfolio.enums.UserRole;\n import com.tracker.portfolio.repository.AuthorityRepository;\n import lombok.RequiredArgsConstructor;\n+import lombok.extern.slf4j.Slf4j;\n import org.springframework.stereotype.Service;\n import org.springframework.transaction.annotation.Transactional;\n \n@@ -15,7 +16,7 @@\n import static com.tracker.portfolio.enums.UserRole.ADMIN;\n import static com.tracker.portfolio.enums.UserRole.USER;\n \n-\n+@Slf4j\n @Service\n @Transactional\n @RequiredArgsConstructor\n@@ -43,19 +44,16 @@ public void createAuthority(UserRole userRole, User user) {\n         usersAuthoritiesService.save(usersAuthorities);\n     }\n \n-    public void deleteAuthorities(int userId) {\n-\n-    }\n-\n     public void save(Authority authority) {\n         authorityRepository.save(authority);\n     }\n \n     public void initAuthorities() {\n-        if (authorityRepository.getByUserRole(USER) != null) {\n-            return;\n+        if (!findAll().isEmpty()) {\n+            authorityRepository.save(new Authority(USER));\n+            authorityRepository.save(new Authority(ADMIN));\n+            log.info(\"Adding authorities to the system...\");\n         }\n-        authorityRepository.save(new Authority(USER));\n-        authorityRepository.save(new Authority(ADMIN));\n+\n     }\n }"
+  },
+  {
+    "sha": "cfe2c63bcfed27f5fc4b3b3a1de2aa5f4ebfd53e",
+    "filename": "src/main/java/com/tracker/portfolio/startup/CommandLineStartupDev.java",
+    "status": "renamed",
+    "additions": 8,
+    "deletions": 13,
+    "changes": 21,
+    "blob_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/blob/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/java/com/tracker/portfolio/startup/CommandLineStartupDev.java",
+    "raw_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/raw/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/java/com/tracker/portfolio/startup/CommandLineStartupDev.java",
+    "contents_url": "https://api.github.com/repos/JacekGajewski/portfolio-tracker-backend/contents/src/main/java/com/tracker/portfolio/startup/CommandLineStartupDev.java?ref=8c90c6f4b18962f1f94496c2cfe0a0c29159a268",
+    "patch": "@@ -1,4 +1,4 @@\n-package com.tracker.portfolio;\n+package com.tracker.portfolio.startup;\n \n import com.tracker.portfolio.entity.*;\n import com.tracker.portfolio.enums.SectorEnum;\n@@ -8,6 +8,7 @@\n import lombok.RequiredArgsConstructor;\n import lombok.extern.slf4j.Slf4j;\n import org.springframework.boot.CommandLineRunner;\n+import org.springframework.context.annotation.Profile;\n import org.springframework.stereotype.Component;\n import org.springframework.transaction.annotation.Transactional;\n \n@@ -22,7 +23,8 @@\n @Slf4j\n @Component\n @RequiredArgsConstructor\n-public class CommandLineStartup implements CommandLineRunner {\n+@Profile(\"dev\")\n+public class CommandLineStartupDev implements CommandLineRunner {\n \n     private final PortfolioService portfolioService;\n     private final UserService userService;\n@@ -31,20 +33,14 @@\n     @Override\n     @Transactional\n     public void run(String... args) {\n-        if (authorityService.findAll().isEmpty()) {\n-            log.info(\"Adding authorities to the system...\");\n-            authorityService.save(new Authority(ADMIN));\n-            authorityService.save(new Authority(USER));\n-        }\n-        // TODO resolve to save the data\n+        authorityService.initAuthorities();\n         if (portfolioService.findAll().isEmpty()) {\n+            createAdminWithPortfolio();\n+            createUserWithPortfolio();\n             log.info(\"Sample data is being initialized\");\n-            // createAdminWithPortfolio();\n-            // createUserWithPortfolio();\n         }\n     }\n \n-    // TODO move to dev data\n     private void createAdminWithPortfolio() {\n         Portfolio portfolio = createAdminPortfolio();\n         User admin = new User(\"admin\", \"admin12\", null, Collections.singletonList(portfolio));\n@@ -55,7 +51,6 @@ private void createAdminWithPortfolio() {\n         userService.save(admin);\n     }\n \n-    // TODO move to dev data\n     private void createUserWithPortfolio() {\n         Portfolio portfolio = createUserPortfolio();\n         User user = new User(\"linda\", \"linda12\", null, Collections.singletonList(portfolio));\n@@ -121,7 +116,7 @@ private BigDecimal getPositionValue(Stock stock, int amount) {\n     }\n \n     private static int getRandomAmount() {\n-        return  new Random().nextInt(100) + 1;\n+        return new Random().nextInt(100) + 1;\n     }\n \n     private LocalDate getLocalDate() {",
+    "previous_filename": "src/main/java/com/tracker/portfolio/CommandLineStartup.java"
+  },
+  {
+    "sha": "28f0fbd94cf562d75a0db87af45dfb461bef9111",
+    "filename": "src/main/java/com/tracker/portfolio/startup/CommandLineStartupProd.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/blob/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/java/com/tracker/portfolio/startup/CommandLineStartupProd.java",
+    "raw_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/raw/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/java/com/tracker/portfolio/startup/CommandLineStartupProd.java",
+    "contents_url": "https://api.github.com/repos/JacekGajewski/portfolio-tracker-backend/contents/src/main/java/com/tracker/portfolio/startup/CommandLineStartupProd.java?ref=8c90c6f4b18962f1f94496c2cfe0a0c29159a268",
+    "patch": "@@ -0,0 +1,24 @@\n+package com.tracker.portfolio.startup;\n+\n+import com.tracker.portfolio.service.AuthorityService;\n+import lombok.RequiredArgsConstructor;\n+import lombok.extern.slf4j.Slf4j;\n+import org.springframework.boot.CommandLineRunner;\n+import org.springframework.context.annotation.Profile;\n+import org.springframework.stereotype.Component;\n+import org.springframework.transaction.annotation.Transactional;\n+\n+@Slf4j\n+@Component\n+@RequiredArgsConstructor\n+@Profile(\"!dev\")\n+public class CommandLineStartupProd implements CommandLineRunner {\n+\n+    private final AuthorityService authorityService;\n+\n+    @Override\n+    @Transactional\n+    public void run(String... args) {\n+        authorityService.initAuthorities();\n+    }\n+}"
+  },
+  {
+    "sha": "bc2fdde8c15e6df3d9337055fe3dcc784383b6fc",
+    "filename": "src/main/resources/application-dev.properties",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/blob/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/resources/application-dev.properties",
+    "raw_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/raw/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/resources/application-dev.properties",
+    "contents_url": "https://api.github.com/repos/JacekGajewski/portfolio-tracker-backend/contents/src/main/resources/application-dev.properties?ref=8c90c6f4b18962f1f94496c2cfe0a0c29159a268",
+    "patch": "@@ -0,0 +1,5 @@\n+spring.datasource.url=jdbc:h2:mem:testdb\n+spring.datasource.driverClassName=org.h2.Driver\n+spring.datasource.username=sa\n+spring.datasource.password=password\n+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect"
+  },
+  {
+    "sha": "790ef957b07a18367e1bed234ed7bb7a16546211",
+    "filename": "src/main/resources/application.properties",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 9,
+    "changes": 9,
+    "blob_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/blob/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/resources/application.properties",
+    "raw_url": "https://github.com/JacekGajewski/portfolio-tracker-backend/raw/8c90c6f4b18962f1f94496c2cfe0a0c29159a268/src/main/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/JacekGajewski/portfolio-tracker-backend/contents/src/main/resources/application.properties?ref=8c90c6f4b18962f1f94496c2cfe0a0c29159a268",
+    "patch": "@@ -6,12 +6,3 @@ spring.jpa.hibernate.ddl-auto=update\n application.jwt.secretKey=secuhukgfhjlkhkghfxghfhkjlghdfhdghkgfkfxjgrxktyvkhgvlutfjyrzjyrxlutltxykzreKey9\n application.jwt.tokenPrefix=Bearer \n application.jwr.tokenExpirationAfterDays=14\n-\n----\n-\n-spring.profiles=dev\n-spring.datasource.url=jdbc:h2:mem:testdb\n-spring.datasource.driverClassName=org.h2.Driver\n-spring.datasource.username=sa\n-spring.datasource.password=password\n-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect"
+  }
+]

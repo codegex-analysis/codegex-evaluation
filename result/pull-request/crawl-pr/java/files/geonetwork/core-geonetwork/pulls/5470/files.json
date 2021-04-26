@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "7668abd697cd4d34adab66c10b9e5f1d824f43da",
+    "filename": "core/src/main/java/org/fao/geonet/kernel/datamanager/draft/DraftMetadataManager.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 9,
+    "changes": 13,
+    "blob_url": "https://github.com/geonetwork/core-geonetwork/blob/2e17d6cc1cd2b3549d71b13784f46106471ed695/core/src/main/java/org/fao/geonet/kernel/datamanager/draft/DraftMetadataManager.java",
+    "raw_url": "https://github.com/geonetwork/core-geonetwork/raw/2e17d6cc1cd2b3549d71b13784f46106471ed695/core/src/main/java/org/fao/geonet/kernel/datamanager/draft/DraftMetadataManager.java",
+    "contents_url": "https://api.github.com/repos/geonetwork/core-geonetwork/contents/core/src/main/java/org/fao/geonet/kernel/datamanager/draft/DraftMetadataManager.java?ref=2e17d6cc1cd2b3549d71b13784f46106471ed695",
+    "patch": "@@ -133,22 +133,17 @@ public AbstractMetadata save(AbstractMetadata info) {\n     public AbstractMetadata update(int id, @Nonnull Updater<? extends AbstractMetadata> updater) {\n         AbstractMetadata md = null;\n         Log.trace(Geonet.DATA_MANAGER, \"AbstractMetadata.update(\" + id + \")\");\n-        try {\n-            Log.trace(Geonet.DATA_MANAGER, \"Updating metadata table.\");\n-            md = super.update(id, updater);\n-        } catch (ClassCastException t) {\n-            // That's fine, maybe we are on the draft side\n-        } catch (Throwable e) {\n-            Log.error(Geonet.DATA_MANAGER, e.getMessage(), e);\n-        }\n-        if (md == null) {\n+        if (metadataDraftRepository.exists(id)) {\n             try {\n                 Log.trace(Geonet.DATA_MANAGER, \"Updating draft table.\");\n                 md = metadataDraftRepository.update(id, (Updater<MetadataDraft>) updater);\n             } catch (ClassCastException t) {\n                 throw new ClassCastException(\"Unknown AbstractMetadata subtype: \" + updater.getClass().getName());\n             }\n+        } else {\n+            md = super.update(id, updater);\n         }\n+\n         return md;\n     }\n "
+  }
+]

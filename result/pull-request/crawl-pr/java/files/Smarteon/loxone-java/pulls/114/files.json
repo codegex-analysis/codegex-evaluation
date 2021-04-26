@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "83f3e73678fde85741e0a02c95f83d3fe81b1101",
+    "filename": "src/main/java/cz/smarteon/loxone/Loxone.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 1,
+    "changes": 20,
+    "blob_url": "https://github.com/Smarteon/loxone-java/blob/c052b9766ac3fa14f4174ea8a88c43a512aca91a/src/main/java/cz/smarteon/loxone/Loxone.java",
+    "raw_url": "https://github.com/Smarteon/loxone-java/raw/c052b9766ac3fa14f4174ea8a88c43a512aca91a/src/main/java/cz/smarteon/loxone/Loxone.java",
+    "contents_url": "https://api.github.com/repos/Smarteon/loxone-java/contents/src/main/java/cz/smarteon/loxone/Loxone.java?ref=c052b9766ac3fa14f4174ea8a88c43a512aca91a",
+    "patch": "@@ -14,6 +14,7 @@\n import java.util.List;\n import java.util.concurrent.CountDownLatch;\n import java.util.concurrent.TimeUnit;\n+import java.util.function.Function;\n \n import static cz.smarteon.loxone.message.ControlCommand.genericControlCommand;\n import static java.util.Objects.requireNonNull;\n@@ -172,10 +173,27 @@ public void sendControlOff(final @NotNull Control control) {\n         sendControlCommand(control, \"Off\");\n     }\n \n+    /**\n+     * Send command built by given commandBuilder applied on given control. Use static factory methods at\n+     * {@link ControlCommand} or extend it with more specific classes in complex scenarios.\n+     * Use {@link CommandResponseListener} added to {@link #webSocket()} to process the response.\n+     * @param control control to build command from\n+     * @param commandBuilder function returning the command of given control\n+     * @param <C> type of the control\n+     */\n+    public <C extends Control> void sendControlCommand(\n+            final @NotNull C control, final @NotNull Function<C, ControlCommand<?>> commandBuilder) {\n+        sendCommand(commandBuilder.apply(control), control.isSecured());\n+    }\n+\n     private void sendControlCommand(final Control control, final String command) {\n         requireNonNull(control, \"control can't be null\");\n         final ControlCommand<JsonValue> controlCommand = genericControlCommand(control.getUuid().toString(), command);\n-        if (control.isSecured()) {\n+        sendCommand(controlCommand, control.isSecured());\n+    }\n+\n+    private void sendCommand(final ControlCommand<?> controlCommand, final boolean secured) {\n+        if (secured) {\n             webSocket().sendSecureCommand(controlCommand);\n         } else {\n             webSocket().sendCommand(controlCommand);"
+  }
+]

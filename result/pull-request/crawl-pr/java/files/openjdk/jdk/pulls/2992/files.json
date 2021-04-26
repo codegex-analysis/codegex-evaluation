@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "987d68f0e66b5d80d160207e030e1aeb24078269",
+    "filename": "src/java.base/share/classes/jdk/internal/jmod/JmodFile.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 5,
+    "changes": 10,
+    "blob_url": "https://github.com/openjdk/jdk/blob/af4fcce447c8abe86100864f7427e988990b1f99/src/java.base/share/classes/jdk/internal/jmod/JmodFile.java",
+    "raw_url": "https://github.com/openjdk/jdk/raw/af4fcce447c8abe86100864f7427e988990b1f99/src/java.base/share/classes/jdk/internal/jmod/JmodFile.java",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/java.base/share/classes/jdk/internal/jmod/JmodFile.java?ref=af4fcce447c8abe86100864f7427e988990b1f99",
+    "patch": "@@ -25,7 +25,6 @@\n \n package jdk.internal.jmod;\n \n-import java.io.BufferedInputStream;\n import java.io.IOException;\n import java.io.InputStream;\n import java.io.OutputStream;\n@@ -52,11 +51,12 @@\n     };\n \n     public static void checkMagic(Path file) throws IOException {\n-        try (InputStream in = Files.newInputStream(file);\n-             BufferedInputStream bis = new BufferedInputStream(in)) {\n+        try (InputStream in = Files.newInputStream(file)) {\n             // validate the header\n-            byte[] magic = new byte[4];\n-            bis.read(magic);\n+            byte[] magic = in.readNBytes(4);\n+            if (magic.length != 4) {\n+                throw new IOException(\"Invalid JMOD file: \" + file);\n+            }\n             if (magic[0] != JMOD_MAGIC_NUMBER[0] ||\n                 magic[1] != JMOD_MAGIC_NUMBER[1]) {\n                 throw new IOException(\"Invalid JMOD file: \" + file.toString());"
+  },
+  {
+    "sha": "f1beb74b2a59bd8df87f5a8ead89b33d36c28f98",
+    "filename": "src/java.desktop/share/classes/sun/awt/image/ByteArrayImageSource.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/openjdk/jdk/blob/af4fcce447c8abe86100864f7427e988990b1f99/src/java.desktop/share/classes/sun/awt/image/ByteArrayImageSource.java",
+    "raw_url": "https://github.com/openjdk/jdk/raw/af4fcce447c8abe86100864f7427e988990b1f99/src/java.desktop/share/classes/sun/awt/image/ByteArrayImageSource.java",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/java.desktop/share/classes/sun/awt/image/ByteArrayImageSource.java?ref=af4fcce447c8abe86100864f7427e988990b1f99",
+    "patch": "@@ -27,7 +27,6 @@\n \n import java.io.InputStream;\n import java.io.ByteArrayInputStream;\n-import java.io.BufferedInputStream;\n \n public class ByteArrayImageSource extends InputStreamImageSource {\n     byte[] imagedata;\n@@ -52,10 +51,8 @@ final boolean checkSecurity(Object context, boolean quiet) {\n     }\n \n     protected ImageDecoder getDecoder() {\n-        InputStream is =\n-            new BufferedInputStream(new ByteArrayInputStream(imagedata,\n-                                                             imageoffset,\n-                                                             imagelength));\n+        InputStream is = new ByteArrayInputStream(imagedata, imageoffset,\n+                imagelength);\n         return getDecoder(is);\n     }\n }"
+  }
+]

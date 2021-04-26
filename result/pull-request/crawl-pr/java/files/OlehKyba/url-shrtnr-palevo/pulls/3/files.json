@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "0a71a30479b9bf34d127ea9426d51aa3d0d44566",
+    "filename": "src/main/java/edu/kpi/testcourse/logic/Logic.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/OlehKyba/url-shrtnr-palevo/blob/73da399eab0494bb81ff9742bb36c9a1ea86a38a/src/main/java/edu/kpi/testcourse/logic/Logic.java",
+    "raw_url": "https://github.com/OlehKyba/url-shrtnr-palevo/raw/73da399eab0494bb81ff9742bb36c9a1ea86a38a/src/main/java/edu/kpi/testcourse/logic/Logic.java",
+    "contents_url": "https://api.github.com/repos/OlehKyba/url-shrtnr-palevo/contents/src/main/java/edu/kpi/testcourse/logic/Logic.java?ref=73da399eab0494bb81ff9742bb36c9a1ea86a38a",
+    "patch": "@@ -5,6 +5,7 @@\n import edu.kpi.testcourse.storage.UrlRepository;\n import edu.kpi.testcourse.storage.UrlRepository.AliasAlreadyExist;\n import edu.kpi.testcourse.storage.UserRepository;\n+import java.util.List;\n \n /**\n  * Business logic of the URL shortener application.\n@@ -102,6 +103,16 @@ public UserIsAlreadyCreated() {\n     }\n   }\n \n+  /**\n+   * GetAllAliasesForUser wrapper. \n+   *\n+   * @param userEmail user email\n+   * @return list of UrlAlias objects\n+   */\n+  public List<UrlAlias> getAllAliasesForUser(String userEmail) {\n+    return urls.getAllAliasesForUser(userEmail);\n+  }\n+  \n   /**\n    * DeleteUrlAlias wrapper.\n    *"
+  },
+  {
+    "sha": "905a141a59609188a745f03ac2f98ae739cbabfd",
+    "filename": "src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java",
+    "status": "modified",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/OlehKyba/url-shrtnr-palevo/blob/73da399eab0494bb81ff9742bb36c9a1ea86a38a/src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java",
+    "raw_url": "https://github.com/OlehKyba/url-shrtnr-palevo/raw/73da399eab0494bb81ff9742bb36c9a1ea86a38a/src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java",
+    "contents_url": "https://api.github.com/repos/OlehKyba/url-shrtnr-palevo/contents/src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java?ref=73da399eab0494bb81ff9742bb36c9a1ea86a38a",
+    "patch": "@@ -1,23 +1,32 @@\n package edu.kpi.testcourse.rest;\n \n import com.fasterxml.jackson.core.JsonProcessingException;\n+import com.fasterxml.jackson.databind.ObjectMapper;\n+import com.google.gson.JsonObject;\n+import com.nimbusds.jose.shaded.json.JSONObject;\n+import edu.kpi.testcourse.entities.UrlAlias;\n import edu.kpi.testcourse.logic.Logic;\n import edu.kpi.testcourse.rest.models.ErrorResponse;\n import edu.kpi.testcourse.rest.models.UrlShortenRequest;\n import edu.kpi.testcourse.rest.models.UrlShortenResponse;\n import edu.kpi.testcourse.serialization.JsonTool;\n+import edu.kpi.testcourse.storage.UrlRepository;\n import edu.kpi.testcourse.storage.UrlRepository.AliasAlreadyExist;\n+import edu.kpi.testcourse.storage.UrlRepository.PermissionDenied;\n import io.micronaut.http.HttpRequest;\n import io.micronaut.http.HttpResponse;\n import io.micronaut.http.MediaType;\n import io.micronaut.http.annotation.Body;\n import io.micronaut.http.annotation.Controller;\n import io.micronaut.http.annotation.Delete;\n+import io.micronaut.http.annotation.Get;\n import io.micronaut.http.annotation.Post;\n import io.micronaut.http.server.util.HttpHostResolver;\n import io.micronaut.security.annotation.Secured;\n import io.micronaut.security.rules.SecurityRule;\n import java.security.Principal;\n+import java.util.ArrayList;\n+import java.util.List;\n import javax.inject.Inject;\n \n /**\n@@ -72,6 +81,27 @@ public AuthenticatedApiController(\n     }\n   }\n \n+  /**\n+  * Get all Url aliases which belongs to username.\n+  */\n+  @Get(value = \"/urls\", processes = MediaType.APPLICATION_JSON)\n+  public HttpResponse<String> getAll(\n+      @Body UrlShortenRequest request,\n+      Principal principal,\n+      HttpRequest<?> httpRequest,\n+      Logic logic) throws UrlRepository.PermissionDenied {\n+    try {\n+      var aliasList = logic.getAllAliasesForUser(principal.getName());\n+      JSONObject result = new JSONObject();\n+      result.put(\"urls\", aliasList);\n+      return HttpResponse.ok(result.toJSONString());\n+    } catch (UrlRepository.PermissionDenied e) {\n+      return HttpResponse.serverError(\n+        json.toJson(new ErrorResponse(1, \"User is not authorized\"))\n+      );\n+    }\n+  }\n+\n   /**\n    * Deletes alias via requested link.\n    *"
+  },
+  {
+    "sha": "dff317d7c733d3c08cb326e1a3fe909b56653a2e",
+    "filename": "src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 2,
+    "changes": 19,
+    "blob_url": "https://github.com/OlehKyba/url-shrtnr-palevo/blob/73da399eab0494bb81ff9742bb36c9a1ea86a38a/src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java",
+    "raw_url": "https://github.com/OlehKyba/url-shrtnr-palevo/raw/73da399eab0494bb81ff9742bb36c9a1ea86a38a/src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java",
+    "contents_url": "https://api.github.com/repos/OlehKyba/url-shrtnr-palevo/contents/src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java?ref=73da399eab0494bb81ff9742bb36c9a1ea86a38a",
+    "patch": "@@ -1,6 +1,8 @@\n package edu.kpi.testcourse.storage;\n \n import edu.kpi.testcourse.entities.UrlAlias;\n+import io.micronaut.context.annotation.Aliases;\n+import java.util.ArrayList;\n import java.util.HashMap;\n import java.util.LinkedList;\n import java.util.List;\n@@ -53,9 +55,22 @@ public void deleteUrlAlias(String email, String alias) {\n     }\n   }\n \n+  /**\n+   * Create a list of UrlAlias objects by email.\n+   *\n+   * @param userEmail gets user email\n+   * @return list of UrlAlias objects\n+   * @throws edu.kpi.testcourse.storage.UrlRepository.PermissionDenied\n+   *         error if emails are not equal\n+   */\n   @Override\n   public List<UrlAlias> getAllAliasesForUser(String userEmail) {\n-    // TODO: We should implement it\n-    throw new UnsupportedOperationException();\n+    List<UrlAlias> aliasesList = new ArrayList<>();\n+    for (UrlAlias urlAlias : aliases.values()) {\n+      if (urlAlias.email().equals(userEmail)) {\n+        aliasesList.add(urlAlias);\n+      }\n+    }\n+    return aliasesList;\n   }\n }"
+  },
+  {
+    "sha": "786299430e0f9606f05a46a775b4a179e8105a4c",
+    "filename": "src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 4,
+    "changes": 25,
+    "blob_url": "https://github.com/OlehKyba/url-shrtnr-palevo/blob/73da399eab0494bb81ff9742bb36c9a1ea86a38a/src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java",
+    "raw_url": "https://github.com/OlehKyba/url-shrtnr-palevo/raw/73da399eab0494bb81ff9742bb36c9a1ea86a38a/src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java",
+    "contents_url": "https://api.github.com/repos/OlehKyba/url-shrtnr-palevo/contents/src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java?ref=73da399eab0494bb81ff9742bb36c9a1ea86a38a",
+    "patch": "@@ -5,6 +5,7 @@\n import static org.junit.jupiter.api.Assertions.*;\n \n import edu.kpi.testcourse.entities.UrlAlias;\n+import edu.kpi.testcourse.storage.UrlRepository.PermissionDenied;\n import org.junit.jupiter.api.Test;\n \n class UrlRepositoryFakeImplTest {\n@@ -38,6 +39,19 @@ void shouldNotAllowToCreateSameAliases() {\n     }).isInstanceOf(UrlRepository.AliasAlreadyExist.class);\n   }\n \n+  @Test\n+  void shouldGetAllAliasesForUser() {\n+    //GIVEN\n+    UrlRepository repo = new UrlRepositoryFakeImpl();\n+\n+    //WHEN\n+    UrlAlias alias1 = new UrlAlias(\"http://r.com/short\", \"http://g.com/long1\", \"aaa@bbb.com\");\n+    repo.createUrlAlias(alias1);\n+\n+    //THEN\n+    assertThat(repo.getAllAliasesForUser(alias1.email())).isNotNull();\n+  }\n+\n   /**\n    * Checking the main ability of delete function: TO DELETE!\n    */\n@@ -67,14 +81,16 @@ void shouldCrashOnDelete() {\n     UrlAlias alias1 = new UrlAlias(\"http://r.com/short\", \"http://g.com/long1\", \"aaa@bbb.com\");\n \n     //THEN\n-    assertThrows(RuntimeException.class, ()->{repo.deleteUrlAlias(alias1.email(), alias1.alias());});\n+    assertThrows(RuntimeException.class, () -> {\n+      repo.deleteUrlAlias(alias1.email(), alias1.alias());\n+    });\n   }\n \n   /**\n    * Test if emails are not equals, throw PermissionDenied\n    */\n   @Test\n-  void shouldCrashPermissionDenied() {\n+  void shouldCrashOnDeletePermissionDenied() {\n     //GIVEN\n     UrlRepositoryFakeImpl repo = new UrlRepositoryFakeImpl();\n \n@@ -83,7 +99,8 @@ void shouldCrashPermissionDenied() {\n     repo.createUrlAlias(alias1);\n \n     //THEN\n-    assertThrows(UrlRepository.PermissionDenied.class, ()->{repo.deleteUrlAlias(\"bbb@aaa.com\", alias1.alias());});\n+    assertThrows(UrlRepository.PermissionDenied.class, () -> {\n+      repo.deleteUrlAlias(\"bbb@aaa.com\", alias1.alias());\n+    });\n   }\n-\n }"
+  }
+]

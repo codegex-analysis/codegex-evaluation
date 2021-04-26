@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "272ff9d9d7b91ec6766e8619e8d44c1beff03f3f",
+    "filename": "spring/src/main/java/dev/fun/examples/DataFiller.java",
+    "status": "added",
+    "additions": 57,
+    "deletions": 0,
+    "changes": 57,
+    "blob_url": "https://github.com/aakazakov/my-sandbox/blob/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/DataFiller.java",
+    "raw_url": "https://github.com/aakazakov/my-sandbox/raw/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/DataFiller.java",
+    "contents_url": "https://api.github.com/repos/aakazakov/my-sandbox/contents/spring/src/main/java/dev/fun/examples/DataFiller.java?ref=842c68896834cabb4bd5b12e041e0e538ff81b0d",
+    "patch": "@@ -0,0 +1,57 @@\n+package dev.fun.examples;\n+\n+import java.util.Arrays;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.boot.CommandLineRunner;\n+import org.springframework.stereotype.Component;\n+\n+import dev.fun.examples.dao.AuthorityRepository;\n+import dev.fun.examples.dao.RoleRepository;\n+import dev.fun.examples.dao.UserRepository;\n+import dev.fun.examples.domain.Authority;\n+import dev.fun.examples.domain.Role;\n+import dev.fun.examples.domain.User;\n+\n+@Component\n+public class DataFiller implements CommandLineRunner {\n+\t\n+\t@Autowired\n+\tprivate AuthorityRepository authorityRepository;\n+\t\n+\t@Autowired\n+\tprivate RoleRepository roleRepository;\n+\t\n+\t@Autowired\n+\tprivate UserRepository userRepository;\n+\n+\t@Override\n+\tpublic void run(String... args) throws Exception {\n+\t\t\n+\t\tAuthority auth1 = authorityRepository.save(new Authority(\"auth1\"));\n+\t\tAuthority auth2 = authorityRepository.save(new Authority(\"auth2\"));\n+\t\tAuthority auth3 = authorityRepository.save(new Authority(\"auth3\"));\n+\t\tAuthority auth4 = authorityRepository.save(new Authority(\"auth4\"));\n+\t\tAuthority auth5 = authorityRepository.save(new Authority(\"auth5\"));\n+\t\tAuthority auth6 = authorityRepository.save(new Authority(\"auth6\"));\n+\t\t\n+\t\tRole role1 = roleRepository.save(new Role(\"role1\"));\n+\t\tRole role2 = roleRepository.save(new Role(\"role2\"));\n+\t\tRole role3 = roleRepository.save(new Role(\"role3\"));\n+\t\t\n+\t\trole1.setAuthorities(Arrays.asList(auth1, auth2, auth3, auth4, auth5, auth6));\n+\t\trole2.setAuthorities(Arrays.asList(auth1, auth2, auth3, auth4));\n+\t\trole3.setAuthorities(Arrays.asList(auth1, auth2));\n+\t\t\n+\t\troleRepository.saveAll(Arrays.asList(role1, role2, role3));\n+\t\t\n+\t\tuserRepository.saveAll(Arrays.asList(\n+\t\t\t\tnew User(\"user1\", \"pass1\", role1),\n+\t\t\t\tnew User(\"user2\", \"pass2\", role2),\n+\t\t\t\tnew User(\"user3\", \"pass3\", role2),\n+\t\t\t\tnew User(\"user4\", \"pass4\", role3)\n+\t\t));\n+\t\t\t\t\n+\t}\n+\n+}"
+  },
+  {
+    "sha": "2c9bfd463eefd63e7176bb7d58a9ff4cfaf6c78b",
+    "filename": "spring/src/main/java/dev/fun/examples/controller/UserController.java",
+    "status": "added",
+    "additions": 46,
+    "deletions": 0,
+    "changes": 46,
+    "blob_url": "https://github.com/aakazakov/my-sandbox/blob/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/controller/UserController.java",
+    "raw_url": "https://github.com/aakazakov/my-sandbox/raw/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/controller/UserController.java",
+    "contents_url": "https://api.github.com/repos/aakazakov/my-sandbox/contents/spring/src/main/java/dev/fun/examples/controller/UserController.java?ref=842c68896834cabb4bd5b12e041e0e538ff81b0d",
+    "patch": "@@ -0,0 +1,46 @@\n+package dev.fun.examples.controller;\n+\n+import java.util.List;\n+import java.util.stream.Collectors;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.http.MediaType;\n+import org.springframework.web.bind.annotation.GetMapping;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RestController;\n+\n+import dev.fun.examples.dao.UserRepository;\n+import dev.fun.examples.domain.Authority;\n+import dev.fun.examples.domain.Role;\n+import dev.fun.examples.domain.User;\n+import dev.fun.examples.dto.UserDto;\n+\n+@RestController\n+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)\n+public class UserController {\n+\n+\t@Autowired\n+\tprivate UserRepository repo;\n+\t\n+\t@GetMapping(\"/users\")\n+\tpublic List<UserDto> getAll() {\n+\t\treturn fromUserList(repo.findAll());\n+\t}\n+\t\n+\tprivate List<UserDto> fromUserList(List<User> userList) {\n+\t\treturn userList.stream().map(this::fromUser).collect(Collectors.toList());\n+\t}\n+\t\n+\tprivate UserDto fromUser(User user) {\n+\t\tUserDto dto = new UserDto();\n+\t\tdto.setId(user.getId());\n+\t\tdto.setUsername(user.getUsername());\n+\t\tdto.setPassword(user.getPassword());\n+\t\tRole userRole = user.getRole();\n+\t\tdto.setRoleTitle(userRole.getTitle());\n+\t\tList<String> authTitles = userRole.getAuthorities().stream().map(Authority::getTitle).collect(Collectors.toList());\n+\t\tdto.setAuthTitles(authTitles);\n+\t\treturn dto;\n+\t}\n+\t\n+}"
+  },
+  {
+    "sha": "706326fdd03a2653916c481585b0601b02656766",
+    "filename": "spring/src/main/java/dev/fun/examples/dao/AuthorityRepository.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/aakazakov/my-sandbox/blob/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/dao/AuthorityRepository.java",
+    "raw_url": "https://github.com/aakazakov/my-sandbox/raw/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/dao/AuthorityRepository.java",
+    "contents_url": "https://api.github.com/repos/aakazakov/my-sandbox/contents/spring/src/main/java/dev/fun/examples/dao/AuthorityRepository.java?ref=842c68896834cabb4bd5b12e041e0e538ff81b0d",
+    "patch": "@@ -0,0 +1,9 @@\n+package dev.fun.examples.dao;\n+\n+import org.springframework.data.jpa.repository.JpaRepository;\n+\n+import dev.fun.examples.domain.Authority;\n+\n+public interface AuthorityRepository extends JpaRepository<Authority, Long>{\n+\n+}"
+  },
+  {
+    "sha": "b5bfdcd30a0d011801432502820daa038ab995bd",
+    "filename": "spring/src/main/java/dev/fun/examples/dao/RoleRepository.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/aakazakov/my-sandbox/blob/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/dao/RoleRepository.java",
+    "raw_url": "https://github.com/aakazakov/my-sandbox/raw/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/dao/RoleRepository.java",
+    "contents_url": "https://api.github.com/repos/aakazakov/my-sandbox/contents/spring/src/main/java/dev/fun/examples/dao/RoleRepository.java?ref=842c68896834cabb4bd5b12e041e0e538ff81b0d",
+    "patch": "@@ -0,0 +1,9 @@\n+package dev.fun.examples.dao;\n+\n+import org.springframework.data.jpa.repository.JpaRepository;\n+\n+import dev.fun.examples.domain.Role;\n+\n+public interface RoleRepository extends JpaRepository<Role, Long> {\n+\n+}"
+  },
+  {
+    "sha": "bce3f52e1ea02ba1dd4aa7b32947c1ffce342766",
+    "filename": "spring/src/main/java/dev/fun/examples/dao/UserRepository.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/aakazakov/my-sandbox/blob/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/dao/UserRepository.java",
+    "raw_url": "https://github.com/aakazakov/my-sandbox/raw/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/dao/UserRepository.java",
+    "contents_url": "https://api.github.com/repos/aakazakov/my-sandbox/contents/spring/src/main/java/dev/fun/examples/dao/UserRepository.java?ref=842c68896834cabb4bd5b12e041e0e538ff81b0d",
+    "patch": "@@ -0,0 +1,9 @@\n+package dev.fun.examples.dao;\n+\n+import org.springframework.data.jpa.repository.JpaRepository;\n+\n+import dev.fun.examples.domain.User;\n+\n+public interface UserRepository extends JpaRepository<User, Long> {\n+\n+}"
+  },
+  {
+    "sha": "b49d7c5f023bfa56e686e8572a275596882c8a7f",
+    "filename": "spring/src/main/java/dev/fun/examples/domain/Authority.java",
+    "status": "added",
+    "additions": 57,
+    "deletions": 0,
+    "changes": 57,
+    "blob_url": "https://github.com/aakazakov/my-sandbox/blob/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/domain/Authority.java",
+    "raw_url": "https://github.com/aakazakov/my-sandbox/raw/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/domain/Authority.java",
+    "contents_url": "https://api.github.com/repos/aakazakov/my-sandbox/contents/spring/src/main/java/dev/fun/examples/domain/Authority.java?ref=842c68896834cabb4bd5b12e041e0e538ff81b0d",
+    "patch": "@@ -0,0 +1,57 @@\n+package dev.fun.examples.domain;\n+\n+import java.util.List;\n+\n+import javax.persistence.Entity;\n+import javax.persistence.GeneratedValue;\n+import javax.persistence.GenerationType;\n+import javax.persistence.Id;\n+import javax.persistence.ManyToMany;\n+import javax.persistence.Table;\n+\n+@Entity\n+@Table(name = \"authorities\")\n+public class Authority {\n+\t\n+\t@Id\n+\t@GeneratedValue(strategy = GenerationType.IDENTITY)\n+\tprivate Long id;\n+\t\n+\tprivate String title;\n+\t\n+\t@ManyToMany(mappedBy = \"authorities\")\n+\tprivate List<Role> roles;\n+\n+\tpublic Long getId() {\n+\t\treturn id;\n+\t}\n+\n+\tpublic void setId(Long id) {\n+\t\tthis.id = id;\n+\t}\n+\n+\tpublic String getTitle() {\n+\t\treturn title;\n+\t}\n+\n+\tpublic void setTitle(String title) {\n+\t\tthis.title = title;\n+\t}\n+\n+\tpublic List<Role> getRoles() {\n+\t\treturn roles;\n+\t}\n+\n+\tpublic void setRoles(List<Role> roles) {\n+\t\tthis.roles = roles;\n+\t}\n+\n+\tpublic Authority(String title) {\n+\t\tthis.title = title;\n+\t}\n+\t\n+\tpublic Authority() {\n+\t\t\n+\t}\n+\t\n+}"
+  },
+  {
+    "sha": "79a1b9e5bc1c60eefdd8166078eda0c33d6d072a",
+    "filename": "spring/src/main/java/dev/fun/examples/domain/Role.java",
+    "status": "added",
+    "additions": 68,
+    "deletions": 0,
+    "changes": 68,
+    "blob_url": "https://github.com/aakazakov/my-sandbox/blob/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/domain/Role.java",
+    "raw_url": "https://github.com/aakazakov/my-sandbox/raw/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/domain/Role.java",
+    "contents_url": "https://api.github.com/repos/aakazakov/my-sandbox/contents/spring/src/main/java/dev/fun/examples/domain/Role.java?ref=842c68896834cabb4bd5b12e041e0e538ff81b0d",
+    "patch": "@@ -0,0 +1,68 @@\n+package dev.fun.examples.domain;\n+\n+import java.util.List;\n+\n+import javax.persistence.Entity;\n+import javax.persistence.GeneratedValue;\n+import javax.persistence.GenerationType;\n+import javax.persistence.Id;\n+import javax.persistence.JoinColumn;\n+import javax.persistence.JoinTable;\n+import javax.persistence.ManyToMany;\n+import javax.persistence.OneToMany;\n+import javax.persistence.Table;\n+\n+@Entity\n+@Table(name = \"roles\")\n+public class Role {\n+\t\n+\t@Id\n+\t@GeneratedValue(strategy = GenerationType.IDENTITY)\n+\tprivate Long id;\n+\t\n+\tprivate String title;\n+\t\n+\t@ManyToMany\n+\t@JoinTable(\n+\t\t\t\tname = \"roles_authorities\",\n+\t\t\t\tjoinColumns = @JoinColumn(name = \"role_id\"),\n+\t\t\t\tinverseJoinColumns = @JoinColumn(name = \"authority_id\")\n+\t\t\t)\n+\tprivate List<Authority> authorities;\n+\t\n+\t@OneToMany(mappedBy = \"role\")\n+\tprivate List<User> users;\n+\n+\tpublic Long getId() {\n+\t\treturn id;\n+\t}\n+\n+\tpublic void setId(Long id) {\n+\t\tthis.id = id;\n+\t}\n+\n+\tpublic String getTitle() {\n+\t\treturn title;\n+\t}\n+\n+\tpublic void setTitle(String title) {\n+\t\tthis.title = title;\n+\t}\n+\n+\tpublic List<Authority> getAuthorities() {\n+\t\treturn authorities;\n+\t}\n+\n+\tpublic void setAuthorities(List<Authority> authorities) {\n+\t\tthis.authorities = authorities;\n+\t}\n+\n+\tpublic Role(String title) {\n+\t\tthis.title = title;\n+\t}\n+\t\n+\tpublic Role() {\n+\t\t\n+\t}\n+\t\n+}"
+  },
+  {
+    "sha": "e4f34e3f7e352ed049fcb5a54ad268bc9500a3b6",
+    "filename": "spring/src/main/java/dev/fun/examples/domain/User.java",
+    "status": "added",
+    "additions": 67,
+    "deletions": 0,
+    "changes": 67,
+    "blob_url": "https://github.com/aakazakov/my-sandbox/blob/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/domain/User.java",
+    "raw_url": "https://github.com/aakazakov/my-sandbox/raw/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/domain/User.java",
+    "contents_url": "https://api.github.com/repos/aakazakov/my-sandbox/contents/spring/src/main/java/dev/fun/examples/domain/User.java?ref=842c68896834cabb4bd5b12e041e0e538ff81b0d",
+    "patch": "@@ -0,0 +1,67 @@\n+package dev.fun.examples.domain;\n+\n+import javax.persistence.Entity;\n+import javax.persistence.GeneratedValue;\n+import javax.persistence.GenerationType;\n+import javax.persistence.Id;\n+import javax.persistence.JoinColumn;\n+import javax.persistence.ManyToOne;\n+import javax.persistence.Table;\n+\n+@Entity\n+@Table(name = \"users\")\n+public class User {\n+\t\n+\t@Id\n+\t@GeneratedValue(strategy = GenerationType.IDENTITY)\n+\tprivate Long id;\n+\tprivate String username;\n+\tprivate String password;\n+\t\n+\t@ManyToOne\n+\t@JoinColumn(name = \"role_id\")\n+\tprivate Role role;\n+\n+\tpublic Long getId() {\n+\t\treturn id;\n+\t}\n+\n+\tpublic void setId(Long id) {\n+\t\tthis.id = id;\n+\t}\n+\n+\tpublic String getUsername() {\n+\t\treturn username;\n+\t}\n+\n+\tpublic void setUsername(String username) {\n+\t\tthis.username = username;\n+\t}\n+\n+\tpublic String getPassword() {\n+\t\treturn password;\n+\t}\n+\n+\tpublic void setPassword(String password) {\n+\t\tthis.password = password;\n+\t}\n+\n+\tpublic Role getRole() {\n+\t\treturn role;\n+\t}\n+\n+\tpublic void setRole(Role role) {\n+\t\tthis.role = role;\n+\t}\n+\n+\tpublic User(String username, String password, Role role) {\n+\t\tthis.username = username;\n+\t\tthis.password = password;\n+\t\tthis.role = role;\n+\t}\n+\t\n+\tpublic User() {\n+\n+\t}\n+\t\n+}"
+  },
+  {
+    "sha": "eff42cc09bc320debc4d13b4eeea3ba153ad5dfe",
+    "filename": "spring/src/main/java/dev/fun/examples/dto/UserDto.java",
+    "status": "added",
+    "additions": 57,
+    "deletions": 0,
+    "changes": 57,
+    "blob_url": "https://github.com/aakazakov/my-sandbox/blob/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/dto/UserDto.java",
+    "raw_url": "https://github.com/aakazakov/my-sandbox/raw/842c68896834cabb4bd5b12e041e0e538ff81b0d/spring/src/main/java/dev/fun/examples/dto/UserDto.java",
+    "contents_url": "https://api.github.com/repos/aakazakov/my-sandbox/contents/spring/src/main/java/dev/fun/examples/dto/UserDto.java?ref=842c68896834cabb4bd5b12e041e0e538ff81b0d",
+    "patch": "@@ -0,0 +1,57 @@\n+package dev.fun.examples.dto;\n+\n+import java.util.List;\n+\n+public class UserDto {\n+\t\n+\tprivate Long id;\n+\tprivate String username;\n+\tprivate String password;\n+\tprivate String roleTitle;\n+\tprivate List<String> authTitles;\n+\t\n+\tpublic Long getId() {\n+\t\treturn id;\n+\t}\n+\t\n+\tpublic void setId(Long id) {\n+\t\tthis.id = id;\n+\t}\n+\t\n+\tpublic String getUsername() {\n+\t\treturn username;\n+\t}\n+\t\n+\tpublic void setUsername(String username) {\n+\t\tthis.username = username;\n+\t}\n+\t\n+\tpublic String getPassword() {\n+\t\treturn password;\n+\t}\n+\t\n+\tpublic void setPassword(String password) {\n+\t\tthis.password = password;\n+\t}\n+\t\n+\tpublic String getRoleTitle() {\n+\t\treturn roleTitle;\n+\t}\n+\t\n+\tpublic void setRoleTitle(String roleTitle) {\n+\t\tthis.roleTitle = roleTitle;\n+\t}\n+\t\n+\tpublic List<String> getAuthTitles() {\n+\t\treturn authTitles;\n+\t}\n+\t\n+\tpublic void setAuthTitles(List<String> authTitles) {\n+\t\tthis.authTitles = authTitles;\n+\t}\n+\t\n+\tpublic UserDto() {\n+\t\t\n+\t}\n+\t\n+}"
+  }
+]

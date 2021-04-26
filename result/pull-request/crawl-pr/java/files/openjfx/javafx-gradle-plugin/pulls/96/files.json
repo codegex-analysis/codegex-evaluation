@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "7479fbb97f2d33894373442e4a9fa45bcca34bb1",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/openjfx/javafx-gradle-plugin/blob/35aa46871ed7cebbff9832327c33ac47bb924cd0/README.md",
+    "raw_url": "https://github.com/openjfx/javafx-gradle-plugin/raw/35aa46871ed7cebbff9832327c33ac47bb924cd0/README.md",
+    "contents_url": "https://api.github.com/repos/openjfx/javafx-gradle-plugin/contents/README.md?ref=35aa46871ed7cebbff9832327c33ac47bb924cd0",
+    "patch": "@@ -56,6 +56,19 @@ To use the plugin, apply the following two steps:\n     }\n     apply(plugin = \"org.openjfx.javafxplugin\")\n \n+##### Gradle 6.4 and above\n+\n+Configure module path inference:\n+\n+**Groovy/Kotlin**\n+\n+    java {\n+        modularity.inferModulePath.set(true)\n+    }\n+\n+or alternatively apply the [gradle-modules-plugin](https://github.com/java9-modularity/gradle-modules-plugin) (applied automatically if using a Gradle version below 6.4).\n+\n+\n \n ### 2. Specify JavaFX modules\n "
+  },
+  {
+    "sha": "de79b08b3cc09a2f3dd4faeaab152f06450d479a",
+    "filename": "src/main/java/org/openjfx/gradle/JavaFXPlugin.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 1,
+    "changes": 11,
+    "blob_url": "https://github.com/openjfx/javafx-gradle-plugin/blob/35aa46871ed7cebbff9832327c33ac47bb924cd0/src/main/java/org/openjfx/gradle/JavaFXPlugin.java",
+    "raw_url": "https://github.com/openjfx/javafx-gradle-plugin/raw/35aa46871ed7cebbff9832327c33ac47bb924cd0/src/main/java/org/openjfx/gradle/JavaFXPlugin.java",
+    "contents_url": "https://api.github.com/repos/openjfx/javafx-gradle-plugin/contents/src/main/java/org/openjfx/gradle/JavaFXPlugin.java?ref=35aa46871ed7cebbff9832327c33ac47bb924cd0",
+    "patch": "@@ -32,6 +32,8 @@\n import com.google.gradle.osdetector.OsDetectorPlugin;\n import org.gradle.api.Plugin;\n import org.gradle.api.Project;\n+import org.gradle.api.plugins.JavaPlugin;\n+import org.gradle.util.VersionNumber;\n import org.javamodularity.moduleplugin.ModuleSystemPlugin;\n import org.openjfx.gradle.tasks.ExecTask;\n \n@@ -40,7 +42,14 @@\n     @Override\n     public void apply(Project project) {\n         project.getPlugins().apply(OsDetectorPlugin.class);\n-        project.getPlugins().apply(ModuleSystemPlugin.class);\n+\n+        VersionNumber thisVersionNumber = VersionNumber.parse(project.getGradle().getGradleVersion());\n+        VersionNumber lowestVersionNumberWithJavaFXSupport = VersionNumber.parse(\"6.4-rc-1\");\n+        if (thisVersionNumber.compareTo(lowestVersionNumberWithJavaFXSupport) < 0) {\n+            project.getPlugins().apply(ModuleSystemPlugin.class);\n+        } else {\n+            project.getPlugins().apply(JavaPlugin.class);\n+        }\n \n         project.getExtensions().create(\"javafx\", JavaFXOptions.class, project);\n "
+  }
+]

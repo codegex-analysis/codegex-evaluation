@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "5fb582f9a688a78a5358cdb372d8054c67f39977",
+    "filename": "geode-gfsh/src/integrationTest/java/org/apache/geode/management/internal/cli/GfshParserAutoCompletionIntegrationTest.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/apache/geode/blob/cd6c29e959d5e81e0a852c57494e4b65955959eb/geode-gfsh/src/integrationTest/java/org/apache/geode/management/internal/cli/GfshParserAutoCompletionIntegrationTest.java",
+    "raw_url": "https://github.com/apache/geode/raw/cd6c29e959d5e81e0a852c57494e4b65955959eb/geode-gfsh/src/integrationTest/java/org/apache/geode/management/internal/cli/GfshParserAutoCompletionIntegrationTest.java",
+    "contents_url": "https://api.github.com/repos/apache/geode/contents/geode-gfsh/src/integrationTest/java/org/apache/geode/management/internal/cli/GfshParserAutoCompletionIntegrationTest.java?ref=cd6c29e959d5e81e0a852c57494e4b65955959eb",
+    "patch": "@@ -429,4 +429,22 @@ public void testIndexType() {\n         .hasSize(org.apache.geode.cache.query.IndexType.values().length);\n     assertThat(candidate.getFirstCandidate()).isEqualTo(buffer + \"hash\");\n   }\n+\n+  @Test\n+  public void testCompletionCreateGatewaySenderWithSpace() {\n+    String buffer = \"create gateway-sender \";\n+    CommandCandidate candidate = gfshParserRule.complete(buffer);\n+    assertThat(candidate.getCandidates()).hasSize(2);\n+    assertThat(candidate.getFirstCandidate()).isEqualTo(buffer + \"--id\");\n+    assertThat(candidate.getCandidates().get(1).getValue())\n+        .isEqualTo(buffer + \"--remote-distributed-system-id\");\n+  }\n+\n+  @Test\n+  public void testCompletionCreateGatewaySenderWithDash() {\n+    String buffer = \"create gateway-sender --\";\n+    CommandCandidate candidate = gfshParserRule.complete(buffer);\n+    assertThat(candidate.getCandidates()).hasSize(1);\n+    assertThat(candidate.getFirstCandidate()).isEqualTo(buffer + \"id\");\n+  }\n }"
+  },
+  {
+    "sha": "f172bc5851f4395483a356a3c64a725d869dcab6",
+    "filename": "geode-gfsh/src/main/java/org/apache/geode/management/internal/cli/commands/CreateGatewaySenderCommand.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 7,
+    "changes": 15,
+    "blob_url": "https://github.com/apache/geode/blob/cd6c29e959d5e81e0a852c57494e4b65955959eb/geode-gfsh/src/main/java/org/apache/geode/management/internal/cli/commands/CreateGatewaySenderCommand.java",
+    "raw_url": "https://github.com/apache/geode/raw/cd6c29e959d5e81e0a852c57494e4b65955959eb/geode-gfsh/src/main/java/org/apache/geode/management/internal/cli/commands/CreateGatewaySenderCommand.java",
+    "contents_url": "https://api.github.com/repos/apache/geode/contents/geode-gfsh/src/main/java/org/apache/geode/management/internal/cli/commands/CreateGatewaySenderCommand.java?ref=cd6c29e959d5e81e0a852c57494e4b65955959eb",
+    "patch": "@@ -59,6 +59,14 @@\n       operation = ResourcePermission.Operation.MANAGE, target = ResourcePermission.Target.GATEWAY)\n   public ResultModel createGatewaySender(\n \n+      @CliOption(key = CliStrings.CREATE_GATEWAYSENDER__ID,\n+          mandatory = true,\n+          help = CliStrings.CREATE_GATEWAYSENDER__ID__HELP) String id,\n+\n+      @CliOption(key = CliStrings.CREATE_GATEWAYSENDER__REMOTEDISTRIBUTEDSYSTEMID,\n+          mandatory = true,\n+          help = CliStrings.CREATE_GATEWAYSENDER__REMOTEDISTRIBUTEDSYSTEMID__HELP) Integer remoteDistributedSystemId,\n+\n       @CliOption(key = {CliStrings.GROUP, CliStrings.GROUPS},\n           optionContext = ConverterHint.MEMBERGROUP,\n           help = CliStrings.CREATE_GATEWAYSENDER__GROUP__HELP) String[] onGroups,\n@@ -67,13 +75,6 @@ public ResultModel createGatewaySender(\n           optionContext = ConverterHint.MEMBERIDNAME,\n           help = CliStrings.CREATE_GATEWAYSENDER__MEMBER__HELP) String[] onMember,\n \n-      @CliOption(key = CliStrings.CREATE_GATEWAYSENDER__ID,\n-          mandatory = true,\n-          help = CliStrings.CREATE_GATEWAYSENDER__ID__HELP) String id,\n-\n-      @CliOption(key = CliStrings.CREATE_GATEWAYSENDER__REMOTEDISTRIBUTEDSYSTEMID,\n-          mandatory = true,\n-          help = CliStrings.CREATE_GATEWAYSENDER__REMOTEDISTRIBUTEDSYSTEMID__HELP) Integer remoteDistributedSystemId,\n \n       @CliOption(key = CliStrings.CREATE_GATEWAYSENDER__GROUPTRANSACTIONEVENTS,\n           specifiedDefaultValue = \"true\","
+  }
+]

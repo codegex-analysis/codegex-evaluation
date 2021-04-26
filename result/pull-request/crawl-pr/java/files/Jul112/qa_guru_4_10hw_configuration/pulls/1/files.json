@@ -1,0 +1,99 @@
+[
+  {
+    "sha": "698d2dd57e3fbe055150955116e57b712471d00f",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/blob/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/build.gradle",
+    "raw_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/raw/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/build.gradle",
+    "contents_url": "https://api.github.com/repos/Jul112/qa_guru_4_10hw_configuration/contents/build.gradle?ref=0f8dbbb1218fbaa9748fe103d146e9f41f88ef35",
+    "patch": "@@ -28,16 +28,16 @@ dependencies {\n             \"com.github.javafaker:javafaker:1.0.2\",\n             \"org.hamcrest:hamcrest-all:1.3\",\n             \"org.aeonbits.owner:owner:1.0.12\",\n-            //\"org.assertj:assertj-core:3.19.0\",\n+            \"org.assertj:assertj-core:3.19.0\",\n             \"org.slf4j:slf4j-simple:1.7.30\",\n             \"org.junit.jupiter:junit-jupiter-api:$junitVersion\",\n             \"org.junit.jupiter:junit-jupiter-params:$junitVersion\")\n     testRuntimeOnly \"org.junit.jupiter:junit-jupiter-engine:$junitVersion\"\n }\n \n-/*tasks.withType(JavaCompile) {\n+tasks.withType(JavaCompile) {\n     options.encoding = \"UTF-8\"\n-}*/\n+}\n \n tasks.withType(Test) {\n     systemProperties += System.properties"
+  },
+  {
+    "sha": "aaacc8a5c26e14f7de72b252c0ec62720f223771",
+    "filename": "src/test/java/configuration/ConfigHelper.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/blob/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/configuration/ConfigHelper.java",
+    "raw_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/raw/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/configuration/ConfigHelper.java",
+    "contents_url": "https://api.github.com/repos/Jul112/qa_guru_4_10hw_configuration/contents/src/test/java/configuration/ConfigHelper.java?ref=0f8dbbb1218fbaa9748fe103d146e9f41f88ef35",
+    "patch": "@@ -0,0 +1,28 @@\n+/*\n+package configuration;\n+\n+import org.aeonbits.owner.ConfigFactory;\n+\n+\n+public class ConfigHelper {\n+\n+    public static String getRemoteDriverUrl() {\n+        return getConfig().getRemoteDriverUrl();\n+    }\n+\n+    public static String getBrowser() {\n+        return getConfig().getBrowser();\n+    }\n+    public static  String getBrowserVersion(){\n+        return getConfig().getBrowserVersion();\n+    }\n+\n+    private static TestConfig getConfig() {\n+//        if (System.getProperty(\"environment\") == null) System.setProperty(\"environment\", \"local\");   // test, prod\n+        return ConfigFactory.newInstance().create(TestConfig.class, System.getProperties());\n+    }\n+}\n+\n+\n+\n+ */"
+  },
+  {
+    "sha": "5d54cd3973d12d98132cf3104d5d7db278c4d669",
+    "filename": "src/test/java/configuration/TestConfig.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/blob/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/configuration/TestConfig.java",
+    "raw_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/raw/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/configuration/TestConfig.java",
+    "contents_url": "https://api.github.com/repos/Jul112/qa_guru_4_10hw_configuration/contents/src/test/java/configuration/TestConfig.java?ref=0f8dbbb1218fbaa9748fe103d146e9f41f88ef35",
+    "patch": "@@ -2,7 +2,11 @@\n \n import org.aeonbits.owner.Config;\n \n-@Config.Sources(\"classpath:${environment}.properties\")\n+@Config.LoadPolicy(Config.LoadType.MERGE)\n+@Config.Sources({\"system:properties\",\n+                 \"classpath:local.properties\",\n+                 \"classpath:${environment}.properties\"\n+                 })\n public interface TestConfig extends Config {\n \n     @Key(\"remote.url\")"
+  },
+  {
+    "sha": "9f2e08b8b612de0588ac84a1991a666015fc8bbf",
+    "filename": "src/test/java/pages/PracticeFormPage.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/blob/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/pages/PracticeFormPage.java",
+    "raw_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/raw/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/pages/PracticeFormPage.java",
+    "contents_url": "https://api.github.com/repos/Jul112/qa_guru_4_10hw_configuration/contents/src/test/java/pages/PracticeFormPage.java?ref=0f8dbbb1218fbaa9748fe103d146e9f41f88ef35",
+    "patch": "@@ -2,6 +2,7 @@\n \n import com.github.javafaker.Faker;\n import io.qameta.allure.Step;\n+import tests.TestBase;\n \n import java.io.File;\n \n@@ -12,7 +13,7 @@\n import static com.codeborne.selenide.Selenide.*;\n import static utils.RandomUtils.*;\n \n-public class PracticeFormPage {\n+public class PracticeFormPage extends TestBase {\n     Faker faker = new Faker();\n     String name = faker.name().firstName();\n     String lastName = faker.name().lastName();"
+  },
+  {
+    "sha": "fbdf426c9a4795da3c1b664ae15d6f240464da4c",
+    "filename": "src/test/java/tests/PracticeFormTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 3,
+    "changes": 5,
+    "blob_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/blob/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/tests/PracticeFormTest.java",
+    "raw_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/raw/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/tests/PracticeFormTest.java",
+    "contents_url": "https://api.github.com/repos/Jul112/qa_guru_4_10hw_configuration/contents/src/test/java/tests/PracticeFormTest.java?ref=0f8dbbb1218fbaa9748fe103d146e9f41f88ef35",
+    "patch": "@@ -1,16 +1,15 @@\n package tests;\n \n-import configuration.TestBase;\n import org.junit.jupiter.api.Test;\n import pages.PracticeFormPage;\n \n public class PracticeFormTest extends TestBase {\n \n-    PracticeFormPage practiceFormPage;\n+    //PracticeFormPage practiceFormPage;\n \n     @Test\n     void fillPracticeFormTest() {\n-        practiceFormPage = new PracticeFormPage();\n+        PracticeFormPage practiceFormPage = new PracticeFormPage();\n \n         practiceFormPage.openPage();\n         practiceFormPage.fillForm();"
+  },
+  {
+    "sha": "46d8487b38ef41cfe72baed99a7759509b737256",
+    "filename": "src/test/java/tests/TestBase.java",
+    "status": "renamed",
+    "additions": 11,
+    "deletions": 10,
+    "changes": 21,
+    "blob_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/blob/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/tests/TestBase.java",
+    "raw_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/raw/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/java/tests/TestBase.java",
+    "contents_url": "https://api.github.com/repos/Jul112/qa_guru_4_10hw_configuration/contents/src/test/java/tests/TestBase.java?ref=0f8dbbb1218fbaa9748fe103d146e9f41f88ef35",
+    "patch": "@@ -1,34 +1,35 @@\n-package configuration;\n+package tests;\n \n import com.codeborne.selenide.Configuration;\n+import configuration.TestConfig;\n import org.aeonbits.owner.ConfigFactory;\n-//import org.junit.jupiter.api.AfterEach;\n+import org.junit.jupiter.api.AfterEach;\n import org.junit.jupiter.api.BeforeAll;\n \n-//import static com.codeborne.selenide.WebDriverRunner.closeWebDriver;\n-//import static helpers.AttachmentsHelper.attachScreenshot;\n+import static helpers.AttachmentsHelper.*;\n \n-public class TestBase{\n+public class TestBase {\n \n     @BeforeAll\n     static void setup() {\n         final TestConfig config = ConfigFactory.create(TestConfig.class, System.getProperties());\n+\n         Configuration.browser = config.getBrowser();\n         Configuration.browserVersion = config.getBrowserVersion();\n         Configuration.startMaximized = true;\n \n-        if (config.getRemoteDriverUrl()!=null) {\n-            Configuration.remote = config.getRemoteDriverUrl();\n-        }\n+//       if (config.getRemoteDriverUrl()!=null) {\n+//            Configuration.remote = config.getRemoteDriverUrl();\n+//        }\n     }\n \n-    /*@AfterEach\n+    @AfterEach\n     public void afterEach() {\n         attachScreenshot(\"Last Screenshot\");\n         attachPageSource();\n         attachAsText(\"Browser console logs\", getConsoleLogs());\n         if (System.getProperty(\"video_storage\")!=null) {\n             attachVideo();\n         }\n-    }*/\n+    }\n }\n\\ No newline at end of file",
+    "previous_filename": "src/test/java/configuration/TestBase.java"
+  },
+  {
+    "sha": "105ff1ad43ebbb083cce057dee7162b619d833cb",
+    "filename": "src/test/resources/local.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/blob/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/resources/local.properties",
+    "raw_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/raw/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/resources/local.properties",
+    "contents_url": "https://api.github.com/repos/Jul112/qa_guru_4_10hw_configuration/contents/src/test/resources/local.properties?ref=0f8dbbb1218fbaa9748fe103d146e9f41f88ef35",
+    "patch": "@@ -1,2 +1,2 @@\n-browser = chrome\n+browser.name = chrome\n browser.version = 89.0\n\\ No newline at end of file"
+  },
+  {
+    "sha": "eed76397f6785a87365edb4757db14d187ee14a1",
+    "filename": "src/test/resources/remote.properties",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/blob/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/resources/remote.properties",
+    "raw_url": "https://github.com/Jul112/qa_guru_4_10hw_configuration/raw/0f8dbbb1218fbaa9748fe103d146e9f41f88ef35/src/test/resources/remote.properties",
+    "contents_url": "https://api.github.com/repos/Jul112/qa_guru_4_10hw_configuration/contents/src/test/resources/remote.properties?ref=0f8dbbb1218fbaa9748fe103d146e9f41f88ef35",
+    "patch": "@@ -1,3 +1,3 @@\n-remote.url = https://user1:1234@selenoid.autotests.cloud:4444/wd/hub\n-browser = chrome\n-browser.version = 89.0\n\\ No newline at end of file\n+#remote.url = https://user1:1234@selenoid.autotests.cloud:4444/wd/hub\n+#browser.name = chrome\n+#browser.version = 89.0\n\\ No newline at end of file"
+  }
+]

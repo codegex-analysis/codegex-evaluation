@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "0ba397cafd7b1ed82e0d8793042addd0d1488ba1",
+    "filename": ".ci/jobs/apm-agent-java-windows.yml",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/elastic/apm-agent-java/blob/2997dfc6242a7abc196b4e7e91446f687239d30f/.ci/jobs/apm-agent-java-windows.yml",
+    "raw_url": "https://github.com/elastic/apm-agent-java/raw/2997dfc6242a7abc196b4e7e91446f687239d30f/.ci/jobs/apm-agent-java-windows.yml",
+    "contents_url": "https://api.github.com/repos/elastic/apm-agent-java/contents/.ci/jobs/apm-agent-java-windows.yml?ref=2997dfc6242a7abc196b4e7e91446f687239d30f",
+    "patch": "@@ -0,0 +1,35 @@\n+---\n+- job:\n+    name: apm-agent-java/apm-agent-java-windows\n+    display-name: APM Agent Java on Windows\n+    description: APM Agent Java on Windows\n+    view: APM-CI\n+    project-type: pipeline\n+    parameters:\n+      - string:\n+          name: REFSPEC\n+          default: master\n+          description: What git reference?\n+      - string:\n+          name: JAVA_VERSION\n+          default: java11\n+          description: What Java version?\n+      - string:\n+          name: MAVEN_CONFIG\n+          default: -V -B \n+          description: Additional maven options.\n+    pipeline-scm:\n+      script-path: .ci/windows.groovy\n+      scm:\n+        - git:\n+            url: git@github.com:elastic/apm-pipeline-library.git\n+            refspec: +refs/heads/*:refs/remotes/origin/* +refs/pull/*/head:refs/remotes/origin/pr/*\n+            wipe-workspace: 'True'\n+            name: origin\n+            shallow-clone: true\n+            credentials-id: f6c7695a-671e-4f4f-a331-acdce44ff9ba\n+            reference-repo: /var/lib/jenkins/.git-references/apm-pipeline-library.git\n+            branches:\n+              - $REFSPEC\n+    triggers:\n+      - timed: 'H H(1-4) * * 0'"
+  },
+  {
+    "sha": "35ba6e922d2b0e10152f18a2931f805222a89369",
+    "filename": ".ci/windows.groovy",
+    "status": "added",
+    "additions": 76,
+    "deletions": 0,
+    "changes": 76,
+    "blob_url": "https://github.com/elastic/apm-agent-java/blob/2997dfc6242a7abc196b4e7e91446f687239d30f/.ci/windows.groovy",
+    "raw_url": "https://github.com/elastic/apm-agent-java/raw/2997dfc6242a7abc196b4e7e91446f687239d30f/.ci/windows.groovy",
+    "contents_url": "https://api.github.com/repos/elastic/apm-agent-java/contents/.ci/windows.groovy?ref=2997dfc6242a7abc196b4e7e91446f687239d30f",
+    "patch": "@@ -0,0 +1,76 @@\n+#!/usr/bin/env groovy\n+\n+@Library('apm@current') _\n+\n+pipeline {\n+  agent { label 'windows-2019-docker-immutable' }\n+  environment {\n+    REPO = 'apm-agent-java'\n+    BASE_DIR = \"src/github.com/elastic/${env.REPO}\"\n+    NOTIFY_TO = credentials('notify-to')\n+    MAVEN_CONFIG = \"${params.MAVEN_CONFIG} -Dmaven.repo.local=.m2\"\n+    JAVA_VERSION = \"${params.JAVA_VERSION}\"\n+    REFSPEC = \"${params.REFSPEC}\"\n+  }\n+  options {\n+    timeout(time: 2, unit: 'HOURS')\n+    buildDiscarder(logRotator(numToKeepStr: '20', artifactNumToKeepStr: '20', daysToKeepStr: '30'))\n+    timestamps()\n+    ansiColor('xterm')\n+    disableResume()\n+    durabilityHint('PERFORMANCE_OPTIMIZED')\n+    rateLimitBuilds(throttle: [count: 60, durationName: 'hour', userBoost: true])\n+    quietPeriod(10)\n+  }\n+  triggers {\n+    cron('H H(4-5) * * 0')\n+  }\n+  parameters {\n+    string(name: 'REFSPEC', defaultValue: 'master', description: 'What git reference?')\n+    string(name: 'JAVA_VERSION', defaultValue: 'java11', description: 'What Java version?')\n+    string(name: 'MAVEN_CONFIG', defaultValue: '-V -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dhttps.protocols=TLSv1.2 -Dmaven.wagon.http.retryHandler.count=3 -Dmaven.wagon.httpconnectionManager.ttlSeconds=25', description: 'Additional maven options.')\n+  }\n+  stages {\n+    stage('Checkout') {\n+      steps {\n+        deleteDir()\n+        gitCheckout(basedir: \"${BASE_DIR}\", githubNotifyFirstTimeContributor: true, shallow: false,\n+                    branch: \"${REFSPEC}\", reference: '/var/lib/jenkins/.git-references/apm-agent-java.git')\n+      }\n+    }\n+    stage('Windows Build') {\n+      steps {\n+        deleteDir()\n+        unstash 'source'\n+        dir(\"${BASE_DIR}\"){\n+          retryWithSleep(retries: 5, seconds: 10) {\n+            bat \"mvnw clean install -DskipTests=true -Dmaven.javadoc.skip=true -Dmaven.gitcommitid.skip=true\"\n+          }\n+        }\n+      }\n+    }\n+    stage('Windows Verify') {\n+      steps {\n+        dir(\"${BASE_DIR}\"){\n+          bat \"mvnw verify\"\n+        }\n+      }\n+      post {\n+        always {\n+          junit(allowEmptyResults: true, keepLongStdio: true, testResults: \"${BASE_DIR}/**/junit-*.xml,${BASE_DIR}/**/TEST-*.xml\")\n+        }\n+      }\n+    }\n+  }\n+  post {\n+    cleanup {\n+      notifyBuildResult()\n+    }\n+    unsuccessful {\n+      slackSend(channel: '#apm-agent-java',\n+                color: 'danger',\n+                message: \"[${env.REPO}] Windows build failed. (<${env.RUN_DISPLAY_URL}|Open>)\",\n+                tokenCredentialId: 'jenkins-slack-integration-token')\n+    }\n+  }\n+}"
+  }
+]

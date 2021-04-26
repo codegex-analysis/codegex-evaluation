@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "a7cbf9da54b488b205758fc6ea3f9ef851f870df",
+    "filename": "Account.java",
+    "status": "modified",
+    "additions": 65,
+    "deletions": 1,
+    "changes": 66,
+    "blob_url": "https://github.com/charlottejeynon/Software-Engineering-2/blob/e77df044b8f3e0b3053f378446be35fa94728961/Account.java",
+    "raw_url": "https://github.com/charlottejeynon/Software-Engineering-2/raw/e77df044b8f3e0b3053f378446be35fa94728961/Account.java",
+    "contents_url": "https://api.github.com/repos/charlottejeynon/Software-Engineering-2/contents/Account.java?ref=e77df044b8f3e0b3053f378446be35fa94728961",
+    "patch": "@@ -4,14 +4,78 @@\n \t\n \tprivate String accountName;\n \tprivate double openingBalance;\n+\tprivate double currentBalance;\n+\tprivate double amount;\n+\tprivate String payee;\n+\n+\n+\t//constructor\n+\tpublic Account() {\n+\n+\t}\n+\n \n \tpublic Account(String accountName, double openingBalance) {\n \t\tthis.accountName = accountName;\n \t\tthis.openingBalance = openingBalance;\n \t}\n-\t\n+\n+\n+\n \tpublic String toString() {\n \t\treturn (accountName + \": \" + openingBalance);\n \t}\n \n+\n+\t//account = new Account(\"Main\", 100); // account object of the class Account\n+\n+\t// internal transfer out of account, update balance\n+\tpublic void internalTransferOut(double Amount, String accountName){\n+\t\tthis.amount = Amount;\n+\t\tthis.accountName = accountName;\n+\t\tcurrentBalance = openingBalance - amount;\n+\t}\n+\n+\t// internal transfer into account, update balance\n+\tpublic void internalTransferIn(double Amount, String accountName){\n+\t\tthis.amount = Amount;\n+\t\tthis.accountName = accountName;\n+\t\tcurrentBalance = openingBalance + amount;\n+\t}\n+\n+\n+\tpublic double Transfer(double Amount, String From, String To){\n+\t\tthis.accountName = From;\n+\t\tinternalTransferOut(amount, From);\n+\t\tthis.accountName = To;\n+\t\tinternalTransferIn(amount, To);\n+\t\treturn currentBalance;\n+\n+\t}\n+\n+\t// set external payee\n+\tprivate void setPayee(String Payee){\n+\t\tthis.payee = Payee;\n+\t}\n+\t// set amount for external payment\n+\tprivate void setAmount(Double Amount){\n+\t\tthis.amount = Amount;\n+\t}\n+\n+\t// make payment to external payee, deduct money transferred from account balance\n+\tpublic void externalTransferOut(String accountName, String Payee, double Amount){\n+\n+\t\tthis.accountName = accountName;\n+\t\tsetPayee(Payee);\n+\t\tsetAmount(Amount);\n+\t\tcurrentBalance = openingBalance - amount;\n+\n+\n+\t}\n+\n+\n+\n+\n+\n+\n }"
+  },
+  {
+    "sha": "16b25028c25164e587fad5df0c02045b936ca6a1",
+    "filename": "NewBank.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/charlottejeynon/Software-Engineering-2/blob/e77df044b8f3e0b3053f378446be35fa94728961/NewBank.java",
+    "raw_url": "https://github.com/charlottejeynon/Software-Engineering-2/raw/e77df044b8f3e0b3053f378446be35fa94728961/NewBank.java",
+    "contents_url": "https://api.github.com/repos/charlottejeynon/Software-Engineering-2/contents/NewBank.java?ref=e77df044b8f3e0b3053f378446be35fa94728961",
+    "patch": "@@ -6,15 +6,21 @@\n \t\n \tprivate static final NewBank bank = new NewBank();\n \tprivate HashMap<String,Customer> customers;\n+\n+\n \t\n \tprivate NewBank() {\n \t\tcustomers = new HashMap<>();\n \t\taddTestData();\n+\n \t}\n \t\n \tprivate void addTestData() {\n \t\tCustomer bhagy = new Customer();\n \t\tbhagy.addAccount(new Account(\"Main\", 1000.0));\n+\t\tbhagy.addAccount(new Account(\"Savings\", 500.0));\n+\t\tAccount a = new Account();\n+\t\ta.Transfer(100, \"Main\", \"Savings\");\n \t\tcustomers.put(\"Bhagy\", bhagy);\n \t\t\n \t\tCustomer christina = new Customer();\n@@ -24,6 +30,8 @@ private void addTestData() {\n \t\tCustomer john = new Customer();\n \t\tjohn.addAccount(new Account(\"Checking\", 250.0));\n \t\tcustomers.put(\"John\", john);\n+\n+\n \t}\n \t\n \tpublic static NewBank getBank() {\n@@ -42,8 +50,12 @@ public synchronized String processRequest(CustomerID customer, String request) {\n \t\tif(customers.containsKey(customer.getKey())) {\n \t\t\tswitch(request) {\n \t\t\tcase \"SHOWMYACCOUNTS\" : return showMyAccounts(customer);\n+\t\t//\tcase \"MOVE\" : return Move();\n+\t\t//\t\tcase \"PAY\"\t: return Pay();\n \t\t\tdefault : return \"FAIL\";\n \t\t\t}\n+\n+\n \t\t}\n \t\treturn \"FAIL\";\n \t}\n@@ -52,4 +64,20 @@ private String showMyAccounts(CustomerID customer) {\n \t\treturn (customers.get(customer.getKey())).accountsToString();\n \t}\n \n+\t/*\n+\tprivate Boolean Move () {\n+\t\treturn (customers.get(customer.getKey())).accountsToString();\n+\t}\n+\t */\n+\n+\t/*\n+\n+\tprivate boolean Pay(){\n+\n+\t}\n+\n+\t */\n+\n+\n+\n }"
+  }
+]

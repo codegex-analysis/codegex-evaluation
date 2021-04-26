@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "677b44176d247e45dd2ba3f4e03b70da572415c5",
+    "filename": "doc/release-notes/6953-dev-jsf-settings.md",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/IQSS/dataverse/blob/617592ff26976cee58f3676ceac5f459e3e2ab34/doc/release-notes/6953-dev-jsf-settings.md",
+    "raw_url": "https://github.com/IQSS/dataverse/raw/617592ff26976cee58f3676ceac5f459e3e2ab34/doc/release-notes/6953-dev-jsf-settings.md",
+    "contents_url": "https://api.github.com/repos/IQSS/dataverse/contents/doc/release-notes/6953-dev-jsf-settings.md?ref=617592ff26976cee58f3676ceac5f459e3e2ab34",
+    "patch": "@@ -0,0 +1,4 @@\n+### Dynamic Java Server Faces Configuration Options\n+\n+This release includes a new way to easily change JSF settings via MicroProfile Config, especially useful during development.\n+See the [development guide on \"Debugging\"](https://guides.dataverse.org/en/5.4/developers/debugging.html).\n\\ No newline at end of file"
+  },
+  {
+    "sha": "abbba80e6873124a305b9d02f4e0b450a4996506",
+    "filename": "doc/sphinx-guides/source/developers/debugging.rst",
+    "status": "modified",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/IQSS/dataverse/blob/617592ff26976cee58f3676ceac5f459e3e2ab34/doc/sphinx-guides/source/developers/debugging.rst",
+    "raw_url": "https://github.com/IQSS/dataverse/raw/617592ff26976cee58f3676ceac5f459e3e2ab34/doc/sphinx-guides/source/developers/debugging.rst",
+    "contents_url": "https://api.github.com/repos/IQSS/dataverse/contents/doc/sphinx-guides/source/developers/debugging.rst?ref=617592ff26976cee58f3676ceac5f459e3e2ab34",
+    "patch": "@@ -10,6 +10,58 @@ Logging\n \n By default, the app server logs at the \"INFO\" level but logging can be increased to \"FINE\" on the fly with (for example) ``./asadmin set-log-levels edu.harvard.iq.dataverse.api.Datasets=FINE``. Running ``./asadmin list-log-levels`` will show the current logging levels.\n \n+Java Server Faces (JSF) Configuration Options\n+---------------------------------------------\n+\n+Some JSF options can be easily changed via MicroProfile Config (using env vars, system properties, etc)\n+during development without recompiling. Changing the options will require at least a redeployment, obviously depending\n+how you get these options in. (Variable substitution only happens during deployment and when using system properties\n+or env vars, you'll need to pass these into the domain, which usually will require a app server restart.)\n+\n+Please note that since Payara 5.2021.1 supporting MicroProfile Config 2.0, you can\n+`use profiles <https://download.eclipse.org/microprofile/microprofile-config-2.0/microprofile-config-spec-2.0.html#configprofile>`_\n+to maintain your settings more easily for different environments.\n+\n+.. list-table::\n+   :widths: 15 15 60 10\n+   :header-rows: 1\n+   :align: left\n+\n+   * - JSF Option\n+     - MPCONFIG Key\n+     - Description\n+     - Default\n+   * - javax.faces.PROJECT_STAGE\n+     - dataverse.jsf.project-stage\n+     - Switch to different levels to make JSF more verbose, disable caches etc.\n+       Read more `here <https://www.ibm.com/support/pages/changes-xhtml-and-java-sources-jsf-20-web-project-not-refreshed-publish-was-v8-server>`_,\n+       `here <https://docs.oracle.com/javaee/6/tutorial/doc/bnaxj.html#giqxl>`_ and `here <https://javaee.github.io/tutorial/jsf-facelets003.html>`_\n+     - ``Production``\n+   * - javax.faces.INTERPRET_EMPTY\n+       _STRING_SUBMITTED_VALUES_AS_NULL\n+     - dataverse.jsf.empty-string-null\n+     - See `Jakarta Server Faces 3.0 Spec`_\n+     - ``true``\n+   * - javax.faces.FACELETS_SKIP_COMMENTS\n+     - dataverse.jsf.skip-comments\n+     - See `Jakarta Server Faces 3.0 Spec`_\n+     - ``true``\n+   * - javax.faces.FACELETS_BUFFER_SIZE\n+     - dataverse.jsf.buffer-size\n+     - See `Jakarta Server Faces 3.0 Spec`_\n+     - ``102400`` (100 KB)\n+   * - javax.faces.FACELETS_REFRESH_PERIOD\n+     - dataverse.jsf.refresh-period\n+     - See `Jakarta Server Faces 3.0 Spec`_\n+     - ``-1``\n+   * - primefaces.THEME\n+     - dataverse.jsf.primefaces.theme\n+     - See `PrimeFaces Configuration Docs`_\n+     - ``bootstrap``\n+\n+.. _Jakarta Server Faces 3.0 Spec: https://jakarta.ee/specifications/faces/3.0/jakarta-faces-3.0.html#a6088\n+.. _PrimeFaces Configuration Docs: https://primefaces.github.io/primefaces/8_0/#/gettingstarted/configuration\n+\n ----\n \n Previous: :doc:`documentation` | Next: :doc:`coding-style`"
+  },
+  {
+    "sha": "5413f9025951bb929a41ee5f59075d39c9488e62",
+    "filename": "src/main/webapp/WEB-INF/web.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 6,
+    "changes": 12,
+    "blob_url": "https://github.com/IQSS/dataverse/blob/617592ff26976cee58f3676ceac5f459e3e2ab34/src/main/webapp/WEB-INF/web.xml",
+    "raw_url": "https://github.com/IQSS/dataverse/raw/617592ff26976cee58f3676ceac5f459e3e2ab34/src/main/webapp/WEB-INF/web.xml",
+    "contents_url": "https://api.github.com/repos/IQSS/dataverse/contents/src/main/webapp/WEB-INF/web.xml?ref=617592ff26976cee58f3676ceac5f459e3e2ab34",
+    "patch": "@@ -27,11 +27,11 @@\n     <context-param>\n         <param-name>javax.faces.PROJECT_STAGE</param-name>\n <!--        <param-value>Development</param-value>-->\n-        <param-value>Production</param-value>\n+        <param-value>${MPCONFIG=dataverse.jsf.project-stage:Production}</param-value>\n     </context-param>\n     <context-param>\n         <param-name>primefaces.THEME</param-name>\n-        <param-value>bootstrap</param-value>\n+        <param-value>${MPCONFIG=dataverse.jsf.primefaces.theme:bootstrap}</param-value>\n     </context-param>\n     <!-- example of a hard-coded PrimePush configuration: -->\n     <!-- context-param -->\n@@ -42,19 +42,19 @@\n         <param-name>\n             javax.faces.INTERPRET_EMPTY_STRING_SUBMITTED_VALUES_AS_NULL\n         </param-name>\n-        <param-value>true</param-value>\n+        <param-value>${MPCONFIG=dataverse.jsf.empty-string-null:true}</param-value>\n     </context-param>\n     <context-param>\n         <param-name>javax.faces.FACELETS_SKIP_COMMENTS</param-name>\n-        <param-value>true</param-value>\n+        <param-value>${MPCONFIG=dataverse.jsf.skip-comments:true}</param-value>\n     </context-param>\n     <context-param>\n         <param-name>javax.faces.FACELETS_BUFFER_SIZE</param-name>\n-        <param-value>102400</param-value>\n+        <param-value>${MPCONFIG=dataverse.jsf.buffer-size:102400}</param-value>\n     </context-param>\n     <context-param>\n         <param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>\n-        <param-value>-1</param-value>\n+        <param-value>${MPCONFIG=dataverse.jsf.refresh-period:-1}</param-value>\n     </context-param>\n     <!-- JSF mapping -->\n     <filter>"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "1a8e97eebdb617c287e3a38454935db392820498",
+    "filename": "navigation/navigation-common/src/androidTest/java/androidx/navigation/NavDeepLinkTest.kt",
+    "status": "modified",
+    "additions": 68,
+    "deletions": 0,
+    "changes": 68,
+    "blob_url": "https://github.com/androidx/androidx/blob/40e86c5720455832c6886e25ce349d7fb6545524/navigation/navigation-common/src/androidTest/java/androidx/navigation/NavDeepLinkTest.kt",
+    "raw_url": "https://github.com/androidx/androidx/raw/40e86c5720455832c6886e25ce349d7fb6545524/navigation/navigation-common/src/androidTest/java/androidx/navigation/NavDeepLinkTest.kt",
+    "contents_url": "https://api.github.com/repos/androidx/androidx/contents/navigation/navigation-common/src/androidTest/java/androidx/navigation/NavDeepLinkTest.kt?ref=40e86c5720455832c6886e25ce349d7fb6545524",
+    "patch": "@@ -1049,4 +1049,72 @@ class NavDeepLinkTest {\n             .that(matchArgs?.getInt(\"id\"))\n             .isEqualTo(id)\n     }\n+\n+    @Test\n+    fun deepLinkCaseInsensitiveDomain() {\n+        val deepLinkString = DEEP_LINK_EXACT_HTTP\n+        val deepLink = NavDeepLink(deepLinkString)\n+\n+        val deepLinkUpper = deepLinkString.toUpperCase()\n+        assertThat(deepLink.matches(Uri.parse(deepLinkUpper)))\n+    }\n+\n+    @Test\n+    fun deepLinkCaseInsensitiveDomainRegexMatching() {\n+        val deepLinkArgument = \"$DEEP_LINK_EXACT_HTTPS/users/{id}/posts\"\n+        val deepLink = NavDeepLink(deepLinkArgument)\n+\n+        val id = 2\n+        val matchArgs = deepLink.getMatchingArguments(\n+            Uri.parse(\"${DEEP_LINK_EXACT_HTTPS.toUpperCase()}/users/${id}/posts\"),\n+            mapOf(\"id\" to intArgument())\n+        )\n+        assertWithMessage(\"Args should not be null\")\n+            .that(matchArgs)\n+            .isNotNull()\n+        assertWithMessage(\"Args should contain the id\")\n+            .that(matchArgs?.getInt(\"id\"))\n+            .isEqualTo(id)\n+    }\n+\n+    @Test\n+    fun deepLinkCaseInsensitiveArguments() {\n+        val deepLinkArgument = \"$DEEP_LINK_EXACT_HTTPS/users/{id}/posts\"\n+        val deepLink = NavDeepLink(deepLinkArgument)\n+\n+        val id = 2\n+        val matchArgs = deepLink.getMatchingArguments(\n+            Uri.parse(deepLinkArgument\n+                .replace(\"{id}\", id.toString())\n+                .replace(\"users\", \"Users\")\n+            ),\n+            mapOf(\"id\" to intArgument())\n+        )\n+        assertWithMessage(\"Args should not be null\")\n+            .that(matchArgs)\n+            .isNotNull()\n+        assertWithMessage(\"Args should contain the id\")\n+            .that(matchArgs?.getInt(\"id\"))\n+            .isEqualTo(id)\n+    }\n+\n+    @Test\n+    fun deepLinkCaseSensitiveParams() {\n+        val deepLinkString = \"$DEEP_LINK_EXACT_HTTP/?myParam={param}\"\n+        val deepLink = NavDeepLink(deepLinkString)\n+\n+        val param = 2\n+        val deepLinkUpper = deepLinkString\n+            .replace(\"myParam\", \"MyParam\")\n+            .replace(\"{param}\", param.toString())\n+        val matchArgs = deepLink.getMatchingArguments(Uri.parse(deepLinkUpper),\n+            mapOf(\"param\" to intArgument()))\n+\n+        assertWithMessage(\"Args should be not be null\")\n+            .that(matchArgs)\n+            .isNotNull()\n+        assertWithMessage(\"Args bundle should be empty\")\n+            .that(matchArgs!!.isEmpty)\n+            .isTrue()\n+    }\n }"
+  },
+  {
+    "sha": "42d18c177ab3022e9f2d4aebe2d6fbf4d2444122",
+    "filename": "navigation/navigation-common/src/main/java/androidx/navigation/NavDeepLink.kt",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/androidx/androidx/blob/40e86c5720455832c6886e25ce349d7fb6545524/navigation/navigation-common/src/main/java/androidx/navigation/NavDeepLink.kt",
+    "raw_url": "https://github.com/androidx/androidx/raw/40e86c5720455832c6886e25ce349d7fb6545524/navigation/navigation-common/src/main/java/androidx/navigation/NavDeepLink.kt",
+    "contents_url": "https://api.github.com/repos/androidx/androidx/contents/navigation/navigation-common/src/main/java/androidx/navigation/NavDeepLink.kt?ref=40e86c5720455832c6886e25ce349d7fb6545524",
+    "patch": "@@ -422,7 +422,7 @@ public class NavDeepLink internal constructor(\n             // specifically escape any .* instances to ensure\n             // they are still treated as wildcards in our final regex\n             val finalRegex = uriRegex.toString().replace(\".*\", \"\\\\E.*\\\\Q\")\n-            pattern = Pattern.compile(finalRegex)\n+            pattern = Pattern.compile(finalRegex, Pattern.CASE_INSENSITIVE)\n         }\n         if (mimeType != null) {\n             val mimeTypePattern = Pattern.compile(\"^[\\\\s\\\\S]+/[\\\\s\\\\S]+$\")"
+  }
+]

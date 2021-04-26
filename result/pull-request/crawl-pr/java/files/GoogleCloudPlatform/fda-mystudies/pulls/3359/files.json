@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "7d6c724a56d481ee76a330534b7f72d0edf6a7ec",
+    "filename": "Android/app/src/main/java/com/harvard/studyappmodule/StandaloneActivity.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/blob/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/StandaloneActivity.java",
+    "raw_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/raw/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/StandaloneActivity.java",
+    "contents_url": "https://api.github.com/repos/GoogleCloudPlatform/fda-mystudies/contents/Android/app/src/main/java/com/harvard/studyappmodule/StandaloneActivity.java?ref=3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a",
+    "patch": "@@ -103,7 +103,7 @@\n   private String activityId;\n   private String localNotification;\n   private String latestConsentVersion = \"0\";\n-\n+  private boolean enrollAgain;\n   private ArrayList<CompletionAdherence> completionAdherenceCalcs = new ArrayList<>();\n \n   private static final String FROM = \"from\";\n@@ -379,7 +379,7 @@ protected void onCreate(Bundle savedInstanceState) {\n       if (studyUpdate.getStudyUpdateData().isInfo()) {\n         dbServiceSubscriber.deleteStudyInfoFromDb(this, studyId);\n       }\n-      if (studyUpdate.getStudyUpdateData().isConsent()) {\n+      if (studyUpdate.getStudyUpdateData().isConsent() && studyUpdate.isEnrollAgain()) {\n         callConsentMetaDataWebservice();\n       } else {\n         AppController.getHelperProgressDialog().dismissDialog();\n@@ -396,12 +396,12 @@ protected void onCreate(Bundle savedInstanceState) {\n     } else if (responseCode == GET_CONSENT_DOC) {\n       ConsentDocumentData consentDocumentData = (ConsentDocumentData) response;\n       latestConsentVersion = consentDocumentData.getConsent().getVersion();\n-\n+      enrollAgain = consentDocumentData.isEnrollAgain();\n       callGetConsentPdfWebservice();\n \n     } else if (responseCode == CONSENTPDF) {\n       ConsentPDF consentPdfData = (ConsentPDF) response;\n-      if (latestConsentVersion != null\n+      if (enrollAgain && latestConsentVersion != null\n           && consentPdfData != null\n           && consentPdfData.getConsent() != null\n           && consentPdfData.getConsent().getVersion() != null) {"
+  },
+  {
+    "sha": "989cd83decebca8f136b9d70bcdc4a48331fc961",
+    "filename": "Android/app/src/main/java/com/harvard/studyappmodule/StudyFragment.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/blob/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/StudyFragment.java",
+    "raw_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/raw/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/StudyFragment.java",
+    "contents_url": "https://api.github.com/repos/GoogleCloudPlatform/fda-mystudies/contents/Android/app/src/main/java/com/harvard/studyappmodule/StudyFragment.java?ref=3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a",
+    "patch": "@@ -128,6 +128,7 @@\n \n   private int deleteIndexNumberDb;\n   private String latestConsentVersion = \"0\";\n+  private boolean enrollAgain;\n   private DbServiceSubscriber dbServiceSubscriber;\n   private Realm realm;\n   private boolean webserviceCall = false;\n@@ -835,7 +836,7 @@ private void callGetStudyListWebservice() {\n       if (studyUpdate.getStudyUpdateData().isInfo()) {\n         dbServiceSubscriber.deleteStudyInfoFromDb(context, studyId);\n       }\n-      if (studyUpdate.getStudyUpdateData().isConsent()) {\n+      if (studyUpdate.getStudyUpdateData().isConsent() && studyUpdate.isEnrollAgain()) {\n         callConsentMetaDataWebservice();\n       } else {\n         AppController.getHelperProgressDialog().dismissDialog();\n@@ -850,10 +851,11 @@ private void callGetStudyListWebservice() {\n     } else if (responseCode == GET_CONSENT_DOC) {\n       ConsentDocumentData consentDocumentData = (ConsentDocumentData) response;\n       latestConsentVersion = consentDocumentData.getConsent().getVersion();\n+      enrollAgain = consentDocumentData.isEnrollAgain();\n       callGetConsentPdfWebservice();\n     } else if (responseCode == CONSENTPDF) {\n       ConsentPDF consentPdfData = (ConsentPDF) response;\n-      if (latestConsentVersion != null\n+      if (enrollAgain && latestConsentVersion != null\n           && consentPdfData != null\n           && consentPdfData.getConsent() != null\n           && consentPdfData.getConsent().getVersion() != null) {"
+  },
+  {
+    "sha": "1530c97494d42e938678f8f749e45a46b0bfcd9c",
+    "filename": "Android/app/src/main/java/com/harvard/studyappmodule/SurveyActivitiesFragment.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/blob/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/SurveyActivitiesFragment.java",
+    "raw_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/raw/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/SurveyActivitiesFragment.java",
+    "contents_url": "https://api.github.com/repos/GoogleCloudPlatform/fda-mystudies/contents/Android/app/src/main/java/com/harvard/studyappmodule/SurveyActivitiesFragment.java?ref=3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a",
+    "patch": "@@ -611,7 +611,7 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {\n           dbServiceSubscriber.deleteStudyInfoFromDb(\n               context, ((SurveyActivity) context).getStudyId());\n         }\n-        if (studyUpdate.getStudyUpdateData().isConsent()) {\n+        if (studyUpdate.getStudyUpdateData().isConsent() && studyUpdate.isEnrollAgain()) {\n           callConsentMetaDataWebservice();\n         } else {\n           StudyList studyList ="
+  },
+  {
+    "sha": "0a2b5f27a0608daeff05f64a78291608ebe5e04d",
+    "filename": "Android/app/src/main/java/com/harvard/studyappmodule/studymodel/ConsentDocumentData.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/blob/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/studymodel/ConsentDocumentData.java",
+    "raw_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/raw/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/studymodel/ConsentDocumentData.java",
+    "contents_url": "https://api.github.com/repos/GoogleCloudPlatform/fda-mystudies/contents/Android/app/src/main/java/com/harvard/studyappmodule/studymodel/ConsentDocumentData.java?ref=3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a",
+    "patch": "@@ -19,6 +19,7 @@\n \n public class ConsentDocumentData extends RealmObject {\n   private String message;\n+  private boolean enrollAgain;\n   private ConsentDocObj consent;\n   @PrimaryKey\n   private String mStudyId;\n@@ -46,4 +47,12 @@ public ConsentDocObj getConsent() {\n   public void setConsent(ConsentDocObj consent) {\n     this.consent = consent;\n   }\n+\n+  public boolean isEnrollAgain() {\n+    return enrollAgain;\n+  }\n+\n+  public void setEnrollAgain(boolean enrollAgain) {\n+    this.enrollAgain = enrollAgain;\n+  }\n }"
+  },
+  {
+    "sha": "a1e52d5bf3c6dedc71e90712431225e0045f1030",
+    "filename": "Android/app/src/main/java/com/harvard/studyappmodule/studymodel/StudyUpdate.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/blob/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/studymodel/StudyUpdate.java",
+    "raw_url": "https://github.com/GoogleCloudPlatform/fda-mystudies/raw/3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a/Android/app/src/main/java/com/harvard/studyappmodule/studymodel/StudyUpdate.java",
+    "contents_url": "https://api.github.com/repos/GoogleCloudPlatform/fda-mystudies/contents/Android/app/src/main/java/com/harvard/studyappmodule/studymodel/StudyUpdate.java?ref=3bd432e46b53b9de265d5dd7c9d49813b9ec0d4a",
+    "patch": "@@ -21,6 +21,7 @@\n   @PrimaryKey private String studyId;\n   private String message;\n   private String currentVersion;\n+  private boolean enrollAgain;\n   private StudyUpdateData updates;\n \n   public String getStudyId() {\n@@ -62,4 +63,12 @@ public StudyUpdateData getStudyUpdateData() {\n   public void setStudyUpdateData(StudyUpdateData updates) {\n     this.updates = updates;\n   }\n+\n+  public boolean isEnrollAgain() {\n+    return enrollAgain;\n+  }\n+\n+  public void setEnrollAgain(boolean enrollAgain) {\n+    this.enrollAgain = enrollAgain;\n+  }\n }"
+  }
+]

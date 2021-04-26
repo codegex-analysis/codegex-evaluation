@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "d22ab6c7e5a0a0dd7985fc947630d6f445ab888d",
+    "filename": "maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 2,
+    "changes": 16,
+    "blob_url": "https://github.com/apache/maven-surefire/blob/69aa81727712fe1108a76b6d2076e369f5ebc607/maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java",
+    "raw_url": "https://github.com/apache/maven-surefire/raw/69aa81727712fe1108a76b6d2076e369f5ebc607/maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java",
+    "contents_url": "https://api.github.com/repos/apache/maven-surefire/contents/maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java?ref=69aa81727712fe1108a76b6d2076e369f5ebc607",
+    "patch": "@@ -3623,9 +3623,21 @@ public void setSystemProperties( Properties systemProperties )\n     }\n \n     @SuppressWarnings( \"UnusedDeclaration\" )\n-    public void setSystemPropertyVariables( Map<String, String> systemPropertyVariables )\n+    public void setSystemPropertyVariables( Map<String, ?> systemPropertyVariables )\n     {\n-        this.systemPropertyVariables = systemPropertyVariables;\n+        if ( systemPropertyVariables != null )\n+        {\n+            this.systemPropertyVariables = new HashMap<>();\n+            for ( final Map.Entry<String, ?> entry : systemPropertyVariables.entrySet() )\n+            {\n+                final Object value = entry.getValue();\n+                this.systemPropertyVariables.put( entry.getKey(), value == null ? null : String.valueOf( value ) );\n+            }\n+        }\n+        else\n+        {\n+            this.systemPropertyVariables = null;\n+        }\n     }\n \n     /**"
+  },
+  {
+    "sha": "697fac4aea80fbc9d646774fb5a626d35ef01e64",
+    "filename": "maven-surefire-common/src/test/java/org/apache/maven/plugin/surefire/AbstractSurefireMojoTest.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/apache/maven-surefire/blob/69aa81727712fe1108a76b6d2076e369f5ebc607/maven-surefire-common/src/test/java/org/apache/maven/plugin/surefire/AbstractSurefireMojoTest.java",
+    "raw_url": "https://github.com/apache/maven-surefire/raw/69aa81727712fe1108a76b6d2076e369f5ebc607/maven-surefire-common/src/test/java/org/apache/maven/plugin/surefire/AbstractSurefireMojoTest.java",
+    "contents_url": "https://api.github.com/repos/apache/maven-surefire/contents/maven-surefire-common/src/test/java/org/apache/maven/plugin/surefire/AbstractSurefireMojoTest.java?ref=69aa81727712fe1108a76b6d2076e369f5ebc607",
+    "patch": "@@ -94,6 +94,7 @@\n import static java.util.Collections.emptySet;\n import static java.util.Collections.singleton;\n import static java.util.Collections.singletonList;\n+import static java.util.Collections.singletonMap;\n import static org.apache.maven.artifact.versioning.VersionRange.createFromVersion;\n import static org.apache.maven.artifact.versioning.VersionRange.createFromVersionSpec;\n import static org.apache.maven.surefire.shared.lang3.JavaVersion.JAVA_9;\n@@ -102,6 +103,7 @@\n import static org.codehaus.plexus.languages.java.jpms.ModuleNameSource.MODULEDESCRIPTOR;\n import static org.fest.assertions.Assertions.assertThat;\n import static org.fest.assertions.MapAssert.entry;\n+import static org.junit.Assert.assertEquals;\n import static org.junit.Assert.fail;\n import static org.mockito.ArgumentMatchers.any;\n import static org.mockito.ArgumentMatchers.anyString;\n@@ -1999,6 +2001,14 @@ protected String getEnableProcessChecker()\n         mojo.verifyParameters();\n     }\n \n+    @Test\n+    public void shouldSupportBooleanSystemPropertiesValue()\n+    {\n+        AbstractSurefireMojo mojo = new Mojo();\n+        mojo.setSystemPropertyVariables( singletonMap( \"offline\", true ) );\n+        assertEquals( singletonMap( \"offline\", \"true\" ), mojo.getSystemPropertyVariables() );\n+    }\n+\n     private void setProjectDepedenciesToMojo( Artifact... deps )\n     {\n         for ( Artifact dep : deps )"
+  }
+]

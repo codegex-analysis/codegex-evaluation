@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "e55074d990fe70f76a76007aa0f4cbc44d1cde6b",
+    "filename": "src/main/java/com/archis/empapp/controller/EventController.java",
+    "status": "added",
+    "additions": 56,
+    "deletions": 0,
+    "changes": 56,
+    "blob_url": "https://github.com/Remyavineeth/empapp/blob/7374e196c750eb1b158e0fee8dc66444533c8a69/src/main/java/com/archis/empapp/controller/EventController.java",
+    "raw_url": "https://github.com/Remyavineeth/empapp/raw/7374e196c750eb1b158e0fee8dc66444533c8a69/src/main/java/com/archis/empapp/controller/EventController.java",
+    "contents_url": "https://api.github.com/repos/Remyavineeth/empapp/contents/src/main/java/com/archis/empapp/controller/EventController.java?ref=7374e196c750eb1b158e0fee8dc66444533c8a69",
+    "patch": "@@ -0,0 +1,56 @@\n+package com.archis.empapp.controller;\n+\n+import com.archis.empapp.dto.Event;\n+import com.archis.empapp.eventservice.EventService;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.http.HttpStatus;\n+import org.springframework.http.ResponseEntity;\n+import org.springframework.web.bind.annotation.*;\n+\n+import java.util.List;\n+\n+@RestController\n+public class EventController {\n+\n+    @Autowired\n+    EventService service;\n+    @RequestMapping(method = RequestMethod.GET,value = \"/event/{id}\")\n+    public ResponseEntity<Event> getNameByID(@PathVariable(\"id\") Long id){\n+\n+\n+        return new ResponseEntity<Event>(service.findById(id), HttpStatus.OK);\n+    }\n+\n+    @RequestMapping(method = RequestMethod.GET,value = \"/event/\")\n+    public ResponseEntity<List<Event>> getEvents(){\n+return new ResponseEntity<List<Event>>(service.getAll(),HttpStatus.OK);\n+    }\n+    @RequestMapping(method = RequestMethod.POST,value = \"/event/\")\n+    public ResponseEntity <String>create(@RequestBody Event event) {\n+service.create(event);\n+        return new ResponseEntity<String>(\"Account Created\",HttpStatus.CREATED);\n+    }\n+    @RequestMapping(method = RequestMethod.PUT,value = \"/event/{id}\")\n+    public ResponseEntity<String> update(@PathVariable Long id,@RequestBody Event updateEvent) {\n+      if(service.findById(id)==null){\n+          return new ResponseEntity<String>(\"Account Not Found\",HttpStatus.NOT_FOUND);\n+\n+      }else{\n+          service.update(updateEvent);\n+return new ResponseEntity<String>(\"Account Updated successfully\",HttpStatus.OK);\n+      }\n+    }\n+   @RequestMapping(method = RequestMethod.DELETE,value = \"/event/{id}\")\n+    public Object delete(@PathVariable Long id){\n+       if(service.findById(id)==null){\n+           return new ResponseEntity<String>(\"Account Not Found\",HttpStatus.NOT_FOUND);\n+\n+       }else{\n+           service.delete(id);\n+           return new ResponseEntity<String>(\"Account Deleted successfully\",HttpStatus.OK);\n+       }\n+\n+    }\n+\n+\n+}"
+  },
+  {
+    "sha": "8454586f88fc2e245110e89cbf0f574c3e9f8e95",
+    "filename": "src/main/java/com/archis/empapp/dto/Event.java",
+    "status": "added",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/Remyavineeth/empapp/blob/7374e196c750eb1b158e0fee8dc66444533c8a69/src/main/java/com/archis/empapp/dto/Event.java",
+    "raw_url": "https://github.com/Remyavineeth/empapp/raw/7374e196c750eb1b158e0fee8dc66444533c8a69/src/main/java/com/archis/empapp/dto/Event.java",
+    "contents_url": "https://api.github.com/repos/Remyavineeth/empapp/contents/src/main/java/com/archis/empapp/dto/Event.java?ref=7374e196c750eb1b158e0fee8dc66444533c8a69",
+    "patch": "@@ -0,0 +1,33 @@\n+package com.archis.empapp.dto;\n+\n+public class Event {\n+    public Long event_id;\n+    public String event_name;\n+    public String event_description;\n+\n+\n+\n+    public String getEvent_description() {\n+        return event_description;\n+    }\n+\n+    public void setEvent_description(String event_description) {\n+        this.event_description = event_description;\n+    }\n+\n+    public String getEvent_name() {\n+        return event_name;\n+    }\n+\n+    public void setEvent_name(String event_name) {\n+        this.event_name = event_name;\n+    }\n+\n+    public Long getEvent_id() {\n+        return event_id;\n+    }\n+\n+    public void setEvent_id(Long event_id) {\n+        this.event_id = event_id;\n+    }\n+}"
+  },
+  {
+    "sha": "0c5ebde949fca5b4ed62814ed77ce3b05006ea85",
+    "filename": "src/main/java/com/archis/empapp/eventservice/EventService.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/Remyavineeth/empapp/blob/7374e196c750eb1b158e0fee8dc66444533c8a69/src/main/java/com/archis/empapp/eventservice/EventService.java",
+    "raw_url": "https://github.com/Remyavineeth/empapp/raw/7374e196c750eb1b158e0fee8dc66444533c8a69/src/main/java/com/archis/empapp/eventservice/EventService.java",
+    "contents_url": "https://api.github.com/repos/Remyavineeth/empapp/contents/src/main/java/com/archis/empapp/eventservice/EventService.java?ref=7374e196c750eb1b158e0fee8dc66444533c8a69",
+    "patch": "@@ -0,0 +1,32 @@\n+package com.archis.empapp.eventservice;\n+\n+import com.archis.empapp.dto.Event;\n+import org.springframework.stereotype.Service;\n+\n+import java.util.ArrayList;\n+import java.util.HashMap;\n+import java.util.List;\n+import java.util.Map;\n+\n+@Service\n+public class EventService {\n+    Map<Long, Event> database=new HashMap<>();\n+    public Event findById(Long id){\n+        return database.get(id);\n+    }\n+    public List<Event> getAll(){\n+        return new ArrayList<>(database.values());\n+    }\n+\n+    public void create(Event event){\n+        database.put(event.getEvent_id(),event);\n+    }\n+    public void update (Event updateEvent){\n+        Event eventToBeUpdated=database.get(updateEvent.getEvent_id());\n+        eventToBeUpdated.setEvent_name(updateEvent.getEvent_name());\n+        eventToBeUpdated.setEvent_description(updateEvent.getEvent_description());\n+    }\n+    public void delete (Long id){\n+        database.remove(id);\n+    }\n+}"
+  }
+]

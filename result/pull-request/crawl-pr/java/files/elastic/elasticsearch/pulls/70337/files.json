@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "561b22186564c8cac504783e37cdd11e99a64439",
+    "filename": "x-pack/plugin/watcher/qa/rest/build.gradle",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/qa/rest/build.gradle",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/qa/rest/build.gradle",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/watcher/qa/rest/build.gradle?ref=08d9d2f1351a5abb76a5def592debe272e8d2c2c",
+    "patch": "@@ -1,6 +1,7 @@\n import org.elasticsearch.gradle.info.BuildParams\n \n apply plugin: 'elasticsearch.yaml-rest-test'\n+apply plugin: 'elasticsearch.yaml-rest-compat-test'\n apply plugin: 'elasticsearch.java-rest-test'\n \n dependencies {\n@@ -34,3 +35,17 @@ if (BuildParams.inFipsJvm){\n   tasks.named(\"javaRestTest\").configure{enabled = false }\n   tasks.named(\"yamlRestTest\").configure{enabled = false }\n }\n+\n+tasks.named(\"yamlRestCompatTest\").configure {\n+  systemProperty 'tests.rest.blacklist', [\n+    'mustache/10_webhook/Test webhook action with mustache integration',\n+    'mustache/25_array_compare/Basic array_compare watch',\n+    'mustache/30_search_input/Test search input mustache integration (using request body and rest_total_hits_as_int)',\n+    'mustache/30_search_input/Test search input mustache integration (using request body)',\n+    'mustache/30_search_input/Test search input mustache integration (using request template and rest_total_hits_as_int)',\n+    'mustache/30_search_input/Test search input mustache integration (using request template)',\n+    'mustache/40_search_transform/Test search transform mustache integration (using request body)',\n+    'mustache/40_search_transform/Test search transform mustache integration (using request template)',\n+    'watcher/put_watch/10_basic/Test empty body is rejected by put watch'\n+  ].join(',')\n+}"
+  },
+  {
+    "sha": "f0bd79d4944fec7490a8085ffbf3a8db1cdae40a",
+    "filename": "x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestAckWatchAction.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 4,
+    "changes": 14,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestAckWatchAction.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestAckWatchAction.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestAckWatchAction.java?ref=08d9d2f1351a5abb76a5def592debe272e8d2c2c",
+    "patch": "@@ -8,6 +8,7 @@\n package org.elasticsearch.xpack.watcher.rest.action;\n \n import org.elasticsearch.client.node.NodeClient;\n+import org.elasticsearch.common.RestApiVersion;\n import org.elasticsearch.common.xcontent.XContentBuilder;\n import org.elasticsearch.rest.BaseRestHandler;\n import org.elasticsearch.rest.BytesRestResponse;\n@@ -34,10 +35,15 @@\n     @Override\n     public List<Route> routes() {\n         return List.of(\n-            new Route(POST, \"/_watcher/watch/{id}/_ack\"),\n-            new Route(PUT, \"/_watcher/watch/{id}/_ack\"),\n-            new Route(POST, \"/_watcher/watch/{id}/_ack/{actions}\"),\n-            new Route(PUT, \"/_watcher/watch/{id}/_ack/{actions}\"));\n+            Route.builder(POST, \"/_watcher/watch/{id}/_ack\")\n+                .replaces(POST, \"/_xpack/watcher/watch/{id}/_ack\", RestApiVersion.V_7).build(),\n+            Route.builder(PUT, \"/_watcher/watch/{id}/_ack\")\n+                .replaces(PUT, \"/_xpack/watcher/watch/{id}/_ack\", RestApiVersion.V_7).build(),\n+            Route.builder(POST, \"/_watcher/watch/{id}/_ack/{actions}\")\n+                .replaces(POST, \"/_xpack/watcher/watch/{id}/_ack/{actions}\", RestApiVersion.V_7).build(),\n+            Route.builder(PUT, \"/_watcher/watch/{id}/_ack/{actions}\")\n+                .replaces(PUT, \"/_xpack/watcher/watch/{id}/_ack/{actions}\", RestApiVersion.V_7).build()\n+        );\n     }\n \n     @Override"
+  },
+  {
+    "sha": "5d7848c204b062b8fb53c0127b6ba70ec6e7d7e0",
+    "filename": "x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestActivateWatchAction.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 4,
+    "changes": 15,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestActivateWatchAction.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestActivateWatchAction.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestActivateWatchAction.java?ref=08d9d2f1351a5abb76a5def592debe272e8d2c2c",
+    "patch": "@@ -8,6 +8,7 @@\n package org.elasticsearch.xpack.watcher.rest.action;\n \n import org.elasticsearch.client.node.NodeClient;\n+import org.elasticsearch.common.RestApiVersion;\n import org.elasticsearch.common.xcontent.XContentBuilder;\n import org.elasticsearch.rest.BaseRestHandler;\n import org.elasticsearch.rest.BytesRestResponse;\n@@ -34,8 +35,11 @@\n     @Override\n     public List<Route> routes() {\n         return List.of(\n-            new Route(POST, \"/_watcher/watch/{id}/_activate\"),\n-            new Route(PUT, \"/_watcher/watch/{id}/_activate\"));\n+            Route.builder(POST, \"/_watcher/watch/{id}/_activate\")\n+                .replaces(POST, \"/_xpack/watcher/watch/{id}/_activate\", RestApiVersion.V_7).build(),\n+            Route.builder(PUT, \"/_watcher/watch/{id}/_activate\")\n+                .replaces(PUT, \"/_xpack/watcher/watch/{id}/_activate\", RestApiVersion.V_7).build()\n+        );\n     }\n \n     @Override\n@@ -63,8 +67,11 @@ public RestResponse buildResponse(ActivateWatchResponse response, XContentBuilde\n         @Override\n         public List<Route> routes() {\n             return List.of(\n-                new Route(POST, \"/_watcher/watch/{id}/_deactivate\"),\n-                new Route(PUT, \"/_watcher/watch/{id}/_deactivate\"));\n+                Route.builder(POST, \"/_watcher/watch/{id}/_deactivate\")\n+                    .replaces(POST, \"/_xpack/watcher/watch/{id}/_deactivate\", RestApiVersion.V_7).build(),\n+                Route.builder(PUT, \"/_watcher/watch/{id}/_deactivate\")\n+                    .replaces(PUT, \"/_xpack/watcher/watch/{id}/_deactivate\", RestApiVersion.V_7).build()\n+            );\n         }\n \n         @Override"
+  },
+  {
+    "sha": "47a54e508954066878b219fb8fce615ec1d1c7d1",
+    "filename": "x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestDeleteWatchAction.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestDeleteWatchAction.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestDeleteWatchAction.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestDeleteWatchAction.java?ref=08d9d2f1351a5abb76a5def592debe272e8d2c2c",
+    "patch": "@@ -8,6 +8,7 @@\n package org.elasticsearch.xpack.watcher.rest.action;\n \n import org.elasticsearch.client.node.NodeClient;\n+import org.elasticsearch.common.RestApiVersion;\n import org.elasticsearch.common.xcontent.XContentBuilder;\n import org.elasticsearch.protocol.xpack.watcher.DeleteWatchRequest;\n import org.elasticsearch.protocol.xpack.watcher.DeleteWatchResponse;\n@@ -29,7 +30,10 @@\n \n     @Override\n     public List<Route> routes() {\n-        return List.of(new Route(DELETE, \"/_watcher/watch/{id}\"));\n+        return List.of(\n+            Route.builder(DELETE, \"/_watcher/watch/{id}\")\n+                .replaces(DELETE, \"/_xpack/watcher/watch/{id}\", RestApiVersion.V_7).build()\n+        );\n     }\n \n     @Override"
+  },
+  {
+    "sha": "b3e2c00cb0a6b9b39ea0c19a44a82548973255d0",
+    "filename": "x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestExecuteWatchAction.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 4,
+    "changes": 14,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestExecuteWatchAction.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestExecuteWatchAction.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestExecuteWatchAction.java?ref=08d9d2f1351a5abb76a5def592debe272e8d2c2c",
+    "patch": "@@ -11,6 +11,7 @@\n import org.elasticsearch.client.node.NodeClient;\n import org.elasticsearch.common.ParseField;\n import org.elasticsearch.common.bytes.BytesReference;\n+import org.elasticsearch.common.RestApiVersion;\n import org.elasticsearch.common.util.set.Sets;\n import org.elasticsearch.common.xcontent.XContentBuilder;\n import org.elasticsearch.common.xcontent.XContentParser;\n@@ -51,10 +52,15 @@\n     @Override\n     public List<Route> routes() {\n         return List.of(\n-            new Route(POST, \"/_watcher/watch/{id}/_execute\"),\n-            new Route(PUT, \"/_watcher/watch/{id}/_execute\"),\n-            new Route(POST, \"/_watcher/watch/_execute\"),\n-            new Route(PUT, \"/_watcher/watch/_execute\"));\n+            Route.builder(POST, \"/_watcher/watch/{id}/_execute\")\n+                .replaces(POST, \"/_xpack/watcher/watch/{id}/_execute\", RestApiVersion.V_7).build(),\n+            Route.builder(PUT, \"/_watcher/watch/{id}/_execute\")\n+                .replaces(PUT, \"/_xpack/watcher/watch/{id}/_execute\", RestApiVersion.V_7).build(),\n+            Route.builder(POST, \"/_watcher/watch/_execute\")\n+                .replaces(POST, \"/_xpack/watcher/watch/_execute\", RestApiVersion.V_7).build(),\n+            Route.builder(PUT, \"/_watcher/watch/_execute\")\n+                .replaces(PUT, \"/_xpack/watcher/watch/_execute\", RestApiVersion.V_7).build()\n+        );\n     }\n \n     @Override"
+  },
+  {
+    "sha": "5a83948f7493cd675504e8b66bf394593fbfe3a6",
+    "filename": "x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestGetWatchAction.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestGetWatchAction.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestGetWatchAction.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestGetWatchAction.java?ref=08d9d2f1351a5abb76a5def592debe272e8d2c2c",
+    "patch": "@@ -8,6 +8,7 @@\n package org.elasticsearch.xpack.watcher.rest.action;\n \n import org.elasticsearch.client.node.NodeClient;\n+import org.elasticsearch.common.RestApiVersion;\n import org.elasticsearch.common.xcontent.XContentBuilder;\n import org.elasticsearch.rest.BaseRestHandler;\n import org.elasticsearch.rest.BytesRestResponse;\n@@ -29,7 +30,10 @@\n \n     @Override\n     public List<Route> routes() {\n-        return List.of(new Route(GET, \"/_watcher/watch/{id}\"));\n+        return List.of(\n+            Route.builder(GET, \"/_watcher/watch/{id}\")\n+                .replaces(GET, \"/_xpack/watcher/watch/{id}\", RestApiVersion.V_7).build()\n+        );\n     }\n \n     @Override"
+  },
+  {
+    "sha": "e5178d5f243f0f1060ed4c4b35d32a04867775fe",
+    "filename": "x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestPutWatchAction.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestPutWatchAction.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestPutWatchAction.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestPutWatchAction.java?ref=08d9d2f1351a5abb76a5def592debe272e8d2c2c",
+    "patch": "@@ -8,6 +8,7 @@\n package org.elasticsearch.xpack.watcher.rest.action;\n \n import org.elasticsearch.client.node.NodeClient;\n+import org.elasticsearch.common.RestApiVersion;\n import org.elasticsearch.common.lucene.uid.Versions;\n import org.elasticsearch.common.util.set.Sets;\n import org.elasticsearch.common.xcontent.XContentBuilder;\n@@ -36,8 +37,11 @@\n     @Override\n     public List<Route> routes() {\n         return List.of(\n-            new Route(POST, \"/_watcher/watch/{id}\"),\n-            new Route(PUT, \"/_watcher/watch/{id}\"));\n+            Route.builder(POST, \"/_watcher/watch/{id}\")\n+                .replaces(POST, \"/_xpack/watcher/watch/{id}\", RestApiVersion.V_7).build(),\n+            Route.builder(PUT, \"/_watcher/watch/{id}\")\n+                .replaces(PUT, \"/_xpack/watcher/watch/{id}\", RestApiVersion.V_7).build()\n+        );\n     }\n \n     @Override"
+  },
+  {
+    "sha": "97c5f6d7a1459f7f934bc26dea1d0f7331c4e6c5",
+    "filename": "x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestWatchServiceAction.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 2,
+    "changes": 11,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestWatchServiceAction.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestWatchServiceAction.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestWatchServiceAction.java?ref=08d9d2f1351a5abb76a5def592debe272e8d2c2c",
+    "patch": "@@ -8,6 +8,7 @@\n package org.elasticsearch.xpack.watcher.rest.action;\n \n import org.elasticsearch.client.node.NodeClient;\n+import org.elasticsearch.common.RestApiVersion;\n import org.elasticsearch.rest.BaseRestHandler;\n import org.elasticsearch.rest.RestRequest;\n import org.elasticsearch.rest.action.RestToXContentListener;\n@@ -22,7 +23,10 @@\n \n     @Override\n     public List<Route> routes() {\n-        return List.of(new Route(POST, \"/_watcher/_start\"));\n+        return List.of(\n+            Route.builder(POST, \"/_watcher/_start\")\n+                .replaces(POST, \"/_xpack/watcher/_start\", RestApiVersion.V_7).build()\n+        );\n     }\n \n     @Override\n@@ -40,7 +44,10 @@ public RestChannelConsumer prepareRequest(RestRequest request, NodeClient client\n \n         @Override\n         public List<Route> routes() {\n-            return List.of(new Route(POST, \"/_watcher/_stop\"));\n+            return List.of(\n+                Route.builder(POST, \"/_watcher/_stop\")\n+                    .replaces(POST, \"/_xpack/watcher/_stop\", RestApiVersion.V_7).build()\n+            );\n         }\n \n         @Override"
+  },
+  {
+    "sha": "03da8261e5b424073f043cb0fb28829476661026",
+    "filename": "x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestWatcherStatsAction.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestWatcherStatsAction.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/08d9d2f1351a5abb76a5def592debe272e8d2c2c/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestWatcherStatsAction.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/watcher/src/main/java/org/elasticsearch/xpack/watcher/rest/action/RestWatcherStatsAction.java?ref=08d9d2f1351a5abb76a5def592debe272e8d2c2c",
+    "patch": "@@ -8,6 +8,7 @@\n package org.elasticsearch.xpack.watcher.rest.action;\n \n import org.elasticsearch.client.node.NodeClient;\n+import org.elasticsearch.common.RestApiVersion;\n import org.elasticsearch.common.Strings;\n import org.elasticsearch.common.logging.DeprecationCategory;\n import org.elasticsearch.common.logging.DeprecationLogger;\n@@ -29,8 +30,11 @@\n     @Override\n     public List<Route> routes() {\n         return List.of(\n-            new Route(GET, \"/_watcher/stats\"),\n-            new Route(GET, \"/_watcher/stats/{metric}\"));\n+            Route.builder(GET, \"/_watcher/stats\")\n+                .replaces(GET, \"/_xpack/watcher/stats\", RestApiVersion.V_7).build(),\n+            Route.builder(GET, \"/_watcher/stats/{metric}\")\n+                .replaces(GET, \"/_xpack/watcher/stats/{metric}\", RestApiVersion.V_7).build()\n+        );\n     }\n \n     @Override"
+  }
+]

@@ -1,0 +1,63 @@
+[
+  {
+    "sha": "25aec4d84f34c267b0bca1a85b349ddbbc286582",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/iis-powp-2020z/powp_jobs2d/blob/4eb6ca2e764bc1b008068abecd2357b5d51d558b/.gitignore",
+    "raw_url": "https://github.com/iis-powp-2020z/powp_jobs2d/raw/4eb6ca2e764bc1b008068abecd2357b5d51d558b/.gitignore",
+    "contents_url": "https://api.github.com/repos/iis-powp-2020z/powp_jobs2d/contents/.gitignore?ref=4eb6ca2e764bc1b008068abecd2357b5d51d558b",
+    "patch": "@@ -3,3 +3,4 @@\n /.classpath\n /.project\n .settings\n+/bin/"
+  },
+  {
+    "sha": "75ea58649c8bd67014b23756f2902897522cf939",
+    "filename": "src/main/java/edu/kis/powp/jobs2d/drivers/adapter/DrawPanelConrollerAdapter.java",
+    "status": "renamed",
+    "additions": 10,
+    "deletions": 6,
+    "changes": 16,
+    "blob_url": "https://github.com/iis-powp-2020z/powp_jobs2d/blob/4eb6ca2e764bc1b008068abecd2357b5d51d558b/src/main/java/edu/kis/powp/jobs2d/drivers/adapter/DrawPanelConrollerAdapter.java",
+    "raw_url": "https://github.com/iis-powp-2020z/powp_jobs2d/raw/4eb6ca2e764bc1b008068abecd2357b5d51d558b/src/main/java/edu/kis/powp/jobs2d/drivers/adapter/DrawPanelConrollerAdapter.java",
+    "contents_url": "https://api.github.com/repos/iis-powp-2020z/powp_jobs2d/contents/src/main/java/edu/kis/powp/jobs2d/drivers/adapter/DrawPanelConrollerAdapter.java?ref=4eb6ca2e764bc1b008068abecd2357b5d51d558b",
+    "patch": "@@ -6,13 +6,16 @@\n import edu.kis.powp.jobs2d.Job2dDriver;\n \n /**\n- * driver adapter to drawer with several bugs.\n+ * driver adapter to drawer: BasicLine\n  */\n-public class MyAdapter extends DrawPanelController implements Job2dDriver {\n+public class DrawPanelConrollerAdapter implements Job2dDriver {\n+\t\n \tprivate int startX = 0, startY = 0;\n-\n-\tpublic MyAdapter() {\n+\tprivate DrawPanelController drawPanelController;\n+\t\n+\tpublic DrawPanelConrollerAdapter(DrawPanelController argDrawPanelController) {\n \t\tsuper();\n+\t\tdrawPanelController = argDrawPanelController;\n \t}\n \n \t@Override\n@@ -27,11 +30,12 @@ public void operateTo(int x, int y) {\n \t\tline.setStartCoordinates(this.startX, this.startY);\n \t\tline.setEndCoordinates(x, y);\n \n-\t\tdrawLine(line);\n+\t\tdrawPanelController.drawLine(line);\n+\t\tsetPosition(x, y);\n \t}\n \n \t@Override\n \tpublic String toString() {\n-\t\treturn \"@Q!$!@$!#@$(*#@&Q(%^*#@\";\n+\t\treturn \"BasicLine! @Q!$!@$!#@$(*#@&Q(%^*#@\";\n \t}\n }",
+    "previous_filename": "src/main/java/edu/kis/powp/jobs2d/drivers/adapter/MyAdapter.java"
+  },
+  {
+    "sha": "5aa2573da0d059565d66516ecdc898453c9ab57d",
+    "filename": "src/main/java/edu/kis/powp/jobs2d/drivers/adapter/LineDrawerAdapter.java",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/iis-powp-2020z/powp_jobs2d/blob/4eb6ca2e764bc1b008068abecd2357b5d51d558b/src/main/java/edu/kis/powp/jobs2d/drivers/adapter/LineDrawerAdapter.java",
+    "raw_url": "https://github.com/iis-powp-2020z/powp_jobs2d/raw/4eb6ca2e764bc1b008068abecd2357b5d51d558b/src/main/java/edu/kis/powp/jobs2d/drivers/adapter/LineDrawerAdapter.java",
+    "contents_url": "https://api.github.com/repos/iis-powp-2020z/powp_jobs2d/contents/src/main/java/edu/kis/powp/jobs2d/drivers/adapter/LineDrawerAdapter.java?ref=4eb6ca2e764bc1b008068abecd2357b5d51d558b",
+    "patch": "@@ -0,0 +1,41 @@\n+package edu.kis.powp.jobs2d.drivers.adapter;\n+\n+import edu.kis.legacy.drawer.panel.DrawPanelController;\n+import edu.kis.legacy.drawer.shape.ILine;\n+import edu.kis.legacy.drawer.shape.LineFactory;\n+import edu.kis.powp.jobs2d.Job2dDriver;\n+\n+/**\n+ * driver adapter to drawer: SpecialLine\n+ */\n+public class LineDrawerAdapter implements Job2dDriver {\n+\t\n+\tprivate int startX = 0, startY = 0;\n+\tprivate DrawPanelController drawPanelController;\n+\t\n+\tpublic LineDrawerAdapter(DrawPanelController argDrawPanelController) {\n+\t\tsuper();\n+\t\tdrawPanelController = argDrawPanelController;\n+\t}\n+\n+\t@Override\n+\tpublic void setPosition(int x, int y) {\n+\t\tthis.startX = x;\n+\t\tthis.startY = y;\n+\t}\n+\n+\t@Override\n+\tpublic void operateTo(int x, int y) {\n+\t\tILine line = LineFactory.getSpecialLine();\n+\t\tline.setStartCoordinates(this.startX, this.startY);\n+\t\tline.setEndCoordinates(x, y);\n+\n+\t\tdrawPanelController.drawLine(line);\n+\t\tsetPosition(x, y);\n+\t}\n+\n+\t@Override\n+\tpublic String toString() {\n+\t\treturn \"SpecialLine! @Q!$!@$!#@$(*#@&Q(%^*#@\";\n+\t}\n+}"
+  },
+  {
+    "sha": "259916e575c53adb74bc77e9151eeacab73956d0",
+    "filename": "src/test/java/edu/kis/powp/jobs2d/TestJobs2dPatterns.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 4,
+    "changes": 14,
+    "blob_url": "https://github.com/iis-powp-2020z/powp_jobs2d/blob/4eb6ca2e764bc1b008068abecd2357b5d51d558b/src/test/java/edu/kis/powp/jobs2d/TestJobs2dPatterns.java",
+    "raw_url": "https://github.com/iis-powp-2020z/powp_jobs2d/raw/4eb6ca2e764bc1b008068abecd2357b5d51d558b/src/test/java/edu/kis/powp/jobs2d/TestJobs2dPatterns.java",
+    "contents_url": "https://api.github.com/repos/iis-powp-2020z/powp_jobs2d/contents/src/test/java/edu/kis/powp/jobs2d/TestJobs2dPatterns.java?ref=4eb6ca2e764bc1b008068abecd2357b5d51d558b",
+    "patch": "@@ -8,9 +8,11 @@\n import edu.kis.legacy.drawer.panel.DefaultDrawerFrame;\n import edu.kis.legacy.drawer.panel.DrawPanelController;\n import edu.kis.powp.appbase.Application;\n-import edu.kis.powp.jobs2d.drivers.adapter.MyAdapter;\n+import edu.kis.powp.jobs2d.drivers.adapter.DrawPanelConrollerAdapter;\n+import edu.kis.powp.jobs2d.drivers.adapter.LineDrawerAdapter;\n import edu.kis.powp.jobs2d.events.SelectChangeVisibleOptionListener;\n import edu.kis.powp.jobs2d.events.SelectTestFigureOptionListener;\n+import edu.kis.powp.jobs2d.events.Select2ndTestFigureOptionListener;\n import edu.kis.powp.jobs2d.features.DrawerFeature;\n import edu.kis.powp.jobs2d.features.DriverFeature;\n \n@@ -25,8 +27,11 @@\n \tprivate static void setupPresetTests(Application application) {\n \t\tSelectTestFigureOptionListener selectTestFigureOptionListener = new SelectTestFigureOptionListener(\n \t\t\t\tDriverFeature.getDriverManager());\n+\t\tSelect2ndTestFigureOptionListener select2ndTestFigureOptionListener = new Select2ndTestFigureOptionListener(\n+\t\t\t\tDriverFeature.getDriverManager());\n \n \t\tapplication.addTest(\"Figure Joe 1\", selectTestFigureOptionListener);\n+\t\tapplication.addTest(\"Figure Joe 2\", select2ndTestFigureOptionListener);\n \t}\n \n \t/**\n@@ -39,8 +44,10 @@ private static void setupDrivers(Application application) {\n \t\tDriverFeature.addDriver(\"Logger Driver\", loggerDriver);\n \t\tDriverFeature.getDriverManager().setCurrentDriver(loggerDriver);\n \n-\t\tJob2dDriver testDriver = new MyAdapter();\n-\t\tDriverFeature.addDriver(\"Buggy Simulator\", testDriver);\n+\t\tJob2dDriver testDriver = new DrawPanelConrollerAdapter(DrawerFeature.getDrawerController());\n+\t\tDriverFeature.addDriver(\"Basic Line Simulator\", testDriver);\n+\t\tJob2dDriver testDriverSpecialLine = new LineDrawerAdapter(DrawerFeature.getDrawerController());\n+\t\tDriverFeature.addDriver(\"Special Line Simulator\", testDriverSpecialLine);\n \n \t\tDriverFeature.updateDriverInfo();\n \t}\n@@ -83,7 +90,6 @@ public static void main(String[] args) {\n \t\t\tpublic void run() {\n \t\t\t\tApplication app = new Application(\"2d jobs Visio\");\n \t\t\t\tDrawerFeature.setupDrawerPlugin(app);\n-\t\t\t\tsetupDefaultDrawerVisibilityManagement(app);\n \n \t\t\t\tDriverFeature.setupDriverPlugin(app);\n \t\t\t\tsetupDrivers(app);"
+  },
+  {
+    "sha": "291951f35f8610bcb0f9327857a3eaa54f3bf609",
+    "filename": "src/test/java/edu/kis/powp/jobs2d/events/Select2ndTestFigureOptionListener.java",
+    "status": "added",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/iis-powp-2020z/powp_jobs2d/blob/4eb6ca2e764bc1b008068abecd2357b5d51d558b/src/test/java/edu/kis/powp/jobs2d/events/Select2ndTestFigureOptionListener.java",
+    "raw_url": "https://github.com/iis-powp-2020z/powp_jobs2d/raw/4eb6ca2e764bc1b008068abecd2357b5d51d558b/src/test/java/edu/kis/powp/jobs2d/events/Select2ndTestFigureOptionListener.java",
+    "contents_url": "https://api.github.com/repos/iis-powp-2020z/powp_jobs2d/contents/src/test/java/edu/kis/powp/jobs2d/events/Select2ndTestFigureOptionListener.java?ref=4eb6ca2e764bc1b008068abecd2357b5d51d558b",
+    "patch": "@@ -0,0 +1,21 @@\n+package edu.kis.powp.jobs2d.events;\n+\n+import edu.kis.powp.jobs2d.drivers.DriverManager;\n+import edu.kis.powp.jobs2d.magicpresets.FiguresJoe;\n+\n+import java.awt.event.ActionEvent;\n+import java.awt.event.ActionListener;\n+\n+public class Select2ndTestFigureOptionListener implements ActionListener {\n+\n+    private DriverManager driverManager;\n+\n+    public Select2ndTestFigureOptionListener(DriverManager driverManager) {\n+        this.driverManager = driverManager;\n+    }\n+\n+    @Override\n+    public void actionPerformed(ActionEvent e) {\n+        FiguresJoe.figureScript2(driverManager.getCurrentDriver());\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

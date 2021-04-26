@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "35eb1ddfbbc029bcab630581847471d7f238ec53",
+    "filename": ".idea/vcs.xml",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/zbist/algoritmi/blob/9b0731ece6406ebf951c123b32e033ed9bec17ab/.idea/vcs.xml",
+    "raw_url": "https://github.com/zbist/algoritmi/raw/9b0731ece6406ebf951c123b32e033ed9bec17ab/.idea/vcs.xml",
+    "contents_url": "https://api.github.com/repos/zbist/algoritmi/contents/.idea/vcs.xml?ref=9b0731ece6406ebf951c123b32e033ed9bec17ab",
+    "patch": "@@ -0,0 +1,6 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<project version=\"4\">\n+  <component name=\"VcsDirectoryMappings\">\n+    <mapping directory=\"\" vcs=\"Git\" />\n+  </component>\n+</project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "8b9d7baa84ab4a7998b928c1ef4893ccea2f622f",
+    "filename": "src/main/java/seven/Graph.java",
+    "status": "added",
+    "additions": 83,
+    "deletions": 0,
+    "changes": 83,
+    "blob_url": "https://github.com/zbist/algoritmi/blob/9b0731ece6406ebf951c123b32e033ed9bec17ab/src/main/java/seven/Graph.java",
+    "raw_url": "https://github.com/zbist/algoritmi/raw/9b0731ece6406ebf951c123b32e033ed9bec17ab/src/main/java/seven/Graph.java",
+    "contents_url": "https://api.github.com/repos/zbist/algoritmi/contents/src/main/java/seven/Graph.java?ref=9b0731ece6406ebf951c123b32e033ed9bec17ab",
+    "patch": "@@ -0,0 +1,83 @@\n+package seven;\n+\n+\n+import java.util.LinkedList;\n+import java.util.Queue;\n+\n+public class Graph {\n+    private final int MAX_VERTS = 32;\n+    private Vertex[] vertexList;\n+    private int[][] adjMat;\n+    private int size;\n+    private Stack stack;\n+\n+    public Graph() {\n+        stack = new Stack(MAX_VERTS);\n+        vertexList = new Vertex[MAX_VERTS];\n+        adjMat = new int[MAX_VERTS][MAX_VERTS];\n+        size = 0;\n+        for (int i = 0; i < MAX_VERTS; i++) {\n+            for (int j = 0; j < MAX_VERTS; j++) {\n+                adjMat[i][j] = 0;\n+            }\n+        }\n+    }\n+\n+    private int getAdjUnvisitedVertex(int ver) {\n+        for (int i = 0; i < size; i++) {\n+            if (adjMat[ver][i] == 1 && !vertexList[i].wasVisited) return i;\n+        }\n+        return -1;\n+    }\n+\n+    public void dfs() {\n+        vertexList[0].wasVisited = true;\n+        displayVertex(0);\n+        stack.push(0);\n+        while (!stack.isEmpty()) {\n+            int v = getAdjUnvisitedVertex(stack.peek());\n+            if (v == -1) {\n+                stack.pop();\n+            } else {\n+                vertexList[v].wasVisited = true;\n+                displayVertex(v);\n+                stack.push(v);\n+            }\n+        }\n+        for (int i = 0; i < size; i++) {\n+            vertexList[i].wasVisited = false;\n+        }\n+    }\n+\n+    public void bfs(){\n+        Queue<Integer> queue = new LinkedList<>();\n+        vertexList[0].wasVisited = true;\n+        displayVertex(0);\n+        queue.add(0);\n+        int v2;\n+        while (!queue.isEmpty()){\n+            int v1 = queue.remove();\n+            while ((v2 = getAdjUnvisitedVertex(v1)) != -1){\n+                vertexList[v2].wasVisited = true;\n+                displayVertex(v2);\n+                queue.add(v2);\n+            }\n+        }\n+        for (int i = 0; i < size; i++) {\n+            vertexList[i].wasVisited = false;\n+        }\n+    }\n+\n+    public void addVertex(char label){\n+        vertexList[size++] = new Vertex(label);\n+    }\n+\n+    public void addEdge(int start, int end){\n+        adjMat[start][end] = 1;\n+        adjMat[end][start] = 1;\n+    }\n+\n+    public void displayVertex(int vertex) {\n+        System.out.println(vertexList[vertex].label);\n+    }\n+}"
+  },
+  {
+    "sha": "9f49daad08c88ab72d4dc2ad8a5d15028f676ab3",
+    "filename": "src/main/java/seven/Main.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/zbist/algoritmi/blob/9b0731ece6406ebf951c123b32e033ed9bec17ab/src/main/java/seven/Main.java",
+    "raw_url": "https://github.com/zbist/algoritmi/raw/9b0731ece6406ebf951c123b32e033ed9bec17ab/src/main/java/seven/Main.java",
+    "contents_url": "https://api.github.com/repos/zbist/algoritmi/contents/src/main/java/seven/Main.java?ref=9b0731ece6406ebf951c123b32e033ed9bec17ab",
+    "patch": "@@ -0,0 +1,25 @@\n+package seven;\n+\n+public class Main {\n+    public static void main(String[] args) {\n+        Graph graph = new Graph();\n+        graph.addVertex('A');\n+        graph.addVertex('B');\n+        graph.addVertex('C');\n+        graph.addVertex('D');\n+        graph.addVertex('E');\n+        graph.addVertex('H');\n+\n+        graph.addEdge(0, 1);\n+        graph.addEdge(1, 2);\n+        graph.addEdge(0, 3);\n+        graph.addEdge(3, 4);\n+\n+        long start = System.nanoTime();\n+        graph.dfs();\n+        System.out.println(System.nanoTime() - start);\n+        start = System.nanoTime();\n+        graph.bfs();\n+        System.out.println(System.nanoTime() - start);\n+    }\n+}"
+  },
+  {
+    "sha": "d6ca48100f87d24ddab51af05fe5025c63a5df9b",
+    "filename": "src/main/java/seven/Stack.java",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/zbist/algoritmi/blob/9b0731ece6406ebf951c123b32e033ed9bec17ab/src/main/java/seven/Stack.java",
+    "raw_url": "https://github.com/zbist/algoritmi/raw/9b0731ece6406ebf951c123b32e033ed9bec17ab/src/main/java/seven/Stack.java",
+    "contents_url": "https://api.github.com/repos/zbist/algoritmi/contents/src/main/java/seven/Stack.java?ref=9b0731ece6406ebf951c123b32e033ed9bec17ab",
+    "patch": "@@ -0,0 +1,30 @@\n+package seven;\n+\n+public class Stack {\n+    private int maxSize;\n+    private int[] stackArr;\n+    private int top;\n+\n+    public Stack(int size) {\n+        this.maxSize = size;\n+        this.stackArr = new int[size];\n+        this.top = -1;\n+    }\n+\n+    public void push(int i){\n+        stackArr[++top] = i;\n+    }\n+\n+    public int pop(){\n+        return stackArr[top--];\n+    }\n+\n+    public boolean isEmpty(){\n+        return top == -1;\n+    }\n+\n+    public int peek(){\n+        return stackArr[top];\n+    }\n+\n+}"
+  },
+  {
+    "sha": "4aea291f88ec4cfa4821a45c9abdd81248dc0731",
+    "filename": "src/main/java/seven/Vertex.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/zbist/algoritmi/blob/9b0731ece6406ebf951c123b32e033ed9bec17ab/src/main/java/seven/Vertex.java",
+    "raw_url": "https://github.com/zbist/algoritmi/raw/9b0731ece6406ebf951c123b32e033ed9bec17ab/src/main/java/seven/Vertex.java",
+    "contents_url": "https://api.github.com/repos/zbist/algoritmi/contents/src/main/java/seven/Vertex.java?ref=9b0731ece6406ebf951c123b32e033ed9bec17ab",
+    "patch": "@@ -0,0 +1,11 @@\n+package seven;\n+\n+public class Vertex {\n+    public char label;\n+    public boolean wasVisited;\n+\n+    public Vertex(char label) {\n+        this.label = label;\n+        this.wasVisited = false;\n+    }\n+}"
+  }
+]

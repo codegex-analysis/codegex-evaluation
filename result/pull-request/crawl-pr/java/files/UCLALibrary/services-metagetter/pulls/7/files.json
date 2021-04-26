@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "947cc03322981efc8de5a6bda0f7d37c4baf75b6",
+    "filename": "src/main/java/edu/ucla/library/services/metadata/CsvHeaders.java",
+    "status": "modified",
+    "additions": 30,
+    "deletions": 4,
+    "changes": 34,
+    "blob_url": "https://github.com/UCLALibrary/services-metagetter/blob/04f50ce3ff9ab34928f57186aabf19e1432ca641/src/main/java/edu/ucla/library/services/metadata/CsvHeaders.java",
+    "raw_url": "https://github.com/UCLALibrary/services-metagetter/raw/04f50ce3ff9ab34928f57186aabf19e1432ca641/src/main/java/edu/ucla/library/services/metadata/CsvHeaders.java",
+    "contents_url": "https://api.github.com/repos/UCLALibrary/services-metagetter/contents/src/main/java/edu/ucla/library/services/metadata/CsvHeaders.java?ref=04f50ce3ff9ab34928f57186aabf19e1432ca641",
+    "patch": "@@ -21,6 +21,11 @@\n      */\n     private int myFormatExtentIndex = -1;\n \n+    /**\n+     * The index position of the 'media.format' column.\n+     */\n+    private int myMediaFormatIndex = -1;\n+\n     /**\n      * Creates a new CSV headers object.\n      *\n@@ -38,6 +43,9 @@ public CsvHeaders(final String... aCsvHeaderRow) {\n                 case \"Format.extent\":\n                     myFormatExtentIndex = index;\n                     break;\n+                case \"media.format\":\n+                    myMediaFormatIndex = index;\n+                    break;\n                 // Other cases for the A/V fields we add (when we work that ticket)\n                 default:\n                     // Do nothing for fields we don't care about\n@@ -81,6 +89,15 @@ public boolean hasObjectTypeIndex() {\n         return myObjectTypeIndex != -1;\n     }\n \n+    /**\n+     * Whether the CSV metadata has a 'Format.extent' column.\n+     *\n+     * @return True if a 'Format.extent' column was found; else, false\n+     */\n+    public boolean hasFormatExtentIndex() {\n+        return myFormatExtentIndex != -1;\n+    }\n+\n     /**\n      * Gets the index position of the 'Format.extent' column from the CSV's header row.\n      *\n@@ -91,11 +108,20 @@ public int getFormatExtentIndex() {\n     }\n \n     /**\n-     * Whether the CSV metadata has a 'Format.extent' column.\n+     * Whether the CSV metadata has a 'media.format' column.\n      *\n-     * @return True if a 'Format.extent' column was found; else, false\n+     * @return True if a 'media.format' column was found; else, false\n      */\n-    public boolean hasFormatExtentIndex() {\n-        return myFormatExtentIndex != -1;\n+    public boolean hasMediaFormatIndex() {\n+        return myMediaFormatIndex != -1;\n+    }\n+\n+    /**\n+     * Gets the index position of the 'media.format' column from the CSV's header row.\n+     *\n+     * @return The index position of the 'media.format' column\n+     */\n+    public int getMediaFormatIndex() {\n+        return myMediaFormatIndex;\n     }\n }"
+  },
+  {
+    "sha": "d0fb32e9fa739be437b006d821a6a92525ad4b01",
+    "filename": "src/main/java/edu/ucla/library/services/metadata/MetadataSetter.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/UCLALibrary/services-metagetter/blob/04f50ce3ff9ab34928f57186aabf19e1432ca641/src/main/java/edu/ucla/library/services/metadata/MetadataSetter.java",
+    "raw_url": "https://github.com/UCLALibrary/services-metagetter/raw/04f50ce3ff9ab34928f57186aabf19e1432ca641/src/main/java/edu/ucla/library/services/metadata/MetadataSetter.java",
+    "contents_url": "https://api.github.com/repos/UCLALibrary/services-metagetter/contents/src/main/java/edu/ucla/library/services/metadata/MetadataSetter.java?ref=04f50ce3ff9ab34928f57186aabf19e1432ca641",
+    "patch": "@@ -338,6 +338,7 @@ private void addMetadata(final String... aRow) throws FileNotFoundException, FfP\n             final FFmpegFormat format = probeResult.getFormat();\n \n             aRow[aRow.length - DURATION_OFFSET] = String.valueOf(format.duration);\n+\n             if (myCsvHeaders.hasFormatExtentIndex() && aRow[myCsvHeaders.getFormatExtentIndex()].trim().equals(\"\")) {\n                 final double rawDuration = format.duration;\n                 final int hours = (int) rawDuration / ONE_HOUR;\n@@ -349,7 +350,10 @@ private void addMetadata(final String... aRow) throws FileNotFoundException, FfP\n                 formattedDuration.append(String.format(\" %02dm %02ds\", minutes, seconds));\n                 aRow[myCsvHeaders.getFormatExtentIndex()] = formattedDuration.toString().trim();\n             }\n-            aRow[aRow.length - FORMAT_OFFSET] = format.format_name;\n+\n+            final Path path = new File(filePath).toPath();\n+            final String mimeType = Files.probeContentType(path);\n+            aRow[aRow.length - FORMAT_OFFSET] = mimeType;\n \n             if (probeResult.getStreams() != null) {\n                 for (final FFmpegStream stream : probeResult.getStreams()) {"
+  },
+  {
+    "sha": "511a19c31c29f7cb82b0b4f3b89949e88763eaa9",
+    "filename": "src/test/java/edu/ucla/library/services/metadata/MetadataSetterTest.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/UCLALibrary/services-metagetter/blob/04f50ce3ff9ab34928f57186aabf19e1432ca641/src/test/java/edu/ucla/library/services/metadata/MetadataSetterTest.java",
+    "raw_url": "https://github.com/UCLALibrary/services-metagetter/raw/04f50ce3ff9ab34928f57186aabf19e1432ca641/src/test/java/edu/ucla/library/services/metadata/MetadataSetterTest.java",
+    "contents_url": "https://api.github.com/repos/UCLALibrary/services-metagetter/contents/src/test/java/edu/ucla/library/services/metadata/MetadataSetterTest.java?ref=04f50ce3ff9ab34928f57186aabf19e1432ca641",
+    "patch": "@@ -134,6 +134,30 @@ public void testPopulateFormatExtentField() throws Exception {\n         }\n     }\n \n+    /**\n+     * Tests populating media.format.\n+     */\n+    @Test\n+    public void testPopulateMediaFormat() throws Exception {\n+        final int statusCode = catchSystemExit(() -> {\n+            MetadataSetter.main(new String[] { CSV_PATH + CSV_NAME, MEDIA_PATH, FFMPEG_PATH, OUTPUT_PATH });\n+        });\n+\n+        // Nb: value comes from src/test/resources/media/ephraim/audio/21198-zz000954s4-2-submaster.mp3\n+        final String audioFormat = \"audio/mpeg\";\n+        // Nb: value comes from src/test/resources/media/ephraim/video/crowd.mpg\n+        final String videoFormat = \"video/mpeg\";\n+        final Path updatedCsv = FileSystems.getDefault().getPath(OUTPUT_PATH + CSV_NAME);\n+        try (CSVReader reader = new CSVReader(new FileReader(updatedCsv.toFile()))) {\n+            final List<String[]> rows = reader.readAll();\n+            final CsvHeaders headers = new CsvHeaders(rows.get(0));\n+            assertEquals(rows.get(2)[headers.getMediaFormatIndex()], audioFormat);\n+            assertEquals(rows.get(4)[headers.getMediaFormatIndex()], videoFormat);\n+        } catch (IOException details) {\n+            fail(details.getMessage());\n+        }\n+    }\n+\n     /**\n      * Tests what happens when ffprobe throws an exception message.\n      */"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "6f160a9cbbfaf4dd894cf1c72ce8d774c0d3319e",
+    "filename": "src/main/java/com/doongji/nestalk/controller/v1/profile/ProfileRestController.java",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/Doong-Ji/nestalk-backend-spring/blob/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/controller/v1/profile/ProfileRestController.java",
+    "raw_url": "https://github.com/Doong-Ji/nestalk-backend-spring/raw/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/controller/v1/profile/ProfileRestController.java",
+    "contents_url": "https://api.github.com/repos/Doong-Ji/nestalk-backend-spring/contents/src/main/java/com/doongji/nestalk/controller/v1/profile/ProfileRestController.java?ref=9665d3e9ed0e7ae518252a4542d60249dd4fe07e",
+    "patch": "@@ -0,0 +1,39 @@\n+package com.doongji.nestalk.controller.v1.profile;\n+\n+import com.doongji.nestalk.controller.v1.profile.dto.ProfileDto;\n+import com.doongji.nestalk.controller.v1.profile.dto.ProfileRequest;\n+import com.doongji.nestalk.entity.profile.Profile;\n+import com.doongji.nestalk.security.JwtAuthentication;\n+import com.doongji.nestalk.service.profile.ProfileService;\n+import io.swagger.annotations.Api;\n+import io.swagger.annotations.ApiOperation;\n+import lombok.RequiredArgsConstructor;\n+import org.springframework.http.ResponseEntity;\n+import org.springframework.security.core.annotation.AuthenticationPrincipal;\n+import org.springframework.web.bind.annotation.PostMapping;\n+import org.springframework.web.bind.annotation.RequestBody;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RestController;\n+\n+@Api(tags = \"프로필 APIs\")\n+@RequestMapping(\"api/v1\")\n+@RequiredArgsConstructor\n+@RestController\n+public class ProfileRestController {\n+\n+    private final ProfileService profileService;\n+\n+    @ApiOperation(value = \"프로필 등록 (JWT 필요)\")\n+    @PostMapping(path = \"profile/create\")\n+    public ResponseEntity<ProfileDto> createProfile(@AuthenticationPrincipal JwtAuthentication jwtAuthentication,\n+                                                    @RequestBody ProfileRequest profileRequest) {\n+        Profile profile = profileService.createProfile(\n+                jwtAuthentication.email,\n+                profileRequest.getStateMessage(),\n+                profileRequest.getProfileImage(),\n+                profileRequest.getBackgroundImage()\n+        );\n+\n+        return ResponseEntity.ok(new ProfileDto(profile));\n+    }\n+}"
+  },
+  {
+    "sha": "34e549c6ee15fd67a44c7bd60afb18a109defcdd",
+    "filename": "src/main/java/com/doongji/nestalk/controller/v1/profile/dto/ProfileDto.java",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/Doong-Ji/nestalk-backend-spring/blob/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/controller/v1/profile/dto/ProfileDto.java",
+    "raw_url": "https://github.com/Doong-Ji/nestalk-backend-spring/raw/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/controller/v1/profile/dto/ProfileDto.java",
+    "contents_url": "https://api.github.com/repos/Doong-Ji/nestalk-backend-spring/contents/src/main/java/com/doongji/nestalk/controller/v1/profile/dto/ProfileDto.java?ref=9665d3e9ed0e7ae518252a4542d60249dd4fe07e",
+    "patch": "@@ -0,0 +1,31 @@\n+package com.doongji.nestalk.controller.v1.profile.dto;\n+\n+import com.doongji.nestalk.entity.profile.Profile;\n+import io.swagger.annotations.ApiModelProperty;\n+import lombok.Getter;\n+import lombok.Setter;\n+import lombok.ToString;\n+\n+import static org.springframework.beans.BeanUtils.copyProperties;\n+\n+@Getter\n+@Setter\n+@ToString\n+public class ProfileDto {\n+\n+    @ApiModelProperty(value = \"PK\")\n+    private Long profileId;\n+\n+    @ApiModelProperty(value = \"상태 메시지\")\n+    private String stateMessage;\n+\n+    @ApiModelProperty(value = \"프로필 이미지\")\n+    private String profileImage;\n+\n+    @ApiModelProperty(value = \"배경화면\")\n+    private String backgroundImage;\n+\n+    public ProfileDto(Profile source) {\n+        copyProperties(source, this);\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d2d21b2a400780022fae2031d82543fc1d663d76",
+    "filename": "src/main/java/com/doongji/nestalk/controller/v1/profile/dto/ProfileRequest.java",
+    "status": "added",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/Doong-Ji/nestalk-backend-spring/blob/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/controller/v1/profile/dto/ProfileRequest.java",
+    "raw_url": "https://github.com/Doong-Ji/nestalk-backend-spring/raw/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/controller/v1/profile/dto/ProfileRequest.java",
+    "contents_url": "https://api.github.com/repos/Doong-Ji/nestalk-backend-spring/contents/src/main/java/com/doongji/nestalk/controller/v1/profile/dto/ProfileRequest.java?ref=9665d3e9ed0e7ae518252a4542d60249dd4fe07e",
+    "patch": "@@ -0,0 +1,20 @@\n+package com.doongji.nestalk.controller.v1.profile.dto;\n+\n+import io.swagger.annotations.ApiModelProperty;\n+import lombok.*;\n+\n+@Getter\n+@Setter\n+@ToString\n+@NoArgsConstructor(access = AccessLevel.PROTECTED)\n+public class ProfileRequest {\n+\n+    @ApiModelProperty(value = \"상태 메시지\")\n+    private String stateMessage;\n+\n+    @ApiModelProperty(value = \"프로필 이미지\")\n+    private String profileImage;\n+\n+    @ApiModelProperty(value = \"배경화면\")\n+    private String backgroundImage;\n+}"
+  },
+  {
+    "sha": "34c0065eeb7dbe3ed05153a656cc890ccbd468d6",
+    "filename": "src/main/java/com/doongji/nestalk/entity/profile/Profile.java",
+    "status": "added",
+    "additions": 55,
+    "deletions": 0,
+    "changes": 55,
+    "blob_url": "https://github.com/Doong-Ji/nestalk-backend-spring/blob/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/entity/profile/Profile.java",
+    "raw_url": "https://github.com/Doong-Ji/nestalk-backend-spring/raw/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/entity/profile/Profile.java",
+    "contents_url": "https://api.github.com/repos/Doong-Ji/nestalk-backend-spring/contents/src/main/java/com/doongji/nestalk/entity/profile/Profile.java?ref=9665d3e9ed0e7ae518252a4542d60249dd4fe07e",
+    "patch": "@@ -0,0 +1,55 @@\n+package com.doongji.nestalk.entity.profile;\n+\n+import com.doongji.nestalk.entity.BaseTimeEntity;\n+import com.doongji.nestalk.entity.user.User;\n+import lombok.AccessLevel;\n+import lombok.Getter;\n+import lombok.NoArgsConstructor;\n+\n+import javax.persistence.*;\n+\n+import static com.google.common.base.Preconditions.checkArgument;\n+import static javax.persistence.FetchType.LAZY;\n+\n+@Entity\n+@Getter\n+@NoArgsConstructor(access = AccessLevel.PROTECTED)\n+public class Profile extends BaseTimeEntity {\n+\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    @Column(name = \"PROFILE_ID\")\n+    private Long profileId;\n+\n+    @Column(name = \"STATE_MESSAGE\")\n+    private String stateMessage;\n+\n+    @Column(name = \"IMAGE_URL\")\n+    private String profileImage;\n+\n+    @Column(name = \"BACKGROUND_URL\")\n+    private String backgroundImage;\n+\n+    @OneToOne(mappedBy = \"profile\", fetch = LAZY)\n+    private User user;\n+\n+    public Profile(String stateMessage, String profileImage, String backgroundImage) {\n+        this(null, stateMessage, profileImage, backgroundImage);\n+    }\n+\n+    public Profile(Long profileId, String stateMessage, String profileImage, String backgroundImage) {\n+        checkArgument(\n+                stateMessage.length() <= 100,\n+                \"stateMessage length must be 100 or less\"\n+        );\n+\n+        this.profileId = profileId;\n+        this.stateMessage = stateMessage;\n+        this.profileImage = profileImage;\n+        this.backgroundImage = backgroundImage;\n+    }\n+\n+    public void updateUser(User user) {\n+        this.user = user;\n+    }\n+}"
+  },
+  {
+    "sha": "0a5967c8781b1d22bdf0791958096c048ae289be",
+    "filename": "src/main/java/com/doongji/nestalk/entity/user/User.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/Doong-Ji/nestalk-backend-spring/blob/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/entity/user/User.java",
+    "raw_url": "https://github.com/Doong-Ji/nestalk-backend-spring/raw/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/entity/user/User.java",
+    "contents_url": "https://api.github.com/repos/Doong-Ji/nestalk-backend-spring/contents/src/main/java/com/doongji/nestalk/entity/user/User.java?ref=9665d3e9ed0e7ae518252a4542d60249dd4fe07e",
+    "patch": "@@ -1,6 +1,7 @@\n package com.doongji.nestalk.entity.user;\n \n import com.doongji.nestalk.entity.BaseTimeEntity;\n+import com.doongji.nestalk.entity.profile.Profile;\n import com.doongji.nestalk.security.Jwt;\n import lombok.*;\n import org.springframework.security.crypto.password.PasswordEncoder;\n@@ -11,6 +12,7 @@\n import static com.google.common.base.Preconditions.checkArgument;\n import static com.google.common.base.Preconditions.checkNotNull;\n import static java.util.regex.Pattern.matches;\n+import static javax.persistence.FetchType.LAZY;\n import static org.apache.commons.lang3.StringUtils.isNotEmpty;\n \n @Getter\n@@ -39,6 +41,10 @@\n     @Column(nullable = false)\n     private LocalDate birthday;\n \n+    @OneToOne(fetch = LAZY)\n+    @JoinColumn(name = \"PROFILE_ID\")\n+    private Profile profile;\n+\n     public User(String email, String name, String password, String phone, LocalDate birthday) {\n         this(null, email, name, password, phone, birthday);\n     }\n@@ -86,4 +92,9 @@ public String createToken(Jwt jwt, String[] roles) {\n         return jwt.newToken(claims);\n     }\n \n+    public void updateProfile(Profile profile) {\n+        this.profile = profile;\n+        profile.updateUser(this);\n+    }\n+\n }"
+  },
+  {
+    "sha": "a0a4830a33c40177a1ab330c479efd45e3a02e60",
+    "filename": "src/main/java/com/doongji/nestalk/repository/profile/ProfileRepository.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/Doong-Ji/nestalk-backend-spring/blob/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/repository/profile/ProfileRepository.java",
+    "raw_url": "https://github.com/Doong-Ji/nestalk-backend-spring/raw/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/repository/profile/ProfileRepository.java",
+    "contents_url": "https://api.github.com/repos/Doong-Ji/nestalk-backend-spring/contents/src/main/java/com/doongji/nestalk/repository/profile/ProfileRepository.java?ref=9665d3e9ed0e7ae518252a4542d60249dd4fe07e",
+    "patch": "@@ -0,0 +1,9 @@\n+package com.doongji.nestalk.repository.profile;\n+\n+import com.doongji.nestalk.entity.profile.Profile;\n+import org.springframework.data.jpa.repository.JpaRepository;\n+import org.springframework.transaction.annotation.Transactional;\n+\n+@Transactional(readOnly = true)\n+public interface ProfileRepository extends JpaRepository <Profile, Long> {\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "c6d344ff2e371562e8827892fc257f74f42ebe8c",
+    "filename": "src/main/java/com/doongji/nestalk/service/profile/ProfileService.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/Doong-Ji/nestalk-backend-spring/blob/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/service/profile/ProfileService.java",
+    "raw_url": "https://github.com/Doong-Ji/nestalk-backend-spring/raw/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/main/java/com/doongji/nestalk/service/profile/ProfileService.java",
+    "contents_url": "https://api.github.com/repos/Doong-Ji/nestalk-backend-spring/contents/src/main/java/com/doongji/nestalk/service/profile/ProfileService.java?ref=9665d3e9ed0e7ae518252a4542d60249dd4fe07e",
+    "patch": "@@ -0,0 +1,29 @@\n+package com.doongji.nestalk.service.profile;\n+\n+import com.doongji.nestalk.entity.profile.Profile;\n+import com.doongji.nestalk.entity.user.User;\n+import com.doongji.nestalk.error.NotFoundException;\n+import com.doongji.nestalk.repository.profile.ProfileRepository;\n+import com.doongji.nestalk.repository.user.UserRepository;\n+import lombok.RequiredArgsConstructor;\n+import org.springframework.stereotype.Service;\n+\n+import javax.transaction.Transactional;\n+\n+@RequiredArgsConstructor\n+@Service\n+public class ProfileService {\n+\n+    private final ProfileRepository profileRepository;\n+    private final UserRepository userRepository;\n+\n+    @Transactional\n+    public Profile createProfile(String email, String stateMessage, String profileImage, String backgroundImage) {\n+        Profile profile = new Profile(stateMessage, profileImage, backgroundImage);\n+        User currentUser = userRepository.findByEmail(email)\n+                .orElseThrow(() -> new NotFoundException(User.class, email));\n+        currentUser.updateProfile(profile);\n+\n+        return profileRepository.save(profile);\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "512e5a05e4cf2b709a4cb01987d76f91f486bcaf",
+    "filename": "src/test/java/com/doongji/nestalk/service/profile/ProfileServiceTest.java",
+    "status": "added",
+    "additions": 74,
+    "deletions": 0,
+    "changes": 74,
+    "blob_url": "https://github.com/Doong-Ji/nestalk-backend-spring/blob/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/test/java/com/doongji/nestalk/service/profile/ProfileServiceTest.java",
+    "raw_url": "https://github.com/Doong-Ji/nestalk-backend-spring/raw/9665d3e9ed0e7ae518252a4542d60249dd4fe07e/src/test/java/com/doongji/nestalk/service/profile/ProfileServiceTest.java",
+    "contents_url": "https://api.github.com/repos/Doong-Ji/nestalk-backend-spring/contents/src/test/java/com/doongji/nestalk/service/profile/ProfileServiceTest.java?ref=9665d3e9ed0e7ae518252a4542d60249dd4fe07e",
+    "patch": "@@ -0,0 +1,74 @@\n+package com.doongji.nestalk.service.profile;\n+\n+import com.doongji.nestalk.entity.profile.Profile;\n+import com.doongji.nestalk.entity.user.User;\n+import com.doongji.nestalk.service.user.UserService;\n+import lombok.extern.slf4j.Slf4j;\n+import org.junit.jupiter.api.*;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.boot.test.context.SpringBootTest;\n+\n+import java.time.LocalDate;\n+\n+import static org.junit.jupiter.api.Assertions.assertEquals;\n+\n+@Slf4j\n+@SpringBootTest\n+@TestInstance(TestInstance.Lifecycle.PER_CLASS)\n+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)\n+class ProfileServiceTest {\n+\n+    @Autowired\n+    private UserService userService;\n+    @Autowired\n+    private ProfileService profileService;\n+\n+    private String email;\n+\n+    private String name;\n+\n+    private String password;\n+\n+    private String phone;\n+\n+    private LocalDate birthday;\n+\n+    private User user;\n+\n+    private String stateMessage;\n+\n+    private String profileImage;\n+\n+    private String backgroundImage;\n+\n+    @BeforeAll\n+    void setup() {\n+        name = \"둥지\";\n+        email = \"doongji.team@gmail.com\";\n+        password = \"P@ssword1\";\n+        phone = \"010-0000-0000\";\n+        birthday = LocalDate.of(1995, 2, 19);\n+        stateMessage = \"상태 메시지\";\n+        profileImage = \"프로필 이미지\";\n+        backgroundImage = \"배경화면\";\n+    }\n+\n+    @Test\n+    @Order(1)\n+    void 사용자_회원가입() {\n+        User user = userService.join(email, name, password, phone, birthday);\n+        this.user = user;\n+        log.info(\"User: {}\", user);\n+    }\n+\n+    @Test\n+    @Order(2)\n+    void 프로필_등록() {\n+        User user = userService.findByEmail(email).orElse(null);\n+        Profile profile = profileService.createProfile(user.getEmail(), stateMessage, profileImage, backgroundImage);\n+        assertEquals(stateMessage, profile.getStateMessage());\n+        assertEquals(profileImage, profile.getProfileImage());\n+        assertEquals(backgroundImage, profile.getBackgroundImage());\n+        log.info(\"Profile: {}\", profile);\n+    }\n+}"
+  }
+]

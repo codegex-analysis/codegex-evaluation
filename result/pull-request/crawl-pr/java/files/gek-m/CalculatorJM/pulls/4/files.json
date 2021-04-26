@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "c7ac95ae915145ba51062f05b47b75f1b4406e6c",
+    "filename": "app/src/main/AndroidManifest.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/gek-m/CalculatorJM/blob/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/AndroidManifest.xml",
+    "raw_url": "https://github.com/gek-m/CalculatorJM/raw/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/AndroidManifest.xml",
+    "contents_url": "https://api.github.com/repos/gek-m/CalculatorJM/contents/app/src/main/AndroidManifest.xml?ref=0b10119660680195c362bf3a4138b2680de5dfa4",
+    "patch": "@@ -9,6 +9,7 @@\n         android:roundIcon=\"@mipmap/ic_launcher_round\"\n         android:supportsRtl=\"true\"\n         android:theme=\"@style/Theme.CalculatorJM\">\n+        <activity android:name=\".SettingsActivity\"></activity>\n         <activity android:name=\".MainActivity\">\n             <intent-filter>\n                 <action android:name=\"android.intent.action.MAIN\" />"
+  },
+  {
+    "sha": "832a3751b6dec28130cb92137154eafda198f82b",
+    "filename": "app/src/main/java/com/example/calculatorjm/MainActivity.java",
+    "status": "modified",
+    "additions": 51,
+    "deletions": 4,
+    "changes": 55,
+    "blob_url": "https://github.com/gek-m/CalculatorJM/blob/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/java/com/example/calculatorjm/MainActivity.java",
+    "raw_url": "https://github.com/gek-m/CalculatorJM/raw/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/java/com/example/calculatorjm/MainActivity.java",
+    "contents_url": "https://api.github.com/repos/gek-m/CalculatorJM/contents/app/src/main/java/com/example/calculatorjm/MainActivity.java?ref=0b10119660680195c362bf3a4138b2680de5dfa4",
+    "patch": "@@ -1,24 +1,50 @@\n package com.example.calculatorjm;\n \n-import androidx.appcompat.app.AppCompatActivity;\n \n-import android.annotation.SuppressLint;\n+import android.content.Intent;\n import android.os.Bundle;\n+import android.view.Menu;\n+import android.view.MenuInflater;\n+import android.view.MenuItem;\n import android.view.View;\n import android.widget.TextView;\n \n import com.example.calculatorjm.domain.CalcOperation;\n+import com.example.calculatorjm.domain.CalcStyle;\n import com.example.calculatorjm.ui.CalcPresenter;\n \n-public class MainActivity extends AppCompatActivity {\n+public class MainActivity extends ThemeActivity {\n+\n+    private static final int STYLE_SETTING_ACTIVITY = 99;\n+\n+    private static final String AppTheme = \"APP_THEME\";\n \n     private CalcPresenter presenter = new CalcPresenter(this);\n     private TextView calcTextView;\n \n+    @Override\n+    public boolean onCreateOptionsMenu(Menu menu) {\n+        MenuInflater inflater = getMenuInflater();\n+        inflater.inflate(R.menu.navigation_menu, menu);\n+        return true;\n+    }\n+\n+    @Override\n+    public boolean onOptionsItemSelected(MenuItem item) {\n+        switch (item.getItemId()) {\n+            case R.id.menu_settings:\n+                gotoSettings();\n+                return true;\n+            default:\n+                return super.onOptionsItemSelected(item);\n+        }\n+    }\n+\n     @Override\n     protected void onCreate(Bundle savedInstanceState) {\n         super.onCreate(savedInstanceState);\n-        //setContentView(R.layout.activity_main);\n+\n+        setTheme(getAppTheme(R.style.CalcStyle));\n         setContentView(R.layout.constraint_calculator);\n         //setContentView(R.layout.grid_calculator);\n \n@@ -151,6 +177,27 @@ public void onClick(View v) {\n         });\n     }\n \n+    private void gotoSettings() {\n+        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);\n+        intent.putExtra(SettingsActivity.THEME_KEY, getCodeStyle(R.style.CalcStyle));\n+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);\n+        startActivityForResult(intent, STYLE_SETTING_ACTIVITY);\n+    }\n+\n+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {\n+        if (requestCode != STYLE_SETTING_ACTIVITY) {\n+            super.onActivityResult(requestCode, resultCode, data);\n+            return;\n+        }\n+\n+        if (resultCode == RESULT_OK) {\n+            CalcStyle style = data.getParcelableExtra(SettingsActivity.STYLE_KEY);\n+            setTheme(style.getStyleId());\n+            recreate();\n+        }\n+    }\n+\n+\n     public void setCalcTextView(String s) {\n         calcTextView.setText(s);\n     }"
+  },
+  {
+    "sha": "e2dd84b31079ff23dd9d90d795615a5f8706de71",
+    "filename": "app/src/main/java/com/example/calculatorjm/SettingsActivity.java",
+    "status": "added",
+    "additions": 78,
+    "deletions": 0,
+    "changes": 78,
+    "blob_url": "https://github.com/gek-m/CalculatorJM/blob/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/java/com/example/calculatorjm/SettingsActivity.java",
+    "raw_url": "https://github.com/gek-m/CalculatorJM/raw/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/java/com/example/calculatorjm/SettingsActivity.java",
+    "contents_url": "https://api.github.com/repos/gek-m/CalculatorJM/contents/app/src/main/java/com/example/calculatorjm/SettingsActivity.java?ref=0b10119660680195c362bf3a4138b2680de5dfa4",
+    "patch": "@@ -0,0 +1,78 @@\n+package com.example.calculatorjm;\n+\n+import android.app.Activity;\n+import android.content.Intent;\n+import android.os.Bundle;\n+import android.view.View;\n+import android.widget.Button;\n+import android.widget.RadioGroup;\n+\n+import com.example.calculatorjm.domain.CalcStyle;\n+import com.google.android.material.radiobutton.MaterialRadioButton;\n+\n+public class SettingsActivity extends ThemeActivity {\n+\n+    public static final String STYLE_KEY = \"STYLE_KEY\";\n+    public static final String THEME_KEY = \"THEME_KEY\";\n+\n+    @Override\n+    protected void onCreate(Bundle savedInstanceState) {\n+        super.onCreate(savedInstanceState);\n+\n+        setTheme(getAppTheme(R.style.CalcStyle));\n+        setContentView(R.layout.activity_settings);\n+\n+        initThemeChooser();\n+\n+        Button btnOk = findViewById(R.id.btn_ok);\n+        btnOk.setOnClickListener(new View.OnClickListener() {\n+            @Override\n+            public void onClick(View v) {\n+                CalcStyle calcStyle = new CalcStyle();\n+                calcStyle.setStyleId(0);\n+\n+                Intent intent = new Intent();\n+                intent.putExtra(STYLE_KEY, calcStyle);\n+                setResult(Activity.RESULT_OK, intent);\n+\n+                finish();\n+            }\n+        });\n+\n+        Button btnCancel = findViewById(R.id.btn_cancel);\n+        btnCancel.setOnClickListener(new View.OnClickListener() {\n+            @Override\n+            public void onClick(View v) {\n+                int styleId = getIntent().getIntExtra(THEME_KEY, 0);\n+                setAppTheme(styleId);\n+                // Метод finish() завершает активити\n+                setResult(Activity.RESULT_CANCELED);\n+                finish();\n+            }\n+        });\n+    }\n+\n+    private void initThemeChooser() {\n+        initRadioButton(findViewById(R.id.radioBtn_normal),\n+                CalcStyle);\n+        initRadioButton(findViewById(R.id.radioBtn_dark),\n+                CalcStyleDark);\n+\n+        RadioGroup rg = findViewById(R.id.radioButtons);\n+        ((MaterialRadioButton) rg.getChildAt(getCodeStyle(CalcStyle))).setChecked(true);\n+    }\n+\n+    private void initRadioButton(View button, final int codeStyle) {\n+        button.setOnClickListener(new View.OnClickListener() {\n+            @Override\n+            public void onClick(View v) {\n+                // сохраним настройки\n+                setAppTheme(codeStyle);\n+                // пересоздадим активити, чтобы тема применилась\n+                recreate();\n+\n+            }\n+        });\n+    }\n+\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "45978e2188a42e4afd6cb447c00f448600f13b19",
+    "filename": "app/src/main/java/com/example/calculatorjm/ThemeActivity.java",
+    "status": "added",
+    "additions": 43,
+    "deletions": 0,
+    "changes": 43,
+    "blob_url": "https://github.com/gek-m/CalculatorJM/blob/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/java/com/example/calculatorjm/ThemeActivity.java",
+    "raw_url": "https://github.com/gek-m/CalculatorJM/raw/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/java/com/example/calculatorjm/ThemeActivity.java",
+    "contents_url": "https://api.github.com/repos/gek-m/CalculatorJM/contents/app/src/main/java/com/example/calculatorjm/ThemeActivity.java?ref=0b10119660680195c362bf3a4138b2680de5dfa4",
+    "patch": "@@ -0,0 +1,43 @@\n+package com.example.calculatorjm;\n+\n+import android.content.SharedPreferences;\n+\n+import androidx.appcompat.app.AppCompatActivity;\n+\n+public class ThemeActivity extends AppCompatActivity {\n+\n+    protected static final int CalcStyle = 0;\n+    protected static final int CalcStyleDark = 1;\n+    private static final String NameSharedPreference = \"STYLE\";\n+    private static final String AppTheme = \"APP_THEME\";\n+\n+    public int getAppTheme(int codeStyle) {\n+        return codeStyleToStyleId(getCodeStyle(codeStyle));\n+    }\n+\n+    // Чтение настроек, параметр «тема»\n+    protected int getCodeStyle(int codeStyle) {\n+        // Работаем через специальный класс сохранения и чтения настроек\n+        SharedPreferences sharedPref = getSharedPreferences(NameSharedPreference, MODE_PRIVATE);\n+        //Прочитать тему, если настройка не найдена - взять по умолчанию\n+        return sharedPref.getInt(AppTheme, codeStyle);\n+    }\n+\n+    // Сохранение настроек\n+    public void setAppTheme(int codeStyle) {\n+        SharedPreferences sharedPref = getSharedPreferences(NameSharedPreference, MODE_PRIVATE);\n+        // Настройки сохраняются посредством специального класса editor.\n+        SharedPreferences.Editor editor = sharedPref.edit();\n+        editor.putInt(AppTheme, codeStyle);\n+        editor.apply();\n+    }\n+\n+    private int codeStyleToStyleId(int codeStyle) {\n+        switch (codeStyle) {\n+            case CalcStyleDark:\n+                return R.style.CalcStyleDark;\n+            default:\n+                return R.style.CalcStyle;\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "ae1d2c2bb90bd3a4b663e27e68ce8d345b5c1b2c",
+    "filename": "app/src/main/java/com/example/calculatorjm/domain/CalcStyle.java",
+    "status": "added",
+    "additions": 61,
+    "deletions": 0,
+    "changes": 61,
+    "blob_url": "https://github.com/gek-m/CalculatorJM/blob/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/java/com/example/calculatorjm/domain/CalcStyle.java",
+    "raw_url": "https://github.com/gek-m/CalculatorJM/raw/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/java/com/example/calculatorjm/domain/CalcStyle.java",
+    "contents_url": "https://api.github.com/repos/gek-m/CalculatorJM/contents/app/src/main/java/com/example/calculatorjm/domain/CalcStyle.java?ref=0b10119660680195c362bf3a4138b2680de5dfa4",
+    "patch": "@@ -0,0 +1,61 @@\n+package com.example.calculatorjm.domain;\n+\n+import android.content.res.Resources;\n+import android.os.Parcel;\n+import android.os.Parcelable;\n+\n+public class CalcStyle implements Parcelable {\n+\n+    private int styleId;\n+    private Resources.Theme StyleTheme;\n+\n+    public CalcStyle() {\n+    }\n+\n+    public CalcStyle(int styleId, Resources.Theme StyleTheme) {\n+        this.styleId = styleId;\n+        this.StyleTheme = StyleTheme;\n+    }\n+\n+    public int getStyleId() {\n+        return styleId;\n+    }\n+\n+    public void setStyleId(int styleId) {\n+        this.styleId = styleId;\n+    }\n+\n+    public Resources.Theme getStyleTheme() {\n+        return StyleTheme;\n+    }\n+\n+    public void setStyleTheme(Resources.Theme styleTheme) {\n+        this.StyleTheme = styleTheme;\n+    }\n+\n+    protected CalcStyle(Parcel in) {\n+        styleId = in.readInt();\n+    }\n+\n+    @Override\n+    public void writeToParcel(Parcel dest, int flags) {\n+        dest.writeInt(styleId);\n+    }\n+\n+    @Override\n+    public int describeContents() {\n+        return 0;\n+    }\n+\n+    public static final Creator<CalcStyle> CREATOR = new Creator<CalcStyle>() {\n+        @Override\n+        public CalcStyle createFromParcel(Parcel in) {\n+            return new CalcStyle(in);\n+        }\n+\n+        @Override\n+        public CalcStyle[] newArray(int size) {\n+            return new CalcStyle[size];\n+        }\n+    };\n+}"
+  },
+  {
+    "sha": "246bdb36a722c2058e3960f53274f83423983266",
+    "filename": "app/src/main/res/layout/activity_settings.xml",
+    "status": "added",
+    "additions": 55,
+    "deletions": 0,
+    "changes": 55,
+    "blob_url": "https://github.com/gek-m/CalculatorJM/blob/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/res/layout/activity_settings.xml",
+    "raw_url": "https://github.com/gek-m/CalculatorJM/raw/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/res/layout/activity_settings.xml",
+    "contents_url": "https://api.github.com/repos/gek-m/CalculatorJM/contents/app/src/main/res/layout/activity_settings.xml?ref=0b10119660680195c362bf3a4138b2680de5dfa4",
+    "patch": "@@ -0,0 +1,55 @@\n+<?xml version=\"1.0\" encoding=\"utf-8\"?>\n+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n+    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n+    xmlns:tools=\"http://schemas.android.com/tools\"\n+    android:layout_width=\"match_parent\"\n+    android:layout_height=\"match_parent\"\n+    android:theme=\"@style/CalcStyle\"\n+    tools:context=\".SettingsActivity\">\n+\n+    <RadioGroup\n+        android:id=\"@+id/radioButtons\"\n+        android:layout_width=\"wrap_content\"\n+        android:layout_height=\"wrap_content\"\n+        app:layout_constraintEnd_toEndOf=\"parent\"\n+        app:layout_constraintStart_toStartOf=\"parent\"\n+        app:layout_constraintTop_toTopOf=\"parent\"\n+        app:layout_constraintBottom_toBottomOf=\"parent\"\n+        android:checkedButton=\"@id/radioBtn_normal\">\n+\n+        <com.google.android.material.radiobutton.MaterialRadioButton\n+            android:id=\"@+id/radioBtn_normal\"\n+            android:layout_width=\"match_parent\"\n+            android:layout_height=\"wrap_content\"\n+            android:text=\"@string/calc_style_usual\" />\n+\n+        <com.google.android.material.radiobutton.MaterialRadioButton\n+            android:id=\"@+id/radioBtn_dark\"\n+            android:layout_width=\"match_parent\"\n+            android:layout_height=\"wrap_content\"\n+            android:text=\"@string/calc_style_dark\" />\n+\n+    </RadioGroup>\n+\n+    <com.google.android.material.button.MaterialButton\n+        android:id=\"@+id/btn_ok\"\n+        android:layout_width=\"wrap_content\"\n+        android:layout_height=\"wrap_content\"\n+        android:text=\"@android:string/ok\"\n+        app:layout_constraintEnd_toEndOf=\"parent\"\n+        app:layout_constraintHorizontal_bias=\"0.293\"\n+        app:layout_constraintStart_toStartOf=\"parent\"\n+        app:layout_constraintTop_toBottomOf=\"@+id/radioButtons\" />\n+\n+    <com.google.android.material.button.MaterialButton\n+        android:id=\"@+id/btn_cancel\"\n+        android:layout_width=\"wrap_content\"\n+        android:layout_height=\"wrap_content\"\n+        android:text=\"@android:string/cancel\"\n+        app:layout_constraintEnd_toEndOf=\"parent\"\n+        app:layout_constraintHorizontal_bias=\"0.293\"\n+        app:layout_constraintStart_toEndOf=\"@+id/btn_ok\"\n+        app:layout_constraintTop_toBottomOf=\"@+id/radioButtons\" />\n+\n+\n+</androidx.constraintlayout.widget.ConstraintLayout>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "5daa0c4a45a6378b263e0384d2bc7d52afc7a7a8",
+    "filename": "app/src/main/res/menu/navigation_menu.xml",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/gek-m/CalculatorJM/blob/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/res/menu/navigation_menu.xml",
+    "raw_url": "https://github.com/gek-m/CalculatorJM/raw/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/res/menu/navigation_menu.xml",
+    "contents_url": "https://api.github.com/repos/gek-m/CalculatorJM/contents/app/src/main/res/menu/navigation_menu.xml?ref=0b10119660680195c362bf3a4138b2680de5dfa4",
+    "patch": "@@ -0,0 +1,8 @@\n+<?xml version=\"1.0\" encoding=\"utf-8\"?>\n+<menu xmlns:android=\"http://schemas.android.com/apk/res/android\"\n+    android:theme=\"@style/CalcStyle\">\n+    <item\n+        android:id=\"@+id/menu_settings\"\n+        android:title=\"Settings\"\n+        android:icon=\"@drawable/ic_baseline_settings_24\"/>\n+</menu>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "4553add3e99a12284143f2af9a6f7f9adb8083ff",
+    "filename": "app/src/main/res/values/strings.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/gek-m/CalculatorJM/blob/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/res/values/strings.xml",
+    "raw_url": "https://github.com/gek-m/CalculatorJM/raw/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/res/values/strings.xml",
+    "contents_url": "https://api.github.com/repos/gek-m/CalculatorJM/contents/app/src/main/res/values/strings.xml?ref=0b10119660680195c362bf3a4138b2680de5dfa4",
+    "patch": "@@ -20,4 +20,6 @@\n     <string name=\"calc_equal\">=</string>\n     <string name=\"calc_sum\">+</string>\n     <string name=\"calc_sub\">-</string>\n+    <string name=\"calc_style_usual\">Normal style</string>\n+    <string name=\"calc_style_dark\">Dark style</string>\n </resources>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "b96526abcf956285bb33ba2c69b8ab725e5167a9",
+    "filename": "app/src/main/res/values/styles.xml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/gek-m/CalculatorJM/blob/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/res/values/styles.xml",
+    "raw_url": "https://github.com/gek-m/CalculatorJM/raw/0b10119660680195c362bf3a4138b2680de5dfa4/app/src/main/res/values/styles.xml",
+    "contents_url": "https://api.github.com/repos/gek-m/CalculatorJM/contents/app/src/main/res/values/styles.xml?ref=0b10119660680195c362bf3a4138b2680de5dfa4",
+    "patch": "@@ -10,4 +10,11 @@\n         <item name=\"android:textSize\">@dimen/calc_text_size</item>\n         <item name=\"android:backgroundTint\">@color/grey</item>\n     </style>\n+\n+    <style name=\"CalcStyleDark\" parent=\"AppTheme\">\n+        <item name=\"android:layout_margin\">@dimen/calc_margin</item>\n+        <item name=\"android:textColor\">@color/black</item>\n+        <item name=\"android:textSize\">@dimen/calc_text_size</item>\n+        <item name=\"android:backgroundTint\">@color/purple_700</item>\n+    </style>\n </resources>\n\\ No newline at end of file"
+  }
+]

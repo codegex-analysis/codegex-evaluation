@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "f06f2638269df5b5fa486a90da86c8a4ca21c974",
+    "filename": "repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/DefaultPathConversionHelper.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 1,
+    "changes": 14,
+    "blob_url": "https://github.com/pentaho/pentaho-platform/blob/8b791bda0b9b7eac2ec466e2962832e043373451/repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/DefaultPathConversionHelper.java",
+    "raw_url": "https://github.com/pentaho/pentaho-platform/raw/8b791bda0b9b7eac2ec466e2962832e043373451/repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/DefaultPathConversionHelper.java",
+    "contents_url": "https://api.github.com/repos/pentaho/pentaho-platform/contents/repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/DefaultPathConversionHelper.java?ref=8b791bda0b9b7eac2ec466e2962832e043373451",
+    "patch": "@@ -14,7 +14,7 @@\n  * See the GNU General Public License for more details.\n  *\n  *\n- * Copyright (c) 2002-2018 Hitachi Vantara. All rights reserved.\n+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.\n  *\n  */\n \n@@ -34,6 +34,7 @@\n   /**\n    * Returns null if path is not at or under the tenant root.\n    */\n+  @Override\n   public String absToRel( final String absPath ) {\n     Assert.hasLength( absPath );\n     Assert.isTrue( absPath.startsWith( RepositoryFile.SEPARATOR ) );\n@@ -54,11 +55,22 @@ public String absToRel( final String absPath ) {\n   /**\n    * Unconditionally adds tenant root path to given path.\n    */\n+  @Override\n   public String relToAbs( final String relPath ) {\n     Assert.hasLength( relPath );\n     Assert.isTrue( relPath.startsWith( RepositoryFile.SEPARATOR ) );\n     return ServerRepositoryPaths.getTenantRootFolderPath()\n         + ( RepositoryFile.SEPARATOR.equals( relPath ) ? \"\" : relPath ); //$NON-NLS-1$\n   }\n \n+  /**\n+   * Converts a path string with backslashes into a path string with the repository separator\n+   * @param path the path string\n+   * @return a new path string with backslashes converted to repository separators\n+   */\n+  @Override\n+  public String convertPathSlashes( final String path ) {\n+    return path.replace( \"\\\\\", RepositoryFile.SEPARATOR );\n+  }\n+\n }"
+  },
+  {
+    "sha": "0513a67d9c11f3137ca950bcd96379dfb5d9f265",
+    "filename": "repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/IPathConversionHelper.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/pentaho/pentaho-platform/blob/8b791bda0b9b7eac2ec466e2962832e043373451/repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/IPathConversionHelper.java",
+    "raw_url": "https://github.com/pentaho/pentaho-platform/raw/8b791bda0b9b7eac2ec466e2962832e043373451/repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/IPathConversionHelper.java",
+    "contents_url": "https://api.github.com/repos/pentaho/pentaho-platform/contents/repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/IPathConversionHelper.java?ref=8b791bda0b9b7eac2ec466e2962832e043373451",
+    "patch": "@@ -14,7 +14,7 @@\n  * See the GNU General Public License for more details.\n  *\n  *\n- * Copyright (c) 2002-2018 Hitachi Vantara. All rights reserved.\n+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.\n  *\n  */\n \n@@ -31,4 +31,8 @@\n \n   String relToAbs( final String relPath );\n \n+  default String convertPathSlashes( final String path ) {\n+    return path;\n+  }\n+\n }"
+  },
+  {
+    "sha": "567adc559a31e46c4646c4398a2d6821c308ca84",
+    "filename": "repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/JcrRepositoryFileDao.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 3,
+    "changes": 5,
+    "blob_url": "https://github.com/pentaho/pentaho-platform/blob/8b791bda0b9b7eac2ec466e2962832e043373451/repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/JcrRepositoryFileDao.java",
+    "raw_url": "https://github.com/pentaho/pentaho-platform/raw/8b791bda0b9b7eac2ec466e2962832e043373451/repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/JcrRepositoryFileDao.java",
+    "contents_url": "https://api.github.com/repos/pentaho/pentaho-platform/contents/repository/src/main/java/org/pentaho/platform/repository2/unified/jcr/JcrRepositoryFileDao.java?ref=8b791bda0b9b7eac2ec466e2962832e043373451",
+    "patch": "@@ -14,7 +14,7 @@\n  * See the GNU General Public License for more details.\n  *\n  *\n- * Copyright (c) 2002-2018 Hitachi Vantara. All rights reserved.\n+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.\n  *\n  */\n \n@@ -367,11 +367,10 @@ public RepositoryFile getFileById( Serializable fileId, IPentahoLocale locale )\n   public RepositoryFile getFile( final String relPath, final boolean loadLocaleMaps, final IPentahoLocale locale ) {\n     Assert.hasText( relPath );\n     Assert.isTrue( relPath.startsWith( RepositoryFile.SEPARATOR ) );\n-\n     return (RepositoryFile) jcrTemplate.execute( new JcrCallback() {\n       @Override\n       public Object doInJcr( final Session session ) throws RepositoryException, IOException {\n-        String absPath = pathConversionHelper.relToAbs( relPath );\n+        String absPath = pathConversionHelper.relToAbs( pathConversionHelper.convertPathSlashes( relPath ) );\n         return internalGetFile( session, absPath, loadLocaleMaps, locale );\n       }\n     } );"
+  },
+  {
+    "sha": "6e9b262b0cd499d35ee145987133c93f1f4cf839",
+    "filename": "repository/src/test/java/org/pentaho/platform/repository2/unified/jcr/DefaultPathConversionHelperTest.java",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/pentaho/pentaho-platform/blob/8b791bda0b9b7eac2ec466e2962832e043373451/repository/src/test/java/org/pentaho/platform/repository2/unified/jcr/DefaultPathConversionHelperTest.java",
+    "raw_url": "https://github.com/pentaho/pentaho-platform/raw/8b791bda0b9b7eac2ec466e2962832e043373451/repository/src/test/java/org/pentaho/platform/repository2/unified/jcr/DefaultPathConversionHelperTest.java",
+    "contents_url": "https://api.github.com/repos/pentaho/pentaho-platform/contents/repository/src/test/java/org/pentaho/platform/repository2/unified/jcr/DefaultPathConversionHelperTest.java?ref=8b791bda0b9b7eac2ec466e2962832e043373451",
+    "patch": "@@ -0,0 +1,37 @@\n+/*!\n+ *\n+ * This program is free software; you can redistribute it and/or modify it under the\n+ * terms of the GNU General Public License, version 2 as published by the Free Software\n+ * Foundation.\n+ *\n+ * You should have received a copy of the GNU General Public License along with this\n+ * program; if not, you can obtain a copy at http://www.gnu.org/licenses/gpl-2.0.html\n+ * or from the Free Software Foundation, Inc.,\n+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.\n+ *\n+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;\n+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n+ * See the GNU General Public License for more details.\n+ *\n+ *\n+ * Copyright (c) 2002-2021 Hitachi Vantara. All rights reserved.\n+ *\n+ */\n+package org.pentaho.platform.repository2.unified.jcr;\n+\n+import org.junit.Test;\n+\n+import static org.junit.Assert.assertEquals;\n+\n+public class DefaultPathConversionHelperTest {\n+\n+    @Test\n+    public void convertPathSlashes() {\n+        DefaultPathConversionHelper converter = new DefaultPathConversionHelper();\n+        assertEquals(\"something/other/filename\", converter.convertPathSlashes( \"something/other\\\\filename\" ) );\n+        assertEquals(\"something/other/filename\", converter.convertPathSlashes( \"something\\\\other\\\\filename\" ) );\n+        assertEquals(\"something/other/else/filename\", converter.convertPathSlashes( \"something\\\\other\\\\else\\\\filename\" ) );\n+        assertEquals(\"something/other/filename\", converter.convertPathSlashes( \"something/other/filename\" ) );\n+        assertEquals(\"filename\", converter.convertPathSlashes( \"filename\" ) );\n+    }\n+}"
+  }
+]

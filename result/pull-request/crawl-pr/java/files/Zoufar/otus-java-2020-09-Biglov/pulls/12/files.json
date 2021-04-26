@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "e2f751ed59d1b4df625f5c9834052f25384bbae7",
+    "filename": "hw29_executors/build.gradle",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/Zoufar/otus-java-2020-09-Biglov/blob/4e048dc55c87802d811b9b4af7bcbdee496cd26a/hw29_executors/build.gradle",
+    "raw_url": "https://github.com/Zoufar/otus-java-2020-09-Biglov/raw/4e048dc55c87802d811b9b4af7bcbdee496cd26a/hw29_executors/build.gradle",
+    "contents_url": "https://api.github.com/repos/Zoufar/otus-java-2020-09-Biglov/contents/hw29_executors/build.gradle?ref=4e048dc55c87802d811b9b4af7bcbdee496cd26a",
+    "patch": "@@ -0,0 +1,45 @@\n+plugins {\n+    // Apply the java plugin to add support for Java\n+    id 'java'\n+    id 'com.github.johnrengelman.shadow'\n+}\n+\n+sourceCompatibility = JavaVersion.VERSION_15\n+targetCompatibility = JavaVersion.VERSION_15\n+\n+dependencies {\n+    implementation 'com.google.code.gson:gson'\n+    implementation 'com.google.guava:guava'\n+    testImplementation 'org.junit.jupiter:junit-jupiter-api'\n+    testImplementation 'org.junit.jupiter:junit-jupiter-engine'\n+    testImplementation 'org.junit.jupiter:junit-jupiter-params'\n+    testImplementation 'org.assertj:assertj-core'\n+    implementation 'ch.qos.logback:logback-classic'\n+    implementation 'org.flywaydb:flyway-core'\n+    implementation 'org.postgresql:postgresql'\n+}\n+\n+test {\n+    useJUnitPlatform()\n+    testLogging {\n+        events \"passed\", \"skipped\", \"failed\"\n+    }\n+}\n+\n+shadowJar {\n+    archiveBaseName.set('hw29_executors-NumberSequence')\n+    archiveVersion.set('0.1')\n+    archiveClassifier.set('')\n+    manifest {\n+        attributes 'Main-Class': 'hw29_executors.NumberSequence'\n+    }\n+}\n+\n+\n+tasks.withType(JavaCompile) {\n+    options.with {\n+        encoding = 'UTF-8'\n+    }\n+}\n+\n+tasks.build.dependsOn tasks.shadowJar"
+  },
+  {
+    "sha": "da4df1f24be5c74c3d3c3802c9457b8dc7e0bae3",
+    "filename": "hw29_executors/src/main/java/hw29_executors/NumberSequence.java",
+    "status": "added",
+    "additions": 119,
+    "deletions": 0,
+    "changes": 119,
+    "blob_url": "https://github.com/Zoufar/otus-java-2020-09-Biglov/blob/4e048dc55c87802d811b9b4af7bcbdee496cd26a/hw29_executors/src/main/java/hw29_executors/NumberSequence.java",
+    "raw_url": "https://github.com/Zoufar/otus-java-2020-09-Biglov/raw/4e048dc55c87802d811b9b4af7bcbdee496cd26a/hw29_executors/src/main/java/hw29_executors/NumberSequence.java",
+    "contents_url": "https://api.github.com/repos/Zoufar/otus-java-2020-09-Biglov/contents/hw29_executors/src/main/java/hw29_executors/NumberSequence.java?ref=4e048dc55c87802d811b9b4af7bcbdee496cd26a",
+    "patch": "@@ -0,0 +1,119 @@\n+package hw29_executors;\n+\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+import java.util.concurrent.BrokenBarrierException;\n+import java.util.concurrent.CyclicBarrier;\n+\n+public class NumberSequence {\n+    private static final Logger logger = LoggerFactory.getLogger(NumberSequence.class);\n+    private int counter = 1;\n+    private int direction = 1;\n+    private int counterUniDir = 0;\n+    private List<Thread> threads = new ArrayList<>();\n+    private static final int LIMIT = 100_000_000;\n+    private CyclicBarrier barrier;\n+\n+\n+    private synchronized void action(int rest) {\n+        for (int i = 0; i < Integer.MAX_VALUE; i++) {\n+            try {\n+                //spurious wakeup https://en.wikipedia.org/wiki/Spurious_wakeup\n+                //поэтому не if\n+                while (counter % 2 == rest) {\n+                    this.wait();\n+                }\n+                logger.info(\"counter = {}\", counter);\n+                counter = counter + direction;\n+                direction = (counter == 1 || counter == 10) ? direction * (-1) : direction;\n+                notifyAll();\n+                sleep();\n+ //             logger.info(\"after notify, i:{}\",i);\n+            } catch (InterruptedException ex) {\n+                Thread.currentThread().interrupt();\n+                throw new NotInterestingException(ex);\n+            }\n+        }\n+    }\n+\n+    public static void main(String[] args) {\n+        NumberSequence numberSequence = new NumberSequence();\n+\n+ //       numberSequence.winkle();\n+\n+        int numberOfThreads = 3;\n+        numberSequence.winkle2(numberOfThreads);\n+\n+    }\n+\n+    private void winkle(){\n+       new Thread(() -> this.action(0)).start();\n+       new Thread(() -> this.action(1)).start();\n+\n+    }\n+\n+\n+    private void winkle2(int numberOfThreads) {\n+        Runnable barrierAction = () -> {\n+ //           logger.info(\"barrier at counter = {}\", counter)\n+        };\n+        barrier = new CyclicBarrier(numberOfThreads, barrierAction);\n+\n+        for (int i = 0; i < numberOfThreads; i++) {\n+            Thread thread = new Thread(new Action2(i, numberOfThreads));\n+            threads.add(thread);\n+            thread.start();\n+        }\n+    }\n+\n+     class Action2 implements Runnable {\n+        int threadNum;\n+        int numberOfThreads;\n+        Action2(int threadNum, int numberOfThreads ) {\n+            this.threadNum = threadNum;\n+            this.numberOfThreads = numberOfThreads;\n+        }\n+\n+        public void run() {\n+            for (int i = 0; i < LIMIT; i++) {\n+                synchronized (NumberSequence.this) {\n+                    if (counterUniDir  % numberOfThreads == threadNum) {\n+                        logger.info(\"counter = {}\", counter);\n+                        counterUniDir++;\n+                        counter = counter + direction;\n+                        direction = (counter == 1 || counter == 10) ? direction * (-1) : direction;\n+                        sleep();\n+                    }\n+                }\n+                try {\n+                    barrier.await();\n+                } catch (InterruptedException ex) {\n+                    logger.error(ex.getMessage(), ex);\n+                } catch (BrokenBarrierException ex) {\n+                    logger.error(ex.getMessage(), ex);\n+                }\n+            }\n+        }\n+     }\n+\n+\n+    private static void sleep() {\n+        try {\n+            Thread.sleep(1_000);\n+        } catch (InterruptedException e) {\n+            logger.error(e.getMessage());\n+            Thread.currentThread().interrupt();\n+        }\n+    }\n+\n+\n+    private static class NotInterestingException extends RuntimeException {\n+        NotInterestingException(InterruptedException ex) {\n+            super(ex);\n+        }\n+    }\n+\n+}"
+  },
+  {
+    "sha": "40852a2d27c1be619d18293934bc6fd1bf0d726f",
+    "filename": "settings.gradle",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/Zoufar/otus-java-2020-09-Biglov/blob/4e048dc55c87802d811b9b4af7bcbdee496cd26a/settings.gradle",
+    "raw_url": "https://github.com/Zoufar/otus-java-2020-09-Biglov/raw/4e048dc55c87802d811b9b4af7bcbdee496cd26a/settings.gradle",
+    "contents_url": "https://api.github.com/repos/Zoufar/otus-java-2020-09-Biglov/contents/settings.gradle?ref=4e048dc55c87802d811b9b4af7bcbdee496cd26a",
+    "patch": "@@ -7,4 +7,5 @@ include 'hw10_instrumentation'\n include 'hw08_gc'\n include 'hw15_patterns'\n include 'hw16_serialization'\n-include 'hw18_jdbc'\n\\ No newline at end of file\n+include 'hw18_jdbc'\n+include 'hw29_executors'\n\\ No newline at end of file"
+  }
+]

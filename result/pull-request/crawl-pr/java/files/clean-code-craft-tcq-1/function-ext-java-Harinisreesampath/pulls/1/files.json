@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "567d92a705a074711ae763ec0cb2af1409747489",
+    "filename": "vitals/LimitCalculator.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/blob/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/LimitCalculator.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/raw/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/LimitCalculator.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/contents/vitals/LimitCalculator.java?ref=47d8e5e950ca6335ff72b692970a7f16dda36e74",
+    "patch": "@@ -0,0 +1,25 @@\n+package vitals;\r\n+\r\n+public class LimitCalculator {\r\n+\tpublic float limitHolder[] = new float[5];\r\n+\t\r\n+\tpublic float[] getLimitHolder() {\r\n+\t\treturn limitHolder;\r\n+\t}\r\n+\r\n+\tpublic LimitCalculator(int percentageValue, float upper, float lower, int numberOfLimits) {\r\n+\t\tfloat deltaLimit = upper * percentageValue / 100;\r\n+\t\tif(numberOfLimits == 2) {\r\n+\t\t\tlimitHolder[0] = 0;         \r\n+\t\t\tlimitHolder[1] = lower;   \r\n+\t\t\tlimitHolder[2] = lower + deltaLimit;\r\n+\t\t\tlimitHolder[3] = upper - deltaLimit-1;  \r\n+\t\t\tlimitHolder[4] = upper;\r\n+\t\t}\r\n+\t\telse {\r\n+\t\t\tlimitHolder[1] = upper;\r\n+\t\t\tlimitHolder[0] = upper - deltaLimit;\r\n+\t\t}\r\n+\r\n+\t}\r\n+}\r"
+  },
+  {
+    "sha": "45bafc6d22a2d44430222833b27b5c20de8a4919",
+    "filename": "vitals/Main.java",
+    "status": "modified",
+    "additions": 49,
+    "deletions": 23,
+    "changes": 72,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/blob/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/Main.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/raw/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/Main.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/contents/vitals/Main.java?ref=47d8e5e950ca6335ff72b692970a7f16dda36e74",
+    "patch": "@@ -1,23 +1,49 @@\n-package vitals;\n-\n-public class Main {\n-    static boolean batteryIsOk(float temperature, float soc, float chargeRate) {\n-        if(temperature < 0 || temperature > 45) {\n-            System.out.println(\"Temperature is out of range!\");\n-            return false;\n-        } else if(soc < 20 || soc > 80) {\n-            System.out.println(\"State of Charge is out of range!\");\n-            return false;\n-        } else if(chargeRate > 0.8) {\n-            System.out.println(\"Charge Rate is out of range!\");\n-            return false;\n-        }\n-        return true;\n-    }\n-\n-    public static void main(String[] args) {\n-        assert(batteryIsOk(25, 70, 0.7f) == true);\n-        assert(batteryIsOk(50, 85, 0.0f) == false);\n-        System.out.println(\"Some more tests needed\");\n-    }\n-}\n+package vitals;\r\n+\r\n+\r\n+public class Main {\r\n+\tpublic static final int PERCENTAGE =5;\r\n+\tpublic static final float LOWER_TEMPERATURE = 0;\r\n+\tpublic static final float HIGHER_TEMPERATURE = 45;\r\n+\tpublic static final float LOWER_SOC = 20;\r\n+\tpublic static final float HIGHER_SOC = 80;\r\n+\tpublic static final float HIGHER_CHARGERATE = 0.8f;\r\n+\tpublic static final float NORMAL_CHARGERATE = 0;\r\n+\tpublic static final int SINGLE_LIMIT = 1;\r\n+\tpublic static final int DOUBLE_LIMIT = 2;\r\n+\t\r\n+    static boolean batteryIsOk(float temperature, float soc, float chargeRate, String measurementUnit) {\r\n+    \tif(measurementUnit.equalsIgnoreCase(\"C\"))\r\n+    \t\ttemperature = TemperatureUnitConverter.convertingTemperatureToFahrenheit(temperature) ;\r\n+    \t\r\n+    \tMeasurementProcessor temperatureProcessor = new MeasurementProcessor();\r\n+    \tfloat temperatureLimitHolder[] = new LimitCalculator(PERCENTAGE, HIGHER_TEMPERATURE, LOWER_TEMPERATURE, DOUBLE_LIMIT).getLimitHolder();\r\n+    \tString temperatureMessageList[] = new MessageGenerator(\"Temperature\").getOutputMessage();\r\n+    \tprintMessage(temperatureProcessor.processedMessage(temperature, temperatureLimitHolder, temperatureMessageList), \"Temperature\");\r\n+    \t\r\n+    \tMeasurementProcessor socProcessor = new MeasurementProcessor();\r\n+    \tfloat socLimitHolder[] = new LimitCalculator(PERCENTAGE, HIGHER_SOC, LOWER_SOC, DOUBLE_LIMIT).getLimitHolder();\r\n+    \tString socMessageList[] = new MessageGenerator(\"SOC\").getOutputMessage();\r\n+    \tprintMessage(socProcessor.processedMessage(soc, socLimitHolder, socMessageList), \"State of Charge\");\r\n+    \t\r\n+    \tMeasurementProcessor chargeRateProcessor = new MeasurementProcessor();\r\n+    \tfloat chargeRateLimitHolder[] = new LimitCalculator(PERCENTAGE, HIGHER_CHARGERATE, NORMAL_CHARGERATE, SINGLE_LIMIT).getLimitHolder();\r\n+    \tString chargeRateMessageList[] = new MessageGenerator(\"ChargeRate\").getOutputMessage();\r\n+    \tprintMessage(chargeRateProcessor.singleLimitMessage(chargeRate, chargeRateLimitHolder, chargeRateMessageList), \"Charge Rate\");\r\n+    \t\r\n+   \t\treturn (temperatureProcessor.isStatus() && socProcessor.isStatus() && chargeRateProcessor.isStatus());    \t   \t\r\n+    }\r\n+    \r\n+    static void printMessage(String message, String type) {\r\n+    \tSystem.out.println(type + \" : \" +message);\r\n+    }\r\n+    \r\n+    public static void main(String[] args) {\r\n+    \tassert(batteryIsOk(25, 70, 0.6f,\"C\") == true);\r\n+    \tassert(batteryIsOk(44, 24, 0.0f,\"C\") == false);\r\n+    \tassert(batteryIsOk(25,10,0.78f,\"C\") == true);\r\n+    \tassert(batteryIsOk(25,70,1.0f,\"F\") == false);\r\n+    \tassert(batteryIsOk(25,10,0.7f,\"F\") == false);    \t\r\n+    \tassert(batteryIsOk(25,70,1,\"F\") == false);\r\n+    }\r\n+}\r"
+  },
+  {
+    "sha": "7ee3bf6b6fee8ade9368338a48644644151b2d11",
+    "filename": "vitals/MeasurementProcessor.java",
+    "status": "added",
+    "additions": 46,
+    "deletions": 0,
+    "changes": 46,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/blob/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/MeasurementProcessor.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/raw/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/MeasurementProcessor.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/contents/vitals/MeasurementProcessor.java?ref=47d8e5e950ca6335ff72b692970a7f16dda36e74",
+    "patch": "@@ -0,0 +1,46 @@\n+package vitals;\r\n+\r\n+public class MeasurementProcessor {\r\n+\tpublic boolean status = true;\r\n+\r\n+\tpublic boolean isStatus() {\r\n+\t\treturn status;\r\n+\t}\r\n+\t\r\n+\t public String processedMessage(float value, float limitHolder[], String messageList[]){\r\n+\t\t\tif(value > limitHolder[0] && value <= limitHolder[1]) {\r\n+\t\t\t\tthis.status = false;\r\n+\t\t\t\treturn messageList[0];\t\r\n+\t\t\t\t}\r\n+\t\t\t\r\n+\t\t\tif(value > limitHolder[1] && value <= limitHolder[2]) {\r\n+\t\t\t  return messageList[1];\r\n+\t\t\t  }\r\n+\t\t\t\r\n+\t\t\tif(value > limitHolder[2] && value <= limitHolder[3]) {\r\n+\t\t\t  return messageList[2];\r\n+\t\t\t  }\r\n+\t\t\t\r\n+\t\t\tif(value > limitHolder[3] && value <= limitHolder[4]) {\r\n+\t\t\t  return messageList[3];\r\n+\t\t\t  }\r\n+\t\t\t\r\n+\t\t\tif(value > limitHolder[4]) {\r\n+\t\t\t\tthis.status = false;\r\n+\t\t\t\treturn messageList[4];\r\n+\t\t\t\t}\t\t  \r\n+\t\t\t\r\n+\t\t\treturn null;\r\n+\t\t\t\r\n+\t\t\t}\r\n+\t\t\t\r\n+\t\t\tpublic String singleLimitMessage(float value, float limitHolder[], String messageList[]) {\r\n+\t\t\t\tif(value > limitHolder[1]) {\r\n+\t\t\t\t\tthis.status = false;\r\n+\t\t\t\t\treturn messageList[2];}\r\n+\t\t\t\telse if(value > limitHolder[0])\r\n+\t\t\t\t\treturn messageList[1];\r\n+\t\t\t\telse\r\n+\t\t\t\t\treturn messageList[0];\r\n+\t\t\t}\r\n+}\r"
+  },
+  {
+    "sha": "c5494b5808cf08192ad35c1dddc577dc779914c4",
+    "filename": "vitals/MessageGenerator.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/blob/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/MessageGenerator.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/raw/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/MessageGenerator.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/contents/vitals/MessageGenerator.java?ref=47d8e5e950ca6335ff72b692970a7f16dda36e74",
+    "patch": "@@ -0,0 +1,32 @@\n+package vitals;\r\n+\r\n+public class MessageGenerator {\r\n+\tpublic String outputMessage[] = new String[5];\r\n+\tpublic String[] getOutputMessage() {\r\n+\t\treturn outputMessage;\r\n+\t}\r\n+\r\n+\tpublic MessageGenerator(String measurementType) {\r\n+\t\tif(measurementType.equalsIgnoreCase(\"Temperature\") ) {\r\n+\t    \toutputMessage[0] = \"LOW_TEMPERATURE_BREACH\";\r\n+\t    \toutputMessage[1] = \"LOW_TEMPERATURE_WARNING\";\r\n+\t    \toutputMessage[2] = \"NORMAL\";\r\n+\t    \toutputMessage[3] = \"HIGH_TEMPERATURE_WARNING\";\r\n+\t    \toutputMessage[4] = \"HIGH_TEMPERATURE_BREACH\";\r\n+\t\t}\r\n+\t\telse if(measurementType.equalsIgnoreCase(\"SOC\")) {\r\n+\t\t\toutputMessage[0] = \"LOW_SOC_BREACH\";\r\n+\t    \toutputMessage[1] = \"LOW_SOC_WARNING\";\r\n+\t    \toutputMessage[2] = \"NORMAL\";\r\n+\t    \toutputMessage[3] = \"HIGH_SOC_WARNING\";\r\n+\t    \toutputMessage[4] = \"HIGH_SOC_BREACH\";\r\n+\t\t}\r\n+\t\telse {\r\n+\t    \toutputMessage[0] = \"NORMAL\";\r\n+\t    \toutputMessage[1] = \"HIGH_CHARGERATE_WARNING\";\r\n+\t    \toutputMessage[2] = \"HIGH_CHARGERATE_BREACH\";\r\n+\t\t}\r\n+\t}\r\n+\r\n+}\r\n+\r"
+  },
+  {
+    "sha": "4b888f30640cd6fb8aa181a9679349b7a3f92e2f",
+    "filename": "vitals/TemperatureUnitConverter.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/blob/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/TemperatureUnitConverter.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/raw/47d8e5e950ca6335ff72b692970a7f16dda36e74/vitals/TemperatureUnitConverter.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-Harinisreesampath/contents/vitals/TemperatureUnitConverter.java?ref=47d8e5e950ca6335ff72b692970a7f16dda36e74",
+    "patch": "@@ -0,0 +1,9 @@\n+package vitals;\r\n+\r\n+public class TemperatureUnitConverter {\r\n+\t  static float convertingTemperatureToFahrenheit(float temperatureInCelius ) {\r\n+\t\t  temperatureInCelius = (temperatureInCelius * 9/5) + 32 ;\r\n+\t      return temperatureInCelius;\r\n+\t    }\r\n+\t\r\n+}\r"
+  }
+]

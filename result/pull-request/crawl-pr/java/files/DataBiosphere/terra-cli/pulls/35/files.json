@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "222851b883143abc9c8b82208d2e5849025ace5f",
+    "filename": ".github/workflows/on-pr-merge.yml",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 6,
+    "changes": 34,
+    "blob_url": "https://github.com/DataBiosphere/terra-cli/blob/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/.github/workflows/on-pr-merge.yml",
+    "raw_url": "https://github.com/DataBiosphere/terra-cli/raw/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/.github/workflows/on-pr-merge.yml",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-cli/contents/.github/workflows/on-pr-merge.yml?ref=6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff",
+    "patch": "@@ -3,27 +3,49 @@ on:\n   workflow_dispatch: {}\n   push:\n     branches:\n-      - main\n+      - mm-PF-569-debug-bumper-gha # TODO: change this back to main before merge\n \n jobs:\n   bump-version-publish-release:\n     runs-on: ubuntu-latest\n     if: \"!contains( github.event.sender.login, 'broadbot')\"\n     steps:\n       - name: Checkout current code\n-        uses: actions/checkout@master\n+        id: checkout_code\n+        uses: actions/checkout@v2\n         with:\n-          token: ${{ secrets.BROADBOT_GITHUB_TOKEN }}\n+          ref: mm-PF-569-debug-bumper-gha # TODO: change this back to main before merge\n       - name: Bump tag and build version\n+        id: bump_tag\n         uses: databiosphere/github-actions/actions/bumper@v0.0.3\n         env:\n           GITHUB_TOKEN: ${{ secrets.BROADBOT_GITHUB_TOKEN }}\n-          RELEASE_BRANCHES: main\n+          DEFAULT_BUMP: minor\n+          RELEASE_BRANCHES: mm-PF-569-debug-bumper-gha # TODO: change this back to main before merge\n           VERSION_FILE_PATH: build.gradle\n           VERSION_LINE_MATCH: ^version\n+      - name: Updating code to get the version bump changes\n+        id: update_code_post_version_bump\n+        run: |\n+          git pull\n+        env:\n+          GITHUB_TOKEN: ${{ secrets.BROADBOT_GITHUB_TOKEN }}\n+      - name: Render config\n+        id: render_config\n+        run: |\n+          # this step does the equivalent of the tools/render-config.sh script\n+          # on local machines, the script fetches a SA from Vault\n+          # in GH actions, the SA key is stored in a GH repo secret\n+          # regardless of how it was fetched, the publish-release script expects this\n+          # key to be stored in rendered/ci-account.json\n+          mkdir -p rendered\n+          echo \"$DEV_CI_SA_KEY\" > rendered/ci-account.json\n+        env:\n+          DEV_CI_SA_KEY: ${{ secrets.DEV_CI_SA_KEY }}\n       - name: Publish a release\n+        id: publish_release\n         run: |\n-          echo \"TODO (PF-570): ./tools/publish-release.sh $RELEASE_VERSION true\"\n+          ./tools/publish-release.sh $RELEASE_VERSION true\n         env:\n           GITHUB_TOKEN: ${{ secrets.BROADBOT_GITHUB_TOKEN }}\n-          RELEASE_VERSION: ${{ steps.tag.outputs.tag }}\n+          RELEASE_VERSION: ${{ steps.bump_tag.outputs.tag }}"
+  },
+  {
+    "sha": "1e85baa24ce34d52c896b89f29113f5ab8fe9013",
+    "filename": "CONTRIBUTING.md",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/DataBiosphere/terra-cli/blob/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/CONTRIBUTING.md",
+    "raw_url": "https://github.com/DataBiosphere/terra-cli/raw/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/CONTRIBUTING.md",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-cli/contents/CONTRIBUTING.md?ref=6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff",
+    "patch": "@@ -119,6 +119,9 @@ To use a specific Docker image from GCR:\n     ```\n \n #### Build a new image\n+The `tools/publish-release.sh` script builds and publishes a new image, and updates the default image path already.\n+So this is mostly useful for development and debugging.\n+\n For any change in the `docker/` directory to take effect:\n 1. Build a new image. This uses a short Git hash for the current commit as the tag. See the script comments for more\n options.\n@@ -138,6 +141,9 @@ options.\n     ```\n \n #### Publish a new image\n+The `tools/publish-release.sh` script builds and publishes a new image, and updates the default image path already.\n+So this is mostly useful for development and debugging.\n+\n To publish a new image to GCR:\n 1. Build the image (see above).\n 2. Render the CI credentials from Vault, in order to upload to GCR.\n@@ -166,7 +172,7 @@ look like for someone who did not build the image.\n #### Update the default image\n It's best to do this as part of a release, but if it's necessary to update the default image manually:\n 1. Publish the image (see above).\n-2. Update the `DockerAppsRunner.DEFAULT_DOCKER_IMAGE_ID` property in the Java code.\n+2. Update the `DockerAppsRunner.defaultImageId` method in the Java code to return a hard-coded string.\n \n \n ### Code structure"
+  },
+  {
+    "sha": "82909265b1b1db91932e637e1380aa51a9e45409",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 13,
+    "changes": 35,
+    "blob_url": "https://github.com/DataBiosphere/terra-cli/blob/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/README.md",
+    "raw_url": "https://github.com/DataBiosphere/terra-cli/raw/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/README.md",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-cli/contents/README.md?ref=6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff",
+    "patch": "@@ -6,6 +6,9 @@\n     * [Spend profile access](#spend-profile-access)\n     * [External data](#external-data)\n     * [Troubleshooting](#troubleshooting)\n+      * [Clear global context](#clear-global-context)\n+      * [Manual Install](#manual-install)\n+      * [Manual Uninstall](#manual-uninstall)\n 2. [Example usage](#example-usage)\n 3. [Commands description](#commands-description)\n     * [Authentication](#authentication)\n@@ -41,16 +44,8 @@ curl -L https://github.com/DataBiosphere/terra-cli/releases/latest/download/down\n This will install the Terra CLI in the current directory. Afterwards, you may want to add it to your `$PATH` directly\n or move it to a place that is already on your `$PATH` (e.g. `/usr/local/bin`).\n \n-#### Manual install\n-A Terra CLI release includes a GitHub release of the `terra-cli` repository and a corresponding Docker image in GCR.\n-`download-install.sh` is a convenience script that downloads the latest (or specific version) of the install package,\n-unarchives it, runs the `install.sh` script included inside, and then deletes the install package.\n-\n-You can also skip the `download-install.sh` script and install manually.\n-- Download the `terra-cli.tar` install package directly from the \n-[GitHub releases page.](https://github.com/DataBiosphere/terra-cli/releases)\n-- Unarchive the `tar` file.\n-- Run the install script from the unarchived directory: `./install.sh`\n+Re-installing will overwrite any existing installation (i.e. all JARs and scripts will be overwritten), but will not\n+modify the `$PATH`. So if you have added it to your `$PATH`, that step needs to be repeated after each install.\n \n #### Requirements\n 1. Java 11\n@@ -92,15 +87,29 @@ external to the Terra workspace, you need to give the user's pet service account\n access. To get the email of the user's pet service account, run `terra gcloud config get-value account`.\n \n #### Troubleshooting\n-- Clear the global context file and all credentials. This will then require you to login again.\n+##### Clear global context\n+Clear the global context file and all credentials. This will then require you to login again.\n ```\n cd $HOME/.terra\n rm global-context.json\n rm StoredCredential\n rm -R pet-keys\n ```\n-- Clear the entire global context, which includes the context file, all credentials, and all JARs.\n-This will then require a re-install (see above).\n+\n+##### Manual install\n+A Terra CLI release includes a GitHub release of the `terra-cli` repository and a corresponding Docker image in GCR.\n+`download-install.sh` is a convenience script that downloads the latest (or specific version) of the install package,\n+unarchives it, runs the `install.sh` script included inside, and then deletes the install package.\n+\n+You can also skip the `download-install.sh` script and install manually.\n+- Download the `terra-cli.tar` install package directly from the \n+[GitHub releases page.](https://github.com/DataBiosphere/terra-cli/releases)\n+- Unarchive the `tar` file.\n+- Run the install script from the unarchived directory: `./install.sh`\n+\n+##### Manual uninstall\n+There is not yet an uninstaller. You can clear the entire global context, which includes the context file, all\n+credentials, and all JARs. This will then require a re-install (see above).\n ```\n rm -R $HOME/.terra\n ```"
+  },
+  {
+    "sha": "506c7591e5b89e1ca51fba8c3bdcb66946bdffb8",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 6,
+    "changes": 33,
+    "blob_url": "https://github.com/DataBiosphere/terra-cli/blob/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/build.gradle",
+    "raw_url": "https://github.com/DataBiosphere/terra-cli/raw/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/build.gradle",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-cli/contents/build.gradle?ref=6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff",
+    "patch": "@@ -20,7 +20,7 @@ if (hasProperty('buildScan')) {\n }\n \n // The tools/publish-release.sh script depends on this version string being of the format \"version = '1.2.3'\"\n-version = '0.9.0'\n+version = '0.16.0'\n group = 'terra-cli'\n sourceCompatibility = JavaVersion.VERSION_11\n \n@@ -170,12 +170,33 @@ startScripts {\n }\n jar {\n     // set attributes in the JAR manifest file that we can access from the Java code\n-    manifest {\n-        attributes 'Implementation-Title': 'terra-cli',\n-                   'Implementation-Version': archiveVersion // this matches the top-level version property\n+    // reference for example manifest values: https://docs.oracle.com/javase/tutorial/deployment/jar/packageman.html\n+     manifest {\n+        attributes  'Specification-Title' : 'Terra CLI',\n+                    'Specification-Version' : \"${project.version}\", // this matches the top-level version property\n+                    'Implementation-Title': 'bio.terra.cli',\n+                    'Implementation-Version': \"${project.properties['dockerRepoPath']}/${project.properties['dockerImageName']}/${project.version}:${project.properties['dockerImageTag']}\"\n     }\n }\n \n+// convenience tasks to fetch build properties from scripts (e.g. see ./tools/)\n task getBuildVersion {\n-    println(version)\n-}\n\\ No newline at end of file\n+    doLast {\n+        println(version)\n+    }\n+}\n+task getDockerRepoPath {\n+    doLast {\n+        println(\"${project.properties['dockerRepoPath']}\")\n+    }\n+}\n+task getDockerImageName {\n+    doLast {\n+        println(\"${project.properties['dockerImageName']}\")\n+    }\n+}\n+task getDockerImageTag {\n+    doLast {\n+        println(\"${project.properties['dockerImageTag']}\")\n+    }\n+}"
+  },
+  {
+    "sha": "29140835b8afae4b92b9e5fccbf65f78a1faf57e",
+    "filename": "gradle.properties",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/DataBiosphere/terra-cli/blob/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/gradle.properties",
+    "raw_url": "https://github.com/DataBiosphere/terra-cli/raw/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/gradle.properties",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-cli/contents/gradle.properties?ref=6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff",
+    "patch": "@@ -0,0 +1,9 @@\n+# These properties, along with the build version number, specify the path to the published Docker image\n+# e.g. gcr.io/terra-cli-dev/terra-cli/0.11.0:stable\n+# These properties are used in/directly by:\n+#    - the ./tools scripts that publish a new release\n+#    - the Gradle build that includes the full image path in the JAR manifest\n+#    - the DockerAppsRunner class that reads the default image path from the JAR manifest\n+dockerRepoPath = gcr.io/terra-cli-dev\n+dockerImageName = terra-cli\n+dockerImageTag = stable"
+  },
+  {
+    "sha": "fecef31bc734459afba0f708252e14ae73242be3",
+    "filename": "src/main/java/bio/terra/cli/apps/DockerAppsRunner.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 6,
+    "changes": 8,
+    "blob_url": "https://github.com/DataBiosphere/terra-cli/blob/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/src/main/java/bio/terra/cli/apps/DockerAppsRunner.java",
+    "raw_url": "https://github.com/DataBiosphere/terra-cli/raw/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/src/main/java/bio/terra/cli/apps/DockerAppsRunner.java",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-cli/contents/src/main/java/bio/terra/cli/apps/DockerAppsRunner.java?ref=6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff",
+    "patch": "@@ -56,14 +56,10 @@ public DockerAppsRunner(GlobalContext globalContext, WorkspaceContext workspaceC\n   // ====================================================\n   // Docker images\n \n-  // This variable specifies the default Docker image id or tag that the CLI uses to run external\n-  // tools. Keep this property in-sync with the dockerImageName Gradle property\n-  private static final String DEFAULT_DOCKER_IMAGE_ID =\n-      \"gcr.io/terra-cli-dev/terra-cli/v0.1:stable\";\n-\n   /** Returns the default image id. */\n   public static String defaultImageId() {\n-    return DEFAULT_DOCKER_IMAGE_ID;\n+    // read from the JAR Manifest file\n+    return DockerAppsRunner.class.getPackage().getImplementationVersion();\n   }\n \n   /**"
+  },
+  {
+    "sha": "d575adb0637138172730740a04735f9f6018a54f",
+    "filename": "src/main/java/bio/terra/cli/context/utils/Version.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/DataBiosphere/terra-cli/blob/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/src/main/java/bio/terra/cli/context/utils/Version.java",
+    "raw_url": "https://github.com/DataBiosphere/terra-cli/raw/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/src/main/java/bio/terra/cli/context/utils/Version.java",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-cli/contents/src/main/java/bio/terra/cli/context/utils/Version.java?ref=6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff",
+    "patch": "@@ -5,6 +5,6 @@\n   /** Getter for the Terra CLI version of the current JAR. */\n   public static String getVersion() {\n     // read from the JAR Manifest file\n-    return Version.class.getPackage().getImplementationVersion();\n+    return Version.class.getPackage().getSpecificationVersion();\n   }\n }"
+  },
+  {
+    "sha": "d2b8deb7bf19a1263ba251a86696d6ff7a942ce0",
+    "filename": "tools/publish-docker.sh",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 3,
+    "changes": 10,
+    "blob_url": "https://github.com/DataBiosphere/terra-cli/blob/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/tools/publish-docker.sh",
+    "raw_url": "https://github.com/DataBiosphere/terra-cli/raw/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/tools/publish-docker.sh",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-cli/contents/tools/publish-docker.sh?ref=6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff",
+    "patch": "@@ -38,9 +38,9 @@ echo \"Logging in to docker using the CI service account key file\"\n cat rendered/ci-account.json | docker login -u _json_key --password-stdin https://gcr.io\n \n echo \"Tagging the local docker image with the name to use in GCR\"\n-dockerGcrProject=\"terra-cli-dev\"\n+dockerRepoPath=$(./gradlew --quiet getDockerRepoPath) # e.g. gcr.io/terra-cli-dev\n localImageNameAndTag=\"$localImageName:$localImageTag\"\n-remoteImageNameAndTag=\"gcr.io/$dockerGcrProject/$remoteImageName:$remoteImageTag\"\n+remoteImageNameAndTag=\"$dockerRepoPath/$remoteImageName:$remoteImageTag\"\n docker tag $localImageNameAndTag $remoteImageNameAndTag\n \n echo \"Logging into to gcloud and configuring docker with the CI service account\"\n@@ -53,7 +53,11 @@ echo \"Pushing the image to GCR\"\n docker push $remoteImageNameAndTag\n \n echo \"Restoring the current gcloud user\"\n-gcloud config set account $currentGcloudUser\n+if [ -n \"$currentGcloudUser\" ]; then\n+  gcloud config set account $currentGcloudUser\n+else\n+  echo \"No current gcloud user to restore\"\n+fi\n \n # write out the path to the remote image\n echo \"$remoteImageNameAndTag successfully pushed to GCR\""
+  },
+  {
+    "sha": "340e5750d688be7e0f93445f68b6634b557d58e6",
+    "filename": "tools/publish-release.sh",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/DataBiosphere/terra-cli/blob/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/tools/publish-release.sh",
+    "raw_url": "https://github.com/DataBiosphere/terra-cli/raw/6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff/tools/publish-release.sh",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-cli/contents/tools/publish-release.sh?ref=6d0c30a7b1a1ba5befc7ad94e8387b8f9d2ed4ff",
+    "patch": "@@ -38,7 +38,9 @@ if [[ $releaseVersion =~ [A-Z] ]]; then\n fi\n \n echo \"-- Checking if this version matches the value in build.gradle\"\n-buildGradleVersion=$(./gradlew getBuildVersion --quiet)\n+# note that the --quiet flag has to be before the task name, otherwise log statements\n+# related to downloading Gradle are not suppressed (https://github.com/gradle/gradle/issues/5098)\n+buildGradleVersion=$(./gradlew --quiet getBuildVersion)\n if [ \"$releaseVersion\" != \"$buildGradleVersion\" ]; then\n   echo \"Release version ($releaseVersion) does not match build.gradle version ($buildGradleVersion)\"\n   exit 1\n@@ -60,7 +62,9 @@ echo \"-- Building the Docker image\"\n ./tools/build-docker.sh forRelease\n \n echo \"-- Publishing the Docker image\"\n-./tools/publish-docker.sh stable \"terra-cli/$releaseVersion\" forRelease\n+dockerImageName=$(./gradlew --quiet getDockerImageName) # e.g. terra-cli\n+dockerImageTag=$(./gradlew --quiet getDockerImageTag) # e.g. stable\n+./tools/publish-docker.sh $dockerImageTag \"$dockerImageName/$releaseVersion\" forRelease\n \n echo \"-- Building the distribution archive\"\n ./gradlew clean distTar -PforRelease"
+  }
+]

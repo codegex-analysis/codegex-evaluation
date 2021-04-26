@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "2da3dccb2eeb6bbb0aefcab3e00cdb503470d7b7",
+    "filename": "src/main/java/de/moemax/pages/Filterpage.java",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/violettka/web-automation/blob/c76a1cb587c891d0fe6b091676be8217662ebe75/src/main/java/de/moemax/pages/Filterpage.java",
+    "raw_url": "https://github.com/violettka/web-automation/raw/c76a1cb587c891d0fe6b091676be8217662ebe75/src/main/java/de/moemax/pages/Filterpage.java",
+    "contents_url": "https://api.github.com/repos/violettka/web-automation/contents/src/main/java/de/moemax/pages/Filterpage.java?ref=c76a1cb587c891d0fe6b091676be8217662ebe75",
+    "patch": "@@ -0,0 +1,45 @@\n+package de.moemax.pages;\n+\n+import com.codeborne.selenide.Condition;\n+import com.codeborne.selenide.Selenide;\n+import com.codeborne.selenide.SelenideElement;\n+import de.sconto.pages.LoginPage;\n+import de.sconto.util.PropertiesLoader;\n+import org.openqa.selenium.By;\n+\n+import static com.codeborne.selenide.Selenide.$;\n+\n+public class Filterpage {\n+    public static String basicURL = \"https://www.moemax.de\";\n+\n+    /* Elements */\n+\n+    private static By acceptBtn = By.xpath(\"//button[@data-purpose='cookieBar.button.accept']\");\n+    private static By filterMarke = By.xpath(\"//span[contains(text(),'Marke')]\");\n+    //in method\n+    private static By filterMarkeelement = By.xpath(\"//span[contains(text(), 'AEG')]\");\n+    private static By resultMarke = By.cssSelector(\"._2uE_EjD8EJAlhOA7\");\n+\n+\n+\n+\n+    public void acceptCookies(){\n+        if ($(acceptBtn).exists()) {\n+            $(acceptBtn).click();\n+        }\n+    }\n+\n+    public void choiseMarke() {\n+        $(filterMarke).click();\n+    }\n+\n+    public void choiseSpecificMarke(String specificMarke){\n+        filterMarkeelement = By.xpath(\"//span[contains(text(), '\" + specificMarke + \"')]\");\n+\n+    }\n+    public SelenideElement resultMarke(){\n+        return $(resultMarke);\n+    }\n+\n+\n+}"
+  },
+  {
+    "sha": "d427bb0a67221ca38787fc73f2913b95248b92de",
+    "filename": "src/test/java/de/moemax/RunCukesTest.java",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/violettka/web-automation/blob/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/moemax/RunCukesTest.java",
+    "raw_url": "https://github.com/violettka/web-automation/raw/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/moemax/RunCukesTest.java",
+    "contents_url": "https://api.github.com/repos/violettka/web-automation/contents/src/test/java/de/moemax/RunCukesTest.java?ref=c76a1cb587c891d0fe6b091676be8217662ebe75",
+    "patch": "@@ -0,0 +1,19 @@\n+package de.moemax;\n+\n+import io.cucumber.junit.Cucumber;\n+import io.cucumber.junit.CucumberOptions;\n+import org.junit.runner.RunWith;\n+\n+@RunWith(Cucumber.class)\n+@CucumberOptions(\n+        plugin = {\"json:target/cucumber-report.json\", \"pretty\"},\n+        glue = \"de.moemax\",\n+        strict = true,\n+        tags = \"@moemax\"\n+)\n+\n+//мар 07, 2021 12:57:06 AM io.cucumber.core.runtime.FeaturePathFeatureSupplier get\n+//WARNING: No features found at classpath:/de/moemax\n+\n+public class RunCukesTest {\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "06ba4b7d21175b0a6a35b07ad108034d9a9cec01",
+    "filename": "src/test/java/de/moemax/steps/FilterpageSteps.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/violettka/web-automation/blob/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/moemax/steps/FilterpageSteps.java",
+    "raw_url": "https://github.com/violettka/web-automation/raw/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/moemax/steps/FilterpageSteps.java",
+    "contents_url": "https://api.github.com/repos/violettka/web-automation/contents/src/test/java/de/moemax/steps/FilterpageSteps.java?ref=c76a1cb587c891d0fe6b091676be8217662ebe75",
+    "patch": "@@ -0,0 +1,34 @@\n+package de.moemax.steps;\n+\n+import com.codeborne.selenide.Condition;\n+import de.moemax.pages.Filterpage;\n+import de.sconto.pages.HomePage;\n+import io.cucumber.java8.En;\n+\n+import static com.codeborne.selenide.Selenide.open;\n+import static de.moemax.pages.Filterpage.basicURL;\n+\n+public class FilterpageSteps implements En {\n+\n+    Filterpage filterpage;\n+    String filterMarke;\n+\n+    public void filterpageSteps() {\n+        Given(\"I am on the Moemax page\", () -> {\n+            filterpage = open(basicURL + \"/s\", Filterpage.class);\n+        });\n+\n+        When(\"I choise Marke\", () -> {\n+            filterpage.choiseMarke();\n+        });\n+        Then(\"I choise {} Marke\", (String specificMarke) -> {\n+            filterMarke = specificMarke;\n+            filterpage.choiseSpecificMarke(specificMarke);\n+\n+        });\n+        Then(\"I see only selected Marke\", () -> {\n+            filterpage.resultMarke().shouldHave(Condition.attribute(filterMarke));\n+        });\n+\n+    }\n+}"
+  },
+  {
+    "sha": "66d8e02d56eacb260738638331518ba1b75c65ab",
+    "filename": "src/test/java/de/sconto/RunCukesTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/violettka/web-automation/blob/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/sconto/RunCukesTest.java",
+    "raw_url": "https://github.com/violettka/web-automation/raw/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/sconto/RunCukesTest.java",
+    "contents_url": "https://api.github.com/repos/violettka/web-automation/contents/src/test/java/de/sconto/RunCukesTest.java?ref=c76a1cb587c891d0fe6b091676be8217662ebe75",
+    "patch": "@@ -9,6 +9,8 @@\n         plugin = {\"json:target/cucumber-report.json\", \"pretty\"},\n         glue = \"de.sconto\",\n         strict = true\n+\n+//        tags = \"@login\"\n )\n public class RunCukesTest {\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d78f87f806474655b9e8878c90a26f5eb08f2934",
+    "filename": "src/test/java/de/sconto/steps/HomePageSteps.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 3,
+    "changes": 12,
+    "blob_url": "https://github.com/violettka/web-automation/blob/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/sconto/steps/HomePageSteps.java",
+    "raw_url": "https://github.com/violettka/web-automation/raw/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/sconto/steps/HomePageSteps.java",
+    "contents_url": "https://api.github.com/repos/violettka/web-automation/contents/src/test/java/de/sconto/steps/HomePageSteps.java?ref=c76a1cb587c891d0fe6b091676be8217662ebe75",
+    "patch": "@@ -6,6 +6,7 @@\n \n import static com.codeborne.selenide.Condition.exist;\n import static com.codeborne.selenide.Selenide.open;\n+import static com.codeborne.selenide.Selenide.page;\n import static de.sconto.pages.HomePage.basicURL;\n \n /**\n@@ -16,12 +17,17 @@\n  */\n public class HomePageSteps implements En {\n     HomePage homePage;\n+    LoginPage loginPage;\n \n     public HomePageSteps() {\n \n-        Given(\"I am on the Homepage\", () -> {\n-            homePage = open(basicURL, HomePage.class);\n-            homePage.acceptCookies();\n+        Given(\"I am on the {}\", (String page) -> {\n+            if(page.equals(\"Homepage\")){\n+                homePage = open(basicURL, HomePage.class);\n+                homePage.acceptCookies();\n+            } if (page.equals(\"Loginpage\")){\n+                open(\"http://the-internet.herokuapp.com/login\");\n+            }\n         });\n \n         Then(\"I should see Homepage\", () -> {"
+  },
+  {
+    "sha": "244f38b61dd28724598ad25b2cd17a4b10ea7cf9",
+    "filename": "src/test/java/de/sconto/steps/LoginSteps.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 4,
+    "changes": 22,
+    "blob_url": "https://github.com/violettka/web-automation/blob/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/sconto/steps/LoginSteps.java",
+    "raw_url": "https://github.com/violettka/web-automation/raw/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/java/de/sconto/steps/LoginSteps.java",
+    "contents_url": "https://api.github.com/repos/violettka/web-automation/contents/src/test/java/de/sconto/steps/LoginSteps.java?ref=c76a1cb587c891d0fe6b091676be8217662ebe75",
+    "patch": "@@ -3,9 +3,12 @@\n import com.codeborne.selenide.Condition;\n import de.sconto.pages.HomePage;\n import de.sconto.pages.LoginPage;\n+import io.cucumber.docstring.DocString;\n import io.cucumber.java8.En;\n+import org.openqa.selenium.By;\n \n import static com.codeborne.selenide.Condition.text;\n+import static com.codeborne.selenide.Selenide.$;\n import static com.codeborne.selenide.Selenide.page;\n \n /**\n@@ -27,12 +30,23 @@ public LoginSteps() {\n         });\n \n         Then(\"I see Login page\", () -> {\n-           loginPage.loginPageHeader().should(Condition.exist);\n-           loginPage.loginPageHeader().shouldHave(text(\"Anmelden\"));\n+            loginPage.loginPageHeader().should(Condition.exist);\n+            loginPage.loginPageHeader().shouldHave(text(\"Anmelden\"));\n         });\n \n-        When(\"I insert valid user credentials\", () -> {\n-            loginPage.validLoginInput();\n+        When(\"I insert {} credentials\", (String state) -> {\n+            if (state.equals(\"valid\")){\n+                loginPage.validLoginInput();\n+            }if (state.equals(\"invalid\")){\n+                $(By.id(\"username\")).setValue(\"tomsmith\");\n+                $(By.id(\"password\")).setValue(\"qwerty\");\n+                $(By.cssSelector(\".radius\")).click();\n+            }\n+        });\n+\n+        Then(\"I see error message:\", (DocString message) ->{\n+            String expectedMessage = message.getContent();\n+            $(By.id(\"flash\")).shouldHave(text(expectedMessage));\n         });\n \n         When(\"I click on Login button\", () -> {"
+  },
+  {
+    "sha": "9c690789be47bc6a1e9c2f3371da3050876e0c4f",
+    "filename": "src/test/resources/de.moemax/marke.feature",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/violettka/web-automation/blob/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/resources/de.moemax/marke.feature",
+    "raw_url": "https://github.com/violettka/web-automation/raw/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/resources/de.moemax/marke.feature",
+    "contents_url": "https://api.github.com/repos/violettka/web-automation/contents/src/test/resources/de.moemax/marke.feature?ref=c76a1cb587c891d0fe6b091676be8217662ebe75",
+    "patch": "@@ -0,0 +1,13 @@\n+@moemax\n+Feature: Moemax Filter Marke\n+\n+  Scenario Outline: Choise Marke\n+    Given I am on the Moemax page\n+    When I choise Marke\n+    And I choise <marke> Marke\n+    Then I see only selected Marke\n+\n+    Examples:\n+      | marke |\n+      | AEG |\n+      | Amika |\n\\ No newline at end of file"
+  },
+  {
+    "sha": "f0bd6bf9d10794611ef009f7de27bacf45fd376a",
+    "filename": "src/test/resources/de/sconto/h-login.feature",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/violettka/web-automation/blob/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/resources/de/sconto/h-login.feature",
+    "raw_url": "https://github.com/violettka/web-automation/raw/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/resources/de/sconto/h-login.feature",
+    "contents_url": "https://api.github.com/repos/violettka/web-automation/contents/src/test/resources/de/sconto/h-login.feature?ref=c76a1cb587c891d0fe6b091676be8217662ebe75",
+    "patch": "@@ -0,0 +1,10 @@\n+@login\n+Feature: Herokuapp Login\n+\n+  Scenario: Negative Login\n+    Given I am on the Loginpage\n+    When I insert invalid credentials\n+    Then I see error message:\n+    \"\"\"\n+    Your password is invalid!!\n+    \"\"\"\n\\ No newline at end of file"
+  },
+  {
+    "sha": "0de5e76c2426de4587f904e3a4321afafcfa3a1b",
+    "filename": "src/test/resources/de/sconto/marke.feature",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/violettka/web-automation/blob/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/resources/de/sconto/marke.feature",
+    "raw_url": "https://github.com/violettka/web-automation/raw/c76a1cb587c891d0fe6b091676be8217662ebe75/src/test/resources/de/sconto/marke.feature",
+    "contents_url": "https://api.github.com/repos/violettka/web-automation/contents/src/test/resources/de/sconto/marke.feature?ref=c76a1cb587c891d0fe6b091676be8217662ebe75",
+    "patch": "@@ -0,0 +1,13 @@\n+@moemax\n+Feature: Moemax Filter Marke\n+\n+  Scenario Outline: Choise Marke\n+    Given I am on the Moemax page\n+    When I choise Marke\n+    And I choise <marke> Marke\n+    Then I see only selected Marke\n+\n+    Examples:\n+      | marke |\n+      | AEG   |\n+      | Amika |\n\\ No newline at end of file"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "0bb6ea94e352caa7e34a2267d0b787fdbc55fcfa",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 6,
+    "changes": 6,
+    "blob_url": "https://github.com/jenkinsci/cobertura-plugin/blob/55f7be9e62dfe52852df932865f91c171d68e1db/pom.xml",
+    "raw_url": "https://github.com/jenkinsci/cobertura-plugin/raw/55f7be9e62dfe52852df932865f91c171d68e1db/pom.xml",
+    "contents_url": "https://api.github.com/repos/jenkinsci/cobertura-plugin/contents/pom.xml?ref=55f7be9e62dfe52852df932865f91c171d68e1db",
+    "patch": "@@ -88,12 +88,6 @@\n         </exclusion>\n       </exclusions>\n     </dependency>\n-    <dependency>\n-      <groupId>org.netbeans.modules</groupId>\n-      <artifactId>org-netbeans-insane</artifactId>\n-      <version>RELEASE72</version>\n-      <scope>test</scope>\n-    </dependency>\n     <dependency>\n       <groupId>net.sf.trove4j</groupId>\n       <artifactId>trove4j</artifactId>"
+  },
+  {
+    "sha": "814105ace8a83b8cf759e9610da1eed97dfc2563",
+    "filename": "src/test/java/hudson/plugins/cobertura/CoberturaCoverageParserTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 25,
+    "changes": 27,
+    "blob_url": "https://github.com/jenkinsci/cobertura-plugin/blob/55f7be9e62dfe52852df932865f91c171d68e1db/src/test/java/hudson/plugins/cobertura/CoberturaCoverageParserTest.java",
+    "raw_url": "https://github.com/jenkinsci/cobertura-plugin/raw/55f7be9e62dfe52852df932865f91c171d68e1db/src/test/java/hudson/plugins/cobertura/CoberturaCoverageParserTest.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/cobertura-plugin/contents/src/test/java/hudson/plugins/cobertura/CoberturaCoverageParserTest.java?ref=55f7be9e62dfe52852df932865f91c171d68e1db",
+    "patch": "@@ -5,14 +5,12 @@\n import hudson.plugins.cobertura.targets.CoverageMetric;\n \n import java.io.InputStream;\n-import java.util.Collections;\n import java.util.LinkedHashMap;\n import java.util.Map;\n import java.util.Set;\n import java.util.HashSet;\n import org.jvnet.hudson.test.Bug;\n-import org.netbeans.insane.scanner.CountingVisitor;\n-import org.netbeans.insane.scanner.ScannerUtils;\n+import org.jvnet.hudson.test.MemoryAssert;\n \n /**\n  * Unit tests for {@link CoberturaCoverageParser}.\n@@ -140,29 +138,8 @@ public void testParseMemoryUsage() throws Exception {\n             InputStream in = getClass().getResourceAsStream(fileName);\n             CoverageResult result = CoberturaCoverageParser.parse(in, null, null);\n             result.setOwner(null);\n-            assertMaxMemoryUsage(fileName + \" results\", result, e.getValue());\n+            MemoryAssert.assertHeapUsage(result, e.getValue());\n         }\n     }\n \n-    /**\n-     * Tests the memory usage of a specified object.\n-     * The memory usage is then compared with the specified\n-     * maximum desired memory usage.  If the average memory usage is greater\n-     * than the specified number, it will be reported as a failed assertion.\n-     *\n-     * @param description a plain-text description, to be used\n-     *          in diagnostic messages\n-     * @param o the object to measure\n-     * @param maxMemoryUsage the maximum desired memory usage for the Callable,\n-     *          in bytes\n-     */\n-    private static void assertMaxMemoryUsage(String description, Object o, int maxMemoryUsage) throws Exception {\n-        CountingVisitor v = new CountingVisitor();\n-        ScannerUtils.scan(null, v, Collections.singleton(o), false);\n-        long memoryUsage = v.getTotalSize();\n-        String message = description + \" consume \" + memoryUsage + \" bytes of memory on average, \" + (memoryUsage - maxMemoryUsage) + \" bytes more than the specified limit of \" + maxMemoryUsage + \" bytes\";\n-        assertTrue(message, memoryUsage <= maxMemoryUsage);\n-        System.out.println(description + \" consume \" + memoryUsage + \"/\" + maxMemoryUsage + \" bytes of memory\");\n-    }\n-\n }"
+  }
+]

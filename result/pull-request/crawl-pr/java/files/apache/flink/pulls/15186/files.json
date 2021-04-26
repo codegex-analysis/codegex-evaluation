@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "2b4cb5be999172fb137d8e2d1c7e2dd2fd102e44",
+    "filename": "flink-runtime/src/main/java/org/apache/flink/runtime/jobmaster/factories/DefaultJobManagerJobMetricGroupFactory.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/flink/blob/f0997a4fb9540f80536f86175e7b37095d375231/flink-runtime/src/main/java/org/apache/flink/runtime/jobmaster/factories/DefaultJobManagerJobMetricGroupFactory.java",
+    "raw_url": "https://github.com/apache/flink/raw/f0997a4fb9540f80536f86175e7b37095d375231/flink-runtime/src/main/java/org/apache/flink/runtime/jobmaster/factories/DefaultJobManagerJobMetricGroupFactory.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/main/java/org/apache/flink/runtime/jobmaster/factories/DefaultJobManagerJobMetricGroupFactory.java?ref=f0997a4fb9540f80536f86175e7b37095d375231",
+    "patch": "@@ -39,6 +39,6 @@ public DefaultJobManagerJobMetricGroupFactory(\n \n     @Override\n     public JobManagerJobMetricGroup create(@Nonnull JobGraph jobGraph) {\n-        return jobManagerMetricGroup.addJob(jobGraph);\n+        return jobManagerMetricGroup.addJob(jobGraph.getJobID(), jobGraph.getName());\n     }\n }"
+  },
+  {
+    "sha": "8381dc177495131d29cb74f83b6e9f7751960897",
+    "filename": "flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/JobManagerMetricGroup.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 4,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/flink/blob/f0997a4fb9540f80536f86175e7b37095d375231/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/JobManagerMetricGroup.java",
+    "raw_url": "https://github.com/apache/flink/raw/f0997a4fb9540f80536f86175e7b37095d375231/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/JobManagerMetricGroup.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/JobManagerMetricGroup.java?ref=f0997a4fb9540f80536f86175e7b37095d375231",
+    "patch": "@@ -20,7 +20,6 @@\n \n import org.apache.flink.api.common.JobID;\n import org.apache.flink.metrics.CharacterFilter;\n-import org.apache.flink.runtime.jobgraph.JobGraph;\n import org.apache.flink.runtime.metrics.MetricRegistry;\n import org.apache.flink.runtime.metrics.dump.QueryScopeInfo;\n import org.apache.flink.runtime.metrics.scope.ScopeFormat;\n@@ -62,9 +61,7 @@ public String hostname() {\n     //  job groups\n     // ------------------------------------------------------------------------\n \n-    public JobManagerJobMetricGroup addJob(JobGraph job) {\n-        JobID jobId = job.getJobID();\n-        String jobName = job.getName();\n+    public JobManagerJobMetricGroup addJob(JobID jobId, String jobName) {\n         // get or create a jobs metric group\n         JobManagerJobMetricGroup currentJobGroup;\n         synchronized (this) {"
+  },
+  {
+    "sha": "5aeb03a851026cc029e794f0a9d69028cc2563f3",
+    "filename": "flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/UnregisteredMetricGroups.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/apache/flink/blob/f0997a4fb9540f80536f86175e7b37095d375231/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/UnregisteredMetricGroups.java",
+    "raw_url": "https://github.com/apache/flink/raw/f0997a4fb9540f80536f86175e7b37095d375231/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/UnregisteredMetricGroups.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/UnregisteredMetricGroups.java?ref=f0997a4fb9540f80536f86175e7b37095d375231",
+    "patch": "@@ -20,7 +20,6 @@\n \n import org.apache.flink.api.common.JobID;\n import org.apache.flink.runtime.executiongraph.ExecutionAttemptID;\n-import org.apache.flink.runtime.jobgraph.JobGraph;\n import org.apache.flink.runtime.jobgraph.JobVertexID;\n import org.apache.flink.runtime.jobgraph.OperatorID;\n import org.apache.flink.runtime.metrics.NoOpMetricRegistry;\n@@ -105,7 +104,7 @@ private UnregisteredJobManagerMetricGroup() {\n         }\n \n         @Override\n-        public JobManagerJobMetricGroup addJob(JobGraph job) {\n+        public JobManagerJobMetricGroup addJob(JobID jobId, String jobName) {\n             return createUnregisteredJobManagerJobMetricGroup();\n         }\n     }"
+  },
+  {
+    "sha": "04cd1fd8a916927309105cce45f374a2f789b929",
+    "filename": "flink-runtime/src/test/java/org/apache/flink/runtime/metrics/groups/JobManagerGroupTest.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 31,
+    "changes": 36,
+    "blob_url": "https://github.com/apache/flink/blob/f0997a4fb9540f80536f86175e7b37095d375231/flink-runtime/src/test/java/org/apache/flink/runtime/metrics/groups/JobManagerGroupTest.java",
+    "raw_url": "https://github.com/apache/flink/raw/f0997a4fb9540f80536f86175e7b37095d375231/flink-runtime/src/test/java/org/apache/flink/runtime/metrics/groups/JobManagerGroupTest.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/test/java/org/apache/flink/runtime/metrics/groups/JobManagerGroupTest.java?ref=f0997a4fb9540f80536f86175e7b37095d375231",
+    "patch": "@@ -21,7 +21,6 @@\n import org.apache.flink.api.common.JobID;\n import org.apache.flink.configuration.Configuration;\n import org.apache.flink.configuration.MetricOptions;\n-import org.apache.flink.runtime.jobgraph.JobGraphBuilder;\n import org.apache.flink.runtime.metrics.MetricRegistryConfiguration;\n import org.apache.flink.runtime.metrics.MetricRegistryImpl;\n import org.apache.flink.runtime.metrics.dump.QueryScopeInfo;\n@@ -54,24 +53,9 @@ public void addAndRemoveJobs() throws Exception {\n         final String jobName1 = \"testjob\";\n         final String jobName2 = \"anotherJob\";\n \n-        JobManagerJobMetricGroup jmJobGroup11 =\n-                group.addJob(\n-                        JobGraphBuilder.newStreamingJobGraphBuilder()\n-                                .setJobId(jid1)\n-                                .setJobName(jobName1)\n-                                .build());\n-        JobManagerJobMetricGroup jmJobGroup12 =\n-                group.addJob(\n-                        JobGraphBuilder.newStreamingJobGraphBuilder()\n-                                .setJobId(jid1)\n-                                .setJobName(jobName1)\n-                                .build());\n-        JobManagerJobMetricGroup jmJobGroup21 =\n-                group.addJob(\n-                        JobGraphBuilder.newStreamingJobGraphBuilder()\n-                                .setJobId(jid2)\n-                                .setJobName(jobName2)\n-                                .build());\n+        JobManagerJobMetricGroup jmJobGroup11 = group.addJob(jid1, jobName1);\n+        JobManagerJobMetricGroup jmJobGroup12 = group.addJob(jid1, jobName1);\n+        JobManagerJobMetricGroup jmJobGroup21 = group.addJob(jid2, jobName2);\n \n         assertEquals(jmJobGroup11, jmJobGroup12);\n \n@@ -103,18 +87,8 @@ public void testCloseClosesAll() throws Exception {\n         final String jobName1 = \"testjob\";\n         final String jobName2 = \"anotherJob\";\n \n-        JobManagerJobMetricGroup jmJobGroup11 =\n-                group.addJob(\n-                        JobGraphBuilder.newStreamingJobGraphBuilder()\n-                                .setJobId(jid1)\n-                                .setJobName(jobName1)\n-                                .build());\n-        JobManagerJobMetricGroup jmJobGroup21 =\n-                group.addJob(\n-                        JobGraphBuilder.newStreamingJobGraphBuilder()\n-                                .setJobId(jid2)\n-                                .setJobName(jobName2)\n-                                .build());\n+        JobManagerJobMetricGroup jmJobGroup11 = group.addJob(jid1, jobName1);\n+        JobManagerJobMetricGroup jmJobGroup21 = group.addJob(jid2, jobName2);\n \n         group.close();\n "
+  }
+]

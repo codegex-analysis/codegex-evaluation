@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "e7fb8707ad3b1f8e7025ea84bf6b42cbbbf9241d",
+    "filename": "tensorflow-core/tensorflow-core-api/.bazelrc",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 3,
+    "changes": 7,
+    "blob_url": "https://github.com/karllessard/tensorflow-java/blob/7452baf516c88d0dd8dba4588421e1284219cb54/tensorflow-core/tensorflow-core-api/.bazelrc",
+    "raw_url": "https://github.com/karllessard/tensorflow-java/raw/7452baf516c88d0dd8dba4588421e1284219cb54/tensorflow-core/tensorflow-core-api/.bazelrc",
+    "contents_url": "https://api.github.com/repos/karllessard/tensorflow-java/contents/tensorflow-core/tensorflow-core-api/.bazelrc?ref=7452baf516c88d0dd8dba4588421e1284219cb54",
+    "patch": "@@ -204,7 +204,8 @@ build:cuda_clang --define=using_clang=true\n build:cuda_clang --action_env TF_CUDA_CLANG=1\n \n # dbg config, as a shorthand for '--config=opt -c dbg'\n-build:dbg --config=opt -c dbg\n+### TF JAVA ### build:dbg --config=opt -c dbg\n+build:dbg -c dbg\n # for now, disable arm_neon. see: https://github.com/tensorflow/tensorflow/issues/33360\n build:dbg --cxxopt -DTF_LITE_DISABLE_X86_NEON\n # AWS SDK must be compiled in release mode. see: https://github.com/tensorflow/tensorflow/issues/37498\n@@ -574,7 +575,7 @@ try-import %workspace%/.tf_configure.bazelrc\n try-import %workspace%/.bazelrc.user\n \n # Here are bazelrc configs for release builds\n-build:release_common --config=opt\n+### TF JAVA ### build:release_common --config=opt\n build:release_common --config=v2\n build:release_common --distinct_host_configuration=false\n build:release_common --action_env TF_CONFIGURE_IOS=\"0\"\n@@ -583,7 +584,7 @@ build:release_cpu_linux --config=release_common\n build:release_cpu_linux --config=avx_linux\n # We use the same toolchain for CPU/GPU packages.\n # Did not add this to the defaults in case this changes.\n-build:release_cpu_linux --crosstool_top=//third_party/toolchains/preconfig/ubuntu16.04/gcc7_manylinux2010-nvcc-cuda10.1:toolchain\n+### TF JAVA ### build:release_cpu_linux --crosstool_top=//third_party/toolchains/preconfig/ubuntu16.04/gcc7_manylinux2010-nvcc-cuda10.1:toolchain\n \n build:release_cpu_macos --config=release_common\n build:release_cpu_macos --config=avx_linux"
+  },
+  {
+    "sha": "4ed62558646cb98f4e199840406db2c9099423fa",
+    "filename": "tensorflow-core/tensorflow-core-api/build.sh",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 23,
+    "changes": 41,
+    "blob_url": "https://github.com/karllessard/tensorflow-java/blob/7452baf516c88d0dd8dba4588421e1284219cb54/tensorflow-core/tensorflow-core-api/build.sh",
+    "raw_url": "https://github.com/karllessard/tensorflow-java/raw/7452baf516c88d0dd8dba4588421e1284219cb54/tensorflow-core/tensorflow-core-api/build.sh",
+    "contents_url": "https://api.github.com/repos/karllessard/tensorflow-java/contents/tensorflow-core/tensorflow-core-api/build.sh?ref=7452baf516c88d0dd8dba4588421e1284219cb54",
+    "patch": "@@ -2,35 +2,30 @@\n # Script to build native TensorFlow libraries\n set -eu\n \n-# Allows us to use ccache with Bazel on Mac\n-export BAZEL_USE_CPP_ONLY_TOOLCHAIN=1\n-\n-export BAZEL_VC=\"${VCINSTALLDIR:-}\"\n-if [[ -d $BAZEL_VC ]]; then\n-    export BUILD_FLAGS=\"--copt=//arch:AVX `#--copt=//arch:AVX2` --define=override_eigen_strong_inline=true\"\n-    export PYTHON_BIN_PATH=$(which python.exe)\n-else\n-    export BUILD_FLAGS=\"--copt=-msse4.1 --copt=-msse4.2 --copt=-mavx `#--copt=-mavx2 --copt=-mfma` --linkopt=-lstdc++ --host_linkopt=-lstdc++\"\n-    export PYTHON_BIN_PATH=$(which python3)\n+if [[ \"${CLASSIFIER:-}\" == *linux* ]]; then\n+    if [[ \"${CLASSIFIER:-}\" == *gpu* ]]; then\n+        export BUILD_FLAGS=\"--config=release_gpu_linux\"\n+    else\n+        export BUILD_FLAGS=\"--config=release_cpu_linux\"\n+    fi\n+    export BUILD_FLAGS=\"$BUILD_FLAGS --copt=-msse4.1 --copt=-msse4.2 --linkopt=-lstdc++ --host_linkopt=-lstdc++ --python_path=$(which python3)\"\n+elif [[ \"${CLASSIFIER:-}\" == *windows* ]]; then\n+    if [[ \"${CLASSIFIER:-}\" == *gpu* ]]; then\n+        export BUILD_FLAGS=\"--config=release_gpu_windows\"\n+    else\n+        export BUILD_FLAGS=\"--config=release_cpu_windows\"\n+    fi\n+    export BUILD_FLAGS=\"$BUILD_FLAGS --copt=//arch:AVX --define=override_eigen_strong_inline=true --python_path=$(which python.exe)\"\n+elif [[ \"${CLASSIFIER:-}\" == *macos* ]]; then\n+    export BUILD_FLAGS=\"--config=release_cpu_macos --copt=-msse4.1 --copt=-msse4.2 --linkopt=-lstdc++ --host_linkopt=-lstdc++ --python_path=$(which python3)\"\n fi\n \n-if [[ \"${EXTENSION:-}\" == *mkl* ]]; then\n+if [[ \"${CLASSIFIER:-}\" == *mkl* ]]; then\n     export BUILD_FLAGS=\"$BUILD_FLAGS --config=mkl\"\n fi\n \n-if [[ \"${EXTENSION:-}\" == *gpu* ]]; then\n-    export BUILD_FLAGS=\"$BUILD_FLAGS --config=cuda\"\n-    export TF_CUDA_COMPUTE_CAPABILITIES=\"${TF_CUDA_COMPUTE_CAPABILITIES:-\"3.5,7.0\"}\"\n-    if [[ -z ${TF_CUDA_PATHS:-} ]] && [[ -d ${CUDA_PATH:-} ]]; then\n-        # Work around some issue with Bazel preventing it from detecting CUDA on Windows\n-        export TF_CUDA_PATHS=\"$CUDA_PATH\"\n-    fi\n-fi\n-\n-BUILD_FLAGS=\"$BUILD_FLAGS --experimental_repo_remote_exec --python_path=\"$PYTHON_BIN_PATH\" --output_filter=DONT_MATCH_ANYTHING --verbose_failures\"\n-\n # Always allow distinct host configuration since we rely on the host JVM for a few things (this was disabled by default on windows)\n-BUILD_FLAGS=\"$BUILD_FLAGS --distinct_host_configuration=true\"\n+BUILD_FLAGS=\"$BUILD_FLAGS --distinct_host_configuration=true --verbose_failures\"\n \n # Build C/C++ API of TensorFlow itself including a target to generate ops for Java\n bazel build $BUILD_FLAGS ${BUILD_USER_FLAGS:-} \\"
+  },
+  {
+    "sha": "1ec81005f2df316711c07b298bcd758c800137e9",
+    "filename": "tensorflow-core/tensorflow-core-api/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/karllessard/tensorflow-java/blob/7452baf516c88d0dd8dba4588421e1284219cb54/tensorflow-core/tensorflow-core-api/pom.xml",
+    "raw_url": "https://github.com/karllessard/tensorflow-java/raw/7452baf516c88d0dd8dba4588421e1284219cb54/tensorflow-core/tensorflow-core-api/pom.xml",
+    "contents_url": "https://api.github.com/repos/karllessard/tensorflow-java/contents/tensorflow-core/tensorflow-core-api/pom.xml?ref=7452baf516c88d0dd8dba4588421e1284219cb54",
+    "patch": "@@ -259,7 +259,7 @@\n                 <argument>${project.basedir}/build.sh</argument>\n               </buildCommand>\n               <environmentVariables>\n-                <EXTENSION>${javacpp.platform.extension}</EXTENSION>\n+                <CLASSIFIER>${native.classifier}</CLASSIFIER>\n                 <BUILD_USER_FLAGS>${native.build.flags}</BUILD_USER_FLAGS>\n               </environmentVariables>\n               <workingDirectory>${project.basedir}</workingDirectory>"
+  }
+]

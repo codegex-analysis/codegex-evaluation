@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "31b74c4cca71f3202f02dc09d7aae47bd487babd",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/hiroki1994/snitch/blob/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/pom.xml",
+    "raw_url": "https://github.com/hiroki1994/snitch/raw/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/pom.xml",
+    "contents_url": "https://api.github.com/repos/hiroki1994/snitch/contents/pom.xml?ref=dde23ca238a22a8128e7b9585b7d4c8f3c91e04c",
+    "patch": "@@ -94,6 +94,26 @@\n \t\t\t\t</exclusion>\n \t\t\t</exclusions>\n \t\t</dependency>\n+\t\t<dependency>\n+    \t\t<groupId>org.junit.platform</groupId>\n+    \t\t<artifactId>junit-platform-launcher</artifactId>\n+    \t\t<scope>test</scope>\n+\t\t</dependency>\n+\t\t<dependency>\n+    \t\t<groupId>org.junit.jupiter</groupId>\n+    \t\t<artifactId>junit-jupiter-api</artifactId>\n+    \t\t<scope>test</scope>\n+\t\t</dependency>\n+\t\t<dependency>\n+    \t\t<groupId>org.junit.jupiter</groupId>\n+    \t\t<artifactId>junit-jupiter-engine</artifactId>\n+    \t\t<scope>test</scope>\n+\t\t</dependency>\n+\t\t<dependency>\n+    \t\t<groupId>org.junit.vintage</groupId>\n+    \t\t<artifactId>junit-vintage-engine</artifactId>\n+    \t\t<scope>test</scope>\n+\t\t</dependency>\n \t\t<dependency>\n \t\t\t<groupId>org.webjars</groupId>\n \t\t\t<artifactId>jquery</artifactId>"
+  },
+  {
+    "sha": "d0d9d1260ef648b7fd41977d4be381728172e51c",
+    "filename": "src/main/java/com/example/demo/login/aspect/ErrorAspect.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 5,
+    "changes": 16,
+    "blob_url": "https://github.com/hiroki1994/snitch/blob/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/main/java/com/example/demo/login/aspect/ErrorAspect.java",
+    "raw_url": "https://github.com/hiroki1994/snitch/raw/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/main/java/com/example/demo/login/aspect/ErrorAspect.java",
+    "contents_url": "https://api.github.com/repos/hiroki1994/snitch/contents/src/main/java/com/example/demo/login/aspect/ErrorAspect.java?ref=dde23ca238a22a8128e7b9585b7d4c8f3c91e04c",
+    "patch": "@@ -11,10 +11,16 @@\n public class ErrorAspect {\n \n \t@AfterThrowing(value=\"execution(* *..*.*..*(..))\" + \" &&(bean(*Controller) || bean(*Service) || bean(*Repository))\" , throwing=\"ex\")\n-\tpublic void throwingNull(DataAccessException ex)\n-\t{\n-     System.out.println(\"=========================================\");\n-     System.out.println(\"DataAccessExceptionが発生しました。:\" + ex);\n-     System.out.println(\"=========================================\");\n+\tpublic void throwingDataAccessException(DataAccessException ex){\n+\t\tSystem.out.println(\"=========================================\");\n+\t\tSystem.out.println(\"DataAccessExceptionが発生しました。:\" + ex);\n+\t\tSystem.out.println(\"=========================================\");\n+\t}\n+\n+\t@AfterThrowing(value=\"execution(* *..*.*..*(..))\" + \" &&(bean(*Controller) || bean(*Service) || bean(*Repository))\" , throwing=\"ex\")\n+\tpublic void throwingException(Exception ex){\n+\t\tSystem.out.println(\"=========================================\");\n+\t\tSystem.out.println(\"Exceptionが発生しました。:\" + ex);\n+\t\tSystem.out.println(\"=========================================\");\n \t}\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "1f5336d1cac89986681d19b5f1d999f63ac2e45c",
+    "filename": "src/main/java/com/example/demo/login/controller/GlobalControllAdvice.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 15,
+    "changes": 32,
+    "blob_url": "https://github.com/hiroki1994/snitch/blob/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/main/java/com/example/demo/login/controller/GlobalControllAdvice.java",
+    "raw_url": "https://github.com/hiroki1994/snitch/raw/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/main/java/com/example/demo/login/controller/GlobalControllAdvice.java",
+    "contents_url": "https://api.github.com/repos/hiroki1994/snitch/contents/src/main/java/com/example/demo/login/controller/GlobalControllAdvice.java?ref=dde23ca238a22a8128e7b9585b7d4c8f3c91e04c",
+    "patch": "@@ -1,8 +1,9 @@\n package com.example.demo.login.controller;\n \n+import java.io.IOException;\n+\n import javax.servlet.http.HttpServletRequest;\n \n-import org.springframework.dao.DataAccessException;\n import org.springframework.dao.EmptyResultDataAccessException;\n import org.springframework.stereotype.Component;\n import org.springframework.ui.Model;\n@@ -16,44 +17,45 @@\n public class GlobalControllAdvice {\n \n \n-\t@ExceptionHandler(DataAccessException.class)\n-\tpublic String dataAccessExceptionHandler(DataAccessException e, Model model, HttpServletRequest request) {\n+\t@ExceptionHandler(EmptyResultDataAccessException.class)\n+\tpublic String emptyResultDataAccessExceptionHandler(EmptyResultDataAccessException e, Model model, HttpServletRequest request) {\n \n \t\tif(request.getAttribute(\"searchForm\")!=null) {\n \t\t\tmodel.addAttribute((SearchForm)request.getAttribute(\"searchForm\"));\n-\t\t\t}else{\n-\t\t\t\tmodel.addAttribute(\"searchForm\", new SearchForm());\n+\t\t}else{\n+\t\t\tmodel.addAttribute(\"searchForm\", new SearchForm());\n \t\t}\n \n \t\tmodel.addAttribute(\"message\", \"指定されたページは存在しません\");\n+\n \t\treturn \"error\";\n \t}\n \n-\n-\t@ExceptionHandler(Exception.class)\n-\tpublic String exceptionHandler(Exception e, Model model, HttpServletRequest request) {\n+\t@ExceptionHandler(IOException.class)\n+\tpublic String IOExceptionExceptionHandler(IOException e, Model model, HttpServletRequest request) {\n \n \t\tif(request.getAttribute(\"searchForm\")!=null) {\n \t\t\tmodel.addAttribute((SearchForm)request.getAttribute(\"searchForm\"));\n-\t\t\t}else{\n-\t\t\t\tmodel.addAttribute(\"searchForm\", new SearchForm());\n+\t\t}else{\n+\t\t\tmodel.addAttribute(\"searchForm\", new SearchForm());\n \t\t}\n \n \t\tmodel.addAttribute(\"message\", \"指定されたページは存在しません\");\n+\n \t\treturn \"error\";\n \t}\n \n-\t@ExceptionHandler(EmptyResultDataAccessException.class)\n-\tpublic String emptyResultDataAccessException(EmptyResultDataAccessException e, Model model, HttpServletRequest request) {\n+\t@ExceptionHandler(Exception.class)\n+\tpublic String exceptionHandler(Exception e, Model model, HttpServletRequest request) {\n \n \t\tif(request.getAttribute(\"searchForm\")!=null) {\n \t\t\tmodel.addAttribute((SearchForm)request.getAttribute(\"searchForm\"));\n-\t\t\t}else{\n-\t\t\t\tmodel.addAttribute(\"searchForm\", new SearchForm());\n+\t\t}else{\n+\t\t\tmodel.addAttribute(\"searchForm\", new SearchForm());\n \t\t}\n \n \t\tmodel.addAttribute(\"message\", \"指定されたページは存在しません\");\n+\n \t\treturn \"error\";\n \t}\n-\n }"
+  },
+  {
+    "sha": "7b4b125bf3f058e1b050707f843001ecc81109f3",
+    "filename": "src/test/java/com/example/demo/GlobalControllAdviceTest.java",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/hiroki1994/snitch/blob/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/test/java/com/example/demo/GlobalControllAdviceTest.java",
+    "raw_url": "https://github.com/hiroki1994/snitch/raw/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/test/java/com/example/demo/GlobalControllAdviceTest.java",
+    "contents_url": "https://api.github.com/repos/hiroki1994/snitch/contents/src/test/java/com/example/demo/GlobalControllAdviceTest.java?ref=dde23ca238a22a8128e7b9585b7d4c8f3c91e04c",
+    "patch": "@@ -0,0 +1,45 @@\n+package com.example.demo;\n+\n+import static org.hamcrest.CoreMatchers.*;\n+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;\n+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;\n+\n+import org.junit.jupiter.api.Test;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;\n+import org.springframework.boot.test.context.SpringBootTest;\n+import org.springframework.test.context.jdbc.Sql;\n+import org.springframework.test.web.servlet.MockMvc;\n+\n+@SpringBootTest\n+@AutoConfigureMockMvc\n+@Sql({\"/Delete.sql\", \"/Schema.sql\", \"/Insert.sql\"})\n+public class GlobalControllAdviceTest {\n+\n+    @Autowired\n+\tprivate MockMvc mockMvc;\n+\n+    @Test\n+\tpublic void EmptyResultDataAccessException発生() throws Exception {\n+\n+\t\tint giftId = 9999;\n+\n+\t\tmockMvc.perform(get(\"/giftDetail/\" + giftId)\n+\t\t\t   .param(\"giftId\", \"9999\"))\n+\t\t\t   .andExpect(status().isOk())\n+\t\t\t   .andExpect(view().name(\"error\"))\n+\t\t\t   .andExpect(content().string(containsString(\"指定されたページは存在しません\")));\n+\t}\n+\n+\t@Test\n+\tpublic void Exception発生() throws Exception {\n+\n+\t\tString giftId = \"H#4kこ\";\n+\n+\t\tmockMvc.perform(get(\"/giftDetail/\" + giftId)\n+\t\t\t   .param(\"giftId\", \"H#4kこ\"))\n+\t\t\t   .andExpect(status().isOk())\n+\t\t\t   .andExpect(view().name(\"error\"))\n+\t\t\t   .andExpect(content().string(containsString(\"指定されたページは存在しません\")));\n+\t}\n+}"
+  },
+  {
+    "sha": "581e52bce4fe5c33d0cb9dda865456b94fad40e9",
+    "filename": "src/test/resources/Insert.sql",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/hiroki1994/snitch/blob/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/test/resources/Insert.sql",
+    "raw_url": "https://github.com/hiroki1994/snitch/raw/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/test/resources/Insert.sql",
+    "contents_url": "https://api.github.com/repos/hiroki1994/snitch/contents/src/test/resources/Insert.sql?ref=dde23ca238a22a8128e7b9585b7d4c8f3c91e04c",
+    "patch": "@@ -0,0 +1,12 @@\n+INSERT INTO userData(userName, mailAddress, password, role) VALUES('userName3', 'mailaddress3@gmail.co.jp', '$2a$10$xRTXvpMWly0oGiu65WZlm.3YL95LGVV2ASFjDhe6WF4.Qji1huIPa', 'ROLE_GENERAL');\n+\n+INSERT INTO guest(guestId, guestName) VALUES('1000', '中越典子');\n+INSERT INTO guest(guestId, guestName) VALUES('1001', 'ミムラ');\n+INSERT INTO guest(guestId, guestName) VALUES('1002', '掛布雅之');\n+\n+INSERT INTO gift(giftId, guestId, giftName, price, image, description, shop, address, phone) VALUES('1000', '1000', 'マカロン', '120個入　3938円', '1000.jpg', 'ショコラアメール/ショコラヴァニーユ/ショコラフランボワーズショコラキャラメル/ショコラカフェ/ショコラミエルショコラピスターシュ/ショコラベルガモット/ショコラパッションポムアニス/マングコリアンドル/パンオレザン上記、12種類', 'ジャン＝ポール･エヴァン伊勢丹新宿店', '東京都新宿区新宿3-14-1伊勢丹新宿店本館B1階', '03-3352-1111');\n+INSERT INTO gift(giftId, guestId, giftName, price, image, description, shop, address, phone) VALUES('1001', '1001', '五家寶', '細巻6本入り 170円', '1001.jpg', '各種詰め合わせあります。ぷうん、と香るきな粉の香ばしさ、サクッとした歯応え、そしてすうっと溶け入る舌触り・・・・・・。主原料である大豆、糯米、砂糖、水飴等が織りなすこの豊かな風味は、総て独自のものを用い、心のこもった手造りによる『花堤五家寳』ならではのものです。', '花堤', '玉県熊谷市榎町3', '048-521-0471');\n+INSERT INTO gift(giftId, guestId, giftName, price, image, description, shop, address, phone) VALUES('1002', '1002', 'ロールケーキ', '1000円 ', '1.jpg', 'ロールケーキ専門店で、手作りしている為、1日80本限定販売です。平飼地鶏の有精自然卵、国内産の小麦粉、砂糖、低脂肪の純生クリームと厳選された素材を使用しています。もちろん、添加物、保存料は一切使用していません。このロールケーキはプレーンとチョコの２種類で、カフェでは、ロールケーキと飲み物のセットがあります。', 'Flat', '豊中市上野東3-18-8', '06-6848-7505');\n+\n+INSERT INTO favGift(userId, giftId) VALUES('1', '1000');\n+INSERT INTO favGift(userId, giftId) VALUES('1', '1001');"
+  },
+  {
+    "sha": "81abbec76a0b88cfaded9f1fbf65e67242db3834",
+    "filename": "src/test/resources/Schema.sql",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/hiroki1994/snitch/blob/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/test/resources/Schema.sql",
+    "raw_url": "https://github.com/hiroki1994/snitch/raw/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/test/resources/Schema.sql",
+    "contents_url": "https://api.github.com/repos/hiroki1994/snitch/contents/src/test/resources/Schema.sql?ref=dde23ca238a22a8128e7b9585b7d4c8f3c91e04c",
+    "patch": "@@ -0,0 +1,36 @@\n+CREATE TABLE IF NOT EXISTS userData (\n+\tuserId INT PRIMARY KEY AUTO_INCREMENT,\n+\tuserName VARCHAR(20) UNIQUE,\n+\tmailAddress VARCHAR(100),\n+\tpassword VARCHAR(100),\n+\trole VARCHAR(20),\n+\tunavailableFlag INT\n+);\n+\n+CREATE TABLE IF NOT EXISTS guest (\n+\tguestId INT PRIMARY KEY AUTO_INCREMENT,\n+\tguestName VARCHAR(30),\n+\tunavailableFlag INT default 0\n+);\n+\n+CREATE TABLE IF NOT EXISTS gift (\n+  \tgiftId INT PRIMARY KEY AUTO_INCREMENT,\n+  \tguestId INT,\n+  \tgiftName VARCHAR(50),\n+  \tprice VARCHAR(100),\n+  \timage VARCHAR(20),\n+  \tdescription VARCHAR(3000),\n+  \tshop VARCHAR(100),\n+  \taddress VARCHAR(500),\n+  \tphone VARCHAR(50),\n+  \tunavailableFlag INT,\n+  \tFOREIGN KEY (guestId) REFERENCES guest(guestId)\n+);\n+\n+\n+CREATE TABLE IF NOT EXISTS favGift (\n+  \tfavId INT PRIMARY KEY AUTO_INCREMENT,\n+  \tuserId INT,\n+  \tgiftId INT,\n+  \tunavailableFlag INT\n+);\n\\ No newline at end of file"
+  },
+  {
+    "sha": "40a22642615feebec68f897896d2e8a9bb0d64e5",
+    "filename": "src/test/resources/delete.sql",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/hiroki1994/snitch/blob/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/test/resources/delete.sql",
+    "raw_url": "https://github.com/hiroki1994/snitch/raw/dde23ca238a22a8128e7b9585b7d4c8f3c91e04c/src/test/resources/delete.sql",
+    "contents_url": "https://api.github.com/repos/hiroki1994/snitch/contents/src/test/resources/delete.sql?ref=dde23ca238a22a8128e7b9585b7d4c8f3c91e04c",
+    "patch": "@@ -0,0 +1,4 @@\n+DROP TABLE IF EXISTS favGift;\n+DROP TABLE IF EXISTS gift;\n+DROP TABLE IF EXISTS guest;\n+DROP TABLE IF EXISTS userData;\n\\ No newline at end of file"
+  }
+]

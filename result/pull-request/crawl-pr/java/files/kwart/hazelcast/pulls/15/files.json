@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "afe9ba2af7c4992a4ab7d91f059619dd1787ca4d",
+    "filename": ".github/internal_snapshot.yml",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/kwart/hazelcast/blob/3a895e7efa810e89b7169f0853656658c62076c6/.github/internal_snapshot.yml",
+    "raw_url": "https://github.com/kwart/hazelcast/raw/3a895e7efa810e89b7169f0853656658c62076c6/.github/internal_snapshot.yml",
+    "contents_url": "https://api.github.com/repos/kwart/hazelcast/contents/.github/internal_snapshot.yml?ref=3a895e7efa810e89b7169f0853656658c62076c6",
+    "patch": "@@ -0,0 +1,39 @@\n+name: Build internal snapshot image\n+\n+on:\n+  push:\n+    branches:\n+      - 'master'\n+      - '[0-9]+.[0-9]+.z'\n+\n+jobs:\n+  push:\n+    runs-on: ubuntu-latest\n+    if: github.repository_owner == 'kwart'\n+    steps:\n+      - name: Checkout tools repo\n+        uses: actions/checkout@v2\n+        with:\n+          repository: hazelcast-dockerfiles/hazelcast-snapshot\n+          ref: gh-actions\n+      - name: Checkout tools repo\n+        uses: actions/checkout@v2\n+        with:\n+          path: hazelcast\n+\n+      - name: Set up QEMU\n+        uses: docker/setup-qemu-action@v1\n+\n+      - name: Set up Docker Buildx\n+        uses: docker/setup-buildx-action@v1\n+\n+      - name: Login to Docker Hub\n+        run: echo \"${{ secrets.DOCKER_PASSWORD }}\" | docker login -u \"${{ secrets.DOCKER_USERNAME }}\" --password-stdin\n+\n+      - name: Build/Push image\n+        run: |\n+          TAGS=\"--tag devopshazelcast/hazelcast:${GITHUB_REF#refs/heads/}\"\n+          if [[ \"${{ github.ref }}\" == \"refs/heads/master\" ]]; then\n+            TAGS=\"${TAGS} --tag devopshazelcast/hazelcast-snapshot:latest\"\n+          fi\n+          docker buildx build --push $TAGS ."
+  },
+  {
+    "sha": "aa4f2fafe93e111258fff585a61b2756c46b9ea3",
+    "filename": "hazelcast-spring-tests/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/kwart/hazelcast/blob/3a895e7efa810e89b7169f0853656658c62076c6/hazelcast-spring-tests/pom.xml",
+    "raw_url": "https://github.com/kwart/hazelcast/raw/3a895e7efa810e89b7169f0853656658c62076c6/hazelcast-spring-tests/pom.xml",
+    "contents_url": "https://api.github.com/repos/kwart/hazelcast/contents/hazelcast-spring-tests/pom.xml?ref=3a895e7efa810e89b7169f0853656658c62076c6",
+    "patch": "@@ -115,7 +115,7 @@\n                 <activeByDefault>true</activeByDefault>\n             </activation>\n             <properties>\n-                <org.springframework.version>5.3.4</org.springframework.version>\n+                <org.springframework.version>5.3.5</org.springframework.version>\n                 <javax.annotation.version>1.3.2</javax.annotation.version>\n             </properties>\n             <dependencies>"
+  },
+  {
+    "sha": "8e53f95875e1be5d7544c369b4ae1507e62ab42f",
+    "filename": "hazelcast-spring/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/kwart/hazelcast/blob/3a895e7efa810e89b7169f0853656658c62076c6/hazelcast-spring/pom.xml",
+    "raw_url": "https://github.com/kwart/hazelcast/raw/3a895e7efa810e89b7169f0853656658c62076c6/hazelcast-spring/pom.xml",
+    "contents_url": "https://api.github.com/repos/kwart/hazelcast/contents/hazelcast-spring/pom.xml?ref=3a895e7efa810e89b7169f0853656658c62076c6",
+    "patch": "@@ -33,7 +33,7 @@\n         <!-- needed for CheckStyle -->\n         <main.basedir>${project.parent.basedir}</main.basedir>\n \n-        <org.springframework.version>5.3.4</org.springframework.version>\n+        <org.springframework.version>5.3.5</org.springframework.version>\n         <javax.annotation.version>1.3.2</javax.annotation.version>\n         <maven-artifact.version>3.6.3</maven-artifact.version>\n         <hazelcast.latest.version>4.0</hazelcast.latest.version>"
+  }
+]

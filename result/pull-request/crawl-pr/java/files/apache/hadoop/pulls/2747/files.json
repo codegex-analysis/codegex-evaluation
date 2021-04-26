@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "fa60198c5be51ade03b3ad9f8fc90183ab3ac421",
+    "filename": "hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/blockmanagement/BlockManager.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/apache/hadoop/blob/4a1f15192bb4c972e99f12c0418e0600d1d95ed0/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/blockmanagement/BlockManager.java",
+    "raw_url": "https://github.com/apache/hadoop/raw/4a1f15192bb4c972e99f12c0418e0600d1d95ed0/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/blockmanagement/BlockManager.java",
+    "contents_url": "https://api.github.com/repos/apache/hadoop/contents/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/blockmanagement/BlockManager.java?ref=4a1f15192bb4c972e99f12c0418e0600d1d95ed0",
+    "patch": "@@ -2246,7 +2246,8 @@ private void adjustSrcNodesAndIndices(BlockInfoStriped block,\n     }\n   }\n \n-  private boolean validateReconstructionWork(BlockReconstructionWork rw) {\n+  @VisibleForTesting\n+  boolean validateReconstructionWork(BlockReconstructionWork rw) {\n     BlockInfo block = rw.getBlock();\n     int priority = rw.getPriority();\n     // Recheck since global lock was released\n@@ -2281,6 +2282,7 @@ private boolean validateReconstructionWork(BlockReconstructionWork rw) {\n               placementStatus.getAdditionalReplicasRequired())) {\n         // If the new targets do not meet the placement policy, or at least\n         // reduce the number of replicas needed, then no use continuing.\n+        rw.resetTargets();\n         return false;\n       }\n       // mark that the reconstruction work is to replicate internal block to a"
+  },
+  {
+    "sha": "59709423f9f624f10e8ea2412a3241d04cd849da",
+    "filename": "hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/blockmanagement/TestBlockManager.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/apache/hadoop/blob/4a1f15192bb4c972e99f12c0418e0600d1d95ed0/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/blockmanagement/TestBlockManager.java",
+    "raw_url": "https://github.com/apache/hadoop/raw/4a1f15192bb4c972e99f12c0418e0600d1d95ed0/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/blockmanagement/TestBlockManager.java",
+    "contents_url": "https://api.github.com/repos/apache/hadoop/contents/hadoop-hdfs-project/hadoop-hdfs/src/test/java/org/apache/hadoop/hdfs/server/blockmanagement/TestBlockManager.java?ref=4a1f15192bb4c972e99f12c0418e0600d1d95ed0",
+    "patch": "@@ -1949,4 +1949,26 @@ public void testLegacyBlockInInvalidateBlocks() {\n     assertEquals(0, ibs.getBlocks());\n     assertEquals(0, ibs.getECBlocks());\n   }\n+\n+  @Test\n+  public void testValidateReconstructionWorkAndRacksNotEnough() {\n+    addNodes(nodes);\n+    // Originally on only nodes in rack A.\n+    List<DatanodeDescriptor> origNodes = rackA;\n+    BlockInfo blockInfo = addBlockOnNodes(0, origNodes);\n+    BlockPlacementStatus status = bm.getBlockPlacementStatus(blockInfo);\n+    // Block has enough copies, but not enough racks.\n+    assertFalse(status.isPlacementPolicySatisfied());\n+    DatanodeStorageInfo newNode = DFSTestUtil.createDatanodeStorageInfo(\n+            \"storage8\", \"8.8.8.8\", \"/rackA\", \"host8\");\n+    BlockReconstructionWork work = bm.scheduleReconstruction(blockInfo, 3);\n+    assertNotNull(work);\n+    assertEquals(1, work.getAdditionalReplRequired());\n+    // the new targets in rack A.\n+    work.setTargets(new DatanodeStorageInfo[]{newNode});\n+    // the new targets do not meet the placement policy return false.\n+    assertFalse(bm.validateReconstructionWork(work));\n+    // validateReconstructionWork return false, need to perform resetTargets().\n+    assertNull(work.getTargets());\n+  }\n }"
+  }
+]

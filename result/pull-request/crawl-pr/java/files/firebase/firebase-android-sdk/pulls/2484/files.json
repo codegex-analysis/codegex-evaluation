@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "99d0fe5c5175ffa291db8313e918666f9de61205",
+    "filename": "firebase-perf/src/main/java/com/google/firebase/perf/config/ConfigResolver.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 4,
+    "changes": 10,
+    "blob_url": "https://github.com/firebase/firebase-android-sdk/blob/8448311edf53130655ada41ef13815091cf27a5c/firebase-perf/src/main/java/com/google/firebase/perf/config/ConfigResolver.java",
+    "raw_url": "https://github.com/firebase/firebase-android-sdk/raw/8448311edf53130655ada41ef13815091cf27a5c/firebase-perf/src/main/java/com/google/firebase/perf/config/ConfigResolver.java",
+    "contents_url": "https://api.github.com/repos/firebase/firebase-android-sdk/contents/firebase-perf/src/main/java/com/google/firebase/perf/config/ConfigResolver.java?ref=8448311edf53130655ada41ef13815091cf27a5c",
+    "patch": "@@ -44,6 +44,8 @@\n import com.google.firebase.perf.util.ImmutableBundle;\n import com.google.firebase.perf.util.Optional;\n import com.google.firebase.perf.util.Utils;\n+import javax.inject.Inject;\n+import javax.inject.Singleton;\n \n /**\n  * Retrieves configuration value from various config storage sources and returns resolved\n@@ -53,14 +55,15 @@\n  * @hide\n  */\n /** @hide */\n+@Singleton\n public class ConfigResolver {\n \n   private static final AndroidLogger logger = AndroidLogger.getInstance();\n   private static volatile ConfigResolver configResolver;\n \n   // Configuration Storage objects.\n   private ImmutableBundle metadataBundle;\n-  private RemoteConfigManager remoteConfigManager;\n+  @Inject RemoteConfigManager remoteConfigManager;\n   private DeviceCacheManager deviceCacheManager;\n \n   /**\n@@ -70,18 +73,17 @@\n    * @param remoteConfigManager the Remote Config values set by Firebase Performance\n    * @param metadataBundle a bundle of metadata values set by app developers in the AndroidManifest\n    */\n-  @VisibleForTesting\n+  @Inject\n   public ConfigResolver(\n       @Nullable RemoteConfigManager remoteConfigManager,\n       @Nullable ImmutableBundle metadataBundle,\n       @Nullable DeviceCacheManager deviceCacheManager) {\n-    this.remoteConfigManager =\n-        remoteConfigManager == null ? RemoteConfigManager.getInstance() : remoteConfigManager;\n     this.metadataBundle = metadataBundle == null ? new ImmutableBundle() : metadataBundle;\n     this.deviceCacheManager =\n         deviceCacheManager == null ? DeviceCacheManager.getInstance() : deviceCacheManager;\n   }\n \n+  // TODO: Remove getInstance() and make its caller DI compatible.\n   public static synchronized ConfigResolver getInstance() {\n     if (configResolver == null) {\n       configResolver = new ConfigResolver(null, null, null);"
+  },
+  {
+    "sha": "5044811bbb8dd01a61747abf696a26b67404d077",
+    "filename": "firebase-perf/src/main/java/com/google/firebase/perf/injection/modules/FirebasePerformanceModule.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/firebase/firebase-android-sdk/blob/8448311edf53130655ada41ef13815091cf27a5c/firebase-perf/src/main/java/com/google/firebase/perf/injection/modules/FirebasePerformanceModule.java",
+    "raw_url": "https://github.com/firebase/firebase-android-sdk/raw/8448311edf53130655ada41ef13815091cf27a5c/firebase-perf/src/main/java/com/google/firebase/perf/injection/modules/FirebasePerformanceModule.java",
+    "contents_url": "https://api.github.com/repos/firebase/firebase-android-sdk/contents/firebase-perf/src/main/java/com/google/firebase/perf/injection/modules/FirebasePerformanceModule.java?ref=8448311edf53130655ada41ef13815091cf27a5c",
+    "patch": "@@ -25,6 +25,9 @@\n import com.google.firebase.perf.internal.GaugeManager;\n import com.google.firebase.perf.internal.RemoteConfigManager;\n import com.google.firebase.remoteconfig.RemoteConfigComponent;\n+\n+import javax.inject.Inject;\n+\n import dagger.Module;\n import dagger.Provides;\n \n@@ -40,6 +43,8 @@\n   private final Provider<RemoteConfigComponent> remoteConfigComponentProvider;\n   private final Provider<TransportFactory> transportFactoryProvider;\n \n+  @Inject RemoteConfigManager remoteConfigManager;\n+\n   public FirebasePerformanceModule(\n       @NonNull FirebaseApp firebaseApp,\n       @NonNull FirebaseInstallationsApi firebaseInstallations,\n@@ -78,7 +83,7 @@ FirebaseInstallationsApi providesFirebaseInstallations() {\n \n   @Provides\n   RemoteConfigManager providesRemoteConfigManager() {\n-    return RemoteConfigManager.getInstance();\n+    return remoteConfigManager;\n   }\n \n   @Provides"
+  },
+  {
+    "sha": "29608899752f1342ae2171af326158a1cb159f50",
+    "filename": "firebase-perf/src/main/java/com/google/firebase/perf/injection/modules/RemoteConfigManagerModule.java",
+    "status": "added",
+    "additions": 46,
+    "deletions": 0,
+    "changes": 46,
+    "blob_url": "https://github.com/firebase/firebase-android-sdk/blob/8448311edf53130655ada41ef13815091cf27a5c/firebase-perf/src/main/java/com/google/firebase/perf/injection/modules/RemoteConfigManagerModule.java",
+    "raw_url": "https://github.com/firebase/firebase-android-sdk/raw/8448311edf53130655ada41ef13815091cf27a5c/firebase-perf/src/main/java/com/google/firebase/perf/injection/modules/RemoteConfigManagerModule.java",
+    "contents_url": "https://api.github.com/repos/firebase/firebase-android-sdk/contents/firebase-perf/src/main/java/com/google/firebase/perf/injection/modules/RemoteConfigManagerModule.java?ref=8448311edf53130655ada41ef13815091cf27a5c",
+    "patch": "@@ -0,0 +1,46 @@\n+// Copyright 2021 Google LLC\n+//\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+//      http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package com.google.firebase.perf.injection.modules;\n+\n+import androidx.annotation.Nullable;\n+\n+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;\n+\n+import java.util.concurrent.Executor;\n+import java.util.concurrent.LinkedBlockingQueue;\n+import java.util.concurrent.ThreadPoolExecutor;\n+import java.util.concurrent.TimeUnit;\n+\n+import dagger.Module;\n+import dagger.Provides;\n+\n+@Module\n+public class RemoteConfigManagerModule {\n+\n+    @Provides\n+    FirebaseRemoteConfig providesFirebaseRemoteConfig() {\n+        return null;\n+    }\n+\n+    @Provides\n+    Executor providesExecutor() {\n+        return new ThreadPoolExecutor(\n+                /* corePoolSize= */ 0,\n+                /* maximumPoolSize= */ 1,\n+                /* keepAliveTime= */ 0L,\n+                TimeUnit.SECONDS,\n+                new LinkedBlockingQueue<Runnable>());\n+    }\n+}"
+  },
+  {
+    "sha": "8bdc7908d5acb41c92fae1390a54d67d462de100",
+    "filename": "firebase-perf/src/main/java/com/google/firebase/perf/internal/RemoteConfigManager.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 17,
+    "changes": 23,
+    "blob_url": "https://github.com/firebase/firebase-android-sdk/blob/8448311edf53130655ada41ef13815091cf27a5c/firebase-perf/src/main/java/com/google/firebase/perf/internal/RemoteConfigManager.java",
+    "raw_url": "https://github.com/firebase/firebase-android-sdk/raw/8448311edf53130655ada41ef13815091cf27a5c/firebase-perf/src/main/java/com/google/firebase/perf/internal/RemoteConfigManager.java",
+    "contents_url": "https://api.github.com/repos/firebase/firebase-android-sdk/contents/firebase-perf/src/main/java/com/google/firebase/perf/internal/RemoteConfigManager.java?ref=8448311edf53130655ada41ef13815091cf27a5c",
+    "patch": "@@ -32,6 +32,7 @@\n import java.util.concurrent.LinkedBlockingQueue;\n import java.util.concurrent.ThreadPoolExecutor;\n import java.util.concurrent.TimeUnit;\n+import javax.inject.Inject;\n \n /**\n  * Manages retrieving all the remote config keys and values that the SDK needs.\n@@ -49,7 +50,7 @@\n \n   private static final String FIREPERF_FRC_NAMESPACE_NAME = \"fireperf\";\n \n-  private static final RemoteConfigManager sharedInstance = new RemoteConfigManager();\n+//  private static final RemoteConfigManager sharedInstance = new RemoteConfigManager();\n   private static final long TIME_AFTER_WHICH_A_FETCH_IS_CONSIDERED_STALE_MS =\n       TimeUnit.HOURS.toMillis(12);\n \n@@ -63,19 +64,7 @@\n \n   private final ConcurrentHashMap<String, FirebaseRemoteConfigValue> allRcConfigMap;\n \n-  private RemoteConfigManager() {\n-    this(\n-        new ThreadPoolExecutor(\n-            /* corePoolSize= */ 0,\n-            /* maximumPoolSize= */ 1,\n-            /* keepAliveTime= */ 0L,\n-            TimeUnit.SECONDS,\n-            new LinkedBlockingQueue<Runnable>()),\n-        /* firebaseRemoteConfig= */ null // set once FirebaseRemoteConfig is initialized\n-        );\n-  }\n-\n-  @VisibleForTesting\n+  @Inject\n   RemoteConfigManager(Executor executor, FirebaseRemoteConfig firebaseRemoteConfig) {\n     this.executor = executor;\n     this.firebaseRemoteConfig = firebaseRemoteConfig;\n@@ -86,9 +75,9 @@ private RemoteConfigManager() {\n   }\n \n   /** Gets the singleton instance. */\n-  public static RemoteConfigManager getInstance() {\n-    return sharedInstance;\n-  }\n+//  public static RemoteConfigManager getInstance() {\n+//    return sharedInstance;\n+//  }\n \n   /**\n    * Sets the {@link Provider} for {@link RemoteConfigComponent} from which we can extract the"
+  }
+]

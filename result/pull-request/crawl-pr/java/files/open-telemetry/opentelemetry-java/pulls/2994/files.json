@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "ae297337b3a6b804e82cd693d33a08e249ac4314",
+    "filename": "sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/processor/BaggageLabelsProcessor.java",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/open-telemetry/opentelemetry-java/blob/82b0cb28d9cc0036620b87b68b2cece0d718b617/sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/processor/BaggageLabelsProcessor.java",
+    "raw_url": "https://github.com/open-telemetry/opentelemetry-java/raw/82b0cb28d9cc0036620b87b68b2cece0d718b617/sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/processor/BaggageLabelsProcessor.java",
+    "contents_url": "https://api.github.com/repos/open-telemetry/opentelemetry-java/contents/sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/processor/BaggageLabelsProcessor.java?ref=82b0cb28d9cc0036620b87b68b2cece0d718b617",
+    "patch": "@@ -0,0 +1,31 @@\n+/*\n+ * Copyright The OpenTelemetry Authors\n+ * SPDX-License-Identifier: Apache-2.0\n+ */\n+\n+package io.opentelemetry.sdk.metrics.processor;\n+\n+import io.opentelemetry.api.baggage.Baggage;\n+import io.opentelemetry.api.metrics.common.Labels;\n+import io.opentelemetry.api.metrics.common.LabelsBuilder;\n+import io.opentelemetry.context.Context;\n+\n+/**\n+ * A labels processor which extracts labels from {@link io.opentelemetry.api.baggage.Baggage}.\n+ * Delegates actual extraction implementation to {@link BaggageMetricsLabelsExtractor}\n+ */\n+public final class BaggageLabelsProcessor implements LabelsProcessor {\n+  private final BaggageMetricsLabelsExtractor baggageMetricsLabelsExtractor;\n+\n+  public BaggageLabelsProcessor(BaggageMetricsLabelsExtractor baggageMetricsLabelsExtractor) {\n+    this.baggageMetricsLabelsExtractor = baggageMetricsLabelsExtractor;\n+  }\n+\n+  @Override\n+  public Labels onLabelsBound(Context ctx, Labels labels) {\n+    LabelsBuilder labelsBuilder = labels.toBuilder();\n+    baggageMetricsLabelsExtractor.fromBaggage(Baggage.fromContext(ctx)).forEach(labelsBuilder::put);\n+\n+    return labelsBuilder.build();\n+  }\n+}"
+  },
+  {
+    "sha": "74a4cfd74a9712bcf24913bdcc33826c64847c7c",
+    "filename": "sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/processor/BaggageMetricsLabelsExtractor.java",
+    "status": "added",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/open-telemetry/opentelemetry-java/blob/82b0cb28d9cc0036620b87b68b2cece0d718b617/sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/processor/BaggageMetricsLabelsExtractor.java",
+    "raw_url": "https://github.com/open-telemetry/opentelemetry-java/raw/82b0cb28d9cc0036620b87b68b2cece0d718b617/sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/processor/BaggageMetricsLabelsExtractor.java",
+    "contents_url": "https://api.github.com/repos/open-telemetry/opentelemetry-java/contents/sdk/metrics/src/main/java/io/opentelemetry/sdk/metrics/processor/BaggageMetricsLabelsExtractor.java?ref=82b0cb28d9cc0036620b87b68b2cece0d718b617",
+    "patch": "@@ -0,0 +1,15 @@\n+/*\n+ * Copyright The OpenTelemetry Authors\n+ * SPDX-License-Identifier: Apache-2.0\n+ */\n+\n+package io.opentelemetry.sdk.metrics.processor;\n+\n+import io.opentelemetry.api.baggage.Baggage;\n+import io.opentelemetry.api.metrics.common.Labels;\n+\n+/** Uses {@link Baggage} to extract labels for metrics. Used with {@link BaggageLabelsProcessor} */\n+public interface BaggageMetricsLabelsExtractor {\n+\n+  Labels fromBaggage(Baggage ctx);\n+}"
+  },
+  {
+    "sha": "3fbf5c0d195d8ad906182bef920fc49b09582be9",
+    "filename": "sdk/metrics/src/test/java/io/opentelemetry/sdk/metrics/processor/BaggageLabelsProcessorTest.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/open-telemetry/opentelemetry-java/blob/82b0cb28d9cc0036620b87b68b2cece0d718b617/sdk/metrics/src/test/java/io/opentelemetry/sdk/metrics/processor/BaggageLabelsProcessorTest.java",
+    "raw_url": "https://github.com/open-telemetry/opentelemetry-java/raw/82b0cb28d9cc0036620b87b68b2cece0d718b617/sdk/metrics/src/test/java/io/opentelemetry/sdk/metrics/processor/BaggageLabelsProcessorTest.java",
+    "contents_url": "https://api.github.com/repos/open-telemetry/opentelemetry-java/contents/sdk/metrics/src/test/java/io/opentelemetry/sdk/metrics/processor/BaggageLabelsProcessorTest.java?ref=82b0cb28d9cc0036620b87b68b2cece0d718b617",
+    "patch": "@@ -0,0 +1,29 @@\n+/*\n+ * Copyright The OpenTelemetry Authors\n+ * SPDX-License-Identifier: Apache-2.0\n+ */\n+\n+package io.opentelemetry.sdk.metrics.processor;\n+\n+import static org.assertj.core.api.Assertions.assertThat;\n+\n+import io.opentelemetry.api.metrics.common.Labels;\n+import io.opentelemetry.api.metrics.common.LabelsBuilder;\n+import io.opentelemetry.context.Context;\n+import org.junit.jupiter.api.Test;\n+\n+public class BaggageLabelsProcessorTest {\n+\n+  @Test\n+  void testLabelsExtractedAndAdded() {\n+    Labels extractedLabels = Labels.of(\"aa\", \"bb\");\n+    BaggageMetricsLabelsExtractor extractor = ctx -> extractedLabels;\n+    BaggageLabelsProcessor labelsProcessor = new BaggageLabelsProcessor(extractor);\n+    Labels originalLabels = Labels.of(\"a\", \"b\");\n+    Labels newLabels = labelsProcessor.onLabelsBound(Context.current(), originalLabels);\n+\n+    LabelsBuilder mergedLabels = newLabels.toBuilder();\n+    extractedLabels.asMap().forEach((k, v) -> newLabels.toBuilder().put(k, v));\n+    assertThat(newLabels).isEqualTo(mergedLabels.build());\n+  }\n+}"
+  }
+]

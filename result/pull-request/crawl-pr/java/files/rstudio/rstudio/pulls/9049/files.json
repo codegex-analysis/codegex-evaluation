@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "f2c14ca3c28d2891c2e7c5fb856d8266293bf8d2",
+    "filename": "CMakeGlobals.txt",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 2,
+    "changes": 9,
+    "blob_url": "https://github.com/rstudio/rstudio/blob/f895b0d90288ed964bbb1113056110e99975cdf9/CMakeGlobals.txt",
+    "raw_url": "https://github.com/rstudio/rstudio/raw/f895b0d90288ed964bbb1113056110e99975cdf9/CMakeGlobals.txt",
+    "contents_url": "https://api.github.com/repos/rstudio/rstudio/contents/CMakeGlobals.txt?ref=f895b0d90288ed964bbb1113056110e99975cdf9",
+    "patch": "@@ -57,6 +57,11 @@ if(UNIX)\n       OUTPUT_STRIP_TRAILING_WHITESPACE)\n    message(STATUS \"Machine architecture: ${UNAME_M}\")\n \n+else()\n+\n+   # assume x86_64 on Windows for now\n+   set(UNAME_M x86_64)\n+\n endif()\n \n # default to debug builds\n@@ -85,8 +90,8 @@ if(NOT DEFINED RSTUDIO_SERVER)\n endif()\n \n if(NOT DEFINED RSTUDIO_DESKTOP)\n-   if(APPLE AND UNAME_M STREQUAL arm64)\n-      message(STATUS \"Desktop builds not currently supported on arm64; disabling RSTUDIO_DESKTOP\")\n+   if(NOT UNAME_M STREQUAL x86_64)\n+      message(STATUS \"Desktop builds not yet supported on ${UNAME_M}; disabling RSTUDIO_DESKTOP\")\n       set(RSTUDIO_DESKTOP FALSE)\n    elseif(RSTUDIO_TARGET STREQUAL \"Development\" OR RSTUDIO_TARGET STREQUAL \"Desktop\")\n       set(RSTUDIO_DESKTOP TRUE)"
+  },
+  {
+    "sha": "984e2a256f7b1186ffbbd15e2410a6802756ed62",
+    "filename": "dependencies/common/install-common",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 4,
+    "changes": 11,
+    "blob_url": "https://github.com/rstudio/rstudio/blob/f895b0d90288ed964bbb1113056110e99975cdf9/dependencies/common/install-common",
+    "raw_url": "https://github.com/rstudio/rstudio/raw/f895b0d90288ed964bbb1113056110e99975cdf9/dependencies/common/install-common",
+    "contents_url": "https://api.github.com/repos/rstudio/rstudio/contents/dependencies/common/install-common?ref=f895b0d90288ed964bbb1113056110e99975cdf9",
+    "patch": "@@ -23,12 +23,15 @@ set -e\n ./install-pandoc\n ./install-packages\n ./install-sentry-cli\n-./install-npm-dependencies\n ./install-soci\n ./install-yaml-cpp\n ./install-crashpad\n \n-if [ -e install-overlay ]\n-then\n-   ./install-overlay\n+if [ \"$(uname)\" = \"Darwin\" ] || [ \"$(uname -m)\" = \"x86_64\" ]; then\n+\t./install-npm-dependencies\n fi\n+\n+if [ -e install-overlay ]; then\n+\t./install-overlay\n+fi\n+"
+  },
+  {
+    "sha": "0104f6a0025e5dec3c6872ddfcce8d4835a6a611",
+    "filename": "dependencies/linux/install-dependencies-focal",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/rstudio/rstudio/blob/f895b0d90288ed964bbb1113056110e99975cdf9/dependencies/linux/install-dependencies-focal",
+    "raw_url": "https://github.com/rstudio/rstudio/raw/f895b0d90288ed964bbb1113056110e99975cdf9/dependencies/linux/install-dependencies-focal",
+    "contents_url": "https://api.github.com/repos/rstudio/rstudio/contents/dependencies/linux/install-dependencies-focal?ref=f895b0d90288ed964bbb1113056110e99975cdf9",
+    "patch": "@@ -71,7 +71,7 @@ sudo apt-get -y install \\\n sudo add-apt-repository -y ppa:openjdk-r/ppa\n sudo apt-get update\n sudo apt-get -y install openjdk-8-jdk\n-sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java\n+sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-$(dpkg --print-architecture)/jre/bin/java\n \n # R\n if ! [ -x \"$(command -v R)\" ]; then"
+  },
+  {
+    "sha": "ddd0af6dec01da8eefcc3f1c5faa3c03b82c693d",
+    "filename": "src/cpp/CMakeLists.txt",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 3,
+    "changes": 8,
+    "blob_url": "https://github.com/rstudio/rstudio/blob/f895b0d90288ed964bbb1113056110e99975cdf9/src/cpp/CMakeLists.txt",
+    "raw_url": "https://github.com/rstudio/rstudio/raw/f895b0d90288ed964bbb1113056110e99975cdf9/src/cpp/CMakeLists.txt",
+    "contents_url": "https://api.github.com/repos/rstudio/rstudio/contents/src/cpp/CMakeLists.txt?ref=f895b0d90288ed964bbb1113056110e99975cdf9",
+    "patch": "@@ -318,12 +318,14 @@ add_definitions(-DRSTUDIO_BOOST_SIGNALS_VERSION=2)\n # add boost as system include directory\n include_directories(SYSTEM ${Boost_INCLUDE_DIRS})\n \n-if(NOT DEFINED RSTUDIO_CRASHPAD_ENABLED AND APPLE AND UNAME_M STREQUAL arm64)\n-   message(STATUS \"Crashpad not yet supported on M1 macOS machines; disabling Crashpad\")\n+# Crashpad\n+\n+# disabled on non-x86_64 architectures for now\n+if(NOT UNAME_M STREQUAL \"x86_64\")\n+   message(STATUS \"Crashpad not yet supported on ${UNAME_M}; disabling Crashpad\")\n    set(RSTUDIO_CRASHPAD_ENABLED FALSE)\n endif()\n \n-# Crashpad\n if (NOT DEFINED RSTUDIO_CRASHPAD_ENABLED OR RSTUDIO_CRASHPAD_ENABLED)\n    if(UNIX)\n       set(RSTUDIO_TOOLS_CRASHPAD \"${RSTUDIO_TOOLS_ROOT}/crashpad\")"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "385c35c2e9a3df125bd0fe1f2064afaa50db949c",
+    "filename": "src/main/java/cam72cam/immersiverailroading/entity/Locomotive.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 3,
+    "changes": 7,
+    "blob_url": "https://github.com/TeamOpenIndustry/ImmersiveRailroading/blob/7ca68efefc68f39890e30b16ae8ff91f2b0acbc6/src/main/java/cam72cam/immersiverailroading/entity/Locomotive.java",
+    "raw_url": "https://github.com/TeamOpenIndustry/ImmersiveRailroading/raw/7ca68efefc68f39890e30b16ae8ff91f2b0acbc6/src/main/java/cam72cam/immersiverailroading/entity/Locomotive.java",
+    "contents_url": "https://api.github.com/repos/TeamOpenIndustry/ImmersiveRailroading/contents/src/main/java/cam72cam/immersiverailroading/entity/Locomotive.java?ref=7ca68efefc68f39890e30b16ae8ff91f2b0acbc6",
+    "patch": "@@ -206,7 +206,7 @@ public void onTick() {\n \t\t\t}\n \t\t}\n \n-\t\tsimulateWheelSlip();\n+\t\tthis.distanceTraveled += simulateWheelSlip();\n \t}\n \t\n \tprotected abstract int getAvailableHP();\n@@ -219,14 +219,15 @@ private double getAppliedTractiveEffort(Speed speed) {\n \t\treturn tractiveEffortNewtons;\n \t}\n \t\n-\tprivate void simulateWheelSlip() {\n+\tprotected double simulateWheelSlip() {\n \t\tdouble tractiveEffortNewtons = getAppliedTractiveEffort(getCurrentSpeed());\n \t\tdouble staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient() * Config.ConfigBalance.tractionMultiplier;\n \t\tstaticTractiveEffort *= 1.5; // Fudge factor\n \t\tdouble adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;\n \t\tif (adhesionFactor > 1) {\n-\t\t\tthis.distanceTraveled += Math.copySign(Math.min((adhesionFactor-1)/10, 1), getThrottle());\n+\t\t\treturn Math.copySign(Math.min((adhesionFactor-1)/10, 1), getThrottle());\n \t\t}\n+\t\treturn 0;\n \t}\n \t\n \tpublic double getTractiveEffortNewtons(Speed speed) {\t"
+  },
+  {
+    "sha": "59c3c9cd97d1cc939777c194255ebac342bab230",
+    "filename": "src/main/java/cam72cam/immersiverailroading/entity/LocomotiveSteam.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 6,
+    "changes": 19,
+    "blob_url": "https://github.com/TeamOpenIndustry/ImmersiveRailroading/blob/7ca68efefc68f39890e30b16ae8ff91f2b0acbc6/src/main/java/cam72cam/immersiverailroading/entity/LocomotiveSteam.java",
+    "raw_url": "https://github.com/TeamOpenIndustry/ImmersiveRailroading/raw/7ca68efefc68f39890e30b16ae8ff91f2b0acbc6/src/main/java/cam72cam/immersiverailroading/entity/LocomotiveSteam.java",
+    "contents_url": "https://api.github.com/repos/TeamOpenIndustry/ImmersiveRailroading/contents/src/main/java/cam72cam/immersiverailroading/entity/LocomotiveSteam.java?ref=7ca68efefc68f39890e30b16ae8ff91f2b0acbc6",
+    "patch": "@@ -12,15 +12,12 @@\n import cam72cam.immersiverailroading.model.RenderComponent;\n import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;\n import cam72cam.immersiverailroading.registry.Quilling.Chime;\n+import cam72cam.immersiverailroading.util.*;\n import cam72cam.mod.entity.sync.TagSync;\n import cam72cam.mod.gui.GuiRegistry;\n import cam72cam.mod.serialization.TagField;\n import cam72cam.mod.serialization.TagMapper;\n import cam72cam.mod.sound.ISound;\n-import cam72cam.immersiverailroading.util.BurnUtil;\n-import cam72cam.immersiverailroading.util.FluidQuantity;\n-import cam72cam.immersiverailroading.util.LiquidUtil;\n-import cam72cam.immersiverailroading.util.VecUtil;\n import cam72cam.mod.entity.Entity;\n import cam72cam.mod.fluid.Fluid;\n import cam72cam.mod.fluid.FluidStack;\n@@ -150,7 +147,17 @@ private double getPhase(int spikes, float offsetDegrees) {\n \t\tphase = Math.abs(Math.cos(phase*Math.PI*spikes + Math.toRadians(offsetDegrees)));\n \t\treturn phase;\n \t}\n-\t\n+\n+\t@Override\n+\tpublic double getTractiveEffortNewtons(Speed speed) {\n+\t\treturn (getDefinition().cab_forward ? -1 : 1) * super.getTractiveEffortNewtons(speed);\n+\t}\n+\n+\t@Override\n+\tprotected double simulateWheelSlip() {\n+\t\treturn (getDefinition().cab_forward ? -1 : 1) * super.simulateWheelSlip();\n+\t}\n+\n \tprivate Map<String, Boolean> phaseOn = new HashMap<>();\n \tprivate List<ISound> sndCache = new ArrayList<>();\n \tprivate int sndCacheId = 0;\n@@ -513,7 +520,7 @@ public void onTick() {\n \t\t}\n \n \t\tEntityCoupleableRollingStock stock = this;\n-\t\tCouplerType coupler = CouplerType.BACK;\n+\t\tCouplerType coupler = getDefinition().cab_forward ? CouplerType.FRONT : CouplerType.BACK;\n \t\twhile (coupler != null && stock.getCoupled(coupler) instanceof Tender) {\n \t\t\tTender tender = (Tender) stock.getCoupled(coupler);\n "
+  },
+  {
+    "sha": "f0176ed4bb695e47793a5e28329f42a28e68673d",
+    "filename": "src/main/java/cam72cam/immersiverailroading/registry/LocomotiveSteamDefinition.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/TeamOpenIndustry/ImmersiveRailroading/blob/7ca68efefc68f39890e30b16ae8ff91f2b0acbc6/src/main/java/cam72cam/immersiverailroading/registry/LocomotiveSteamDefinition.java",
+    "raw_url": "https://github.com/TeamOpenIndustry/ImmersiveRailroading/raw/7ca68efefc68f39890e30b16ae8ff91f2b0acbc6/src/main/java/cam72cam/immersiverailroading/registry/LocomotiveSteamDefinition.java",
+    "contents_url": "https://api.github.com/repos/TeamOpenIndustry/ImmersiveRailroading/contents/src/main/java/cam72cam/immersiverailroading/registry/LocomotiveSteamDefinition.java?ref=7ca68efefc68f39890e30b16ae8ff91f2b0acbc6",
+    "patch": "@@ -33,6 +33,7 @@\n     private int numSlots;\n     private int width;\n     public boolean tender_auto_feed;\n+    public boolean cab_forward;\n \n     public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {\n         super(LocomotiveSteam.class, defID, data);\n@@ -54,6 +55,7 @@ public void parseJson(JsonObject data) throws Exception {\n         this.numSlots = (int) Math.ceil(firebox.get(\"slots\").getAsInt() * internal_inv_scale);\n         this.width = (int) Math.ceil(firebox.get(\"width\").getAsInt() * internal_inv_scale);\n         this.tender_auto_feed = properties.has(\"tender_auto_feed\") ? properties.get(\"tender_auto_feed\").getAsBoolean() : true;\n+        this.cab_forward = properties.has(\"cab_forward\") && properties.get(\"cab_forward\").getAsBoolean();\n \n         JsonObject sounds = data.has(\"sounds\") ? data.get(\"sounds\").getAsJsonObject() : null;\n "
+  }
+]

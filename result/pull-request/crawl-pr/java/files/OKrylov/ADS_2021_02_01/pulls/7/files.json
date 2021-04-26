@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "34ca876e063b3f275b170b0080599782178d02b6",
+    "filename": "src/lesson8/DoubleHashTableImpl.java",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/OKrylov/ADS_2021_02_01/blob/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/DoubleHashTableImpl.java",
+    "raw_url": "https://github.com/OKrylov/ADS_2021_02_01/raw/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/DoubleHashTableImpl.java",
+    "contents_url": "https://api.github.com/repos/OKrylov/ADS_2021_02_01/contents/src/lesson8/DoubleHashTableImpl.java?ref=78962445da54ad1a893d2327ffdb9b58b9c467f7",
+    "patch": "@@ -0,0 +1,19 @@\n+package lesson8;\n+\n+public class DoubleHashTableImpl<K, V> extends HashTableImpl<K, V> {\n+\n+    private static final int DOUBLE_HASH_CONST = 5;\n+\n+    public DoubleHashTableImpl(int maxSize) {\n+        super(maxSize);\n+    }\n+\n+    @Override\n+    protected int getStep(K key) {\n+        return hashDoubleFunc(key);\n+    }\n+\n+    private int hashDoubleFunc(K key) {\n+        return DOUBLE_HASH_CONST - (key.hashCode() % DOUBLE_HASH_CONST);\n+    }\n+}"
+  },
+  {
+    "sha": "369baf8a11f375b4537d18b922834ad8cb3db41e",
+    "filename": "src/lesson8/HashTable.java",
+    "status": "added",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/OKrylov/ADS_2021_02_01/blob/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/HashTable.java",
+    "raw_url": "https://github.com/OKrylov/ADS_2021_02_01/raw/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/HashTable.java",
+    "contents_url": "https://api.github.com/repos/OKrylov/ADS_2021_02_01/contents/src/lesson8/HashTable.java?ref=78962445da54ad1a893d2327ffdb9b58b9c467f7",
+    "patch": "@@ -0,0 +1,27 @@\n+package lesson8;\n+\n+public interface HashTable<K, V> {\n+\n+    boolean put(K key, V value);\n+\n+    V get(K key);\n+\n+    V remove(K key);\n+\n+    int size();\n+\n+    boolean isEmpty();\n+\n+    void display();\n+\n+\n+    interface Entry<K, V> {\n+\n+        K getKey();\n+\n+        V getValue();\n+\n+        void setValue(V value);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "edcf8505f6aac2753632ef3696d7e1dcaa1ed92b",
+    "filename": "src/lesson8/HashTableImpl.java",
+    "status": "added",
+    "additions": 134,
+    "deletions": 0,
+    "changes": 134,
+    "blob_url": "https://github.com/OKrylov/ADS_2021_02_01/blob/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/HashTableImpl.java",
+    "raw_url": "https://github.com/OKrylov/ADS_2021_02_01/raw/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/HashTableImpl.java",
+    "contents_url": "https://api.github.com/repos/OKrylov/ADS_2021_02_01/contents/src/lesson8/HashTableImpl.java?ref=78962445da54ad1a893d2327ffdb9b58b9c467f7",
+    "patch": "@@ -0,0 +1,134 @@\n+package lesson8;\n+\n+public class HashTableImpl<K, V> implements HashTable<K, V> {\n+\n+    static class Item<K, V> implements Entry<K, V> {\n+        private final K key;\n+        private V value;\n+\n+        public Item(K key, V value) {\n+            this.key = key;\n+            this.value = value;\n+        }\n+\n+        @Override\n+        public String toString() {\n+            return \"Item{\" +\n+                    \"key=\" + key +\n+                    \", value=\" + value +\n+                    '}';\n+        }\n+\n+        @Override\n+        public K getKey() {\n+            return key;\n+        }\n+\n+        @Override\n+        public V getValue() {\n+            return value;\n+        }\n+\n+        @Override\n+        public void setValue(V value) {\n+            this.value = value;\n+        }\n+    }\n+\n+    private final Item<K, V>[] data;\n+    private int size;\n+\n+    @SuppressWarnings(\"unchecked\")\n+    public HashTableImpl(int maxSize) {\n+        this.data = new Item[maxSize * 2];\n+    }\n+\n+    private int hashFunc(K key) {\n+        return key.hashCode() % data.length;\n+    }\n+\n+    @Override\n+    public boolean put(K key, V value) {\n+        int index = hashFunc(key);\n+\n+        int count = 0;\n+        while (data[index] != null) {\n+            if (data[index].getKey().equals(key)) {\n+                data[index].setValue(value);\n+                return true;\n+            }\n+\n+            if (count >= data.length) {\n+                return false;\n+            }\n+\n+            count++;\n+            index += getStep(key);\n+            index %= data.length;\n+        }\n+\n+        data[index] = new Item<>(key, value);\n+        size++;\n+        return true;\n+    }\n+\n+    protected int getStep(K key) {\n+        return 1;\n+    }\n+\n+    @Override\n+    public V get(K key) {\n+        int index = indexOf(key);\n+        return index != -1 ? data[index].getValue() : null;\n+    }\n+\n+    private int indexOf(K key) {\n+        int index = hashFunc(key);\n+\n+        int count = 0;\n+        while (count < data.length) {\n+            Item<K, V> item = data[index];\n+            if (item != null && item.getKey().equals(key)) {\n+                return index;\n+            }\n+            count++;\n+            index += getStep(key);\n+            index %= data.length;\n+        }\n+\n+        return -1;\n+    }\n+\n+    @Override\n+    public V remove(K key) {\n+        int index = indexOf(key);\n+        if (index == -1) {\n+            return null;\n+        }\n+\n+        Item<K, V> item = data[index];\n+        data[index] = null;\n+        size--;\n+        return item.getValue();\n+    }\n+\n+    @Override\n+    public int size() {\n+        return size;\n+    }\n+\n+    @Override\n+    public boolean isEmpty() {\n+        return size == 0;\n+    }\n+\n+    @Override\n+    public void display() {\n+        System.out.println(\"----------\");\n+        for (int i = 0; i < data.length; i++) {\n+            System.out.printf(\"%d = [%s]\", i, data[i]);\n+            System.out.println();\n+        }\n+        System.out.println(\"----------\");\n+    }\n+}"
+  },
+  {
+    "sha": "148a1a828fe588f96c2dc3ec74be42c1f2f3c0df",
+    "filename": "src/lesson8/Main8.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/OKrylov/ADS_2021_02_01/blob/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/Main8.java",
+    "raw_url": "https://github.com/OKrylov/ADS_2021_02_01/raw/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/Main8.java",
+    "contents_url": "https://api.github.com/repos/OKrylov/ADS_2021_02_01/contents/src/lesson8/Main8.java?ref=78962445da54ad1a893d2327ffdb9b58b9c467f7",
+    "patch": "@@ -0,0 +1,32 @@\n+package lesson8;\n+\n+public class Main8 {\n+\n+    public static void main(String[] args) {\n+//        HashTable<Product, Integer> hashTable = new HashTableImpl<>(5);//5 * 2 = 10\n+        HashTable<Product, Integer> hashTable = new DoubleHashTableImpl<>(5);//5 * 2 = 10\n+\n+        hashTable.put(new Product(1, \"Orange\"), 150);\n+        hashTable.put(new Product(77, \"Banana\"), 100);\n+        hashTable.put(new Product(77, \"Carrot\"), 228);\n+        hashTable.put(new Product(60, \"Lemon\"), 250);\n+        hashTable.put(new Product(52, \"Milk\"), 120);\n+        hashTable.put(new Product(21, \"Potato\"), 67);\n+\n+        System.out.println(\"Size is \" + hashTable.size());\n+        hashTable.display();\n+\n+        System.out.println(\"Cost potato is \" + hashTable.get(new Product(21, \"Potato\")));\n+        System.out.println(\"Cost banana is \" + hashTable.get(new Product(77, \"Banana\")));\n+        System.out.println(\"Cost carrot is \" + hashTable.get(new Product(77, \"Carrot\")));\n+\n+        hashTable.remove(new Product(21, \"Potato\"));\n+        hashTable.remove(new Product(77, \"Banana\"));\n+\n+        System.out.println(\"Cost potato is \" + hashTable.get(new Product(21, \"Potato\")));\n+        System.out.println(\"Cost banana is \" + hashTable.get(new Product(77, \"Banana\")));\n+        System.out.println(\"Cost carrot is \" + hashTable.get(new Product(77, \"Carrot\")));\n+\n+        hashTable.display();\n+    }\n+}"
+  },
+  {
+    "sha": "0f8f2ad6e5d7826f208a6382162aeacfdf963163",
+    "filename": "src/lesson8/MutableKeyTest.java",
+    "status": "added",
+    "additions": 53,
+    "deletions": 0,
+    "changes": 53,
+    "blob_url": "https://github.com/OKrylov/ADS_2021_02_01/blob/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/MutableKeyTest.java",
+    "raw_url": "https://github.com/OKrylov/ADS_2021_02_01/raw/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/MutableKeyTest.java",
+    "contents_url": "https://api.github.com/repos/OKrylov/ADS_2021_02_01/contents/src/lesson8/MutableKeyTest.java?ref=78962445da54ad1a893d2327ffdb9b58b9c467f7",
+    "patch": "@@ -0,0 +1,53 @@\n+package lesson8;\n+\n+import java.util.HashMap;\n+import java.util.Map;\n+\n+public class MutableKeyTest {\n+\n+    public static void main(String[] args) {\n+\n+        class MyKey {\n+            Integer i;\n+\n+            public void setI(Integer i) {\n+                this.i = i;\n+            }\n+\n+            public MyKey(Integer i) {\n+                this.i = i;\n+            }\n+\n+            @Override\n+            public int hashCode() {\n+                return i;\n+            }\n+\n+            @Override\n+            public boolean equals(Object obj) {\n+                if (obj instanceof MyKey) {\n+                    return i.equals(((MyKey) obj).i);\n+                } else\n+                    return false;\n+            }\n+\n+        }\n+\n+        Map<MyKey, String> myMap = new HashMap<>();\n+        MyKey key1 = new MyKey(1);\n+        MyKey key2 = new MyKey(2);\n+\n+        myMap.put(key1, \"test \" + 1);\n+        myMap.put(key2, \"test \" + 2);\n+\n+        System.out.println(\"Before:\");\n+        System.out.println(\"test1= \" + myMap.get(key1) + \" test2=\" + myMap.get(key2));\n+\n+        // modifying key1\n+        key1.setI(3);\n+\n+        System.out.println(\"After:\");\n+        System.out.println(\"test1= \" + myMap.get(key1) + \" test2=\" + myMap.get(key2));\n+\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "62556b670a76ad3a8df830a42eae7d23fdf94a14",
+    "filename": "src/lesson8/Product.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/OKrylov/ADS_2021_02_01/blob/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/Product.java",
+    "raw_url": "https://github.com/OKrylov/ADS_2021_02_01/raw/78962445da54ad1a893d2327ffdb9b58b9c467f7/src/lesson8/Product.java",
+    "contents_url": "https://api.github.com/repos/OKrylov/ADS_2021_02_01/contents/src/lesson8/Product.java?ref=78962445da54ad1a893d2327ffdb9b58b9c467f7",
+    "patch": "@@ -0,0 +1,44 @@\n+package lesson8;\n+\n+import java.util.Objects;\n+\n+public class Product {\n+\n+    private final int id;\n+    private final String title;\n+\n+    public Product(int id, String title) {\n+        this.id = id;\n+        this.title = title;\n+    }\n+\n+    public int getId() {\n+        return id;\n+    }\n+\n+    public String getTitle() {\n+        return title;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return \"Product{\" +\n+                \"id=\" + id +\n+                \", title='\" + title + '\\'' +\n+                '}';\n+    }\n+\n+    @Override\n+    public boolean equals(Object o) {\n+        if (this == o) return true;\n+        if (o == null || getClass() != o.getClass()) return false;\n+        Product product = (Product) o;\n+        return id == product.id && Objects.equals(title, product.title);\n+    }\n+\n+    @Override\n+    public int hashCode() {\n+        return id;\n+//        return Objects.hash(id);\n+    }\n+}"
+  }
+]

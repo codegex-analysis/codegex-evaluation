@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "9864f687b1b6daa3c8311fb54eb3c65c0f27c8a1",
+    "filename": "src/main/java/fr/minuskube/inv/ClickableItem.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/MinusKube/SmartInvs/blob/3ce0a41762a68473b9e40fd2d4eb23b5d0395f22/src/main/java/fr/minuskube/inv/ClickableItem.java",
+    "raw_url": "https://github.com/MinusKube/SmartInvs/raw/3ce0a41762a68473b9e40fd2d4eb23b5d0395f22/src/main/java/fr/minuskube/inv/ClickableItem.java",
+    "contents_url": "https://api.github.com/repos/MinusKube/SmartInvs/contents/src/main/java/fr/minuskube/inv/ClickableItem.java?ref=3ce0a41762a68473b9e40fd2d4eb23b5d0395f22",
+    "patch": "@@ -23,6 +23,16 @@ public static ClickableItem of(ItemStack item, Consumer<InventoryClickEvent> con\n         return new ClickableItem(item, consumer);\n     }\n \n+    /**\n+     * Updates the {@code ItemStack} of a {@code ClickableItem} without changing its listener.\n+     * @param clickableItem the old {@code ClickableItem}\n+     * @param itemStack the new {@code ItemStack}\n+     * @return a new {@code ClickableItem} with its related {@code ItemStack} updated\n+     */\n+    public static ClickableItem updateItem(ClickableItem clickableItem, ItemStack itemStack) {\n+        return new ClickableItem(itemStack, clickableItem.consumer);\n+    }\n+\n     public void run(InventoryClickEvent e) { consumer.accept(e); }\n \n     public ItemStack getItem() { return item; }"
+  },
+  {
+    "sha": "aa9d2cfad44695842cf3e8bd2a9ccafde61d509e",
+    "filename": "src/main/java/fr/minuskube/inv/InventoryManager.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/MinusKube/SmartInvs/blob/3ce0a41762a68473b9e40fd2d4eb23b5d0395f22/src/main/java/fr/minuskube/inv/InventoryManager.java",
+    "raw_url": "https://github.com/MinusKube/SmartInvs/raw/3ce0a41762a68473b9e40fd2d4eb23b5d0395f22/src/main/java/fr/minuskube/inv/InventoryManager.java",
+    "contents_url": "https://api.github.com/repos/MinusKube/SmartInvs/contents/src/main/java/fr/minuskube/inv/InventoryManager.java?ref=3ce0a41762a68473b9e40fd2d4eb23b5d0395f22",
+    "patch": "@@ -80,12 +80,12 @@ public void registerOpeners(InventoryOpener... openers) {\n         this.openers.addAll(Arrays.asList(openers));\n     }\n \n-    public List<Player> getOpenedPlayers(SmartInventory inv) {\n-        List<Player> list = new ArrayList<>();\n+    public List<UUID> getOpenedPlayers(SmartInventory inv) {\n+        List<UUID> list = new ArrayList<>();\n \n         this.inventories.forEach((player, playerInv) -> {\n             if (inv.equals(playerInv))\n-                list.add(Bukkit.getPlayer(player));\n+                list.add(player);\n         });\n \n         return list;"
+  },
+  {
+    "sha": "a14dd60ea963d4bf56ebaedff3371b9903a8100c",
+    "filename": "src/main/java/fr/minuskube/inv/content/InventoryContents.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 2,
+    "changes": 22,
+    "blob_url": "https://github.com/MinusKube/SmartInvs/blob/3ce0a41762a68473b9e40fd2d4eb23b5d0395f22/src/main/java/fr/minuskube/inv/content/InventoryContents.java",
+    "raw_url": "https://github.com/MinusKube/SmartInvs/raw/3ce0a41762a68473b9e40fd2d4eb23b5d0395f22/src/main/java/fr/minuskube/inv/content/InventoryContents.java",
+    "contents_url": "https://api.github.com/repos/MinusKube/SmartInvs/contents/src/main/java/fr/minuskube/inv/content/InventoryContents.java?ref=3ce0a41762a68473b9e40fd2d4eb23b5d0395f22",
+    "patch": "@@ -36,13 +36,20 @@\n \n     InventoryContents add(ClickableItem item);\n \n+    /**\n+     * Updates an item in this inventory without reloading the entire GUI.\n+     * @param slotPos the position of the item to update\n+     * @param itemStack the new {@code ItemStack} that will replace the old one\n+     * @return this {@code InventoryContents} instance\n+     */\n+    InventoryContents update(SlotPos slotPos, ItemStack itemStack);\n+\n     InventoryContents fill(ClickableItem item);\n     InventoryContents fillRow(int row, ClickableItem item);\n     InventoryContents fillColumn(int column, ClickableItem item);\n     InventoryContents fillBorders(ClickableItem item);\n \n-    InventoryContents fillRect(int fromRow, int fromColumn,\n-                               int toRow, int toColumn, ClickableItem item);\n+    InventoryContents fillRect(int fromRow, int fromColumn, int toRow, int toColumn, ClickableItem item);\n     InventoryContents fillRect(SlotPos fromPos, SlotPos toPos, ClickableItem item);\n \n     <T> T property(String name);\n@@ -163,6 +170,17 @@ public InventoryContents add(ClickableItem item) {\n             return this;\n         }\n \n+        @Override\n+        public InventoryContents update(SlotPos slotPos, ItemStack itemStack) {\n+            Optional<ClickableItem> optional = get(slotPos);\n+            if (!optional.isPresent())\n+                return this;\n+\n+            ClickableItem newClickableItem = ClickableItem.updateItem(optional.get(), itemStack);\n+            set(slotPos, newClickableItem);\n+            return this;\n+        }\n+\n         @Override\n         public InventoryContents fill(ClickableItem item) {\n             for(int row = 0; row < contents.length; row++)"
+  }
+]

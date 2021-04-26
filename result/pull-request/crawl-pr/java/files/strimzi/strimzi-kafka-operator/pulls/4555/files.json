@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "38ed11e6a3985ddce2c9358f83a8af320e3e32c8",
+    "filename": "systemtest/src/main/java/io/strimzi/systemtest/resources/crd/KafkaResource.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/strimzi/strimzi-kafka-operator/blob/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/main/java/io/strimzi/systemtest/resources/crd/KafkaResource.java",
+    "raw_url": "https://github.com/strimzi/strimzi-kafka-operator/raw/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/main/java/io/strimzi/systemtest/resources/crd/KafkaResource.java",
+    "contents_url": "https://api.github.com/repos/strimzi/strimzi-kafka-operator/contents/systemtest/src/main/java/io/strimzi/systemtest/resources/crd/KafkaResource.java?ref=4fea162b973d073e80b4a1c99534446c253bec60",
+    "patch": "@@ -37,6 +37,7 @@\n import java.util.function.Consumer;\n \n import static io.strimzi.systemtest.enums.CustomResourceStatus.Ready;\n+import static io.strimzi.systemtest.interfaces.TestSeparator.LOGGER;\n import static io.strimzi.systemtest.resources.ResourceManager.CR_CREATION_TIMEOUT;\n import static io.strimzi.systemtest.resources.ResourceManager.kubeClient;\n \n@@ -242,6 +243,7 @@ public static Kafka createAndWaitForReadiness(Kafka kafka) {\n                     if (e.getMessage().contains(\"object is being deleted\")) {\n                         return false;\n                     } else {\n+                        LOGGER.debug(\"Error found: \" + e.getMessage());\n                         throw e;\n                     }\n                 }"
+  },
+  {
+    "sha": "67fcfebd6a4316fc01365b4ab28ab4f9ffe4b956",
+    "filename": "systemtest/src/main/java/io/strimzi/systemtest/utils/ClientUtils.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 4,
+    "changes": 14,
+    "blob_url": "https://github.com/strimzi/strimzi-kafka-operator/blob/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/main/java/io/strimzi/systemtest/utils/ClientUtils.java",
+    "raw_url": "https://github.com/strimzi/strimzi-kafka-operator/raw/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/main/java/io/strimzi/systemtest/utils/ClientUtils.java",
+    "contents_url": "https://api.github.com/repos/strimzi/strimzi-kafka-operator/contents/systemtest/src/main/java/io/strimzi/systemtest/utils/ClientUtils.java?ref=4fea162b973d073e80b4a1c99534446c253bec60",
+    "patch": "@@ -11,6 +11,7 @@\n import org.apache.logging.log4j.LogManager;\n import org.apache.logging.log4j.Logger;\n \n+import java.rmi.UnexpectedException;\n import java.time.Duration;\n import java.util.Random;\n \n@@ -51,20 +52,25 @@ public static void waitUntilClientReceivedMessagesTls(KafkaClientOperations kafk\n     public static void waitTillContinuousClientsFinish(String producerName, String consumerName, String namespace, int messageCount) {\n         LOGGER.info(\"Waiting till producer {} and consumer {} finish\", producerName, consumerName);\n         TestUtils.waitFor(\"continuous clients finished\", Constants.GLOBAL_POLL_INTERVAL, timeoutForClientFinishJob(messageCount),\n-            () -> kubeClient().getJobStatus(producerName) && kubeClient().getJobStatus(consumerName));\n+            () -> kubeClient().checkSucceededJobStatus(producerName) && kubeClient().checkSucceededJobStatus(consumerName));\n     }\n \n     public static void waitForClientSuccess(String jobName, String namespace, int messageCount) {\n         LOGGER.info(\"Waiting for producer/consumer:{} to finished\", jobName);\n         TestUtils.waitFor(\"job finished\", Constants.GLOBAL_POLL_INTERVAL, timeoutForClientFinishJob(messageCount),\n-            () -> kubeClient().namespace(namespace).getJobStatus(jobName));\n+            () -> kubeClient().namespace(namespace).checkSucceededJobStatus(jobName));\n     }\n \n-    public static void waitForClientTimeout(String jobName, String namespace, int messageCount) {\n+    public static void waitForClientTimeout(String jobName, String namespace, int messageCount) throws UnexpectedException {\n         LOGGER.info(\"Waiting for producer/consumer:{} to finish with failure.\", jobName);\n         try {\n             TestUtils.waitFor(\"Job did not finish within time limit (as expected).\", Constants.GLOBAL_POLL_INTERVAL, timeoutForClientFinishJob(messageCount),\n-                () -> kubeClient().namespace(namespace).getJobStatus(jobName));\n+                () -> kubeClient().namespace(namespace).checkSucceededJobStatus(jobName));\n+            if (kubeClient().namespace(namespace).getJobStatus(jobName).getFailed().equals(1)) {\n+                LOGGER.debug(\"Job finished with 1 failed pod (expected - timeout).\");\n+            } else {\n+                throw new UnexpectedException(\"Job finished (unexpectedly) with 1 successful pod.\");\n+            }\n         } catch (WaitException e) {\n             if (e.getMessage().contains(\"Timeout after \")) {\n                 LOGGER.info(\"Client job '{}' finished with expected timeout.\", jobName);"
+  },
+  {
+    "sha": "b953f37d647e6883dda123195f00bf968ea7ee68",
+    "filename": "systemtest/src/main/java/io/strimzi/systemtest/utils/kubeUtils/controllers/JobUtils.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/strimzi/strimzi-kafka-operator/blob/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/main/java/io/strimzi/systemtest/utils/kubeUtils/controllers/JobUtils.java",
+    "raw_url": "https://github.com/strimzi/strimzi-kafka-operator/raw/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/main/java/io/strimzi/systemtest/utils/kubeUtils/controllers/JobUtils.java",
+    "contents_url": "https://api.github.com/repos/strimzi/strimzi-kafka-operator/contents/systemtest/src/main/java/io/strimzi/systemtest/utils/kubeUtils/controllers/JobUtils.java?ref=4fea162b973d073e80b4a1c99534446c253bec60",
+    "patch": "@@ -48,6 +48,6 @@ public static void deleteJobWithWait(String namespace, String name) {\n     public static void waitForJobFailure(String jobName, String namespace, long timeout) {\n         LOGGER.info(\"Waiting for job: {} will be in error state\", jobName);\n         TestUtils.waitFor(\"job finished\", Constants.GLOBAL_POLL_INTERVAL, timeout,\n-            () -> !kubeClient().getJobStatus(jobName));\n+            () -> !kubeClient().checkSucceededJobStatus(jobName));\n     }\n }"
+  },
+  {
+    "sha": "6564044bf9f47b5f8d39d283b4e4f065d376dce2",
+    "filename": "systemtest/src/test/java/io/strimzi/systemtest/mirrormaker/MirrorMaker2ST.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/strimzi/strimzi-kafka-operator/blob/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/test/java/io/strimzi/systemtest/mirrormaker/MirrorMaker2ST.java",
+    "raw_url": "https://github.com/strimzi/strimzi-kafka-operator/raw/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/test/java/io/strimzi/systemtest/mirrormaker/MirrorMaker2ST.java",
+    "contents_url": "https://api.github.com/repos/strimzi/strimzi-kafka-operator/contents/systemtest/src/test/java/io/strimzi/systemtest/mirrormaker/MirrorMaker2ST.java?ref=4fea162b973d073e80b4a1c99534446c253bec60",
+    "patch": "@@ -72,6 +72,7 @@\n import static org.hamcrest.Matchers.hasItem;\n import static org.hamcrest.Matchers.is;\n import static org.hamcrest.Matchers.nullValue;\n+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;\n import static org.junit.jupiter.api.Assertions.assertNotNull;\n import static org.junit.jupiter.api.Assertions.assertNull;\n import static org.valid4j.matchers.jsonpath.JsonPathMatchers.hasJsonPath;\n@@ -1042,12 +1043,12 @@ void testRestoreOffsetsInConsumerGroup() {\n         LOGGER.info(\"There should be no more messages to read. Try to consume at least 1 message. \" +\n                 \"This client job should fail on timeout.\");\n         initialInternalClientTargetJob.createAndWaitForReadiness(initialInternalClientTargetJob.consumerStrimzi().build());\n-        ClientUtils.waitForClientTimeout(targetConsumerName, NAMESPACE, 1);\n+        assertDoesNotThrow(() -> ClientUtils.waitForClientTimeout(targetConsumerName, NAMESPACE, 1));\n \n         LOGGER.info(\"As it's Active-Active MM2 mode, there should be no more messages to read from Source cluster\" +\n                 \" topic. This client job should fail on timeout.\");\n         initialInternalClientSourceJob.createAndWaitForReadiness(initialInternalClientSourceJob.consumerStrimzi().build());\n-        ClientUtils.waitForClientTimeout(sourceConsumerName, NAMESPACE, 1);\n+        assertDoesNotThrow(() -> ClientUtils.waitForClientTimeout(sourceConsumerName, NAMESPACE, 1));\n     }\n \n     @BeforeAll"
+  },
+  {
+    "sha": "99fc225f86f8fcbfa05ed63dcecb1e22f0de8396",
+    "filename": "systemtest/src/test/java/io/strimzi/systemtest/security/oauth/OauthPlainST.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 4,
+    "changes": 9,
+    "blob_url": "https://github.com/strimzi/strimzi-kafka-operator/blob/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/test/java/io/strimzi/systemtest/security/oauth/OauthPlainST.java",
+    "raw_url": "https://github.com/strimzi/strimzi-kafka-operator/raw/4fea162b973d073e80b4a1c99534446c253bec60/systemtest/src/test/java/io/strimzi/systemtest/security/oauth/OauthPlainST.java",
+    "contents_url": "https://api.github.com/repos/strimzi/strimzi-kafka-operator/contents/systemtest/src/test/java/io/strimzi/systemtest/security/oauth/OauthPlainST.java?ref=4fea162b973d073e80b4a1c99534446c253bec60",
+    "patch": "@@ -48,6 +48,7 @@\n import static io.strimzi.systemtest.Constants.OAUTH;\n import static io.strimzi.systemtest.Constants.REGRESSION;\n import static io.strimzi.test.k8s.KubeClusterResource.kubeClient;\n+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;\n \n @Tag(OAUTH)\n @Tag(REGRESSION)\n@@ -81,9 +82,9 @@ void testProducerConsumerAudienceTokenChecks() {\n \n         LOGGER.info(\"Use clients without access token containing audience token\");\n         oauthInternalClientJob.createAndWaitForReadiness(oauthInternalClientJob.producerStrimziOauthPlain().build());\n-        ClientUtils.waitForClientTimeout(OAUTH_PRODUCER_NAME, NAMESPACE, MESSAGE_COUNT);\n+        assertDoesNotThrow(() -> ClientUtils.waitForClientTimeout(OAUTH_PRODUCER_NAME, NAMESPACE, MESSAGE_COUNT));\n         oauthInternalClientJob.createAndWaitForReadiness(oauthInternalClientJob.consumerStrimziOauthPlain().build());\n-        ClientUtils.waitForClientTimeout(OAUTH_CONSUMER_NAME, NAMESPACE, MESSAGE_COUNT);\n+        assertDoesNotThrow(() -> ClientUtils.waitForClientTimeout(OAUTH_CONSUMER_NAME, NAMESPACE, MESSAGE_COUNT));\n \n         JobUtils.deleteJobWithWait(NAMESPACE, OAUTH_PRODUCER_NAME);\n         JobUtils.deleteJobWithWait(NAMESPACE, OAUTH_CONSUMER_NAME);\n@@ -111,10 +112,10 @@ void testAccessTokenClaimCheck() {\n                 .build();\n \n         oauthInternalClientChecksJob.createAndWaitForReadiness(oauthInternalClientChecksJob.producerStrimziOauthPlain().build());\n-        ClientUtils.waitForClientTimeout(OAUTH_CLIENT_AUDIENCE_PRODUCER, NAMESPACE, MESSAGE_COUNT);\n+        assertDoesNotThrow(() -> ClientUtils.waitForClientTimeout(OAUTH_CLIENT_AUDIENCE_PRODUCER, NAMESPACE, MESSAGE_COUNT));\n \n         oauthInternalClientChecksJob.createAndWaitForReadiness(oauthInternalClientChecksJob.consumerStrimziOauthPlain().build());\n-        ClientUtils.waitForClientTimeout(OAUTH_CLIENT_AUDIENCE_CONSUMER, NAMESPACE, MESSAGE_COUNT);\n+        assertDoesNotThrow(() -> ClientUtils.waitForClientTimeout(OAUTH_CLIENT_AUDIENCE_CONSUMER, NAMESPACE, MESSAGE_COUNT));\n \n         JobUtils.deleteJobWithWait(NAMESPACE, OAUTH_CLIENT_AUDIENCE_PRODUCER);\n         JobUtils.deleteJobWithWait(NAMESPACE, OAUTH_CLIENT_AUDIENCE_CONSUMER);"
+  },
+  {
+    "sha": "a43a34a423de2fecd2ce3b38bae55d965363a1bf",
+    "filename": "test/src/main/java/io/strimzi/test/k8s/KubeClient.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 2,
+    "changes": 14,
+    "blob_url": "https://github.com/strimzi/strimzi-kafka-operator/blob/4fea162b973d073e80b4a1c99534446c253bec60/test/src/main/java/io/strimzi/test/k8s/KubeClient.java",
+    "raw_url": "https://github.com/strimzi/strimzi-kafka-operator/raw/4fea162b973d073e80b4a1c99534446c253bec60/test/src/main/java/io/strimzi/test/k8s/KubeClient.java",
+    "contents_url": "https://api.github.com/repos/strimzi/strimzi-kafka-operator/contents/test/src/main/java/io/strimzi/test/k8s/KubeClient.java?ref=4fea162b973d073e80b4a1c99534446c253bec60",
+    "patch": "@@ -23,6 +23,7 @@\n import io.fabric8.kubernetes.api.model.apps.StatefulSet;\n import io.fabric8.kubernetes.api.model.batch.Job;\n import io.fabric8.kubernetes.api.model.batch.JobList;\n+import io.fabric8.kubernetes.api.model.batch.JobStatus;\n import io.fabric8.kubernetes.api.model.networking.v1.Ingress;\n import io.fabric8.kubernetes.api.model.rbac.ClusterRole;\n import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;\n@@ -442,8 +443,17 @@ public Job getJob(String jobName) {\n         return client.batch().jobs().inNamespace(getNamespace()).withName(jobName).get();\n     }\n \n-    public Boolean getJobStatus(String jobName) {\n-        return client.batch().jobs().inNamespace(getNamespace()).withName(jobName).get().getStatus().getSucceeded().equals(1);\n+    public Boolean checkSucceededJobStatus(String jobName) {\n+        return checkSucceededJobStatus(jobName, 1);\n+    }\n+\n+    public Boolean checkSucceededJobStatus(String jobName, int expectedSucceededPods) {\n+        return getJobStatus(jobName).getSucceeded().equals(expectedSucceededPods);\n+    }\n+\n+    // Pods Statuses:  0 Running / 0 Succeeded / 1 Failed\n+    public JobStatus getJobStatus(String jobName) {\n+        return client.batch().jobs().inNamespace(getNamespace()).withName(jobName).get().getStatus();\n     }\n \n     public JobList getJobList() {"
+  }
+]

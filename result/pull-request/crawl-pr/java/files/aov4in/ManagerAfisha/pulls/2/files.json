@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "0ad889a8600c66590698a728ea14265a4fced3ec",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 48,
+    "deletions": 5,
+    "changes": 53,
+    "blob_url": "https://github.com/aov4in/ManagerAfisha/blob/84fc02eb43547fed06212aec171f7942aae927c3/pom.xml",
+    "raw_url": "https://github.com/aov4in/ManagerAfisha/raw/84fc02eb43547fed06212aec171f7942aae927c3/pom.xml",
+    "contents_url": "https://api.github.com/repos/aov4in/ManagerAfisha/contents/pom.xml?ref=84fc02eb43547fed06212aec171f7942aae927c3",
+    "patch": "@@ -24,21 +24,64 @@\n         <dependency>\n             <groupId>org.junit.jupiter</groupId>\n             <artifactId>junit-jupiter</artifactId>\n-            <version>5.4.2</version>\n+            <version>5.7.0</version>\n             <scope>test</scope>\n         </dependency>\n+        <dependency>\n+            <groupId>org.junit.jupiter</groupId>\n+            <artifactId>junit-jupiter-api</artifactId>\n+            <version>5.7.0</version>\n+            <scope>compile</scope>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.mockito</groupId>\n+            <artifactId>mockito-core</artifactId>\n+            <version>3.7.7</version>\n+            <scope>compile</scope>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.mockito</groupId>\n+            <artifactId>mockito-junit-jupiter</artifactId>\n+            <version>3.7.7</version>\n+            <scope>compile</scope>\n+        </dependency>\n     </dependencies>\n \n     <build>\n         <plugins>\n             <plugin>\n                 <groupId>org.apache.maven.plugins</groupId>\n                 <artifactId>maven-surefire-plugin</artifactId>\n-                <version>2.22.2</version>\n+                <version>3.0.0-M5</version>\n+                <configuration>\n+                    <failIfNoTests>true</failIfNoTests>\n+                </configuration>\n+            </plugin>\n+            <plugin>\n+                <groupId>org.jacoco</groupId>\n+                <artifactId>jacoco-maven-plugin</artifactId>\n+                <version>0.8.6</version>\n+                <executions>\n+                    <execution>\n+                        <id>prepare-agent</id>\n+                        <phase>initialize</phase>\n+                        <goals>\n+                            <goal>prepare-agent</goal>\n+                        </goals>\n+                    </execution>\n+                    <execution>\n+                        <id>report</id>\n+                        <phase>verify</phase>\n+                        <goals>\n+                            <goal>report</goal>\n+                        </goals>\n+                    </execution>\n+                    <execution>\n+                        <id>check</id>\n+                        <phase>verify</phase>\n+                    </execution>\n+                </executions>\n             </plugin>\n         </plugins>\n     </build>\n-\n-\n-\n </project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "4ffeee603efb74e570c81c940ac08d75ed122d6d",
+    "filename": "src/main/java/ru/netology/domain/PurchaseItem.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 4,
+    "changes": 9,
+    "blob_url": "https://github.com/aov4in/ManagerAfisha/blob/84fc02eb43547fed06212aec171f7942aae927c3/src/main/java/ru/netology/domain/PurchaseItem.java",
+    "raw_url": "https://github.com/aov4in/ManagerAfisha/raw/84fc02eb43547fed06212aec171f7942aae927c3/src/main/java/ru/netology/domain/PurchaseItem.java",
+    "contents_url": "https://api.github.com/repos/aov4in/ManagerAfisha/contents/src/main/java/ru/netology/domain/PurchaseItem.java?ref=84fc02eb43547fed06212aec171f7942aae927c3",
+    "patch": "@@ -9,8 +9,9 @@\n @Data\n public class PurchaseItem {\n     private int id;\n-    private int productId;\n-    private String productName;\n-    private int productPrice;\n-    private int count;\n+    private int movieId;\n+    private String imageUrl;\n+    private String name;\n+    private String genre;\n+    private int ageLimit;\n }"
+  },
+  {
+    "sha": "29e9bff870a4fa0684e3dc0d27c5cf0068590eba",
+    "filename": "src/main/java/ru/netology/manager/CartManager.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 49,
+    "changes": 49,
+    "blob_url": "https://github.com/aov4in/ManagerAfisha/blob/26c9ddc89d49a758d7109076ab488543f375cde9/src/main/java/ru/netology/manager/CartManager.java",
+    "raw_url": "https://github.com/aov4in/ManagerAfisha/raw/26c9ddc89d49a758d7109076ab488543f375cde9/src/main/java/ru/netology/manager/CartManager.java",
+    "contents_url": "https://api.github.com/repos/aov4in/ManagerAfisha/contents/src/main/java/ru/netology/manager/CartManager.java?ref=26c9ddc89d49a758d7109076ab488543f375cde9",
+    "patch": "@@ -1,49 +0,0 @@\n-package ru.netology.manager;\n-\n-import ru.netology.domain.PurchaseItem;\n-\n-public class CartManager {\n-    private PurchaseItem[] items = new PurchaseItem[0];\n-\n-    public void add(PurchaseItem item) {\n-        // создаём новый массив размером на единицу больше\n-        int length = items.length + 1;\n-        PurchaseItem[] tmp = new PurchaseItem[length];\n-        // itar + tab\n-        // копируем поэлементно\n-        // for (int i = 0; i < items.length; i++) {\n-        //   tmp[i] = items[i];\n-        // }\n-        System.arraycopy(items, 0, tmp, 0, items.length);\n-        // кладём последним наш элемент\n-        int lastIndex = tmp.length - 1;\n-        tmp[lastIndex] = item;\n-        items = tmp;\n-    }\n-\n-    public PurchaseItem[] getAll() {\n-        PurchaseItem[] result = new PurchaseItem[items.length];\n-        // перебираем массив в прямом порядке\n-        // но кладём в результаты в обратном\n-        for (int i = 0; i < result.length; i++) {\n-            int index = items.length - i - 1;\n-            result[i] = items[index];\n-        }\n-        return result;\n-    }\n-\n-    // наивная реализация\n-    public void removeById(int id) {\n-        int length = items.length - 1;\n-        PurchaseItem[] tmp = new PurchaseItem[length];\n-        int index = 0;\n-        for (PurchaseItem item : items) {\n-            if (item.getId() != id) {\n-                tmp[index] = item;\n-                index++;\n-            }\n-        }\n-        // меняем наши элементы\n-        items = tmp;\n-    }\n-}"
+  },
+  {
+    "sha": "dcf2abba8c04ee46680f07eca93abd6b7530bdc6",
+    "filename": "src/main/java/ru/netology/manager/MovieManager.java",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/aov4in/ManagerAfisha/blob/84fc02eb43547fed06212aec171f7942aae927c3/src/main/java/ru/netology/manager/MovieManager.java",
+    "raw_url": "https://github.com/aov4in/ManagerAfisha/raw/84fc02eb43547fed06212aec171f7942aae927c3/src/main/java/ru/netology/manager/MovieManager.java",
+    "contents_url": "https://api.github.com/repos/aov4in/ManagerAfisha/contents/src/main/java/ru/netology/manager/MovieManager.java?ref=84fc02eb43547fed06212aec171f7942aae927c3",
+    "patch": "@@ -0,0 +1,30 @@\n+package ru.netology.manager;\n+\n+import ru.netology.domain.PurchaseItem;\n+import ru.netology.repository.MovieRepository;\n+\n+public class MovieManager {\n+    private MovieRepository repository;\n+    private int posterLength = 10;\n+\n+    public MovieManager(MovieRepository repository) {\n+        this.repository = repository;\n+    }\n+\n+    public void add(PurchaseItem item) {\n+        repository.save(item);\n+    }\n+\n+    public PurchaseItem[] getAll() {\n+        PurchaseItem[] items = repository.findAll();\n+        int resultLength = Math.min(posterLength, items.length);\n+        PurchaseItem[] result = new PurchaseItem[resultLength];\n+        for (int i = 0; i < result.length; i++) {\n+            int index = items.length - i - 1;\n+            result[i] = items[index];\n+        }\n+        return result;\n+    }\n+\n+\n+}"
+  },
+  {
+    "sha": "f0743ddee184f4f1c15d594ec96ae5c230dcbb07",
+    "filename": "src/main/java/ru/netology/repository/MovieRepository.java",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/aov4in/ManagerAfisha/blob/84fc02eb43547fed06212aec171f7942aae927c3/src/main/java/ru/netology/repository/MovieRepository.java",
+    "raw_url": "https://github.com/aov4in/ManagerAfisha/raw/84fc02eb43547fed06212aec171f7942aae927c3/src/main/java/ru/netology/repository/MovieRepository.java",
+    "contents_url": "https://api.github.com/repos/aov4in/ManagerAfisha/contents/src/main/java/ru/netology/repository/MovieRepository.java?ref=84fc02eb43547fed06212aec171f7942aae927c3",
+    "patch": "@@ -0,0 +1,48 @@\n+package ru.netology.repository;\n+\n+import ru.netology.domain.PurchaseItem;\n+\n+public class MovieRepository {\n+    private PurchaseItem[] items = new PurchaseItem[0];\n+\n+    public PurchaseItem[] findAll() {\n+        return items;\n+    }\n+\n+    public void save(PurchaseItem item) {\n+        int length = items.length + 1;\n+        PurchaseItem[] tmp = new PurchaseItem[length];\n+        System.arraycopy(items, 0, tmp, 0, items.length);\n+        int lastIndex = tmp.length - 1;\n+        tmp[lastIndex] = item;\n+        items = tmp;\n+    }\n+\n+    public void removeById(int id) {\n+        int length = items.length - 1;\n+        PurchaseItem[] tmp = new PurchaseItem[length];\n+        int index = 0;\n+        for (PurchaseItem item : items) {\n+            if (item.getId() != id) {\n+                tmp[index] = item;\n+                index++;\n+            }\n+        }\n+        items = tmp;\n+    }\n+\n+    public PurchaseItem findById(int id) {\n+        for (PurchaseItem item : items) {\n+            if (item.getId() == id) {\n+                return item;\n+            }\n+        }\n+        return null;\n+    }\n+\n+    public PurchaseItem[] removeAll() {\n+        PurchaseItem[] items = new PurchaseItem[0];\n+\n+        return items;\n+    }\n+}"
+  },
+  {
+    "sha": "0b331c2d0b14953360f40eca8ef4c25fe3b78275",
+    "filename": "src/test/java/ru/netology/manager/CartManagerNonEmptyTest.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 47,
+    "changes": 47,
+    "blob_url": "https://github.com/aov4in/ManagerAfisha/blob/26c9ddc89d49a758d7109076ab488543f375cde9/src/test/java/ru/netology/manager/CartManagerNonEmptyTest.java",
+    "raw_url": "https://github.com/aov4in/ManagerAfisha/raw/26c9ddc89d49a758d7109076ab488543f375cde9/src/test/java/ru/netology/manager/CartManagerNonEmptyTest.java",
+    "contents_url": "https://api.github.com/repos/aov4in/ManagerAfisha/contents/src/test/java/ru/netology/manager/CartManagerNonEmptyTest.java?ref=26c9ddc89d49a758d7109076ab488543f375cde9",
+    "patch": "@@ -1,47 +0,0 @@\n-package ru.netology.manager;\n-\n-import org.junit.jupiter.api.Test;\n-import ru.netology.domain.PurchaseItem;\n-\n-import static org.junit.jupiter.api.Assertions.*;\n-\n-public class CartManagerNonEmptyTest {\n-    @Test\n-    public void shouldRemoveIfExists() {\n-        CartManager manager = new CartManager();\n-        int idToRemove = 1;\n-        PurchaseItem first = new PurchaseItem(1, 1, \"first\", 1, 1);\n-        PurchaseItem second = new PurchaseItem(2, 2, \"second\", 1, 1);\n-        PurchaseItem third = new PurchaseItem(3, 3, \"third\", 1, 1);\n-        manager.add(first);\n-        manager.add(second);\n-        manager.add(third);\n-\n-        manager.removeById(idToRemove);\n-\n-        PurchaseItem[] actual = manager.getAll();\n-        PurchaseItem[] expected = new PurchaseItem[]{third, second};\n-\n-//    assertEquals(expected, actual);\n-        assertArrayEquals(expected, actual);\n-    }\n-\n-    @Test\n-    public void shouldNotRemoveIfNotExists() {\n-        CartManager manager = new CartManager();\n-        int idToRemove = 4;\n-        PurchaseItem first = new PurchaseItem(1, 1, \"first\", 1, 1);\n-        PurchaseItem second = new PurchaseItem(2, 2, \"second\", 1, 1);\n-        PurchaseItem third = new PurchaseItem(3, 3, \"third\", 1, 1);\n-        manager.add(first);\n-        manager.add(second);\n-        manager.add(third);\n-\n-        manager.removeById(idToRemove);\n-\n-        PurchaseItem[] actual = manager.getAll();\n-        PurchaseItem[] expected = new PurchaseItem[]{third, second, first};\n-\n-        assertArrayEquals(expected, actual);\n-    }\n-}"
+  },
+  {
+    "sha": "3377cfeda2f3de5ec85414dfd1d208950641f74b",
+    "filename": "src/test/java/ru/netology/manager/CartManagerNonEmptyWithSetupTest.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 46,
+    "changes": 46,
+    "blob_url": "https://github.com/aov4in/ManagerAfisha/blob/26c9ddc89d49a758d7109076ab488543f375cde9/src/test/java/ru/netology/manager/CartManagerNonEmptyWithSetupTest.java",
+    "raw_url": "https://github.com/aov4in/ManagerAfisha/raw/26c9ddc89d49a758d7109076ab488543f375cde9/src/test/java/ru/netology/manager/CartManagerNonEmptyWithSetupTest.java",
+    "contents_url": "https://api.github.com/repos/aov4in/ManagerAfisha/contents/src/test/java/ru/netology/manager/CartManagerNonEmptyWithSetupTest.java?ref=26c9ddc89d49a758d7109076ab488543f375cde9",
+    "patch": "@@ -1,46 +0,0 @@\n-package ru.netology.manager;\n-\n-import org.junit.jupiter.api.BeforeEach;\n-import org.junit.jupiter.api.Test;\n-import ru.netology.domain.PurchaseItem;\n-import ru.netology.manager.CartManager;\n-\n-import static org.junit.jupiter.api.Assertions.assertArrayEquals;\n-\n-public class CartManagerNonEmptyWithSetupTest {\n-    private CartManager manager = new CartManager();\n-    private PurchaseItem first = new PurchaseItem(1, 1, \"first\", 1, 1);\n-    private PurchaseItem second = new PurchaseItem(2, 2, \"second\", 1, 1);\n-    private PurchaseItem third = new PurchaseItem(3, 3, \"third\", 1, 1);\n-\n-    @BeforeEach\n-    public void setUp() {\n-        manager.add(first);\n-        manager.add(second);\n-        manager.add(third);\n-    }\n-\n-    @Test\n-    public void shouldRemoveIfExists() {\n-        int idToRemove = 1;\n-        manager.removeById(idToRemove);\n-\n-        PurchaseItem[] actual = manager.getAll();\n-        PurchaseItem[] expected = new PurchaseItem[]{third, second};\n-\n-//    assertEquals(expected, actual);\n-        assertArrayEquals(expected, actual);\n-    }\n-\n-    @Test\n-    public void shouldNotRemoveIfNotExists() {\n-        int idToRemove = 4;\n-\n-        manager.removeById(idToRemove);\n-\n-        PurchaseItem[] actual = manager.getAll();\n-        PurchaseItem[] expected = new PurchaseItem[]{third, second, first};\n-\n-        assertArrayEquals(expected, actual);\n-    }\n-}"
+  },
+  {
+    "sha": "11a66a14b2e042ddeb9f380eaf20d1074f731c0c",
+    "filename": "src/test/java/ru/netology/manager/MovieManagerTest.java",
+    "status": "added",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/aov4in/ManagerAfisha/blob/84fc02eb43547fed06212aec171f7942aae927c3/src/test/java/ru/netology/manager/MovieManagerTest.java",
+    "raw_url": "https://github.com/aov4in/ManagerAfisha/raw/84fc02eb43547fed06212aec171f7942aae927c3/src/test/java/ru/netology/manager/MovieManagerTest.java",
+    "contents_url": "https://api.github.com/repos/aov4in/ManagerAfisha/contents/src/test/java/ru/netology/manager/MovieManagerTest.java?ref=84fc02eb43547fed06212aec171f7942aae927c3",
+    "patch": "@@ -0,0 +1,58 @@\n+package ru.netology.manager;\n+\n+import org.junit.jupiter.api.BeforeEach;\n+import org.junit.jupiter.api.Test;\n+import org.junit.jupiter.api.extension.ExtendWith;\n+import org.mockito.InjectMocks;\n+import org.mockito.Mock;\n+import org.mockito.junit.jupiter.MockitoExtension;\n+import static org.mockito.Mockito.doReturn;\n+import ru.netology.domain.PurchaseItem;\n+import ru.netology.repository.MovieRepository;\n+\n+import static org.junit.jupiter.api.Assertions.*;\n+\n+\n+@ExtendWith(MockitoExtension.class)\n+\n+public class MovieManagerTest {\n+    @Mock\n+    private MovieRepository MovieRepository;\n+    @InjectMocks\n+    private MovieManager MovieManager;\n+    private PurchaseItem first = new PurchaseItem(1, 1, \"url1\", \"name1\", \"genre1\", 6);\n+    private PurchaseItem second = new PurchaseItem(2, 2, \"url2\", \"name2\", \"genre2\", 14);\n+    private PurchaseItem third = new PurchaseItem(3, 3, \"url3\", \"name3\", \"genre3\", 18);\n+    private PurchaseItem forth = new PurchaseItem(4, 4, \"url4\", \"name4\", \"genre1\", 6);\n+\n+    @BeforeEach\n+    public void setUp() {\n+        MovieManager.add(first);\n+        MovieManager.add(second);\n+        MovieManager.add(third);\n+    }\n+\n+    @Test\n+    public void shouldAdd() {\n+        MovieManager.add(forth);\n+\n+        PurchaseItem[] returned = new PurchaseItem[]{first, second, third, forth};\n+        doReturn(returned).when(MovieRepository).findAll();\n+\n+        PurchaseItem[] expected = new PurchaseItem[]{first, second, third, forth};\n+        PurchaseItem[] actual = MovieRepository.findAll();\n+        assertArrayEquals(expected, actual);\n+\n+    }\n+\n+    @Test\n+    public void shouldGetAll() {\n+        PurchaseItem[] returned = new PurchaseItem[]{first, second, third};\n+        doReturn(returned).when(MovieRepository).findAll();\n+\n+        PurchaseItem[] expected = new PurchaseItem[]{third, second, first};\n+        PurchaseItem[] actual = MovieManager.getAll();\n+        assertArrayEquals(expected, actual);\n+\n+    }\n+}"
+  },
+  {
+    "sha": "34b4067a468082796993970d33a1b7a981310117",
+    "filename": "src/test/java/ru/netology/manager/MovieRepositoryTest.java",
+    "status": "added",
+    "additions": 69,
+    "deletions": 0,
+    "changes": 69,
+    "blob_url": "https://github.com/aov4in/ManagerAfisha/blob/84fc02eb43547fed06212aec171f7942aae927c3/src/test/java/ru/netology/manager/MovieRepositoryTest.java",
+    "raw_url": "https://github.com/aov4in/ManagerAfisha/raw/84fc02eb43547fed06212aec171f7942aae927c3/src/test/java/ru/netology/manager/MovieRepositoryTest.java",
+    "contents_url": "https://api.github.com/repos/aov4in/ManagerAfisha/contents/src/test/java/ru/netology/manager/MovieRepositoryTest.java?ref=84fc02eb43547fed06212aec171f7942aae927c3",
+    "patch": "@@ -0,0 +1,69 @@\n+package ru.netology.manager;\n+\n+import org.junit.jupiter.api.BeforeEach;\n+import org.junit.jupiter.api.Test;\n+import ru.netology.domain.PurchaseItem;\n+import ru.netology.repository.MovieRepository;\n+\n+import static org.junit.jupiter.api.Assertions.*;\n+\n+public class MovieRepositoryTest {\n+\n+    private MovieRepository movieRepository = new MovieRepository();\n+\n+    private PurchaseItem first = new PurchaseItem(1, 1, \"url1\", \"name1\", \"genre1\", 6);\n+    private PurchaseItem second = new PurchaseItem(5, 2, \"url2\", \"name2\", \"genre2\", 14);\n+    private PurchaseItem third = new PurchaseItem(7, 3, \"url3\", \"name3\", \"genre3\", 18);\n+\n+    @BeforeEach\n+    public void setUp() {\n+        movieRepository.save(first);\n+        movieRepository.save(second);\n+        movieRepository.save(third);\n+    }\n+\n+    @Test\n+    public void shouldAdd() {\n+        PurchaseItem[] actual = movieRepository.findAll();\n+        PurchaseItem[] expected = new PurchaseItem[]{first, second, third};\n+\n+        assertArrayEquals(expected, actual);\n+\n+    }\n+\n+    @Test\n+    public void shouldRemoveById() {\n+        int idToRemove = 5;\n+        movieRepository.removeById(idToRemove);\n+        PurchaseItem[] actual = movieRepository.findAll();\n+        PurchaseItem[] expected = new PurchaseItem[]{first, third};\n+\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    public void shouldFindByIdIfExists() {\n+        int findId = 5;\n+        PurchaseItem actual = movieRepository.findById(findId);\n+        PurchaseItem expected = second;\n+\n+        assertEquals(expected, actual);\n+    }\n+\n+    @Test\n+    public void shouldFindByIdIfNotExists() {\n+        int findId = 4;\n+        PurchaseItem actual = movieRepository.findById(findId);\n+\n+        assertNull(actual);\n+    }\n+\n+    @Test\n+    public void shouldRemoveAll() {\n+        movieRepository.removeAll();\n+        PurchaseItem[] actual = movieRepository.removeAll();\n+        PurchaseItem[] expected = new PurchaseItem[0];\n+\n+        assertArrayEquals(expected, actual);\n+    }\n+}"
+  }
+]

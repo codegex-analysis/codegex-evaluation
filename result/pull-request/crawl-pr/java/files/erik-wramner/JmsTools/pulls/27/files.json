@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "4907ee986733848ffc2d1c9eb987342fa3d9f861",
+    "filename": "JmsConsumer/src/main/java/name/wramner/jmstools/consumer/DequeueWorker.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/erik-wramner/JmsTools/blob/0b79b4d0e0fa03e7b72f4b6b125c38c088106828/JmsConsumer/src/main/java/name/wramner/jmstools/consumer/DequeueWorker.java",
+    "raw_url": "https://github.com/erik-wramner/JmsTools/raw/0b79b4d0e0fa03e7b72f4b6b125c38c088106828/JmsConsumer/src/main/java/name/wramner/jmstools/consumer/DequeueWorker.java",
+    "contents_url": "https://api.github.com/repos/erik-wramner/JmsTools/contents/JmsConsumer/src/main/java/name/wramner/jmstools/consumer/DequeueWorker.java?ref=0b79b4d0e0fa03e7b72f4b6b125c38c088106828",
+    "patch": "@@ -173,6 +173,12 @@ private void saveMessageHeaders(Message msg, String baseName) throws JMSExceptio\n             Properties props = new Properties();\r\n             for (Enumeration<?> propertyNames = msg.getPropertyNames(); propertyNames.hasMoreElements();) {\r\n                 String name = propertyNames.nextElement().toString();\r\n+                try {\r\n+                    props.setProperty(name, msg.getStringProperty(name));\r\n+                } catch (NullPointerException e) {\r\n+                   _logger.error(\"Header \\\"\" + name + \"\\\" has a null value on: \" + msg.getJMSMessageID() + \" Header is not stored\");\r\n+                   continue;\r\n+                }\r\n                 props.setProperty(name, msg.getStringProperty(name));\r\n             }\r\n             props.store(fos, \"JMS properties for \" + msg.getJMSMessageID());\r\n@@ -255,4 +261,4 @@ private void verifyChecksum(ChecksummedMessageData md, String jmsId, String appl\n     protected String[] getMessageLogHeaders() {\r\n         return new String[] { \"ConsumedTime\", \"JMSID\", \"ID\", \"Length\" };\r\n     }\r\n-}\n\\ No newline at end of file\n+}\r"
+  }
+]

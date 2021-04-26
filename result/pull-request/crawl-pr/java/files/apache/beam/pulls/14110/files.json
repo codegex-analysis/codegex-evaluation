@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "ab6f0b1c33398a1ad8269764e7ffef0ee61a5b53",
+    "filename": "sdks/python/apache_beam/coders/coders.py",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 10,
+    "changes": 30,
+    "blob_url": "https://github.com/apache/beam/blob/6dd0475f3a9ffad0201ace687a99bfefa446d346/sdks/python/apache_beam/coders/coders.py",
+    "raw_url": "https://github.com/apache/beam/raw/6dd0475f3a9ffad0201ace687a99bfefa446d346/sdks/python/apache_beam/coders/coders.py",
+    "contents_url": "https://api.github.com/repos/apache/beam/contents/sdks/python/apache_beam/coders/coders.py?ref=6dd0475f3a9ffad0201ace687a99bfefa446d346",
+    "patch": "@@ -80,6 +80,7 @@\n     'FastPrimitivesCoder',\n     'FloatCoder',\n     'IterableCoder',\n+    'ListCoder',\n     'MapCoder',\n     'NullableCoder',\n     'PickleCoder',\n@@ -1131,7 +1132,7 @@ def __hash__(self):\n     return hash((type(self), self._elem_coder))\n \n \n-class IterableCoder(FastCoder):\n+class ListLikeCoder(FastCoder):\n   \"\"\"Coder of iterables of homogeneous objects.\"\"\"\n   def __init__(self, elem_coder):\n     # type: (Coder) -> None\n@@ -1148,7 +1149,7 @@ def as_deterministic_coder(self, step_label, error_message=None):\n     if self.is_deterministic():\n       return self\n     else:\n-      return IterableCoder(\n+      return type(self)(\n           self._elem_coder.as_deterministic_coder(step_label, error_message))\n \n   def as_cloud_object(self, coders_context=None):\n@@ -1163,20 +1164,17 @@ def as_cloud_object(self, coders_context=None):\n   def value_coder(self):\n     return self._elem_coder\n \n-  def to_type_hint(self):\n-    return typehints.Iterable[self._elem_coder.to_type_hint()]\n-\n-  @staticmethod\n-  def from_type_hint(typehint, registry):\n-    # type: (Any, CoderRegistry) -> IterableCoder\n-    return IterableCoder(registry.get_coder(typehint.inner_type))\n+  @classmethod\n+  def from_type_hint(cls, typehint, registry):\n+    # type: (Any, CoderRegistry) -> ListLikeCoder\n+    return cls(registry.get_coder(typehint.inner_type))\n \n   def _get_component_coders(self):\n     # type: () -> Tuple[Coder, ...]\n     return (self._elem_coder, )\n \n   def __repr__(self):\n-    return 'IterableCoder[%r]' % self._elem_coder\n+    return '%s[%r]' % (self.__class__.__name__, self._elem_coder)\n \n   def __eq__(self, other):\n     return (\n@@ -1186,9 +1184,21 @@ def __hash__(self):\n     return hash((type(self), self._elem_coder))\n \n \n+class IterableCoder(ListLikeCoder):\n+  \"\"\"Coder of iterables of homogeneous objects.\"\"\"\n+  def to_type_hint(self):\n+    return typehints.Iterable[self._elem_coder.to_type_hint()]\n+\n+\n Coder.register_structured_urn(common_urns.coders.ITERABLE.urn, IterableCoder)\n \n \n+class ListCoder(ListLikeCoder):\n+  \"\"\"Coder of Python lists.\"\"\"\n+  def to_type_hint(self):\n+    return List[self._elem_coder.to_type_hint()]\n+\n+\n class GlobalWindowCoder(SingletonCoder):\n   \"\"\"Coder for global windows.\"\"\"\n   def __init__(self):"
+  },
+  {
+    "sha": "6d377a14ba11ed4e4fb05435aada76ac8dc00d9a",
+    "filename": "sdks/python/apache_beam/coders/coders_test_common.py",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/apache/beam/blob/6dd0475f3a9ffad0201ace687a99bfefa446d346/sdks/python/apache_beam/coders/coders_test_common.py",
+    "raw_url": "https://github.com/apache/beam/raw/6dd0475f3a9ffad0201ace687a99bfefa446d346/sdks/python/apache_beam/coders/coders_test_common.py",
+    "contents_url": "https://api.github.com/repos/apache/beam/contents/sdks/python/apache_beam/coders/coders_test_common.py?ref=6dd0475f3a9ffad0201ace687a99bfefa446d346",
+    "patch": "@@ -128,6 +128,7 @@ def tearDownClass(cls):\n         coders.AvroGenericCoder,\n         coders.DeterministicProtoCoder,\n         coders.FastCoder,\n+        coders.ListLikeCoder,\n         coders.ProtoCoder,\n         coders.ToBytesCoder\n     ])\n@@ -399,6 +400,14 @@ def iter_generator(count):\n         list(iter_generator(count)),\n         iterable_coder.decode(iterable_coder.encode(iter_generator(count))))\n \n+  def test_list_coder(self):\n+    list_coder = coders.ListCoder(coders.VarIntCoder())\n+    # Test unnested\n+    self.check_coder(list_coder, [1], [-1, 0, 100])\n+    # Test nested\n+    self.check_coder(\n+        coders.TupleCoder((coders.VarIntCoder(), list_coder)), (1, [1, 2, 3]))\n+\n   def test_windowedvalue_coder_paneinfo(self):\n     coder = coders.WindowedValueCoder(\n         coders.VarIntCoder(), coders.GlobalWindowCoder())"
+  },
+  {
+    "sha": "2a2101e2f9752e14b20ab076ce762dd6038419eb",
+    "filename": "sdks/python/apache_beam/coders/typecoders.py",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/beam/blob/6dd0475f3a9ffad0201ace687a99bfefa446d346/sdks/python/apache_beam/coders/typecoders.py",
+    "raw_url": "https://github.com/apache/beam/raw/6dd0475f3a9ffad0201ace687a99bfefa446d346/sdks/python/apache_beam/coders/typecoders.py",
+    "contents_url": "https://api.github.com/repos/apache/beam/contents/sdks/python/apache_beam/coders/typecoders.py?ref=6dd0475f3a9ffad0201ace687a99bfefa446d346",
+    "patch": "@@ -133,10 +133,10 @@ def get_coder(self, typehint):\n         raise RuntimeError(\n             'Coder registry has no fallback coder. This can happen if the '\n             'fast_coders module could not be imported.')\n-      if isinstance(\n-          typehint,\n-          (typehints.IterableTypeConstraint, typehints.ListConstraint)):\n+      if isinstance(typehint, typehints.IterableTypeConstraint):\n         return coders.IterableCoder.from_type_hint(typehint, self)\n+      elif isinstance(typehint, typehints.ListConstraint):\n+        return coders.ListCoder.from_type_hint(typehint, self)\n       elif typehint is None:\n         # In some old code, None is used for Any.\n         # TODO(robertwb): Clean this up."
+  },
+  {
+    "sha": "55e2ddc2a51d55c05cde113e48018589fdb9015d",
+    "filename": "sdks/python/scripts/generate_pydoc.sh",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/beam/blob/6dd0475f3a9ffad0201ace687a99bfefa446d346/sdks/python/scripts/generate_pydoc.sh",
+    "raw_url": "https://github.com/apache/beam/raw/6dd0475f3a9ffad0201ace687a99bfefa446d346/sdks/python/scripts/generate_pydoc.sh",
+    "contents_url": "https://api.github.com/repos/apache/beam/contents/sdks/python/scripts/generate_pydoc.sh?ref=6dd0475f3a9ffad0201ace687a99bfefa446d346",
+    "patch": "@@ -149,6 +149,7 @@ ignore_identifiers = [\n   # Ignore private classes\n   'apache_beam.coders.coders._PickleCoderBase',\n   'apache_beam.coders.coders.FastCoder',\n+  'apache_beam.coders.coders.ListLikeCoder',\n   'apache_beam.io._AvroSource',\n   'apache_beam.io.gcp.bigquery.RowAsDictJsonCoder',\n   'apache_beam.io.gcp.datastore.v1new.datastoreio._Mutate',"
+  }
+]

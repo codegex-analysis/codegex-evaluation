@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "253327a810e5657928a64d656051490c06bf9c18",
+    "filename": ".github/workflows/build-CI.yml",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/MinecraftZock/WorldEdit/blob/5178456777c5a01d3b9a5b7e411df1b065a4bc12/.github/workflows/build-CI.yml",
+    "raw_url": "https://github.com/MinecraftZock/WorldEdit/raw/5178456777c5a01d3b9a5b7e411df1b065a4bc12/.github/workflows/build-CI.yml",
+    "contents_url": "https://api.github.com/repos/MinecraftZock/WorldEdit/contents/.github/workflows/build-CI.yml?ref=5178456777c5a01d3b9a5b7e411df1b065a4bc12",
+    "patch": "@@ -0,0 +1,31 @@\n+name: PullRequest\n+\n+on: [pull_request]\n+\n+jobs:\n+  buildMod:\n+    name: build plugin\n+    runs-on: ubuntu-latest\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v2.3.4\n+        with:\n+          fetch-depth: 0\n+      - name: Find Tag\n+        id: tagger\n+        uses: jimschubert/query-tag-action@v2\n+        with:\n+          skip-unshallow: 'true'\n+          abbrev: false\n+          commit-ish: HEAD\n+      - name: build plugin\n+        run:  ./gradlew build\n+      - name: grab artifact\n+        uses: actions/upload-artifact@v2\n+        if: ${{ always() }}\n+        with:\n+          name: WorldGuardPlugin-${{steps.tagger.outputs.tag}}\n+          path: |\n+            ./**/build/libs/*.jar\n+            !buildSrc/build/libs/*.jar\n+          if-no-files-found: error"
+  },
+  {
+    "sha": "75747dfcff8ba9d0dae987cc60c436b206ad1ce4",
+    "filename": ".github/workflows/release-CI.yml",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/MinecraftZock/WorldEdit/blob/5178456777c5a01d3b9a5b7e411df1b065a4bc12/.github/workflows/release-CI.yml",
+    "raw_url": "https://github.com/MinecraftZock/WorldEdit/raw/5178456777c5a01d3b9a5b7e411df1b065a4bc12/.github/workflows/release-CI.yml",
+    "contents_url": "https://api.github.com/repos/MinecraftZock/WorldEdit/contents/.github/workflows/release-CI.yml?ref=5178456777c5a01d3b9a5b7e411df1b065a4bc12",
+    "patch": "@@ -0,0 +1,41 @@\n+name: Release\n+\n+on:\n+  push:\n+    tags:\n+      - '*'\n+\n+jobs:\n+  build:\n+    name: Publish release\n+    runs-on: ubuntu-latest\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v2.3.4\n+        with:\n+          fetch-depth: 0\n+      - name: Find Tag\n+        id: tagger\n+        uses: jimschubert/query-tag-action@v2\n+        with:\n+          skip-unshallow: 'true'\n+          commit-ish: HEAD\n+      - name: Build project\n+        run: ./gradlew build -S\n+#      - name: grab artifact\n+#        uses: actions/upload-artifact@v2\n+#        if: ${{ always() }}\n+#        with:\n+#          name: Worldguard plugin\n+#          path: |\n+#            ./**/build/libs/*.jar\n+#            !buildSrc/build/libs/*.jar\n+#          if-no-files-found: error\n+      - run: |\n+          find . -name \"*${{steps.tagger.outputs.tag}}*.jar\"\n+          find . -name \"*.jar\"\n+          assetsJar=$(find . -name \"*${{steps.tagger.outputs.tag}}*.jar\" | while read -r asset ; do echo \"-a $asset\" ; done)\n+          hub release create ${assetsJar} -m \"${{steps.tagger.outputs.tag}}\" \"${{steps.tagger.outputs.tag}}\"\n+        env:\n+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}\n+          VERSION: ${{ github.ref }}"
+  },
+  {
+    "sha": "df4f54894f3521f2e97e72d17cb69d8ae08ea43d",
+    "filename": ".travis.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 18,
+    "changes": 18,
+    "blob_url": "https://github.com/MinecraftZock/WorldEdit/blob/913d4d67aac69fa7e05b6692b1be7d81fed65c4c/.travis.yml",
+    "raw_url": "https://github.com/MinecraftZock/WorldEdit/raw/913d4d67aac69fa7e05b6692b1be7d81fed65c4c/.travis.yml",
+    "contents_url": "https://api.github.com/repos/MinecraftZock/WorldEdit/contents/.travis.yml?ref=913d4d67aac69fa7e05b6692b1be7d81fed65c4c",
+    "patch": "@@ -1,18 +0,0 @@\n-dist: trusty\n-language: java\n-notifications:\n-  email: false\n-before_install: chmod +x gradlew\n-script: ./gradlew build -s\n-jdk:\n-  - oraclejdk8\n-# Caching for Gradle files, prevents hitting Maven too much.\n-before_cache:\n-  - find $HOME/.gradle/ -name '*.lock' -print -exec rm -f {} \\;\n-cache:\n-  directories:\n-    - $HOME/.gradle/caches/\n-    - $HOME/.gradle/wrapper/\n-\n-# Faster builds without sudo.\n-sudo: false"
+  },
+  {
+    "sha": "eedd0e7dd60f79bae67e2cefdab0664266c3ec65",
+    "filename": "build.gradle.kts",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 9,
+    "changes": 32,
+    "blob_url": "https://github.com/MinecraftZock/WorldEdit/blob/5178456777c5a01d3b9a5b7e411df1b065a4bc12/build.gradle.kts",
+    "raw_url": "https://github.com/MinecraftZock/WorldEdit/raw/5178456777c5a01d3b9a5b7e411df1b065a4bc12/build.gradle.kts",
+    "contents_url": "https://api.github.com/repos/MinecraftZock/WorldEdit/contents/build.gradle.kts?ref=5178456777c5a01d3b9a5b7e411df1b065a4bc12",
+    "patch": "@@ -54,13 +54,27 @@ codecov {\n     reportTask.set(totalReport)\n }\n \n-if (!project.hasProperty(\"gitCommitHash\")) {\n-    apply(plugin = \"org.ajoberstar.grgit\")\n-    ext[\"gitCommitHash\"] = try {\n-        extensions.getByName<Grgit>(\"grgit\").head()?.abbreviatedId\n-    } catch (e: Exception) {\n-        logger.warn(\"Error getting commit hash\", e)\n-\n-        \"no.git.id\"\n+fun String.runCommand(\n+    workingDir: File = File(\".\"),\n+    timeoutAmount: Long = 60,\n+    timeoutUnit: TimeUnit = TimeUnit.SECONDS\n+): String = ProcessBuilder(split(\"\\\\s(?=(?:[^'\\\"`]*(['\\\"`])[^'\\\"`]*\\\\1)*[^'\\\"`]*$)\".toRegex()))\n+    .directory(workingDir)\n+    .redirectOutput(ProcessBuilder.Redirect.PIPE)\n+    .redirectError(ProcessBuilder.Redirect.PIPE)\n+    .start()\n+    .apply { waitFor(timeoutAmount, timeoutUnit) }\n+    .run {\n+        val error = errorStream.bufferedReader().readText().trim()\n+        if (error.isNotEmpty()) {\n+            throw Exception(error)\n+        }\n+        inputStream.bufferedReader().readText().trim()\n     }\n-}\n+\n+ext[\"gitVersion\"] = getTag()\n+\n+fun getTag(): String {\n+    val process = \"git describe --tags\".runCommand(workingDir = rootDir)\n+    return process.trim()\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e73fc6eef9d49203ee2dfadbc52340ba8423649a",
+    "filename": "buildSrc/src/main/kotlin/PlatformConfig.kt",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/MinecraftZock/WorldEdit/blob/5178456777c5a01d3b9a5b7e411df1b065a4bc12/buildSrc/src/main/kotlin/PlatformConfig.kt",
+    "raw_url": "https://github.com/MinecraftZock/WorldEdit/raw/5178456777c5a01d3b9a5b7e411df1b065a4bc12/buildSrc/src/main/kotlin/PlatformConfig.kt",
+    "contents_url": "https://api.github.com/repos/MinecraftZock/WorldEdit/contents/buildSrc/src/main/kotlin/PlatformConfig.kt?ref=5178456777c5a01d3b9a5b7e411df1b065a4bc12",
+    "patch": "@@ -28,7 +28,7 @@ fun Project.applyPlatformAndCoreConfiguration() {\n     apply(plugin = \"com.github.johnrengelman.shadow\")\n     apply(plugin = \"com.jfrog.artifactory\")\n \n-    ext[\"internalVersion\"] = \"$version+${rootProject.ext[\"gitCommitHash\"]}\"\n+    ext[\"internalVersion\"] = \"${rootProject.ext[\"gitVersion\"]}\"\n \n     tasks\n         .withType<JavaCompile>()"
+  },
+  {
+    "sha": "d9eedd504ad8ec987acf4d82d3c5ffb328b49a78",
+    "filename": "gradle.properties",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/MinecraftZock/WorldEdit/blob/5178456777c5a01d3b9a5b7e411df1b065a4bc12/gradle.properties",
+    "raw_url": "https://github.com/MinecraftZock/WorldEdit/raw/5178456777c5a01d3b9a5b7e411df1b065a4bc12/gradle.properties",
+    "contents_url": "https://api.github.com/repos/MinecraftZock/WorldEdit/contents/gradle.properties?ref=5178456777c5a01d3b9a5b7e411df1b065a4bc12",
+    "patch": "@@ -1,5 +1,4 @@\n group=com.sk89q.worldedit\n-version=7.3.0-SNAPSHOT\n \n org.gradle.jvmargs=-Xmx1512M\n org.gradle.parallel=true"
+  },
+  {
+    "sha": "48a84b5933bef9283c268cf383354d4f289a1104",
+    "filename": "worldedit-bukkit/build.gradle.kts",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/MinecraftZock/WorldEdit/blob/5178456777c5a01d3b9a5b7e411df1b065a4bc12/worldedit-bukkit/build.gradle.kts",
+    "raw_url": "https://github.com/MinecraftZock/WorldEdit/raw/5178456777c5a01d3b9a5b7e411df1b065a4bc12/worldedit-bukkit/build.gradle.kts",
+    "contents_url": "https://api.github.com/repos/MinecraftZock/WorldEdit/contents/worldedit-bukkit/build.gradle.kts?ref=5178456777c5a01d3b9a5b7e411df1b065a4bc12",
+    "patch": "@@ -72,3 +72,8 @@ tasks.named<ShadowJar>(\"shadowJar\") {\n tasks.named(\"assemble\").configure {\n     dependsOn(\"shadowJar\")\n }\n+\n+tasks.named<Jar>(\"jar\") {\n+    val projectVersion = project.properties[\"gitVersion\"]\n+    version = projectVersion.toString()\n+}"
+  },
+  {
+    "sha": "253198f25b7955bc7f27c5b9fddf0b5e3a9d9a66",
+    "filename": "worldedit-core/build.gradle.kts",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/MinecraftZock/WorldEdit/blob/5178456777c5a01d3b9a5b7e411df1b065a4bc12/worldedit-core/build.gradle.kts",
+    "raw_url": "https://github.com/MinecraftZock/WorldEdit/raw/5178456777c5a01d3b9a5b7e411df1b065a4bc12/worldedit-core/build.gradle.kts",
+    "contents_url": "https://api.github.com/repos/MinecraftZock/WorldEdit/contents/worldedit-core/build.gradle.kts?ref=5178456777c5a01d3b9a5b7e411df1b065a4bc12",
+    "patch": "@@ -120,3 +120,8 @@ tasks.named<Copy>(\"processResources\") {\n         into(\"lang\")\n     }\n }\n+\n+tasks.named<Jar>(\"jar\") {\n+    val projectVersion = project.properties[\"gitVersion\"]\n+    version = projectVersion.toString()\n+}"
+  },
+  {
+    "sha": "e13238919620198b045a52006e048447ba2addd4",
+    "filename": "worldedit-libs/bukkit/build.gradle.kts",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/MinecraftZock/WorldEdit/blob/5178456777c5a01d3b9a5b7e411df1b065a4bc12/worldedit-libs/bukkit/build.gradle.kts",
+    "raw_url": "https://github.com/MinecraftZock/WorldEdit/raw/5178456777c5a01d3b9a5b7e411df1b065a4bc12/worldedit-libs/bukkit/build.gradle.kts",
+    "contents_url": "https://api.github.com/repos/MinecraftZock/WorldEdit/contents/worldedit-libs/bukkit/build.gradle.kts?ref=5178456777c5a01d3b9a5b7e411df1b065a4bc12",
+    "patch": "@@ -11,3 +11,7 @@ repositories {\n dependencies {\n     \"shade\"(\"net.kyori:text-adapter-bukkit:${Versions.TEXT_EXTRAS}\")\n }\n+tasks.named<Jar>(\"jar\") {\n+    val projectVersion = project.properties[\"gitVersion\"]\n+    version = projectVersion.toString()\n+}"
+  }
+]

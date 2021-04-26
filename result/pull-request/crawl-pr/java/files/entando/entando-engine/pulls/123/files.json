@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "f5f87d62001d952fdc93795a5dcb576fd2b5dc90",
+    "filename": "src/main/java/com/agiletec/aps/system/SystemConstants.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/entando/entando-engine/blob/1b6e466da947edf514acc43b2b72aada7937d5a9/src/main/java/com/agiletec/aps/system/SystemConstants.java",
+    "raw_url": "https://github.com/entando/entando-engine/raw/1b6e466da947edf514acc43b2b72aada7937d5a9/src/main/java/com/agiletec/aps/system/SystemConstants.java",
+    "contents_url": "https://api.github.com/repos/entando/entando-engine/contents/src/main/java/com/agiletec/aps/system/SystemConstants.java?ref=1b6e466da947edf514acc43b2b72aada7937d5a9",
+    "patch": "@@ -99,6 +99,8 @@\n     public static final String EXTRAPAR_EXECUTOR_BEAN_CONTAINER = \"reqCtx_param_ExecutorBeanContainer\";\n \n     public static final String EXTRAPAR_CSP_NONCE_TOKEN = \"reqCtx_param_nonce_token\";\n+    \n+    public static final String EXTRAPAR_WEBUI_APPL_BASE_URL = \"webui_applicationBaseURL\";\n \n     /**\n      * Nome parametro di sessione: utente corrente"
+  },
+  {
+    "sha": "80aef92c6d3a9cc5789b61beb40f0b0cd9cee4d3",
+    "filename": "src/main/java/com/agiletec/aps/system/services/url/URLManager.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/entando/entando-engine/blob/1b6e466da947edf514acc43b2b72aada7937d5a9/src/main/java/com/agiletec/aps/system/services/url/URLManager.java",
+    "raw_url": "https://github.com/entando/entando-engine/raw/1b6e466da947edf514acc43b2b72aada7937d5a9/src/main/java/com/agiletec/aps/system/services/url/URLManager.java",
+    "contents_url": "https://api.github.com/repos/entando/entando-engine/contents/src/main/java/com/agiletec/aps/system/services/url/URLManager.java?ref=1b6e466da947edf514acc43b2b72aada7937d5a9",
+    "patch": "@@ -28,6 +28,7 @@\n import javax.servlet.http.HttpServletRequest;\n import javax.servlet.http.HttpServletResponse;\n import java.util.Map;\n+import org.apache.commons.lang3.StringUtils;\n \n /**\n  * Servizio di gestione degli url; crea un URL completo ad una pagina del\n@@ -170,6 +171,12 @@ protected void addBaseURL(StringBuilder link, HttpServletRequest request) {\n             link.append(this.getConfigManager().getParam(SystemConstants.PAR_APPL_BASE_URL));\n             return;\n         }\n+        RequestContext reqCtx = (RequestContext) request.getAttribute(RequestContext.REQCTX);\n+        String webUiApplicationBaseUrl = (null != reqCtx) ? (String) reqCtx.getExtraParam(SystemConstants.EXTRAPAR_WEBUI_APPL_BASE_URL) : null;\n+        if (!StringUtils.isBlank(webUiApplicationBaseUrl)) {\n+            link.append(webUiApplicationBaseUrl);\n+            return;\n+        }\n         if (this.isForceAddSchemeHost()) {\n             String reqScheme = request.getScheme();\n             link.append(reqScheme);"
+  },
+  {
+    "sha": "394614d6aebbf18cf8409c25ec3ad5b8bfdf9fa0",
+    "filename": "src/test/java/com/agiletec/aps/system/services/url/TestURLManager.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/entando/entando-engine/blob/1b6e466da947edf514acc43b2b72aada7937d5a9/src/test/java/com/agiletec/aps/system/services/url/TestURLManager.java",
+    "raw_url": "https://github.com/entando/entando-engine/raw/1b6e466da947edf514acc43b2b72aada7937d5a9/src/test/java/com/agiletec/aps/system/services/url/TestURLManager.java",
+    "contents_url": "https://api.github.com/repos/entando/entando-engine/contents/src/test/java/com/agiletec/aps/system/services/url/TestURLManager.java?ref=1b6e466da947edf514acc43b2b72aada7937d5a9",
+    "patch": "@@ -68,6 +68,28 @@ void testGetURLString_2() throws Throwable {\n         }\n     }\n \n+    @Test\n+    void testGetWebUiURLString() throws Throwable {\n+        String webUiBaseUrl = \"https://webui.entando.org/webui\";\n+        RequestContext reqCtx = this.getRequestContext();\n+        reqCtx.addExtraParam(SystemConstants.EXTRAPAR_WEBUI_APPL_BASE_URL, webUiBaseUrl);\n+        PageURL pageURL = urlManager.createURL(reqCtx);\n+        pageURL.setLangCode(\"en\");\n+        pageURL.setPageCode(\"pagina_11\");\n+        try {\n+            String url = this.urlManager.getURLString(pageURL, reqCtx);\n+            assertEquals(webUiBaseUrl + \"/en/pagina_11.page\", url);\n+            this.changeUrlStyle(SystemConstants.CONFIG_PARAM_URL_STYLE_BREADCRUMBS);\n+            url = this.urlManager.getURLString(pageURL, reqCtx);\n+            assertEquals(webUiBaseUrl + \"/pages/en/homepage/pagina_1/pagina_11/\", url);\n+        } catch (Throwable t) {\n+            throw t;\n+        } finally {\n+            this.changeUrlStyle(SystemConstants.CONFIG_PARAM_URL_STYLE_CLASSIC);\n+            reqCtx.removeExtraParam(SystemConstants.EXTRAPAR_WEBUI_APPL_BASE_URL);\n+        }\n+    }\n+\n     private void changeUrlStyle(String styleType) throws Throwable {\n         try {\n             String xmlParams = this.configManager.getConfigItem(SystemConstants.CONFIG_ITEM_PARAMS);"
+  }
+]

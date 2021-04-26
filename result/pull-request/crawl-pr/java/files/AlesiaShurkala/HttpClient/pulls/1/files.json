@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "94a25f7f4cb416c083d265558da75d457237d671",
+    "filename": ".idea/vcs.xml",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/AlesiaShurkala/HttpClient/blob/ef8d6bcd40322135725ce70e0f2539a3730ef783/.idea/vcs.xml",
+    "raw_url": "https://github.com/AlesiaShurkala/HttpClient/raw/ef8d6bcd40322135725ce70e0f2539a3730ef783/.idea/vcs.xml",
+    "contents_url": "https://api.github.com/repos/AlesiaShurkala/HttpClient/contents/.idea/vcs.xml?ref=ef8d6bcd40322135725ce70e0f2539a3730ef783",
+    "patch": "@@ -0,0 +1,6 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<project version=\"4\">\n+  <component name=\"VcsDirectoryMappings\">\n+    <mapping directory=\"$PROJECT_DIR$\" vcs=\"Git\" />\n+  </component>\n+</project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "662c3dc666e5c3ca0e1ca897fb17ad959700afd7",
+    "filename": "src/HttpClient.java",
+    "status": "modified",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/AlesiaShurkala/HttpClient/blob/ef8d6bcd40322135725ce70e0f2539a3730ef783/src/HttpClient.java",
+    "raw_url": "https://github.com/AlesiaShurkala/HttpClient/raw/ef8d6bcd40322135725ce70e0f2539a3730ef783/src/HttpClient.java",
+    "contents_url": "https://api.github.com/repos/AlesiaShurkala/HttpClient/contents/src/HttpClient.java?ref=ef8d6bcd40322135725ce70e0f2539a3730ef783",
+    "patch": "@@ -1,5 +1,41 @@\n+import java.io.BufferedReader;\n+import java.io.InputStreamReader;\n+import java.io.PrintWriter;\n+import java.net.InetAddress;\n+import java.net.Socket;\n+\n public class HttpClient {\n+\n     public static void main(String[] args) throws Exception {\n+        String host = \"www.nbrb.by\";\n+        String path = \"/api/exrates/currencies/145\";\n+        InetAddress addr = InetAddress.getByName(host);\n+        int port = 80;\n+        Socket socket = new Socket(addr, port);\n+        boolean autoflush = true;\n+        PrintWriter out = new PrintWriter(socket.getOutputStream(), autoflush);\n+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));\n+\n+        out.println(\"GET \" + path + \" HTTP/1.1\");\n+        out.println(\"Host: \"+host+\":\"+port);\n+        out.println(\"Connection: Close\");\n+        out.println();\n+\n+        // read the response\n+        boolean loop = true;\n+        StringBuilder sb = new StringBuilder(8096);\n+        while (loop) {\n+            if (in.ready()) {\n+                int i = 0;\n+                while (i != -1) {\n+                    i = in.read();\n+                    sb.append((char) i);\n+                }\n+                loop = false;\n+            }\n+        }\n+        System.out.println(sb.toString());\n+        socket.close();\n     }\n }\n "
+  }
+]

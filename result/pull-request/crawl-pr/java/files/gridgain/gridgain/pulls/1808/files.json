@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "c857f59a542df27eec8ba2127b428f40a87a42c9",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePartitionExchangeManager.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 4,
+    "changes": 10,
+    "blob_url": "https://github.com/gridgain/gridgain/blob/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePartitionExchangeManager.java",
+    "raw_url": "https://github.com/gridgain/gridgain/raw/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePartitionExchangeManager.java",
+    "contents_url": "https://api.github.com/repos/gridgain/gridgain/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePartitionExchangeManager.java?ref=3a47c9938e185ab7890656aa9026179d356c7c7e",
+    "patch": "@@ -1297,9 +1297,10 @@ public void forceReassign(GridDhtPartitionExchangeId exchId, GridDhtPartitionsEx\n     /**\n      * @param topVer Topology version.\n      * @param grpId Group id.\n+     * @param rebalanceId Rebalance id.\n      */\n-    public void finishPreloading(AffinityTopologyVersion topVer, int grpId) {\n-        exchWorker.finishPreloading(topVer, grpId);\n+    public void finishPreloading(AffinityTopologyVersion topVer, int grpId, long rebalanceId) {\n+        exchWorker.finishPreloading(topVer, grpId, rebalanceId);\n     }\n \n     /**\n@@ -3071,9 +3072,10 @@ void forceReassign(GridDhtPartitionExchangeId exchId, GridDhtPartitionsExchangeF\n         /**\n          * @param topVer Topology version.\n          * @param grpId Group id.\n+         * @param rebalanceId Rebalance id.\n          */\n-        void finishPreloading(AffinityTopologyVersion topVer, int grpId) {\n-            futQ.add(new FinishPreloadingTask(topVer, grpId));\n+        void finishPreloading(AffinityTopologyVersion topVer, int grpId, long rebalanceId) {\n+            futQ.add(new FinishPreloadingTask(topVer, grpId, rebalanceId));\n         }\n \n         /**"
+  },
+  {
+    "sha": "a60df1bec065c404b317ff3f9d0fd069a06354d0",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePreloader.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/gridgain/gridgain/blob/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePreloader.java",
+    "raw_url": "https://github.com/gridgain/gridgain/raw/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePreloader.java",
+    "contents_url": "https://api.github.com/repos/gridgain/gridgain/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePreloader.java?ref=3a47c9938e185ab7890656aa9026179d356c7c7e",
+    "patch": "@@ -249,6 +249,7 @@ public RebalanceFuture addAssignments(GridDhtPreloaderAssignments assignments,\n      * Finish preloading for given topology version.\n      *\n      * @param topVer Topology version.\n+     * @param rebalanceId Rebalance id.\n      */\n-    public void finishPreloading(AffinityTopologyVersion topVer);\n+    public void finishPreloading(AffinityTopologyVersion topVer, long rebalanceId);\n }"
+  },
+  {
+    "sha": "dc5b6b933b0ef6a63a32ebabcd0afe1f14cec89c",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePreloaderAdapter.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/gridgain/gridgain/blob/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePreloaderAdapter.java",
+    "raw_url": "https://github.com/gridgain/gridgain/raw/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePreloaderAdapter.java",
+    "contents_url": "https://api.github.com/repos/gridgain/gridgain/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCachePreloaderAdapter.java?ref=3a47c9938e185ab7890656aa9026179d356c7c7e",
+    "patch": "@@ -218,7 +218,7 @@ public GridCachePreloaderAdapter(CacheGroupContext grp) {\n     }\n \n     /** {@inheritDoc} */\n-    @Override public void finishPreloading(AffinityTopologyVersion topVer) {\n+    @Override public void finishPreloading(AffinityTopologyVersion topVer, long rebalanceId) {\n         // No-op.\n     }\n }"
+  },
+  {
+    "sha": "89f5329ce1f8d76572f5880ba862cded407a7c89",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCacheProcessor.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/gridgain/gridgain/blob/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCacheProcessor.java",
+    "raw_url": "https://github.com/gridgain/gridgain/raw/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCacheProcessor.java",
+    "contents_url": "https://api.github.com/repos/gridgain/gridgain/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCacheProcessor.java?ref=3a47c9938e185ab7890656aa9026179d356c7c7e",
+    "patch": "@@ -445,7 +445,7 @@ else if (task instanceof FinishPreloadingTask) {\n             CacheGroupContext grp = cacheGroup(task0.groupId());\n \n             if (grp != null)\n-                grp.preloader().finishPreloading(task0.topologyVersion());\n+                grp.preloader().finishPreloading(task0.topologyVersion(), task0.rebalanceId());\n         }\n         else\n             U.warn(log, \"Unsupported custom exchange task: \" + task);"
+  },
+  {
+    "sha": "30a1af780d30e63d31975aa43fcb814c9f2becd3",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/FinishPreloadingTask.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 7,
+    "changes": 21,
+    "blob_url": "https://github.com/gridgain/gridgain/blob/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/FinishPreloadingTask.java",
+    "raw_url": "https://github.com/gridgain/gridgain/raw/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/FinishPreloadingTask.java",
+    "contents_url": "https://api.github.com/repos/gridgain/gridgain/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/FinishPreloadingTask.java?ref=3a47c9938e185ab7890656aa9026179d356c7c7e",
+    "patch": "@@ -23,22 +23,22 @@\n  * A task for finishing preloading future in exchange worker thread.\n  */\n public class FinishPreloadingTask implements CachePartitionExchangeWorkerTask {\n-    /**\n-     * Topology version.\n-     */\n+    /** Topology version. */\n     private final AffinityTopologyVersion topVer;\n \n-    /**\n-     * Group id.\n-     */\n+    /** Group id. */\n     private final int grpId;\n \n+    /** Rebalance id. */\n+    private final long rebalanceId;\n+\n     /**\n      * @param topVer Topology version.\n      */\n-    public FinishPreloadingTask(AffinityTopologyVersion topVer, int grpId) {\n+    public FinishPreloadingTask(AffinityTopologyVersion topVer, int grpId, long rebalanceId) {\n         this.grpId = grpId;\n         this.topVer = topVer;\n+        this.rebalanceId = rebalanceId;\n     }\n \n     /**\n@@ -61,4 +61,11 @@ public AffinityTopologyVersion topologyVersion() {\n     public int groupId() {\n         return grpId;\n     }\n+\n+    /**\n+     * @return Rebalance id.\n+     */\n+    public long rebalanceId() {\n+        return rebalanceId;\n+    }\n }"
+  },
+  {
+    "sha": "34993fc505c6fe7c79cb1d6d0e5e789a07864e04",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/GridDhtPartitionDemander.java",
+    "status": "modified",
+    "additions": 39,
+    "deletions": 37,
+    "changes": 76,
+    "blob_url": "https://github.com/gridgain/gridgain/blob/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/GridDhtPartitionDemander.java",
+    "raw_url": "https://github.com/gridgain/gridgain/raw/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/GridDhtPartitionDemander.java",
+    "contents_url": "https://api.github.com/repos/gridgain/gridgain/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/GridDhtPartitionDemander.java?ref=3a47c9938e185ab7890656aa9026179d356c7c7e",
+    "patch": "@@ -1398,7 +1398,7 @@ public void requestPartitions() {\n \n             if (isDone()) {\n                 assert !result() : \"Rebalance future was done, but partitions never requested [grp=\"\n-                    + grp.cacheOrGroupName() + \", topVer=\" + topologyVersion() + \"]\";\n+                    + grp.cacheOrGroupName() + \", topVer=\" + topologyVersion() + \", rebalanceId=\" + rebalanceId + \"]\";\n \n                 return;\n             }\n@@ -1423,7 +1423,7 @@ public void requestPartitions() {\n \n                     U.log(log, \"Prepared rebalancing [grp=\" + grp.cacheOrGroupName()\n                         + \", mode=\" + cfg.getRebalanceMode() + \", supplier=\" + node.id() + \", partitionsCount=\" + parts.size()\n-                        + \", topVer=\" + topologyVersion() + \"]\");\n+                        + \", topVer=\" + topologyVersion() + \", rebalanceId=\" + rebalanceId + \"]\");\n                 }\n \n                 if (!parts.isEmpty()) {\n@@ -1482,7 +1482,8 @@ private void requestPartitions0(\n                         \", topVer=\" + topVer +\n                         \", supplier=\" + supplierNode.id() +\n                         \", fullPartitions=\" + S.compact(parts.fullSet()) +\n-                        \", histPartitions=\" + S.compact(parts.historicalSet()) + ']');\n+                        \", histPartitions=\" + S.compact(parts.historicalSet()) +\n+                        \", rebalanceId=\" + rebalanceId + ']');\n \n                 ctx.io().sendOrderedMessage(supplierNode, msg.topic(),\n                     msg.convertIfNeeded(supplierNode.version()), grp.ioPolicy(), msg.timeout());\n@@ -1510,36 +1511,11 @@ private void requestPartitions0(\n             }\n         }\n \n-        /** {@inheritDoc} */\n-        @Override public boolean onDone(@Nullable Boolean res, @Nullable Throwable err) {\n-            if (super.onDone(res, err)) {\n-                if (!isInitial()) {\n-                    sendRebalanceFinishedEvent();\n-\n-                    if (log.isInfoEnabled())\n-                        log.info(\"Completed rebalance future: \" + this);\n-\n-                    // Complete sync future only if rebalancing was not cancelled.\n-                    if (res && !grp.preloader().syncFuture().isDone())\n-                        ((GridFutureAdapter)grp.preloader().syncFuture()).onDone();\n-\n-                    if (isChainFinished())\n-                        onChainFinished();\n-                }\n-\n-                if (next != null)\n-                    next.requestPartitions(); // Process next group.\n-\n-                return true;\n-            }\n-\n-            return false;\n-        }\n-\n         /**\n          * @param topVer Rebalancing topology version.\n+         * @param rebalanceId Rebalance id.\n          */\n-        public void ownPartitionsAndFinishFuture(AffinityTopologyVersion topVer) {\n+        public void ownPartitionsAndFinishFuture(AffinityTopologyVersion topVer, long rebalanceId) {\n             // Ignore all client exchanges.\n             // Note rebalancing may be started on client topology version if forced reassign was queued after client\n             // topology exchange.\n@@ -1556,8 +1532,11 @@ public void ownPartitionsAndFinishFuture(AffinityTopologyVersion topVer) {\n                 return;\n             }\n \n+            if (this.rebalanceId != rebalanceId)\n+                return;\n+\n             if (onDone(true, null)) {\n-                assert state == RebalanceFutureState.STARTED : this;\n+                assert state == RebalanceFutureState.STARTED : \"[state=\" + state + \", fut=\" + this + \"]\";\n \n                 grp.localWalEnabled(true, true);\n \n@@ -1601,11 +1580,17 @@ public boolean isInitial() {\n         }\n \n         /**\n-         * Cancel running future or mark for cancel {@code RebalanceFutureState#MARK_CANCELLED}.\n+         * Cancel running future or mark for cancel {@code RebalanceFutureState#MARK_CANCELLED}, if it not started yet.\n          */\n         private void tryCancel() {\n-            if (STATE_UPD.compareAndSet(this, RebalanceFutureState.INIT, RebalanceFutureState.MARK_CANCELLED))\n+            if (STATE_UPD.compareAndSet(this, RebalanceFutureState.INIT, RebalanceFutureState.MARK_CANCELLED)) {\n+                U.log(log, \"Rebalancing marked as cancelled [grp=\" + grp.cacheOrGroupName() +\n+                    \", topVer=\" + topologyVersion() + \", rebalanceId=\" + rebalanceId + \"]\");\n+\n+                // Don't call #cancel() for this future from INIT state, as it will trigger #requestPartitions()\n+                // for #next future.\n                 return;\n+            }\n \n             cancel();\n         }\n@@ -1626,7 +1611,7 @@ private void tryCancel() {\n                         return true;\n \n                     U.log(log, \"Cancelled rebalancing from all nodes [grp=\" + grp.cacheOrGroupName() +\n-                        \", topVer=\" + topologyVersion() + \"]\");\n+                        \", topVer=\" + topologyVersion() + \", rebalanceId=\" + rebalanceId + \"]\");\n \n                     if (!ctx.kernalContext().isStopping()) {\n                         for (UUID nodeId : remaining.keySet())\n@@ -1657,6 +1642,23 @@ private void tryCancel() {\n                     lastCancelledTime.accumulateAndGet(System.currentTimeMillis(), Math::max);\n                 else if (startTime != -1)\n                     endTime = System.currentTimeMillis();\n+\n+                if (log != null && log.isInfoEnabled() && !isInitial())\n+                    log.info(\"Completed rebalance future: \" + this + (isFailed() ? \", error=\" + err : \"\"));\n+\n+                if (!isInitial()) {\n+                    sendRebalanceFinishedEvent();\n+\n+                    // Complete sync future only if rebalancing was not cancelled.\n+                    if (res && !grp.preloader().syncFuture().isDone())\n+                        ((GridFutureAdapter)grp.preloader().syncFuture()).onDone();\n+\n+                    if (isChainFinished())\n+                        onChainFinished();\n+                }\n+\n+                if (next != null)\n+                    next.requestPartitions(); // Process next group.\n             }\n \n             return byThisCall;\n@@ -1828,7 +1830,7 @@ private void checkIsDone(boolean cancelled) {\n                     cp.onStateChanged(PAGE_SNAPSHOT_TAKEN, () -> grp.localWalEnabled(true, false));\n \n                     cp.onStateChanged(FINISHED, () -> {\n-                        ctx.exchange().finishPreloading(topVer, grp.groupId());\n+                        ctx.exchange().finishPreloading(topVer, grp.groupId(), rebalanceId);\n                     });\n                 }\n                 else {\n@@ -2093,9 +2095,9 @@ private void logSupplierDone(UUID nodeId) {\n     /**\n      * @param topVer Topopolog verion.\n      */\n-    void finishPreloading(AffinityTopologyVersion topVer) {\n+    void finishPreloading(AffinityTopologyVersion topVer, long rebalanceId) {\n         assert !rebalanceFut.isInitial() : topVer;\n \n-        rebalanceFut.ownPartitionsAndFinishFuture(topVer);\n+        rebalanceFut.ownPartitionsAndFinishFuture(topVer, rebalanceId);\n     }\n }"
+  },
+  {
+    "sha": "9ccbe84cb647c8994b677ed6902d4b18379ef8d8",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/GridDhtPreloader.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/gridgain/gridgain/blob/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/GridDhtPreloader.java",
+    "raw_url": "https://github.com/gridgain/gridgain/raw/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/GridDhtPreloader.java",
+    "contents_url": "https://api.github.com/repos/gridgain/gridgain/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/preloader/GridDhtPreloader.java?ref=3a47c9938e185ab7890656aa9026179d356c7c7e",
+    "patch": "@@ -591,12 +591,12 @@ public void tryFinishEviction(GridDhtLocalPartition part) {\n     }\n \n     /** {@inheritDoc} */\n-    @Override public void finishPreloading(AffinityTopologyVersion topVer) {\n+    @Override public void finishPreloading(AffinityTopologyVersion topVer, long rebalanceId) {\n         if (!enterBusy())\n             return;\n \n         try {\n-            demander.finishPreloading(topVer);\n+            demander.finishPreloading(topVer, rebalanceId);\n         }\n         finally {\n             leaveBusy();"
+  },
+  {
+    "sha": "35da83ba298f0358510fcb7a01e846c164eab21b",
+    "filename": "modules/core/src/test/java/org/apache/ignite/internal/processors/cache/distributed/rebalancing/RebalanceStatisticsTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/gridgain/gridgain/blob/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/test/java/org/apache/ignite/internal/processors/cache/distributed/rebalancing/RebalanceStatisticsTest.java",
+    "raw_url": "https://github.com/gridgain/gridgain/raw/3a47c9938e185ab7890656aa9026179d356c7c7e/modules/core/src/test/java/org/apache/ignite/internal/processors/cache/distributed/rebalancing/RebalanceStatisticsTest.java",
+    "contents_url": "https://api.github.com/repos/gridgain/gridgain/contents/modules/core/src/test/java/org/apache/ignite/internal/processors/cache/distributed/rebalancing/RebalanceStatisticsTest.java?ref=3a47c9938e185ab7890656aa9026179d356c7c7e",
+    "patch": "@@ -50,6 +50,7 @@\n import org.jetbrains.annotations.Nullable;\n import org.junit.Test;\n \n+import static java.util.Arrays.asList;\n import static java.util.Objects.requireNonNull;\n import static java.util.function.Function.identity;\n import static java.util.stream.Collectors.toList;\n@@ -179,7 +180,7 @@ public void testRebalanceStatistics() throws Exception {\n                 };\n \n                 assertTrue(\n-                    supplierMsgs.toString(),\n+                    \"msgs=\" + supplierMsgs.toString() + \", checVals=\" + asList(checVals).toString(),\n                     supplierMsgs.stream().anyMatch(s -> Stream.of(checVals).allMatch(s::contains))\n                 );\n             }"
+  }
+]

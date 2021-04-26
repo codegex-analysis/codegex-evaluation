@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "b87ba8e10bc3aaeaef8cb7a734a2f8ac80170048",
+    "filename": "app/src/main/java/org/schabi/newpipe/RouterActivity.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 1,
+    "changes": 12,
+    "blob_url": "https://github.com/TeamNewPipe/NewPipe/blob/a72d2a6396c7674acb8fe1a6ad0a3d0bc6b19f25/app/src/main/java/org/schabi/newpipe/RouterActivity.java",
+    "raw_url": "https://github.com/TeamNewPipe/NewPipe/raw/a72d2a6396c7674acb8fe1a6ad0a3d0bc6b19f25/app/src/main/java/org/schabi/newpipe/RouterActivity.java",
+    "contents_url": "https://api.github.com/repos/TeamNewPipe/NewPipe/contents/app/src/main/java/org/schabi/newpipe/RouterActivity.java?ref=a72d2a6396c7674acb8fe1a6ad0a3d0bc6b19f25",
+    "patch": "@@ -251,6 +251,7 @@ protected void onSuccess() {\n         final String showInfoKey = getString(R.string.show_info_key);\n         final String videoPlayerKey = getString(R.string.video_player_key);\n         final String backgroundPlayerKey = getString(R.string.background_player_key);\n+        final String enqueueBackgroundKey = getString(R.string.enqueue_background_key);\n         final String popupPlayerKey = getString(R.string.popup_player_key);\n         final String downloadKey = getString(R.string.download_key);\n         final String alwaysAskKey = getString(R.string.always_ask_open_action_key);\n@@ -299,7 +300,8 @@ protected void onSuccess() {\n             boolean serviceSupportsChoice = false;\n             if (isVideoPlayerSelected) {\n                 serviceSupportsChoice = capabilities.contains(VIDEO);\n-            } else if (selectedChoiceKey.equals(backgroundPlayerKey)) {\n+            } else if (selectedChoiceKey.equals(backgroundPlayerKey)\n+                    || selectedChoiceKey.equals(enqueueBackgroundKey)) {\n                 serviceSupportsChoice = capabilities.contains(AUDIO);\n             }\n \n@@ -437,6 +439,9 @@ private void showDialog(final List<AdapterChoiceItem> choices) {\n         final AdapterChoiceItem backgroundPlayer = new AdapterChoiceItem(\n                 getString(R.string.background_player_key), getString(R.string.background_player),\n                 resolveResourceIdFromAttr(context, R.attr.ic_headset));\n+        final AdapterChoiceItem enqueueBackground = new AdapterChoiceItem(\n+                getString(R.string.enqueue_background_key), getString(R.string.enqueue_background),\n+                resolveResourceIdFromAttr(context, R.attr.ic_add));\n \n         if (linkType == LinkType.STREAM) {\n             if (isExtVideoEnabled) {\n@@ -466,6 +471,7 @@ private void showDialog(final List<AdapterChoiceItem> choices) {\n             }\n             if (capabilities.contains(AUDIO)) {\n                 returnList.add(backgroundPlayer);\n+                returnList.add(enqueueBackground);\n             }\n \n         } else {\n@@ -476,6 +482,7 @@ private void showDialog(final List<AdapterChoiceItem> choices) {\n             }\n             if (capabilities.contains(AUDIO) && !isExtAudioEnabled) {\n                 returnList.add(backgroundPlayer);\n+                returnList.add(enqueueBackground);\n             }\n         }\n \n@@ -706,6 +713,7 @@ public void handleChoice(final Choice choice) {\n                 final String videoPlayerKey = getString(R.string.video_player_key);\n                 final String backgroundPlayerKey = getString(R.string.background_player_key);\n                 final String popupPlayerKey = getString(R.string.popup_player_key);\n+                final String enqueueBackgroundKey = getString(R.string.enqueue_background_key);\n \n                 final SharedPreferences preferences = PreferenceManager\n                         .getDefaultSharedPreferences(this);\n@@ -738,6 +746,8 @@ public void handleChoice(final Choice choice) {\n                     NavigationHelper.playOnBackgroundPlayer(this, playQueue, true);\n                 } else if (choice.playerChoice.equals(popupPlayerKey)) {\n                     NavigationHelper.playOnPopupPlayer(this, playQueue, true);\n+                } else if (choice.playerChoice.equals((enqueueBackgroundKey))) {\n+                    NavigationHelper.enqueueOnBackgroundPlayer(this, playQueue, true);\n                 }\n             };\n         }"
+  },
+  {
+    "sha": "1cc509346bf0a55aa4537b7de0279180e4964e6c",
+    "filename": "app/src/main/res/values/settings_keys.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/TeamNewPipe/NewPipe/blob/a72d2a6396c7674acb8fe1a6ad0a3d0bc6b19f25/app/src/main/res/values/settings_keys.xml",
+    "raw_url": "https://github.com/TeamNewPipe/NewPipe/raw/a72d2a6396c7674acb8fe1a6ad0a3d0bc6b19f25/app/src/main/res/values/settings_keys.xml",
+    "contents_url": "https://api.github.com/repos/TeamNewPipe/NewPipe/contents/app/src/main/res/values/settings_keys.xml?ref=a72d2a6396c7674acb8fe1a6ad0a3d0bc6b19f25",
+    "patch": "@@ -320,6 +320,7 @@\n     <string name=\"video_player_key\" translatable=\"false\">video_player</string>\n     <string name=\"background_player_key\" translatable=\"false\">background_player</string>\n     <string name=\"popup_player_key\" translatable=\"false\">popup_player</string>\n+    <string name=\"enqueue_background_key\" translatable=\"false\">enqueue_background</string>\n     <string name=\"download_key\" translatable=\"false\">download</string>\n     <string name=\"always_ask_open_action_key\" translatable=\"false\">always_ask_player</string>\n "
+  },
+  {
+    "sha": "41bde679016ea0f7950eb7e7df2b8e4c85ccc3cb",
+    "filename": "app/src/main/res/values/strings.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/TeamNewPipe/NewPipe/blob/a72d2a6396c7674acb8fe1a6ad0a3d0bc6b19f25/app/src/main/res/values/strings.xml",
+    "raw_url": "https://github.com/TeamNewPipe/NewPipe/raw/a72d2a6396c7674acb8fe1a6ad0a3d0bc6b19f25/app/src/main/res/values/strings.xml",
+    "contents_url": "https://api.github.com/repos/TeamNewPipe/NewPipe/contents/app/src/main/res/values/strings.xml?ref=a72d2a6396c7674acb8fe1a6ad0a3d0bc6b19f25",
+    "patch": "@@ -483,6 +483,7 @@\n     <string name=\"video_player\">Video player</string>\n     <string name=\"background_player\">Background player</string>\n     <string name=\"popup_player\">Popup player</string>\n+    <string name=\"enqueue_background\">Enqueue background</string>\n     <string name=\"always_ask_open_action\">Always ask</string>\n     <string name=\"preferred_player_fetcher_notification_title\">Getting info…</string>\n     <string name=\"preferred_player_fetcher_notification_message\">\"Loading requested content\"</string>"
+  }
+]

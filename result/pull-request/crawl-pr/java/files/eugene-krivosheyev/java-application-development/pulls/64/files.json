@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c2b715d3390e51fb978fca50d2f29745c678085f",
+    "filename": "src/main/java/com/acme/dbo/txlog/Facade.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 3,
+    "changes": 24,
+    "blob_url": "https://github.com/eugene-krivosheyev/java-application-development/blob/a4e4cb2b2a2be606f6d0472a367b5e49cb3b1f94/src/main/java/com/acme/dbo/txlog/Facade.java",
+    "raw_url": "https://github.com/eugene-krivosheyev/java-application-development/raw/a4e4cb2b2a2be606f6d0472a367b5e49cb3b1f94/src/main/java/com/acme/dbo/txlog/Facade.java",
+    "contents_url": "https://api.github.com/repos/eugene-krivosheyev/java-application-development/contents/src/main/java/com/acme/dbo/txlog/Facade.java?ref=a4e4cb2b2a2be606f6d0472a367b5e49cb3b1f94",
+    "patch": "@@ -1,11 +1,29 @@\n package com.acme.dbo.txlog;\n \n+import static com.acme.dbo.txlog.OutputDecorator.logOutput;\n+\n public class Facade {\n+\n+\n     public static void log(int message) {\n-        System.out.println(\"primitive: \" + message);\n+        logOutput(message);\n     }\n \n-    public static void log(byte message) {\n-        System.out.println(\"primitive: \" + message);\n+    public static void log(char message) {\n+        logOutput(message);\n     }\n+\n+    public static void log(String message) {\n+        logOutput(message);\n+    }\n+\n+    public static void log(Object message) {\n+        logOutput(message);\n+    }\n+\n+    public static void log(boolean message) {\n+        logOutput(message);\n+    }\n+\n+\n }"
+  },
+  {
+    "sha": "24e4e062653d6c30b09c43e35afbed8c4645c954",
+    "filename": "src/main/java/com/acme/dbo/txlog/OutputDecorator.java",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/eugene-krivosheyev/java-application-development/blob/a4e4cb2b2a2be606f6d0472a367b5e49cb3b1f94/src/main/java/com/acme/dbo/txlog/OutputDecorator.java",
+    "raw_url": "https://github.com/eugene-krivosheyev/java-application-development/raw/a4e4cb2b2a2be606f6d0472a367b5e49cb3b1f94/src/main/java/com/acme/dbo/txlog/OutputDecorator.java",
+    "contents_url": "https://api.github.com/repos/eugene-krivosheyev/java-application-development/contents/src/main/java/com/acme/dbo/txlog/OutputDecorator.java?ref=a4e4cb2b2a2be606f6d0472a367b5e49cb3b1f94",
+    "patch": "@@ -0,0 +1,36 @@\n+package com.acme.dbo.txlog;\n+\n+public class OutputDecorator {\n+    public static final String PRIMITIVE_PREFIX = \"primitive: \";\n+    public static final String CHAR_PREFIX = \"char: \";\n+    public static final String STRING_PREFIX = \"string: \";\n+    public static final String REFERENCE_PREFIX = \"reference: \";\n+\n+    public static void logOutput(int message) {\n+\n+        System.out.println(PRIMITIVE_PREFIX +message);\n+    }\n+\n+    public static void logOutput(byte message) {\n+\n+        System.out.println(PRIMITIVE_PREFIX +message);\n+    }\n+\n+    public static void logOutput(char message) {\n+\n+        System.out.println(CHAR_PREFIX +message);\n+    }\n+    public static void logOutput(String message) {\n+\n+        System.out.println(STRING_PREFIX +message);\n+    }\n+    public static void logOutput(boolean message) {\n+\n+        System.out.println(PRIMITIVE_PREFIX +message);\n+    }\n+\n+    public static void logOutput(Object message) {\n+\n+        System.out.println(REFERENCE_PREFIX +message);\n+    }\n+}"
+  },
+  {
+    "sha": "4629899abfd42437c90618a7a57e97fd60c9c57b",
+    "filename": "src/test/java/com/acme/dbo/txlog/iteration01/LoggerTest.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 4,
+    "changes": 10,
+    "blob_url": "https://github.com/eugene-krivosheyev/java-application-development/blob/a4e4cb2b2a2be606f6d0472a367b5e49cb3b1f94/src/test/java/com/acme/dbo/txlog/iteration01/LoggerTest.java",
+    "raw_url": "https://github.com/eugene-krivosheyev/java-application-development/raw/a4e4cb2b2a2be606f6d0472a367b5e49cb3b1f94/src/test/java/com/acme/dbo/txlog/iteration01/LoggerTest.java",
+    "contents_url": "https://api.github.com/repos/eugene-krivosheyev/java-application-development/contents/src/test/java/com/acme/dbo/txlog/iteration01/LoggerTest.java?ref=a4e4cb2b2a2be606f6d0472a367b5e49cb3b1f94",
+    "patch": "@@ -8,6 +8,8 @@\n \n import java.io.IOException;\n \n+import static java.lang.System.*;\n+\n public class LoggerTest implements SysoutCaptureAndAssertionAbility {\n     //region given\n     @Before\n@@ -32,7 +34,7 @@ public void shouldLogInteger() throws IOException {\n \n         //region then\n         assertSysoutContains(\"primitive: \");\n-        assertSysoutEquals(\"primitive: 1\\nprimitive: 0\\nprimitive: -1\\n\");\n+        assertSysoutEquals(\"primitive: 1\"+ lineSeparator()+\"primitive: 0\"+ lineSeparator()+\"primitive: -1\"+ lineSeparator());\n         //endregion\n     }\n \n@@ -52,8 +54,8 @@ public void shouldLogByte() throws IOException {\n         //endregion\n     }\n \n-    /*\n-    TODO: implement Logger solution to match specification as tests\n+\n+ //   TODO: implement Logger solution to match specification as tests\n \n     @Test\n     public void shouldLogChar() throws IOException {\n@@ -109,5 +111,5 @@ public void shouldLogReference() throws IOException {\n         //endregion\n     }\n \n-    */\n+\n }\n\\ No newline at end of file"
+  }
+]

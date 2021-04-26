@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "d6d824883f99a2b6748dfddf384e03d6e27a5d52",
+    "filename": "app/src/main/java/com/team300/fridge/NotificationUtils.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/skee21/Fridge/blob/2dcda9dcfae98afb8ec6a0825dc9885fca9fceac/app/src/main/java/com/team300/fridge/NotificationUtils.java",
+    "raw_url": "https://github.com/skee21/Fridge/raw/2dcda9dcfae98afb8ec6a0825dc9885fca9fceac/app/src/main/java/com/team300/fridge/NotificationUtils.java",
+    "contents_url": "https://api.github.com/repos/skee21/Fridge/contents/app/src/main/java/com/team300/fridge/NotificationUtils.java?ref=2dcda9dcfae98afb8ec6a0825dc9885fca9fceac",
+    "patch": "@@ -22,7 +22,7 @@ public void createChannels() {\n \n         // create android channel\n         NotificationChannel androidChannel = new NotificationChannel(ANDROID_CHANNEL_ID,\n-                ANDROID_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);\n+                ANDROID_CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);\n         // Sets whether notifications posted to this channel should display notification lights\n         androidChannel.enableLights(true);\n         // Sets whether notification posted to this channel should vibrate."
+  },
+  {
+    "sha": "7120957510c16f35e24f92e9e5612db1f77f741d",
+    "filename": "app/src/main/java/com/team300/fridge/OpenSettingsDialogFragment.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/skee21/Fridge/blob/2dcda9dcfae98afb8ec6a0825dc9885fca9fceac/app/src/main/java/com/team300/fridge/OpenSettingsDialogFragment.java",
+    "raw_url": "https://github.com/skee21/Fridge/raw/2dcda9dcfae98afb8ec6a0825dc9885fca9fceac/app/src/main/java/com/team300/fridge/OpenSettingsDialogFragment.java",
+    "contents_url": "https://api.github.com/repos/skee21/Fridge/contents/app/src/main/java/com/team300/fridge/OpenSettingsDialogFragment.java?ref=2dcda9dcfae98afb8ec6a0825dc9885fca9fceac",
+    "patch": "@@ -0,0 +1,35 @@\n+package com.team300.fridge;\n+\n+import android.app.Dialog;\n+import android.content.DialogInterface;\n+import android.content.Intent;\n+import android.os.Bundle;\n+import android.provider.Settings;\n+import android.support.v4.app.DialogFragment;\n+import android.support.v7.app.AlertDialog;\n+\n+public class OpenSettingsDialogFragment extends DialogFragment {\n+    @Override\n+    public Dialog onCreateDialog(Bundle savedInstanceState) {\n+        String channelId = getArguments().getString(\"Channel_Id\");\n+        // Use the Builder class for convenient dialog construction\n+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());\n+        builder.setMessage(R.string.change_notification_settings)\n+                .setTitle(\"Notifications\")\n+                .setPositiveButton(\"Change\", new DialogInterface.OnClickListener() {\n+                    public void onClick(DialogInterface dialog, int id) {\n+                        Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);\n+                        intent.putExtra(Settings.EXTRA_APP_PACKAGE, getActivity().getPackageName());\n+                        intent.putExtra(Settings.EXTRA_CHANNEL_ID, channelId);\n+                        startActivity(intent);\n+                    }\n+                })\n+                .setNegativeButton(\"Cancel\", new DialogInterface.OnClickListener() {\n+                    public void onClick(DialogInterface dialog, int id) {\n+                        // User cancelled the dialog\n+                    }\n+                });\n+        // Create the AlertDialog object and return it\n+        return builder.create();\n+    }\n+}"
+  },
+  {
+    "sha": "a15ccfffb3610072a47d64c53670036a9d311c11",
+    "filename": "app/src/main/java/com/team300/fridge/Tabs/UserFragment.java",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 5,
+    "changes": 34,
+    "blob_url": "https://github.com/skee21/Fridge/blob/2dcda9dcfae98afb8ec6a0825dc9885fca9fceac/app/src/main/java/com/team300/fridge/Tabs/UserFragment.java",
+    "raw_url": "https://github.com/skee21/Fridge/raw/2dcda9dcfae98afb8ec6a0825dc9885fca9fceac/app/src/main/java/com/team300/fridge/Tabs/UserFragment.java",
+    "contents_url": "https://api.github.com/repos/skee21/Fridge/contents/app/src/main/java/com/team300/fridge/Tabs/UserFragment.java?ref=2dcda9dcfae98afb8ec6a0825dc9885fca9fceac",
+    "patch": "@@ -4,10 +4,12 @@\n import android.app.NotificationChannel;\n import android.app.NotificationManager;\n import android.content.Context;\n+import android.content.Intent;\n import android.os.Build;\n import android.os.Bundle;\n import android.os.Handler;\n import android.os.Looper;\n+import android.provider.Settings;\n import android.support.annotation.Nullable;\n import android.support.v4.app.Fragment;\n import android.support.v4.app.NotificationCompat;\n@@ -17,12 +19,19 @@\n import android.widget.Button;\n import android.widget.CheckBox;\n import android.widget.TextView;\n+import android.widget.Toast;\n \n+import com.team300.fridge.AddFoodItemActivity;\n+import com.team300.fridge.FoodItemDialog;\n+import com.team300.fridge.MainActivity;\n import com.team300.fridge.NotificationUtils;\n+import com.team300.fridge.OpenSettingsDialogFragment;\n import com.team300.fridge.R;\n import com.team300.fridge.User;\n \n import java.time.DayOfWeek;\n+import java.time.LocalDate;\n+import java.util.Date;\n import java.util.List;\n \n /**\n@@ -105,9 +114,25 @@ public void onActivityCreated(@Nullable Bundle savedInstanceState) {\n         Button demoNotification = view.findViewById(R.id.demo);\n         demoNotification.setOnClickListener((v)->{\n             //for demonstration purposes, we have to trigger a notification\n-            //set up a notification for 15 seconds later\n-            Context context = demoNotification.getContext();\n-            createNotification(context);\n+            //set up a notification for 5 seconds later if today is one of the notification dates\n+            NotificationChannel myNotificationChannel = mNotificationUtils.getManager().getNotificationChannel(NotificationUtils.ANDROID_CHANNEL_ID);\n+            if (myNotificationChannel.getImportance() == NotificationManager.IMPORTANCE_HIGH) {\n+                LocalDate today = LocalDate.now();\n+                if (notificationDates.contains(today.getDayOfWeek())) {\n+                    Context context = demoNotification.getContext();\n+                    createNotification(context);\n+                } else {\n+                    Toast.makeText(getActivity().getApplicationContext(), \"No Notifications Today\", Toast.LENGTH_SHORT).show();\n+                }\n+            } else {\n+                //otherwise their is a user setting preventing the heads-up notification, open dialog to\n+                //ask user to change it\n+                OpenSettingsDialogFragment dialog = new OpenSettingsDialogFragment();\n+                Bundle args = new Bundle();\n+                args.putString(\"Channel_Id\", myNotificationChannel.getId());\n+                dialog.setArguments(args);\n+                dialog.show(getActivity().getSupportFragmentManager(), \"Open Settings Dialog\");\n+            }\n         });\n     }\n \n@@ -151,7 +176,6 @@ public void onCheckboxClicked(View view) {\n     //create notification for non-demo will need to take in values from notificationDates as well\n     //notif icon drawable for custom icon if we want\n     private void createNotification(Context context){\n-        System.out.println(\"Create notification\");\n         String notifMsg = \"It's time to check your fridge before your food goes bad!\";\n         //Notification object creation\n         Notification.Builder builder = mNotificationUtils.getAndroidChannelNotification(\"What's in your Fridge?\", notifMsg);\n@@ -160,7 +184,7 @@ private void createNotification(Context context){\n             public void run() {\n                 mNotificationUtils.getManager().notify(0, builder.build());\n             }\n-        }, 15000);\n+        }, 5000);\n     }\n \n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "deb7b3367150204acbb151a873813a7525c6da76",
+    "filename": "app/src/main/res/values/strings.xml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 3,
+    "changes": 8,
+    "blob_url": "https://github.com/skee21/Fridge/blob/2dcda9dcfae98afb8ec6a0825dc9885fca9fceac/app/src/main/res/values/strings.xml",
+    "raw_url": "https://github.com/skee21/Fridge/raw/2dcda9dcfae98afb8ec6a0825dc9885fca9fceac/app/src/main/res/values/strings.xml",
+    "contents_url": "https://api.github.com/repos/skee21/Fridge/contents/app/src/main/res/values/strings.xml?ref=2dcda9dcfae98afb8ec6a0825dc9885fca9fceac",
+    "patch": "@@ -9,14 +9,16 @@\n \n     <string name=\"hello_first_fragment\">Hello first fragment</string>\n     <string name=\"hello_second_fragment\">Hello second fragment. Arg: %1$s</string>\n-    <string name=\"looks_like_your_fridge_is_empty_at_the_moment\">Looks like your fridge is empty at the moment!</string>\n+    <string name=\"looks_like_your_fridge_is_empty_at_the_moment\">Looks like your fridge is empty at\n+        the moment!</string>\n     <string name=\"find_food\">Find Food</string>\n     <string name=\"search\">Search</string>\n     <string name=\"no_grocery_lists\">Looks like you have no lists yet!</string>\n \n     <string name=\"tab_text_1\">Lists</string>\n     <string name=\"tab_text_2\">Fridge</string>\n     <string name=\"tab_text_3\">Profile</string>\n-    <!-- TODO: Remove or change this placeholder text -->\n-    <string name=\"hello_blank_fragment\">Hello blank fragment</string>\n+\n+    <string name=\"change_notification_settings\">Currently your user settings dont allow for heads up\n+        notifications. Would you like to change the notification behavior?</string>\n </resources>\n\\ No newline at end of file"
+  }
+]

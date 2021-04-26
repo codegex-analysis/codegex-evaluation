@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "4ea8a5203e582bf7c6f1cdada2b3aee2519e88ea",
+    "filename": "persistence-modules/core-java-persistence-2/src/main/java/com/baeldung/tableexists/DatabaseConfig.java",
+    "status": "added",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/eugenp/tutorials/blob/6e062d6d8dab19901be1110cfd0869c8dbd2f04a/persistence-modules/core-java-persistence-2/src/main/java/com/baeldung/tableexists/DatabaseConfig.java",
+    "raw_url": "https://github.com/eugenp/tutorials/raw/6e062d6d8dab19901be1110cfd0869c8dbd2f04a/persistence-modules/core-java-persistence-2/src/main/java/com/baeldung/tableexists/DatabaseConfig.java",
+    "contents_url": "https://api.github.com/repos/eugenp/tutorials/contents/persistence-modules/core-java-persistence-2/src/main/java/com/baeldung/tableexists/DatabaseConfig.java?ref=6e062d6d8dab19901be1110cfd0869c8dbd2f04a",
+    "patch": "@@ -0,0 +1,21 @@\n+package com.baeldung.tableexists;\n+\n+import java.sql.Connection;\n+import java.sql.DriverManager;\n+import java.sql.SQLException;\n+\n+class DatabaseConfig {\n+    static Connection connect() throws ClassNotFoundException, SQLException {\n+        Class.forName(\"org.h2.Driver\");\n+        String url = \"jdbc:h2:mem:testdb\";\n+        return DriverManager.getConnection(url, \"user\", \"password\");\n+    }\n+\n+    static void createTables(Connection connection) throws SQLException {\n+        connection.createStatement().executeUpdate(\"create table EMPLOYEE (id int primary key auto_increment, name VARCHAR(255))\");\n+    }\n+\n+    static void dropTables(Connection connection) throws SQLException {\n+        connection.createStatement().executeUpdate(\"drop table EMPLOYEE\");\n+    }\n+}"
+  },
+  {
+    "sha": "e6b2ea2fcfbaa5cbffae7c6fcb4c66e4a3bcf96b",
+    "filename": "persistence-modules/core-java-persistence-2/src/main/java/com/baeldung/tableexists/TableChecker.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/eugenp/tutorials/blob/6e062d6d8dab19901be1110cfd0869c8dbd2f04a/persistence-modules/core-java-persistence-2/src/main/java/com/baeldung/tableexists/TableChecker.java",
+    "raw_url": "https://github.com/eugenp/tutorials/raw/6e062d6d8dab19901be1110cfd0869c8dbd2f04a/persistence-modules/core-java-persistence-2/src/main/java/com/baeldung/tableexists/TableChecker.java",
+    "contents_url": "https://api.github.com/repos/eugenp/tutorials/contents/persistence-modules/core-java-persistence-2/src/main/java/com/baeldung/tableexists/TableChecker.java?ref=6e062d6d8dab19901be1110cfd0869c8dbd2f04a",
+    "patch": "@@ -0,0 +1,35 @@\n+package com.baeldung.tableexists;\n+\n+import java.sql.*;\n+\n+class TableChecker {\n+    static void printAllTables(Connection connection, String tableName) throws SQLException {\n+        DatabaseMetaData databaseMetaData = connection.getMetaData();\n+        ResultSet resultSet = databaseMetaData.getTables(null, null, tableName, new String[] {\"TABLE\"});\n+\n+        while (resultSet.next()) {\n+            String name = resultSet.getString(\"TABLE_NAME\");\n+            String schema = resultSet.getString(\"TABLE_SCHEM\");\n+            System.out.println(name + \" on schema \" + schema);\n+        }\n+    }\n+\n+    static boolean tableExists(Connection connection, String tableName) throws SQLException {\n+        DatabaseMetaData meta = connection.getMetaData();\n+        ResultSet resultSet = meta.getTables(null, null, tableName, new String[] {\"TABLE\"});\n+\n+        return resultSet.next();\n+    }\n+\n+    static boolean tableExistsSQL(Connection connection, String tableName) throws SQLException {\n+        PreparedStatement preparedStatement = connection.prepareStatement(\"SELECT count(*) \" +\n+                \"FROM information_schema.tables \" +\n+                \"WHERE table_name = ?\" +\n+                \"LIMIT 1;\");\n+        preparedStatement.setString(1, tableName);\n+\n+        ResultSet resultSet = preparedStatement.executeQuery();\n+        resultSet.next();\n+        return resultSet.getInt(1) != 0;\n+    }\n+}"
+  },
+  {
+    "sha": "d7322332a5a955ccb66950ef0bcfe6defa957ff0",
+    "filename": "persistence-modules/core-java-persistence-2/src/test/java/com/baeldung/tableexists/TableCheckerTest.java",
+    "status": "added",
+    "additions": 70,
+    "deletions": 0,
+    "changes": 70,
+    "blob_url": "https://github.com/eugenp/tutorials/blob/6e062d6d8dab19901be1110cfd0869c8dbd2f04a/persistence-modules/core-java-persistence-2/src/test/java/com/baeldung/tableexists/TableCheckerTest.java",
+    "raw_url": "https://github.com/eugenp/tutorials/raw/6e062d6d8dab19901be1110cfd0869c8dbd2f04a/persistence-modules/core-java-persistence-2/src/test/java/com/baeldung/tableexists/TableCheckerTest.java",
+    "contents_url": "https://api.github.com/repos/eugenp/tutorials/contents/persistence-modules/core-java-persistence-2/src/test/java/com/baeldung/tableexists/TableCheckerTest.java?ref=6e062d6d8dab19901be1110cfd0869c8dbd2f04a",
+    "patch": "@@ -0,0 +1,70 @@\n+package com.baeldung.tableexists;\n+\n+import org.junit.jupiter.api.Test;\n+\n+import java.sql.Connection;\n+import java.sql.SQLException;\n+\n+import static org.junit.jupiter.api.Assertions.assertFalse;\n+import static org.junit.jupiter.api.Assertions.assertTrue;\n+\n+class TableCheckerUnitTest {\n+\n+    @Test\n+    void givenCreatedTable_shouldFindTable() throws SQLException, ClassNotFoundException {\n+        // given\n+        Connection connection = DatabaseConfig.connect();\n+        DatabaseConfig.createTables(connection);\n+\n+        // when\n+        boolean tableExists = TableChecker.tableExists(connection, \"EMPLOYEE\");\n+\n+        // then\n+        TableChecker.printAllTables(connection, null);\n+        assertTrue(tableExists);\n+\n+        DatabaseConfig.dropTables(connection);\n+    }\n+\n+    @Test\n+    void givenCreatedTable_shouldFindTableWithSQL() throws SQLException, ClassNotFoundException {\n+        // given\n+        Connection connection = DatabaseConfig.connect();\n+        DatabaseConfig.createTables(connection);\n+\n+        // when\n+        boolean tableExists = TableChecker.tableExistsSQL(connection, \"EMPLOYEE\");\n+\n+        // then\n+        TableChecker.printAllTables(connection, null);\n+        assertTrue(tableExists);\n+\n+        DatabaseConfig.dropTables(connection);\n+    }\n+\n+    @Test\n+    void givenNoTable_shouldNotFindTable() throws SQLException, ClassNotFoundException {\n+        // given\n+        Connection connection = DatabaseConfig.connect();\n+\n+        // when\n+        boolean tableExists = TableChecker.tableExists(connection, \"EMPLOYEE\");\n+\n+        // then\n+        TableChecker.printAllTables(connection, null);\n+        assertFalse(tableExists);\n+    }\n+\n+    @Test\n+    void givenNoTable_shouldNotFindTableWithSQL() throws SQLException, ClassNotFoundException {\n+        // given\n+        Connection connection = DatabaseConfig.connect();\n+\n+        // when\n+        boolean tableExists = TableChecker.tableExistsSQL(connection, \"EMPLOYEE\");\n+\n+        // then\n+        TableChecker.printAllTables(connection, null);\n+        assertFalse(tableExists);\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "77e1d08a48d0ba8047f8c3f9dba6a7ddfc64a6ac",
+    "filename": "eng/common/pipelines/templates/steps/set-default-branch.yml",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/Azure/azure-sdk-for-java/blob/1459497847a7b84a9802ad9c9caf89029486bb01/eng/common/pipelines/templates/steps/set-default-branch.yml",
+    "raw_url": "https://github.com/Azure/azure-sdk-for-java/raw/1459497847a7b84a9802ad9c9caf89029486bb01/eng/common/pipelines/templates/steps/set-default-branch.yml",
+    "contents_url": "https://api.github.com/repos/Azure/azure-sdk-for-java/contents/eng/common/pipelines/templates/steps/set-default-branch.yml?ref=1459497847a7b84a9802ad9c9caf89029486bb01",
+    "patch": "@@ -0,0 +1,7 @@\n+steps:\n+- pwsh: |\n+    $setDefaultBranch = (git remote show origin | Out-String) -replace \"(?ms).*HEAD branch: (\\w+).*\", '$1'\n+    Write-Host $setDefaultBranch\n+    echo \"##vso[task.setvariable variable=DefaultBranch]$setDefaultBranch\"\n+  displayName: \"Setup Default Branch\"\n+  condition: eq(variables['DefaultBranch'], '')\n\\ No newline at end of file"
+  },
+  {
+    "sha": "7cf296d2f96e56836b06d5ba2fa2730b21259920",
+    "filename": "eng/common/pipelines/templates/steps/verify-links.yml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/Azure/azure-sdk-for-java/blob/1459497847a7b84a9802ad9c9caf89029486bb01/eng/common/pipelines/templates/steps/verify-links.yml",
+    "raw_url": "https://github.com/Azure/azure-sdk-for-java/raw/1459497847a7b84a9802ad9c9caf89029486bb01/eng/common/pipelines/templates/steps/verify-links.yml",
+    "contents_url": "https://api.github.com/repos/Azure/azure-sdk-for-java/contents/eng/common/pipelines/templates/steps/verify-links.yml?ref=1459497847a7b84a9802ad9c9caf89029486bb01",
+    "patch": "@@ -6,11 +6,12 @@ parameters:\n   Recursive: $false\n   CheckLinkGuidance: $true\n   Urls: '(Get-ChildItem -Path ./ -Recurse -Include *.md)'\n-  BranchReplaceRegex: \"^(${env:SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI}.*/(?:blob|tree)/)master(/.*)$\"\n+  BranchReplaceRegex: \"(^${env:SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI}.*/(?:blob|tree)/)$(DefaultBranch)(/.*)$\"\n   BranchReplacementName: \"${env:SYSTEM_PULLREQUEST_SOURCECOMMITID}\"\n   Condition: succeeded() # If you want to run on failure for the link checker, set it to `Condition: succeededOrFailed()`.\n \n steps:\n+  - template: /eng/common/pipelines/templates/steps/set-default-branch.yml\n   - task: PowerShell@2\n     displayName: Link verification check\n     condition: ${{ parameters.Condition }}\n@@ -26,4 +27,4 @@ steps:\n         -branchReplaceRegex \"${{ parameters.BranchReplaceRegex }}\"\n         -branchReplacementName ${{ parameters.BranchReplacementName }}\n         -devOpsLogging: $true\n-        -checkLinkGuidance: ${{ parameters.CheckLinkGuidance }}\n+        -checkLinkGuidance: ${{ parameters.CheckLinkGuidance }}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d1dbb085a3a7ca82232cad7dc20bf6f868f5aa3d",
+    "filename": "eng/common/scripts/Verify-Links.ps1",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/Azure/azure-sdk-for-java/blob/1459497847a7b84a9802ad9c9caf89029486bb01/eng/common/scripts/Verify-Links.ps1",
+    "raw_url": "https://github.com/Azure/azure-sdk-for-java/raw/1459497847a7b84a9802ad9c9caf89029486bb01/eng/common/scripts/Verify-Links.ps1",
+    "contents_url": "https://api.github.com/repos/Azure/azure-sdk-for-java/contents/eng/common/scripts/Verify-Links.ps1?ref=1459497847a7b84a9802ad9c9caf89029486bb01",
+    "patch": "@@ -278,7 +278,8 @@ function GetLinks([System.Uri]$pageUri)\n \n   return $links;\n }\n-\n+Write-Host \"Here is the place to look into default branch.\"\n+Write-Host $branchReplaceRegex\n if ($urls) {\n   if ($urls.Count -eq 0) {\n     Write-Host \"Usage $($MyInvocation.MyCommand.Name) <urls>\";"
+  },
+  {
+    "sha": "b4a4f775d91dfa14b09f5dd9a02b14371928d5d7",
+    "filename": "eng/pipelines/aggregate-reports.yml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 7,
+    "changes": 14,
+    "blob_url": "https://github.com/Azure/azure-sdk-for-java/blob/1459497847a7b84a9802ad9c9caf89029486bb01/eng/pipelines/aggregate-reports.yml",
+    "raw_url": "https://github.com/Azure/azure-sdk-for-java/raw/1459497847a7b84a9802ad9c9caf89029486bb01/eng/pipelines/aggregate-reports.yml",
+    "contents_url": "https://api.github.com/repos/Azure/azure-sdk-for-java/contents/eng/pipelines/aggregate-reports.yml?ref=1459497847a7b84a9802ad9c9caf89029486bb01",
+    "patch": "@@ -103,6 +103,13 @@ jobs:\n       # Only run if building all libraries succeeded.\n       condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))\n       displayName: 'Component Detection'\n+    # Run link verification at the end as it will run no matter the pipeline passing or failing.\n+    # If this task fails with an error it shouldn't prevent aggregate reports from being generated.\n+    - template: ../common/pipelines/templates/steps/verify-links.yml\n+      parameters:\n+        Directory: \"\"\n+        CheckLinkGuidance: $true\n+        Condition: succeededOrFailed()\n \n     # Put cred scan step before install and build packages to avoid the tool scans generated folder like /target.\n     - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3\n@@ -126,10 +133,3 @@ jobs:\n         # GdnBreakOutputBaseline: baseline\n       condition: succeededOrFailed()\n       continueOnError: true\n-    # Run link verification at the end as it will run no matter the pipeline passing or failing.\n-    # If this task fails with an error it shouldn't prevent aggregate reports from being generated.\n-    - template: ../common/pipelines/templates/steps/verify-links.yml\n-      parameters:\n-        Directory: \"\"\n-        CheckLinkGuidance: $true\n-        Condition: succeededOrFailed()"
+  },
+  {
+    "sha": "0eb801909ddaa0dfb43b6384d97fbfc204f23f93",
+    "filename": "eng/pipelines/templates/jobs/archetype-sdk-client.yml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Azure/azure-sdk-for-java/blob/1459497847a7b84a9802ad9c9caf89029486bb01/eng/pipelines/templates/jobs/archetype-sdk-client.yml",
+    "raw_url": "https://github.com/Azure/azure-sdk-for-java/raw/1459497847a7b84a9802ad9c9caf89029486bb01/eng/pipelines/templates/jobs/archetype-sdk-client.yml",
+    "contents_url": "https://api.github.com/repos/Azure/azure-sdk-for-java/contents/eng/pipelines/templates/jobs/archetype-sdk-client.yml?ref=1459497847a7b84a9802ad9c9caf89029486bb01",
+    "patch": "@@ -201,7 +201,7 @@ jobs:\n           ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:\n             Directory: sdk/${{ parameters.ServiceDirectory }}\n           CheckLinkGuidance: $true\n-\n+          Condition: succeededOrFailed()\n       # Use BasePathLength of 38 instead of the default 49 as some GA'd files fail when the number is higher.\n       - template: /eng/common/pipelines/templates/steps/verify-path-length.yml\n         parameters:"
+  }
+]

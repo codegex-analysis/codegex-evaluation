@@ -1,0 +1,97 @@
+[
+  {
+    "sha": "489ddb21a954638ffbf9eb483cc75c4ead4f61b3",
+    "filename": "src/com/griddynamics/main/VehicleSolution.java",
+    "status": "added",
+    "additions": 165,
+    "deletions": 0,
+    "changes": 165,
+    "blob_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/blob/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/src/com/griddynamics/main/VehicleSolution.java",
+    "raw_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/raw/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/src/com/griddynamics/main/VehicleSolution.java",
+    "contents_url": "https://api.github.com/repos/kolegova-mary/Java_Kolegova_repo/contents/src/com/griddynamics/main/VehicleSolution.java?ref=cc946dcbd0b305e4c700fd11ca8b909468f9cadf",
+    "patch": "@@ -0,0 +1,165 @@\n+package com.griddynamics.main;\n+\n+import java.io.FileWriter;\n+import java.io.IOException;\n+import java.io.Writer;\n+import java.net.URL;\n+import java.nio.file.Files;\n+import java.nio.file.Path;\n+import java.nio.file.Paths;\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+import static java.lang.System.lineSeparator;\n+\n+public class VehicleSolution {\n+    public static void main(String[] args) {\n+        URL resource = VehicleSolution.class.getClassLoader().getResource(\"vehicle_data.txt\");\n+        if (resource == null) {\n+            System.out.println(\"Can't find input file.\");\n+            return;\n+        }\n+        try {\n+            read(resource.getPath());\n+        } catch (FileFormatException | IOException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+    public static void read(String inputFile) throws FileFormatException, IOException {\n+        Path inputFilePath = Paths.get(inputFile);\n+        List<String> lines = Files.readAllLines(inputFilePath);\n+        List<Vehicle> vehicles = new ArrayList<>();\n+        for (int i = 0; i < lines.size(); i++) {\n+            String line = lines.get(i);\n+            String cur = line.replaceAll(\"\\\\s+\", \"\");\n+            cur = cur.replace(':', ',');\n+            String[] parameters = cur.split(\",\");\n+            if (parameters.length == 5) {\n+                if (parameters[0].equalsIgnoreCase(\"CAR\")) {\n+                    vehicles.add(new Car(parameters[1], parameters[2],\n+                            Integer.parseInt(parameters[3]), parameters[4]));\n+                } else {\n+                    vehicles.add(new Truck(parameters[1], parameters[2],\n+                            Integer.parseInt(parameters[3]), Long.parseLong(parameters[4])));\n+                }\n+            } else {\n+                throw new FileFormatException(\"Your values in file are invalid. \" +\n+                        \"Check them and try again.\", i + 1);\n+            }\n+        }\n+        if (vehicles.isEmpty()) {\n+            System.out.println(\"Empty file provided.\");\n+            return;\n+        }\n+        try (Writer carWriter = new FileWriter(inputFilePath.getParent().resolve(\"CarOut\").toFile());\n+             Writer truckWriter = new FileWriter(inputFilePath.getParent().resolve(\"TruckOut\").toFile())) {\n+            for (Vehicle vehicle : vehicles) {\n+                String s = vehicle.toString();\n+                if (vehicle instanceof Car) {\n+                    carWriter.write(s + lineSeparator());\n+                } else {\n+                    truckWriter.write(s + lineSeparator());\n+                }\n+            }\n+        }\n+    }\n+\n+    public static class FileFormatException extends Exception {\n+        private final int lineNumber;\n+\n+        public FileFormatException(String message, int lineNumber) {\n+            super(message);\n+            this.lineNumber = lineNumber;\n+        }\n+\n+        public int getLineNumber() {\n+            return lineNumber;\n+        }\n+    }\n+\n+    public static class Vehicle {\n+        protected String model;\n+        protected String producer;\n+        protected int age;\n+\n+        public Vehicle(String model, String producer, int age) {\n+            this.model = model;\n+            this.producer = producer;\n+            this.age = age;\n+        }\n+\n+        public String getModel() {\n+            return model;\n+        }\n+\n+        public void setModel(String model) {\n+            this.model = model;\n+        }\n+\n+        public String getProducer() {\n+            return producer;\n+        }\n+\n+        public void setProducer(String producer) {\n+            this.producer = producer;\n+        }\n+\n+        public int getAge() {\n+            return age;\n+        }\n+\n+        public void setAge(int age) {\n+            this.age = age;\n+        }\n+\n+        @Override\n+        public String toString() {\n+            return model + \",\" + producer + \",\" + age;\n+        }\n+    }\n+\n+    public static class Car extends Vehicle {\n+        protected String type;\n+\n+        public Car(String model, String producer, int age, String type) {\n+            super(model, producer, age);\n+            this.type = type;\n+        }\n+\n+        public String getType() {\n+            return type;\n+        }\n+\n+        public void setType(String type) {\n+            this.type = type;\n+        }\n+\n+        @Override\n+        public String toString() {\n+            return \"CAR: \" + super.toString() + \",\" + type;\n+        }\n+    }\n+\n+    public static class Truck extends Vehicle {\n+        long tonnage;\n+\n+        public Truck(String model, String producer, int age, long tonnage) {\n+            super(model, producer, age);\n+            this.tonnage = tonnage;\n+        }\n+\n+        public long getTonnage() {\n+            return tonnage;\n+        }\n+\n+        public void setTonnage(long tonnage) {\n+            this.tonnage = tonnage;\n+        }\n+\n+        @Override\n+        public String toString() {\n+            return \"TRUCK: \" + super.toString() + \",\" + tonnage;\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "03ba11b996e5d357f149f0a8c699a290401a02dc",
+    "filename": "src/resources/vehicle_data.txt",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/blob/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/src/resources/vehicle_data.txt",
+    "raw_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/raw/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/src/resources/vehicle_data.txt",
+    "contents_url": "https://api.github.com/repos/kolegova-mary/Java_Kolegova_repo/contents/src/resources/vehicle_data.txt?ref=cc946dcbd0b305e4c700fd11ca8b909468f9cadf",
+    "patch": "@@ -0,0 +1,4 @@\n+CAR:VAZ-2101, VAZ, 40, sedan\n+TRUCK:KamAZ-4211, KamAZ, 5, 8000\n+CAR:VAZ-2000, VAZ, 50, pupu\n+TRUCK:KamAZ-3011, AZ, 2, 900"
+  },
+  {
+    "sha": "9d50800824fc57d01778155efb41c288bb7b8c8e",
+    "filename": "test/com/griddynamics/test/TestVehicle.java",
+    "status": "added",
+    "additions": 67,
+    "deletions": 0,
+    "changes": 67,
+    "blob_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/blob/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/com/griddynamics/test/TestVehicle.java",
+    "raw_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/raw/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/com/griddynamics/test/TestVehicle.java",
+    "contents_url": "https://api.github.com/repos/kolegova-mary/Java_Kolegova_repo/contents/test/com/griddynamics/test/TestVehicle.java?ref=cc946dcbd0b305e4c700fd11ca8b909468f9cadf",
+    "patch": "@@ -0,0 +1,67 @@\n+package com.griddynamics.test;\n+\n+import com.griddynamics.main.VehicleSolution;\n+import com.griddynamics.main.VehicleSolution.FileFormatException;\n+import org.testng.annotations.Test;\n+\n+import java.io.IOException;\n+import java.net.URL;\n+\n+import static org.testng.Assert.assertEquals;\n+import static org.testng.Assert.fail;\n+\n+public class TestVehicle {\n+\n+    @Test\n+    public void testUsual() {\n+        String filePath = getFilePath(\"vehicle_data.txt\");\n+        try {\n+            VehicleSolution.read(filePath);\n+        } catch (FileFormatException | IOException e) {\n+            e.printStackTrace();\n+            fail();\n+        }\n+    }\n+\n+    @Test(expectedExceptions = FileFormatException.class)\n+    public void testInvalidValue() throws IOException, FileFormatException {\n+        VehicleSolution.read(getFilePath(\"invalid_value.txt\"));\n+    }\n+\n+    @Test(expectedExceptions = IOException.class)\n+    public void testNotExistFile() throws IOException, FileFormatException {\n+        VehicleSolution.read(getFilePath(\"not-existed.txt\"));\n+    }\n+\n+    @Test(expectedExceptions = FileFormatException.class)\n+    public void testMissedComma() throws IOException, FileFormatException {\n+        VehicleSolution.read(getFilePath(\"missed_comma.txt\"));\n+    }\n+\n+    @Test\n+    public void testRightLineMissedComma() throws IOException {\n+        try {\n+            VehicleSolution.read(getFilePath(\"missed_comma.txt\"));\n+        } catch (FileFormatException e) {\n+            assertEquals(e.getLineNumber(), 2);\n+        }\n+    }\n+\n+    @Test\n+    public void textEmpty() throws IOException, FileFormatException {\n+        //\n+        VehicleSolution.read(getFilePath(\"empty.txt\"));\n+    }\n+\n+    @Test(expectedExceptions = FileFormatException.class)\n+    public void testExtraComma() throws IOException, FileFormatException {\n+        VehicleSolution.read(getFilePath(\"extra_comma.txt\"));\n+    }\n+\n+    private String getFilePath(String fileName) {\n+        Integer a = 5;\n+        URL url = getClass().getClassLoader().getResource(fileName);\n+        return url == null ? \"\" : url.getPath();\n+    }\n+\n+}"
+  },
+  {
+    "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "filename": "test/testResources/empty.txt",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/blob/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/empty.txt",
+    "raw_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/raw/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/empty.txt",
+    "contents_url": "https://api.github.com/repos/kolegova-mary/Java_Kolegova_repo/contents/test/testResources/empty.txt?ref=cc946dcbd0b305e4c700fd11ca8b909468f9cadf"
+  },
+  {
+    "sha": "e65dc1ae920984c8f47463c6133320c6b6da195e",
+    "filename": "test/testResources/extra_comma.txt",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/blob/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/extra_comma.txt",
+    "raw_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/raw/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/extra_comma.txt",
+    "contents_url": "https://api.github.com/repos/kolegova-mary/Java_Kolegova_repo/contents/test/testResources/extra_comma.txt?ref=cc946dcbd0b305e4c700fd11ca8b909468f9cadf",
+    "patch": "@@ -0,0 +1,4 @@\n+CAR:VAZ-2101, ,VAZ, 40, sedan\n+TRUCK:KamAZ-4211, KamAZ, 5, 8000\n+CAR:VAZ-2000, VAZ, 50, pupu\n+TRUCK:KamAZ-3011, AZ, 2, 900"
+  },
+  {
+    "sha": "f2289097d4cbcf16f4f2a33707f94537fcfb5481",
+    "filename": "test/testResources/invalid_value.txt",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/blob/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/invalid_value.txt",
+    "raw_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/raw/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/invalid_value.txt",
+    "contents_url": "https://api.github.com/repos/kolegova-mary/Java_Kolegova_repo/contents/test/testResources/invalid_value.txt?ref=cc946dcbd0b305e4c700fd11ca8b909468f9cadf",
+    "patch": "@@ -0,0 +1 @@\n+qwerty\n\\ No newline at end of file"
+  },
+  {
+    "sha": "9d8d0546c98ae91624768ebe2a15bb436f06adc7",
+    "filename": "test/testResources/missed_comma.txt",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/blob/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/missed_comma.txt",
+    "raw_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/raw/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/missed_comma.txt",
+    "contents_url": "https://api.github.com/repos/kolegova-mary/Java_Kolegova_repo/contents/test/testResources/missed_comma.txt?ref=cc946dcbd0b305e4c700fd11ca8b909468f9cadf",
+    "patch": "@@ -0,0 +1,4 @@\n+CAR:VAZ-2101, VAZ, 40, sedan\n+TRUCK:KamAZ-42KamAZ, 5, 8000\n+CAR:VAZ-2000, VAZ, 5pu\n+TRUCK:KamAZ-3011, AZ, 2, 900"
+  },
+  {
+    "sha": "03ba11b996e5d357f149f0a8c699a290401a02dc",
+    "filename": "test/testResources/vehicle_data.txt",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/blob/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/vehicle_data.txt",
+    "raw_url": "https://github.com/kolegova-mary/Java_Kolegova_repo/raw/cc946dcbd0b305e4c700fd11ca8b909468f9cadf/test/testResources/vehicle_data.txt",
+    "contents_url": "https://api.github.com/repos/kolegova-mary/Java_Kolegova_repo/contents/test/testResources/vehicle_data.txt?ref=cc946dcbd0b305e4c700fd11ca8b909468f9cadf",
+    "patch": "@@ -0,0 +1,4 @@\n+CAR:VAZ-2101, VAZ, 40, sedan\n+TRUCK:KamAZ-4211, KamAZ, 5, 8000\n+CAR:VAZ-2000, VAZ, 50, pupu\n+TRUCK:KamAZ-3011, AZ, 2, 900"
+  }
+]

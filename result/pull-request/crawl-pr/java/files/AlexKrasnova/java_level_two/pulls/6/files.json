@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "1c4323cac8fdef8e46da7ee9336d452690f4ee6d",
+    "filename": "lesson5/.gitignore",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/AlexKrasnova/java_level_two/blob/e0306ee4aa23074c8388feffc3d66fdf1384e83b/lesson5/.gitignore",
+    "raw_url": "https://github.com/AlexKrasnova/java_level_two/raw/e0306ee4aa23074c8388feffc3d66fdf1384e83b/lesson5/.gitignore",
+    "contents_url": "https://api.github.com/repos/AlexKrasnova/java_level_two/contents/lesson5/.gitignore?ref=e0306ee4aa23074c8388feffc3d66fdf1384e83b",
+    "patch": "@@ -0,0 +1,3 @@\n+/.idea/\n+/target/\n+lesson5.iml\n\\ No newline at end of file"
+  },
+  {
+    "sha": "5c6975f516f1152cc6c161740e0ea46ec2192aa7",
+    "filename": "lesson5/pom.xml",
+    "status": "added",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/AlexKrasnova/java_level_two/blob/e0306ee4aa23074c8388feffc3d66fdf1384e83b/lesson5/pom.xml",
+    "raw_url": "https://github.com/AlexKrasnova/java_level_two/raw/e0306ee4aa23074c8388feffc3d66fdf1384e83b/lesson5/pom.xml",
+    "contents_url": "https://api.github.com/repos/AlexKrasnova/java_level_two/contents/lesson5/pom.xml?ref=e0306ee4aa23074c8388feffc3d66fdf1384e83b",
+    "patch": "@@ -0,0 +1,16 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n+         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n+         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n+    <modelVersion>4.0.0</modelVersion>\n+\n+    <groupId>ru.geekbrains.alexkrasnova.javaleveltwo</groupId>\n+    <artifactId>lesson5</artifactId>\n+    <version>1.0-SNAPSHOT</version>\n+\n+    <properties>\n+        <maven.compiler.source>11</maven.compiler.source>\n+        <maven.compiler.target>11</maven.compiler.target>\n+    </properties>\n+\n+</project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "761c09dfbd276303eb7701b20c9d7b3b152a45bc",
+    "filename": "lesson5/src/main/java/ru/geekbrains/alexkrasnova/javaleveltwo/lesson5/MainApp.java",
+    "status": "added",
+    "additions": 73,
+    "deletions": 0,
+    "changes": 73,
+    "blob_url": "https://github.com/AlexKrasnova/java_level_two/blob/e0306ee4aa23074c8388feffc3d66fdf1384e83b/lesson5/src/main/java/ru/geekbrains/alexkrasnova/javaleveltwo/lesson5/MainApp.java",
+    "raw_url": "https://github.com/AlexKrasnova/java_level_two/raw/e0306ee4aa23074c8388feffc3d66fdf1384e83b/lesson5/src/main/java/ru/geekbrains/alexkrasnova/javaleveltwo/lesson5/MainApp.java",
+    "contents_url": "https://api.github.com/repos/AlexKrasnova/java_level_two/contents/lesson5/src/main/java/ru/geekbrains/alexkrasnova/javaleveltwo/lesson5/MainApp.java?ref=e0306ee4aa23074c8388feffc3d66fdf1384e83b",
+    "patch": "@@ -0,0 +1,73 @@\n+package ru.geekbrains.alexkrasnova.javaleveltwo.lesson5;\n+\n+public class MainApp {\n+\n+    static final int SIZE = 10000000;\n+    static final int HALF = SIZE / 2;\n+    float[] arr = new float[SIZE];\n+\n+    public static void main(String[] args) throws InterruptedException {\n+        createArray();\n+        createArrayThreads();\n+\n+    }\n+\n+    public static float[] createArray() {\n+\n+        float[] arr = new float[SIZE];\n+\n+        for (int i = 0; i < SIZE; i++) {\n+            arr[i] = 1;\n+        }\n+\n+        long a = System.currentTimeMillis();\n+\n+        for (int i = 0; i < SIZE; i++) {\n+            arr[i] = (float) (arr[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));\n+        }\n+        System.out.println(System.currentTimeMillis() - a);\n+        return arr;\n+    }\n+\n+    public static float[] createArrayThreads() throws InterruptedException {\n+\n+        float[] arr = new float[SIZE];\n+\n+        for (int i = 0; i < SIZE; i++) {\n+            arr[i] = 1;\n+        }\n+\n+        long a = System.currentTimeMillis();\n+\n+        float[] arr1 = new float[HALF];\n+        float[] arr2 = new float[HALF];\n+        System.arraycopy(arr, 0, arr1, 0, HALF);\n+        System.arraycopy(arr, HALF, arr2, 0, HALF);\n+\n+        Thread t1 = new Thread(() -> {\n+            for (int i = 0; i < HALF; i++) {\n+                arr1[i] = (float) (arr1[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));\n+            }\n+        });\n+        t1.start();\n+\n+        Thread t2 = new Thread(() -> {\n+            for (int i = HALF; i < SIZE; i++) {\n+                arr2[i - HALF] = (float) (arr2[i - HALF] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));\n+            }\n+        });\n+        t2.start();\n+\n+        t1.join();\n+        t2.join();\n+        System.arraycopy(arr1, 0, arr, 0, HALF);\n+        System.arraycopy(arr2, 0, arr, HALF, HALF);\n+\n+\n+        System.out.println(System.currentTimeMillis() - a);\n+        return arr;\n+    }\n+\n+}\n+\n+"
+  }
+]

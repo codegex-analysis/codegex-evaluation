@@ -1,0 +1,97 @@
+[
+  {
+    "sha": "c7961fc0ce54d06af4f6995a5b91ac3b6f41e9b5",
+    "filename": "catroid/src/androidTest/assets/catrobatTests/formula/testFlattenFunction.catrobat",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/androidTest/assets/catrobatTests/formula/testFlattenFunction.catrobat",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/androidTest/assets/catrobatTests/formula/testFlattenFunction.catrobat",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/androidTest/assets/catrobatTests/formula/testFlattenFunction.catrobat?ref=ea95df328ca69e73787d34827ac84f5de361216e"
+  },
+  {
+    "sha": "d3fe843b771214a290d968185530fb6eecf81025",
+    "filename": "catroid/src/main/java/org/catrobat/catroid/common/Constants.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/common/Constants.java",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/common/Constants.java",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/java/org/catrobat/catroid/common/Constants.java?ref=ea95df328ca69e73787d34827ac84f5de361216e",
+    "patch": "@@ -39,8 +39,7 @@\n \n public final class Constants {\n \n-\tpublic static final double CURRENT_CATROBAT_LANGUAGE_VERSION = 1.0;\n-\n+\tpublic static final double CURRENT_CATROBAT_LANGUAGE_VERSION = 1.01;\n \tpublic static final String REMOTE_DISPLAY_APP_ID = \"CEBB9229\";\n \tpublic static final int CAST_CONNECTION_TIMEOUT = 5000; //in milliseconds\n \tpublic static final int CAST_NOT_SEEING_DEVICE_TIMEOUT = 3000; //in milliseconds"
+  },
+  {
+    "sha": "3f1b7ade50c1e9261413afae61e2855e0fd29ef6",
+    "filename": "catroid/src/main/java/org/catrobat/catroid/formulaeditor/FormulaElement.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 14,
+    "changes": 41,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/formulaeditor/FormulaElement.java",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/formulaeditor/FormulaElement.java",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/java/org/catrobat/catroid/formulaeditor/FormulaElement.java?ref=ea95df328ca69e73787d34827ac84f5de361216e",
+    "patch": "@@ -433,6 +433,8 @@ private Object interpretFunction(Functions function, Scope scope) {\n \t\t\t\treturn interpretFunctionNumberOfItems(arguments.get(0), scope);\n \t\t\tcase INDEX_OF_ITEM:\n \t\t\t\treturn interpretFunctionIndexOfItem(arguments.get(0), scope);\n+\t\t\tcase FLATTEN:\n+\t\t\t\treturn interpretFunctionFlatten(scope, leftChild);\n \t\t\tcase COLLIDES_WITH_COLOR:\n \t\t\t\treturn booleanToDouble(new ColorCollisionDetection(scope, StageActivity.stageListener)\n \t\t\t\t\t\t.tryInterpretFunctionTouchesColor(arguments.get(0)));\n@@ -555,6 +557,10 @@ private static String interpretFunctionJoin3(Scope scope, FormulaElement leftChi\n \t\t\t\tscope) + interpretFunctionString(additionalChildren.get(0), scope);\n \t}\n \n+\tprivate static String interpretFunctionFlatten(Scope scope, FormulaElement leftChild) {\n+\t\treturn interpretFunctionString(leftChild, scope);\n+\t}\n+\n \tprivate static String tryInterpretFunctionRegex(Scope scope, FormulaElement leftChild,\n \t\t\tFormulaElement rightChild) {\n \t\ttry {\n@@ -578,23 +584,30 @@ private static String interpretFunctionRegex(String patternString, String matche\n \t}\n \n \tprivate static String interpretFunctionString(FormulaElement child, Scope scope) {\n-\t\tif (child == null) {\n-\t\t\treturn \"\";\n-\t\t} else if (child.getElementType() == ElementType.STRING) {\n-\t\t\treturn child.getValue();\n-\t\t}\n-\t\tObject objectInterpretation = child.interpretRecursive(scope);\n \t\tString parameterInterpretation = \"\";\n-\n-\t\tif (child.getElementType() == ElementType.NUMBER) {\n-\t\t\tdouble number = Double.parseDouble((String) objectInterpretation);\n-\t\t\tif (!Double.isNaN(number)) {\n-\t\t\t\tparameterInterpretation += isInteger(number) ? (int) number : number;\n+\t\tif (child != null) {\n+\t\t\tObject objectInterpretation = child.interpretRecursive(scope);\n+\t\t\tswitch (child.getElementType()) {\n+\t\t\t\tcase STRING:\n+\t\t\t\t\tparameterInterpretation = child.getValue();\n+\t\t\t\t\tbreak;\n+\t\t\t\tcase NUMBER:\n+\t\t\t\t\tparameterInterpretation = formatNumberString((String) objectInterpretation);\n+\t\t\t\t\tbreak;\n+\t\t\t\tdefault:\n+\t\t\t\t\tparameterInterpretation = trimTrailingCharacters((String) objectInterpretation);\n \t\t\t}\n-\t\t} else {\n-\t\t\tparameterInterpretation += objectInterpretation;\n \t\t}\n-\t\treturn trimTrailingCharacters(parameterInterpretation);\n+\t\treturn parameterInterpretation;\n+\t}\n+\n+\tprivate static String formatNumberString(String numberString) {\n+\t\tdouble number = Double.parseDouble(numberString);\n+\t\tString formattedNumberString = \"\";\n+\t\tif (!Double.isNaN(number)) {\n+\t\t\tformattedNumberString += isInteger(number) ? (int) number : number;\n+\t\t}\n+\t\treturn trimTrailingCharacters(formattedNumberString);\n \t}\n \n \tprivate Object interpretFunctionLength(Object left, Scope scope) {"
+  },
+  {
+    "sha": "1ac58d755cc3ae169b557e75ce724a3a46e76c62",
+    "filename": "catroid/src/main/java/org/catrobat/catroid/formulaeditor/Functions.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/formulaeditor/Functions.java",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/formulaeditor/Functions.java",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/java/org/catrobat/catroid/formulaeditor/Functions.java?ref=ea95df328ca69e73787d34827ac84f5de361216e",
+    "patch": "@@ -34,8 +34,9 @@\n \tLETTER, JOIN, JOIN3, REGEX, LIST_ITEM, CONTAINS, INDEX_OF_ITEM, NUMBER_OF_ITEMS, ARDUINOANALOG,\n \tARDUINODIGITAL, RASPIDIGITAL,\n \tMULTI_FINGER_X, MULTI_FINGER_Y, MULTI_FINGER_TOUCHED, INDEX_CURRENT_TOUCH, COLLIDES_WITH_COLOR,\n+\n \tCOLOR_TOUCHES_COLOR, COLOR_AT_XY, COLOR_EQUALS_COLOR, TEXT_BLOCK_X, TEXT_BLOCK_Y,\n-\tTEXT_BLOCK_SIZE, TEXT_BLOCK_FROM_CAMERA, TEXT_BLOCK_LANGUAGE_FROM_CAMERA, IF_THEN_ELSE;\n+\tTEXT_BLOCK_SIZE, TEXT_BLOCK_FROM_CAMERA, TEXT_BLOCK_LANGUAGE_FROM_CAMERA, IF_THEN_ELSE, FLATTEN;\n \n \tprivate static final String TAG = Functions.class.getSimpleName();\n \tpublic static final EnumSet<Functions> TEXT = EnumSet.of(LENGTH, LETTER, JOIN, JOIN3, REGEX);"
+  },
+  {
+    "sha": "e00ba2ee325a815fc87bb73fd1f4146b0271e93f",
+    "filename": "catroid/src/main/java/org/catrobat/catroid/formulaeditor/InternFormulaKeyboardAdapter.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/formulaeditor/InternFormulaKeyboardAdapter.java",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/formulaeditor/InternFormulaKeyboardAdapter.java",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/java/org/catrobat/catroid/formulaeditor/InternFormulaKeyboardAdapter.java?ref=ea95df328ca69e73787d34827ac84f5de361216e",
+    "patch": "@@ -184,7 +184,8 @@\n \t\t\t\treturn buildDoubleParameterFunction(Functions.INDEX_OF_ITEM,\n \t\t\t\t\t\tNUMBER, \"1\",\n \t\t\t\t\t\tUSER_LIST, \"list_name\");\n-\n+\t\t\tcase R.string.formula_editor_function_flatten:\n+\t\t\t\treturn buildSingleParameterFunction(Functions.FLATTEN, STRING, \"list_name\");\n \t\t\tcase R.string.formula_editor_function_arduino_read_pin_value_digital:\n \t\t\t\treturn buildSingleParameterFunction(Functions.ARDUINODIGITAL, NUMBER, \"0\");\n \t\t\tcase R.string.formula_editor_function_arduino_read_pin_value_analog:"
+  },
+  {
+    "sha": "13a922aeacd9352b2b25da6b595075baf2dfdcc7",
+    "filename": "catroid/src/main/java/org/catrobat/catroid/formulaeditor/InternToExternGenerator.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/formulaeditor/InternToExternGenerator.java",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/formulaeditor/InternToExternGenerator.java",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/java/org/catrobat/catroid/formulaeditor/InternToExternGenerator.java?ref=ea95df328ca69e73787d34827ac84f5de361216e",
+    "patch": "@@ -78,6 +78,7 @@\n \t\tINTERN_EXTERN_LANGUAGE_CONVERTER_MAP.put(Functions.JOIN.name(), R.string.formula_editor_function_join);\n \t\tINTERN_EXTERN_LANGUAGE_CONVERTER_MAP.put(Functions.JOIN3.name(), R.string.formula_editor_function_join3);\n \t\tINTERN_EXTERN_LANGUAGE_CONVERTER_MAP.put(Functions.REGEX.name(), R.string.formula_editor_function_regex);\n+\t\tINTERN_EXTERN_LANGUAGE_CONVERTER_MAP.put(Functions.FLATTEN.name(), R.string.formula_editor_function_flatten);\n \n \t\t//DRONE SENSORS\n \t\tINTERN_EXTERN_LANGUAGE_CONVERTER_MAP.put(Sensors.DRONE_BATTERY_STATUS.name(), R.string.formula_editor_sensor_drone_battery_status);"
+  },
+  {
+    "sha": "76a40802e063eb4456db4e0fa4c869393243e5f8",
+    "filename": "catroid/src/main/java/org/catrobat/catroid/ui/recyclerview/fragment/CategoryListFragment.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 4,
+    "changes": 11,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/ui/recyclerview/fragment/CategoryListFragment.java",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/java/org/catrobat/catroid/ui/recyclerview/fragment/CategoryListFragment.java",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/java/org/catrobat/catroid/ui/recyclerview/fragment/CategoryListFragment.java?ref=ea95df328ca69e73787d34827ac84f5de361216e",
+    "patch": "@@ -122,20 +122,23 @@\n \tprivate static final List<Integer> STRING_FUNCTIONS = asList(R.string.formula_editor_function_length,\n \t\t\tR.string.formula_editor_function_letter, R.string.formula_editor_function_join,\n \t\t\tR.string.formula_editor_function_join3, R.string.formula_editor_function_regex,\n-\t\t\tR.string.formula_editor_function_regex_assistant);\n+\t\t\tR.string.formula_editor_function_regex_assistant,\n+\t\t\tR.string.formula_editor_function_flatten);\n \tprivate static final List<Integer> STRING_PARAMS = asList(R.string.formula_editor_function_length_parameter,\n \t\t\tR.string.formula_editor_function_letter_parameter,\n \t\t\tR.string.formula_editor_function_join_parameter,\n \t\t\tR.string.formula_editor_function_join3_parameter,\n \t\t\tR.string.formula_editor_function_regex_parameter,\n-\t\t\tR.string.formula_editor_function_no_parameter);\n+\t\t\tR.string.formula_editor_function_no_parameter,\n+\t\t\tR.string.formula_editor_function_flatten_parameter);\n \tprivate static final List<Integer> LIST_FUNCTIONS = asList(R.string.formula_editor_function_number_of_items,\n \t\t\tR.string.formula_editor_function_list_item, R.string.formula_editor_function_contains,\n-\t\t\tR.string.formula_editor_function_index_of_item);\n+\t\t\tR.string.formula_editor_function_index_of_item, R.string.formula_editor_function_flatten);\n \tprivate static final List<Integer> LIST_PARAMS = asList(R.string.formula_editor_function_number_of_items_parameter,\n \t\t\tR.string.formula_editor_function_list_item_parameter,\n \t\t\tR.string.formula_editor_function_contains_parameter,\n-\t\t\tR.string.formula_editor_function_index_of_item_parameter);\n+\t\t\tR.string.formula_editor_function_index_of_item_parameter,\n+\t\t\tR.string.formula_editor_function_flatten_parameter);\n \tprivate static final List<Integer> LOGIC_BOOL = asList(R.string.formula_editor_logic_and,\n \t\t\tR.string.formula_editor_logic_or, R.string.formula_editor_logic_not,\n \t\t\tR.string.formula_editor_function_true, R.string.formula_editor_function_false);"
+  },
+  {
+    "sha": "9cfd0823a8c76a858672242d2f5ef268842024e2",
+    "filename": "catroid/src/main/res/values/strings.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/res/values/strings.xml",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/ea95df328ca69e73787d34827ac84f5de361216e/catroid/src/main/res/values/strings.xml",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/res/values/strings.xml?ref=ea95df328ca69e73787d34827ac84f5de361216e",
+    "patch": "@@ -2011,6 +2011,8 @@ needs read and write access to it. You can always change permissions through you\n     <string name=\"camera_error_text_detection\">\n         There was a problem with text detection. Some components may still be downloading in the\n         background. Please make sure you are connected to the internet and check back later.</string>\n+    <string name=\"formula_editor_function_flatten\">flatten</string>\n+    <string name=\"formula_editor_function_flatten_parameter\">(*list name*)</string>\n     <!--  -->\n \n "
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c6f1d2e68379ee2e660497185ec4650e00e99d4a",
+    "filename": "PartitionLabels.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/super30admin/Greedy-2/blob/c6047f2674d8d75e244b11a540279a132ff518f6/PartitionLabels.java",
+    "raw_url": "https://github.com/super30admin/Greedy-2/raw/c6047f2674d8d75e244b11a540279a132ff518f6/PartitionLabels.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Greedy-2/contents/PartitionLabels.java?ref=c6047f2674d8d75e244b11a540279a132ff518f6",
+    "patch": "@@ -0,0 +1,35 @@\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+// Time Complexity : O(n)\n+// Space Complexity : O(1)\n+// Did this code successfully run on Leetcode : yes\n+// Any problem you faced while coding this : getting started\n+\n+// Your code here along with comments explaining your approach\n+public class PartitionLabels {\n+    class Solution {\n+        public List<Integer> partitionLabels(String S) {\n+            if(S == null || S.length() == 0) return null;\n+\n+            List<Integer> outputArray = new ArrayList<>();\n+\n+            //create array to store the last index of each characted in S\n+            int[] lastIndices = new int[26];\n+            for (int i = 0; i < S.length(); i++) {\n+                lastIndices[S.charAt(i) - 'a'] = i;\n+            }\n+\n+            //determine start and end of partition\n+            int start=0, end=0;\n+            for (int i = 0; i < S.length(); i++) {\n+                end = Math.max(end, lastIndices[S.charAt(i)-'a']);\n+                if(i == end){\n+                    outputArray.add(end-start+1);\n+                    start = end +1;\n+                }\n+            }\n+            return outputArray;\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "43d5cc78d04285635149b07dfa0cdd47f968d52c",
+    "filename": "QueueReconstructionByHeight.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/super30admin/Greedy-2/blob/c6047f2674d8d75e244b11a540279a132ff518f6/QueueReconstructionByHeight.java",
+    "raw_url": "https://github.com/super30admin/Greedy-2/raw/c6047f2674d8d75e244b11a540279a132ff518f6/QueueReconstructionByHeight.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Greedy-2/contents/QueueReconstructionByHeight.java?ref=c6047f2674d8d75e244b11a540279a132ff518f6",
+    "patch": "@@ -0,0 +1,32 @@\n+import java.util.Arrays;\n+import java.util.Comparator;\n+import java.util.LinkedList;\n+import java.util.List;\n+// Time Complexity :O(n^2)\n+// Space Complexity :O(n)\n+// Did this code successfully run on Leetcode : yes\n+// Any problem you faced while coding this : getting started\n+\n+// Your code here along with comments explaining your approach\n+public class QueueReconstructionByHeight {\n+    class Solution {\n+        public int[][] reconstructQueue(int[][] people) {\n+            //sort array based on decreasing order of height, if height is same then sort by ascending order of k\n+            Arrays.sort(people, new Comparator<int[]>() {\n+                @Override\n+                public int compare(int[] o1, int[] o2) {\n+                    return o1[0] == o2[0] ? o1[1] - o2[1] : o2[0] - o1[0];\n+                }\n+            });\n+\n+            //iterate through people, for each people[i], try to directly put it in the correct position.\n+            List<int[]> output = new LinkedList<>();\n+            for(int[] p : people){\n+                output.add(p[1], p);\n+            }\n+\n+            int n = people.length;\n+            return output.toArray(new int[n][2]);//conver to arraylist\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "8b1b6145563b106e6c69568ba35c4c682e159133",
+    "filename": "TaskScheduler.java",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/super30admin/Greedy-2/blob/c6047f2674d8d75e244b11a540279a132ff518f6/TaskScheduler.java",
+    "raw_url": "https://github.com/super30admin/Greedy-2/raw/c6047f2674d8d75e244b11a540279a132ff518f6/TaskScheduler.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Greedy-2/contents/TaskScheduler.java?ref=c6047f2674d8d75e244b11a540279a132ff518f6",
+    "patch": "@@ -0,0 +1,48 @@\n+import java.util.ArrayList;\n+import java.util.HashMap;\n+import java.util.List;\n+import java.util.PriorityQueue;\n+\n+// Time Complexity :O(n)\n+// Space Complexity :O(nlogn)\n+// Did this code successfully run on Leetcode : yes\n+// Any problem you faced while coding this : getting started\n+\n+// Your code here along with comments explaining your approach\n+public class TaskScheduler {\n+\n+    class Solution {\n+        public int leastInterval(char[] tasks, int n) {\n+\n+            //create hashmap and store count of characters in tasks\n+            HashMap<Character, Integer> map = new HashMap<>();\n+            for(char c:tasks){\n+                map.put(c, map.getOrDefault(c,0)+1);\n+            }\n+\n+            //create maxheap and add values from map\n+            PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a,b)->b-a);\n+            maxHeap.addAll(map.values());\n+\n+            //process cycles\n+            int cycles=0;\n+            while(!maxHeap.isEmpty()){\n+                List<Integer> list = new ArrayList<>();\n+                for (int i = 0; i < n+1; i++) {\n+                    if(!maxHeap.isEmpty()){\n+                        list.add(maxHeap.remove());\n+                    }\n+                }\n+                for(int l:list){\n+                    if(--l > 0){\n+                        maxHeap.add(l);\n+                    }\n+                }\n+                cycles+=maxHeap.isEmpty() ? list.size() : n+1;\n+            }\n+            return cycles;//return result\n+        }\n+    }\n+\n+\n+}"
+  }
+]

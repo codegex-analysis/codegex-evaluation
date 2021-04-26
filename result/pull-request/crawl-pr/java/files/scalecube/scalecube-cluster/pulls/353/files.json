@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "01938373e0a71adfa2ee082b642a3288727e8d9d",
+    "filename": "transport-parent/transport-netty/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/scalecube/scalecube-cluster/blob/9b90ac239350b37b7fac65107f47993f0cc4b560/transport-parent/transport-netty/pom.xml",
+    "raw_url": "https://github.com/scalecube/scalecube-cluster/raw/9b90ac239350b37b7fac65107f47993f0cc4b560/transport-parent/transport-netty/pom.xml",
+    "contents_url": "https://api.github.com/repos/scalecube/scalecube-cluster/contents/transport-parent/transport-netty/pom.xml?ref=9b90ac239350b37b7fac65107f47993f0cc4b560",
+    "patch": "@@ -21,6 +21,7 @@\n     <dependency>\n       <groupId>io.projectreactor.netty</groupId>\n       <artifactId>reactor-netty</artifactId>\n+      <version>1.0.0</version>\n     </dependency>\n \n     <!-- Test dependencies -->"
+  },
+  {
+    "sha": "3385cd44c5347d8208495f3347e0b505960708a8",
+    "filename": "transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/TransportImpl.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/scalecube/scalecube-cluster/blob/9b90ac239350b37b7fac65107f47993f0cc4b560/transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/TransportImpl.java",
+    "raw_url": "https://github.com/scalecube/scalecube-cluster/raw/9b90ac239350b37b7fac65107f47993f0cc4b560/transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/TransportImpl.java",
+    "contents_url": "https://api.github.com/repos/scalecube/scalecube-cluster/contents/transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/TransportImpl.java?ref=9b90ac239350b37b7fac65107f47993f0cc4b560",
+    "patch": "@@ -14,6 +14,7 @@\n import io.scalecube.net.Address;\n import io.scalecube.transport.netty.tcp.TcpTransportFactory;\n import java.net.InetAddress;\n+import java.net.InetSocketAddress;\n import java.util.Map;\n import java.util.Objects;\n import java.util.Optional;\n@@ -72,8 +73,8 @@ public TransportImpl(MessageCodec messageCodec, Receiver receiver, Sender sender\n   }\n \n   private static Address prepareAddress(DisposableServer server) {\n-    InetAddress address = server.address().getAddress();\n-    int port = server.address().getPort();\n+    InetAddress address = ((InetSocketAddress) server.address()).getAddress();\n+    int port = ((InetSocketAddress) server.address()).getPort();\n     if (address.isAnyLocalAddress()) {\n       return Address.create(Address.getLocalIpAddress().getHostAddress(), port);\n     } else {"
+  },
+  {
+    "sha": "64a9351d1ff7de3ba6bbbb56229c1098f7608840",
+    "filename": "transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/tcp/TcpReceiver.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/scalecube/scalecube-cluster/blob/9b90ac239350b37b7fac65107f47993f0cc4b560/transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/tcp/TcpReceiver.java",
+    "raw_url": "https://github.com/scalecube/scalecube-cluster/raw/9b90ac239350b37b7fac65107f47993f0cc4b560/transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/tcp/TcpReceiver.java",
+    "contents_url": "https://api.github.com/repos/scalecube/scalecube-cluster/contents/transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/tcp/TcpReceiver.java?ref=9b90ac239350b37b7fac65107f47993f0cc4b560",
+    "patch": "@@ -7,7 +7,6 @@\n import java.net.InetSocketAddress;\n import reactor.core.publisher.Mono;\n import reactor.netty.DisposableServer;\n-import reactor.netty.channel.BootstrapHandlers;\n import reactor.netty.tcp.TcpServer;\n \n final class TcpReceiver implements Receiver {\n@@ -42,9 +41,7 @@ private TcpServer newTcpServer(ReceiverContext context) {\n         .option(ChannelOption.TCP_NODELAY, true)\n         .option(ChannelOption.SO_KEEPALIVE, true)\n         .option(ChannelOption.SO_REUSEADDR, true)\n-        .bootstrap(\n-            b ->\n-                BootstrapHandlers.updateConfiguration(\n-                    b, \"inbound\", new TcpChannelInitializer(config.maxFrameLength())));\n+        .doOnChannelInit((connectionObserver, channel, remoteAddress) -> \n+            new TcpChannelInitializer(config.maxFrameLength()).accept(connectionObserver, channel));\n   }\n }"
+  },
+  {
+    "sha": "37916d8838432d0f8943bd2f02c925f36cb56658",
+    "filename": "transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/tcp/TcpSender.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/scalecube/scalecube-cluster/blob/9b90ac239350b37b7fac65107f47993f0cc4b560/transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/tcp/TcpSender.java",
+    "raw_url": "https://github.com/scalecube/scalecube-cluster/raw/9b90ac239350b37b7fac65107f47993f0cc4b560/transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/tcp/TcpSender.java",
+    "contents_url": "https://api.github.com/repos/scalecube/scalecube-cluster/contents/transport-parent/transport-netty/src/main/java/io/scalecube/transport/netty/tcp/TcpSender.java?ref=9b90ac239350b37b7fac65107f47993f0cc4b560",
+    "patch": "@@ -8,7 +8,6 @@\n import io.scalecube.transport.netty.TransportImpl.SenderContext;\n import reactor.core.publisher.Mono;\n import reactor.netty.Connection;\n-import reactor.netty.channel.BootstrapHandlers;\n import reactor.netty.resources.ConnectionProvider;\n import reactor.netty.tcp.TcpClient;\n \n@@ -50,10 +49,8 @@ private TcpClient newTcpClient(SenderContext context, Address address) {\n             .option(ChannelOption.SO_KEEPALIVE, true)\n             .option(ChannelOption.SO_REUSEADDR, true)\n             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.connectTimeout())\n-            .bootstrap(\n-                b ->\n-                    BootstrapHandlers.updateConfiguration(\n-                        b, \"outbound\", new TcpChannelInitializer(config.maxFrameLength())));\n+            .doOnChannelInit((connectionObserver, channel, remoteAddress) ->\n+                new TcpChannelInitializer(config.maxFrameLength()).accept(connectionObserver, channel));\n     return config.isSecured() ? tcpClient.secure() : tcpClient;\n   }\n }"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "c2817aca2a6470463862126a78c9218fef6ad4f1",
+    "filename": "vitals/Main.java",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 15,
+    "changes": 38,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/blob/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/Main.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/raw/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/Main.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-srini9941/contents/vitals/Main.java?ref=29a1c17813eb3064cecb7ed0f772ceeac5f686d2",
+    "patch": "@@ -1,23 +1,31 @@\n package vitals;\n \n+import java.util.HashMap;\n+import java.util.Map;\n+\n+\n public class Main {\n-    static boolean batteryIsOk(float temperature, float soc, float chargeRate) {\n-        if(temperature < 0 || temperature > 45) {\n-            System.out.println(\"Temperature is out of range!\");\n-            return false;\n-        } else if(soc < 20 || soc > 80) {\n-            System.out.println(\"State of Charge is out of range!\");\n-            return false;\n-        } else if(chargeRate > 0.8) {\n-            System.out.println(\"Charge Rate is out of range!\");\n-            return false;\n-        }\n-        return true;\n+\n+    static boolean batteryIsOk(\n+        float temperature,\n+        float soc,\n+        float chargeRate\n+    )\n+    {\n+        Map<String, Float> currentAttributeValues = new HashMap<>();\n+        currentAttributeValues.put(\"Temperature\", temperature);\n+        currentAttributeValues.put(\"SOC\", soc);\n+        currentAttributeValues.put(\"ChargeRate\", chargeRate);\n+        VitalsValidator validator = new VitalsValidator();\n+        return validator.checkBattery(currentAttributeValues);\n     }\n \n     public static void main(String[] args) {\n-        assert(batteryIsOk(25, 70, 0.7f) == true);\n-        assert(batteryIsOk(50, 85, 0.0f) == false);\n-        System.out.println(\"Some more tests needed\");\n+        assert (batteryIsOk(25, 70, 0.7f) == true);\n+        assert (batteryIsOk(50, 85, 0.0f) == false);\n+        assert (batteryIsOk(25, 85, 0.6f) == false);\n+        assert (batteryIsOk(25, 60 , 0.9f) == false);\n+        assert (batteryIsOk(-10, 70, 0.6f) == false);\n+        assert (batteryIsOk(25, 10, 0.6f) == false);\n     }\n }"
+  },
+  {
+    "sha": "b3918e3bb52ca3bcad865b772174ae284d508090",
+    "filename": "vitals/ThresholdProvider.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/blob/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/ThresholdProvider.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/raw/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/ThresholdProvider.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-srini9941/contents/vitals/ThresholdProvider.java?ref=29a1c17813eb3064cecb7ed0f772ceeac5f686d2",
+    "patch": "@@ -0,0 +1,32 @@\n+package vitals;\n+\n+import java.util.List;\n+import java.util.stream.Collectors;\n+import java.util.stream.Stream;\n+\n+import vitals.model.ThresholdValue;\n+\n+/**\n+ * @author Shrinidhi Muralidhar Karanam on 2021-03-02\n+ */\n+class ThresholdProvider {\n+    private static final int MINIMUM_TEMPERATURE = 0;\n+    private static final int MAXIMUM_TEMPERATURE = 45;\n+    private static final int MINIMUM_SOC_VALUE = 20;\n+    private static final int MAXIMUM_SOC_VALUE = 80;\n+    private static final float MAXIMUM_CHANGE_RATE = 0.8f;\n+\n+    private static final List<ThresholdValue> thresholdList = Stream.of(\n+        new ThresholdValue(\"Temperature\", MINIMUM_TEMPERATURE, MAXIMUM_TEMPERATURE),\n+        new ThresholdValue(\"SOC\", MINIMUM_SOC_VALUE, MAXIMUM_SOC_VALUE),\n+        new ThresholdValue(\"ChargeRate\", 0, MAXIMUM_CHANGE_RATE)\n+    ).collect(Collectors.toList());\n+\n+    private ThresholdProvider() {\n+    }\n+\n+    public static ThresholdValue provideThreshold(String name) {\n+        return thresholdList.stream().filter(i -> name.equalsIgnoreCase(i.getName())).findFirst().orElse(null);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "3acc6cb46eb1637a2732e310b38ac7ed26a55113",
+    "filename": "vitals/VitalsValidator.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/blob/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/VitalsValidator.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/raw/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/VitalsValidator.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-srini9941/contents/vitals/VitalsValidator.java?ref=29a1c17813eb3064cecb7ed0f772ceeac5f686d2",
+    "patch": "@@ -0,0 +1,28 @@\n+package vitals;\n+\n+import java.util.Map;\n+\n+import vitals.model.AttributeState;\n+import vitals.model.ThresholdValue;\n+import vitals.model.VitalsIndicator;\n+\n+/**\n+ * @author Shrinidhi Muralidhar Karanam on 2021-03-01\n+ */\n+public class VitalsValidator {\n+\n+\n+    public boolean checkBattery(Map<String, Float> batteryAttributes){\n+        return batteryAttributes.entrySet().stream()\n+            .map(this::check).allMatch(i -> i.getStatus() == AttributeState.OK);\n+    }\n+\n+    private VitalsIndicator check(Map.Entry<String, Float> entry) {\n+        ThresholdValue value = ThresholdProvider.provideThreshold(entry.getKey());\n+        AttributeState status = value.verify(entry.getValue());\n+        if (status != AttributeState.OK) {\n+            System.out.println(entry.getKey() + \" \" + entry.getValue() + \" is out of range and is \" + status.toString().toLowerCase() + \" provided threshold\");\n+        }\n+        return new VitalsIndicator(entry.getKey(), status);\n+    }\n+}"
+  },
+  {
+    "sha": "6b3735bbe5d1f8a4cb86efa9be0dde87c07dccf9",
+    "filename": "vitals/model/AttributeState.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/blob/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/model/AttributeState.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/raw/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/model/AttributeState.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-srini9941/contents/vitals/model/AttributeState.java?ref=29a1c17813eb3064cecb7ed0f772ceeac5f686d2",
+    "patch": "@@ -0,0 +1,11 @@\n+package vitals.model;\n+\n+/**\n+ * @author Shrinidhi Muralidhar Karanam on 2021-03-02\n+ */\n+public enum AttributeState {\n+\n+    OVER,\n+    UNDER,\n+    OK;\n+}"
+  },
+  {
+    "sha": "4b269dcead45a29d6d227275a095e6597223b47c",
+    "filename": "vitals/model/ThresholdValue.java",
+    "status": "added",
+    "additions": 56,
+    "deletions": 0,
+    "changes": 56,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/blob/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/model/ThresholdValue.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/raw/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/model/ThresholdValue.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-srini9941/contents/vitals/model/ThresholdValue.java?ref=29a1c17813eb3064cecb7ed0f772ceeac5f686d2",
+    "patch": "@@ -0,0 +1,56 @@\n+package vitals.model;\n+\n+/**\n+ * @author Shrinidhi Muralidhar Karanam on 2021-03-02\n+ */\n+public class ThresholdValue {\n+\n+    private String name;\n+    private float minimumValue;\n+    private float maximumValue;\n+\n+    public ThresholdValue(\n+        String name,\n+        float minimumValue,\n+        float maximumValue\n+    )\n+    {\n+        this.name = name;\n+        this.minimumValue = minimumValue;\n+        this.maximumValue = maximumValue;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public void setName(String name) {\n+        this.name = name;\n+    }\n+\n+    public float getMinimumValue() {\n+        return minimumValue;\n+    }\n+\n+    public void setMinimumValue(float minimumValue) {\n+        this.minimumValue = minimumValue;\n+    }\n+\n+    public float getMaximumValue() {\n+        return maximumValue;\n+    }\n+\n+    public void setMaximumValue(float maximumValue) {\n+        this.maximumValue = maximumValue;\n+    }\n+\n+    public AttributeState verify(float currentValue){\n+        if(currentValue < minimumValue ) {\n+            return AttributeState.UNDER;\n+        }\n+        if (currentValue > maximumValue){\n+            return AttributeState.OVER;\n+        }\n+        return AttributeState.OK;\n+    }\n+}"
+  },
+  {
+    "sha": "6ad10c49d4adff712665da534de3dfc6046d7059",
+    "filename": "vitals/model/VitalsIndicator.java",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/blob/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/model/VitalsIndicator.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-srini9941/raw/29a1c17813eb3064cecb7ed0f772ceeac5f686d2/vitals/model/VitalsIndicator.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-srini9941/contents/vitals/model/VitalsIndicator.java?ref=29a1c17813eb3064cecb7ed0f772ceeac5f686d2",
+    "patch": "@@ -0,0 +1,36 @@\n+package vitals.model;\n+\n+/**\n+ * @author Shrinidhi Muralidhar Karanam on 2021-03-01\n+ */\n+public class VitalsIndicator {\n+\n+    private String name;\n+    private AttributeState status;\n+\n+    public VitalsIndicator(\n+        String name,\n+        AttributeState status\n+    )\n+    {\n+        this.name = name;\n+        this.status = status;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public void setName(String name) {\n+        this.name = name;\n+    }\n+\n+    public AttributeState getStatus() {\n+        return status;\n+    }\n+\n+    public void setStatus(AttributeState status) {\n+        this.status = status;\n+    }\n+\n+}"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "009e62cda7b5ef56d3f99d92e53bfb9e3baaff17",
+    "filename": "warehouse/query-core/src/test/java/datawave/query/MaxExpansionRegexQueryTest.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 2,
+    "changes": 15,
+    "blob_url": "https://github.com/NationalSecurityAgency/datawave/blob/1c0a995f69de31966dfebdf19261f8840af84234/warehouse/query-core/src/test/java/datawave/query/MaxExpansionRegexQueryTest.java",
+    "raw_url": "https://github.com/NationalSecurityAgency/datawave/raw/1c0a995f69de31966dfebdf19261f8840af84234/warehouse/query-core/src/test/java/datawave/query/MaxExpansionRegexQueryTest.java",
+    "contents_url": "https://api.github.com/repos/NationalSecurityAgency/datawave/contents/warehouse/query-core/src/test/java/datawave/query/MaxExpansionRegexQueryTest.java?ref=1c0a995f69de31966dfebdf19261f8840af84234",
+    "patch": "@@ -1,6 +1,11 @@\n package datawave.query;\n \n import datawave.query.exceptions.FullTableScansDisallowedException;\n+import datawave.query.function.JexlEvaluation;\n+import datawave.query.index.lookup.RangeStream;\n+import datawave.query.iterator.QueryIterator;\n+import datawave.query.planner.ThreadedRangeBundler;\n+import datawave.query.tables.async.event.VisitorFunction;\n import datawave.query.testframework.AbstractFunctionalQuery;\n import datawave.query.testframework.AccumuloSetupHelper;\n import datawave.query.testframework.CitiesDataType;\n@@ -12,10 +17,12 @@\n import java.net.URI;\n import java.util.List;\n \n+import org.apache.log4j.Level;\n import org.apache.log4j.Logger;\n import org.junit.Assert;\n import org.junit.BeforeClass;\n import org.junit.Test;\n+import sun.rmi.runtime.Log;\n \n import java.util.ArrayList;\n import java.util.Collection;\n@@ -249,13 +256,16 @@ public void testMaxValueAnyFieldNegAnd() throws Exception {\n     @Test\n     public void testMaxIvaratorResultsFailsQuery() throws Exception {\n         log.info(\"------  testMaxIvaratorResultsFailsQuery  ------\");\n+        \n         String regex = RE_OP + \"'b.*'\";\n         String query = Constants.ANY_FIELD + regex;\n         \n         String anyRegex = this.dataManager.convertAnyField(regex);\n         String expect = anyRegex;\n         \n-        List<String> dirs = ivaratorConfig();\n+        List<String> dirs;\n+        \n+        dirs = ivaratorConfig();\n         // set collapseUids to ensure we have shard ranges such that ivarators will actually execute\n         this.logic.setCollapseUids(true);\n         // force the regex lookup into an ivarator\n@@ -267,8 +277,9 @@ public void testMaxIvaratorResultsFailsQuery() throws Exception {\n         // verify that the ivarators ran and completed\n         assertTrue(countComplete(dirs) >= 1);\n         \n+        dirs.clear();\n         // now get a new set of ivarator directories\n-        dirs = ivaratorConfig();\n+        // dirs = ivaratorConfig();\n         // set the max ivarator results to 1\n         this.logic.setMaxIvaratorResults(1);\n         try {"
+  },
+  {
+    "sha": "02f887f95d2c59e5e83cd842a694079b3562fec6",
+    "filename": "warehouse/query-core/src/test/java/datawave/query/testframework/AccumuloSetupHelper.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/NationalSecurityAgency/datawave/blob/1c0a995f69de31966dfebdf19261f8840af84234/warehouse/query-core/src/test/java/datawave/query/testframework/AccumuloSetupHelper.java",
+    "raw_url": "https://github.com/NationalSecurityAgency/datawave/raw/1c0a995f69de31966dfebdf19261f8840af84234/warehouse/query-core/src/test/java/datawave/query/testframework/AccumuloSetupHelper.java",
+    "contents_url": "https://api.github.com/repos/NationalSecurityAgency/datawave/contents/warehouse/query-core/src/test/java/datawave/query/testframework/AccumuloSetupHelper.java?ref=1c0a995f69de31966dfebdf19261f8840af84234",
+    "patch": "@@ -153,7 +153,7 @@ private void ingestTestData(Configuration conf, TestFileLoader loader) throws IO\n         \n         File tmpDir = new File(System.getProperty(\"java.io.tmpdir\"));\n         Path tmpPath = new Path(tmpDir.toURI());\n-        Path seqFile = new Path(tmpPath, UUID.randomUUID().toString());\n+        Path seqFile = new Path(tmpPath, \"---\" + UUID.randomUUID().toString());\n         \n         TaskAttemptID id = new TaskAttemptID(\"testJob\", 0, TaskType.MAP, 0, 0);\n         TaskAttemptContext context = new TaskAttemptContextImpl(conf, id);"
+  },
+  {
+    "sha": "f3a92a7a4aed789c4c748f12622a7dacc28a9d48",
+    "filename": "warehouse/query-core/src/test/java/datawave/query/testframework/CityDataManager.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/NationalSecurityAgency/datawave/blob/1c0a995f69de31966dfebdf19261f8840af84234/warehouse/query-core/src/test/java/datawave/query/testframework/CityDataManager.java",
+    "raw_url": "https://github.com/NationalSecurityAgency/datawave/raw/1c0a995f69de31966dfebdf19261f8840af84234/warehouse/query-core/src/test/java/datawave/query/testframework/CityDataManager.java",
+    "contents_url": "https://api.github.com/repos/NationalSecurityAgency/datawave/contents/warehouse/query-core/src/test/java/datawave/query/testframework/CityDataManager.java?ref=1c0a995f69de31966dfebdf19261f8840af84234",
+    "patch": "@@ -32,7 +32,7 @@ public CityDataManager() {\n     \n     @Override\n     public void addTestData(final URI file, final String datatype, final Set<String> indexes) throws IOException {\n-        Assert.assertFalse(\"datatype has already been configured(\" + datatype + \")\", this.rawData.containsKey(datatype));\n+        \n         try (final Reader reader = Files.newBufferedReader(Paths.get(file)); final CSVReader csv = new CSVReader(reader, ',', '\\\"', '\\0')) {\n             String[] data;\n             int count = 0;\n@@ -45,6 +45,7 @@ public void addTestData(final URI file, final String datatype, final Set<String>\n             this.rawData.put(datatype, cityData);\n             this.rawDataIndex.put(datatype, indexes);\n             log.info(\"city test data(\" + file + \") count(\" + count + \")\");\n+            \n         }\n     }\n     "
+  },
+  {
+    "sha": "4f4ba4479390cc6ae62cf67213d6ab4d48e2c09f",
+    "filename": "web-services/common/src/test/java/datawave/webservice/common/cache/SharedCacheCoordinatorTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/NationalSecurityAgency/datawave/blob/1c0a995f69de31966dfebdf19261f8840af84234/web-services/common/src/test/java/datawave/webservice/common/cache/SharedCacheCoordinatorTest.java",
+    "raw_url": "https://github.com/NationalSecurityAgency/datawave/raw/1c0a995f69de31966dfebdf19261f8840af84234/web-services/common/src/test/java/datawave/webservice/common/cache/SharedCacheCoordinatorTest.java",
+    "contents_url": "https://api.github.com/repos/NationalSecurityAgency/datawave/contents/web-services/common/src/test/java/datawave/webservice/common/cache/SharedCacheCoordinatorTest.java?ref=1c0a995f69de31966dfebdf19261f8840af84234",
+    "patch": "@@ -21,6 +21,9 @@\n import org.junit.experimental.categories.Category;\n import org.powermock.reflect.Whitebox;\n \n+import java.util.logging.Level;\n+import java.util.logging.Logger;\n+\n /**\n  * Tests functionality in the {@link SharedCacheCoordinator}.\n  */"
+  }
+]

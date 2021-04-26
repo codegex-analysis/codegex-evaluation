@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "50fe39b5ad2a2aac4451bd123b08e7d74880dc8d",
+    "filename": "CHANGELOG.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/eclipse/jkube/blob/46ae74b49caded508bb1c11af27b6300f5e470c0/CHANGELOG.md",
+    "raw_url": "https://github.com/eclipse/jkube/raw/46ae74b49caded508bb1c11af27b6300f5e470c0/CHANGELOG.md",
+    "contents_url": "https://api.github.com/repos/eclipse/jkube/contents/CHANGELOG.md?ref=46ae74b49caded508bb1c11af27b6300f5e470c0",
+    "patch": "@@ -31,6 +31,7 @@ Usage:\n * Fix #592: Upgrade kubernetes client from 5.0.0 to 5.1.1\n * Fix #594: Debug with suspend mode removes Liveness Probe\n * Fix #591: Helm linter no longer fails with generated charts\n+* Fix #571: Replace usages of deprecated `org.apache.commons.text.StrSubstitutor`\n \n ### 1.1.1 (2021-02-23)\n * Fix #570: Disable namespace creation during k8s:resource with `jkube.namespace` flag"
+  },
+  {
+    "sha": "b2974ee729955a9d78825ac092d5d80a4aac30e6",
+    "filename": "jkube-kit/build/service/docker/src/main/java/org/eclipse/jkube/kit/build/service/docker/WaitService.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/eclipse/jkube/blob/46ae74b49caded508bb1c11af27b6300f5e470c0/jkube-kit/build/service/docker/src/main/java/org/eclipse/jkube/kit/build/service/docker/WaitService.java",
+    "raw_url": "https://github.com/eclipse/jkube/raw/46ae74b49caded508bb1c11af27b6300f5e470c0/jkube-kit/build/service/docker/src/main/java/org/eclipse/jkube/kit/build/service/docker/WaitService.java",
+    "contents_url": "https://api.github.com/repos/eclipse/jkube/contents/jkube-kit/build/service/docker/src/main/java/org/eclipse/jkube/kit/build/service/docker/WaitService.java?ref=46ae74b49caded508bb1c11af27b6300f5e470c0",
+    "patch": "@@ -19,13 +19,13 @@\n import java.util.List;\n import java.util.Properties;\n \n+import org.apache.commons.text.StringSubstitutor;\n import org.eclipse.jkube.kit.build.api.model.Container;\n import org.eclipse.jkube.kit.build.service.docker.access.DockerAccess;\n import org.eclipse.jkube.kit.build.service.docker.access.DockerAccessException;\n import org.eclipse.jkube.kit.build.service.docker.access.log.DefaultLogCallback;\n import org.eclipse.jkube.kit.build.service.docker.access.log.LogDispatcher;\n import org.eclipse.jkube.kit.build.service.docker.access.log.LogOutputSpec;\n-import org.eclipse.jkube.kit.config.image.WaitConfiguration;\n import org.eclipse.jkube.kit.build.service.docker.wait.ExitCodeChecker;\n import org.eclipse.jkube.kit.build.service.docker.wait.HealthCheckChecker;\n import org.eclipse.jkube.kit.build.service.docker.wait.HttpPingChecker;\n@@ -36,8 +36,8 @@\n import org.eclipse.jkube.kit.build.service.docker.wait.WaitTimeoutException;\n import org.eclipse.jkube.kit.build.service.docker.wait.WaitUtil;\n import org.eclipse.jkube.kit.common.KitLogger;\n-import org.apache.commons.text.StrSubstitutor;\n import org.eclipse.jkube.kit.config.image.ImageConfiguration;\n+import org.eclipse.jkube.kit.config.image.WaitConfiguration;\n \n /**\n  * @author roland\n@@ -147,7 +147,7 @@ private WaitConfiguration getWaitConfiguration(ImageConfiguration imageConfig) {\n     private WaitChecker getUrlWaitChecker(String imageConfigDesc,\n                                           Properties projectProperties,\n                                           WaitConfiguration wait) {\n-        String waitUrl = StrSubstitutor.replace(wait.getUrl(), projectProperties);\n+        String waitUrl = StringSubstitutor.replace(wait.getUrl(), projectProperties);\n         WaitConfiguration.HttpConfiguration httpConfig = wait.getHttp();\n         HttpPingChecker checker;\n         if (httpConfig != null) {"
+  },
+  {
+    "sha": "aee54ba51bb13b000e16c715f8c56025ce69fb26",
+    "filename": "jkube-kit/build/service/docker/src/main/java/org/eclipse/jkube/kit/build/service/docker/access/ContainerCreateConfig.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 9,
+    "changes": 18,
+    "blob_url": "https://github.com/eclipse/jkube/blob/46ae74b49caded508bb1c11af27b6300f5e470c0/jkube-kit/build/service/docker/src/main/java/org/eclipse/jkube/kit/build/service/docker/access/ContainerCreateConfig.java",
+    "raw_url": "https://github.com/eclipse/jkube/raw/46ae74b49caded508bb1c11af27b6300f5e470c0/jkube-kit/build/service/docker/src/main/java/org/eclipse/jkube/kit/build/service/docker/access/ContainerCreateConfig.java",
+    "contents_url": "https://api.github.com/repos/eclipse/jkube/contents/jkube-kit/build/service/docker/src/main/java/org/eclipse/jkube/kit/build/service/docker/access/ContainerCreateConfig.java?ref=46ae74b49caded508bb1c11af27b6300f5e470c0",
+    "patch": "@@ -13,14 +13,6 @@\n  */\n package org.eclipse.jkube.kit.build.service.docker.access;\n \n-import com.google.gson.JsonArray;\n-import com.google.gson.JsonObject;\n-\n-import org.eclipse.jkube.kit.common.JsonFactory;\n-import org.eclipse.jkube.kit.common.util.EnvUtil;\n-import org.eclipse.jkube.kit.config.image.build.Arguments;\n-import org.apache.commons.text.StrSubstitutor;\n-\n import java.io.FileNotFoundException;\n import java.io.FileReader;\n import java.io.IOException;\n@@ -30,6 +22,14 @@\n import java.util.Properties;\n import java.util.Set;\n \n+import org.apache.commons.text.StringSubstitutor;\n+import org.eclipse.jkube.kit.common.JsonFactory;\n+import org.eclipse.jkube.kit.common.util.EnvUtil;\n+import org.eclipse.jkube.kit.config.image.build.Arguments;\n+\n+import com.google.gson.JsonArray;\n+import com.google.gson.JsonObject;\n+\n \n public class ContainerCreateConfig {\n \n@@ -87,7 +87,7 @@ public ContainerCreateConfig environment(String envPropsFile, Map<String, String\n                      */\n                     value = value.substring(1, value.length());\n                 }\n-                envProps.put(entry.getKey(), StrSubstitutor.replace(value, mavenProps));\n+                envProps.put(entry.getKey(), StringSubstitutor.replace(value, mavenProps));\n             }\n         }\n         if (envPropsFile != null) {"
+  }
+]

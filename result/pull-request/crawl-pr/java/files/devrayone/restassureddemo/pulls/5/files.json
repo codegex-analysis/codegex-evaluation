@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "f5b9dd7dcc7f0ec9bab8f4e8ee732d5a8e528e37",
+    "filename": "src/test/java/ru/devray/restassureddemo/BatchRequestCompaniesTest.java",
+    "status": "added",
+    "additions": 72,
+    "deletions": 0,
+    "changes": 72,
+    "blob_url": "https://github.com/devrayone/restassureddemo/blob/5e67cfb43867b3635515ea5940d11bd988d638ca/src/test/java/ru/devray/restassureddemo/BatchRequestCompaniesTest.java",
+    "raw_url": "https://github.com/devrayone/restassureddemo/raw/5e67cfb43867b3635515ea5940d11bd988d638ca/src/test/java/ru/devray/restassureddemo/BatchRequestCompaniesTest.java",
+    "contents_url": "https://api.github.com/repos/devrayone/restassureddemo/contents/src/test/java/ru/devray/restassureddemo/BatchRequestCompaniesTest.java?ref=5e67cfb43867b3635515ea5940d11bd988d638ca",
+    "patch": "@@ -0,0 +1,72 @@\n+package ru.devray.restassureddemo;\n+\n+import groovy.json.JsonToken;\n+import io.restassured.builder.RequestSpecBuilder;\n+import io.restassured.filter.log.LogDetail;\n+import io.restassured.http.ContentType;\n+import io.restassured.path.json.JsonPath;\n+import io.restassured.response.ResponseBody;\n+import io.restassured.specification.RequestSpecification;\n+import org.hamcrest.Matchers;\n+import org.junit.jupiter.api.Assertions;\n+import org.junit.jupiter.api.BeforeAll;\n+import org.junit.jupiter.api.DisplayName;\n+import org.junit.jupiter.api.Test;\n+import ru.devray.restassureddemo.entities.StockPrice;\n+\n+import java.lang.reflect.Type;\n+import java.util.Arrays;\n+\n+import static io.restassured.RestAssured.given;\n+\n+/**\n+ * todo Document type BatchRequestTest\n+ */\n+public class BatchRequestCompaniesTest {\n+    public static final String API_KEY = \"fa23e088feb18e525bc990245e71c885\";\n+    public static final String BASE_URI = \"https://financialmodelingprep.com/\";\n+    public static final String endPointBatchRequestCompanies = \"api/v3/quote/AAPL,FB,GOOG?apikey=\";\n+    public static RequestSpecification spec;\n+\n+    @BeforeAll\n+    static void setUp(){\n+        spec = new RequestSpecBuilder()\n+            .setBaseUri(BASE_URI)\n+            .log(LogDetail.ALL)\n+            .setAccept(ContentType.JSON)\n+            .build();\n+    }\n+\n+    @DisplayName(\"Тест проверяет что в результате GET-запроса возвращается код 200 и ответ не пустой\")\n+    @Test\n+    void bddStyleTestExample(){\n+        given().spec(spec)\n+            .when().get(endPointBatchRequestCompanies+API_KEY)\n+            .then().statusCode(200) //проверяем код ответа от сервера\n+            .and().body(Matchers.notNullValue()); //проверяем\n+    }\n+\n+    @DisplayName(\"Десериализуем объекты json в объекты класса StockPrice\")\n+    @Test\n+    void getResponseBodyAsObjectTest(){\n+        // сериализация\n+        // данные объекта - сохранение в двоичной форме.\n+        // десериализация - двоичный файл -> объекты\n+        StockPrice[] stockPrice =\n+            given().baseUri(BASE_URI)\n+                .when().get(endPointBatchRequestCompanies+API_KEY)\n+                .then().extract().body().as(StockPrice[].class);\n+\n+        Assertions.assertTrue(stockPrice.length > 0);\n+    }\n+\n+    @DisplayName(\"Проверяем что у объекта есть поля symbol, name, volume  и они не равны нулю\")\n+    @Test\n+    void getBatchRequestCompaniesTest(){\n+        given().spec(spec)\n+            .when().get(endPointBatchRequestCompanies + API_KEY)\n+            .then().body(\"symbol\", Matchers.notNullValue())\n+            .and().body(\"name\", Matchers.notNullValue())\n+            .and().body(\"volume\", Matchers.notNullValue());\n+    }\n+}"
+  },
+  {
+    "sha": "b2519ba136d78e82a8f8ee58105aa20e1957714d",
+    "filename": "src/test/java/ru/devray/restassureddemo/entities/StockPrice.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/devrayone/restassureddemo/blob/5e67cfb43867b3635515ea5940d11bd988d638ca/src/test/java/ru/devray/restassureddemo/entities/StockPrice.java",
+    "raw_url": "https://github.com/devrayone/restassureddemo/raw/5e67cfb43867b3635515ea5940d11bd988d638ca/src/test/java/ru/devray/restassureddemo/entities/StockPrice.java",
+    "contents_url": "https://api.github.com/repos/devrayone/restassureddemo/contents/src/test/java/ru/devray/restassureddemo/entities/StockPrice.java?ref=5e67cfb43867b3635515ea5940d11bd988d638ca",
+    "patch": "@@ -1,12 +1,14 @@\n package ru.devray.restassureddemo.entities;\n \n+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;\n import com.fasterxml.jackson.annotation.JsonProperty;\n \n /**\n  * Этот класс - POJO-класс, представление получаемых от REST-сервиса данных.\n  * Поскольку от REST сервиса мы получаем данные в формате JSON, то чтобы работать с ними как с объектами,\n  * нам необходимо\n  */\n+@JsonIgnoreProperties(ignoreUnknown = true)\n public class StockPrice {\n \n     @JsonProperty(\"symbol\")"
+  }
+]

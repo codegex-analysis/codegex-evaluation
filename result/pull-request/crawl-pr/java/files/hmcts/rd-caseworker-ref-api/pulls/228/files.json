@@ -1,0 +1,71 @@
+[
+  {
+    "sha": "bb8235e41ee03a583f7266ccc7f947ee2bcdbe4c",
+    "filename": "src/integrationTest/java/uk/gov/hmcts/reform/cwrdapi/CaseWorkerCreateUserWithFileUploadTest.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/hmcts/rd-caseworker-ref-api/blob/8f3425654fd739a2135d66de4a4b726726b9abb4/src/integrationTest/java/uk/gov/hmcts/reform/cwrdapi/CaseWorkerCreateUserWithFileUploadTest.java",
+    "raw_url": "https://github.com/hmcts/rd-caseworker-ref-api/raw/8f3425654fd739a2135d66de4a4b726726b9abb4/src/integrationTest/java/uk/gov/hmcts/reform/cwrdapi/CaseWorkerCreateUserWithFileUploadTest.java",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-caseworker-ref-api/contents/src/integrationTest/java/uk/gov/hmcts/reform/cwrdapi/CaseWorkerCreateUserWithFileUploadTest.java?ref=8f3425654fd739a2135d66de4a4b726726b9abb4",
+    "patch": "@@ -127,6 +127,12 @@ public void shouldReturn400WhenFileHasNoData() throws IOException {\n             TYPE_XLSX, \"400\", cwdAdmin);\n     }\n \n+    @Test\n+    public void shouldReturn400WhenFileHasEmptyRows() throws IOException {\n+        uploadCaseWorkerFile(\"Staff Data Upload With Empty Rows.xlsx\",\n+            TYPE_XLSX, \"400\", cwdAdmin);\n+    }\n+\n     @Test\n     public void shouldReturn400WhenContentTypeIsInvalid() throws IOException {\n         uploadCaseWorkerFile(\"Staff Data Upload Xlsx With Only Header.xlsx\","
+  },
+  {
+    "sha": "483b3c2c7a29c0629dd4251d0108cbebd88a8f3c",
+    "filename": "src/integrationTest/resources/Staff Data Upload With Empty Rows.xlsx",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/hmcts/rd-caseworker-ref-api/blob/8f3425654fd739a2135d66de4a4b726726b9abb4/src/integrationTest/resources/Staff%20Data%20Upload%20With%20Empty%20Rows.xlsx",
+    "raw_url": "https://github.com/hmcts/rd-caseworker-ref-api/raw/8f3425654fd739a2135d66de4a4b726726b9abb4/src/integrationTest/resources/Staff%20Data%20Upload%20With%20Empty%20Rows.xlsx",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-caseworker-ref-api/contents/src/integrationTest/resources/Staff%20Data%20Upload%20With%20Empty%20Rows.xlsx?ref=8f3425654fd739a2135d66de4a4b726726b9abb4"
+  },
+  {
+    "sha": "fc58622600e333b18b3d15155e27857779f19979",
+    "filename": "src/main/java/uk/gov/hmcts/reform/cwrdapi/service/impl/ExcelAdaptorServiceImpl.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 7,
+    "changes": 35,
+    "blob_url": "https://github.com/hmcts/rd-caseworker-ref-api/blob/8f3425654fd739a2135d66de4a4b726726b9abb4/src/main/java/uk/gov/hmcts/reform/cwrdapi/service/impl/ExcelAdaptorServiceImpl.java",
+    "raw_url": "https://github.com/hmcts/rd-caseworker-ref-api/raw/8f3425654fd739a2135d66de4a4b726726b9abb4/src/main/java/uk/gov/hmcts/reform/cwrdapi/service/impl/ExcelAdaptorServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-caseworker-ref-api/contents/src/main/java/uk/gov/hmcts/reform/cwrdapi/service/impl/ExcelAdaptorServiceImpl.java?ref=8f3425654fd739a2135d66de4a4b726726b9abb4",
+    "patch": "@@ -34,6 +34,7 @@\n import static java.util.Objects.nonNull;\n import static java.util.Optional.empty;\n import static java.util.Optional.ofNullable;\n+import static org.apache.commons.lang3.BooleanUtils.isNotTrue;\n import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;\n import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;\n import static org.springframework.util.ReflectionUtils.makeAccessible;\n@@ -114,23 +115,43 @@ private void validateHeaders(List<String> headersToBeValidated,\n         Field rowField = getRowIdField((Class<Object>) classType);\n         Optional<Object> bean;\n         while (rowIterator.hasNext()) {\n-            bean = handleRowProcessing(classType, rowField, headers, rowIterator.next(), parentFieldMap,\n-                childHeaderToCellMap, customObjectFieldsMapping);\n-            bean.ifPresent(o -> objectList.add((T) o));\n+            Row row = rowIterator.next();\n+            if (isNotTrue(isBlankRow(row))) {\n+                bean = handleRowProcessing(classType, rowField, headers, row, parentFieldMap,\n+                        childHeaderToCellMap, customObjectFieldsMapping);\n+                bean.ifPresent(o -> objectList.add((T) o));\n+            } else {\n+                break;\n+            }\n         }\n         return objectList;\n     }\n \n+    private boolean isBlankRow(Row row) {\n+        boolean isEmptyRow = false;\n+        try {\n+            if (checkIfRowIsEmpty(row)) {\n+                if (row.getRowNum() == 1) {\n+                    throw new ExcelValidationException(HttpStatus.BAD_REQUEST, FILE_NO_DATA_ERROR_MESSAGE);\n+                }\n+                isEmptyRow = true;\n+            }\n+        } catch (ExcelValidationException e) {\n+            throw e;\n+        } catch (Exception ex) {\n+            log.error(\"{}::{}:: Job Id {}\", loggingComponentName, FILE_NO_DATA_ERROR_MESSAGE,\n+                    validationServiceFacade.getAuditJobId());\n+        }\n+        return isEmptyRow;\n+    }\n+\n     public <T> Optional<Object> handleRowProcessing(Class<T> classType, Field rowField, List<String> headers, Row row,\n                                                     Map<String, Field> parentFieldMap,\n                                                     Map<String, Object> childHeaderToCellMap,\n                                                     List<Triple<String, Field, List<Field>>>\n                                                         customObjectFieldsMapping) {\n         Object bean;\n         try {\n-            if (checkIfRowIsEmpty(row)) {\n-                return empty(); //Skipping empty rows\n-            }\n             bean = populateDomainObject(classType, rowField, headers, row, parentFieldMap, childHeaderToCellMap,\n                 customObjectFieldsMapping);\n         } catch (Exception ex) {\n@@ -315,7 +336,7 @@ private boolean checkIfRowIsEmpty(Row row) {\n         for (int cellNum = row.getFirstCellNum(); cellNum < row.getLastCellNum(); cellNum++) {\n             Cell cell = row.getCell(cellNum);\n             Object cellValue = getCellValue(cell);\n-            if (nonNull(cellValue) && isNotEmpty(cellValue.toString())) {\n+            if (nonNull(cellValue) && isNotEmpty(cellValue.toString().trim())) {\n                 return false;\n             }\n         }"
+  },
+  {
+    "sha": "680e21dacdda6c6715f25e8699f7f521a5bf10ce",
+    "filename": "src/test/java/uk/gov/hmcts/reform/cwrdapi/service/ExcelAdaptorServiceImplTest.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/hmcts/rd-caseworker-ref-api/blob/8f3425654fd739a2135d66de4a4b726726b9abb4/src/test/java/uk/gov/hmcts/reform/cwrdapi/service/ExcelAdaptorServiceImplTest.java",
+    "raw_url": "https://github.com/hmcts/rd-caseworker-ref-api/raw/8f3425654fd739a2135d66de4a4b726726b9abb4/src/test/java/uk/gov/hmcts/reform/cwrdapi/service/ExcelAdaptorServiceImplTest.java",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-caseworker-ref-api/contents/src/test/java/uk/gov/hmcts/reform/cwrdapi/service/ExcelAdaptorServiceImplTest.java?ref=8f3425654fd739a2135d66de4a4b726726b9abb4",
+    "patch": "@@ -146,4 +146,14 @@ public void sendServiceRoleMappingXlsxWithIncorrectHeaders() throws IOException\n                 .isExactlyInstanceOf(ExcelValidationException.class)\n                 .hasMessage(CaseWorkerConstants.FILE_MISSING_HEADERS);\n     }\n+\n+    @Test\n+    public void parseXlsxShouldThrowExceptionWhenBlankRowsPresentTest() throws IOException {\n+        Workbook workbook = WorkbookFactory\n+                .create(new File(\"src/test/resources/Staff Data Upload With Empty Rows.xlsx\"));\n+\n+        Assertions.assertThatThrownBy(() -> excelAdaptorServiceImpl.parseExcel(workbook, CaseWorkerProfile.class))\n+                .isExactlyInstanceOf(ExcelValidationException.class)\n+                .hasMessage(FILE_NO_DATA_ERROR_MESSAGE);\n+    }\n }"
+  },
+  {
+    "sha": "483b3c2c7a29c0629dd4251d0108cbebd88a8f3c",
+    "filename": "src/test/resources/Staff Data Upload With Empty Rows.xlsx",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/hmcts/rd-caseworker-ref-api/blob/8f3425654fd739a2135d66de4a4b726726b9abb4/src/test/resources/Staff%20Data%20Upload%20With%20Empty%20Rows.xlsx",
+    "raw_url": "https://github.com/hmcts/rd-caseworker-ref-api/raw/8f3425654fd739a2135d66de4a4b726726b9abb4/src/test/resources/Staff%20Data%20Upload%20With%20Empty%20Rows.xlsx",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-caseworker-ref-api/contents/src/test/resources/Staff%20Data%20Upload%20With%20Empty%20Rows.xlsx?ref=8f3425654fd739a2135d66de4a4b726726b9abb4"
+  },
+  {
+    "sha": "9e88db347761eeef0956f54f717159c2575acbc7",
+    "filename": "src/test/resources/Staff Data Upload.xlsx",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/hmcts/rd-caseworker-ref-api/blob/8f3425654fd739a2135d66de4a4b726726b9abb4/src/test/resources/Staff%20Data%20Upload.xlsx",
+    "raw_url": "https://github.com/hmcts/rd-caseworker-ref-api/raw/8f3425654fd739a2135d66de4a4b726726b9abb4/src/test/resources/Staff%20Data%20Upload.xlsx",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-caseworker-ref-api/contents/src/test/resources/Staff%20Data%20Upload.xlsx?ref=8f3425654fd739a2135d66de4a4b726726b9abb4"
+  }
+]

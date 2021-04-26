@@ -1,0 +1,2 @@
+To run this experiment, you should download [Codegex](https://github.com/codegex-analysis/Codegex), then put [exp_pull_requests.py)](https://github.com/codegex-analysis/codegex-evaluation/tree/main/result/pull-request/scripts/run_codegex/exp_pull_requests.py) and `crawl-pr](https://github.com/codegex-analysis/codegex-evaluation/tree/main/result/pull-request/crawl-pr)` (renaming as `PullRequests`) under the root of Codegex. Then install requirements and run the script.
+

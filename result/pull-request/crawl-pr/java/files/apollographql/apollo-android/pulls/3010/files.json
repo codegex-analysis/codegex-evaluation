@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "2383f455f86e3d4e4023f506cc00dbb46df39f86",
+    "filename": "apollo-http-cache/src/main/java/com/apollographql/apollo/cache/http/Utils.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apollographql/apollo-android/blob/b938e4b6caefb8b305361daf5269d024441faefc/apollo-http-cache/src/main/java/com/apollographql/apollo/cache/http/Utils.java",
+    "raw_url": "https://github.com/apollographql/apollo-android/raw/b938e4b6caefb8b305361daf5269d024441faefc/apollo-http-cache/src/main/java/com/apollographql/apollo/cache/http/Utils.java",
+    "contents_url": "https://api.github.com/repos/apollographql/apollo-android/contents/apollo-http-cache/src/main/java/com/apollographql/apollo/cache/http/Utils.java?ref=b938e4b6caefb8b305361daf5269d024441faefc",
+    "patch": "@@ -37,7 +37,7 @@\n \n   static Response strip(Response response) {\n     return response != null && response.body() != null\n-        ? response.newBuilder().body(null).networkResponse(null).cacheResponse(null).build()\n+        ? response.newBuilder().body(null).networkResponse(null).cacheResponse(null).priorResponse(null).build()\n         : response;\n   }\n "
+  },
+  {
+    "sha": "8a990f10c72e73bf6813e01aa9190c4e3b3ef61b",
+    "filename": "apollo-integration/src/test/java/com/apollographql/apollo/HttpCacheTestKotlin.kt",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/apollographql/apollo-android/blob/b938e4b6caefb8b305361daf5269d024441faefc/apollo-integration/src/test/java/com/apollographql/apollo/HttpCacheTestKotlin.kt",
+    "raw_url": "https://github.com/apollographql/apollo-android/raw/b938e4b6caefb8b305361daf5269d024441faefc/apollo-integration/src/test/java/com/apollographql/apollo/HttpCacheTestKotlin.kt",
+    "contents_url": "https://api.github.com/repos/apollographql/apollo-android/contents/apollo-integration/src/test/java/com/apollographql/apollo/HttpCacheTestKotlin.kt?ref=b938e4b6caefb8b305361daf5269d024441faefc",
+    "patch": "@@ -0,0 +1,52 @@\n+package com.apollographql.apollo\n+\n+import com.apollographql.apollo.Utils.mockResponse\n+import com.apollographql.apollo.api.cache.http.HttpCachePolicy\n+import com.apollographql.apollo.cache.http.ApolloHttpCache\n+import com.apollographql.apollo.cache.http.DiskLruHttpCacheStore\n+import com.apollographql.apollo.coroutines.await\n+import com.apollographql.apollo.integration.httpcache.AllPlanetsQuery\n+import kotlinx.coroutines.runBlocking\n+import okhttp3.OkHttpClient\n+import okhttp3.mockwebserver.MockResponse\n+import okhttp3.mockwebserver.MockWebServer\n+import org.junit.Test\n+import java.io.File\n+\n+class HttpCacheTestKotlin {\n+  private val response408 = MockResponse().setResponseCode(408).setBody(\"error\")\n+  private val response200 = mockResponse(\"HttpCacheTestAllPlanets.json\")\n+\n+  @Test\n+  fun test408() {\n+    val cacheDir = File(\"build/integrationTestCache\")\n+    cacheDir.deleteRecursively()\n+    val mockServer = MockWebServer()\n+\n+    val apolloClient = ApolloClient\n+      .builder()\n+      .serverUrl(mockServer.url(\"/\"))\n+      .httpCache(\n+        ApolloHttpCache(\n+          DiskLruHttpCacheStore(\n+            cacheDir,\n+            Long.MAX_VALUE\n+          )\n+        )\n+      )\n+      .defaultHttpCachePolicy(HttpCachePolicy.NETWORK_FIRST)\n+      .useHttpGetMethodForQueries(true)\n+      .useHttpGetMethodForPersistedQueries(true)\n+      .enableAutoPersistedQueries(true)\n+      .defaultHttpCachePolicy(HttpCachePolicy.NETWORK_FIRST)\n+      .build()\n+\n+    runBlocking {\n+      mockServer.enqueue(response200)\n+      apolloClient.query(AllPlanetsQuery()).await()\n+      mockServer.enqueue(response408)\n+      mockServer.enqueue(response408)\n+      apolloClient.query(AllPlanetsQuery()).await()\n+    }\n+  }\n+}\n\\ No newline at end of file"
+  }
+]

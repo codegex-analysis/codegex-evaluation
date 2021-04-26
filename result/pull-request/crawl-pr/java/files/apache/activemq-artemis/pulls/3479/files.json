@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "61e1894aca032492f4b6ec058d9729033f60aeff",
+    "filename": "artemis-core-client/src/main/java/org/apache/activemq/artemis/core/client/ActiveMQClientLogger.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/apache/activemq-artemis/blob/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/artemis-core-client/src/main/java/org/apache/activemq/artemis/core/client/ActiveMQClientLogger.java",
+    "raw_url": "https://github.com/apache/activemq-artemis/raw/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/artemis-core-client/src/main/java/org/apache/activemq/artemis/core/client/ActiveMQClientLogger.java",
+    "contents_url": "https://api.github.com/repos/apache/activemq-artemis/contents/artemis-core-client/src/main/java/org/apache/activemq/artemis/core/client/ActiveMQClientLogger.java?ref=b4307e8b891b68718cd727c80e6fa9f5738f9ff1",
+    "patch": "@@ -395,6 +395,11 @@\n            format = Message.Format.MESSAGE_FORMAT)\n    void unableToCheckEpollAvailability(@Cause Throwable e);\n \n+   @LogMessage(level = Logger.Level.WARN)\n+   @Message(id = 212080, value = \"Unable to check IoUring availability \",\n+      format = Message.Format.MESSAGE_FORMAT)\n+   void unableToCheckIoUringAvailability(@Cause Throwable e);\n+\n    @LogMessage(level = Logger.Level.WARN)\n    @Message(id = 212072, value = \"Failed to change channel state to ReadyForWriting \",\n            format = Message.Format.MESSAGE_FORMAT)\n@@ -420,6 +425,11 @@\n            format = Message.Format.MESSAGE_FORMAT)\n    void unableToCheckEpollAvailabilitynoClass();\n \n+   @LogMessage(level = Logger.Level.WARN)\n+   @Message(id = 212079, value = \"IoUring is not available, please add to the classpath or configure useIoUring=false to remove this warning\",\n+      format = Message.Format.MESSAGE_FORMAT)\n+   void unableToCheckIoUringAvailabilitynoClass();\n+\n    @LogMessage(level = Logger.Level.WARN)\n    @Message(id = 212077, value = \"Timed out waiting to receive initial broadcast from cluster. Retry {0} of {1}\",\n            format = Message.Format.MESSAGE_FORMAT)"
+  },
+  {
+    "sha": "2ef4d0de53f32a880e2618a4bb39ef11fef33f06",
+    "filename": "artemis-core-client/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/CheckDependencies.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/apache/activemq-artemis/blob/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/artemis-core-client/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/CheckDependencies.java",
+    "raw_url": "https://github.com/apache/activemq-artemis/raw/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/artemis-core-client/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/CheckDependencies.java",
+    "contents_url": "https://api.github.com/repos/apache/activemq-artemis/contents/artemis-core-client/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/CheckDependencies.java?ref=b4307e8b891b68718cd727c80e6fa9f5738f9ff1",
+    "patch": "@@ -54,4 +54,17 @@ public static final boolean isKQueueAvailable() {\n          return false;\n       }\n    }\n+\n+   public static boolean isIoUringAvailable() {\n+      try {\n+         return Env.isLinuxOs() && (boolean) (Class.forName(\"io.netty.incubator.channel.uring.IOUring\")\n+            .getMethod(\"isAvailable\").invoke(null));\n+      } catch (NoClassDefFoundError noClassDefFoundError) {\n+         ActiveMQClientLogger.LOGGER.unableToCheckIoUringAvailabilitynoClass();\n+         return false;\n+      } catch (Throwable e) {\n+         ActiveMQClientLogger.LOGGER.unableToCheckIoUringAvailability(e);\n+         return false;\n+      }\n+   }\n }"
+  },
+  {
+    "sha": "a6a1c924b89ea264e863b294bf02f47d1b134148",
+    "filename": "artemis-core-client/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/TransportConstants.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/activemq-artemis/blob/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/artemis-core-client/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/TransportConstants.java",
+    "raw_url": "https://github.com/apache/activemq-artemis/raw/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/artemis-core-client/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/TransportConstants.java",
+    "contents_url": "https://api.github.com/repos/apache/activemq-artemis/contents/artemis-core-client/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/TransportConstants.java?ref=b4307e8b891b68718cd727c80e6fa9f5738f9ff1",
+    "patch": "@@ -61,6 +61,8 @@\n \n    public static final String USE_KQUEUE_PROP_NAME = \"useKQueue\";\n \n+   public static final String USE_IOURING_PROP_NAME = \"useIoUring\";\n+\n    @Deprecated\n    /**\n     * @deprecated Use USE_GLOBAL_WORKER_POOL_PROP_NAME\n@@ -202,6 +204,8 @@\n \n    public static final boolean DEFAULT_USE_KQUEUE = true;\n \n+   public static final boolean DEFAULT_USE_IOURING = false;\n+\n    public static final boolean DEFAULT_USE_INVM = false;\n \n    public static final boolean DEFAULT_USE_SERVLET = false;\n@@ -374,6 +378,7 @@ private static int parseDefaultVariable(String variableName, int defaultValue) {\n       allowableAcceptorKeys.add(TransportConstants.USE_EPOLL_PROP_NAME);\n       allowableAcceptorKeys.add(TransportConstants.USE_KQUEUE_PROP_NAME);\n       allowableAcceptorKeys.add(TransportConstants.USE_INVM_PROP_NAME);\n+      allowableAcceptorKeys.add(TransportConstants.USE_IOURING_PROP_NAME);\n       //noinspection deprecation\n       allowableAcceptorKeys.add(TransportConstants.PROTOCOL_PROP_NAME);\n       allowableAcceptorKeys.add(TransportConstants.PROTOCOLS_PROP_NAME);\n@@ -443,6 +448,7 @@ private static int parseDefaultVariable(String variableName, int defaultValue) {\n       allowableConnectorKeys.add(TransportConstants.USE_NIO_GLOBAL_WORKER_POOL_PROP_NAME);\n       allowableConnectorKeys.add(TransportConstants.USE_EPOLL_PROP_NAME);\n       allowableConnectorKeys.add(TransportConstants.USE_KQUEUE_PROP_NAME);\n+      allowableConnectorKeys.add(TransportConstants.USE_IOURING_PROP_NAME);\n       allowableConnectorKeys.add(TransportConstants.USE_GLOBAL_WORKER_POOL_PROP_NAME);\n       allowableConnectorKeys.add(TransportConstants.HOST_PROP_NAME);\n       allowableConnectorKeys.add(TransportConstants.PORT_PROP_NAME);"
+  },
+  {
+    "sha": "6c01fc50127a1797650ff1e4a8a89470ce462ab4",
+    "filename": "artemis-server/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/NettyAcceptor.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/apache/activemq-artemis/blob/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/artemis-server/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/NettyAcceptor.java",
+    "raw_url": "https://github.com/apache/activemq-artemis/raw/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/artemis-server/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/NettyAcceptor.java",
+    "contents_url": "https://api.github.com/repos/apache/activemq-artemis/contents/artemis-server/src/main/java/org/apache/activemq/artemis/core/remoting/impl/netty/NettyAcceptor.java?ref=b4307e8b891b68718cd727c80e6fa9f5738f9ff1",
+    "patch": "@@ -40,6 +40,7 @@\n import java.util.concurrent.Executor;\n import java.util.concurrent.ScheduledExecutorService;\n import java.util.concurrent.ScheduledFuture;\n+import java.util.concurrent.ThreadFactory;\n import java.util.concurrent.TimeUnit;\n import java.util.concurrent.atomic.AtomicBoolean;\n \n@@ -112,6 +113,7 @@\n    public static final String NIO_ACCEPTOR_TYPE = \"NIO\";\n    public static final String EPOLL_ACCEPTOR_TYPE = \"EPOLL\";\n    public static final String KQUEUE_ACCEPTOR_TYPE = \"KQUEUE\";\n+   public static final String IOURING_ACCEPTOR_TYPE = \"IO_URING\";\n \n    static {\n       // Disable default Netty leak detection if the Netty leak detection level system properties are not in use\n@@ -148,6 +150,8 @@\n \n    private final boolean useKQueue;\n \n+   private final boolean useIoUring;\n+\n    private final ProtocolHandler protocolHandler;\n \n    private final String host;\n@@ -268,6 +272,7 @@ public NettyAcceptor(final String name,\n \n       useEpoll = ConfigurationHelper.getBooleanProperty(TransportConstants.USE_EPOLL_PROP_NAME, TransportConstants.DEFAULT_USE_EPOLL, configuration);\n       useKQueue = ConfigurationHelper.getBooleanProperty(TransportConstants.USE_KQUEUE_PROP_NAME, TransportConstants.DEFAULT_USE_KQUEUE, configuration);\n+      useIoUring = ConfigurationHelper.getBooleanProperty(TransportConstants.USE_IOURING_PROP_NAME, TransportConstants.DEFAULT_USE_IOURING, configuration);\n \n       backlog = ConfigurationHelper.getIntProperty(TransportConstants.BACKLOG_PROP_NAME, -1, configuration);\n       useInvm = ConfigurationHelper.getBooleanProperty(TransportConstants.USE_INVM_PROP_NAME, TransportConstants.DEFAULT_USE_INVM, configuration);\n@@ -401,6 +406,21 @@ public ActiveMQThreadFactory run() {\n             acceptorType = KQUEUE_ACCEPTOR_TYPE;\n \n             logger.debug(\"Acceptor using native kqueue\");\n+         } else if (useIoUring && CheckDependencies.isIoUringAvailable()) {\n+            channelClazz = (Class<? extends ServerChannel>) Class.forName(\"io.netty.incubator.channel.uring.IOUringServerSocketChannel\",\n+                                                                          true, ClientSessionFactoryImpl.class.getClassLoader());\n+            eventLoopGroup = (EventLoopGroup) Class.forName(\"io.netty.incubator.channel.uring.IOUringEventLoopGroup\",\n+                                                            true, ClientSessionFactoryImpl.class.getClassLoader())\n+               .getConstructor(int.class, ThreadFactory.class)\n+               .newInstance(remotingThreads, AccessController.doPrivileged(new PrivilegedAction<ActiveMQThreadFactory>() {\n+                  @Override\n+                  public ActiveMQThreadFactory run() {\n+                     return new ActiveMQThreadFactory(\"activemq-netty-threads\", true, ClientSessionFactoryImpl.class.getClassLoader());\n+                  }\n+               }));\n+            acceptorType = IOURING_ACCEPTOR_TYPE;\n+\n+            logger.debug(\"Acceptor using native io_uring\");\n          } else {\n             channelClazz = NioServerSocketChannel.class;\n             eventLoopGroup = new NioEventLoopGroup(remotingThreads, AccessController.doPrivileged(new PrivilegedAction<ActiveMQThreadFactory>() {"
+  },
+  {
+    "sha": "51b1464e53f7226a2d2c07215a2c3629bf194c1f",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/activemq-artemis/blob/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/pom.xml",
+    "raw_url": "https://github.com/apache/activemq-artemis/raw/b4307e8b891b68718cd727c80e6fa9f5738f9ff1/pom.xml",
+    "contents_url": "https://api.github.com/repos/apache/activemq-artemis/contents/pom.xml?ref=b4307e8b891b68718cd727c80e6fa9f5738f9ff1",
+    "patch": "@@ -103,7 +103,7 @@\n       <maven.assembly.plugin.version>2.4</maven.assembly.plugin.version>\n       <mockito.version>3.3.3</mockito.version>\n       <jctools.version>2.1.2</jctools.version>\n-      <netty.version>4.1.51.Final</netty.version>\n+      <netty.version>4.1.59.Final</netty.version>\n \n       <!-- this is basically for tests -->\n       <netty-tcnative-version>2.0.33.Final</netty-tcnative-version>"
+  }
+]

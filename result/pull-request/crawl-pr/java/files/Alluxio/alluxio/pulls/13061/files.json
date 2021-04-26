@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "dea9978ef1543eaa92fb6cf075113f4994e797d4",
+    "filename": "integration/kubernetes/helm-chart/alluxio/CHANGELOG.md",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/Alluxio/alluxio/blob/0233df14a2ab3d06463108b81e9fd5f1f78fc127/integration/kubernetes/helm-chart/alluxio/CHANGELOG.md",
+    "raw_url": "https://github.com/Alluxio/alluxio/raw/0233df14a2ab3d06463108b81e9fd5f1f78fc127/integration/kubernetes/helm-chart/alluxio/CHANGELOG.md",
+    "contents_url": "https://api.github.com/repos/Alluxio/alluxio/contents/integration/kubernetes/helm-chart/alluxio/CHANGELOG.md?ref=0233df14a2ab3d06463108b81e9fd5f1f78fc127",
+    "patch": "@@ -145,4 +145,9 @@\n - Add a table of keys and default values for the Helm templates in README\n \n 0.6.13\n+\n - Add remote logger for Alluxio services, putting the centralized logs in emptyDir/hostPath/PVC\n+\n+0.6.14\n+\n+- Migrate master StatefuleSet and worker DaemonSet securityContext to Pod-level (see Issue #13096)"
+  },
+  {
+    "sha": "a098215359dcf6d86a2401ab30fa676409051cd7",
+    "filename": "integration/kubernetes/helm-chart/alluxio/Chart.yaml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Alluxio/alluxio/blob/0233df14a2ab3d06463108b81e9fd5f1f78fc127/integration/kubernetes/helm-chart/alluxio/Chart.yaml",
+    "raw_url": "https://github.com/Alluxio/alluxio/raw/0233df14a2ab3d06463108b81e9fd5f1f78fc127/integration/kubernetes/helm-chart/alluxio/Chart.yaml",
+    "contents_url": "https://api.github.com/repos/Alluxio/alluxio/contents/integration/kubernetes/helm-chart/alluxio/Chart.yaml?ref=0233df14a2ab3d06463108b81e9fd5f1f78fc127",
+    "patch": "@@ -12,7 +12,7 @@\n name: alluxio\n apiVersion: v1\n description: Open source data orchestration for analytics and machine learning in any cloud.\n-version: 0.6.13\n+version: 0.6.14\n home: https://www.alluxio.io/\n maintainers:\n - name: Adit Madan"
+  },
+  {
+    "sha": "4a1de883b5d22ec7117d8b24f7f3b84769109429",
+    "filename": "integration/kubernetes/helm-chart/alluxio/templates/master/statefulset.yaml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 8,
+    "changes": 10,
+    "blob_url": "https://github.com/Alluxio/alluxio/blob/0233df14a2ab3d06463108b81e9fd5f1f78fc127/integration/kubernetes/helm-chart/alluxio/templates/master/statefulset.yaml",
+    "raw_url": "https://github.com/Alluxio/alluxio/raw/0233df14a2ab3d06463108b81e9fd5f1f78fc127/integration/kubernetes/helm-chart/alluxio/templates/master/statefulset.yaml",
+    "contents_url": "https://api.github.com/repos/Alluxio/alluxio/contents/integration/kubernetes/helm-chart/alluxio/templates/master/statefulset.yaml?ref=0233df14a2ab3d06463108b81e9fd5f1f78fc127",
+    "patch": "@@ -68,14 +68,14 @@ spec:\n {{ toYaml .Values.nodeSelector | trim | indent 8  }}\n       {{- end }}\n       securityContext:\n+        runAsUser: {{ .Values.user }}\n+        runAsGroup: {{ .Values.group }}\n         fsGroup: {{ .Values.fsGroup }}\n       initContainers:\n       {{- if .Values.journal.format.runFormat}}\n       - name: journal-format\n         image: {{ .Values.image }}:{{ .Values.imageTag }}\n         imagePullPolicy: {{ .Values.imagePullPolicy }}\n-        securityContext:\n-          runAsUser: {{ .Values.user }}\n         command: [\"alluxio\",\"formatJournal\"]\n         volumeMounts:\n           - name: alluxio-journal\n@@ -85,9 +85,6 @@ spec:\n         - name: alluxio-master\n           image: {{ .Values.image }}:{{ .Values.imageTag }}\n           imagePullPolicy: {{ .Values.imagePullPolicy }}\n-          securityContext:\n-            runAsUser: {{ .Values.user }}\n-            runAsGroup: {{ .Values.group }}\n           {{- if .Values.master.resources  }}\n {{ include \"alluxio.master.resources\" . | indent 10 }}\n           {{- end }}\n@@ -155,9 +152,6 @@ spec:\n         - name: alluxio-job-master\n           image: {{ .Values.image }}:{{ .Values.imageTag }}\n           imagePullPolicy: {{ .Values.imagePullPolicy }}\n-          securityContext:\n-            runAsUser: {{ .Values.user }}\n-            runAsGroup: {{ .Values.group }}\n           {{- if .Values.jobMaster.resources  }}\n {{ include \"alluxio.jobMaster.resources\" . | indent 10 }}\n           {{- end }}"
+  },
+  {
+    "sha": "78672f80243fd576c7724a4f8559683c517ebb99",
+    "filename": "integration/kubernetes/helm-chart/alluxio/templates/worker/daemonset.yaml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 6,
+    "changes": 8,
+    "blob_url": "https://github.com/Alluxio/alluxio/blob/0233df14a2ab3d06463108b81e9fd5f1f78fc127/integration/kubernetes/helm-chart/alluxio/templates/worker/daemonset.yaml",
+    "raw_url": "https://github.com/Alluxio/alluxio/raw/0233df14a2ab3d06463108b81e9fd5f1f78fc127/integration/kubernetes/helm-chart/alluxio/templates/worker/daemonset.yaml",
+    "contents_url": "https://api.github.com/repos/Alluxio/alluxio/contents/integration/kubernetes/helm-chart/alluxio/templates/worker/daemonset.yaml?ref=0233df14a2ab3d06463108b81e9fd5f1f78fc127",
+    "patch": "@@ -53,6 +53,8 @@ spec:\n       hostPID: {{ $hostPID }}\n       dnsPolicy: {{ .Values.worker.dnsPolicy | default ($hostNetwork | ternary \"ClusterFirstWithHostNet\" \"ClusterFirst\") }}\n       securityContext:\n+        runAsUser: {{ .Values.user }}\n+        runAsGroup: {{ .Values.group }}\n         fsGroup: {{ .Values.fsGroup }}\n       nodeSelector:\n       {{- if .Values.worker.nodeSelector }}\n@@ -64,9 +66,6 @@ spec:\n         - name: alluxio-worker\n           image: {{ .Values.image }}:{{ .Values.imageTag }}\n           imagePullPolicy: {{ .Values.imagePullPolicy }}\n-          securityContext:\n-            runAsUser: {{ .Values.user }}\n-            runAsGroup: {{ .Values.group }}\n           {{- if .Values.worker.resources  }}\n {{ include \"alluxio.worker.resources\" . | indent 10 }}\n           {{- end }}\n@@ -122,9 +121,6 @@ spec:\n             {{- end }}\n         - name: alluxio-job-worker\n           image: {{ .Values.image }}:{{ .Values.imageTag }}\n-          securityContext:\n-            runAsUser: {{ .Values.user }}\n-            runAsGroup: {{ .Values.group }}\n           imagePullPolicy: {{ .Values.imagePullPolicy }}\n           {{- if .Values.jobWorker.resources  }}\n {{ include \"alluxio.jobWorker.resources\" . | indent 10 }}"
+  }
+]

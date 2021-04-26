@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "fdd3b397b1136c95c864ab32a906e22e4ad21dd0",
+    "filename": "actions.js",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/AGvisorPRO/react-native-callkeep/blob/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/actions.js",
+    "raw_url": "https://github.com/AGvisorPRO/react-native-callkeep/raw/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/actions.js",
+    "contents_url": "https://api.github.com/repos/AGvisorPRO/react-native-callkeep/contents/actions.js?ref=0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492",
+    "patch": "@@ -4,6 +4,7 @@ const RNCallKeepModule = NativeModules.RNCallKeep;\n const eventEmitter = new NativeEventEmitter(RNCallKeepModule);\n \n const RNCallKeepDidReceiveStartCallAction = 'RNCallKeepDidReceiveStartCallAction';\n+const RNCallKeepPerformShowIncomingCallAction = 'RNCallKeepPerformShowIncomingCallAction';\n const RNCallKeepPerformAnswerCallAction = 'RNCallKeepPerformAnswerCallAction';\n const RNCallKeepPerformEndCallAction = 'RNCallKeepPerformEndCallAction';\n const RNCallKeepDidActivateAudioSession = 'RNCallKeepDidActivateAudioSession';\n@@ -26,6 +27,9 @@ const didReceiveStartCallAction = handler => {\n   return eventEmitter.addListener(RNCallKeepDidReceiveStartCallAction, (data) => handler(data));\n };\n \n+const showIncomingCall = handler =>\n+  eventEmitter.addListener(RNCallKeepPerformShowIncomingCallAction, (data) => handler(data));\n+\n const answerCall = handler =>\n   eventEmitter.addListener(RNCallKeepPerformAnswerCallAction, (data) => handler(data));\n \n@@ -63,6 +67,7 @@ export const emit = (eventName, payload) => eventEmitter.emit(eventName, payload\n \n export const listeners = {\n   didReceiveStartCallAction,\n+  showIncomingCall,\n   answerCall,\n   endCall,\n   didActivateAudioSession,"
+  },
+  {
+    "sha": "fe5c248104b46b75c90ddcc35d963eb42c4a0e44",
+    "filename": "android/src/main/java/io/wazo/callkeep/Constants.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/AGvisorPRO/react-native-callkeep/blob/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/Constants.java",
+    "raw_url": "https://github.com/AGvisorPRO/react-native-callkeep/raw/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/Constants.java",
+    "contents_url": "https://api.github.com/repos/AGvisorPRO/react-native-callkeep/contents/android/src/main/java/io/wazo/callkeep/Constants.java?ref=0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492",
+    "patch": "@@ -1,6 +1,7 @@\n package io.wazo.callkeep;\n \n public class Constants {\n+    public static final String ACTION_SHOW_INCOMING_CALL = \"ACTION_SHOW_INCOMING_CALL\";\n     public static final String ACTION_ANSWER_CALL = \"ACTION_ANSWER_CALL\";\n     public static final String ACTION_AUDIO_SESSION = \"ACTION_AUDIO_SESSION\";\n     public static final String ACTION_CHECK_REACHABILITY = \"ACTION_CHECK_REACHABILITY\";"
+  },
+  {
+    "sha": "6c1c7e6bdf0c0d4e7eef2a6ce473531bccced394",
+    "filename": "android/src/main/java/io/wazo/callkeep/RNCallKeepBackgroundMessagingService.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AGvisorPRO/react-native-callkeep/blob/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/RNCallKeepBackgroundMessagingService.java",
+    "raw_url": "https://github.com/AGvisorPRO/react-native-callkeep/raw/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/RNCallKeepBackgroundMessagingService.java",
+    "contents_url": "https://api.github.com/repos/AGvisorPRO/react-native-callkeep/contents/android/src/main/java/io/wazo/callkeep/RNCallKeepBackgroundMessagingService.java?ref=0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492",
+    "patch": "@@ -42,7 +42,7 @@ HeadlessJsTaskConfig getTaskConfig(Intent intent) {\n       \"RNCallKeepBackgroundMessage\",\n       Arguments.fromBundle(extras),\n       60000,\n-      false\n+      true\n     );\n   }\n }"
+  },
+  {
+    "sha": "8a8fca4e8c6fd368ee7cd8fd5aec3f7e3e5ca45f",
+    "filename": "android/src/main/java/io/wazo/callkeep/RNCallKeepModule.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 3,
+    "changes": 13,
+    "blob_url": "https://github.com/AGvisorPRO/react-native-callkeep/blob/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/RNCallKeepModule.java",
+    "raw_url": "https://github.com/AGvisorPRO/react-native-callkeep/raw/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/RNCallKeepModule.java",
+    "contents_url": "https://api.github.com/repos/AGvisorPRO/react-native-callkeep/contents/android/src/main/java/io/wazo/callkeep/RNCallKeepModule.java?ref=0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492",
+    "patch": "@@ -75,6 +75,7 @@\n import static io.wazo.callkeep.Constants.EXTRA_CALL_UUID;\n import static io.wazo.callkeep.Constants.EXTRA_CALL_NUMBER;\n import static io.wazo.callkeep.Constants.ACTION_END_CALL;\n+import static io.wazo.callkeep.Constants.ACTION_SHOW_INCOMING_CALL;\n import static io.wazo.callkeep.Constants.ACTION_ANSWER_CALL;\n import static io.wazo.callkeep.Constants.ACTION_MUTE_CALL;\n import static io.wazo.callkeep.Constants.ACTION_UNMUTE_CALL;\n@@ -163,7 +164,7 @@ public void displayIncomingCall(String uuid, String number, String callerName) {\n         Log.d(TAG, \"displayIncomingCall number: \" + number + \", callerName: \" + callerName);\n \n         Bundle extras = new Bundle();\n-        Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null);\n+        Uri uri = Uri.fromParts(PhoneAccount.SCHEME_SIP, number, null);\n \n         extras.putParcelable(TelecomManager.EXTRA_INCOMING_CALL_ADDRESS, uri);\n         extras.putString(EXTRA_CALLER_NAME, callerName);\n@@ -195,7 +196,7 @@ public void startCall(String uuid, String number, String callerName) {\n         Log.d(TAG, \"startCall number: \" + number + \", callerName: \" + callerName);\n \n         Bundle extras = new Bundle();\n-        Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null);\n+        Uri uri = Uri.fromParts(PhoneAccount.SCHEME_SIP, number, null);\n \n         Bundle callExtras = new Bundle();\n         callExtras.putString(EXTRA_CALLER_NAME, callerName);\n@@ -575,7 +576,8 @@ private void registerPhoneAccount(Context appContext) {\n         String appName = this.getApplicationName(this.getAppContext());\n \n         PhoneAccount.Builder builder = new PhoneAccount.Builder(handle, appName)\n-                .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER);\n+                .setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED)\n+                .addSupportedUriScheme(PhoneAccount.SCHEME_SIP);\n \n         if (_settings != null && _settings.hasKey(\"imageName\")) {\n             int identifier = appContext.getResources().getIdentifier(_settings.getString(\"imageName\"), \"drawable\", appContext.getPackageName());\n@@ -628,6 +630,7 @@ private void registerReceiver() {\n         if (!isReceiverRegistered) {\n             IntentFilter intentFilter = new IntentFilter();\n             intentFilter.addAction(ACTION_END_CALL);\n+            intentFilter.addAction(ACTION_SHOW_INCOMING_CALL);\n             intentFilter.addAction(ACTION_ANSWER_CALL);\n             intentFilter.addAction(ACTION_MUTE_CALL);\n             intentFilter.addAction(ACTION_UNMUTE_CALL);\n@@ -670,6 +673,10 @@ public void onReceive(Context context, Intent intent) {\n                     args.putString(\"callUUID\", attributeMap.get(EXTRA_CALL_UUID));\n                     sendEventToJS(\"RNCallKeepPerformEndCallAction\", args);\n                     break;\n+                case ACTION_SHOW_INCOMING_CALL:\n+                    args.putString(\"callUUID\", attributeMap.get(EXTRA_CALL_UUID));\n+                    sendEventToJS(\"RNCallKeepPerformShowIncomingCallAction\", args);\n+                    break;\n                 case ACTION_ANSWER_CALL:\n                     args.putString(\"callUUID\", attributeMap.get(EXTRA_CALL_UUID));\n                     sendEventToJS(\"RNCallKeepPerformAnswerCallAction\", args);"
+  },
+  {
+    "sha": "262960a5dc237deaebedce05358445b00e3e71f4",
+    "filename": "android/src/main/java/io/wazo/callkeep/VoiceConnection.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/AGvisorPRO/react-native-callkeep/blob/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/VoiceConnection.java",
+    "raw_url": "https://github.com/AGvisorPRO/react-native-callkeep/raw/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/VoiceConnection.java",
+    "contents_url": "https://api.github.com/repos/AGvisorPRO/react-native-callkeep/contents/android/src/main/java/io/wazo/callkeep/VoiceConnection.java?ref=0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492",
+    "patch": "@@ -43,6 +43,7 @@\n import static io.wazo.callkeep.Constants.ACTION_END_CALL;\n import static io.wazo.callkeep.Constants.ACTION_HOLD_CALL;\n import static io.wazo.callkeep.Constants.ACTION_MUTE_CALL;\n+import static io.wazo.callkeep.Constants.ACTION_SHOW_INCOMING_CALL;\n import static io.wazo.callkeep.Constants.ACTION_UNHOLD_CALL;\n import static io.wazo.callkeep.Constants.ACTION_UNMUTE_CALL;\n import static io.wazo.callkeep.Constants.EXTRA_CALLER_NAME;\n@@ -91,6 +92,14 @@ public void onCallAudioStateChanged(CallAudioState state) {\n         sendCallRequestToActivity(isMuted ? ACTION_MUTE_CALL : ACTION_UNMUTE_CALL, handle);\n     }\n \n+    @Override\n+    public void onShowIncomingCallUi() {\n+        super.onShowIncomingCallUi();\n+        Log.d(TAG, \"onShowIncomingCallUi called\");\n+\n+        sendCallRequestToActivity(ACTION_SHOW_INCOMING_CALL, handle);\n+    }\n+\n     @Override\n     public void onAnswer() {\n         super.onAnswer();"
+  },
+  {
+    "sha": "d884cbcc60a24f44cb2a9b8d42108d88ef6b6c22",
+    "filename": "android/src/main/java/io/wazo/callkeep/VoiceConnectionService.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/AGvisorPRO/react-native-callkeep/blob/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/VoiceConnectionService.java",
+    "raw_url": "https://github.com/AGvisorPRO/react-native-callkeep/raw/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/android/src/main/java/io/wazo/callkeep/VoiceConnectionService.java",
+    "contents_url": "https://api.github.com/repos/AGvisorPRO/react-native-callkeep/contents/android/src/main/java/io/wazo/callkeep/VoiceConnectionService.java?ref=0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492",
+    "patch": "@@ -34,6 +34,7 @@\n import android.speech.tts.Voice;\n import androidx.annotation.Nullable;\n import androidx.core.app.NotificationCompat;\n+import android.telecom.PhoneAccount;\n import androidx.localbroadcastmanager.content.LocalBroadcastManager;\n import android.telecom.CallAudioState;\n import android.telecom.Connection;\n@@ -308,6 +309,12 @@ private Connection createConnection(ConnectionRequest request) {\n         connection.setExtras(extras);\n         currentConnections.put(extras.getString(EXTRA_CALL_UUID), connection);\n \n+        TelecomManager telecomManager = (TelecomManager) this.getApplicationContext().getSystemService(Context.TELECOM_SERVICE);\n+        PhoneAccount phoneAccount = telecomManager.getPhoneAccount(request.getAccountHandle());\n+        if ((phoneAccount.getCapabilities() & PhoneAccount.CAPABILITY_SELF_MANAGED) != 0) {\n+            connection.setConnectionProperties(Connection.PROPERTY_SELF_MANAGED);\n+        }\n+\n         // Get other connections for conferencing\n         Map<String, VoiceConnection> otherConnections = new HashMap<>();\n         for (Map.Entry<String, VoiceConnection> entry : currentConnections.entrySet()) {"
+  },
+  {
+    "sha": "357825a56030d517dcae8b66657b458fa97911b8",
+    "filename": "index.d.ts",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/AGvisorPRO/react-native-callkeep/blob/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/index.d.ts",
+    "raw_url": "https://github.com/AGvisorPRO/react-native-callkeep/raw/0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492/index.d.ts",
+    "contents_url": "https://api.github.com/repos/AGvisorPRO/react-native-callkeep/contents/index.d.ts?ref=0c671770ba5a1f1766c5a6c5ac667f8eb2e4f492",
+    "patch": "@@ -2,6 +2,7 @@ declare module 'react-native-callkeep' {\n   export type Events =\n     'didReceiveStartCallAction' |\n     'answerCall' |\n+    'showIncomingCall' |\n     'endCall' |\n     'didActivateAudioSession' |\n     'didDeactivateAudioSession' |"
+  }
+]

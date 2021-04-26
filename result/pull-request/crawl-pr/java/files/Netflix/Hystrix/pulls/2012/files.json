@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "ca06aab6d937ebafe3e5fe8d6d822f277932d9ce",
+    "filename": "hystrix-core/src/main/java/com/netflix/hystrix/AbstractCommand.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/Netflix/Hystrix/blob/5535a16fcb42e5ab72c858291b85d9942ad827b5/hystrix-core/src/main/java/com/netflix/hystrix/AbstractCommand.java",
+    "raw_url": "https://github.com/Netflix/Hystrix/raw/5535a16fcb42e5ab72c858291b85d9942ad827b5/hystrix-core/src/main/java/com/netflix/hystrix/AbstractCommand.java",
+    "contents_url": "https://api.github.com/repos/Netflix/Hystrix/contents/hystrix-core/src/main/java/com/netflix/hystrix/AbstractCommand.java?ref=5535a16fcb42e5ab72c858291b85d9942ad827b5",
+    "patch": "@@ -382,7 +382,9 @@ public void call() {\n         final Action0 unsubscribeCommandCleanup = new Action0() {\n             @Override\n             public void call() {\n-                circuitBreaker.markNonSuccess();\n+                if (circuitBreaker.isAfterTryWindow()) {\n+                    circuitBreaker.markNonSuccess();\n+                }\n                 if (_cmd.commandState.compareAndSet(CommandState.OBSERVABLE_CHAIN_CREATED, CommandState.UNSUBSCRIBED)) {\n                     if (!_cmd.executionResult.containsTerminalEvent()) {\n                         _cmd.eventNotifier.markEvent(HystrixEventType.CANCELLED, _cmd.commandKey);"
+  },
+  {
+    "sha": "7b9892fd8e4edad8599b6581237a80e2a12d4da7",
+    "filename": "hystrix-core/src/main/java/com/netflix/hystrix/HystrixCircuitBreaker.java",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 1,
+    "changes": 24,
+    "blob_url": "https://github.com/Netflix/Hystrix/blob/5535a16fcb42e5ab72c858291b85d9942ad827b5/hystrix-core/src/main/java/com/netflix/hystrix/HystrixCircuitBreaker.java",
+    "raw_url": "https://github.com/Netflix/Hystrix/raw/5535a16fcb42e5ab72c858291b85d9942ad827b5/hystrix-core/src/main/java/com/netflix/hystrix/HystrixCircuitBreaker.java",
+    "contents_url": "https://api.github.com/repos/Netflix/Hystrix/contents/hystrix-core/src/main/java/com/netflix/hystrix/HystrixCircuitBreaker.java?ref=5535a16fcb42e5ab72c858291b85d9942ad827b5",
+    "patch": "@@ -63,6 +63,11 @@\n      */\n     boolean attemptExecution();\n \n+    /**\n+     * Determine whether the time is exceeded\n+     */\n+    boolean isAfterTryWindow();\n+\n     /**\n      * @ExcludeFromJavadoc\n      * @ThreadSafe\n@@ -145,6 +150,7 @@ public static HystrixCircuitBreaker getInstance(HystrixCommandKey key) {\n \n         private final AtomicReference<Status> status = new AtomicReference<Status>(Status.CLOSED);\n         private final AtomicLong circuitOpened = new AtomicLong(-1);\n+        private final AtomicLong circuitTried = new AtomicLong(-1);\n         private final AtomicReference<Subscription> activeSubscription = new AtomicReference<Subscription>(null);\n \n         protected HystrixCircuitBreakerImpl(HystrixCommandKey key, HystrixCommandGroupKey commandGroup, final HystrixCommandProperties properties, HystrixCommandMetrics metrics) {\n@@ -260,6 +266,14 @@ private boolean isAfterSleepWindow() {\n             return currentTime > circuitOpenTime + sleepWindowTime;\n         }\n \n+        @Override\n+        public boolean isAfterTryWindow() {\n+            final long circuitTryTime = circuitTried.get();\n+            final long currentTime = System.currentTimeMillis();\n+            final long tryWindowTime = properties.circuitBreakerSleepWindowInMilliseconds().get();\n+            return currentTime > circuitTryTime + tryWindowTime;\n+        }\n+\n         @Override\n         public boolean attemptExecution() {\n             if (properties.circuitBreakerForceOpen().get()) {\n@@ -268,7 +282,8 @@ public boolean attemptExecution() {\n             if (properties.circuitBreakerForceClosed().get()) {\n                 return true;\n             }\n-            if (circuitOpened.get() == -1) {\n+            //Keep the conditions uniform\n+            if (status.get().equals(Status.CLOSED)) {\n                 return true;\n             } else {\n                 if (isAfterSleepWindow()) {\n@@ -277,6 +292,8 @@ public boolean attemptExecution() {\n                     //if the executing command fails, the status will transition to OPEN\n                     //if the executing command gets unsubscribed, the status will transition to OPEN\n                     if (status.compareAndSet(Status.OPEN, Status.HALF_OPEN)) {\n+                        //set try time\n+                        circuitTried.set(System.currentTimeMillis());\n                         return true;\n                     } else {\n                         return false;\n@@ -319,6 +336,11 @@ public void markNonSuccess() {\n         public boolean attemptExecution() {\n             return true;\n         }\n+\n+        @Override\n+        public boolean isAfterTryWindow() {\n+            return false;\n+        }\n     }\n \n }"
+  }
+]

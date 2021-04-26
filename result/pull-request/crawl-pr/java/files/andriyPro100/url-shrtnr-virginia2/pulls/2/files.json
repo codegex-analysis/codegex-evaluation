@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "268754d32c6edc70dea6f5e12055308cc433a87f",
+    "filename": "src/main/java/edu/kpi/testcourse/logic/Logic.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/blob/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/main/java/edu/kpi/testcourse/logic/Logic.java",
+    "raw_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/raw/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/main/java/edu/kpi/testcourse/logic/Logic.java",
+    "contents_url": "https://api.github.com/repos/andriyPro100/url-shrtnr-virginia2/contents/src/main/java/edu/kpi/testcourse/logic/Logic.java?ref=7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd",
+    "patch": "@@ -5,6 +5,7 @@\n import edu.kpi.testcourse.storage.UrlRepository;\n import edu.kpi.testcourse.storage.UrlRepository.AliasAlreadyExist;\n import edu.kpi.testcourse.storage.UserRepository;\n+import java.util.List;\n \n /**\n  * Business logic of the URL shortener application.\n@@ -92,6 +93,12 @@ public String findFullUrl(String alias) {\n \n     return null;\n   }\n+  /**\n+   * Get a list of aliases by user's email.\n+   */\n+  public List<UrlAlias> getAllAliases(String username) {\n+    return urls.getAllAliases(username);\n+  }\n \n   /**\n    * Error for situation when we are trying to register already registered user."
+  },
+  {
+    "sha": "ebced6802c16066fff94853dcd3cc248f93ad923",
+    "filename": "src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 1,
+    "changes": 26,
+    "blob_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/blob/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java",
+    "raw_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/raw/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java",
+    "contents_url": "https://api.github.com/repos/andriyPro100/url-shrtnr-virginia2/contents/src/main/java/edu/kpi/testcourse/rest/AuthenticatedApiController.java?ref=7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd",
+    "patch": "@@ -2,22 +2,27 @@\n \n import com.fasterxml.jackson.core.JsonProcessingException;\n import com.fasterxml.jackson.databind.ObjectMapper;\n+import edu.kpi.testcourse.entities.UrlAlias;\n import edu.kpi.testcourse.logic.Logic;\n import edu.kpi.testcourse.rest.models.ErrorResponse;\n import edu.kpi.testcourse.rest.models.UrlShortenRequest;\n import edu.kpi.testcourse.rest.models.UrlShortenResponse;\n import edu.kpi.testcourse.serialization.JsonTool;\n+import edu.kpi.testcourse.storage.UrlRepository;\n import edu.kpi.testcourse.storage.UrlRepository.AliasAlreadyExist;\n+import edu.kpi.testcourse.storage.UrlRepository.PermissionDenied;\n import io.micronaut.http.HttpRequest;\n import io.micronaut.http.HttpResponse;\n import io.micronaut.http.MediaType;\n import io.micronaut.http.annotation.Body;\n import io.micronaut.http.annotation.Controller;\n+import io.micronaut.http.annotation.Get;\n import io.micronaut.http.annotation.Post;\n import io.micronaut.http.server.util.HttpHostResolver;\n import io.micronaut.security.annotation.Secured;\n import io.micronaut.security.rules.SecurityRule;\n import java.security.Principal;\n+import java.util.List;\n import javax.inject.Inject;\n \n /**\n@@ -50,7 +55,7 @@ public AuthenticatedApiController(\n   }\n \n   /**\n-   * Create URL alias.\n+   * Create an URL alias.\n    */\n   @Post(value = \"/urls/shorten\", processes = MediaType.APPLICATION_JSON)\n   public HttpResponse<String> shorten(\n@@ -71,4 +76,23 @@ public AuthenticatedApiController(\n       );\n     }\n   }\n+\n+  /**\n+   * Show all URL aliases for a certain user.\n+   */\n+  @Get(value = \"/urls/showAllAliases\", processes = MediaType.APPLICATION_JSON)\n+  public HttpResponse<String> getAll(\n+      @Body UrlShortenRequest request,\n+      Principal principal,\n+      HttpRequest<?> httpRequest,\n+      Logic logic) throws UrlRepository.PermissionDenied {\n+    try {\n+      List<UrlAlias> aliasList = logic.getAllAliases(principal.getName());\n+      return HttpResponse.created(json.toJson(aliasList));\n+    } catch (PermissionDenied e) {\n+      return HttpResponse.serverError(\n+        json.toJson(new ErrorResponse(1, \"User is not authorized\"))\n+      );\n+    }\n+  }\n }"
+  },
+  {
+    "sha": "8aecb6a430d35b208280a9fb66138b8d2bc6c59a",
+    "filename": "src/main/java/edu/kpi/testcourse/storage/UrlRepository.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/blob/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/main/java/edu/kpi/testcourse/storage/UrlRepository.java",
+    "raw_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/raw/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/main/java/edu/kpi/testcourse/storage/UrlRepository.java",
+    "contents_url": "https://api.github.com/repos/andriyPro100/url-shrtnr-virginia2/contents/src/main/java/edu/kpi/testcourse/storage/UrlRepository.java?ref=7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd",
+    "patch": "@@ -32,7 +32,7 @@\n   /**\n    * Finds all URLs that belong to the user with the given email.\n    */\n-  List<UrlAlias> getAllAliasesForUser(String userEmail);\n+  List<UrlAlias> getAllAliases(String username);\n \n   /**\n    * Error for a case when we try to create a shortened URL that is already exist."
+  },
+  {
+    "sha": "a74771a7448cdad7d12e9782be2e05fe6741cf5d",
+    "filename": "src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java",
+    "status": "modified",
+    "additions": 42,
+    "deletions": 24,
+    "changes": 66,
+    "blob_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/blob/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java",
+    "raw_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/raw/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java",
+    "contents_url": "https://api.github.com/repos/andriyPro100/url-shrtnr-virginia2/contents/src/main/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImpl.java?ref=7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd",
+    "patch": "@@ -1,39 +1,57 @@\n package edu.kpi.testcourse.storage;\n \n import edu.kpi.testcourse.entities.UrlAlias;\n+import java.util.ArrayList;\n import java.util.HashMap;\n import java.util.List;\n import javax.annotation.Nullable;\n \n-/**\n+ /**\n  * An in-memory fake implementation of {@link UrlRepository}.\n  */\n public class UrlRepositoryFakeImpl implements UrlRepository {\n   private final HashMap<String, UrlAlias> aliases = new HashMap<>();\n-\n-  @Override\n-  public void createUrlAlias(UrlAlias urlAlias) {\n-    if (aliases.containsKey(urlAlias.alias())) {\n-      throw new UrlRepository.AliasAlreadyExist();\n-    }\n-\n-    aliases.put(urlAlias.alias(), urlAlias);\n-  }\n-\n-  @Override\n-  public @Nullable UrlAlias findUrlAlias(String alias) {\n-    return aliases.get(alias);\n-  }\n-\n-  @Override\n-  public void deleteUrlAlias(String email, String alias) {\n-    // TODO: We should implement it\n-    throw new UnsupportedOperationException();\n+  \n+ /**\n+ * Adding of an URL alias into a HashMap storage. \n+ */\n+@Override\n+public void createUrlAlias(UrlAlias urlAlias) {\n+  if (aliases.containsKey(urlAlias.alias())) {\n+    throw new UrlRepository.AliasAlreadyExist();\n   }\n+  aliases.put(urlAlias.alias(), urlAlias);\n+}\n \n-  @Override\n-  public List<UrlAlias> getAllAliasesForUser(String userEmail) {\n-    // TODO: We should implement it\n-    throw new UnsupportedOperationException();\n+ /**\n+ * Finding of an URL alias by alias name from the HashMap storage. \n+ */ \n+@Override\n+public @Nullable UrlAlias findUrlAlias(String alias) {\n+  return aliases.get(alias);\n+}\n+  \n+ /**\n+ * Deleting of an URL alias from the HashMap storage. \n+ */\n+@Override\n+public void deleteUrlAlias(String email, String alias) {\n+  // TODO: We should implement it\n+  throw new UnsupportedOperationException();\n+}\n+ /**\n+ * Getting a list of all URL aliases of certain user. \n+ */\n+@Override\n+public List<UrlAlias> getAllAliases(String username) {\n+  List<UrlAlias> aliasesList = new ArrayList<>();\n+  for (UrlAlias urlAlias : aliases.values()) {\n+    if (urlAlias.email().equals(username)) {\n+      aliasesList.add(urlAlias);\n+    } else {\n+      throw new PermissionDenied();\n+    }\n   }\n+  return aliasesList;\n+}\n }"
+  },
+  {
+    "sha": "805444b9f9e1a9367aacce0fe89f4a1873814b79",
+    "filename": "src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java",
+    "status": "modified",
+    "additions": 30,
+    "deletions": 2,
+    "changes": 32,
+    "blob_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/blob/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java",
+    "raw_url": "https://github.com/andriyPro100/url-shrtnr-virginia2/raw/7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd/src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java",
+    "contents_url": "https://api.github.com/repos/andriyPro100/url-shrtnr-virginia2/contents/src/test/java/edu/kpi/testcourse/storage/UrlRepositoryFakeImplTest.java?ref=7cc4ae0fb153dd1a0ee5bf4e9aefe87a74b34ebd",
+    "patch": "@@ -3,12 +3,18 @@\n import static org.assertj.core.api.AssertionsForClassTypes.assertThat;\n import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;\n import static org.junit.jupiter.api.Assertions.*;\n-\n import edu.kpi.testcourse.entities.UrlAlias;\n+import edu.kpi.testcourse.storage.UrlRepository.PermissionDenied;\n import org.junit.jupiter.api.Test;\n \n+/**\n+* Class for testing a storage module.\n+*/\n class UrlRepositoryFakeImplTest {\n \n+  /**\n+  * Checking functionality of creating aliases.\n+  */\n   @Test\n   void shouldCreateAlias() {\n     //GIVEN\n@@ -21,7 +27,10 @@ void shouldCreateAlias() {\n     //THEN\n     assertThat(repo.findUrlAlias(\"http://r.com/short\")).isEqualTo(alias);\n   }\n-\n+  \n+  /**\n+  * Checking functionality of abillity to not allowing creating the same aliases.\n+  */\n   @Test\n   void shouldNotAllowToCreateSameAliases() {\n     //GIVEN\n@@ -37,6 +46,25 @@ void shouldNotAllowToCreateSameAliases() {\n       repo.createUrlAlias(alias2);\n     }).isInstanceOf(UrlRepository.AliasAlreadyExist.class);\n   }\n+  \n+  /**\n+  * Checking functionality of abillity getting all aliases of a certain user.\n+  */\n+  @Test\n+  void shouldGetAllAliases() {\n+    //GIVEN\n+    UrlRepository repo = new UrlRepositoryFakeImpl();\n \n+    //WHEN\n+    UrlAlias testAlias = new UrlAlias(\"test\", \"http://localhost:8080/\", \"artem@gmail.com\");\n+    UrlAlias testAlias2 = new UrlAlias(\"lol\", \"http://localhost:8080/\", \"artem@gmail.com\");\n+    UrlAlias testAlias3 = new UrlAlias(\"shorten\", \"http://localhost:8080/\", \"lol@gmail.com\");\n+\n+    repo.createUrlAlias(testAlias);\n+    repo.createUrlAlias(testAlias2);\n \n+    //THEN\n+    assertFalse(repo.getAllAliases(testAlias.email()).isEmpty());\n+    assertThrows(PermissionDenied.class, ()->{repo.getAllAliases(testAlias3.email());});\n+  }\n }"
+  }
+]

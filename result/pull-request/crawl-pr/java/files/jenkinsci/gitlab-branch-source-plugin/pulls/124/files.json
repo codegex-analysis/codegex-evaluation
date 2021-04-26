@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "43c3cebd40271a4513ddfd6d4e3cda1dae000d23",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/blob/3f4a47e1b6a57f3a9c166d11e893570285684a66/pom.xml",
+    "raw_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/raw/3f4a47e1b6a57f3a9c166d11e893570285684a66/pom.xml",
+    "contents_url": "https://api.github.com/repos/jenkinsci/gitlab-branch-source-plugin/contents/pom.xml?ref=3f4a47e1b6a57f3a9c166d11e893570285684a66",
+    "patch": "@@ -14,7 +14,7 @@\n   <properties>\n     <revision>1.5.5</revision>\n     <changelist>-SNAPSHOT</changelist>\n-    <jenkins.version>2.176.4</jenkins.version>\n+    <jenkins.version>2.263.4</jenkins.version>\n     <java.level>8</java.level>\n     <jcasc.version>1.36</jcasc.version>\n   </properties>"
+  },
+  {
+    "sha": "6cbe80afb1e0ac16af823c9a5ebec9b45eabca8a",
+    "filename": "src/main/java/io/jenkins/plugins/gitlabbranchsource/GitLabHookCreator.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/blob/3f4a47e1b6a57f3a9c166d11e893570285684a66/src/main/java/io/jenkins/plugins/gitlabbranchsource/GitLabHookCreator.java",
+    "raw_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/raw/3f4a47e1b6a57f3a9c166d11e893570285684a66/src/main/java/io/jenkins/plugins/gitlabbranchsource/GitLabHookCreator.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/gitlab-branch-source-plugin/contents/src/main/java/io/jenkins/plugins/gitlabbranchsource/GitLabHookCreator.java?ref=3f4a47e1b6a57f3a9c166d11e893570285684a66",
+    "patch": "@@ -17,6 +17,8 @@\n import org.gitlab4j.api.models.ProjectHook;\n import org.gitlab4j.api.models.SystemHook;\n \n+import static io.jenkins.plugins.gitlabbranchsource.helpers.GitLabHelper.getProxyConfig;\n+\n public class GitLabHookCreator {\n \n     public static final Logger LOGGER = Logger.getLogger(GitLabHookCreator.class.getName());\n@@ -91,7 +93,7 @@ public static void register(GitLabSCMSource source,\n         if (credentials != null) {\n             try {\n                 GitLabApi gitLabApi = new GitLabApi(server.getServerUrl(),\n-                    credentials.getToken().getPlainText());\n+                    credentials.getToken().getPlainText(), null, getProxyConfig());\n                 createWebHookWhenMissing(gitLabApi, source.getProjectPath(), hookUrl, secretToken);\n             } catch (GitLabApiException e) {\n                 LOGGER.log(Level.WARNING,\n@@ -131,7 +133,7 @@ public static void createSystemHookWhenMissing(GitLabServer server,\n         String systemHookUrl = getHookUrl(server, false);\n         try {\n             GitLabApi gitLabApi = new GitLabApi(server.getServerUrl(),\n-                credentials.getToken().getPlainText());\n+                credentials.getToken().getPlainText(), null, getProxyConfig());\n             SystemHook systemHook = gitLabApi.getSystemHooksApi()\n                 .getSystemHookStream()\n                 .filter(hook -> systemHookUrl.equals(hook.getUrl()))"
+  },
+  {
+    "sha": "900a52ff06387f786a9a6c75e8d728d027d4b22d",
+    "filename": "src/main/java/io/jenkins/plugins/gitlabbranchsource/GitLabSCMNavigator.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/blob/3f4a47e1b6a57f3a9c166d11e893570285684a66/src/main/java/io/jenkins/plugins/gitlabbranchsource/GitLabSCMNavigator.java",
+    "raw_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/raw/3f4a47e1b6a57f3a9c166d11e893570285684a66/src/main/java/io/jenkins/plugins/gitlabbranchsource/GitLabSCMNavigator.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/gitlab-branch-source-plugin/contents/src/main/java/io/jenkins/plugins/gitlabbranchsource/GitLabSCMNavigator.java?ref=3f4a47e1b6a57f3a9c166d11e893570285684a66",
+    "patch": "@@ -70,6 +70,7 @@\n import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;\n import static com.cloudbees.plugins.credentials.domains.URIRequirementBuilder.fromUri;\n import static io.jenkins.plugins.gitlabbranchsource.helpers.GitLabHelper.apiBuilder;\n+import static io.jenkins.plugins.gitlabbranchsource.helpers.GitLabHelper.getProxyConfig;\n import static io.jenkins.plugins.gitlabbranchsource.helpers.GitLabHelper.getServerUrl;\n import static io.jenkins.plugins.gitlabbranchsource.helpers.GitLabHelper.getServerUrlFromName;\n import static io.jenkins.plugins.gitlabbranchsource.helpers.GitLabIcons.ICON_GITLAB;\n@@ -249,7 +250,7 @@ public void visitSources(@NonNull final SCMSourceObserver observer)\n             if (webHookCredentials != null) {\n                 GitLabServer server = GitLabServers.get().findServer(serverName);\n                 webhookGitLabApi = new GitLabApi(getServerUrl(server),\n-                    webHookCredentials.getToken().getPlainText());\n+                    webHookCredentials.getToken().getPlainText(), null, getProxyConfig());\n                 webHookUrl = GitLabHookCreator.getHookUrl(server, true);\n             }\n             for (Project p : projects) {"
+  },
+  {
+    "sha": "0a317cee6bcff57c65c70be1bbaf0e51184a09da",
+    "filename": "src/main/java/io/jenkins/plugins/gitlabbranchsource/helpers/GitLabHelper.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 2,
+    "changes": 23,
+    "blob_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/blob/3f4a47e1b6a57f3a9c166d11e893570285684a66/src/main/java/io/jenkins/plugins/gitlabbranchsource/helpers/GitLabHelper.java",
+    "raw_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/raw/3f4a47e1b6a57f3a9c166d11e893570285684a66/src/main/java/io/jenkins/plugins/gitlabbranchsource/helpers/GitLabHelper.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/gitlab-branch-source-plugin/contents/src/main/java/io/jenkins/plugins/gitlabbranchsource/helpers/GitLabHelper.java?ref=3f4a47e1b6a57f3a9c166d11e893570285684a66",
+    "patch": "@@ -3,11 +3,15 @@\n import com.damnhandy.uri.template.UriTemplate;\n import com.damnhandy.uri.template.UriTemplateBuilder;\n import com.damnhandy.uri.template.impl.Operator;\n+import hudson.ProxyConfiguration;\n import io.jenkins.plugins.gitlabserverconfig.credentials.PersonalAccessToken;\n import io.jenkins.plugins.gitlabserverconfig.servers.GitLabServer;\n import io.jenkins.plugins.gitlabserverconfig.servers.GitLabServers;\n+import java.util.Map;\n+import jenkins.model.Jenkins;\n import org.eclipse.jgit.annotations.NonNull;\n import org.gitlab4j.api.GitLabApi;\n+import org.gitlab4j.api.ProxyClientConfig;\n \n public class GitLabHelper {\n \n@@ -16,14 +20,29 @@ public static GitLabApi apiBuilder(String serverName) {\n         if (server != null) {\n             PersonalAccessToken credentials = server.getCredentials();\n             if (credentials != null) {\n-                return new GitLabApi(server.getServerUrl(), credentials.getToken().getPlainText());\n+                return new GitLabApi(server.getServerUrl(), credentials.getToken().getPlainText(), null, getProxyConfig());\n             }\n-            return new GitLabApi(server.getServerUrl(), GitLabServer.EMPTY_TOKEN);\n+            return new GitLabApi(server.getServerUrl(), GitLabServer.EMPTY_TOKEN, null, getProxyConfig());\n         }\n         throw new IllegalStateException(\n             String.format(\"No server found with the name: %s\", serverName));\n     }\n \n+    public static Map<String, Object> getProxyConfig () {\n+        ProxyConfiguration proxyConfiguration = Jenkins.get().getProxy();\n+        if (proxyConfiguration != null) {\n+            if (proxyConfiguration.getUserName() != null && proxyConfiguration.getSecretPassword() != null) {\n+                return ProxyClientConfig.createProxyClientConfig(\n+                    \"http://\" + proxyConfiguration.getName() + \":\" + proxyConfiguration.getPort(),\n+                    proxyConfiguration.getUserName(),\n+                    proxyConfiguration.getSecretPassword().getPlainText());\n+            }\n+            return ProxyClientConfig.createProxyClientConfig(\n+                \"http://\" + proxyConfiguration.getName() + \":\" + proxyConfiguration.getPort());\n+        }\n+        return null;\n+    }\n+\n     @NonNull\n     public static String getServerUrlFromName(String serverName) {\n         GitLabServer server = GitLabServers.get().findServer(serverName);"
+  },
+  {
+    "sha": "8202ce0b97aefd457ae185cf4d344cdf436875f2",
+    "filename": "src/main/java/io/jenkins/plugins/gitlabserverconfig/servers/GitLabServer.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 3,
+    "changes": 7,
+    "blob_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/blob/3f4a47e1b6a57f3a9c166d11e893570285684a66/src/main/java/io/jenkins/plugins/gitlabserverconfig/servers/GitLabServer.java",
+    "raw_url": "https://github.com/jenkinsci/gitlab-branch-source-plugin/raw/3f4a47e1b6a57f3a9c166d11e893570285684a66/src/main/java/io/jenkins/plugins/gitlabserverconfig/servers/GitLabServer.java",
+    "contents_url": "https://api.github.com/repos/jenkinsci/gitlab-branch-source-plugin/contents/src/main/java/io/jenkins/plugins/gitlabserverconfig/servers/GitLabServer.java?ref=3f4a47e1b6a57f3a9c166d11e893570285684a66",
+    "patch": "@@ -39,6 +39,7 @@\n import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;\n import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;\n import static com.cloudbees.plugins.credentials.domains.URIRequirementBuilder.fromUri;\n+import static io.jenkins.plugins.gitlabbranchsource.helpers.GitLabHelper.getProxyConfig;\n import static org.apache.commons.lang.StringUtils.defaultIfBlank;\n \n /**\n@@ -308,7 +309,7 @@ public static FormValidation doCheckServerUrl(@QueryParameter String serverUrl)\n             if (GITLAB_SERVER_URL.equals(serverUrl)) {\n                 LOGGER.log(Level.FINEST, String.format(\"Community version of GitLab: %s\", serverUrl));\n             }\n-            GitLabApi gitLabApi = new GitLabApi(serverUrl, \"\");\n+            GitLabApi gitLabApi = new GitLabApi(serverUrl, \"\", null, getProxyConfig());\n             try {\n                 gitLabApi.getProjectApi().getProjects(1, 1);\n                 return FormValidation.ok();\n@@ -360,7 +361,7 @@ public FormValidation doTestConnection(@QueryParameter String serverUrl,\n                 privateToken = credentials.getToken().getPlainText();\n             }\n             if (privateToken.equals(EMPTY_TOKEN)) {\n-                GitLabApi gitLabApi = new GitLabApi(serverUrl, EMPTY_TOKEN);\n+                GitLabApi gitLabApi = new GitLabApi(serverUrl, EMPTY_TOKEN, null, getProxyConfig());\n                 try {\n                     /*\n                     In order to validate a GitLab Server without personal access token,\n@@ -378,7 +379,7 @@ public FormValidation doTestConnection(@QueryParameter String serverUrl,\n                 }\n             } else {\n \n-                GitLabApi gitLabApi = new GitLabApi(serverUrl, privateToken);\n+                GitLabApi gitLabApi = new GitLabApi(serverUrl, privateToken, null, getProxyConfig());\n                 try {\n                     User user = gitLabApi.getUserApi().getCurrentUser();\n                     LOGGER.log(Level.FINEST, String"
+  }
+]

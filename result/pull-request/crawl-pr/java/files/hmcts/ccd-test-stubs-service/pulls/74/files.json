@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "9bde31abe00ee721ea9d42fbb021fb67fd9fd1c3",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/hmcts/ccd-test-stubs-service/blob/752087b6f30edd1b9b2fe8a67258c1ef29c9f7e0/build.gradle",
+    "raw_url": "https://github.com/hmcts/ccd-test-stubs-service/raw/752087b6f30edd1b9b2fe8a67258c1ef29c9f7e0/build.gradle",
+    "contents_url": "https://api.github.com/repos/hmcts/ccd-test-stubs-service/contents/build.gradle?ref=752087b6f30edd1b9b2fe8a67258c1ef29c9f7e0",
+    "patch": "@@ -91,7 +91,7 @@ sonarqube {\n     property \"sonar.jacoco.reportPaths\", \"${project.buildDir}/jacoco/junitPlatformTest.exec\"\n     property \"sonar.jacoco.itReportPath\", \"${project.buildDir}/jacoco/integration.exec\"\n     property \"sonar.junit.reportPaths\", \"${project.buildDir}/test-results/junit-platform\"\n-    property \"sonar.exclusions\", \"**/token/*.java,**/ApplicationConfig.java,**/IdamUserInfo.java\"\n+    property \"sonar.exclusions\", \"**/token/*.java,**/ApplicationConfig.java,**/IdamUserInfo.java,**/ReadinessHealthIndicator.java\"\n     property \"sonar.coverage.exclusions\", \"**/token/*.java,**/*Controller.java\"\n \n   }"
+  },
+  {
+    "sha": "900df42719b92bf9e06c9ac7ab655cd25649a7fc",
+    "filename": "charts/ccd-test-stubs-service/Chart.yaml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/hmcts/ccd-test-stubs-service/blob/752087b6f30edd1b9b2fe8a67258c1ef29c9f7e0/charts/ccd-test-stubs-service/Chart.yaml",
+    "raw_url": "https://github.com/hmcts/ccd-test-stubs-service/raw/752087b6f30edd1b9b2fe8a67258c1ef29c9f7e0/charts/ccd-test-stubs-service/Chart.yaml",
+    "contents_url": "https://api.github.com/repos/hmcts/ccd-test-stubs-service/contents/charts/ccd-test-stubs-service/Chart.yaml?ref=752087b6f30edd1b9b2fe8a67258c1ef29c9f7e0",
+    "patch": "@@ -3,11 +3,11 @@ appVersion: \"1.0\"\n description: A Helm chart for ccd-test-stubs-service App\n name: ccd-test-stubs-service\n home: https://github.com/hmcts/ccd-test-stubs-service\n-version: 1.0.9\n+version: 1.1.0\n maintainers:\n   - name: HMCTS CCD Dev Team\n     email: ccd-devops@HMCTS.NET\n dependencies:\n   - name: java\n-    version: 2.18.1\n+    version: 3.4.4\n     repository: '@hmctspublic'"
+  },
+  {
+    "sha": "0820fb5bf14c0522b9222020f3360700b004224b",
+    "filename": "src/main/java/uk/gov/hmcts/reform/ccd/test/stubs/service/controllers/ReadinessHealthIndicator.java",
+    "status": "added",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/hmcts/ccd-test-stubs-service/blob/752087b6f30edd1b9b2fe8a67258c1ef29c9f7e0/src/main/java/uk/gov/hmcts/reform/ccd/test/stubs/service/controllers/ReadinessHealthIndicator.java",
+    "raw_url": "https://github.com/hmcts/ccd-test-stubs-service/raw/752087b6f30edd1b9b2fe8a67258c1ef29c9f7e0/src/main/java/uk/gov/hmcts/reform/ccd/test/stubs/service/controllers/ReadinessHealthIndicator.java",
+    "contents_url": "https://api.github.com/repos/hmcts/ccd-test-stubs-service/contents/src/main/java/uk/gov/hmcts/reform/ccd/test/stubs/service/controllers/ReadinessHealthIndicator.java?ref=752087b6f30edd1b9b2fe8a67258c1ef29c9f7e0",
+    "patch": "@@ -0,0 +1,26 @@\n+package uk.gov.hmcts.reform.ccd.test.stubs.service.controllers;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.beans.factory.annotation.Qualifier;\n+import org.springframework.boot.actuate.health.AbstractHealthIndicator;\n+import org.springframework.boot.actuate.health.Health;\n+import org.springframework.boot.actuate.health.HealthIndicator;\n+import org.springframework.stereotype.Component;\n+\n+/**\n+ * Readiness endpoint that always returns the same as the Liveness.\n+ * Note this is a *temporary* measure for RDM-10197 and should be deleted\n+ * when the proper Readiness check is added in RDM-9052.\n+ */\n+@Component\n+public class ReadinessHealthIndicator extends AbstractHealthIndicator {\n+\n+    @Autowired\n+    @Qualifier(\"liveness\")\n+    HealthIndicator livenessIndicator;\n+\n+    @Override\n+    protected void doHealthCheck(Health.Builder builder) throws Exception {\n+        builder.status(livenessIndicator.health().getStatus());\n+    }\n+}"
+  }
+]

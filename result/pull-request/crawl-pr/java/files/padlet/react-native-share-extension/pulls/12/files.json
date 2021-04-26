@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "e676e8eccbb31af86340f40ec690a4ca5b403d4b",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 1,
+    "changes": 17,
+    "blob_url": "https://github.com/padlet/react-native-share-extension/blob/50f60f5444bbd9370b44e38acd4822712c2f3145/README.md",
+    "raw_url": "https://github.com/padlet/react-native-share-extension/raw/50f60f5444bbd9370b44e38acd4822712c2f3145/README.md",
+    "contents_url": "https://api.github.com/repos/padlet/react-native-share-extension/contents/README.md?ref=50f60f5444bbd9370b44e38acd4822712c2f3145",
+    "patch": "@@ -112,6 +112,8 @@ The setup requires a little bit more work. I will try to describe as detail as p\n \n - Now go back to your extension file (in my case `MyShareEx.m`) and paste the following code there **being sure to substitute `MyShareEx` in all three places for whatever you chose above**\n \n+> If your project entry is `index.js` instead of `index.ios.js` then needs to replace `@\"index.ios\"` with `@\"index\"`\n+\n ```objective-c\n #import <Foundation/Foundation.h>\n #import \"ReactNativeShareExtension.h\"\n@@ -240,7 +242,7 @@ import java.util.List;\n public class ShareApplication extends Application implements ReactApplication {\n  private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {\n    @Override\n-   protected boolean getUseDeveloperSupport() {\n+   public boolean getUseDeveloperSupport() {\n      return BuildConfig.DEBUG;\n \n    }\n@@ -543,6 +545,19 @@ export NODE_BINARY=node\n ../bin/react-native-xcode.sh\n ```\n \n+# Open container app\n+Steps needed to open the host application from the share extension.\n+1) Allow your app to be opened via URL Scheme - [Learn more](https://medium.com/react-native-training/deep-linking-your-react-native-app-d87c39a1ad5e)\n+2) In xcode, select share extension and go to Build Settings and set **Require Only App-Extension-Safe API** to `NO`.\n+\n+Then you can open your app from the share extension by calling openURL:\n+\n+```\n+import ShareExtension from 'react-native-share-extension';\n+\n+ShareExtension.openURL('sample://example/url');\n+```\n+\n # Troubleshooting on iOS devices\n \n Using the iOS Simulator and remote react-native debugger to develop the extension can hide issues that won't occur until testing on device. If you're experiencing issues running the extension on iOS devices, examine the Xcode console or device log for any obvious errors. If the Xcode console isn't receiving console output, ensure that the OS_ACTIVITY_MODE=disable environment var isn't enabled for the active scheme (see https://github.com/facebook/react-native/issues/10027). OS_ACTIVITY_MODE will hide device logging in the Xcode console, so its use is only advisable for iOS Simulator. For release mode, in order to view console output and see all output in the syslog, uncomment the `RCTSetLogThreshold(RCTLogLevelInfo - 1);` statement in your MyShareEx class."
+  },
+  {
+    "sha": "5f6015feee6d683adfc6cb29cb5ce5a2aaeb7a90",
+    "filename": "android/src/main/java/com/alinz/parkerdan/shareextension/RealPathUtil.java",
+    "status": "modified",
+    "additions": 74,
+    "deletions": 7,
+    "changes": 81,
+    "blob_url": "https://github.com/padlet/react-native-share-extension/blob/50f60f5444bbd9370b44e38acd4822712c2f3145/android/src/main/java/com/alinz/parkerdan/shareextension/RealPathUtil.java",
+    "raw_url": "https://github.com/padlet/react-native-share-extension/raw/50f60f5444bbd9370b44e38acd4822712c2f3145/android/src/main/java/com/alinz/parkerdan/shareextension/RealPathUtil.java",
+    "contents_url": "https://api.github.com/repos/padlet/react-native-share-extension/contents/android/src/main/java/com/alinz/parkerdan/shareextension/RealPathUtil.java?ref=50f60f5444bbd9370b44e38acd4822712c2f3145",
+    "patch": "@@ -9,6 +9,13 @@\n import android.content.ContentUris;\n import android.os.Environment;\n \n+import java.io.BufferedOutputStream;\n+import java.io.File;\n+import java.io.FileOutputStream;\n+import java.io.IOException;\n+import java.io.InputStream;\n+import java.util.UUID;\n+\n public class RealPathUtil {\n  public static String getRealPathFromURI(final Context context, final Uri uri) {\n \n@@ -62,12 +69,7 @@ else if (isMediaDocument(uri)) {\n      }\n      // MediaStore (and general)\n      else if (\"content\".equalsIgnoreCase(uri.getScheme())) {\n-\n-         // Return the remote address\n-         if (isGooglePhotosUri(uri))\n-             return uri.getLastPathSegment();\n-\n-         return getDataColumn(context, uri, null, null);\n+         return getImagePath(context, uri);\n      }\n      // File\n      else if (\"file\".equalsIgnoreCase(uri.getScheme())) {\n@@ -135,12 +137,77 @@ public static boolean isMediaDocument(Uri uri) {\n      return \"com.android.providers.media.documents\".equals(uri.getAuthority());\n  }\n \n+ public static String getImagePath(Context context, Uri uri){\n+    if (\"content\".equalsIgnoreCase(uri.getScheme())) {\n+\n+        if (isGoogleOldPhotosUri(uri)) {\n+            // return http path, then download file.\n+            return uri.getLastPathSegment();\n+        } else if (isGoogleNewPhotosUri(uri) || isMMSFile(uri)) {\n+            // copy from uri. context.getContentResolver().openInputStream(uri);\n+            return copyFile(context, uri);\n+        }\n+    }\n+\n+    return getDataColumn(context, uri, null, null);\n+ }\n+\n  /**\n   * @param uri The Uri to check.\n   * @return Whether the Uri authority is Google Photos.\n   */\n- public static boolean isGooglePhotosUri(Uri uri) {\n+ public static boolean isGoogleOldPhotosUri(Uri uri) {\n      return \"com.google.android.apps.photos.content\".equals(uri.getAuthority());\n  }\n \n+ public static boolean isGoogleNewPhotosUri(Uri uri) {\n+    return \"com.google.android.apps.photos.contentprovider\".equals(uri.getAuthority());\n+ }\n+\n+ public static boolean isMMSFile(Uri uri) {\n+    return \"com.android.mms.file\".equals(uri.getAuthority());\n+}\n+\n+ private static String copyFile(Context context, Uri uri) {\n+\n+    String filePath;\n+    InputStream inputStream = null;\n+    BufferedOutputStream outStream = null;\n+    try {\n+        inputStream = context.getContentResolver().openInputStream(uri);\n+\n+        File extDir = context.getExternalFilesDir(null);\n+        filePath = extDir.getAbsolutePath() + \"/IMG_\" + UUID.randomUUID().toString() + \".jpg\";\n+        outStream = new BufferedOutputStream(new FileOutputStream\n+                (filePath));\n+\n+        byte[] buf = new byte[2048];\n+        int len;\n+        while ((len = inputStream.read(buf)) > 0) {\n+            outStream.write(buf, 0, len);\n+        }\n+\n+    } catch (IOException e) {\n+        e.printStackTrace();\n+        filePath = \"\";\n+    } finally {\n+        try {\n+            if (inputStream != null) {\n+                inputStream.close();\n+            }\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+        try {\n+            if (outStream != null) {\n+                outStream.close();\n+            }\n+        } catch (IOException e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+    return filePath;\n+ }\n+\n }"
+  },
+  {
+    "sha": "ddf1e6921fc167e5eb34e5d362fab6fd1f7dbe66",
+    "filename": "ios/ReactNativeShareExtension.m",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 27,
+    "changes": 38,
+    "blob_url": "https://github.com/padlet/react-native-share-extension/blob/50f60f5444bbd9370b44e38acd4822712c2f3145/ios/ReactNativeShareExtension.m",
+    "raw_url": "https://github.com/padlet/react-native-share-extension/raw/50f60f5444bbd9370b44e38acd4822712c2f3145/ios/ReactNativeShareExtension.m",
+    "contents_url": "https://api.github.com/repos/padlet/react-native-share-extension/contents/ios/ReactNativeShareExtension.m?ref=50f60f5444bbd9370b44e38acd4822712c2f3145",
+    "patch": "@@ -43,6 +43,14 @@ - (void)viewDidLoad {\n \n \n \n+RCT_EXPORT_METHOD(openURL:(NSString *)url) {\n+  UIApplication *application = [UIApplication sharedApplication];\n+  NSURL *urlToOpen = [NSURL URLWithString:[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];\n+  [application openURL:urlToOpen options:@{} completionHandler: nil];\n+}\n+\n+\n+\n RCT_REMAP_METHOD(data,\n                  resolver:(RCTPromiseResolveBlock)resolve\n                  rejecter:(RCTPromiseRejectBlock)reject)\n@@ -60,7 +68,6 @@ - (void)viewDidLoad {\n }\n \n - (void)extractDataFromContext:(NSExtensionContext *)context withCallback:(void(^)(NSString *value, NSString* contentType, NSException *exception))callback {\n-    \n     @try {\n         NSExtensionItem *item = [context.inputItems firstObject];\n         NSArray *attachments = item.attachments;\n@@ -92,31 +99,10 @@ - (void)extractDataFromContext:(NSExtensionContext *)context withCallback:(void(\n             }];\n         } else if (imageProvider) {\n             [imageProvider loadItemForTypeIdentifier:IMAGE_IDENTIFIER options:nil completionHandler:^(id<NSSecureCoding> item, NSError *error) {\n-                \n-                /**\n-                 * Save the image to NSTemporaryDirectory(), which cleans itself tri-daily.\n-                 * This is necessary as the iOS 11 screenshot editor gives us a UIImage, while\n-                 * sharing from Photos and similar apps gives us a URL\n-                 * Therefore the solution is to save a UIImage, either way, and return the local path to that temp UIImage\n-                 * This path will be sent to React Native and can be processed and accessed RN side.\n-                **/\n-                \n-                UIImage *sharedImage;\n-                NSString *filePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@\"RNSE_TEMP_IMG\"];\n-                NSString *fullPath = [filePath stringByAppendingPathExtension:@\"png\"];\n-                \n-                if ([(NSObject *)item isKindOfClass:[UIImage class]]){\n-                    sharedImage = (UIImage *)item;\n-                }else if ([(NSObject *)item isKindOfClass:[NSURL class]]){\n-                    NSURL* url = (NSURL *)item;\n-                    NSData *data = [NSData dataWithContentsOfURL:url];\n-                    sharedImage = [UIImage imageWithData:data];\n-                }\n-                \n-                [UIImagePNGRepresentation(sharedImage) writeToFile:fullPath atomically:YES];\n-                \n+                NSURL *url = (NSURL *)item;\n+\n                 if(callback) {\n-                    callback(fullPath, [fullPath pathExtension], nil);\n+                    callback([url absoluteString], [[[url absoluteString] pathExtension] lowercaseString], nil);\n                 }\n             }];\n         } else if (textProvider) {\n@@ -140,6 +126,4 @@ - (void)extractDataFromContext:(NSExtensionContext *)context withCallback:(void(\n     }\n }\n \n-\n-\n @end"
+  },
+  {
+    "sha": "4da7e8b9e4072b1316f5944bf90f2b0ad54fd721",
+    "filename": "lib/index.d.ts",
+    "status": "added",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/padlet/react-native-share-extension/blob/50f60f5444bbd9370b44e38acd4822712c2f3145/lib/index.d.ts",
+    "raw_url": "https://github.com/padlet/react-native-share-extension/raw/50f60f5444bbd9370b44e38acd4822712c2f3145/lib/index.d.ts",
+    "contents_url": "https://api.github.com/repos/padlet/react-native-share-extension/contents/lib/index.d.ts?ref=50f60f5444bbd9370b44e38acd4822712c2f3145",
+    "patch": "@@ -0,0 +1,21 @@\n+// Type definitions for [react-native-share-extension]\n+// Project: https://github.com/padlet/react-native-share-extension\n+declare module 'react-native-share-extension' {\n+  interface RNShareData {\n+    value: string;\n+    type: \"text/url\" | \"images/*\" | \"text/plain\";\n+  }\n+  interface RNShareFiles {\n+    files: RNShareData[]\n+  }\n+\n+  interface ShareExtension {\n+    close(): void;\n+    data(): Promise<RNShareFiles>;\n+    openURL(uri: string): void;\n+  }\n+\n+  const RNShareExtension: ShareExtension;\n+  export default RNShareExtension;\n+  export type { RNShareData };\n+}"
+  },
+  {
+    "sha": "e8fe3d370d0ad7883e2a21eabe25eb12d4b424a9",
+    "filename": "lib/index.js",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/padlet/react-native-share-extension/blob/50f60f5444bbd9370b44e38acd4822712c2f3145/lib/index.js",
+    "raw_url": "https://github.com/padlet/react-native-share-extension/raw/50f60f5444bbd9370b44e38acd4822712c2f3145/lib/index.js",
+    "contents_url": "https://api.github.com/repos/padlet/react-native-share-extension/contents/lib/index.js?ref=50f60f5444bbd9370b44e38acd4822712c2f3145",
+    "patch": "@@ -5,5 +5,6 @@ import { NativeModules } from 'react-native'\n // NativeModules.ShareExtension.close()\n export default {\n   data: () => NativeModules.ReactNativeShareExtension.data(),\n-  close: () => NativeModules.ReactNativeShareExtension.close()\n+  close: () => NativeModules.ReactNativeShareExtension.close(),\n+  openURL: (url) => NativeModules.ReactNativeShareExtension.openURL(url),\n }"
+  },
+  {
+    "sha": "28489d5f1dd4e13138dca60d8d2453a547247bf4",
+    "filename": "package.json",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/padlet/react-native-share-extension/blob/50f60f5444bbd9370b44e38acd4822712c2f3145/package.json",
+    "raw_url": "https://github.com/padlet/react-native-share-extension/raw/50f60f5444bbd9370b44e38acd4822712c2f3145/package.json",
+    "contents_url": "https://api.github.com/repos/padlet/react-native-share-extension/contents/package.json?ref=50f60f5444bbd9370b44e38acd4822712c2f3145",
+    "patch": "@@ -1,8 +1,14 @@\n {\n   \"name\": \"react-native-share-extension\",\n-  \"version\": \"1.2.1\",\n+  \"version\": \"2.0.0\",\n   \"description\": \"share extension using react-native for both ios and android\",\n   \"main\": \"lib/index.js\",\n+  \"types\": \"lib/index.d.ts\",\n+  \"files\": [\n+    \"android\",\n+    \"ios\",\n+    \"lib/\"\n+  ],\n   \"scripts\": {\n     \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n   },"
+  }
+]

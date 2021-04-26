@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "4d95d2c45e6b816f4b665e8e9e0d0a4db1707c58",
+    "filename": "src/main/java/ru/betterend/item/EndArmorItem.java",
+    "status": "modified",
+    "additions": 33,
+    "deletions": 1,
+    "changes": 34,
+    "blob_url": "https://github.com/paulevsGitch/BetterEnd/blob/6bdc2fa7c7edb4242fa960a8a206c36f550ea62a/src/main/java/ru/betterend/item/EndArmorItem.java",
+    "raw_url": "https://github.com/paulevsGitch/BetterEnd/raw/6bdc2fa7c7edb4242fa960a8a206c36f550ea62a/src/main/java/ru/betterend/item/EndArmorItem.java",
+    "contents_url": "https://api.github.com/repos/paulevsGitch/BetterEnd/contents/src/main/java/ru/betterend/item/EndArmorItem.java?ref=6bdc2fa7c7edb4242fa960a8a206c36f550ea62a",
+    "patch": "@@ -1,17 +1,49 @@\n package ru.betterend.item;\r\n \r\n+import com.google.common.collect.ImmutableMultimap;\r\n+import com.google.common.collect.Multimap;\r\n import net.minecraft.entity.EquipmentSlot;\r\n+import net.minecraft.entity.attribute.EntityAttribute;\r\n+import net.minecraft.entity.attribute.EntityAttributeModifier;\r\n+import net.minecraft.entity.attribute.EntityAttributes;\r\n import net.minecraft.item.ArmorItem;\r\n import net.minecraft.item.ArmorMaterial;\r\n import net.minecraft.item.Item;\r\n+import ru.betterend.mixin.common.ArmorItemAccessor;\r\n import ru.betterend.patterns.Patterned;\r\n import ru.betterend.patterns.Patterns;\r\n \r\n+import java.util.UUID;\r\n+\r\n public class EndArmorItem extends ArmorItem implements Patterned {\r\n \tpublic EndArmorItem(ArmorMaterial material, EquipmentSlot slot, Item.Settings settings) {\r\n \t\tsuper(material, slot, settings);\r\n+\r\n+\t\taddKnockbackResistance((ArmorItemAccessor) this, slot, this.knockbackResistance);\r\n \t}\r\n-\t\r\n+\r\n+\t/** Ensures knockback resistance is actually applied */\r\n+\tprivate static void addKnockbackResistance(ArmorItemAccessor accessor, EquipmentSlot slot, double knockbackResistance) {\r\n+\t\tif (knockbackResistance == 0) {\r\n+\t\t\treturn;\r\n+\t\t}\r\n+\r\n+\t\tMultimap<EntityAttribute, EntityAttributeModifier> attributeModifiers = accessor.getAttributeModifiers();\r\n+\r\n+\t\t// In case Mojang or anyone else decided to fix this\r\n+\t\tif (attributeModifiers.keys().contains(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE)) {\r\n+\t\t\treturn;\r\n+\t\t}\r\n+\r\n+\t\tUUID uuid = accessor.getModifiers()[slot.getEntitySlotId()];\r\n+\r\n+\t\t// Rebuild attributeModifiers to include knockback resistance\r\n+\t\tImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> builder = ImmutableMultimap.builder();\r\n+\t\tbuilder.putAll(attributeModifiers);\r\n+\t\tbuilder.put(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, new EntityAttributeModifier(uuid, \"Armor knockback resistance\", knockbackResistance, EntityAttributeModifier.Operation.ADDITION));\r\n+\t\taccessor.setAttributeModifiers(builder.build());\r\n+\t}\r\n+\r\n \t@Override\r\n \tpublic String getModelPattern(String name) {\r\n \t\treturn Patterns.createJson(Patterns.ITEM_GENERATED, name);\r"
+  },
+  {
+    "sha": "5c340f885d9e871debabb868f1e953ddd76d97d9",
+    "filename": "src/main/java/ru/betterend/mixin/common/ArmorItemAccessor.java",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/paulevsGitch/BetterEnd/blob/6bdc2fa7c7edb4242fa960a8a206c36f550ea62a/src/main/java/ru/betterend/mixin/common/ArmorItemAccessor.java",
+    "raw_url": "https://github.com/paulevsGitch/BetterEnd/raw/6bdc2fa7c7edb4242fa960a8a206c36f550ea62a/src/main/java/ru/betterend/mixin/common/ArmorItemAccessor.java",
+    "contents_url": "https://api.github.com/repos/paulevsGitch/BetterEnd/contents/src/main/java/ru/betterend/mixin/common/ArmorItemAccessor.java?ref=6bdc2fa7c7edb4242fa960a8a206c36f550ea62a",
+    "patch": "@@ -0,0 +1,22 @@\n+package ru.betterend.mixin.common;\n+\n+import com.google.common.collect.Multimap;\n+import net.minecraft.entity.attribute.EntityAttribute;\n+import net.minecraft.entity.attribute.EntityAttributeModifier;\n+import net.minecraft.item.ArmorItem;\n+import org.spongepowered.asm.mixin.Mixin;\n+import org.spongepowered.asm.mixin.gen.Accessor;\n+\n+import java.util.UUID;\n+\n+@Mixin(ArmorItem.class)\n+public interface ArmorItemAccessor {\n+\t@Accessor(\"MODIFIERS\")\n+\tUUID[] getModifiers();\n+\n+\t@Accessor(\"attributeModifiers\")\n+\tMultimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers();\n+\n+\t@Accessor(\"attributeModifiers\")\n+\tvoid setAttributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers);\n+}"
+  },
+  {
+    "sha": "6c7deff1b0fe1fd1db682ebd0bc04ec7a476a94f",
+    "filename": "src/main/resources/betterend.mixins.common.json",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/paulevsGitch/BetterEnd/blob/6bdc2fa7c7edb4242fa960a8a206c36f550ea62a/src/main/resources/betterend.mixins.common.json",
+    "raw_url": "https://github.com/paulevsGitch/BetterEnd/raw/6bdc2fa7c7edb4242fa960a8a206c36f550ea62a/src/main/resources/betterend.mixins.common.json",
+    "contents_url": "https://api.github.com/repos/paulevsGitch/BetterEnd/contents/src/main/resources/betterend.mixins.common.json?ref=6bdc2fa7c7edb4242fa960a8a206c36f550ea62a",
+    "patch": "@@ -4,6 +4,7 @@\n \t\"package\": \"ru.betterend.mixin.common\",\r\n \t\"compatibilityLevel\": \"JAVA_8\",\r\n \t\"mixins\": [\r\n+\t\t\"ArmorItemAccessor\",\r\n \t\t\"EnchantmentScreenHandlerMixin\",\r\n \t\t\"PlayerAdvancementTrackerMixin\",\r\n \t\t\"CraftingScreenHandlerMixin\",\r"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "aabebf04f65ac4257d6c1abce47e2bd50a2bbf0e",
+    "filename": "src/main/java/com/puppycrawl/tools/checkstyle/checks/indentation/TryHandler.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 1,
+    "changes": 27,
+    "blob_url": "https://github.com/checkstyle/checkstyle/blob/78a965b4089a596a6ddf6877797ef38d3d649b45/src/main/java/com/puppycrawl/tools/checkstyle/checks/indentation/TryHandler.java",
+    "raw_url": "https://github.com/checkstyle/checkstyle/raw/78a965b4089a596a6ddf6877797ef38d3d649b45/src/main/java/com/puppycrawl/tools/checkstyle/checks/indentation/TryHandler.java",
+    "contents_url": "https://api.github.com/repos/checkstyle/checkstyle/contents/src/main/java/com/puppycrawl/tools/checkstyle/checks/indentation/TryHandler.java?ref=78a965b4089a596a6ddf6877797ef38d3d649b45",
+    "patch": "@@ -64,7 +64,8 @@ public IndentLevel getSuggestedChildIndent(AbstractExpressionHandler child) {\n         final IndentLevel result;\n         if (child instanceof CatchHandler\n             || child instanceof FinallyHandler\n-            || child instanceof NewHandler) {\n+            || child instanceof NewHandler\n+                && isTryBlocksResourceSpecification(child)) {\n             result = getIndent();\n         }\n         else {\n@@ -163,4 +164,28 @@ private void checkTryResources(final DetailAST resourcesSpecAst) {\n         }\n     }\n \n+    /**\n+     * Check if the expression is resource of try block.\n+     * https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.20.3\n+     *\n+     * @param expression The expression to check\n+     * @return if the expression provided is try block's resource specification.\n+     */\n+    private static boolean isTryBlocksResourceSpecification(AbstractExpressionHandler expression) {\n+        boolean isResourceSpecificationExpression = false;\n+\n+        DetailAST ast = expression.getMainAst();\n+\n+        while (ast.getType() != TokenTypes.LITERAL_TRY) {\n+            if (ast.getType() == TokenTypes.RESOURCE_SPECIFICATION) {\n+                isResourceSpecificationExpression = true;\n+                break;\n+            }\n+\n+            ast = ast.getParent();\n+        }\n+\n+        return isResourceSpecificationExpression;\n+    }\n+\n }"
+  },
+  {
+    "sha": "59f7e91cb05c18301a493328a6a1bc3d454a70f9",
+    "filename": "src/test/java/com/puppycrawl/tools/checkstyle/checks/indentation/IndentationCheckTest.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/checkstyle/checkstyle/blob/78a965b4089a596a6ddf6877797ef38d3d649b45/src/test/java/com/puppycrawl/tools/checkstyle/checks/indentation/IndentationCheckTest.java",
+    "raw_url": "https://github.com/checkstyle/checkstyle/raw/78a965b4089a596a6ddf6877797ef38d3d649b45/src/test/java/com/puppycrawl/tools/checkstyle/checks/indentation/IndentationCheckTest.java",
+    "contents_url": "https://api.github.com/repos/checkstyle/checkstyle/contents/src/test/java/com/puppycrawl/tools/checkstyle/checks/indentation/IndentationCheckTest.java?ref=78a965b4089a596a6ddf6877797ef38d3d649b45",
+    "patch": "@@ -2625,6 +2625,28 @@ public void testNewHandler() throws Exception {\n         verifyWarns(checkConfig, getPath(\"InputIndentationNewHandler.java\"), expected);\n     }\n \n+    @Test\n+    public void testTryHandler() throws Exception {\n+        final DefaultConfiguration checkConfig = createModuleConfig(IndentationCheck.class);\n+        checkConfig.addAttribute(\"tabWidth\", \"4\");\n+        checkConfig.addAttribute(\"braceAdjustment\", \"0\");\n+        checkConfig.addAttribute(\"lineWrappingIndentation\", \"8\");\n+        checkConfig.addAttribute(\"forceStrictCondition\", \"true\");\n+        final String[] expected = CommonUtil.EMPTY_STRING_ARRAY;\n+        verifyWarns(checkConfig, getPath(\"InputIndentationTryBlockWithResources.java\"), expected);\n+    }\n+\n+    @Test\n+    public void testTryHandler2() throws Exception {\n+        final DefaultConfiguration checkConfig = createModuleConfig(IndentationCheck.class);\n+        checkConfig.addAttribute(\"tabWidth\", \"4\");\n+        checkConfig.addAttribute(\"braceAdjustment\", \"0\");\n+        checkConfig.addAttribute(\"lineWrappingIndentation\", \"8\");\n+        checkConfig.addAttribute(\"forceStrictCondition\", \"true\");\n+        final String[] expected = CommonUtil.EMPTY_STRING_ARRAY;\n+        verifyWarns(checkConfig, getPath(\"InputIndentationTryBlock.java\"), expected);\n+    }\n+\n     @Test\n     public void testChainedMethodWithBracketOnNewLine() throws Exception {\n         final DefaultConfiguration checkConfig = createModuleConfig(IndentationCheck.class);"
+  },
+  {
+    "sha": "7ba3323be4a773796294335c6d6fd2ecd61e0b58",
+    "filename": "src/test/resources/com/puppycrawl/tools/checkstyle/checks/indentation/indentation/InputIndentationTryBlock.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/checkstyle/checkstyle/blob/78a965b4089a596a6ddf6877797ef38d3d649b45/src/test/resources/com/puppycrawl/tools/checkstyle/checks/indentation/indentation/InputIndentationTryBlock.java",
+    "raw_url": "https://github.com/checkstyle/checkstyle/raw/78a965b4089a596a6ddf6877797ef38d3d649b45/src/test/resources/com/puppycrawl/tools/checkstyle/checks/indentation/indentation/InputIndentationTryBlock.java",
+    "contents_url": "https://api.github.com/repos/checkstyle/checkstyle/contents/src/test/resources/com/puppycrawl/tools/checkstyle/checks/indentation/indentation/InputIndentationTryBlock.java?ref=78a965b4089a596a6ddf6877797ef38d3d649b45",
+    "patch": "@@ -0,0 +1,24 @@\n+/* Config:                                                                  //indent:0 exp:0\n+ * This test-input is intended to be checked using following configuration: //indent:1 exp:1\n+ *                                                                          //indent:1 exp:1\n+ * basicOffset = 4                                                          //indent:1 exp:1\n+ * braceAdjustment = 0                                                      //indent:1 exp:1\n+ * caseIndent = 4                                                           //indent:1 exp:1\n+ * forceStrictCondition = true                                              //indent:1 exp:1\n+ * lineWrappingIndentation = 8                                              //indent:1 exp:1\n+ * tabWidth = 4                                                             //indent:1 exp:1\n+ * throwsIndent = 4                                                         //indent:1 exp:1\n+ */                                                                         //indent:1 exp:1\n+\n+package com.puppycrawl.tools.checkstyle.checks.indentation.indentation; //indent:0 exp:0\n+\n+import java.io.InputStreamReader; //indent:0 exp:0\n+\n+public class InputIndentationTryBlock { //indent:0 exp:0\n+    public void delete(final int assetId) { //indent:4 exp:4\n+        try { //indent:8 exp:8\n+            new Object().equals(Integer.valueOf(assetId)); //indent:12 exp:12\n+        } catch (Exception ignore) { //indent:8 exp:8\n+        } //indent:8 exp:8\n+    } //indent:4 exp:4\n+} //indent:0 exp:0"
+  },
+  {
+    "sha": "14fe212db597dac8c69be97db1053bbebefdbb8d",
+    "filename": "src/test/resources/com/puppycrawl/tools/checkstyle/checks/indentation/indentation/InputIndentationTryBlockWithResources.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/checkstyle/checkstyle/blob/78a965b4089a596a6ddf6877797ef38d3d649b45/src/test/resources/com/puppycrawl/tools/checkstyle/checks/indentation/indentation/InputIndentationTryBlockWithResources.java",
+    "raw_url": "https://github.com/checkstyle/checkstyle/raw/78a965b4089a596a6ddf6877797ef38d3d649b45/src/test/resources/com/puppycrawl/tools/checkstyle/checks/indentation/indentation/InputIndentationTryBlockWithResources.java",
+    "contents_url": "https://api.github.com/repos/checkstyle/checkstyle/contents/src/test/resources/com/puppycrawl/tools/checkstyle/checks/indentation/indentation/InputIndentationTryBlockWithResources.java?ref=78a965b4089a596a6ddf6877797ef38d3d649b45",
+    "patch": "@@ -0,0 +1,25 @@\n+/* Config:                                                                  //indent:0 exp:0\n+ * This test-input is intended to be checked using following configuration: //indent:1 exp:1\n+ *                                                                          //indent:1 exp:1\n+ * basicOffset = 4                                                          //indent:1 exp:1\n+ * braceAdjustment = 0                                                      //indent:1 exp:1\n+ * caseIndent = 4                                                           //indent:1 exp:1\n+ * forceStrictCondition = true                                              //indent:1 exp:1\n+ * lineWrappingIndentation = 8                                              //indent:1 exp:1\n+ * tabWidth = 4                                                             //indent:1 exp:1\n+ * throwsIndent = 4                                                         //indent:1 exp:1\n+ */                                                                         //indent:1 exp:1\n+\n+package com.puppycrawl.tools.checkstyle.checks.indentation.indentation; //indent:0 exp:0\n+\n+import java.io.InputStreamReader; //indent:0 exp:0\n+\n+public class InputIndentationTryBlockWithResources { //indent:0 exp:0\n+    public void delete(final int assetId) { //indent:4 exp:4\n+        try (InputStreamReader reader = //indent:8 exp:8\n+                new InputStreamReader(System.in)) { //indent:16 exp:16\n+            new Object().equals(Integer.valueOf(assetId)); //indent:12 exp:12\n+        } catch (Exception ignore) { //indent:8 exp:8\n+        } //indent:8 exp:8\n+    } //indent:4 exp:4\n+} //indent:0 exp:0"
+  }
+]

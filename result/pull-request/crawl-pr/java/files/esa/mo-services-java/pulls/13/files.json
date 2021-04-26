@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "770b9d79cdb4217309a19dc70ec08678bf831038",
+    "filename": "bindings/transport-file/src/main/java/esa/mo/mal/transport/file/FileTransceiver.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/esa/mo-services-java/blob/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/bindings/transport-file/src/main/java/esa/mo/mal/transport/file/FileTransceiver.java",
+    "raw_url": "https://github.com/esa/mo-services-java/raw/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/bindings/transport-file/src/main/java/esa/mo/mal/transport/file/FileTransceiver.java",
+    "contents_url": "https://api.github.com/repos/esa/mo-services-java/contents/bindings/transport-file/src/main/java/esa/mo/mal/transport/file/FileTransceiver.java?ref=0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4",
+    "patch": "@@ -24,7 +24,6 @@\n import esa.mo.mal.transport.gen.sending.GENOutgoingMessageHolder;\n import esa.mo.mal.transport.gen.util.GENMessagePoller.GENMessageReceiver;\n import java.io.File;\n-import java.io.FileOutputStream;\n import java.io.IOException;\n import java.io.InputStream;\n import java.nio.channels.Channels;\n@@ -87,7 +86,7 @@ public void sendEncodedMessage(GENOutgoingMessageHolder packetData) throws IOExc\n \n         java.io.File tmpFile = new File(outgoingDirectory.toFile(), tmpname + \".tmp\");\n \n-        java.io.FileOutputStream fos = new FileOutputStream(tmpFile);\n+        java.io.OutputStream fos = Files.newOutputStream(tmpFile.toPath());\n         try {\n             fos.write((byte[]) packetData.getEncodedMessage());\n             fos.flush();"
+  },
+  {
+    "sha": "5803ba63a2a9398d07a6a489197a02ebdf2cce8d",
+    "filename": "bindings/transport-zmtp/src/main/java/esa/mo/mal/transport/zmtp/ZMTPStringMappingDirectory.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/esa/mo-services-java/blob/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/bindings/transport-zmtp/src/main/java/esa/mo/mal/transport/zmtp/ZMTPStringMappingDirectory.java",
+    "raw_url": "https://github.com/esa/mo-services-java/raw/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/bindings/transport-zmtp/src/main/java/esa/mo/mal/transport/zmtp/ZMTPStringMappingDirectory.java",
+    "contents_url": "https://api.github.com/repos/esa/mo-services-java/contents/bindings/transport-zmtp/src/main/java/esa/mo/mal/transport/zmtp/ZMTPStringMappingDirectory.java?ref=0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4",
+    "patch": "@@ -21,9 +21,10 @@\n package esa.mo.mal.transport.zmtp;\n \n import java.io.BufferedReader;\n+import java.io.File;\n import java.io.FileNotFoundException;\n-import java.io.FileReader;\n import java.io.IOException;\n+import java.nio.file.Files;\n import java.text.MessageFormat;\n import java.util.HashMap;\n import java.util.Map;\n@@ -54,7 +55,7 @@ public void loadDirectory(String filePath) throws MALException {\n         keyToValueMap.clear();\n         valueToKeyMap.clear();\n         try {\n-            BufferedReader br = new BufferedReader(new FileReader(filePath));\n+            BufferedReader br = new BufferedReader(Files.newBufferedReader(new File(filePath).toPath()));\n             String line;\n             while ((line = br.readLine()) != null) {\n                 if (line.length() == 0) {"
+  },
+  {
+    "sha": "dd585e9c0b882ae058894e554f571d9e2a8d5ae3",
+    "filename": "providers-consumers/basic-demo/src/main/java/esa/mo/mal/demo/provider/DemoProviderServiceImpl.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/esa/mo-services-java/blob/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/providers-consumers/basic-demo/src/main/java/esa/mo/mal/demo/provider/DemoProviderServiceImpl.java",
+    "raw_url": "https://github.com/esa/mo-services-java/raw/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/providers-consumers/basic-demo/src/main/java/esa/mo/mal/demo/provider/DemoProviderServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/esa/mo-services-java/contents/providers-consumers/basic-demo/src/main/java/esa/mo/mal/demo/provider/DemoProviderServiceImpl.java?ref=0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4",
+    "patch": "@@ -22,9 +22,10 @@\n \n import java.io.BufferedWriter;\n import java.io.File;\n-import java.io.FileOutputStream;\n import java.io.IOException;\n+import java.io.OutputStream;\n import java.io.OutputStreamWriter;\n+import java.nio.file.Files;\n import java.util.AbstractMap;\n import java.util.LinkedList;\n import java.util.List;\n@@ -173,7 +174,7 @@ public void startServices(final String protocol) throws MALException, MALInterac\n \n         try {\n             final File file = new File(\"demoServiceURI.properties\");\n-            final FileOutputStream fos = new FileOutputStream(file);\n+            final OutputStream fos = Files.newOutputStream(file.toPath());\n             final OutputStreamWriter osw = new OutputStreamWriter(fos);\n             final BufferedWriter wrt = new BufferedWriter(osw);\n             wrt.append(\"uri=\" + demoServiceProvider.getURI());"
+  },
+  {
+    "sha": "4b67a9131eb0ef67a9484b895f799162dccf30c2",
+    "filename": "providers-consumers/encoding-performance-test/src/main/java/esa/mo/performance/encoder/TestEncoder.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/esa/mo-services-java/blob/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/providers-consumers/encoding-performance-test/src/main/java/esa/mo/performance/encoder/TestEncoder.java",
+    "raw_url": "https://github.com/esa/mo-services-java/raw/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/providers-consumers/encoding-performance-test/src/main/java/esa/mo/performance/encoder/TestEncoder.java",
+    "contents_url": "https://api.github.com/repos/esa/mo-services-java/contents/providers-consumers/encoding-performance-test/src/main/java/esa/mo/performance/encoder/TestEncoder.java?ref=0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4",
+    "patch": "@@ -23,7 +23,7 @@\n import esa.mo.performance.util.TestStructureBuilder;\n import java.io.ByteArrayInputStream;\n import java.io.ByteArrayOutputStream;\n-import java.io.FileOutputStream;\n+import java.nio.file.Files;\n import java.util.Date;\n import java.util.LinkedList;\n import java.util.List;\n@@ -161,7 +161,7 @@ protected static void check(Results result, MALElementStreamFactory streamFactor\n \n         if (result.dump) {\n             java.io.File outputFile = new java.io.File(result.encoderName + \".txt\");\n-            java.io.FileOutputStream fos = new FileOutputStream(outputFile);\n+            java.io.OutputStream fos = Files.newOutputStream(outputFile.toPath());\n             fos.write(baos.toByteArray());\n             fos.close();\n         }"
+  },
+  {
+    "sha": "4102e84de29255e6efe38e61706c9b2ba96f66d4",
+    "filename": "providers-consumers/transport-bridge/src/main/java/esa/mo/mal/transport/bridge/Main.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/esa/mo-services-java/blob/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/providers-consumers/transport-bridge/src/main/java/esa/mo/mal/transport/bridge/Main.java",
+    "raw_url": "https://github.com/esa/mo-services-java/raw/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/providers-consumers/transport-bridge/src/main/java/esa/mo/mal/transport/bridge/Main.java",
+    "contents_url": "https://api.github.com/repos/esa/mo-services-java/contents/providers-consumers/transport-bridge/src/main/java/esa/mo/mal/transport/bridge/Main.java?ref=0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4",
+    "patch": "@@ -22,7 +22,9 @@\n \n import esa.mo.mal.impl.util.StructureHelper;\n import java.io.BufferedWriter;\n+import java.io.File;\n import java.net.MalformedURLException;\n+import java.nio.file.Files;\n import java.util.Map;\n import java.util.Properties;\n import org.ccsds.moims.mo.mal.MALException;\n@@ -113,7 +115,7 @@ protected static void storeURIs(String filename, URI uri) throws Exception {\n     }\n \n     protected static void storeURIs(String filename, String uri, String buri) throws Exception {\n-        java.io.BufferedWriter wrt = new BufferedWriter(new java.io.FileWriter(new java.io.File(filename)));\n+        java.io.BufferedWriter wrt = new BufferedWriter(Files.newBufferedWriter(new File(filename).toPath()));\n         wrt.append(\"uri=\" + uri);\n         wrt.newLine();\n         wrt.append(\"broker=\" + buri);"
+  },
+  {
+    "sha": "c25b5103a9f92dae88eb24545042fa3529be54bf",
+    "filename": "stub-generator/generator-docs/src/main/java/esa/mo/tools/stubgen/GeneratorDocument.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/esa/mo-services-java/blob/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/stub-generator/generator-docs/src/main/java/esa/mo/tools/stubgen/GeneratorDocument.java",
+    "raw_url": "https://github.com/esa/mo-services-java/raw/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/stub-generator/generator-docs/src/main/java/esa/mo/tools/stubgen/GeneratorDocument.java",
+    "contents_url": "https://api.github.com/repos/esa/mo-services-java/contents/stub-generator/generator-docs/src/main/java/esa/mo/tools/stubgen/GeneratorDocument.java?ref=0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4",
+    "patch": "@@ -25,9 +25,9 @@\n import esa.mo.tools.stubgen.specification.StdStrings;\n import esa.mo.tools.stubgen.writers.TargetWriter;\n import esa.mo.xsd.TypeReference;\n-import java.io.FileOutputStream;\n import java.io.IOException;\n import java.io.OutputStream;\n+import java.nio.file.Files;\n import java.util.Arrays;\n import java.util.LinkedList;\n import java.util.List;\n@@ -126,7 +126,7 @@ protected CompositeField createCompositeElementsDetails(TargetWriter file,\n         root.appendChild(newNode);\n         // Set the transcoder input and output.\n         TranscoderInput input = new TranscoderInput(document);\n-        OutputStream ostream = new FileOutputStream(StubUtils.createLowLevelFile(folder, name, \"png\"));\n+        OutputStream ostream = Files.newOutputStream(StubUtils.createLowLevelFile(folder, name, \"png\").toPath());\n         TranscoderOutput output = new TranscoderOutput(ostream);\n \n         // Perform the transcoding."
+  },
+  {
+    "sha": "a50f8c161a758953824f6be212bd67b64eef9f4e",
+    "filename": "stub-generator/generator-lib/src/main/java/esa/mo/tools/stubgen/StubUtils.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 7,
+    "changes": 14,
+    "blob_url": "https://github.com/esa/mo-services-java/blob/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/stub-generator/generator-lib/src/main/java/esa/mo/tools/stubgen/StubUtils.java",
+    "raw_url": "https://github.com/esa/mo-services-java/raw/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/stub-generator/generator-lib/src/main/java/esa/mo/tools/stubgen/StubUtils.java",
+    "contents_url": "https://api.github.com/repos/esa/mo-services-java/contents/stub-generator/generator-lib/src/main/java/esa/mo/tools/stubgen/StubUtils.java?ref=0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4",
+    "patch": "@@ -22,13 +22,13 @@\n \n import esa.mo.tools.stubgen.specification.CompositeField;\n import java.io.File;\n-import java.io.FileInputStream;\n import java.io.FileNotFoundException;\n-import java.io.FileOutputStream;\n import java.io.IOException;\n+import java.io.InputStream;\n import java.io.OutputStreamWriter;\n import java.io.Writer;\n-import java.nio.charset.Charset;\n+import java.nio.charset.StandardCharsets;\n+import java.nio.file.Files;\n import java.util.Arrays;\n import java.util.LinkedList;\n import java.util.List;\n@@ -72,11 +72,11 @@ public static void createZipfile(String destinationFolderName,\n         try {\n             // Create the ZIP file\n             ZipOutputStream out = new ZipOutputStream(\n-                    new FileOutputStream(destinationFolderName + outFilename));\n+                    Files.newOutputStream(new File(destinationFolderName + outFilename).toPath()));\n \n             // Compress the files\n             for (int i = 0; i < filenames.length; ++i) {\n-                FileInputStream in = new FileInputStream(destinationFolderName + \"/\" + filenames[i]);\n+                InputStream in = Files.newInputStream(new File(destinationFolderName + \"/\" + filenames[i]).toPath());\n \n                 try {\n                     // Add ZIP entry to output stream.\n@@ -141,7 +141,7 @@ public static Writer createLowLevelWriter(String folder, String name,\n             String ext) throws IOException {\n         File file = createLowLevelFile(folder, name, ext);\n \n-        return new OutputStreamWriter(new FileOutputStream(file), Charset.forName(\"UTF-8\"));\n+        return new OutputStreamWriter(Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8);\n     }\n \n     /**\n@@ -160,7 +160,7 @@ public static Writer createLowLevelWriter(File folder, String name,\n             throw new IOException(\"Unable to create file: \" + file.getPath());\n         }\n \n-        return new OutputStreamWriter(new FileOutputStream(file), Charset.forName(\"UTF-8\"));\n+        return new OutputStreamWriter(Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8);\n     }\n \n     /**"
+  },
+  {
+    "sha": "05d1a4cf5a06eab9284bab4cc62ea47da5bc0fc8",
+    "filename": "support-libs/support-mal/src/main/java/esa/mo/mal/support/StructureHelper.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/esa/mo-services-java/blob/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/support-libs/support-mal/src/main/java/esa/mo/mal/support/StructureHelper.java",
+    "raw_url": "https://github.com/esa/mo-services-java/raw/0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4/support-libs/support-mal/src/main/java/esa/mo/mal/support/StructureHelper.java",
+    "contents_url": "https://api.github.com/repos/esa/mo-services-java/contents/support-libs/support-mal/src/main/java/esa/mo/mal/support/StructureHelper.java?ref=0ef5ae1a7a63a5536e18d45a5cb94cc1e35accc4",
+    "patch": "@@ -22,10 +22,11 @@\n \n import java.io.BufferedWriter;\n import java.io.File;\n-import java.io.FileOutputStream;\n import java.io.IOException;\n+import java.io.OutputStream;\n import java.io.OutputStreamWriter;\n import java.net.MalformedURLException;\n+import java.nio.file.Files;\n import java.util.Properties;\n import java.util.Set;\n import java.util.TreeSet;\n@@ -178,7 +179,7 @@ public static void storeURIs(String filename, String propertyPrefix, URI service\n \n             try {\n                 File file = new File(filename);\n-                final FileOutputStream fos = new FileOutputStream(file);\n+                final OutputStream fos = Files.newOutputStream(file.toPath());\n                 final OutputStreamWriter osw = new OutputStreamWriter(fos);\n                 final BufferedWriter wrt = new BufferedWriter(osw);\n "
+  }
+]

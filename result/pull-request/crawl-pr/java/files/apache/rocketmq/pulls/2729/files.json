@@ -1,0 +1,37 @@
+[
+  {
+    "sha": "3b96f0f3ec643e4e0dbfccb9dec507c66273e7d0",
+    "filename": "client/src/main/java/org/apache/rocketmq/client/impl/producer/DefaultMQProducerImpl.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 14,
+    "changes": 21,
+    "blob_url": "https://github.com/apache/rocketmq/blob/d6da221d869e276459c8f81a024164711b1f9d8e/client/src/main/java/org/apache/rocketmq/client/impl/producer/DefaultMQProducerImpl.java",
+    "raw_url": "https://github.com/apache/rocketmq/raw/d6da221d869e276459c8f81a024164711b1f9d8e/client/src/main/java/org/apache/rocketmq/client/impl/producer/DefaultMQProducerImpl.java",
+    "contents_url": "https://api.github.com/repos/apache/rocketmq/contents/client/src/main/java/org/apache/rocketmq/client/impl/producer/DefaultMQProducerImpl.java?ref=d6da221d869e276459c8f81a024164711b1f9d8e",
+    "patch": "@@ -80,7 +80,6 @@\n import org.apache.rocketmq.common.message.MessageQueue;\n import org.apache.rocketmq.common.message.MessageType;\n import org.apache.rocketmq.common.protocol.NamespaceUtil;\n-import org.apache.rocketmq.common.protocol.ResponseCode;\n import org.apache.rocketmq.common.protocol.header.CheckTransactionStateRequestHeader;\n import org.apache.rocketmq.common.protocol.header.EndTransactionRequestHeader;\n import org.apache.rocketmq.common.protocol.header.SendMessageRequestHeader;\n@@ -620,20 +619,14 @@ private SendResult sendDefaultImpl(\n                         log.warn(String.format(\"sendKernelImpl exception, resend at once, InvokeID: %s, RT: %sms, Broker: %s\", invokeID, endTimestamp - beginTimestampPrev, mq), e);\n                         log.warn(msg.toString());\n                         exception = e;\n-                        switch (e.getResponseCode()) {\n-                            case ResponseCode.TOPIC_NOT_EXIST:\n-                            case ResponseCode.SERVICE_NOT_AVAILABLE:\n-                            case ResponseCode.SYSTEM_ERROR:\n-                            case ResponseCode.NO_PERMISSION:\n-                            case ResponseCode.NO_BUYER_ID:\n-                            case ResponseCode.NOT_IN_CURRENT_UNIT:\n-                                continue;\n-                            default:\n-                                if (sendResult != null) {\n-                                    return sendResult;\n-                                }\n+                        if (this.defaultMQProducer.getRetryResponseCodes().contains(e.getResponseCode())) {\n+                            continue;\n+                        } else {\n+                            if (sendResult != null) {\n+                                return sendResult;\n+                            }\n \n-                                throw e;\n+                            throw e;\n                         }\n                     } catch (InterruptedException e) {\n                         endTimestamp = System.currentTimeMillis();"
+  },
+  {
+    "sha": "33d0ecc272cc49df8a37d96c5a9daaaaff0d7599",
+    "filename": "client/src/main/java/org/apache/rocketmq/client/producer/DefaultMQProducer.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/apache/rocketmq/blob/d6da221d869e276459c8f81a024164711b1f9d8e/client/src/main/java/org/apache/rocketmq/client/producer/DefaultMQProducer.java",
+    "raw_url": "https://github.com/apache/rocketmq/raw/d6da221d869e276459c8f81a024164711b1f9d8e/client/src/main/java/org/apache/rocketmq/client/producer/DefaultMQProducer.java",
+    "contents_url": "https://api.github.com/repos/apache/rocketmq/contents/client/src/main/java/org/apache/rocketmq/client/producer/DefaultMQProducer.java?ref=d6da221d869e276459c8f81a024164711b1f9d8e",
+    "patch": "@@ -16,8 +16,11 @@\n  */\n package org.apache.rocketmq.client.producer;\n \n+import java.util.Arrays;\n import java.util.Collection;\n import java.util.List;\n+import java.util.Set;\n+import java.util.concurrent.CopyOnWriteArraySet;\n import java.util.concurrent.ExecutorService;\n import org.apache.rocketmq.client.ClientConfig;\n import org.apache.rocketmq.client.QueryResult;\n@@ -38,6 +41,7 @@\n import org.apache.rocketmq.common.message.MessageExt;\n import org.apache.rocketmq.common.message.MessageId;\n import org.apache.rocketmq.common.message.MessageQueue;\n+import org.apache.rocketmq.common.protocol.ResponseCode;\n import org.apache.rocketmq.common.topic.TopicValidator;\n import org.apache.rocketmq.logging.InternalLogger;\n import org.apache.rocketmq.remoting.RPCHook;\n@@ -62,6 +66,15 @@\n      */\n     protected final transient DefaultMQProducerImpl defaultMQProducerImpl;\n     private final InternalLogger log = ClientLogger.getLog();\n+    private final Set<Integer> retryResponseCodes = new CopyOnWriteArraySet<Integer>(Arrays.asList(\n+            ResponseCode.TOPIC_NOT_EXIST,\n+            ResponseCode.SERVICE_NOT_AVAILABLE,\n+            ResponseCode.SYSTEM_ERROR,\n+            ResponseCode.NO_PERMISSION,\n+            ResponseCode.NO_BUYER_ID,\n+            ResponseCode.NOT_IN_CURRENT_UNIT\n+    ));\n+\n     /**\n      * Producer group conceptually aggregates all producer instances of exactly same role, which is particularly\n      * important when transactional messages are involved. </p>\n@@ -960,6 +973,15 @@ public void setAsyncSenderExecutor(final ExecutorService asyncSenderExecutor) {\n         this.defaultMQProducerImpl.setAsyncSenderExecutor(asyncSenderExecutor);\n     }\n \n+    /**\n+     * Add response code for retrying.\n+     *\n+     * @param responseCode response code, {@link ResponseCode}\n+     */\n+    public void addRetryResponseCode(int responseCode) {\n+        this.retryResponseCodes.add(responseCode);\n+    }\n+\n     private MessageBatch batch(Collection<Message> msgs) throws MQClientException {\n         MessageBatch msgBatch;\n         try {\n@@ -1090,4 +1112,7 @@ public TraceDispatcher getTraceDispatcher() {\n         return traceDispatcher;\n     }\n \n+    public Set<Integer> getRetryResponseCodes() {\n+        return retryResponseCodes;\n+    }\n }"
+  },
+  {
+    "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "filename": "docs/cn/README",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/apache/rocketmq/blob/39bb9386f10d5d8dfe81183c172a3a86f6d313bd/docs/cn/README",
+    "raw_url": "https://github.com/apache/rocketmq/raw/39bb9386f10d5d8dfe81183c172a3a86f6d313bd/docs/cn/README",
+    "contents_url": "https://api.github.com/repos/apache/rocketmq/contents/docs/cn/README?ref=39bb9386f10d5d8dfe81183c172a3a86f6d313bd"
+  }
+]

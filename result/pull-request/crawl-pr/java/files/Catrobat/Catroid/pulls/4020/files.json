@@ -1,0 +1,49 @@
+[
+  {
+    "sha": "8e5935c17d6486bbe5658b46b01edf2ec8de97c9",
+    "filename": "catroid/src/androidTest/assets/catrobatTests/bricks/control/testLoopDelay.catrobat",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/f1a461fe05bf5d9194ba32ee825958f12b5ac50b/catroid/src/androidTest/assets/catrobatTests/bricks/control/testLoopDelay.catrobat",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/f1a461fe05bf5d9194ba32ee825958f12b5ac50b/catroid/src/androidTest/assets/catrobatTests/bricks/control/testLoopDelay.catrobat",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/androidTest/assets/catrobatTests/bricks/control/testLoopDelay.catrobat?ref=f1a461fe05bf5d9194ba32ee825958f12b5ac50b"
+  },
+  {
+    "sha": "9313aedadce366d34917ac527ee05dba40ec634f",
+    "filename": "catroid/src/main/java/org/catrobat/catroid/content/actions/LoopAction.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/f1a461fe05bf5d9194ba32ee825958f12b5ac50b/catroid/src/main/java/org/catrobat/catroid/content/actions/LoopAction.kt",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/f1a461fe05bf5d9194ba32ee825958f12b5ac50b/catroid/src/main/java/org/catrobat/catroid/content/actions/LoopAction.kt",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/java/org/catrobat/catroid/content/actions/LoopAction.kt?ref=f1a461fe05bf5d9194ba32ee825958f12b5ac50b",
+    "patch": "@@ -24,12 +24,14 @@\n package org.catrobat.catroid.content.actions\n \n import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction\n+import org.catrobat.catroid.utils.LoopUtil\n \n abstract class LoopAction : RepeatAction() {\n     var isLoopDelay = true\n     protected var currentTime = 0f\n \n-    protected fun isLoopDelayNeeded(): Boolean = currentTime < LOOP_DELAY && isLoopDelay\n+    protected fun isLoopDelayNeeded(): Boolean = currentTime < LOOP_DELAY &&\n+        isLoopDelay && !LoopUtil.isAnyStitchRunning()\n \n     companion object {\n         private const val LOOP_DELAY = 0.02f"
+  },
+  {
+    "sha": "2d5c5229443b2206a10cbc82d44893b799fd0f67",
+    "filename": "catroid/src/main/java/org/catrobat/catroid/embroidery/RunningStitch.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/f1a461fe05bf5d9194ba32ee825958f12b5ac50b/catroid/src/main/java/org/catrobat/catroid/embroidery/RunningStitch.java",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/f1a461fe05bf5d9194ba32ee825958f12b5ac50b/catroid/src/main/java/org/catrobat/catroid/embroidery/RunningStitch.java",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/java/org/catrobat/catroid/embroidery/RunningStitch.java?ref=f1a461fe05bf5d9194ba32ee825958f12b5ac50b",
+    "patch": "@@ -67,4 +67,8 @@ public void deactivate() {\n \t\ttype = null;\n \t\tsprite = null;\n \t}\n+\n+\tpublic boolean isRunning() {\n+\t\treturn isRunning;\n+\t}\n }"
+  },
+  {
+    "sha": "b6f20360cd8c9027bf87453f5e46876f85c070bd",
+    "filename": "catroid/src/main/java/org/catrobat/catroid/utils/LoopUtil.kt",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 7,
+    "changes": 22,
+    "blob_url": "https://github.com/Catrobat/Catroid/blob/f1a461fe05bf5d9194ba32ee825958f12b5ac50b/catroid/src/main/java/org/catrobat/catroid/utils/LoopUtil.kt",
+    "raw_url": "https://github.com/Catrobat/Catroid/raw/f1a461fe05bf5d9194ba32ee825958f12b5ac50b/catroid/src/main/java/org/catrobat/catroid/utils/LoopUtil.kt",
+    "contents_url": "https://api.github.com/repos/Catrobat/Catroid/contents/catroid/src/main/java/org/catrobat/catroid/utils/LoopUtil.kt?ref=f1a461fe05bf5d9194ba32ee825958f12b5ac50b",
+    "patch": "@@ -23,6 +23,7 @@\n \n package org.catrobat.catroid.utils\n \n+import org.catrobat.catroid.ProjectManager\n import org.catrobat.catroid.content.bricks.Brick\n import org.catrobat.catroid.content.bricks.BrickBaseType\n import org.catrobat.catroid.content.bricks.ChangeBrightnessByNBrick\n@@ -50,7 +51,6 @@ import org.catrobat.catroid.content.bricks.SetSizeToBrick\n import org.catrobat.catroid.content.bricks.SetTransparencyBrick\n import org.catrobat.catroid.content.bricks.SetXBrick\n import org.catrobat.catroid.content.bricks.SetYBrick\n-import org.catrobat.catroid.content.bricks.StitchBrick\n import org.catrobat.catroid.content.bricks.TurnLeftBrick\n import org.catrobat.catroid.content.bricks.TurnRightBrick\n import java.util.ArrayList\n@@ -70,16 +70,24 @@ object LoopUtil {\n \n     @JvmStatic\n     fun checkLoopBrickForLoopDelay(loopBrick: CompositeBrick): Boolean {\n-        var isLoopDelayBrick = false\n         val allNestedBricks: List<Brick> = ArrayList()\n         loopBrick.addToFlatList(allNestedBricks)\n-\n         for (brick in allNestedBricks.filter { b -> !b.isCommentedOut }) {\n-            isLoopDelayBrick = isLoopDelayBrick || loopDelayBricks.contains(brick::class)\n-            if (brick is StitchBrick) {\n-                return false\n+            if (loopDelayBricks.contains(brick::class)) {\n+                return true\n+            }\n+        }\n+        return false\n+    }\n+\n+    @JvmStatic\n+    fun isAnyStitchRunning(): Boolean {\n+        ProjectManager.getInstance() ?: return false\n+        ProjectManager.getInstance().currentProject.spriteListWithClones.forEach {\n+            if (it.runningStitch.isRunning) {\n+                return true\n             }\n         }\n-        return isLoopDelayBrick\n+        return false\n     }\n }"
+  }
+]

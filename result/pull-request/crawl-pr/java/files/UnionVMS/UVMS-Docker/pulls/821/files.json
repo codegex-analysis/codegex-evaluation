@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "cc872f35e86b50cf1ac9bf98a3db13c29db81dc3",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/UnionVMS/UVMS-Docker/blob/20261e57ead030e8549d2b1ae501723223dbe55e/pom.xml",
+    "raw_url": "https://github.com/UnionVMS/UVMS-Docker/raw/20261e57ead030e8549d2b1ae501723223dbe55e/pom.xml",
+    "contents_url": "https://api.github.com/repos/UnionVMS/UVMS-Docker/contents/pom.xml?ref=20261e57ead030e8549d2b1ae501723223dbe55e",
+    "patch": "@@ -19,7 +19,7 @@\n \t\t<project.scm.id>github</project.scm.id>\n \t\t<scm.connection>scm:git:https://github.com/UnionVMS/UVMS-Docker.git</scm.connection>\n \t\t<scm.url>scm:git:https://github.com/UnionVMS/UVMS-Docker.git</scm.url>\n-\t\t<unionvms.wildfly.version>21.0.1.Final</unionvms.wildfly.version>\n+\t\t<unionvms.wildfly.version>23.0.0.Final</unionvms.wildfly.version>\n \t\t<unionvms.project.unionvms.web.version>3.0.78-UVMS</unionvms.project.unionvms.web.version>\n \t\t<unionvms.project.vms.web.version>1.1.7</unionvms.project.vms.web.version>\n \t\t<unionvms.project.mapfishprint.version>3.20.2.1</unionvms.project.mapfishprint.version>"
+  },
+  {
+    "sha": "88246ba89659606987a1e609f04c3da8c5250d2b",
+    "filename": "wildfly-base/src/main/docker/cli-scripts/uvms_configuration.cli",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/UnionVMS/UVMS-Docker/blob/20261e57ead030e8549d2b1ae501723223dbe55e/wildfly-base/src/main/docker/cli-scripts/uvms_configuration.cli",
+    "raw_url": "https://github.com/UnionVMS/UVMS-Docker/raw/20261e57ead030e8549d2b1ae501723223dbe55e/wildfly-base/src/main/docker/cli-scripts/uvms_configuration.cli",
+    "contents_url": "https://api.github.com/repos/UnionVMS/UVMS-Docker/contents/wildfly-base/src/main/docker/cli-scripts/uvms_configuration.cli?ref=20261e57ead030e8549d2b1ae501723223dbe55e",
+    "patch": "@@ -17,6 +17,7 @@ embed-server --server-config=${SERVER_CONFIG}\n /system-property=hibernate.spatial.dialect:add(value=org.hibernate.spatial.dialect.postgis.PostgisPG9Dialect)\n /system-property=hawtio.authenticationEnabled:add(value=false)\n /system-property=USM.secretKey:add(value=$secretkey)\n+/system-property=resteasy.preferJacksonOverJsonB:add(value=false)\n \n # Logging\n /subsystem=logging/logger=org.apache.tomcat.util.modeler:add(level=WARN)\n@@ -177,6 +178,12 @@ embed-server --server-config=${SERVER_CONFIG}\n /subsystem=jca/workmanager=default/long-running-threads=default:write-attribute(name=max-threads, value=64)\n \n # Microprofile Metrics\n+# Wildfly 22.0.0.Final workaround\n+if (outcome != success) of /extension=org.wildfly.extension.microprofile.metrics-smallrye:read-attribute(name=module)\n+    /extension=org.wildfly.extension.microprofile.metrics-smallrye:add\n+    /subsystem=microprofile-metrics-smallrye:add(security-enabled=false, exposed-subsystems=[*], prefix=${wildfly.metrics.prefix:wildfly})\n+    /subsystem=metrics:write-attribute(name=exposed-subsystems, value=[messaging-activemq, transactions])\n+end-if\n /subsystem=microprofile-metrics-smallrye:write-attribute(name=exposed-subsystems, value=[messaging-activemq, transactions])\n \n # Naming"
+  },
+  {
+    "sha": "dfa0a3e0b80262a8d3ef6065c03bf00f68a1b38a",
+    "filename": "wildfly-base/src/main/docker/standalone.conf",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 3,
+    "changes": 25,
+    "blob_url": "https://github.com/UnionVMS/UVMS-Docker/blob/20261e57ead030e8549d2b1ae501723223dbe55e/wildfly-base/src/main/docker/standalone.conf",
+    "raw_url": "https://github.com/UnionVMS/UVMS-Docker/raw/20261e57ead030e8549d2b1ae501723223dbe55e/wildfly-base/src/main/docker/standalone.conf",
+    "contents_url": "https://api.github.com/repos/UnionVMS/UVMS-Docker/contents/wildfly-base/src/main/docker/standalone.conf?ref=20261e57ead030e8549d2b1ae501723223dbe55e",
+    "patch": "@@ -1,10 +1,9 @@\n ## -*- shell-script -*- ######################################################\n ##                                                                          ##\n-##  JBoss Bootstrap Script Configuration                                    ##\n+##  WildFly bootstrap Script Configuration                                    ##\n ##                                                                          ##\n ##############################################################################\n \n-\n #\n # This file is optional; it may be removed if not needed.\n #\n@@ -30,6 +29,9 @@\n #\n #JAVA_HOME=\"/opt/java/jdk\"\n \n+# tell linux glibc how many memory pools can be created that are used by malloc\n+# MALLOC_ARENA_MAX=\"5\"\n+\n #\n # Specify the exact Java VM executable to use.\n #\n@@ -48,7 +50,7 @@ fi\n # Specify options to pass to the Java VM.\n #\n if [ \"x$JAVA_OPTS\" = \"x\" ]; then\n-   JAVA_OPTS=\"-Xms1024m -Xmx4096m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -XX:+AggressiveOpts -XX:+DoEscapeAnalysis -Djava.net.preferIPv4Stack=true -Duser.timezone=UTC -Dresteasy.preferJacksonOverJsonB=false\"\n+   JAVA_OPTS=\"-Xms1024m -Xmx4096m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Duser.timezone=UTC\"\n    JAVA_OPTS=\"$JAVA_OPTS -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true\"\n else\n    echo \"JAVA_OPTS already set in environment; overriding default settings with values: $JAVA_OPTS\"\n@@ -66,6 +68,23 @@ fi\n # Uncomment to gather JBoss Modules metrics\n #JAVA_OPTS=\"$JAVA_OPTS -Djboss.modules.metrics=true\"\n \n+# Uncomment to enable the experimental JDK 11 support for ByteBuddy\n+# ByteBuddy is the default bytecode provider of Hibernate ORM\n+#JAVA_OPTS=\"$JAVA_OPTS -Dnet.bytebuddy.experimental=true\"\n+\n+# Uncomment this to run with a security manager enabled\n+# SECMGR=\"true\"\n+\n # Uncomment this in order to be able to run WildFly on FreeBSD\n # when you get \"epoll_create function not implemented\" message in dmesg output\n #JAVA_OPTS=\"$JAVA_OPTS -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.PollSelectorProvider\"\n+\n+# Uncomment this out to control garbage collection logging\n+# GC_LOG=\"true\"\n+\n+# Uncomment and edit to use a custom java.security file to override all the Java security properties\n+#JAVA_OPTS=\"$JAVA_OPTS -Djava.security.properties==/path/to/custom/java.security\"\n+\n+# Uncomment to add a Java agent. If an agent is added to the module options, then jboss-modules.jar is added as an agent\n+# on the JVM. This allows things like the log manager or security manager to be configured before the agent is invoked.\n+# MODULE_OPTS=\"-javaagent:agent.jar\"\n\\ No newline at end of file"
+  }
+]

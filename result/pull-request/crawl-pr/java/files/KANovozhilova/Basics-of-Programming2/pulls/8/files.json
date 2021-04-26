@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "8e1f3d76ff9ffc174b3cbd679bd68ac5f2b2c078",
+    "filename": "Lesson8/src/main/java/entities/Privilege.java",
+    "status": "added",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/KANovozhilova/Basics-of-Programming2/blob/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/entities/Privilege.java",
+    "raw_url": "https://github.com/KANovozhilova/Basics-of-Programming2/raw/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/entities/Privilege.java",
+    "contents_url": "https://api.github.com/repos/KANovozhilova/Basics-of-Programming2/contents/Lesson8/src/main/java/entities/Privilege.java?ref=5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1",
+    "patch": "@@ -0,0 +1,17 @@\n+package entities;\r\n+\r\n+import javax.persistence.*;\r\n+import java.util.Collection;\r\n+\r\n+@Entity\r\n+public class Privilege {\r\n+\r\n+    @Id\r\n+    @GeneratedValue(strategy = GenerationType.AUTO)\r\n+    private Long id;\r\n+\r\n+    private String name;\r\n+\r\n+    @ManyToMany(mappedBy = \"privileges\")\r\n+    private Collection<Role> roles;\r\n+}\r"
+  },
+  {
+    "sha": "fdff5013acedda7f4e954513d4ed9935e35e71e9",
+    "filename": "Lesson8/src/main/java/entities/Role.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/KANovozhilova/Basics-of-Programming2/blob/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/entities/Role.java",
+    "raw_url": "https://github.com/KANovozhilova/Basics-of-Programming2/raw/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/entities/Role.java",
+    "contents_url": "https://api.github.com/repos/KANovozhilova/Basics-of-Programming2/contents/Lesson8/src/main/java/entities/Role.java?ref=5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1",
+    "patch": "@@ -0,0 +1,25 @@\n+package entities;\r\n+\r\n+import javax.persistence.*;\r\n+import java.util.Collection;\r\n+\r\n+@Entity\r\n+public class Role {\r\n+\r\n+    @Id\r\n+    @GeneratedValue(strategy = GenerationType.AUTO)\r\n+    private Long id;\r\n+\r\n+    private String name;\r\n+    @ManyToMany(mappedBy = \"roles\")\r\n+    private Collection<User> users;\r\n+\r\n+    @ManyToMany\r\n+    @JoinTable(\r\n+            name = \"roles_privileges\",\r\n+            joinColumns = @JoinColumn(\r\n+                    name = \"role_id\", referencedColumnName = \"id\"),\r\n+            inverseJoinColumns = @JoinColumn(\r\n+                    name = \"privilege_id\", referencedColumnName = \"id\"))\r\n+    private Collection<Privilege> privileges;\r\n+}\r"
+  },
+  {
+    "sha": "06915bfbcde2c9520624955712c55222dc44e33b",
+    "filename": "Lesson8/src/main/java/entities/User.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/KANovozhilova/Basics-of-Programming2/blob/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/entities/User.java",
+    "raw_url": "https://github.com/KANovozhilova/Basics-of-Programming2/raw/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/entities/User.java",
+    "contents_url": "https://api.github.com/repos/KANovozhilova/Basics-of-Programming2/contents/Lesson8/src/main/java/entities/User.java?ref=5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1",
+    "patch": "@@ -0,0 +1,29 @@\n+package entities;\r\n+\r\n+import javax.persistence.*;\r\n+import java.util.Collection;\r\n+\r\n+@Entity\r\n+public class User {\r\n+\r\n+    @Id\r\n+    @GeneratedValue(strategy = GenerationType.AUTO)\r\n+    private Long id;\r\n+\r\n+    private String firstName;\r\n+    private String lastName;\r\n+    private String email;\r\n+    private String password;\r\n+    private boolean enabled;\r\n+    private boolean tokenExpired;\r\n+\r\n+    @ManyToMany\r\n+    @JoinTable(\r\n+            name = \"users_roles\",\r\n+            joinColumns = @JoinColumn(\r\n+                    name = \"user_id\", referencedColumnName = \"id\"),\r\n+            inverseJoinColumns = @JoinColumn(\r\n+                    name = \"role_id\", referencedColumnName = \"id\"))\r\n+    private Collection<Role> roles;\r\n+\r\n+}\r"
+  },
+  {
+    "sha": "880eb9aa584af94624d74e7e4f0657e120f92fb4",
+    "filename": "Lesson8/src/main/java/spring/SetupDataLoader.java",
+    "status": "added",
+    "additions": 84,
+    "deletions": 0,
+    "changes": 84,
+    "blob_url": "https://github.com/KANovozhilova/Basics-of-Programming2/blob/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/spring/SetupDataLoader.java",
+    "raw_url": "https://github.com/KANovozhilova/Basics-of-Programming2/raw/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/spring/SetupDataLoader.java",
+    "contents_url": "https://api.github.com/repos/KANovozhilova/Basics-of-Programming2/contents/Lesson8/src/main/java/spring/SetupDataLoader.java?ref=5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1",
+    "patch": "@@ -0,0 +1,84 @@\n+package spring;\r\n+\r\n+import entities.Privilege;\r\n+import entities.Role;\r\n+import entities.User;\r\n+import org.springframework.beans.factory.annotation.Autowired;\r\n+import org.springframework.context.ApplicationListener;\r\n+import org.springframework.context.event.ContextRefreshedEvent;\r\n+import org.springframework.stereotype.Component;\r\n+import org.springframework.transaction.annotation.Transactional;\r\n+\r\n+import java.util.Arrays;\r\n+import java.util.Collection;\r\n+import java.util.List;\r\n+\r\n+@Component\r\n+public class SetupDataLoader implements ApplicationListener<ContextRefreshedEvent> {\r\n+\r\n+    boolean alreadySetup = false;\r\n+\r\n+    @Autowired\r\n+    private UserRepo userRepo;\r\n+\r\n+    @Autowired\r\n+    private RoleRepo roleRepo;\r\n+\r\n+    @Autowired\r\n+    private PrivilegeRepo privilegeRepo;\r\n+\r\n+    @Autowired\r\n+    PasswordEncoder passwordEncoder;\r\n+\r\n+    @Override\r\n+    @Transactional\r\n+    public void onApplicationEvent(ContextRefreshedEvent event) {\r\n+        if (alreadySetup)\r\n+            return;\r\n+        Privilege readPrivilege\r\n+                = createPrivilegeIfNotFound(\"READ_PRIVILEGE\");\r\n+        Privilege writePrivilege\r\n+                = createPrivilegeIfNotFound(\"WRITE_PRIVILEGE\");\r\n+\r\n+        List<Privilege> adminPrivileges = Arrays.asList(\r\n+                readPrivilege, writePrivilege);\r\n+        createRoleIfNotFound(\"ROLE_ADMIN\", adminPrivileges);\r\n+        createRoleIfNotFound(\"ROLE_USER\", Arrays.asList(readPrivilege));\r\n+\r\n+        Role adminRole = roleRepo.findByName(\"ROLE_ADMIN\");\r\n+        User user = new User();\r\n+        user.setFirstName(\"name\");\r\n+        user.setLastName(\"name\");\r\n+        user.setPassword(passwordEncoder.encode(\"1111\"));\r\n+        user.setEmail(\"name@name.com\");\r\n+        user.setRoles(Arrays.asList(adminRole));\r\n+        user.setEnabled(true);\r\n+        userRepo.save(user);\r\n+\r\n+        alreadySetup = true;\r\n+    }\r\n+\r\n+    @Transactional\r\n+    Privilege createPrivilegeIfNotFound(String name) {\r\n+\r\n+        Privilege privilege = privilegeRepo.findByName(name);\r\n+        if (privilege == null) {\r\n+            privilege = new Privilege(name);\r\n+            privilegeRepo.save(privilege);\r\n+        }\r\n+        return privilege;\r\n+    }\r\n+\r\n+    @Transactional\r\n+    Role createRoleIfNotFound(\r\n+            String name, Collection<Privilege> privileges) {\r\n+\r\n+        Role role = roleRepo.findByName(name);\r\n+        if (role == null) {\r\n+            role = new Role(name);\r\n+            role.setPrivileges(privileges);\r\n+            roleRepo.save(role);\r\n+        }\r\n+        return role;\r\n+    }\r\n+}\r"
+  },
+  {
+    "sha": "437c1b3969d40d4e969f7341321684938de5e15e",
+    "filename": "Lesson8/src/main/java/spring/UserService.java",
+    "status": "added",
+    "additions": 74,
+    "deletions": 0,
+    "changes": 74,
+    "blob_url": "https://github.com/KANovozhilova/Basics-of-Programming2/blob/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/spring/UserService.java",
+    "raw_url": "https://github.com/KANovozhilova/Basics-of-Programming2/raw/5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1/Lesson8/src/main/java/spring/UserService.java",
+    "contents_url": "https://api.github.com/repos/KANovozhilova/Basics-of-Programming2/contents/Lesson8/src/main/java/spring/UserService.java?ref=5c3b0f96e2b55d36e62f0f80e1d2d862ac41ead1",
+    "patch": "@@ -0,0 +1,74 @@\n+package spring;\r\n+\r\n+import entities.Privilege;\r\n+import entities.Role;\r\n+import entities.User;\r\n+import org.springframework.beans.factory.annotation.Autowired;\r\n+import org.springframework.stereotype.Service;\r\n+import org.springframework.transaction.annotation.Transactional;\r\n+\r\n+import java.util.ArrayList;\r\n+import java.util.Arrays;\r\n+import java.util.Collection;\r\n+import java.util.List;\r\n+\r\n+@Service(\"UserDetailsService\")\r\n+@Transactional\r\n+public class UserService implements UserDetaisService {\r\n+\r\n+    @Autowired\r\n+    private UserRepo userRepo;\r\n+\r\n+    @Autowired\r\n+    private SpringUserService service;\r\n+\r\n+    @Autowired\r\n+    private MessageSource messages;\r\n+\r\n+    @Autowired\r\n+    private RoleRepo roleRepo;\r\n+\r\n+    @Override\r\n+    public UserDetails loadUserByUsername(String email)\r\n+            throws UsernameNotFoundException {\r\n+\r\n+        User user = userRepo.findByEmail(email);\r\n+        if (user == null) {\r\n+            return new org.springframework.security.core.userdetails.User(\r\n+                    \" \", \" \", true, true, true, true,\r\n+                    getAuthorities(Arrays.asList(\r\n+                            roleRepo.findByName(\"ROLE_USER\"))));\r\n+        }\r\n+\r\n+        return new org.springframework.security.core.userdetails.User(\r\n+                user.getEmail(), user.getPassword(), user.isEnabled(), true, true,\r\n+                true, getAuthorities(user.getRoles()));\r\n+    }\r\n+\r\n+    private Collection<? extends GrantedAuthority> getAuthorities(\r\n+            Collection<Role> roles) {\r\n+\r\n+        return getGrantedAuthorities(getPrivileges(roles));\r\n+    }\r\n+\r\n+    private List<String> getPrivileges(Collection<Role> roles) {\r\n+\r\n+        List<String> privileges = new ArrayList<>();\r\n+        List<Privilege> collection = new ArrayList<>();\r\n+        for (Role role : roles) {\r\n+            collection.addAll(role.getPrivileges());\r\n+        }\r\n+        for (Privilege item : collection) {\r\n+            privileges.add(item.getName());\r\n+        }\r\n+        return privileges;\r\n+    }\r\n+\r\n+    private List<GrantedAuthority> getGrantedAuthorities(List<String> privileges) {\r\n+        List<GrantedAuthority> authorities = new ArrayList<>();\r\n+        for (String privilege : privileges) {\r\n+            authorities.add(new SimpleGrantedAuthority(privilege));\r\n+        }\r\n+        return authorities;\r\n+    }\r\n+}\r"
+  }
+]

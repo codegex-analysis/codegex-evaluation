@@ -1,0 +1,87 @@
+[
+  {
+    "sha": "a6de7f388781bec77fac41664f51163f25c33e0e",
+    "filename": "src/main/java/com/sample/DisplayServlet.java",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/RatkathVamsi/VipaniEnterprises/blob/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/DisplayServlet.java",
+    "raw_url": "https://github.com/RatkathVamsi/VipaniEnterprises/raw/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/DisplayServlet.java",
+    "contents_url": "https://api.github.com/repos/RatkathVamsi/VipaniEnterprises/contents/src/main/java/com/sample/DisplayServlet.java?ref=7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0",
+    "patch": "@@ -0,0 +1,45 @@\n+package com.sample;\n+\n+import com.sample.model.Display;\n+\n+import javax.servlet.RequestDispatcher;\n+import javax.servlet.ServletException;\n+import javax.servlet.annotation.WebServlet;\n+import javax.servlet.http.HttpServlet;\n+import javax.servlet.http.HttpServletRequest;\n+import javax.servlet.http.HttpServletResponse;\n+import java.io.IOException;\n+import java.sql.SQLException;\n+import java.util.List;\n+\n+@WebServlet(\n+        name = \"DisplayServlet\",\n+        urlPatterns = \"/Display\"\n+)\n+\n+public class DisplayServlet extends HttpServlet  {\n+\n+    @Override\n+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  throws ServletException, IOException\n+    {\n+       MySQLCon db;\n+        try {\n+            db = new MySQLCon();\n+            List<Display> display= db.getDisplay();\n+\n+            System.out.println(\"Inside Display Servlet\");\n+            for(int i=0;i<display.size();i++)\n+            {\n+                System.out.println(display.get(i));\n+            }\n+\n+            req.setAttribute(\"display\",display);\n+            RequestDispatcher view = req.getRequestDispatcher(\"display.jsp\");\n+            view.forward(req, resp);\n+\n+        } catch (SQLException | ClassNotFoundException throwables) {\n+            throwables.printStackTrace();\n+        }\n+\n+    }\n+}"
+  },
+  {
+    "sha": "a2503035d802c382a0d7a86a730ce8ab33734b77",
+    "filename": "src/main/java/com/sample/MySQLCon.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/RatkathVamsi/VipaniEnterprises/blob/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/MySQLCon.java",
+    "raw_url": "https://github.com/RatkathVamsi/VipaniEnterprises/raw/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/MySQLCon.java",
+    "contents_url": "https://api.github.com/repos/RatkathVamsi/VipaniEnterprises/contents/src/main/java/com/sample/MySQLCon.java?ref=7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0",
+    "patch": "@@ -1,5 +1,6 @@\n package com.sample;\n \n+import com.sample.model.Display;\n import com.sample.model.ProductionEntry;\n import com.sample.model.Purchases;\n import com.sample.model.Sales;\n@@ -28,6 +29,29 @@ private Connection createConnection() throws ClassNotFoundException, SQLExceptio\n         return con;\n     }\n \n+    public List <Display> getDisplay() throws SQLException, ClassNotFoundException {\n+        List <Display> displayList = new ArrayList<Display>();\n+        Connection con = createConnection();\n+        Statement stmt= con.createStatement();\n+        ResultSet rs= stmt.executeQuery(\"SELECT id,startDate,endDate FROM `default`.transaction;\");\n+\n+        while(rs.next())\n+        {\n+           int id=rs.getInt(1);\n+           String startDate= rs.getString(2);\n+           String endDate= rs.getString(3);\n+\n+           Display display = new Display();\n+           display.setTransactionId(id);\n+           display.setStartDate(startDate);\n+           display.setEndDate(endDate);\n+\n+           displayList.add(display);\n+\n+        }\n+        return displayList;\n+    }\n+\n     public List<Purchases> getPurchases() throws SQLException, ClassNotFoundException {\n         List<Purchases> purchases = new ArrayList<Purchases>();\n         String purchasesFilter[] = {\"UD Cotton Seed\",\n@@ -201,6 +225,8 @@ public void insertProductionEntry(ProductionEntry productionEntry) throws SQLExc\n         preparedStmt.execute();\n     }\n \n+\n+\n     public int insertRecords(ProductionEntry productionEntry) throws SQLException, ClassNotFoundException {\n         Connection con = createConnection();\n         String query1= \"select max(id) as id From `default`.transaction ;\";"
+  },
+  {
+    "sha": "cd89fab16721dad41d7d5cafa718bf7cd2b6d253",
+    "filename": "src/main/java/com/sample/createProductionEntryServlet.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/RatkathVamsi/VipaniEnterprises/blob/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/createProductionEntryServlet.java",
+    "raw_url": "https://github.com/RatkathVamsi/VipaniEnterprises/raw/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/createProductionEntryServlet.java",
+    "contents_url": "https://api.github.com/repos/RatkathVamsi/VipaniEnterprises/contents/src/main/java/com/sample/createProductionEntryServlet.java?ref=7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0",
+    "patch": "@@ -12,8 +12,6 @@\n import java.io.IOException;\n import java.sql.Date;\n import java.sql.SQLException;\n-import java.util.Arrays;\n-import java.util.List;\n \n \n "
+  },
+  {
+    "sha": "e75c3e6ec4d142a45657e05db6de95fd1600819e",
+    "filename": "src/main/java/com/sample/model/Display.java",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/RatkathVamsi/VipaniEnterprises/blob/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/model/Display.java",
+    "raw_url": "https://github.com/RatkathVamsi/VipaniEnterprises/raw/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/model/Display.java",
+    "contents_url": "https://api.github.com/repos/RatkathVamsi/VipaniEnterprises/contents/src/main/java/com/sample/model/Display.java?ref=7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0",
+    "patch": "@@ -0,0 +1,40 @@\n+package com.sample.model;\n+\n+public class Display {\n+    private int transactionId;\n+    private String startDate;\n+    private String endDate;\n+\n+    @Override\n+    public String toString() {\n+        return \"Display{\" +\n+                \"transactionId=\" + transactionId +\n+                \", startDate='\" + startDate + '\\'' +\n+                \", endDate='\" + endDate + '\\'' +\n+                '}';\n+    }\n+\n+    public int getTransactionId() {\n+        return transactionId;\n+    }\n+\n+    public void setTransactionId(int transactionId) {\n+        this.transactionId = transactionId;\n+    }\n+\n+    public String getStartDate() {\n+        return startDate;\n+    }\n+\n+    public void setStartDate(String startDate) {\n+        this.startDate = startDate;\n+    }\n+\n+    public String getEndDate() {\n+        return endDate;\n+    }\n+\n+    public void setEndDate(String endDate) {\n+        this.endDate = endDate;\n+    }\n+}"
+  },
+  {
+    "sha": "27e264a202756b854aa3553d8e492eb106746b64",
+    "filename": "src/main/java/com/sample/model/ProductionEntry.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/RatkathVamsi/VipaniEnterprises/blob/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/model/ProductionEntry.java",
+    "raw_url": "https://github.com/RatkathVamsi/VipaniEnterprises/raw/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/java/com/sample/model/ProductionEntry.java",
+    "contents_url": "https://api.github.com/repos/RatkathVamsi/VipaniEnterprises/contents/src/main/java/com/sample/model/ProductionEntry.java?ref=7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0",
+    "patch": "@@ -110,15 +110,19 @@ public void setItemNames(String[] itemNames) {\n         this.itemNames = itemNames;\n     }\n \n+\n     public String[] getItemNames() {\n         return itemNames;\n+\n     }\n \n     public void setStock(String[] stock) {\n         this.stock = stock;\n     }\n \n+\n     public String[] getStock() {\n         return stock;\n     }\n+    \n }"
+  },
+  {
+    "sha": "414b08b0b2c9fe5bd55b6b9bf96b14bb0ba7d27e",
+    "filename": "src/main/webapp/display.jsp",
+    "status": "added",
+    "additions": 68,
+    "deletions": 0,
+    "changes": 68,
+    "blob_url": "https://github.com/RatkathVamsi/VipaniEnterprises/blob/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/webapp/display.jsp",
+    "raw_url": "https://github.com/RatkathVamsi/VipaniEnterprises/raw/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/webapp/display.jsp",
+    "contents_url": "https://api.github.com/repos/RatkathVamsi/VipaniEnterprises/contents/src/main/webapp/display.jsp?ref=7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0",
+    "patch": "@@ -0,0 +1,68 @@\n+<%@ page import =\"java.util.*\" %>\n+<%@ page import =\"com.sample.model.Display\" %>\n+<!DOCTYPE html>\n+<html lang=\"en\">\n+<head>\n+    <meta charset=\"UTF-8\">\n+    <title>Result</title>\n+    <script src=\"https://code.jquery.com/jquery-1.10.2.js\"></script>\n+\n+    <script type=\"text/javascript\">\n+        $(function(){\n+        $(\"#header\").load(\"header.html\");\n+        $(\"#footer\").load(\"footer.html\");\n+        });\n+\n+    </script>\n+</head>\n+<body>\n+\n+   <%\n+   List<Display> result= (List) request.getAttribute(\"display\");\n+   Iterator it=result.iterator();\n+   %>\n+\n+<div id=\"header\"></div>\n+<form action = \"Display\" method = \"post\" enctype = \"multipart/form-data\">\n+<div id=\"TableDisplay\" style=\"display: flex; justify-content: center\">\n+<style>\n+  td, th {\n+  border: 1px solid #dddddd;\n+  text-align: left;\n+  padding: 8px;\n+}\n+</style>\n+    <table id=\"mytab1\">\n+\n+        <tr>\n+            <th>Transaction id</th>\n+            <th>Start date</th>\n+            <th>End Date</th>\n+        </tr>\n+        <%\n+        while(it.hasNext()){\n+        Display display= (Display) it.next() ;\n+        %>\n+        <tr>\n+          <td><%= display.getTransactionId() %></td>\n+          <td><%= display.getStartDate() %></td>\n+          <td><%= display.getEndDate() %></td>\n+        </tr>\n+        <%\n+        }\n+        %>\n+\n+    </table>\n+\n+\n+\n+</div>\n+\n+</form>\n+<div id=\"footer\"></div>\n+</body>\n+\n+<script>\n+\n+</script>\n+</html>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "ca3f61636ccb4baad3d0f505c606544e76f274a0",
+    "filename": "src/main/webapp/index.jsp",
+    "status": "renamed",
+    "additions": 6,
+    "deletions": 29,
+    "changes": 35,
+    "blob_url": "https://github.com/RatkathVamsi/VipaniEnterprises/blob/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/webapp/index.jsp",
+    "raw_url": "https://github.com/RatkathVamsi/VipaniEnterprises/raw/7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0/src/main/webapp/index.jsp",
+    "contents_url": "https://api.github.com/repos/RatkathVamsi/VipaniEnterprises/contents/src/main/webapp/index.jsp?ref=7d3ea6ea28eb76cdb772cc3aa79bbbb93f6ab2d0",
+    "patch": "@@ -1,3 +1,4 @@\n+<%@ page import =\"java.util.*\" %>\n <!DOCTYPE html>\n <html lang=\"en\">\n <head>\n@@ -21,6 +22,7 @@\n \n </head>\n <body>\n+\n <div id=\"header\"></div>\n <!--Remaining section-->\n \n@@ -40,37 +42,12 @@ <h1 style=\"display: flex; justify-content: center\"> Production Entries</h1>\n \n <br>\n <br>\n-<br>\n-\n-<div id=\"TableDisplay\" style=\"display: flex; justify-content: center\">\n-\n-    <table id=\"mytab1\">\n-        <tr>\n-            <th>Period</th>\n-            <th>UD Cake Produced</th>\n-            <th>Profit</th>\n-        </tr>\n-        <tr>\n-            <td></td>\n-            <td></td>\n-            <td></td>\n-        </tr>\n-        <tr>\n-            <td></td>\n-            <td></td>\n-            <td></td>\n-        </tr>\n-        <tr>\n-            <td></td>\n-            <td></td>\n-            <td></td>\n-        </tr>\n-\n-    </table>\n-\n+<a href=\"Display\">\n+<button type=\"button\">check</button>\n+</a>\n \n+<br>\n \n-</div>\n <!--</div> -->\n <div id=\"footer\"></div>\n ",
+    "previous_filename": "src/main/webapp/index.html"
+  }
+]

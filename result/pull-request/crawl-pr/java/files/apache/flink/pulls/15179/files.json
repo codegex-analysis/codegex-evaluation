@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "1a04d8a6eca97673a7e4fa3c719e95ea8b93256b",
+    "filename": "flink-metrics/flink-metrics-core/src/main/java/org/apache/flink/metrics/LogicalScopeProvider.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/apache/flink/blob/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-metrics/flink-metrics-core/src/main/java/org/apache/flink/metrics/LogicalScopeProvider.java",
+    "raw_url": "https://github.com/apache/flink/raw/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-metrics/flink-metrics-core/src/main/java/org/apache/flink/metrics/LogicalScopeProvider.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-metrics/flink-metrics-core/src/main/java/org/apache/flink/metrics/LogicalScopeProvider.java?ref=a3b1f3391fea3be3c40c92c95b0aab51398a91ad",
+    "patch": "@@ -0,0 +1,25 @@\n+/*\n+ * Licensed to the Apache Software Foundation (ASF) under one or more\n+ * contributor license agreements.  See the NOTICE file distributed with\n+ * this work for additional information regarding copyright ownership.\n+ * The ASF licenses this file to You under the Apache License, Version 2.0\n+ * (the \"License\"); you may not use this file except in compliance with\n+ * the License.  You may obtain a copy of the License at\n+ *\n+ *    http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Unless required by applicable law or agreed to in writing, software\n+ * distributed under the License is distributed on an \"AS IS\" BASIS,\n+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+ * See the License for the specific language governing permissions and\n+ * limitations under the License.\n+ */\n+\n+package org.apache.flink.metrics;\n+\n+/** Extension for metric groups that support logical scopes. */\n+public interface LogicalScopeProvider {\n+    String getLogicalScope(CharacterFilter filter);\n+\n+    String getLogicalScope(CharacterFilter filter, char delimiter);\n+}"
+  },
+  {
+    "sha": "db462a42b486f9d50085410d94ed867ae41b3d58",
+    "filename": "flink-metrics/flink-metrics-influxdb/src/main/java/org/apache/flink/metrics/influxdb/MeasurementInfoProvider.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 4,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/flink/blob/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-metrics/flink-metrics-influxdb/src/main/java/org/apache/flink/metrics/influxdb/MeasurementInfoProvider.java",
+    "raw_url": "https://github.com/apache/flink/raw/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-metrics/flink-metrics-influxdb/src/main/java/org/apache/flink/metrics/influxdb/MeasurementInfoProvider.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-metrics/flink-metrics-influxdb/src/main/java/org/apache/flink/metrics/influxdb/MeasurementInfoProvider.java?ref=a3b1f3391fea3be3c40c92c95b0aab51398a91ad",
+    "patch": "@@ -20,9 +20,8 @@\n \n import org.apache.flink.annotation.VisibleForTesting;\n import org.apache.flink.metrics.CharacterFilter;\n+import org.apache.flink.metrics.LogicalScopeProvider;\n import org.apache.flink.metrics.MetricGroup;\n-import org.apache.flink.runtime.metrics.groups.AbstractMetricGroup;\n-import org.apache.flink.runtime.metrics.groups.FrontMetricGroup;\n \n import java.util.HashMap;\n import java.util.Map;\n@@ -63,7 +62,6 @@ private static String getScopedName(String metricName, MetricGroup group) {\n     }\n \n     private static String getLogicalScope(MetricGroup group) {\n-        return ((FrontMetricGroup<AbstractMetricGroup<?>>) group)\n-                .getLogicalScope(CHARACTER_FILTER, SCOPE_SEPARATOR);\n+        return ((LogicalScopeProvider) group).getLogicalScope(CHARACTER_FILTER, SCOPE_SEPARATOR);\n     }\n }"
+  },
+  {
+    "sha": "e91884a753271ab1a7535487e770bb86048b100a",
+    "filename": "flink-metrics/flink-metrics-jmx/src/main/java/org/apache/flink/metrics/jmx/JMXReporter.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 4,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/flink/blob/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-metrics/flink-metrics-jmx/src/main/java/org/apache/flink/metrics/jmx/JMXReporter.java",
+    "raw_url": "https://github.com/apache/flink/raw/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-metrics/flink-metrics-jmx/src/main/java/org/apache/flink/metrics/jmx/JMXReporter.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-metrics/flink-metrics-jmx/src/main/java/org/apache/flink/metrics/jmx/JMXReporter.java?ref=a3b1f3391fea3be3c40c92c95b0aab51398a91ad",
+    "patch": "@@ -23,15 +23,14 @@\n import org.apache.flink.metrics.Counter;\n import org.apache.flink.metrics.Gauge;\n import org.apache.flink.metrics.Histogram;\n+import org.apache.flink.metrics.LogicalScopeProvider;\n import org.apache.flink.metrics.Meter;\n import org.apache.flink.metrics.Metric;\n import org.apache.flink.metrics.MetricConfig;\n import org.apache.flink.metrics.MetricGroup;\n import org.apache.flink.metrics.reporter.InstantiateViaFactory;\n import org.apache.flink.metrics.reporter.MetricReporter;\n import org.apache.flink.runtime.management.JMXService;\n-import org.apache.flink.runtime.metrics.groups.AbstractMetricGroup;\n-import org.apache.flink.runtime.metrics.groups.FrontMetricGroup;\n \n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n@@ -198,8 +197,7 @@ public void notifyOfRemovedMetric(Metric metric, String metricName, MetricGroup\n \n     static String generateJmxDomain(String metricName, MetricGroup group) {\n         return JMX_DOMAIN_PREFIX\n-                + ((FrontMetricGroup<AbstractMetricGroup<?>>) group)\n-                        .getLogicalScope(CHARACTER_FILTER, '.')\n+                + ((LogicalScopeProvider) group).getLogicalScope(CHARACTER_FILTER, '.')\n                 + '.'\n                 + metricName;\n     }"
+  },
+  {
+    "sha": "2328b6298b428dba47e0e7933b079a4fef29637b",
+    "filename": "flink-metrics/flink-metrics-prometheus/src/main/java/org/apache/flink/metrics/prometheus/AbstractPrometheusReporter.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 4,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/flink/blob/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-metrics/flink-metrics-prometheus/src/main/java/org/apache/flink/metrics/prometheus/AbstractPrometheusReporter.java",
+    "raw_url": "https://github.com/apache/flink/raw/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-metrics/flink-metrics-prometheus/src/main/java/org/apache/flink/metrics/prometheus/AbstractPrometheusReporter.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-metrics/flink-metrics-prometheus/src/main/java/org/apache/flink/metrics/prometheus/AbstractPrometheusReporter.java?ref=a3b1f3391fea3be3c40c92c95b0aab51398a91ad",
+    "patch": "@@ -25,13 +25,12 @@\n import org.apache.flink.metrics.Gauge;\n import org.apache.flink.metrics.Histogram;\n import org.apache.flink.metrics.HistogramStatistics;\n+import org.apache.flink.metrics.LogicalScopeProvider;\n import org.apache.flink.metrics.Meter;\n import org.apache.flink.metrics.Metric;\n import org.apache.flink.metrics.MetricConfig;\n import org.apache.flink.metrics.MetricGroup;\n import org.apache.flink.metrics.reporter.MetricReporter;\n-import org.apache.flink.runtime.metrics.groups.AbstractMetricGroup;\n-import org.apache.flink.runtime.metrics.groups.FrontMetricGroup;\n \n import io.prometheus.client.Collector;\n import io.prometheus.client.CollectorRegistry;\n@@ -251,8 +250,7 @@ public void notifyOfRemovedMetric(\n \n     @SuppressWarnings(\"unchecked\")\n     private static String getLogicalScope(MetricGroup group) {\n-        return ((FrontMetricGroup<AbstractMetricGroup<?>>) group)\n-                .getLogicalScope(CHARACTER_FILTER, SCOPE_SEPARATOR);\n+        return ((LogicalScopeProvider) group).getLogicalScope(CHARACTER_FILTER, SCOPE_SEPARATOR);\n     }\n \n     @VisibleForTesting"
+  },
+  {
+    "sha": "6776c6c3e9760fab7473bfbd55f3637bb5b8663a",
+    "filename": "flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/FrontMetricGroup.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/flink/blob/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/FrontMetricGroup.java",
+    "raw_url": "https://github.com/apache/flink/raw/a3b1f3391fea3be3c40c92c95b0aab51398a91ad/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/FrontMetricGroup.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/groups/FrontMetricGroup.java?ref=a3b1f3391fea3be3c40c92c95b0aab51398a91ad",
+    "patch": "@@ -20,6 +20,7 @@\n \n import org.apache.flink.annotation.VisibleForTesting;\n import org.apache.flink.metrics.CharacterFilter;\n+import org.apache.flink.metrics.LogicalScopeProvider;\n \n import java.util.Map;\n \n@@ -32,7 +33,8 @@\n  *\n  * @param <P> parentMetricGroup to {@link AbstractMetricGroup AbstractMetricGroup}\n  */\n-public class FrontMetricGroup<P extends AbstractMetricGroup<?>> extends ProxyMetricGroup<P> {\n+public class FrontMetricGroup<P extends AbstractMetricGroup<?>> extends ProxyMetricGroup<P>\n+        implements LogicalScopeProvider {\n \n     @VisibleForTesting static final char DEFAULT_REPLACEMENT = '_';\n     @VisibleForTesting static final char DEFAULT_REPLACEMENT_ALTERNATIVE = '-';\n@@ -68,11 +70,13 @@ public String getMetricIdentifier(String metricName, CharacterFilter filter) {\n                 this.settings.getReporterIndex(), this.settings.getExcludedVariables());\n     }\n \n+    @Override\n     public String getLogicalScope(CharacterFilter filter) {\n         return parentMetricGroup.getLogicalScope(\n                 getDelimiterFilter(this.settings, filter), this.settings.getDelimiter());\n     }\n \n+    @Override\n     public String getLogicalScope(CharacterFilter filter, char delimiter) {\n         return parentMetricGroup.getLogicalScope(\n                 getDelimiterFilter(this.settings, filter),"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "cfedc18ac173e957a39ddcbd45335ab2852b9afa",
+    "filename": "core/src/main/scala/kafka/server/MetadataCache.scala",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/kafka/blob/0ed5690d129d3daf291a7a2a1e76dfa6cc20bd3b/core/src/main/scala/kafka/server/MetadataCache.scala",
+    "raw_url": "https://github.com/apache/kafka/raw/0ed5690d129d3daf291a7a2a1e76dfa6cc20bd3b/core/src/main/scala/kafka/server/MetadataCache.scala",
+    "contents_url": "https://api.github.com/repos/apache/kafka/contents/core/src/main/scala/kafka/server/MetadataCache.scala?ref=0ed5690d129d3daf291a7a2a1e76dfa6cc20bd3b",
+    "patch": "@@ -392,7 +392,7 @@ class ZkMetadataCache(brokerId: Int) extends MetadataCache with Logging {\n       aliveNodes.get(brokerId).foreach { listenerMap =>\n         val listeners = listenerMap.keySet\n         if (!aliveNodes.values.forall(_.keySet == listeners))\n-          error(s\"Listeners are not identical across brokers: $aliveNodes\")\n+          info(s\"Listeners are not identical across brokers: $aliveNodes\")\n       }\n \n       val newTopicIds = updateMetadataRequest.topicStates().asScala"
+  },
+  {
+    "sha": "68db916cb29fac5cd39811253108078e3b2ec249",
+    "filename": "core/src/main/scala/kafka/server/metadata/MetadataBrokers.scala",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/kafka/blob/0ed5690d129d3daf291a7a2a1e76dfa6cc20bd3b/core/src/main/scala/kafka/server/metadata/MetadataBrokers.scala",
+    "raw_url": "https://github.com/apache/kafka/raw/0ed5690d129d3daf291a7a2a1e76dfa6cc20bd3b/core/src/main/scala/kafka/server/metadata/MetadataBrokers.scala",
+    "contents_url": "https://api.github.com/repos/apache/kafka/contents/core/src/main/scala/kafka/server/metadata/MetadataBrokers.scala?ref=0ed5690d129d3daf291a7a2a1e76dfa6cc20bd3b",
+    "patch": "@@ -107,7 +107,7 @@ object MetadataBrokers {\n       }\n     }\n     if (!listenersIdenticalAcrossBrokers) {\n-      log.error(\"Listeners are not identical across alive brokers. \" +\n+      log.info(\"Listeners are not identical across alive brokers. \" +\n         _aliveBrokers.asScala.map(\n           broker => s\"${broker.id}: ${broker.endpoints.keySet.mkString(\", \")}\"))\n     }"
+  },
+  {
+    "sha": "47921f617aafe7c94e30f8bfc4046ce125b614f6",
+    "filename": "core/src/test/scala/kafka/server/metadata/MetadataBrokersTest.scala",
+    "status": "modified",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/apache/kafka/blob/0ed5690d129d3daf291a7a2a1e76dfa6cc20bd3b/core/src/test/scala/kafka/server/metadata/MetadataBrokersTest.scala",
+    "raw_url": "https://github.com/apache/kafka/raw/0ed5690d129d3daf291a7a2a1e76dfa6cc20bd3b/core/src/test/scala/kafka/server/metadata/MetadataBrokersTest.scala",
+    "contents_url": "https://api.github.com/repos/apache/kafka/contents/core/src/test/scala/kafka/server/metadata/MetadataBrokersTest.scala?ref=0ed5690d129d3daf291a7a2a1e76dfa6cc20bd3b",
+    "patch": "@@ -17,6 +17,7 @@\n \n package kafka.server.metadata\n \n+import java.util\n import java.util.Collections\n import kafka.utils.TestUtils\n import org.junit.jupiter.api.Assertions._\n@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory\n \n import java.util.concurrent.TimeUnit\n import scala.collection.mutable\n+import scala.jdk.CollectionConverters._\n \n \n @Timeout(value = 120000, unit = TimeUnit.MILLISECONDS)\n@@ -52,6 +54,34 @@ class MetadataBrokersTest {\n     assertEquals(expected, found)\n   }\n \n+  @Test\n+  def testBrokersIdenticalEndPoints(): Unit = {\n+    \n+    var listenersIdenticalAcrossBrokers = true\n+    var prevListeners: collection.Set[String] = null\n+    val builder = new MetadataBrokersBuilder(log, emptyBrokers)\n+    builder.add(TestUtils.createMetadataBroker(0))\n+    builder.add(TestUtils.createMetadataBroker(1))\n+    builder.add(TestUtils.createMetadataBroker(2))\n+    builder.add(TestUtils.createMetadataBroker(3))\n+    val brokers = builder.build()\n+    val brokerMap = brokers.cloneBrokerMap()\n+\n+    val _aliveBrokers = new util.ArrayList[MetadataBroker](brokerMap.size())\n+    \n+    brokerMap.values().iterator().asScala.foreach { broker =>\n+      if (!broker.fenced) {\n+        if (prevListeners == null) {\n+          prevListeners = broker.endpoints.keySet\n+        } else if (!prevListeners.equals(broker.endpoints.keySet)) {\n+          listenersIdenticalAcrossBrokers = false\n+        }\n+        _aliveBrokers.add(broker)\n+      }\n+    }\n+    assertTrue(listenersIdenticalAcrossBrokers)\n+  }\n+\n   @Test\n   def testChangeFencing(): Unit = {\n     val builder = new MetadataBrokersBuilder(log, emptyBrokers)"
+  }
+]

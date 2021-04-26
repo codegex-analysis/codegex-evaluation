@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "5fc94be12605c85852f4b0095bf0840087411da9",
+    "filename": "app/src/main/java/ch/epfl/sdp/appart/Database.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/SDPepe/AppArt/blob/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/main/java/ch/epfl/sdp/appart/Database.java",
+    "raw_url": "https://github.com/SDPepe/AppArt/raw/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/main/java/ch/epfl/sdp/appart/Database.java",
+    "contents_url": "https://api.github.com/repos/SDPepe/AppArt/contents/app/src/main/java/ch/epfl/sdp/appart/Database.java?ref=47bb158810f2d92be170a036f1e98d73d1b1d8ac",
+    "patch": "@@ -1,5 +1,6 @@\n package ch.epfl.sdp.appart;\n \n+import ch.epfl.sdp.appart.user.User;\n import java.util.List;\n import java.util.concurrent.CompletableFuture;\n \n@@ -13,4 +14,10 @@\n \n     CompletableFuture<Boolean> updateCard(Card card);\n \n+    CompletableFuture<User> getUser(String userId);\n+\n+    CompletableFuture<Boolean> putUser(User user);\n+\n+    CompletableFuture<Boolean> updateUser(User user);\n+\n }"
+  },
+  {
+    "sha": "f565423eb6da7e6548a8431a338e157e4ff76ced",
+    "filename": "app/src/main/java/ch/epfl/sdp/appart/FirebaseDB.java",
+    "status": "modified",
+    "additions": 69,
+    "deletions": 0,
+    "changes": 69,
+    "blob_url": "https://github.com/SDPepe/AppArt/blob/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/main/java/ch/epfl/sdp/appart/FirebaseDB.java",
+    "raw_url": "https://github.com/SDPepe/AppArt/raw/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/main/java/ch/epfl/sdp/appart/FirebaseDB.java",
+    "contents_url": "https://api.github.com/repos/SDPepe/AppArt/contents/app/src/main/java/ch/epfl/sdp/appart/FirebaseDB.java?ref=47bb158810f2d92be170a036f1e98d73d1b1d8ac",
+    "patch": "@@ -2,6 +2,9 @@\n \n import android.net.Uri;\n \n+import ch.epfl.sdp.appart.user.AppUser;\n+import ch.epfl.sdp.appart.user.Gender;\n+import ch.epfl.sdp.appart.user.User;\n import com.google.firebase.firestore.FirebaseFirestore;\n import com.google.firebase.firestore.QueryDocumentSnapshot;\n import com.google.firebase.storage.FirebaseStorage;\n@@ -96,4 +99,70 @@ public FirebaseDB() {\n         return docData;\n     }\n \n+    @Override\n+    public CompletableFuture<User> getUser(String userId) {\n+        CompletableFuture<User> result = new CompletableFuture<>();\n+\n+        //ask firebase async to get the user objects and notify the future\n+        //when they have been fetched\n+        db.collection(\"users\").document(userId).get().addOnCompleteListener(\n+            task -> {\n+                if (task.isSuccessful()) {\n+                    Map<String, Object> data = task.getResult().getData();\n+                    AppUser user = new AppUser((String) data.get(\"email\"), userId);\n+\n+                    user.setAge((int) data.get(\"age\"));\n+                    user.setUserEmail((String) data.get(\"email\"));\n+                    user.setGender(Gender.ALL.get((int) data.get(\"gender\")));\n+                    user.setName((String) data.get(\"name\"));\n+                    user.setPhoneNumber((String) data.get(\"phoneNumber\"));\n+                    user.setProfileImage((String) data.get(\"profilePicture\"));\n+\n+                    result.complete(user);\n+\n+                } else {\n+                    result.completeExceptionally(new UnsupportedOperationException(\"failed to fetch the user from firebase\"));\n+                }\n+            }\n+        );\n+        return result;\n+    }\n+\n+    @Override\n+    public CompletableFuture<Boolean> putUser(User user) {\n+        CompletableFuture<Boolean> isFinishedFuture = new CompletableFuture<>();\n+        db.collection(\"users\")\n+            .document(user.getUserId())\n+            .set(extractUserInfo(user)).addOnCompleteListener(task -> {\n+            if (task.isSuccessful()) {\n+                isFinishedFuture.complete(task.isSuccessful());\n+            }});\n+        return isFinishedFuture;\n+    }\n+\n+    @Override\n+    public CompletableFuture<Boolean> updateUser(User user) {\n+        CompletableFuture<Boolean> isFinishedFuture = new CompletableFuture<>();\n+        db.collection(\"user\")\n+            .document(user.getUserId())\n+            .set(extractUserInfo(user))\n+            .addOnCompleteListener(task -> {\n+                isFinishedFuture.complete(task.isSuccessful());\n+            });\n+        return isFinishedFuture;\n+    }\n+\n+    private Map<String, Object> extractUserInfo(User user) {\n+        Map<String, Object> docData = new HashMap<>();\n+        docData.put(\"age\", user.getAge());\n+        docData.put(\"email\", user.getUserEmail());\n+        docData.put(\"gender\", user.getGender());\n+        docData.put(\"name\", user.getName());\n+        docData.put(\"phoneNumber\", user.getPhoneNumber());\n+        docData.put(\"profilePicture\", user.getProfileImage());\n+        return docData;\n+    }\n+\n+\n+\n }"
+  },
+  {
+    "sha": "33cd1f8b36c52f5e2069edf1b7692cc3120f2e39",
+    "filename": "app/src/main/java/ch/epfl/sdp/appart/MockDataBase.java",
+    "status": "modified",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/SDPepe/AppArt/blob/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/main/java/ch/epfl/sdp/appart/MockDataBase.java",
+    "raw_url": "https://github.com/SDPepe/AppArt/raw/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/main/java/ch/epfl/sdp/appart/MockDataBase.java",
+    "contents_url": "https://api.github.com/repos/SDPepe/AppArt/contents/app/src/main/java/ch/epfl/sdp/appart/MockDataBase.java?ref=47bb158810f2d92be170a036f1e98d73d1b1d8ac",
+    "patch": "@@ -1,21 +1,29 @@\n package ch.epfl.sdp.appart;\n \n+import ch.epfl.sdp.appart.user.AppUser;\n+import ch.epfl.sdp.appart.user.User;\n import java.util.ArrayList;\n+import java.util.HashMap;\n import java.util.List;\n+import java.util.Map;\n import java.util.concurrent.CompletableFuture;\n \n import ch.epfl.sdp.appart.scrolling.card.Card;\n \n public class MockDataBase implements Database {\n \n     private final List<Card> cards = new ArrayList<>();\n+    private final Map<String, User> users = new HashMap<>();\n \n     public MockDataBase() {\n         cards.add(new Card(\"unknown\", \"unknown\", \"Lausanne\", 1000, \"file:///android_asset/apart_fake_image_1.jpeg\"));\n         cards.add(new Card(\"unknown\", \"unknown\", \"Lausanne\", 1000, \"file:///android_asset/apart_fake_image_1.jpeg\"));\n         cards.add(new Card(\"unknown\", \"unknown\", \"Lausanne\", 1000, \"file:///android_asset/apart_fake_image_1.jpeg\"));\n         cards.add(new Card(\"unknown\", \"unknown\", \"Lausanne\", 1000, \"file:///android_asset/apart_fake_image_1.jpeg\"));\n         cards.add(new Card(\"unknown\", \"unknown\", \"Lausanne\", 1000, \"file:///android_asset/apart_fake_image_1.jpeg\"));\n+        users.put(\"id0\", new AppUser(\"id0\", \"test0@epfl.ch\"));\n+        users.put(\"id1\", new AppUser(\"id1\", \"test1@epfl.ch\"));\n+        users.put(\"id2\", new AppUser(\"id2\", \"test2@epfl.ch\"));\n     }\n \n     @Override\n@@ -45,4 +53,31 @@ public MockDataBase() {\n         return result;\n     }\n \n+    @Override\n+    public CompletableFuture<User> getUser(String userId) {\n+        CompletableFuture<User> result = new CompletableFuture<>();\n+        result.complete(users.get(userId));\n+        return result;\n+    }\n+\n+    @Override\n+    public CompletableFuture<Boolean> putUser(User user) {\n+        CompletableFuture<Boolean> result = new CompletableFuture<>();\n+        users.put(user.getUserId(), user);\n+        result.complete(true);\n+        return result;\n+    }\n+\n+    @Override\n+    public CompletableFuture<Boolean> updateUser(User user) {\n+        CompletableFuture<Boolean> result = new CompletableFuture<>();\n+        if (users.containsValue(user)) {\n+            users.put(user.getUserId(), user);\n+            result.complete(true);\n+        } else {\n+            result.complete(false);\n+        }\n+        return result;\n+    }\n+\n }"
+  },
+  {
+    "sha": "2155bcf94b29969383bce8d70e14b47f82029964",
+    "filename": "app/src/main/java/ch/epfl/sdp/appart/user/UserViewModel.java",
+    "status": "added",
+    "additions": 68,
+    "deletions": 0,
+    "changes": 68,
+    "blob_url": "https://github.com/SDPepe/AppArt/blob/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/main/java/ch/epfl/sdp/appart/user/UserViewModel.java",
+    "raw_url": "https://github.com/SDPepe/AppArt/raw/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/main/java/ch/epfl/sdp/appart/user/UserViewModel.java",
+    "contents_url": "https://api.github.com/repos/SDPepe/AppArt/contents/app/src/main/java/ch/epfl/sdp/appart/user/UserViewModel.java?ref=47bb158810f2d92be170a036f1e98d73d1b1d8ac",
+    "patch": "@@ -0,0 +1,68 @@\n+package ch.epfl.sdp.appart.user;\n+\n+import androidx.lifecycle.LiveData;\n+import androidx.lifecycle.MutableLiveData;\n+import androidx.lifecycle.ViewModel;\n+import ch.epfl.sdp.appart.Database;\n+\n+import dagger.hilt.android.lifecycle.HiltViewModel;\n+import java.util.concurrent.CompletableFuture;\n+import javax.inject.Inject;\n+\n+\n+@HiltViewModel\n+public class UserViewModel extends ViewModel {\n+\n+\n+\n+  private final MutableLiveData<Boolean> mPutCardConfirmed = new MutableLiveData<>();\n+  private final MutableLiveData<Boolean> mUpdateCardConfirmed = new MutableLiveData<>();\n+  private final MutableLiveData<User> mUser = new MutableLiveData<>();\n+\n+  Database db;\n+\n+  @Inject\n+  public UserViewModel(Database database) {\n+    this.db = database;\n+  }\n+\n+  /*\n+   * Put the user in the database and updates the LiveData\n+   */\n+  public void putUser(User user) {\n+    CompletableFuture<Boolean> putUser = db.putUser(user);\n+    putUser.thenAccept(mPutCardConfirmed::setValue);\n+  }\n+\n+  /*\n+   * Update the user in the database and updates the LiveData\n+   */\n+  public void updateUser(User user) {\n+    CompletableFuture<Boolean> updateUser = db.updateUser(user);\n+    updateUser.thenAccept(mUpdateCardConfirmed::setValue);\n+  }\n+\n+  /*\n+   * Get the user from the database and updates the LiveData\n+   */\n+  public void getUser(String userId) {\n+    CompletableFuture<User> getUser = db.getUser(userId);\n+    getUser.thenAccept(mUser::setValue);\n+  }\n+\n+  /*\n+   * Getters for MutableLiveData instances declared above\n+   */\n+  public MutableLiveData<Boolean> getPutCardConfirmed() {\n+    return mPutCardConfirmed;\n+  }\n+\n+  public MutableLiveData<Boolean> getUpdateCardConfirmed() {\n+    return mUpdateCardConfirmed;\n+  }\n+\n+  public MutableLiveData<User> getUser() {\n+    return mUser;\n+  }\n+\n+}"
+  },
+  {
+    "sha": "383f99101099eeee3524503e51ae13da9ce11776",
+    "filename": "app/src/test/java/ch/epfl/sdp/appart/DatabaseUnitTest.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/SDPepe/AppArt/blob/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/test/java/ch/epfl/sdp/appart/DatabaseUnitTest.java",
+    "raw_url": "https://github.com/SDPepe/AppArt/raw/47bb158810f2d92be170a036f1e98d73d1b1d8ac/app/src/test/java/ch/epfl/sdp/appart/DatabaseUnitTest.java",
+    "contents_url": "https://api.github.com/repos/SDPepe/AppArt/contents/app/src/test/java/ch/epfl/sdp/appart/DatabaseUnitTest.java?ref=47bb158810f2d92be170a036f1e98d73d1b1d8ac",
+    "patch": "@@ -1,5 +1,7 @@\n package ch.epfl.sdp.appart;\n \n+import ch.epfl.sdp.appart.user.AppUser;\n+import ch.epfl.sdp.appart.user.User;\n import org.junit.Test;\n \n import ch.epfl.sdp.appart.scrolling.card.Card;\n@@ -34,4 +36,29 @@ public void updateCardTest() {\n         db.updateCard(card);\n         assertTrue(true);\n     }\n+\n+    @Test\n+    public void getUserTest() {\n+        Database db = mock(Database.class);\n+        db.getUser(\"id0\");\n+        assertTrue(true);\n+    }\n+\n+    @Test\n+    public void putUserTest() {\n+        Database db = mock(Database.class);\n+        User user =  new AppUser(\"id3\", \"test3@epfl.ch\");\n+        db.putUser(user);\n+        assertTrue(true);\n+    }\n+\n+    @Test\n+    public void updateUserTest() {\n+        Database db = mock(Database.class);\n+        User user =  new AppUser(\"id2\", \"test2_update@epfl.ch\");\n+        db.updateUser(user);\n+        assertTrue(true);\n+    }\n+\n+\n }"
+  }
+]

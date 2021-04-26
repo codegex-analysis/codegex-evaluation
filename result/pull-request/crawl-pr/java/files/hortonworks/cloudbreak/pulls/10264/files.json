@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "ebfd19a08eb3baecaf50b6d9748de5397bf46e7d",
+    "filename": "freeipa/src/main/resources/freeipa-salt/salt/freeipa/common-install.sls",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/hortonworks/cloudbreak/blob/626500ac522fa0bfdc884e371f34278bb4bc5131/freeipa/src/main/resources/freeipa-salt/salt/freeipa/common-install.sls",
+    "raw_url": "https://github.com/hortonworks/cloudbreak/raw/626500ac522fa0bfdc884e371f34278bb4bc5131/freeipa/src/main/resources/freeipa-salt/salt/freeipa/common-install.sls",
+    "contents_url": "https://api.github.com/repos/hortonworks/cloudbreak/contents/freeipa/src/main/resources/freeipa-salt/salt/freeipa/common-install.sls?ref=626500ac522fa0bfdc884e371f34278bb4bc5131",
+    "patch": "@@ -17,6 +17,15 @@ one_week_next_update_grace_period:\n       - service pki-tomcatd@pki-tomcat start\n     - unless: grep \"^ca[.]crl[.]MasterCRL[.]nextUpdateGracePeriod=10080$\" /var/lib/pki/pki-tomcat/ca/conf/CS.cfg\n \n+add-httpd-x-cdp-trace-id:\n+   file.line:\n+     - name: /usr/lib/python2.7/site-packages/ipaserver/rpcserver.py\n+     - mode: ensure\n+     - content: \"        logger.info('X-cdp-request-ID : %s', environ.get('HTTP_X_CDP_REQUEST_ID'))\"\n+     - after: \"return self.marshal(result, RefererError(referer=environ['HTTP_REFERER']), _id)\"\n+     - indent: False\n+     - backup: False\n+\n /usr/lib/python2.7/site-packages/ipaserver/plugins/getkeytab.py:\n   file.managed:\n     - makedirs: True\n@@ -32,6 +41,7 @@ restart_freeipa_after_plugin_change:\n     - onlyif: test -f /etc/ipa/default.conf\n     - watch:\n       - file: /usr/lib/python2.7/site-packages/ipaserver/plugins/getkeytab.py\n+      - file: /usr/lib/python2.7/site-packages/ipaserver/rpcserver.py\n \n set_number_of_krb5kdc_workers:\n   file.replace:"
+  }
+]

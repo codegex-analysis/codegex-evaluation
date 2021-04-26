@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "8355d2cf6aa9a511ae9d0b16f107ef485106de4f",
+    "filename": ".github/workflows/java-build.yml",
+    "status": "added",
+    "additions": 38,
+    "deletions": 0,
+    "changes": 38,
+    "blob_url": "https://github.com/srbarrios/uyuni/blob/15bb4e73e8e445467de1d402e50d6d55b7bbb3bc/.github/workflows/java-build.yml",
+    "raw_url": "https://github.com/srbarrios/uyuni/raw/15bb4e73e8e445467de1d402e50d6d55b7bbb3bc/.github/workflows/java-build.yml",
+    "contents_url": "https://api.github.com/repos/srbarrios/uyuni/contents/.github/workflows/java-build.yml?ref=15bb4e73e8e445467de1d402e50d6d55b7bbb3bc",
+    "patch": "@@ -0,0 +1,38 @@\n+name: Java Build\n+\n+on:\n+  pull_request:\n+    paths:\n+      - 'java/**.java'\n+\n+jobs:\n+  java_build:\n+    runs-on: ubuntu-latest\n+    container: registry.opensuse.org/systemsmanagement/uyuni/master/docker/containers/uyuni-master-pgsql:latest\n+\n+    steps:\n+    - uses: actions/checkout@v2\n+\n+    - name: Cache dependencies\n+      id: cache-dependencies\n+      uses: actions/cache@v2\n+      with:\n+        path: java/lib\n+        key: ${{ runner.os }}-java-lib-${{ hashFiles('java/buildconf/ivy/*.*') }}\n+\n+    - name: Resolve dependencies\n+      if: steps.cache-dependencies.outputs.cache-hit != 'true'\n+      run: |\n+        cd java\n+        ant -f manager-build.xml ivy\n+\n+    - name: Compile branding jar\n+      run: |\n+        cd java\n+        ant -f manager-build.xml refresh-branding-jar\n+\n+    - name: Deploy Java code\n+      run: |\n+        cd java\n+        ant -f manager-build.xml refresh-branding-jar deploy -Ddeploy.host=localhost restart-tomcat restart-taskomatic\n+        ant -f manager-build.xml refresh-branding-jar deploy-static-resources -Ddeploy.host=localhost\n\\ No newline at end of file"
+  },
+  {
+    "sha": "fb4a94d1476df1e794fac913360114572a896f21",
+    "filename": "java/code/src/com/suse/utils/test/MyTest.java",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/srbarrios/uyuni/blob/15bb4e73e8e445467de1d402e50d6d55b7bbb3bc/java/code/src/com/suse/utils/test/MyTest.java",
+    "raw_url": "https://github.com/srbarrios/uyuni/raw/15bb4e73e8e445467de1d402e50d6d55b7bbb3bc/java/code/src/com/suse/utils/test/MyTest.java",
+    "contents_url": "https://api.github.com/repos/srbarrios/uyuni/contents/java/code/src/com/suse/utils/test/MyTest.java?ref=15bb4e73e8e445467de1d402e50d6d55b7bbb3bc",
+    "patch": "@@ -0,0 +1 @@\n+// This is just a test"
+  }
+]

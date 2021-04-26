@@ -1,0 +1,36 @@
+[
+  {
+    "sha": "13fa9f64002b869dd3b0b5a418b0a516f33e2e6b",
+    "filename": "client/target/classes/sample/RegController.class",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/BichevoyIgor/JavaChat/blob/7c6789ab23938bc78c64357db8adcacbe8816a09/client/target/classes/sample/RegController.class",
+    "raw_url": "https://github.com/BichevoyIgor/JavaChat/raw/7c6789ab23938bc78c64357db8adcacbe8816a09/client/target/classes/sample/RegController.class",
+    "contents_url": "https://api.github.com/repos/BichevoyIgor/JavaChat/contents/client/target/classes/sample/RegController.class?ref=7c6789ab23938bc78c64357db8adcacbe8816a09"
+  },
+  {
+    "sha": "311b1fc72d14917630b615b4bc3bace6b07cb3b7",
+    "filename": "server/src/main/java/server/ClientHandler.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 5,
+    "changes": 19,
+    "blob_url": "https://github.com/BichevoyIgor/JavaChat/blob/7c6789ab23938bc78c64357db8adcacbe8816a09/server/src/main/java/server/ClientHandler.java",
+    "raw_url": "https://github.com/BichevoyIgor/JavaChat/raw/7c6789ab23938bc78c64357db8adcacbe8816a09/server/src/main/java/server/ClientHandler.java",
+    "contents_url": "https://api.github.com/repos/BichevoyIgor/JavaChat/contents/server/src/main/java/server/ClientHandler.java?ref=7c6789ab23938bc78c64357db8adcacbe8816a09",
+    "patch": "@@ -6,6 +6,7 @@\n import java.io.DataOutputStream;\n import java.io.IOException;\n import java.net.Socket;\n+import java.net.SocketTimeoutException;\n \n public class ClientHandler {\n     private Server server;\n@@ -24,6 +25,7 @@ public ClientHandler(Server server, Socket socket) {\n \n             new Thread(() -> {\n                 try {\n+                    socket.setSoTimeout(120000);\n                     //цикл аутентификации\n                     while (true) {\n                         String str = in.readUTF();\n@@ -41,13 +43,13 @@ public ClientHandler(Server server, Socket socket) {\n                             String newNick = server.getAuthService().getNicknameAndPassword(token[1], token[2]);\n                             login = token[1];\n                             if (newNick != null) {\n-                                if (!server.isLoginAutentification(login)){\n+                                if (!server.isLoginAutentification(login)) {\n                                     nickname = newNick;\n                                     sendMessage(Command.AUTH_OK + \" \" + nickname);\n                                     server.subscribe(this);\n                                     System.out.println(\"client connected with nick: \" + nickname + \" from \" + socket.getRemoteSocketAddress());\n                                     break;\n-                                }else {\n+                                } else {\n                                     sendMessage(\"Логин занят\");\n                                 }\n \n@@ -57,19 +59,20 @@ public ClientHandler(Server server, Socket socket) {\n                             }\n                         }\n                         //регистрация\n-                        if (str.startsWith(Command.REG)){\n+                        if (str.startsWith(Command.REG)) {\n                             String[] token = str.split(\"\\\\s\", 4);\n                             if (token.length < 4) {\n                                 continue;\n                             }\n                             boolean regSuccess = server.getAuthService().registration(token[1], token[2], token[3]);\n-                            if (regSuccess){\n+                            if (regSuccess) {\n                                 sendMessage(Command.REG_OK);\n-                            }else sendMessage(Command.REG_NO);\n+                            } else sendMessage(Command.REG_NO);\n                         }\n                     }\n                     //цикл работы\n                     while (true) {\n+                        socket.setSoTimeout(0);\n                         String str = in.readUTF();\n                         if (str.startsWith(\"/\")) {\n                             if (str.equals(Command.END)) {\n@@ -89,6 +92,12 @@ public ClientHandler(Server server, Socket socket) {\n                         }\n                     }\n \n+                } catch (SocketTimeoutException e) {\n+                    try {\n+                        out.writeUTF(Command.END);\n+                    } catch (IOException ioException) {\n+                        ioException.printStackTrace();\n+                    }\n                 } catch (IOException e) {\n                     e.printStackTrace();\n                 } finally {"
+  },
+  {
+    "sha": "2ab93c414578f7cb5edcee2358edc2fdb7cd1fad",
+    "filename": "server/target/classes/server/ClientHandler.class",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/BichevoyIgor/JavaChat/blob/7c6789ab23938bc78c64357db8adcacbe8816a09/server/target/classes/server/ClientHandler.class",
+    "raw_url": "https://github.com/BichevoyIgor/JavaChat/raw/7c6789ab23938bc78c64357db8adcacbe8816a09/server/target/classes/server/ClientHandler.class",
+    "contents_url": "https://api.github.com/repos/BichevoyIgor/JavaChat/contents/server/target/classes/server/ClientHandler.class?ref=7c6789ab23938bc78c64357db8adcacbe8816a09"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "cfaebf80b3050345c4e682b6d146036a5ce0a0cd",
+    "filename": ".github/workflows/maven.yml",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 2,
+    "changes": 12,
+    "blob_url": "https://github.com/jitsi/jitsi-utils/blob/ce1d02c83d2b8168fe2ef5cbdfec8fc7e2a264bf/.github/workflows/maven.yml",
+    "raw_url": "https://github.com/jitsi/jitsi-utils/raw/ce1d02c83d2b8168fe2ef5cbdfec8fc7e2a264bf/.github/workflows/maven.yml",
+    "contents_url": "https://api.github.com/repos/jitsi/jitsi-utils/contents/.github/workflows/maven.yml?ref=ce1d02c83d2b8168fe2ef5cbdfec8fc7e2a264bf",
+    "patch": "@@ -5,6 +5,10 @@ name: Java CI with Maven\n \n on: [push, pull_request]\n \n+env:\n+  # Java version to use for the release\n+  RELEASE_JAVA_VERSION: 8\n+\n jobs:\n   test:\n \n@@ -34,7 +38,11 @@ jobs:\n             ${{ runner.os }}-maven-\n \n       - name: Build and test with Maven\n-        run: mvn -B verify\n+        run: mvn -B verify -Pcoverage\n+\n+      - name: Upload coverage report\n+        if: matrix.java == env.RELEASE_JAVA_VERSION\n+        uses: codecov/codecov-action@v1\n \n   release:\n     if: github.ref == 'refs/heads/master'\n@@ -49,7 +57,7 @@ jobs:\n       - name: Set up JDK\n         uses: actions/setup-java@v1\n         with:\n-          java-version: 8\n+          java-version: ${{ env.RELEASE_JAVA_VERSION }}\n           server-id: ossrh\n           server-username: SONATYPE_USER\n           server-password: SONATYPE_PW"
+  },
+  {
+    "sha": "be76db6d3b9c79a9a83b28341ebb61f0c068508a",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/jitsi/jitsi-utils/blob/ce1d02c83d2b8168fe2ef5cbdfec8fc7e2a264bf/pom.xml",
+    "raw_url": "https://github.com/jitsi/jitsi-utils/raw/ce1d02c83d2b8168fe2ef5cbdfec8fc7e2a264bf/pom.xml",
+    "contents_url": "https://api.github.com/repos/jitsi/jitsi-utils/contents/pom.xml?ref=ce1d02c83d2b8168fe2ef5cbdfec8fc7e2a264bf",
+    "patch": "@@ -332,6 +332,35 @@\n     </build>\n \n     <profiles>\n+        <profile>\n+            <id>coverage</id>\n+            <properties>\n+                <jacoco.version>0.8.6</jacoco.version>\n+            </properties>\n+            <build>\n+                <plugins>\n+                    <plugin>\n+                        <groupId>org.jacoco</groupId>\n+                        <artifactId>jacoco-maven-plugin</artifactId>\n+                        <version>${jacoco.version}</version>\n+                        <executions>\n+                            <execution>\n+                                <goals>\n+                                    <goal>prepare-agent</goal>\n+                                </goals>\n+                            </execution>\n+                            <execution>\n+                                <id>report</id>\n+                                <phase>test</phase>\n+                                <goals>\n+                                    <goal>report</goal>\n+                                </goals>\n+                            </execution>\n+                        </executions>\n+                    </plugin>\n+                </plugins>\n+            </build>\n+        </profile>\n         <profile>\n             <id>release</id>\n             <activation>"
+  }
+]

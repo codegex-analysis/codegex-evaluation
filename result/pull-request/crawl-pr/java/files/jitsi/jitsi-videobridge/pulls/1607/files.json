@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "f60711441b627031ee92b4c2938ba7aa5981a0ba",
+    "filename": ".github/workflows/maven.yml",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/jitsi/jitsi-videobridge/blob/9a010aa78264b736ee7d4f8d5e50bfefa6112ef1/.github/workflows/maven.yml",
+    "raw_url": "https://github.com/jitsi/jitsi-videobridge/raw/9a010aa78264b736ee7d4f8d5e50bfefa6112ef1/.github/workflows/maven.yml",
+    "contents_url": "https://api.github.com/repos/jitsi/jitsi-videobridge/contents/.github/workflows/maven.yml?ref=9a010aa78264b736ee7d4f8d5e50bfefa6112ef1",
+    "patch": "@@ -28,4 +28,7 @@ jobs:\n         restore-keys: |\n           ${{ runner.os }}-maven-\n     - name: Build with Maven\n-      run: ./resources/build.sh\n+      run: ./resources/build.sh -Pcoverage\n+\n+    - name: Upload coverage report\n+      uses: codecov/codecov-action@v1"
+  },
+  {
+    "sha": "766cd42d16834b64b233b02987e4d047da2d80f6",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/jitsi/jitsi-videobridge/blob/9a010aa78264b736ee7d4f8d5e50bfefa6112ef1/pom.xml",
+    "raw_url": "https://github.com/jitsi/jitsi-videobridge/raw/9a010aa78264b736ee7d4f8d5e50bfefa6112ef1/pom.xml",
+    "contents_url": "https://api.github.com/repos/jitsi/jitsi-videobridge/contents/pom.xml?ref=9a010aa78264b736ee7d4f8d5e50bfefa6112ef1",
+    "patch": "@@ -125,4 +125,36 @@\n         </repository>\n     </repositories>\n \n+    <profiles>\n+        <profile>\n+            <id>coverage</id>\n+            <properties>\n+                <jacoco.version>0.8.6</jacoco.version>\n+            </properties>\n+            <build>\n+                <plugins>\n+                    <plugin>\n+                        <groupId>org.jacoco</groupId>\n+                        <artifactId>jacoco-maven-plugin</artifactId>\n+                        <version>${jacoco.version}</version>\n+                        <executions>\n+                            <execution>\n+                                <goals>\n+                                    <goal>prepare-agent</goal>\n+                                </goals>\n+                            </execution>\n+                            <!-- attached to Maven test phase -->\n+                            <execution>\n+                                <id>report</id>\n+                                <phase>test</phase>\n+                                <goals>\n+                                    <goal>report</goal>\n+                                </goals>\n+                            </execution>\n+                        </executions>\n+                    </plugin>\n+                </plugins>\n+            </build>\n+        </profile>\n+    </profiles>\n </project>"
+  },
+  {
+    "sha": "2b61a5bcd48bdec6028f4b34dd637df61b2dcff9",
+    "filename": "resources/build.sh",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/jitsi/jitsi-videobridge/blob/9a010aa78264b736ee7d4f8d5e50bfefa6112ef1/resources/build.sh",
+    "raw_url": "https://github.com/jitsi/jitsi-videobridge/raw/9a010aa78264b736ee7d4f8d5e50bfefa6112ef1/resources/build.sh",
+    "contents_url": "https://api.github.com/repos/jitsi/jitsi-videobridge/contents/resources/build.sh?ref=9a010aa78264b736ee7d4f8d5e50bfefa6112ef1",
+    "patch": "@@ -2,4 +2,4 @@\n \n set -e\n \n-mvn clean verify package\n+mvn clean verify package \"$@\""
+  }
+]

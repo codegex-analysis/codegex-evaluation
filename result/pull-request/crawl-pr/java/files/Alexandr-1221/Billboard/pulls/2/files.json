@@ -1,0 +1,123 @@
+[
+  {
+    "sha": "14199d43621e462e05424d1123a9a2ba79b188a7",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/219f84aa21ea53e86917b45b34532b1da125d406/pom.xml",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/219f84aa21ea53e86917b45b34532b1da125d406/pom.xml",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/pom.xml?ref=219f84aa21ea53e86917b45b34532b1da125d406",
+    "patch": "@@ -27,6 +27,12 @@\n             <version>5.4.2</version>\n             <scope>test</scope>\n         </dependency>\n+        <dependency>\n+            <groupId>org.mockito</groupId>\n+            <artifactId>mockito-junit-jupiter</artifactId>\n+            <version>3.8.0</version>\n+            <scope>test</scope>\n+        </dependency>\n     </dependencies>\n \n     <build>\n@@ -35,6 +41,30 @@\n                 <groupId>org.apache.maven.plugins</groupId>\n                 <artifactId>maven-surefire-plugin</artifactId>\n                 <version>2.22.2</version>\n+                <configuration>\n+                    <failIfNoTests>true</failIfNoTests>\n+                </configuration>\n+            </plugin>\n+            <plugin>\n+                <groupId>org.jacoco</groupId>\n+                <artifactId>jacoco-maven-plugin</artifactId>\n+                <version>0.8.5</version>\n+                <executions>\n+                    <execution>\n+                        <id>prepare-agent</id>\n+                        <phase>initialize</phase>\n+                        <goals>\n+                            <goal>prepare-agent</goal>\n+                        </goals>\n+                    </execution>\n+                    <execution>\n+                        <id>report</id>\n+                        <phase>verify</phase>\n+                        <goals>\n+                            <goal>report</goal>\n+                        </goals>\n+                    </execution>\n+                </executions>\n             </plugin>\n         </plugins>\n     </build>"
+  },
+  {
+    "sha": "c5b371a122f101b284cbd010ef81e04b7fdb10b5",
+    "filename": "src/main/java/ru/netology/domain/PurchaseFilm.java",
+    "status": "renamed",
+    "additions": 6,
+    "deletions": 5,
+    "changes": 11,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/219f84aa21ea53e86917b45b34532b1da125d406/src/main/java/ru/netology/domain/PurchaseFilm.java",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/219f84aa21ea53e86917b45b34532b1da125d406/src/main/java/ru/netology/domain/PurchaseFilm.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/src/main/java/ru/netology/domain/PurchaseFilm.java?ref=219f84aa21ea53e86917b45b34532b1da125d406",
+    "patch": "@@ -7,10 +7,11 @@\n @NoArgsConstructor\n @AllArgsConstructor\n @Data\n-public class PurchaseItem {\n+\n+public class PurchaseFilm {\n   private int id;\n-  private int productId;\n-  private String productName;\n-  private int productPrice;\n-  private int count;\n+  private int filmId;\n+  private String filmName;\n+  private String filmGenre;\n+  private boolean isPremiere;\n }",
+    "previous_filename": "src/main/java/ru/netology/domain/PurchaseItem.java"
+  },
+  {
+    "sha": "4da613024056dc112d030e33afa4c4e4c543c1ab",
+    "filename": "src/main/java/ru/netology/manager/CartManager.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 49,
+    "changes": 49,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/faafa7e294205f972bffd8c1f9f367e26de5f640/src/main/java/ru/netology/manager/CartManager.java",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/faafa7e294205f972bffd8c1f9f367e26de5f640/src/main/java/ru/netology/manager/CartManager.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/src/main/java/ru/netology/manager/CartManager.java?ref=faafa7e294205f972bffd8c1f9f367e26de5f640",
+    "patch": "@@ -1,49 +0,0 @@\n-package ru.netology.manager;\n-\n-import ru.netology.domain.PurchaseItem;\n-\n-public class CartManager {\n-  private PurchaseItem[] items = new PurchaseItem[0];\n-\n-  public void add(PurchaseItem item) {\n-    // создаём новый массив размером на единицу больше\n-    int length = items.length + 1;\n-    PurchaseItem[] tmp = new PurchaseItem[length];\n-    // itar + tab\n-    // копируем поэлементно\n-    // for (int i = 0; i < items.length; i++) {\n-    //   tmp[i] = items[i];\n-    // }\n-    System.arraycopy(items, 0, tmp, 0, items.length);\n-    // кладём последним наш элемент\n-    int lastIndex = tmp.length - 1;\n-    tmp[lastIndex] = item;\n-    items = tmp;\n-  }\n-\n-  public PurchaseItem[] getAll() {\n-    PurchaseItem[] result = new PurchaseItem[items.length];\n-    // перебираем массив в прямом порядке\n-    // но кладём в результаты в обратном\n-    for (int i = 0; i < result.length; i++) {\n-      int index = items.length - i - 1;\n-      result[i] = items[index];\n-    }\n-    return result;\n-  }\n-\n-  // наивная реализация\n-  public void removeById(int id) {\n-    int length = items.length - 1;\n-    PurchaseItem[] tmp = new PurchaseItem[length];\n-    int index = 0;\n-    for (PurchaseItem item : items) {\n-      if (item.getId() != id) {\n-        tmp[index] = item;\n-        index++;\n-      }\n-    }\n-    // меняем наши элементы\n-    items = tmp;\n-  }\n-}"
+  },
+  {
+    "sha": "69189f2329c75219ec7706e813a115633080d801",
+    "filename": "src/main/java/ru/netology/manager/FilmManager.java",
+    "status": "added",
+    "additions": 49,
+    "deletions": 0,
+    "changes": 49,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/219f84aa21ea53e86917b45b34532b1da125d406/src/main/java/ru/netology/manager/FilmManager.java",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/219f84aa21ea53e86917b45b34532b1da125d406/src/main/java/ru/netology/manager/FilmManager.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/src/main/java/ru/netology/manager/FilmManager.java?ref=219f84aa21ea53e86917b45b34532b1da125d406",
+    "patch": "@@ -0,0 +1,49 @@\n+package ru.netology.manager;\n+\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+import ru.netology.domain.PurchaseFilm;\n+import ru.netology.repository.FilmRepository;\n+\n+@Data\n+@NoArgsConstructor\n+\n+public class FilmManager {\n+  private FilmRepository repository;\n+  private int maxLength = 10;\n+\n+  public FilmManager(FilmRepository repository) {\n+    this.repository = repository;\n+  }\n+\n+  public FilmManager(int maxLength) {\n+    this.maxLength = maxLength;\n+  }\n+\n+  public void add(PurchaseFilm film) {\n+    repository.save(film);\n+  }\n+\n+  public PurchaseFilm[] getAll() {\n+    PurchaseFilm[] films = repository.findAll();\n+    int indexMax = Math.min(maxLength, films.length);\n+    PurchaseFilm[] result = new PurchaseFilm[indexMax];\n+    for (int i = 0; i < indexMax; i++) {\n+      int index = films.length - 1 - i;\n+      result[i] = films[index];\n+    }\n+    return result;\n+  }\n+\n+  public PurchaseFilm[] getById(int id) {\n+    return repository.findById(id);\n+  }\n+\n+  public void removeById(int id) {\n+    repository.removeById(id);\n+  }\n+\n+  public void removeAll() {\n+    repository.removeAll();\n+  }\n+}"
+  },
+  {
+    "sha": "7e90442e4dfe4af001f86fa50817da45ef1b6f0f",
+    "filename": "src/main/java/ru/netology/repository/FilmRepository.java",
+    "status": "added",
+    "additions": 47,
+    "deletions": 0,
+    "changes": 47,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/219f84aa21ea53e86917b45b34532b1da125d406/src/main/java/ru/netology/repository/FilmRepository.java",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/219f84aa21ea53e86917b45b34532b1da125d406/src/main/java/ru/netology/repository/FilmRepository.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/src/main/java/ru/netology/repository/FilmRepository.java?ref=219f84aa21ea53e86917b45b34532b1da125d406",
+    "patch": "@@ -0,0 +1,47 @@\n+package ru.netology.repository;\n+\n+import ru.netology.domain.PurchaseFilm;\n+\n+public class FilmRepository {\n+\n+    private PurchaseFilm[] films = new PurchaseFilm[0];\n+\n+    public PurchaseFilm[] findAll() {\n+        return films;\n+    }\n+\n+    public void save(PurchaseFilm newFilm) {\n+        int length = films.length + 1;\n+        PurchaseFilm[] result = new PurchaseFilm[length];\n+        System.arraycopy(films, 0, result, 0, films.length);\n+        result[result.length - 1] = newFilm;\n+        films = result;\n+    }\n+\n+    public PurchaseFilm[] findById(int id) {\n+        PurchaseFilm[] result = new PurchaseFilm[1];\n+        for (PurchaseFilm film : films) {\n+            if (film.getId() == id) {\n+                result[0] = film;\n+            }\n+        }\n+        return result;\n+    }\n+\n+    public void removeById(int id) {\n+        int length = films.length - 1;\n+        PurchaseFilm[] newFilm = new PurchaseFilm[length];\n+        int index = 0;\n+        for (PurchaseFilm film : films) {\n+            if (film.getId() != id) {\n+                newFilm[index] = film;\n+                index++;\n+            }\n+        }\n+        films = newFilm;\n+    }\n+\n+    public void removeAll() {\n+        films = new PurchaseFilm[0];\n+    }\n+}"
+  },
+  {
+    "sha": "7efbb6877427e65e6d8587ceaaead3c9d8a46566",
+    "filename": "src/test/java/ru/netology/domain/PurchaseFilmTest.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/219f84aa21ea53e86917b45b34532b1da125d406/src/test/java/ru/netology/domain/PurchaseFilmTest.java",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/219f84aa21ea53e86917b45b34532b1da125d406/src/test/java/ru/netology/domain/PurchaseFilmTest.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/src/test/java/ru/netology/domain/PurchaseFilmTest.java?ref=219f84aa21ea53e86917b45b34532b1da125d406",
+    "patch": "@@ -0,0 +1,24 @@\n+package ru.netology.domain;\n+\n+import org.junit.jupiter.api.Test;\n+\n+import static org.junit.jupiter.api.Assertions.*;\n+\n+class PurchaseFilmTest {\n+\n+    @Test\n+    public void validatePurchaseFilm(){\n+        PurchaseFilm film = new PurchaseFilm();\n+        film.setId(1);\n+        film.setFilmId(1);\n+        film.setFilmGenre(\"comedy\");\n+        film.setFilmName(\"noname\");\n+        assertEquals(1, film.getId());\n+        assertEquals(1, film.getFilmId());\n+        assertEquals(\"noname\", film.getFilmName());\n+        assertEquals(\"comedy\", film.getFilmGenre());\n+        assertFalse(film.isPremiere());\n+        film.setPremiere(true);\n+        assertTrue(film.isPremiere());\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d8382e7291f768a51028556a8c0275949865dcad",
+    "filename": "src/test/java/ru/netology/manager/CartManagerTestNonEmpty.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 48,
+    "changes": 48,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/faafa7e294205f972bffd8c1f9f367e26de5f640/src/test/java/ru/netology/manager/CartManagerTestNonEmpty.java",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/faafa7e294205f972bffd8c1f9f367e26de5f640/src/test/java/ru/netology/manager/CartManagerTestNonEmpty.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/src/test/java/ru/netology/manager/CartManagerTestNonEmpty.java?ref=faafa7e294205f972bffd8c1f9f367e26de5f640",
+    "patch": "@@ -1,48 +0,0 @@\n-package ru.netology.manager;\n-\n-import org.junit.jupiter.api.Test;\n-import ru.netology.domain.PurchaseItem;\n-import ru.netology.manager.CartManager;\n-\n-import static org.junit.jupiter.api.Assertions.*;\n-\n-public class CartManagerTestNonEmpty {\n-  @Test\n-  public void shouldRemoveIfExists() {\n-    CartManager manager = new CartManager();\n-    int idToRemove = 1;\n-    PurchaseItem first = new PurchaseItem(1, 1, \"first\", 1, 1);\n-    PurchaseItem second = new PurchaseItem(2, 2, \"second\", 1, 1);\n-    PurchaseItem third = new PurchaseItem(3, 3, \"third\", 1, 1);\n-    manager.add(first);\n-    manager.add(second);\n-    manager.add(third);\n-\n-    manager.removeById(idToRemove);\n-\n-    PurchaseItem[] actual = manager.getAll();\n-    PurchaseItem[] expected = new PurchaseItem[]{third, second};\n-\n-//    assertEquals(expected, actual);\n-    assertArrayEquals(expected, actual);\n-  }\n-\n-  @Test\n-  public void shouldNotRemoveIfNotExists() {\n-    CartManager manager = new CartManager();\n-    int idToRemove = 4;\n-    PurchaseItem first = new PurchaseItem(1, 1, \"first\", 1, 1);\n-    PurchaseItem second = new PurchaseItem(2, 2, \"second\", 1, 1);\n-    PurchaseItem third = new PurchaseItem(3, 3, \"third\", 1, 1);\n-    manager.add(first);\n-    manager.add(second);\n-    manager.add(third);\n-\n-    manager.removeById(idToRemove);\n-\n-    PurchaseItem[] actual = manager.getAll();\n-    PurchaseItem[] expected = new PurchaseItem[]{third, second, first};\n-\n-    assertArrayEquals(expected, actual);\n-  }\n-}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "999db31ce6bf72eab8ecfddb68bf631255b5002b",
+    "filename": "src/test/java/ru/netology/manager/CartManagerTestNonEmptyWithSetup.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 46,
+    "changes": 46,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/faafa7e294205f972bffd8c1f9f367e26de5f640/src/test/java/ru/netology/manager/CartManagerTestNonEmptyWithSetup.java",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/faafa7e294205f972bffd8c1f9f367e26de5f640/src/test/java/ru/netology/manager/CartManagerTestNonEmptyWithSetup.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/src/test/java/ru/netology/manager/CartManagerTestNonEmptyWithSetup.java?ref=faafa7e294205f972bffd8c1f9f367e26de5f640",
+    "patch": "@@ -1,46 +0,0 @@\n-package ru.netology.manager;\n-\n-import org.junit.jupiter.api.BeforeEach;\n-import org.junit.jupiter.api.Test;\n-import ru.netology.domain.PurchaseItem;\n-import ru.netology.manager.CartManager;\n-\n-import static org.junit.jupiter.api.Assertions.assertArrayEquals;\n-\n-public class CartManagerTestNonEmptyWithSetup {\n-  private CartManager manager = new CartManager();\n-  private PurchaseItem first = new PurchaseItem(1, 1, \"first\", 1, 1);\n-  private PurchaseItem second = new PurchaseItem(2, 2, \"second\", 1, 1);\n-  private PurchaseItem third = new PurchaseItem(3, 3, \"third\", 1, 1);\n-\n-  @BeforeEach\n-  public void setUp() {\n-    manager.add(first);\n-    manager.add(second);\n-    manager.add(third);\n-  }\n-\n-  @Test\n-  public void shouldRemoveIfExists() {\n-    int idToRemove = 1;\n-    manager.removeById(idToRemove);\n-\n-    PurchaseItem[] actual = manager.getAll();\n-    PurchaseItem[] expected = new PurchaseItem[]{third, second};\n-\n-//    assertEquals(expected, actual);\n-    assertArrayEquals(expected, actual);\n-  }\n-\n-  @Test\n-  public void shouldNotRemoveIfNotExists() {\n-    int idToRemove = 4;\n-\n-    manager.removeById(idToRemove);\n-\n-    PurchaseItem[] actual = manager.getAll();\n-    PurchaseItem[] expected = new PurchaseItem[]{third, second, first};\n-\n-    assertArrayEquals(expected, actual);\n-  }\n-}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "721f7794431209efb169a488fcc8f00df9136e7b",
+    "filename": "src/test/java/ru/netology/manager/FilmManagerTest.java",
+    "status": "added",
+    "additions": 60,
+    "deletions": 0,
+    "changes": 60,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/219f84aa21ea53e86917b45b34532b1da125d406/src/test/java/ru/netology/manager/FilmManagerTest.java",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/219f84aa21ea53e86917b45b34532b1da125d406/src/test/java/ru/netology/manager/FilmManagerTest.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/src/test/java/ru/netology/manager/FilmManagerTest.java?ref=219f84aa21ea53e86917b45b34532b1da125d406",
+    "patch": "@@ -0,0 +1,60 @@\n+package ru.netology.manager;\n+\n+import lombok.Data;\n+import org.junit.jupiter.api.Test;\n+import ru.netology.domain.PurchaseFilm;\n+import org.junit.jupiter.api.extension.ExtendWith;\n+import org.mockito.Mock;\n+import org.mockito.junit.jupiter.MockitoExtension;\n+import ru.netology.manager.FilmManager;\n+import org.mockito.InjectMocks;\n+import ru.netology.repository.FilmRepository;\n+\n+import static org.junit.jupiter.api.Assertions.assertArrayEquals;\n+import static org.junit.jupiter.api.Assertions.assertEquals;\n+import static org.mockito.Mockito.doReturn;\n+\n+@ExtendWith(MockitoExtension.class)\n+@Data\n+\n+public class FilmManagerTest {\n+    @Mock\n+    private FilmRepository repository;\n+    @InjectMocks\n+    private FilmManager manager;\n+    private PurchaseFilm first = new PurchaseFilm(1, 1, \"first\", \"comedy\", true);\n+    private PurchaseFilm second = new PurchaseFilm(2, 2, \"second\", \"comedy\", true);\n+    private PurchaseFilm third = new PurchaseFilm(3, 3, \"third\", \"comedy\", true);\n+    private PurchaseFilm fourth = new PurchaseFilm(4, 4, \"fourth\", \"comedy\", true);\n+    private PurchaseFilm fifth = new PurchaseFilm(5, 5, \"fifth\", \"comedy\", true);\n+    private PurchaseFilm sixth = new PurchaseFilm(6, 6, \"sixth\", \"comedy\", true);\n+    private PurchaseFilm seventh = new PurchaseFilm(7, 7, \"seventh\", \"comedy\", true);\n+    private PurchaseFilm eighth = new PurchaseFilm(8, 8, \"eighth\", \"comedy\", true);\n+    private PurchaseFilm ninth = new PurchaseFilm(9, 9, \"ninth\", \"comedy\", true);\n+    private PurchaseFilm tenth = new PurchaseFilm(10, 10, \"tenth\", \"comedy\", true);\n+    private PurchaseFilm eleventh = new PurchaseFilm(11, 11, \"eleventh\", \"comedy\", true);\n+\n+    @Test\n+    public void validateFilmManager(){\n+        FilmManager manager = new FilmManager();\n+        assertEquals(10, manager.getMaxLength());\n+    }\n+\n+    @Test\n+    public void shouldSortedFilmsReverseUnderMax() {\n+        PurchaseFilm[] returned = new PurchaseFilm[]{first, second, third, fourth, fifth};\n+        doReturn(returned).when(repository).findAll();\n+        PurchaseFilm[] actual = manager.getAll();\n+        PurchaseFilm[] expected = new PurchaseFilm[]{fifth, fourth, third, second, first};\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    public void shouldSortedFilmsReverseOverMax() {\n+        PurchaseFilm[] returned = new PurchaseFilm[]{first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth, eleventh};\n+        doReturn(returned).when(repository).findAll();\n+        PurchaseFilm[] actual = manager.getAll();\n+        PurchaseFilm[] expected = new PurchaseFilm[]{eleventh, tenth, ninth, eighth, seventh, sixth, fifth, fourth, third, second};\n+        assertArrayEquals(expected, actual);\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "933ac31a1df6ec29cb18d8fb800ef31d2165c16a",
+    "filename": "src/test/java/ru/netology/repository/FilmRepositoryTest.java",
+    "status": "added",
+    "additions": 54,
+    "deletions": 0,
+    "changes": 54,
+    "blob_url": "https://github.com/Alexandr-1221/Billboard/blob/219f84aa21ea53e86917b45b34532b1da125d406/src/test/java/ru/netology/repository/FilmRepositoryTest.java",
+    "raw_url": "https://github.com/Alexandr-1221/Billboard/raw/219f84aa21ea53e86917b45b34532b1da125d406/src/test/java/ru/netology/repository/FilmRepositoryTest.java",
+    "contents_url": "https://api.github.com/repos/Alexandr-1221/Billboard/contents/src/test/java/ru/netology/repository/FilmRepositoryTest.java?ref=219f84aa21ea53e86917b45b34532b1da125d406",
+    "patch": "@@ -0,0 +1,54 @@\n+package ru.netology.repository;\n+\n+import org.junit.jupiter.api.BeforeEach;\n+import org.junit.jupiter.api.Test;\n+import ru.netology.domain.PurchaseFilm;\n+import ru.netology.manager.FilmManager;\n+\n+import static org.junit.jupiter.api.Assertions.*;\n+\n+class FilmRepositoryTest {\n+    private FilmRepository repository = new FilmRepository();\n+    private PurchaseFilm first = new PurchaseFilm(1, 1, \"first\", \"comedy\", true);\n+    private PurchaseFilm second = new PurchaseFilm(2, 2, \"second\", \"comedy\", true);\n+    private PurchaseFilm third = new PurchaseFilm(3, 3, \"third\", \"comedy\", true);\n+    private PurchaseFilm fourth = new PurchaseFilm(4, 4, \"fourth\", \"comedy\", true);\n+\n+    @BeforeEach\n+    public void setUp() {\n+        repository.save(first);\n+        repository.save(second);\n+        repository.save(third);\n+    }\n+\n+    @Test\n+    void validateFindAll() {\n+        repository.save(fourth);\n+        PurchaseFilm[] actual = repository.findAll();\n+        PurchaseFilm[] expected = new PurchaseFilm[]{first, second, third, fourth};\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void validateFindById() {\n+        PurchaseFilm[] actual = repository.findById(2);\n+        PurchaseFilm[] expected = new PurchaseFilm[]{second};\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void validateRemoveById() {\n+        repository.removeById(2);\n+        PurchaseFilm[] actual = repository.findAll();\n+        PurchaseFilm[] expected = new PurchaseFilm[]{first, third};\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void validateRemoveAll() {\n+        repository.removeAll();\n+        PurchaseFilm[] actual = repository.findAll();\n+        PurchaseFilm[] expected = new PurchaseFilm[]{};\n+        assertArrayEquals(expected, actual);\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

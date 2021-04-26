@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "1c74ddb8f6c2c817e2e1cdfa6c188612df55c3a9",
+    "filename": ".travis.yml",
+    "status": "added",
+    "additions": 51,
+    "deletions": 0,
+    "changes": 51,
+    "blob_url": "https://github.com/homelab21/homelab/blob/ccc5696440c8ec3ca44441fa1fd9b8363d74d723/.travis.yml",
+    "raw_url": "https://github.com/homelab21/homelab/raw/ccc5696440c8ec3ca44441fa1fd9b8363d74d723/.travis.yml",
+    "contents_url": "https://api.github.com/repos/homelab21/homelab/contents/.travis.yml?ref=ccc5696440c8ec3ca44441fa1fd9b8363d74d723",
+    "patch": "@@ -0,0 +1,51 @@\n+os:\n+  - linux\n+services:\n+  - docker\n+language: node_js\n+node_js:\n+  - \"12.16.1\"\n+cache:\n+  directories:\n+    - node\n+    - node_modules\n+    - $HOME/.gradle\n+env:\n+  global:\n+    - NODE_VERSION=12.16.1\n+    - SPRING_OUTPUT_ANSI_ENABLED=ALWAYS\n+    - SPRING_JPA_SHOW_SQL=false\n+    - JHI_DISABLE_WEBPACK_LOGS=true\n+    - NG_CLI_ANALYTICS=\"false\"\n+before_install:\n+  - |\n+    if [[ $JHI_JDK = '8' ]]; then\n+      echo '*** Using OpenJDK 8'\n+    else\n+      echo '*** Using OpenJDK 11 by default'\n+      sudo add-apt-repository ppa:openjdk-r/ppa -y\n+      sudo apt-get update -q\n+      sudo apt-get install -y openjdk-11-jdk -y\n+      sudo update-java-alternatives -s java-1.11.0-openjdk-amd64\n+      java -version\n+    fi\n+  - java -version\n+  - sudo /etc/init.d/mysql stop\n+  - sudo /etc/init.d/postgresql stop\n+  - nvm install $NODE_VERSION\n+  - npm install -g npm\n+  - node -v\n+  - npm -v\n+install:\n+  - npm install\n+script:\n+  - chmod +x gradlew\n+  - ./gradlew checkstyleNohttp\n+  - ./gradlew clean test integrationTest\n+  - ./gradlew npm_run_test -PnodeInstall --no-daemon\n+  - ./gradlew bootJar -Pprod -x test\n+notifications:\n+  webhooks:\n+    on_success: change  # options: [always|never|change] default: always\n+    on_failure: always  # options: [always|never|change] default: always\n+    on_start: false     # default: false"
+  }
+]

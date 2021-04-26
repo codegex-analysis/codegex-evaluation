@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "5ea66666e0c0579cc13385d379416d60ce1cfff0",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 4,
+    "changes": 4,
+    "blob_url": "https://github.com/twobeeb/kafka-namespaces-service/blob/27a020417d13965c00777d2a88713e829273ef8b/README.md",
+    "raw_url": "https://github.com/twobeeb/kafka-namespaces-service/raw/27a020417d13965c00777d2a88713e829273ef8b/README.md",
+    "contents_url": "https://api.github.com/repos/twobeeb/kafka-namespaces-service/contents/README.md?ref=27a020417d13965c00777d2a88713e829273ef8b",
+    "patch": "@@ -4,10 +4,6 @@ Namespaces on top of Kafka Broker, Kafka Connect and Schema Registry\n ## Key features\r\n - Desired state API\r\n   - Mimics K8S principles\r\n-  - Easy to use\r\n-    - View : GET /api/namespaces/\\<ns-name\\>/topics/\\<topic-name\\>\r\n-    - List : GET /api/namespaces/\\<ns-name\\>/topics\r\n-    - Create : POST /api/namespaces/\\<ns-name\\>/topics\r\n - Self-service\r\n   - [Topics](#topic-creation-request)\r\n   - Schemas, Connects, KafkaUsers\r"
+  },
+  {
+    "sha": "5e9e41c4c0409c9c8e351683b94dc4b17ab5e05d",
+    "filename": "src/test/java/com/michelin/ns4kafka/controllers/TopicControllerTest.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/twobeeb/kafka-namespaces-service/blob/27a020417d13965c00777d2a88713e829273ef8b/src/test/java/com/michelin/ns4kafka/controllers/TopicControllerTest.java",
+    "raw_url": "https://github.com/twobeeb/kafka-namespaces-service/raw/27a020417d13965c00777d2a88713e829273ef8b/src/test/java/com/michelin/ns4kafka/controllers/TopicControllerTest.java",
+    "contents_url": "https://api.github.com/repos/twobeeb/kafka-namespaces-service/contents/src/test/java/com/michelin/ns4kafka/controllers/TopicControllerTest.java?ref=27a020417d13965c00777d2a88713e829273ef8b",
+    "patch": "@@ -115,7 +115,18 @@ public void GetTopic(){\n     @Test\n     @Order(30)\n     public void UpdateTopicWithPartitionChange(){\n+        Topic topic = Topic.builder()\n+                .metadata(ObjectMeta.builder().name(\"test.topic1\").build())\n+                .spec(Topic.TopicSpec.builder()\n+                        .replicationFactor(3)\n+                        .partitions(6)\n+                        .build())\n+                .build();\n \n+        HttpClientResponseException actual = Assertions.assertThrows(HttpClientResponseException.class,\n+                () -> client.toBlocking().retrieve(HttpRequest.POST(\"/api/namespaces/test/topics\",topic), Topic.class));\n+\n+        Assertions.assertEquals(\"Message validation failed\", actual.getMessage());\n     }\n \n     @Test"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "d8518f4bf80301d311ce69d0a7e767bc4e05e514",
+    "filename": "presto-docs/src/main/sphinx/functions/math.rst",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/prestodb/presto/blob/4ba3a98288187a2b594b2cf5267d897c55cf00bf/presto-docs/src/main/sphinx/functions/math.rst",
+    "raw_url": "https://github.com/prestodb/presto/raw/4ba3a98288187a2b594b2cf5267d897c55cf00bf/presto-docs/src/main/sphinx/functions/math.rst",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-docs/src/main/sphinx/functions/math.rst?ref=4ba3a98288187a2b594b2cf5267d897c55cf00bf",
+    "patch": "@@ -85,6 +85,19 @@ Mathematical Functions\n     The a, b parameters must be positive real numbers and value v must be a real value.\n     The value v must lie on the interval [0, 1].\n \n+.. function:: cauchy_cdf(mean, scale, v) -> double\n+\n+    Compute the Cauchy cdf with given parameters mean and scale (gamma): P(N; mean, scale).\n+    The scale parameter must be a positive real number.\n+    The value parameter must lie on the interval [0, 1].\n+\n+.. function:: inverse_cauchy_cdf(mean, scale, p) -> double\n+\n+    Compute the inverse of the Cauchy cdf with given parameters mean and\n+    scale (gamma) for the probability p.\n+    The scale parameter must be a positive real number.\n+    The probability p must lie on the interval [0, 1].\n+\n .. function:: ln(x) -> double\n \n     Returns the natural logarithm of ``x``."
+  },
+  {
+    "sha": "b4a77ca5996c7aecb8f5424fe5a9f555a42625f7",
+    "filename": "presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/prestodb/presto/blob/4ba3a98288187a2b594b2cf5267d897c55cf00bf/presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/4ba3a98288187a2b594b2cf5267d897c55cf00bf/presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java?ref=4ba3a98288187a2b594b2cf5267d897c55cf00bf",
+    "patch": "@@ -31,6 +31,7 @@\n import com.google.common.primitives.Doubles;\n import io.airlift.slice.Slice;\n import org.apache.commons.math3.distribution.BetaDistribution;\n+import org.apache.commons.math3.distribution.CauchyDistribution;\n import org.apache.commons.math3.special.Erf;\n \n import java.math.BigDecimal;\n@@ -704,6 +705,33 @@ public static double betaCdf(\n         return distribution.cumulativeProbability(value);\n     }\n \n+    @Description(\"Cauchy cdf for a given value, median, and scale (gamma)\")\n+    @ScalarFunction\n+    @SqlType(StandardTypes.DOUBLE)\n+    public static double cauchyCdf(\n+            @SqlType(StandardTypes.DOUBLE) double median,\n+            @SqlType(StandardTypes.DOUBLE) double scale,\n+            @SqlType(StandardTypes.DOUBLE) double v)\n+    {\n+        checkCondition(scale > 0, INVALID_FUNCTION_ARGUMENT, \"scale must be > 0\");\n+        CauchyDistribution distribution = new CauchyDistribution(null, median, scale, CauchyDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);\n+        return distribution.cumulativeProbability(v);\n+    }\n+\n+    @Description(\"Inverse of Cauchy cdf for a given probability, median, and scale (gamma)\")\n+    @ScalarFunction\n+    @SqlType(StandardTypes.DOUBLE)\n+    public static double inverseCauchyCdf(\n+            @SqlType(StandardTypes.DOUBLE) double median,\n+            @SqlType(StandardTypes.DOUBLE) double scale,\n+            @SqlType(StandardTypes.DOUBLE) double p)\n+    {\n+        checkCondition(p >= 0 && p <= 1, INVALID_FUNCTION_ARGUMENT, \"p must be in the interval [0, 1]\");\n+        checkCondition(scale > 0, INVALID_FUNCTION_ARGUMENT, \"scale must be > 0\");\n+        CauchyDistribution distribution = new CauchyDistribution(null, median, scale, CauchyDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);\n+        return distribution.inverseCumulativeProbability(p);\n+    }\n+\n     @Description(\"round to nearest integer\")\n     @ScalarFunction(\"round\")\n     @SqlType(StandardTypes.TINYINT)"
+  },
+  {
+    "sha": "4605def58fea81aa0630f69fa754f90ab7926e1e",
+    "filename": "presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/prestodb/presto/blob/4ba3a98288187a2b594b2cf5267d897c55cf00bf/presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/4ba3a98288187a2b594b2cf5267d897c55cf00bf/presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java?ref=4ba3a98288187a2b594b2cf5267d897c55cf00bf",
+    "patch": "@@ -1372,6 +1372,30 @@ public void testBetaCdf()\n         assertInvalidFunction(\"beta_cdf(3, 5, 1.1)\", \"value must be in the interval [0, 1]\");\n     }\n \n+    @Test\n+    public void testCauchyCdf()\n+            throws Exception\n+    {\n+        assertFunction(\"cauchy_cdf(0.0, 1.0, 0.0)\", DOUBLE, 0.5);\n+        assertFunction(\"cauchy_cdf(0.0, 1.0, 1.0)\", DOUBLE, 0.75);\n+        assertFunction(\"cauchy_cdf(5.0, 2.0, 3.0)\", DOUBLE, 0.25);\n+        assertFunction(\"round(cauchy_cdf(2.5, 1.0, 3.0), 2)\", DOUBLE, 0.65);\n+        assertFunction(\"round(cauchy_cdf(5.0, 1.0, 3.0), 2)\", DOUBLE, 0.15);\n+\n+        assertInvalidFunction(\"cauchy_cdf(0.0, -1.0, 0.0)\", \"scale must be > 0\");\n+    }\n+\n+    @Test\n+    public void testInverseCauchyCdf()\n+    {\n+        assertFunction(\"inverse_cauchy_cdf(0.0, 1.0, 0.5)\", DOUBLE, 0.0);\n+        assertFunction(\"inverse_cauchy_cdf(5.0, 2.0, 0.25)\", DOUBLE, 3.0);\n+        assertFunction(\"round(inverse_cauchy_cdf(2.5, 1.0, 0.65), 2)\", DOUBLE, 3.01);\n+        assertFunction(\"round(inverse_cauchy_cdf(5.0, 1.0, 0.15), 2)\", DOUBLE, 3.04);\n+\n+        assertInvalidFunction(\"inverse_cauchy_cdf(0.0, -1.0, 0.0)\", \"scale must be > 0\");\n+    }\n+\n     @Test\n     public void testWilsonInterval()\n     {"
+  }
+]

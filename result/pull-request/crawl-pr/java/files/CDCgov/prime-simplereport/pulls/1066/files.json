@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "d18692352ac1e4a33332f64e6ec5850ce69e0d56",
+    "filename": "backend/src/main/java/gov/cdc/usds/simplereport/api/export/DataHubUploadController.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 56,
+    "changes": 56,
+    "blob_url": "https://github.com/CDCgov/prime-simplereport/blob/46fef0fdc5c00f14ec2ee55c742d6d47f5893af9/backend/src/main/java/gov/cdc/usds/simplereport/api/export/DataHubUploadController.java",
+    "raw_url": "https://github.com/CDCgov/prime-simplereport/raw/46fef0fdc5c00f14ec2ee55c742d6d47f5893af9/backend/src/main/java/gov/cdc/usds/simplereport/api/export/DataHubUploadController.java",
+    "contents_url": "https://api.github.com/repos/CDCgov/prime-simplereport/contents/backend/src/main/java/gov/cdc/usds/simplereport/api/export/DataHubUploadController.java?ref=46fef0fdc5c00f14ec2ee55c742d6d47f5893af9",
+    "patch": "@@ -1,56 +0,0 @@\n-package gov.cdc.usds.simplereport.api.export;\n-\n-import com.fasterxml.jackson.databind.ObjectMapper;\n-import gov.cdc.usds.simplereport.service.DataHubUploaderService;\n-import java.io.IOException;\n-import java.text.DateFormat;\n-import java.text.SimpleDateFormat;\n-import java.util.Date;\n-import java.util.Map;\n-import javax.servlet.http.HttpServletResponse;\n-import org.springframework.http.MediaType;\n-import org.springframework.http.ResponseEntity;\n-import org.springframework.validation.annotation.Validated;\n-import org.springframework.web.bind.annotation.*;\n-\n-/** Created by tomn on 11Dec2020 */\n-@RestController\n-@RequestMapping(value = \"/export\")\n-@Validated\n-public class DataHubUploadController {\n-\n-  private final DataHubUploaderService _hubuploadservice;\n-\n-  public DataHubUploadController(DataHubUploaderService us) {\n-    this._hubuploadservice = us;\n-  }\n-\n-  @GetMapping(value = \"/uploadTestEvent\", produces = MediaType.APPLICATION_JSON_VALUE)\n-  public String uploadTestEventCSVToDataHub(\n-      @RequestParam String apikey, @RequestParam(defaultValue = \"\") String startupdateby)\n-      throws IOException {\n-    Map<String, String> result =\n-        _hubuploadservice.uploadTestEventCSVToDataHub(apikey, startupdateby);\n-    ObjectMapper mapperObj = new ObjectMapper();\n-    return mapperObj.writeValueAsString(result);\n-  }\n-\n-  @GetMapping(\n-      value = \"/testEvent\",\n-      produces = {\"text/csv\"})\n-  public ResponseEntity<?> exportTestEventCSV(\n-      HttpServletResponse response, @RequestParam(defaultValue = \"\") String startupdateby)\n-      throws IOException {\n-    var csvContent = _hubuploadservice.createTestCSVForDataHub(startupdateby);\n-\n-    response.setContentType(\"text/csv\");\n-    DateFormat dateFormatter = new SimpleDateFormat(\"yyyy-MM-dd_HH-mm-ss\");\n-    String currentDateTime = dateFormatter.format(new Date());\n-\n-    String headerKey = \"Content-Disposition\";\n-    String headerValue = \"attachment; filename=testEvents_\" + currentDateTime + \".csv\";\n-    response.setHeader(headerKey, headerValue);\n-    response.getWriter().print(csvContent);\n-    return ResponseEntity.accepted().build();\n-  }\n-}"
+  },
+  {
+    "sha": "799d4f2bfeecbde1802e23f9772b1a8b8b855525",
+    "filename": "backend/src/main/java/gov/cdc/usds/simplereport/config/AuthorizationConfiguration.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 6,
+    "changes": 6,
+    "blob_url": "https://github.com/CDCgov/prime-simplereport/blob/dfaeb00334f0f18ccceb6bb8461505401ba91b7d/backend/src/main/java/gov/cdc/usds/simplereport/config/AuthorizationConfiguration.java",
+    "raw_url": "https://github.com/CDCgov/prime-simplereport/raw/dfaeb00334f0f18ccceb6bb8461505401ba91b7d/backend/src/main/java/gov/cdc/usds/simplereport/config/AuthorizationConfiguration.java",
+    "contents_url": "https://api.github.com/repos/CDCgov/prime-simplereport/contents/backend/src/main/java/gov/cdc/usds/simplereport/config/AuthorizationConfiguration.java?ref=dfaeb00334f0f18ccceb6bb8461505401ba91b7d",
+    "patch": "@@ -135,10 +135,4 @@\n   @Target(METHOD)\n   @PreAuthorize(SPEL_HAS_PERMISSION + \"SUBMIT_TEST\" + \")\")\n   public @interface RequirePermissionSubmitTest {}\n-\n-  /** Require the current user to have the {@link UserPermission#EXPORT_TEST_EVENT} permission. */\n-  @Retention(RUNTIME)\n-  @Target(METHOD)\n-  @PreAuthorize(SPEL_HAS_PERMISSION + \"EXPORT_TEST_EVENT\" + \")\")\n-  public @interface RequirePermissionExportTestEvent {}\n }"
+  },
+  {
+    "sha": "870b8a03f8bbbfc5724bef6e242e41d24bb3eaa2",
+    "filename": "backend/src/main/java/gov/cdc/usds/simplereport/config/authorization/UserPermission.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/CDCgov/prime-simplereport/blob/dfaeb00334f0f18ccceb6bb8461505401ba91b7d/backend/src/main/java/gov/cdc/usds/simplereport/config/authorization/UserPermission.java",
+    "raw_url": "https://github.com/CDCgov/prime-simplereport/raw/dfaeb00334f0f18ccceb6bb8461505401ba91b7d/backend/src/main/java/gov/cdc/usds/simplereport/config/authorization/UserPermission.java",
+    "contents_url": "https://api.github.com/repos/CDCgov/prime-simplereport/contents/backend/src/main/java/gov/cdc/usds/simplereport/config/authorization/UserPermission.java?ref=dfaeb00334f0f18ccceb6bb8461505401ba91b7d",
+    "patch": "@@ -17,6 +17,5 @@\n   MANAGE_USERS,\n   START_TEST,\n   UPDATE_TEST,\n-  SUBMIT_TEST,\n-  EXPORT_TEST_EVENT;\n+  SUBMIT_TEST;\n }"
+  },
+  {
+    "sha": "04c2261e73e98c83db3cd1a92777f210802d301c",
+    "filename": "backend/src/main/java/gov/cdc/usds/simplereport/service/DataHubUploaderService.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 84,
+    "changes": 84,
+    "blob_url": "https://github.com/CDCgov/prime-simplereport/blob/dfaeb00334f0f18ccceb6bb8461505401ba91b7d/backend/src/main/java/gov/cdc/usds/simplereport/service/DataHubUploaderService.java",
+    "raw_url": "https://github.com/CDCgov/prime-simplereport/raw/dfaeb00334f0f18ccceb6bb8461505401ba91b7d/backend/src/main/java/gov/cdc/usds/simplereport/service/DataHubUploaderService.java",
+    "contents_url": "https://api.github.com/repos/CDCgov/prime-simplereport/contents/backend/src/main/java/gov/cdc/usds/simplereport/service/DataHubUploaderService.java?ref=dfaeb00334f0f18ccceb6bb8461505401ba91b7d",
+    "patch": "@@ -4,7 +4,6 @@\n import com.fasterxml.jackson.dataformat.csv.CsvMapper;\n import com.fasterxml.jackson.dataformat.csv.CsvSchema;\n import gov.cdc.usds.simplereport.api.model.TestEventExport;\n-import gov.cdc.usds.simplereport.config.AuthorizationConfiguration;\n import gov.cdc.usds.simplereport.config.simplereport.DataHubConfig;\n import gov.cdc.usds.simplereport.db.model.DataHubUpload;\n import gov.cdc.usds.simplereport.db.model.TestEvent;\n@@ -22,10 +21,7 @@\n import java.util.ArrayList;\n import java.util.Date;\n import java.util.List;\n-import java.util.Map;\n import java.util.TimeZone;\n-import java.util.concurrent.TimeUnit;\n-import javax.persistence.NoResultException;\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n import org.springframework.boot.web.client.RestTemplateBuilder;\n@@ -104,10 +100,6 @@ private static String dateToUTCString(Date d) {\n     return simpleDateFormat.format(d);\n   }\n \n-  private static Date utcStringToDate(String s) {\n-    return Date.from(Instant.parse(s));\n-  }\n-\n   // we put this in a function because the query can return null and it abstracts it out\n   private Date getLatestRecordedTimestamp() {\n     DataHubUpload lastUpload =\n@@ -123,19 +115,6 @@ private Date getLatestRecordedTimestamp() {\n     }\n   }\n \n-  // backwards compatible while refactoring\n-  private void createTestEventCSV(String lastEndCreateOn)\n-      throws IOException, DateTimeParseException, NoResultException {\n-    final Date DATE_1MIN_AGO = new Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(1));\n-    if (lastEndCreateOn.length() == 0) {\n-      // This should only happen when database is empty\n-      LOG.error(\n-          \"No default timestamp, will return everything. Use url to set initial lastEndCreateOn.\");\n-      throw new NoResultException(\"No default lastEndCreateOn, everything would match.\");\n-    }\n-    createTestEventCSV(utcStringToDate(lastEndCreateOn), DATE_1MIN_AGO);\n-  }\n-\n   private void createTestEventCSV(Date earlistCreatedAt, Date latestCreateOn)\n       throws IOException, DateTimeParseException {\n     List<TestEvent> events =\n@@ -193,69 +172,6 @@ private void uploadCSVDocument(String apiKey) throws RestClientException {\n     _resultJson = restTemplate.postForObject(url, contentsAsResource, String.class);\n   }\n \n-  @AuthorizationConfiguration.RequireGlobalAdminUser\n-  public String createTestCSVForDataHub(String lastEndCreateOn) throws IOException {\n-    try {\n-      this.createTestEventCSV(lastEndCreateOn);\n-      return this._fileContents;\n-    } catch (NoResultException err) {\n-      return \"\";\n-    }\n-  }\n-\n-  // ultimately, it would be nice if each row had an ID that could be dedupped on the server.\n-  @AuthorizationConfiguration.RequireGlobalAdminUser\n-  public Map<String, String> uploadTestEventCSVToDataHub(\n-      final String apiKey, String lastEndCreateOn) {\n-    try {\n-      this.init();\n-      // this will be null if there are no enties in the tracking table.\n-      // This is important for first-ever-run and then if the webpage is run again after the db is\n-      // initialized\n-      Date lastTimestamp = getLatestRecordedTimestamp();\n-      if (lastTimestamp == null) {\n-        DataHubUpload upload = _trackingService.startUpload(utcStringToDate(lastEndCreateOn));\n-        LOG.info(\"Added {} to data_hub_upload table\", upload.getInternalId());\n-        // database has no entries. FIRST EVER RUN.\n-        this.createTestEventCSV(lastEndCreateOn);\n-        if (this._rowCount == 0) {\n-          LOG.warn(\"No rows were found for uploadTestEventCSVToDataHub.\");\n-        } else {\n-          _trackingService.markRowCount(upload, _rowCount, _nextTimestamp);\n-          try {\n-            this.uploadCSVDocument(apiKey);\n-            _trackingService.markSucceeded(upload, _resultJson, _warnMessage);\n-          } catch (RestClientException e) {\n-            _trackingService.markFailed(upload, this._resultJson, e);\n-          }\n-        }\n-      } else {\n-        // run the new code and ignore the lastEndCreateOn passed in.\n-        dataHubUploaderTask();\n-      }\n-\n-      return Map.of(\n-          \"result\",\n-          \"ok\",\n-          \"lastTimestamp\",\n-          dateToUTCString(this._nextTimestamp),\n-          \"rowsSent\",\n-          String.valueOf(this._rowCount),\n-          \"uploadResultId\",\n-          this._resultJson,\n-          \"message\",\n-          this._warnMessage);\n-    } catch (RestClientException err) {\n-      return Map.of(\n-          \"result\",\n-          \"error\",\n-          \"message\",\n-          \"Err: uploading csv to data-hub failed. error='\" + err.toString() + \"'\");\n-    } catch (IOException err) {\n-      return Map.of(\"result\", \"error\", \"messsage\", err.toString());\n-    }\n-  }\n-\n   public void dataHubUploaderTask() {\n     // sanity check everything is configured correctly (dev likely will not be)\n     if (!_config.getUploadEnabled()) {"
+  },
+  {
+    "sha": "7b82b5a861c9fbb9be6ca1e84678aa7043cc6c56",
+    "filename": "backend/src/main/resources/schema.graphqls",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/CDCgov/prime-simplereport/blob/dfaeb00334f0f18ccceb6bb8461505401ba91b7d/backend/src/main/resources/schema.graphqls",
+    "raw_url": "https://github.com/CDCgov/prime-simplereport/raw/dfaeb00334f0f18ccceb6bb8461505401ba91b7d/backend/src/main/resources/schema.graphqls",
+    "contents_url": "https://api.github.com/repos/CDCgov/prime-simplereport/contents/backend/src/main/resources/schema.graphqls?ref=dfaeb00334f0f18ccceb6bb8461505401ba91b7d",
+    "patch": "@@ -23,7 +23,6 @@ enum UserPermission {\n   START_TEST\n   UPDATE_TEST\n   SUBMIT_TEST\n-  EXPORT_TEST_EVENT\n }\n \n enum OrganizationRole {"
+  }
+]

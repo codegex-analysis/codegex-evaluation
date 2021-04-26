@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "1cffc743e906df15c120bd5a738d264c6287abed",
+    "filename": "src/main/java/org/traccar/protocol/PretraceProtocolDecoder.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 3,
+    "changes": 15,
+    "blob_url": "https://github.com/traccar/traccar/blob/0395ac19b89420ec14e57b03d7a15c5a70bce148/src/main/java/org/traccar/protocol/PretraceProtocolDecoder.java",
+    "raw_url": "https://github.com/traccar/traccar/raw/0395ac19b89420ec14e57b03d7a15c5a70bce148/src/main/java/org/traccar/protocol/PretraceProtocolDecoder.java",
+    "contents_url": "https://api.github.com/repos/traccar/traccar/contents/src/main/java/org/traccar/protocol/PretraceProtocolDecoder.java?ref=0395ac19b89420ec14e57b03d7a15c5a70bce148",
+    "patch": "@@ -37,7 +37,7 @@ public PretraceProtocolDecoder(Protocol protocol) {\n             .text(\"(\")\n             .number(\"(d{15})\")                   // imei\n             .number(\"Uddd\")                      // type\n-            .number(\"d\")                         // gps type\n+            .number(\"(d)\")                         // gps type\n             .expression(\"([AV])\")                // validity\n             .number(\"(dd)(dd)(dd)\")              // date (yymmdd)\n             .number(\"(dd)(dd)(dd)\")              // time (hhmmss)\n@@ -75,8 +75,8 @@ protected Object decode(\n         Position position = new Position(getProtocolName());\n         position.setDeviceId(deviceSession.getDeviceId());\n \n+        position.set(Position.KEY_GPS, parser.nextInt(0));\n         position.setValid(parser.next().equals(\"A\"));\n-\n         position.setTime(parser.nextDateTime());\n \n         position.setLatitude(parser.nextCoordinate());\n@@ -90,7 +90,16 @@ protected Object decode(\n         position.set(Position.KEY_HDOP, parser.nextInt(0));\n         position.set(Position.KEY_RSSI, parser.nextInt(0));\n \n-        parser.next(); // state\n+        String stateValue = parser.next(); // state\n+        int bitName = 0;\n+        for (int bytePos=7; bytePos>=0; bytePos--)\n+        {\n+            for (int bitPos=0; bitPos<4; bitPos++)\n+            {\n+                if (((stateValue.charAt(bytePos) - '0') & (1 << bitPos)) == (1 << bitPos)) position.set(\"State_Bit\"+bitName, true);\n+                bitName++;\n+            }\n+        }\n \n         if (parser.hasNext()) {\n             for (String value : parser.next().split(\",\")) {"
+  },
+  {
+    "sha": "0accc919fd4bc7fd071d398d7ece61099ed33781",
+    "filename": "src/main/java/org/traccar/protocol/TeltonikaProtocolDecoder.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/traccar/traccar/blob/0395ac19b89420ec14e57b03d7a15c5a70bce148/src/main/java/org/traccar/protocol/TeltonikaProtocolDecoder.java",
+    "raw_url": "https://github.com/traccar/traccar/raw/0395ac19b89420ec14e57b03d7a15c5a70bce148/src/main/java/org/traccar/protocol/TeltonikaProtocolDecoder.java",
+    "contents_url": "https://api.github.com/repos/traccar/traccar/contents/src/main/java/org/traccar/protocol/TeltonikaProtocolDecoder.java?ref=0395ac19b89420ec14e57b03d7a15c5a70bce148",
+    "patch": "@@ -538,7 +538,7 @@ private void decodeLocation(Position position, ByteBuf buf, int codec) {\n                 int length = buf.readUnsignedShort();\n                 if (id == 256) {\n                     position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));\n-                } else if (id == 385) {\n+                } else if ((id == 385) || (id == 10500)) {\n                     ByteBuf data = buf.readSlice(length);\n                     data.readUnsignedByte(); // data part\n                     int index = 1;\n@@ -559,6 +559,7 @@ private void decodeLocation(Position position, ByteBuf buf, int codec) {\n                         if (BitUtil.check(flags, 2)) {\n                             position.set(\"beacon\" + index + \"Temp\", data.readUnsignedShort());\n                         }\n+\n                         index += 1;\n                     }\n                 } else {"
+  }
+]

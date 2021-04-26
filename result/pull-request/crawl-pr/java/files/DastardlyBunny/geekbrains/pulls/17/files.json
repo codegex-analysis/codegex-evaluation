@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "44e6d803d7d90c935ad3592407cdffef59d14aa2",
+    "filename": "src/main/java/ru/geekbrains2/lesson5/MainApp.java",
+    "status": "added",
+    "additions": 49,
+    "deletions": 0,
+    "changes": 49,
+    "blob_url": "https://github.com/DastardlyBunny/geekbrains/blob/b853b0c75c7ccdee31f08b537619f883e5d78f16/src/main/java/ru/geekbrains2/lesson5/MainApp.java",
+    "raw_url": "https://github.com/DastardlyBunny/geekbrains/raw/b853b0c75c7ccdee31f08b537619f883e5d78f16/src/main/java/ru/geekbrains2/lesson5/MainApp.java",
+    "contents_url": "https://api.github.com/repos/DastardlyBunny/geekbrains/contents/src/main/java/ru/geekbrains2/lesson5/MainApp.java?ref=b853b0c75c7ccdee31f08b537619f883e5d78f16",
+    "patch": "@@ -0,0 +1,49 @@\n+package ru.geekbrains2.lesson5;\n+\n+import java.util.Arrays;\n+\n+public class MainApp {\n+\n+    static final int size = 10_000_000;\n+    static final int h = size / 2;\n+\n+    public static void main(String[] args) {\n+        getArray();\n+        getArrayThread();\n+    }\n+\n+    public static void getArray() {\n+        float[] arr = new float[size];\n+        Arrays.fill(arr, 1);\n+        long a = System.currentTimeMillis();\n+        arrayMath(arr, size, 0);\n+        System.out.println(System.currentTimeMillis() - a);\n+    }\n+\n+    private static void arrayMath(float[] arr, int size, int start) {\n+        for (int i = 0; i < size; i++) {\n+            arr[i + start] = (float)(arr[i + start] * Math.sin(0.2f + (i + start) / 5.0f) *\n+                    Math.cos(0.2f + (i + start) / 5.0f) * Math.cos(0.4f + (i + start) / 2.0f));\n+        }\n+    }\n+\n+    public static void getArrayThread() {\n+        float[] arr = new float[size];\n+        Arrays.fill(arr, 1);\n+        long a = System.currentTimeMillis();\n+        Thread t1 = new Thread(() -> arrayMath(arr, h, 0));\n+        Thread t2 = new Thread(() -> arrayMath(arr, h, h));\n+\n+        t1.start();\n+        t2.start();\n+\n+        try {\n+            t1.join();\n+            t2.join();\n+        } catch (InterruptedException e) {\n+            e.printStackTrace();\n+        }\n+\n+        System.out.println(System.currentTimeMillis() - a);\n+    }\n+}"
+  }
+]

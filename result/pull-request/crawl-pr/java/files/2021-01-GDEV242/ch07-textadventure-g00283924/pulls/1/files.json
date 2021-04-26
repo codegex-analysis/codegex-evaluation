@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "b6263f018a50367c0cfa9f6fd766cbb9cab46840",
+    "filename": "Command.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/blob/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Command.java",
+    "raw_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/raw/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Command.java",
+    "contents_url": "https://api.github.com/repos/2021-01-GDEV242/ch07-textadventure-g00283924/contents/Command.java?ref=441a8c4ce4b5c132ba96a28aa858e8e99ce19941",
+    "patch": "@@ -13,8 +13,8 @@\n  *\n  * If the command had only one word, then the second word is <null>.\n  * \n- * @author  Michael Kölling and David J. Barnes\n- * @version 2016.02.29\n+ * @author  Joan Amaury rosario\n+ * @version 2020.03.10\n  */\n \n public class Command"
+  },
+  {
+    "sha": "34930e3f0ae69f64e156e58bc22799c5e797e966",
+    "filename": "CommandWord.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 3,
+    "changes": 7,
+    "blob_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/blob/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/CommandWord.java",
+    "raw_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/raw/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/CommandWord.java",
+    "contents_url": "https://api.github.com/repos/2021-01-GDEV242/ch07-textadventure-g00283924/contents/CommandWord.java?ref=441a8c4ce4b5c132ba96a28aa858e8e99ce19941",
+    "patch": "@@ -2,14 +2,15 @@\n  * Representations for all the valid command words for the game\n  * along with a string in a particular language.\n  * \n- * @author  Michael Kölling and David J. Barnes\n- * @version 2016.02.29\n+ * @author  Joan Amaury rosario\n+ * @version 2020.03.10\n  */\n public enum CommandWord\n {\n     // A value for each command word along with its\n     // corresponding user interface string.\n-    GO(\"go\"), QUIT(\"quit\"), HELP(\"help\"), UNKNOWN(\"?\");\n+    GO(\"go\"), QUIT(\"quit\"), HELP(\"help\"), EAT(\"eat\"),\n+    LOOK(\"look\"), TAKE(\"take\"), UNKNOWN(\"?\");\n     \n     // The command string.\n     private String commandString;"
+  },
+  {
+    "sha": "3752ef95c4fb9a94cd98f8734655c0e603c814ba",
+    "filename": "CommandWords.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/blob/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/CommandWords.java",
+    "raw_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/raw/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/CommandWords.java",
+    "contents_url": "https://api.github.com/repos/2021-01-GDEV242/ch07-textadventure-g00283924/contents/CommandWords.java?ref=441a8c4ce4b5c132ba96a28aa858e8e99ce19941",
+    "patch": "@@ -7,8 +7,8 @@\n  * This class holds an enumeration of all command words known to the game.\n  * It is used to recognise commands as they are typed in.\n  *\n- * @author  Michael Kölling and David J. Barnes\n- * @version 2016.02.29\n+ * @author  Joan Amaury rosario\n+ * @version 2020.03.10\n  */\n \n public class CommandWords\n@@ -59,7 +59,7 @@ public boolean isCommand(String aString)\n     /**\n      * Print all valid commands to System.out.\n      */\n-    public void showAll() \n+    public void getCommandList() \n     {\n         for(String command : validCommands.keySet()) {\n             System.out.print(command + \"  \");"
+  },
+  {
+    "sha": "ddf8d0d40fef7b27fa2df15bcd5ab316a84645e8",
+    "filename": "Game.java",
+    "status": "modified",
+    "additions": 76,
+    "deletions": 11,
+    "changes": 87,
+    "blob_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/blob/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Game.java",
+    "raw_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/raw/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Game.java",
+    "contents_url": "https://api.github.com/repos/2021-01-GDEV242/ch07-textadventure-g00283924/contents/Game.java?ref=441a8c4ce4b5c132ba96a28aa858e8e99ce19941",
+    "patch": "@@ -11,14 +11,15 @@\n  *  rooms, creates the parser and starts the game.  It also evaluates and\n  *  executes the commands that the parser returns.\n  * \n- * @author  Michael Kölling and David J. Barnes\n- * @version 2016.02.29\n+ * @author  Joan Amaury rosario\n+ * @version 2020.03.10\n  */\n \n public class Game \n {\n     private Parser parser;\n     private Room currentRoom;\n+    private Player player;\n         \n     /**\n      * Create the game and initialise its internal map.\n@@ -28,25 +29,36 @@ public Game()\n         createRooms();\n         parser = new Parser();\n     }\n-\n+    \n     /**\n      * Create all the rooms and link their exits together.\n      */\n     private void createRooms()\n     {\n-        Room outside, theater, pub, lab, office;\n+        Room outside, theater, pub, lab, office, pond, garden, \n+        pathway, further, rip, Rip, RIp, RIP;\n       \n         // create the rooms\n         outside = new Room(\"outside the main entrance of the university\");\n-        theater = new Room(\"in a lecture theater\");\n-        pub = new Room(\"in the campus pub\");\n-        lab = new Room(\"in a computing lab\");\n-        office = new Room(\"in the computing admin office\");\n+        theater = new Room(\"in a theater full of old manekins odly placed in every seat.\");\n+        pub = new Room(\"in the campus pub. Something feels off here...\");\n+        lab = new Room(\"in a computing lab. Nothing odd here. \");\n+        office = new Room(\"in the  admin office. Theres blood everywhere! WHat the hell happened here?!\");\n+        pond = new Room(\"near a pond behind the building\");\n+        pathway = new Room(\"on an eerie looking pathway surrounded by trees\");\n+        garden = new Room(\"on the universities garden. You feel safe here.\");\n+        further = new Room(\"further down the path. Something doesnt feel right. Maybe turn around?\");\n+        rip = new Room(\"Somethings off. You cant seem to stop going forward.\");\n+        Rip = new Room(\"no longer in control of your body.\");\n+        RIp = new Room(\"no longer in control.\");\n+        RIP = new Room(\"dead\");\n+        \n         \n         // initialise room exits\n         outside.setExit(\"east\", theater);\n         outside.setExit(\"south\", lab);\n         outside.setExit(\"west\", pub);\n+        outside.setExit(\"north\", pond);\n \n         theater.setExit(\"west\", outside);\n \n@@ -56,6 +68,23 @@ private void createRooms()\n         lab.setExit(\"east\", office);\n \n         office.setExit(\"west\", lab);\n+        \n+        pond.setExit(\"south\", outside);\n+        pond.setExit(\"north\", pathway);\n+        pond.setExit(\"east\", garden);\n+        \n+        garden.setExit(\"west\", pond);\n+        \n+        pathway.setExit(\"south\", pond);\n+        pathway.setExit(\"north\", further);\n+        \n+        further.setExit(\"north\", rip);\n+        \n+        rip.setExit(\"north\", Rip);\n+        \n+        Rip.setExit(\"north\", RIp);\n+        \n+        RIp.setExit(\"north\", RIP);\n \n         currentRoom = outside;  // start game outside\n     }\n@@ -75,7 +104,7 @@ public void play()\n             Command command = parser.getCommand();\n             finished = processCommand(command);\n         }\n-        System.out.println(\"Thank you for playing.  Good bye.\");\n+        System.out.println(\"Thank you for playing.  Adios!\");\n     }\n \n     /**\n@@ -85,12 +114,36 @@ private void printWelcome()\n     {\n         System.out.println();\n         System.out.println(\"Welcome to the World of Zuul!\");\n-        System.out.println(\"World of Zuul is a new, incredibly boring adventure game.\");\n+        System.out.println(\"World of Zuul is a new, incredibly exciting adventure game.\");\n         System.out.println(\"Type '\" + CommandWord.HELP + \"' if you need help.\");\n         System.out.println();\n         System.out.println(currentRoom.getLongDescription());\n     }\n+    \n+    /** \n+     * take command word that allows player to \"pick up item\"\n+     */\n+    private void take()\n+    {\n+       System.out.println(\"You have picked up an Item.\"); \n+    }\n \n+    /** \n+     * look command word that gives room description\n+       */\n+    private void look()\n+    {\n+        System.out.println(currentRoom.getLongDescription());\n+    }\n+    \n+    /**\n+     * command word to eat \n+     */\n+    private void eat()\n+    {\n+     System.out.println(\"You have eaten. You are no longer hungry.\");   \n+    }\n+    \n     /**\n      * Given a command, process (that is: execute) the command.\n      * @param command The command to be processed.\n@@ -114,7 +167,19 @@ private boolean processCommand(Command command)\n             case GO:\n                 goRoom(command);\n                 break;\n-\n+                \n+            case LOOK:\n+                look();\n+                break;\n+            \n+            case EAT:\n+                eat();\n+                break;\n+            \n+            case TAKE:\n+                 take();\n+                  break;\n+                  \n             case QUIT:\n                 wantToQuit = quit(command);\n                 break;"
+  },
+  {
+    "sha": "3c283cfeb65e57cf52a5fabde88f008dd9c4f980",
+    "filename": "Item.java",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/blob/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Item.java",
+    "raw_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/raw/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Item.java",
+    "contents_url": "https://api.github.com/repos/2021-01-GDEV242/ch07-textadventure-g00283924/contents/Item.java?ref=441a8c4ce4b5c132ba96a28aa858e8e99ce19941",
+    "patch": "@@ -0,0 +1,41 @@\n+/**\n+ * Create ingame Items for each room\n+ *\n+ * @author  Joan Amaury rosario\n+ * @version 2020.03.10\n+ */\n+public class Item {\n+    \n+  private String itemDescription;\n+  private int itemWeight;\n+\n+    /**\n+     * Item description\n+     * @param (description of the item, weight of the item)\n+     */\n+    public Item()\n+    {\n+     itemDescription = \" \" ;\n+     itemWeight = 0;\n+    }\n+    \n+    /**\n+     * Creates an item for a room\n+     * @param (description of the item, weight of the item)\n+     */\n+    public Item(String description, int weight)\n+    {\n+     itemDescription = description;\n+     itemWeight = weight;\n+    }\n+\n+    /**\n+     * gets the description of an item\n+     * @return itemInfo and the weight as a string\n+     */\n+    public String getItemDescription()\n+    {\n+        String itemInfo =\"Item name: \"+ this.itemDescription + \"Weight: \" + this.itemWeight;\n+        return itemInfo;\n+    }\n+}"
+  },
+  {
+    "sha": "23262be6a3e780e68d94db6de1afb482ce821aea",
+    "filename": "Parser.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 5,
+    "changes": 11,
+    "blob_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/blob/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Parser.java",
+    "raw_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/raw/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Parser.java",
+    "contents_url": "https://api.github.com/repos/2021-01-GDEV242/ch07-textadventure-g00283924/contents/Parser.java?ref=441a8c4ce4b5c132ba96a28aa858e8e99ce19941",
+    "patch": "@@ -13,8 +13,8 @@\n  * the known commands, and if the input is not one of the known commands, it\n  * returns a command object that is marked as an unknown command.\n  * \n- * @author  Michael Kölling and David J. Barnes\n- * @version 2016.02.29\n+ @author  Joan Amaury rosario\n+ * @version 2020.03.10\n  */\n public class Parser \n {\n@@ -55,12 +55,13 @@ public Command getCommand()\n \n         return new Command(commands.getCommandWord(word1), word2);\n     }\n-\n-    /**\n+    \n+/**\n      * Print out a list of valid command words.\n      */\n     public void showCommands()\n     {\n-        commands.showAll();\n+        commands.getCommandList();\n     }\n+    \n }"
+  },
+  {
+    "sha": "940a8f14998d23f99c2fbc0b4d1c6f4c7aa919a2",
+    "filename": "Player.java",
+    "status": "added",
+    "additions": 51,
+    "deletions": 0,
+    "changes": 51,
+    "blob_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/blob/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Player.java",
+    "raw_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/raw/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Player.java",
+    "contents_url": "https://api.github.com/repos/2021-01-GDEV242/ch07-textadventure-g00283924/contents/Player.java?ref=441a8c4ce4b5c132ba96a28aa858e8e99ce19941",
+    "patch": "@@ -0,0 +1,51 @@\n+\n+/**\n+ * Write a description of class Player here.\n+ *\n+ * @author  Joan Amaury rosario\n+ * @version 2020.03.10\n+ */\n+public class Player\n+{\n+    // instance variables - replace the example below with your own\n+    private String playerName;\n+    private static int MAXWEIGHT = 100;\n+    private double playerWeight;\n+    private Room currentRoom;\n+\n+    /**\n+     * Constructor for objects of class Player\n+     */\n+    public Player(String name)\n+    {\n+        this.playerName = playerName;\n+        \n+        playerWeight = 10;\n+    }\n+\n+      /**\n+     *A method to return the players name\n+     */\n+    public String getPlayerName()\n+    {\n+        return playerName;\n+    }\n+ \n+   /**\n+    * A method to return the weight of the player \n+    */\n+    public double getPlayerWeight()\n+    {\n+        return playerWeight;\n+    }\n+    \n+    /**\n+     * returns the max weight a player can hold\n+     */\n+    public int getMAXWEIGHT()\n+    {\n+        return MAXWEIGHT;\n+    }\n+    \n+}\n+"
+  },
+  {
+    "sha": "a70a0c46e623ba660e2f0b8872349561b1a54e5e",
+    "filename": "Room.java",
+    "status": "modified",
+    "additions": 37,
+    "deletions": 6,
+    "changes": 43,
+    "blob_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/blob/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Room.java",
+    "raw_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/raw/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/Room.java",
+    "contents_url": "https://api.github.com/repos/2021-01-GDEV242/ch07-textadventure-g00283924/contents/Room.java?ref=441a8c4ce4b5c132ba96a28aa858e8e99ce19941",
+    "patch": "@@ -12,14 +12,15 @@\n  * connected to other rooms via exits.  For each existing exit, the room \n  * stores a reference to the neighboring room.\n  * \n- * @author  Michael Kölling and David J. Barnes\n- * @version 2016.02.29\n+ * @author  Joan Amaury rosario\n+ * @version 2020.03.10\n  */\n \n public class Room \n {\n     private String description;\n-    private HashMap<String, Room> exits;        // stores exits of this room.\n+    private HashMap<String, Room> exits;\n+    private HashMap<String, Item> items;// stores exits of this room.\n \n     /**\n      * Create a room described \"description\". Initially, it has\n@@ -51,7 +52,7 @@ public String getShortDescription()\n     {\n         return description;\n     }\n-\n+    \n     /**\n      * Return a description of the room in the form:\n      *     You are in the kitchen.\n@@ -62,7 +63,20 @@ public String getLongDescription()\n     {\n         return \"You are \" + description + \".\\n\" + getExitString();\n     }\n-\n+    \n+  /**\n+     * returns a string descrbing the items within a room\n+     */\n+    private String getItemString()\n+    {\n+        String returnString = \"Items in the room are: \";\n+        Set<String> keys = items.keySet();\n+        for(String item : keys) {\n+            returnString +=\" \" + item;\n+        }\n+        return returnString;\n+    }\n+    \n     /**\n      * Return a string describing the room's exits, for example\n      * \"Exits: north west\".\n@@ -77,7 +91,24 @@ private String getExitString()\n         }\n         return returnString;\n     }\n-\n+    \n+    /**\n+     * add items to a room\n+     */\n+    public void addItem(String name, Item object)\n+    {\n+        items.put(name, object);\n+    }\n+    \n+    /**\n+     * A method that will remove items from the hashMap of items that\n+     * the room holds\n+     */\n+    public void removeItem(String name)\n+    {\n+        items.remove(name);\n+    }\n+    \n     /**\n      * Return the room that is reached if we go from this room in direction\n      * \"direction\". If there is no room in that direction, return null."
+  },
+  {
+    "sha": "25fc05315164813622b84791d59cda41b33b461c",
+    "filename": "package.bluej",
+    "status": "modified",
+    "additions": 80,
+    "deletions": 57,
+    "changes": 137,
+    "blob_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/blob/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/package.bluej",
+    "raw_url": "https://github.com/2021-01-GDEV242/ch07-textadventure-g00283924/raw/441a8c4ce4b5c132ba96a28aa858e8e99ce19941/package.bluej",
+    "contents_url": "https://api.github.com/repos/2021-01-GDEV242/ch07-textadventure-g00283924/contents/package.bluej?ref=441a8c4ce4b5c132ba96a28aa858e8e99ce19941",
+    "patch": "@@ -1,44 +1,53 @@\n #BlueJ package file\n-dependency1.from=Game\n-dependency1.to=Parser\n+dependency1.from=Parser\n+dependency1.to=CommandWords\n dependency1.type=UsesDependency\n-dependency2.from=Game\n-dependency2.to=Room\n+dependency10.from=Game\n+dependency10.to=Command\n+dependency10.type=UsesDependency\n+dependency11.from=Game\n+dependency11.to=CommandWord\n+dependency11.type=UsesDependency\n+dependency2.from=Parser\n+dependency2.to=Command\n dependency2.type=UsesDependency\n-dependency3.from=Game\n-dependency3.to=Command\n+dependency3.from=CommandWords\n+dependency3.to=CommandWord\n dependency3.type=UsesDependency\n-dependency4.from=Game\n+dependency4.from=Command\n dependency4.to=CommandWord\n dependency4.type=UsesDependency\n-dependency5.from=Command\n-dependency5.to=CommandWord\n+dependency5.from=Room\n+dependency5.to=Item\n dependency5.type=UsesDependency\n-dependency6.from=CommandWords\n-dependency6.to=CommandWord\n+dependency6.from=Player\n+dependency6.to=Room\n dependency6.type=UsesDependency\n-dependency7.from=Parser\n-dependency7.to=CommandWords\n+dependency7.from=Game\n+dependency7.to=Parser\n dependency7.type=UsesDependency\n-dependency8.from=Parser\n-dependency8.to=Command\n+dependency8.from=Game\n+dependency8.to=Room\n dependency8.type=UsesDependency\n-editor.fx.0.height=722\n+dependency9.from=Game\n+dependency9.to=Player\n+dependency9.type=UsesDependency\n+editor.fx.0.height=710\n editor.fx.0.width=800\n-editor.fx.0.x=560\n-editor.fx.0.y=175\n+editor.fx.0.x=740\n+editor.fx.0.y=128\n objectbench.height=102\n-objectbench.width=461\n-package.divider.horizontal=0.6\n-package.divider.vertical=0.7988929889298892\n-package.editor.height=410\n-package.editor.width=658\n-package.editor.x=617\n-package.editor.y=228\n-package.frame.height=600\n-package.frame.width=800\n-package.numDependencies=8\n-package.numTargets=6\n+objectbench.width=546\n+package.divider.horizontal=0.5808823529411765\n+package.divider.vertical=0.8088235294117646\n+package.editor.height=456\n+package.editor.width=846\n+package.editor.x=188\n+package.editor.y=142\n+package.frame.height=670\n+package.frame.width=986\n+package.numDependencies=11\n+package.numTargets=8\n package.showExtends=true\n package.showUses=true\n project.charset=UTF-8\n@@ -47,51 +56,65 @@ readme.name=@README\n readme.width=47\n readme.x=10\n readme.y=10\n-target1.height=60\n-target1.name=Game\n-target1.naviview.expanded=true\n+target1.height=50\n+target1.name=Item\n target1.showInterface=false\n target1.type=ClassTarget\n target1.width=100\n-target1.x=90\n-target1.y=120\n-target2.height=60\n-target2.name=Command\n-target2.naviview.expanded=true\n+target1.x=180\n+target1.y=210\n+target2.height=70\n+target2.name=Player\n target2.showInterface=false\n target2.type=ClassTarget\n-target2.width=100\n-target2.x=410\n-target2.y=280\n+target2.width=90\n+target2.x=270\n+target2.y=120\n target3.height=60\n-target3.name=CommandWord\n+target3.name=Game\n target3.naviview.expanded=true\n target3.showInterface=false\n-target3.type=EnumTarget\n-target3.width=130\n-target3.x=270\n-target3.y=380\n+target3.type=ClassTarget\n+target3.width=100\n+target3.x=90\n+target3.y=120\n target4.height=60\n-target4.name=CommandWords\n+target4.name=Command\n target4.naviview.expanded=true\n target4.showInterface=false\n target4.type=ClassTarget\n-target4.width=140\n-target4.x=510\n-target4.y=150\n+target4.width=100\n+target4.x=440\n+target4.y=330\n target5.height=60\n-target5.name=Room\n+target5.name=CommandWord\n target5.naviview.expanded=true\n target5.showInterface=false\n-target5.type=ClassTarget\n-target5.width=100\n+target5.type=EnumTarget\n+target5.width=130\n target5.x=210\n-target5.y=230\n+target5.y=390\n target6.height=60\n-target6.name=Parser\n+target6.name=CommandWords\n target6.naviview.expanded=true\n target6.showInterface=false\n target6.type=ClassTarget\n-target6.width=100\n-target6.x=310\n-target6.y=70\n+target6.width=140\n+target6.x=480\n+target6.y=140\n+target7.height=60\n+target7.name=Room\n+target7.naviview.expanded=true\n+target7.showInterface=false\n+target7.type=ClassTarget\n+target7.width=100\n+target7.x=250\n+target7.y=300\n+target8.height=60\n+target8.name=Parser\n+target8.naviview.expanded=true\n+target8.showInterface=false\n+target8.type=ClassTarget\n+target8.width=100\n+target8.x=370\n+target8.y=70"
+  }
+]

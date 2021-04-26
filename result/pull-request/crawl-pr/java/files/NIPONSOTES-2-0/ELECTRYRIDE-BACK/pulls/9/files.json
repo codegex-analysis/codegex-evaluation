@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "c8c09bc4fbd9554678b87d51e63817bb29f55c45",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/785f6e04cf12a7fcca9ea95df65a4249588d51f9/build.gradle",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/785f6e04cf12a7fcca9ea95df65a4249588d51f9/build.gradle",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/build.gradle?ref=785f6e04cf12a7fcca9ea95df65a4249588d51f9",
+    "patch": "@@ -37,7 +37,7 @@ sonarqube {\n   }\n }\n ext {\n-    jacocoExclusions = ['**/*edu/escuelaing/eci/ieti/ElectryrideBack2Application.java','**/*edu/escuelaing/eci/ieti/controllers/** ','**/*edu/escuelaing/eci/ieti/models/**','**/*edu/escuelaing/eci/ieti/repository/**','**/*edu/escuelaing/eci/ieti/services/**']\n+    jacocoExclusions = ['**/*edu/escuelaing/eci/ieti/ElectryrideBack2Application.java'] //,'**/*edu/escuelaing/eci/ieti/controllers/** ','**/*edu/escuelaing/eci/ieti/models/**','**/*edu/escuelaing/eci/ieti/repository/**','**/*edu/escuelaing/eci/ieti/services/**'\n }\n \n test {"
+  },
+  {
+    "sha": "cee667652963e3f8d2353654f0a4921ee66f62c9",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/controllers/BicycleController.java",
+    "status": "added",
+    "additions": 49,
+    "deletions": 0,
+    "changes": 49,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/controllers/BicycleController.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/controllers/BicycleController.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/controllers/BicycleController.java?ref=785f6e04cf12a7fcca9ea95df65a4249588d51f9",
+    "patch": "@@ -0,0 +1,49 @@\n+package edu.escuelaing.eci.ieti.controllers;\n+\n+import java.util.List;\n+\n+import edu.escuelaing.eci.ieti.models.Parking;\n+import edu.escuelaing.eci.ieti.services.ParkingService;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.http.HttpStatus;\n+import org.springframework.http.ResponseEntity;\n+import org.springframework.web.bind.annotation.CrossOrigin;\n+import org.springframework.web.bind.annotation.PathVariable;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RequestMethod;\n+import org.springframework.web.bind.annotation.RestController;\n+\n+@RestController\n+@CrossOrigin(origins=\"http://localhost:3000\")\n+@RequestMapping(\"/api/bikes\")\n+public class BicycleController {\n+\n+    @Autowired\n+    private ParkingService parkingService;\n+\n+    @RequestMapping(value=\"/parkings\", method = RequestMethod.GET)\n+    public ResponseEntity<List<Parking>> getParking(){\n+        List<Parking> parkings = null;\n+        try {\n+            parkings = parkingService.getParkings();\n+            return new ResponseEntity<>(parkings, HttpStatus.ACCEPTED);\n+        } catch (Exception ex) {\n+            System.out.println(\"ERROR DE Get Parkings: \"+ex);\n+            return null;\n+        }        \n+    }\n+\n+\n+    @RequestMapping(value=\"/parking/{id}\", method=RequestMethod.GET)\n+    public ResponseEntity<Object> updateParking(@PathVariable String id) {\n+        System.out.println(\"ENTRANDO EN MODIFICAR APLICACION\");\n+        try {\n+            System.out.println(\"\\n Entra en post de parking: \"+ id + \"\\n \");\n+            parkingService.rentedBike(id);            \n+        } catch (Exception ex) {\n+            return new ResponseEntity<>(\"Error 404\", HttpStatus.NOT_FOUND);\n+        }\n+        return new ResponseEntity<>( HttpStatus.ACCEPTED);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "fe1e844cb384c76bbb2c7a03374995022e4ca7c5",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/controllers/UserController.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/controllers/UserController.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/controllers/UserController.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/controllers/UserController.java?ref=785f6e04cf12a7fcca9ea95df65a4249588d51f9",
+    "patch": "@@ -17,7 +17,7 @@\n     @Autowired\n     UserServices userS;\n \n-    @RequestMapping(value=\"/users\" ,method = RequestMethod.GET)\n+    @RequestMapping(value=\"/\" ,method = RequestMethod.GET)\n     public ResponseEntity<List<User>> getUsers() {\n         List<User> users = null;\n         try {"
+  },
+  {
+    "sha": "a8ad03a3f27ed8c97781c8a120d9bb715734185b",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/models/Parking.java",
+    "status": "added",
+    "additions": 89,
+    "deletions": 0,
+    "changes": 89,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/models/Parking.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/models/Parking.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/models/Parking.java?ref=785f6e04cf12a7fcca9ea95df65a4249588d51f9",
+    "patch": "@@ -0,0 +1,89 @@\n+package edu.escuelaing.eci.ieti.models;\n+\n+import org.springframework.data.annotation.Id;\n+import org.springframework.data.mongodb.core.mapping.Document;\n+\n+@Document(collection = \"parkings\")\n+public class Parking {\n+    \n+    @Id\n+    private String id;\n+    private String name;\n+    private String description;\n+    private Double longitude;\n+    private Double latitude;\n+    private Integer bikes_aviables;\n+\n+    public Parking(String id, String name, String description, Double longitude, Double latitude, Integer bikes_aviables) {\n+        this.id = id;\n+        this.name = name;\n+        this.description = description;\n+        this.longitude = longitude;\n+        this.latitude = latitude;\n+        this.bikes_aviables = bikes_aviables;\n+    }\n+\n+    public Parking() {\n+    }\n+\n+    public String getId() {\n+        return id;\n+    }\n+\n+    public void setId(String id) {\n+        this.id = id;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public void setName(String name) {\n+        this.name = name;\n+    }\n+\n+    public String getDescription() {\n+        return description;\n+    }\n+\n+    public void setDescription(String description) {\n+        this.description = description;\n+    }\n+\n+    public Double getLongitude() {\n+        return longitude;\n+    }\n+\n+    public void setLongitude(Double longitude) {\n+        this.longitude = longitude;\n+    }\n+\n+    public Double getLatitude() {\n+        return latitude;\n+    }\n+\n+    public void setLatitude(Double latitude) {\n+        this.latitude = latitude;\n+    }\n+\n+    public Integer getBikes_aviables() {\n+        return bikes_aviables;\n+    }\n+\n+    public void setBikes_aviables(Integer bikes_aviables) {\n+        this.bikes_aviables = bikes_aviables;\n+    }\n+\n+\n+    @Override\n+    public String toString() {\n+        return \"Parking{\" +\n+                \"id='\" + id + '\\'' +\n+                \", name='\" + name + '\\'' +\n+                \", description='\" + description + '\\'' +\n+                \", longitude=\" + longitude +\n+                \", latitude=\" + latitude +\n+                \", bikes_aviables=\" + bikes_aviables +\n+                '}';\n+    }\n+}"
+  },
+  {
+    "sha": "ef4c163286525e08b4e5406fd95fc9cd5dfaf33d",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/repository/ParkingRepository.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/repository/ParkingRepository.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/repository/ParkingRepository.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/repository/ParkingRepository.java?ref=785f6e04cf12a7fcca9ea95df65a4249588d51f9",
+    "patch": "@@ -0,0 +1,10 @@\n+package edu.escuelaing.eci.ieti.repository;\n+\n+\n+import edu.escuelaing.eci.ieti.models.Parking;\n+import org.springframework.data.mongodb.repository.MongoRepository;\n+import org.springframework.stereotype.Repository;\n+\n+@Repository\n+public interface ParkingRepository extends MongoRepository<Parking, String> {\n+}"
+  },
+  {
+    "sha": "f9ea7c652d5a719f1bb3fe6e263218156a4aca28",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/services/ParkingService.java",
+    "status": "added",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/services/ParkingService.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/services/ParkingService.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/services/ParkingService.java?ref=785f6e04cf12a7fcca9ea95df65a4249588d51f9",
+    "patch": "@@ -0,0 +1,15 @@\n+package edu.escuelaing.eci.ieti.services;\n+\n+import java.util.List;\n+\n+import edu.escuelaing.eci.ieti.models.Parking;\n+import org.springframework.stereotype.Service;\n+\n+@Service\n+public interface ParkingService {\n+    \n+    List<Parking> getParkings();\n+\n+    void rentedBike(String id);\n+\n+}"
+  },
+  {
+    "sha": "96baddd6b4d8d8e4bdafeec1e535eef2c6067f84",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/services/impl/ParkingServiceImpl.java",
+    "status": "added",
+    "additions": 56,
+    "deletions": 0,
+    "changes": 56,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/services/impl/ParkingServiceImpl.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/785f6e04cf12a7fcca9ea95df65a4249588d51f9/src/main/java/edu/escuelaing/eci/ieti/services/impl/ParkingServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/services/impl/ParkingServiceImpl.java?ref=785f6e04cf12a7fcca9ea95df65a4249588d51f9",
+    "patch": "@@ -0,0 +1,56 @@\n+package edu.escuelaing.eci.ieti.services.impl;\n+\n+import edu.escuelaing.eci.ieti.models.Parking;\n+import edu.escuelaing.eci.ieti.repository.ParkingRepository;\n+import org.springframework.beans.factory.annotation.Autowired;\n+\n+import edu.escuelaing.eci.ieti.services.ParkingService;\n+import org.springframework.stereotype.Component;\n+\n+import java.util.List;\n+import java.util.Optional;\n+\n+@Component\n+public class ParkingServiceImpl implements ParkingService{\n+    \n+    @Autowired\n+    private ParkingRepository parkingRepository;\n+\n+\n+    @Override\n+    public List<Parking> getParkings(){\n+        return parkingRepository.findAll();\n+    }\n+\n+    @Override\n+    public void rentedBike(String id){\n+        //log.info(mongoOps.findOne(new Query(where(\"name\").is(\"Joe\")), Person.class));\n+        //parkingRepository.updateFirst(query(where(\"id\").is(id)), update(\"bikes_aviable\", 1000), Parking.class);\n+        Parking parking = findParkingBydId(id);\n+        System.out.println(\"\\n PARKING FORMATEADO: \"+parking+\" \\n\");\n+        if(parking != null){\n+            //Esta variable puede cambiar dependiendo si dejamos que un usuario alquile mas de una bici al tiempo\n+            int bikesRented = 1;\n+            int actualBikes = parking.getBikes_aviables();\n+            if((actualBikes-bikesRented>=0) && (bikesRented>0)){\n+                parking.setBikes_aviables(actualBikes-bikesRented);\n+                parkingRepository.save(parking);\n+            }\n+\n+        }\n+    }\n+\n+    public Parking findParkingBydId(String id){\n+\n+        Optional<Parking> optionalParking =parkingRepository.findById(id);\n+        System.out.println(\"\\n Parking OPTIONAL: \"+optionalParking+\" \\n\");\n+        Parking parking;\n+        if(!optionalParking.isEmpty()){\n+            parking = optionalParking.get();\n+        }else {\n+            parking = null;\n+        }\n+        return parking;\n+    }\n+\n+}"
+  }
+]

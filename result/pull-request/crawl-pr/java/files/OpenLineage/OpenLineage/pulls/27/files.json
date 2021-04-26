@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "47c4089ebd55e249f16157d7006cb73ea3bee19e",
+    "filename": "client/generator/src/main/java/io/openlineage/client/JavaPoetGenerator.java",
+    "status": "modified",
+    "additions": 65,
+    "deletions": 0,
+    "changes": 65,
+    "blob_url": "https://github.com/OpenLineage/OpenLineage/blob/491c880818d5e211f722e6bc493e7b8de064dcea/client/generator/src/main/java/io/openlineage/client/JavaPoetGenerator.java",
+    "raw_url": "https://github.com/OpenLineage/OpenLineage/raw/491c880818d5e211f722e6bc493e7b8de064dcea/client/generator/src/main/java/io/openlineage/client/JavaPoetGenerator.java",
+    "contents_url": "https://api.github.com/repos/OpenLineage/OpenLineage/contents/client/generator/src/main/java/io/openlineage/client/JavaPoetGenerator.java?ref=491c880818d5e211f722e6bc493e7b8de064dcea",
+    "patch": "@@ -21,6 +21,9 @@\n import com.fasterxml.jackson.annotation.JsonAnySetter;\n import com.fasterxml.jackson.annotation.JsonCreator;\n import com.fasterxml.jackson.annotation.JsonProperty;\n+import com.fasterxml.jackson.core.JsonProcessingException;\n+import com.fasterxml.jackson.databind.JsonNode;\n+import com.fasterxml.jackson.databind.ObjectMapper;\n import com.squareup.javapoet.AnnotationSpec;\n import com.squareup.javapoet.ClassName;\n import com.squareup.javapoet.CodeBlock;\n@@ -122,6 +125,11 @@ private void generateTypes(TypeSpec.Builder containerTypeBuilder) {\n           if (f.getName().equals(\"_schemaURL\")) {\n             String schemaURL = baseURL + \"#/definitions/\" + type.getName();\n             constructor.addCode(\"this.$N = URI.create($S);\\n\", f.getName(), schemaURL);\n+            String schema = generateAndValidateSchema(type);\n+            classBuilder.addField(\n+                FieldSpec.builder(ClassName.get(String.class), \"__schema\", PUBLIC, FINAL, STATIC)\n+                .initializer(\"$S\", schema).build());\n+\n           } else {\n             if (!(f.getName().equals(\"_producer\") || f.getName().equals(\"producer\"))) {\n               builderClassBuilder.addField(getTypeName(f.getType()), f.getName(), PRIVATE);\n@@ -228,6 +236,63 @@ private void generateTypes(TypeSpec.Builder containerTypeBuilder) {\n \n   }\n \n+  private String generateAndValidateSchema(ObjectType type) {\n+    // generate self contained schema\n+    String schema = generateSchema(type);\n+    // verify that we can parse it and obtain the same schema back\n+    ObjectMapper mapper = new ObjectMapper();\n+    try {\n+      TypeResolver typeResolver = new TypeResolver(mapper.readValue(schema, JsonNode.class));\n+      String other = generateSchema(typeResolver.getRootTypes().get(0));\n+      if (!other.equals(schema)) {\n+        throw new RuntimeException(\"\\n\" + schema + \"\\n\" + other);\n+      }\n+    } catch (JsonProcessingException e) {\n+      throw new RuntimeException(e);\n+    }\n+    return schema;\n+  }\n+\n+  private String generateSchema(Type type) {\n+    String schema = schema(type);\n+    return \"{ \\\"$schema\\\": \\\"https://json-schema.org/draft/2019-09/schema\\\", \\\"oneOf\\\": [\" + schema + \" ] }\";\n+  }\n+\n+  private String schema(Type type) {\n+    return type.accept(new TypeVisitor<String>(){\n+\n+      @Override\n+      public String visit(PrimitiveType primitiveType) {\n+        return \"{ \\\"type\\\" : \\\"\"+primitiveType.getName()+\"\\\"\"\n+            + (primitiveType.getFormat() != null ? \", \\\"format\\\" : \\\"\"+primitiveType.getFormat()+\"\\\"\" : \"\")\n+            + \"}\";\n+      }\n+\n+      @Override\n+      public String visit(ObjectType objectType) {\n+        return  \"{ \\\"type\\\" : \\\"object\\\",\"\n+            + \"\\\"properties\\\": {\"\n+            + schema(objectType.getProperties())\n+            + \"}}\";\n+      }\n+\n+      private String schema(List<Field> properties) {\n+        List<String> elements = new ArrayList<String>();\n+        for (Field field : properties) {\n+          elements.add(\"\\\"\" + field.getName() + \"\\\": \" + field.getType().accept(this));\n+        }\n+        return String.join(\", \", elements);\n+      }\n+\n+      @Override\n+      public String visit(ArrayType arrayType) {\n+        return \"{ \\\"type\\\" : \\\"array\\\"\"\n+            + \", \\\"items\\\" : \" + arrayType.getItems().accept(this)\n+            + \"}\";\n+      }\n+    });\n+  }\n+\n   private Builder getter(Field f) {\n     Builder builder = MethodSpec\n         .methodBuilder(\"get\" + titleCase(f.getName()))"
+  },
+  {
+    "sha": "e5ac30c0fe3c502cfbe238f85bf61fcc63d03a1f",
+    "filename": "client/generator/src/main/java/io/openlineage/client/TypeResolver.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/OpenLineage/OpenLineage/blob/491c880818d5e211f722e6bc493e7b8de064dcea/client/generator/src/main/java/io/openlineage/client/TypeResolver.java",
+    "raw_url": "https://github.com/OpenLineage/OpenLineage/raw/491c880818d5e211f722e6bc493e7b8de064dcea/client/generator/src/main/java/io/openlineage/client/TypeResolver.java",
+    "contents_url": "https://api.github.com/repos/OpenLineage/OpenLineage/contents/client/generator/src/main/java/io/openlineage/client/TypeResolver.java?ref=491c880818d5e211f722e6bc493e7b8de064dcea",
+    "patch": "@@ -22,14 +22,15 @@\n   private Map<String, ObjectType> types = new HashMap<>();\n   private Set<String> referencedTypes = new HashSet<>();\n   private Set<String> baseTypes = new HashSet<>();\n+  private List<Type> rootTypes = new ArrayList<>();\n \n   public TypeResolver(JsonNode rootSchema) {\n     super();\n     this.rootSchema = rootSchema;\n     JsonNode jsonNode = rootSchema.get(\"oneOf\");\n     if (jsonNode.isArray()) {\n       for (final JsonNode type : jsonNode) {\n-        resolveType(new Schema(\"RunEvent\", type));\n+        rootTypes.add(resolveType(new Schema(\"RunEvent\", type)));\n       }\n     }\n   }\n@@ -352,4 +353,8 @@ private String lastPart(String pointer) {\n     return baseTypes;\n   }\n \n+  public List<Type> getRootTypes() {\n+    return rootTypes;\n+  }\n+\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "ac9ae857d4e444212e8de7b51833b80f46aafb11",
+    "filename": "client/src/test/java/io/openlineage/client/OpenLineageTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/OpenLineage/OpenLineage/blob/491c880818d5e211f722e6bc493e7b8de064dcea/client/src/test/java/io/openlineage/client/OpenLineageTest.java",
+    "raw_url": "https://github.com/OpenLineage/OpenLineage/raw/491c880818d5e211f722e6bc493e7b8de064dcea/client/src/test/java/io/openlineage/client/OpenLineageTest.java",
+    "contents_url": "https://api.github.com/repos/OpenLineage/OpenLineage/contents/client/src/test/java/io/openlineage/client/OpenLineageTest.java?ref=491c880818d5e211f722e6bc493e7b8de064dcea",
+    "patch": "@@ -128,7 +128,6 @@ public void factory() throws JsonProcessingException {\n \n \n     assertEquals(json, mapper.writeValueAsString(read));\n-\n-\n   }\n+\n }"
+  }
+]

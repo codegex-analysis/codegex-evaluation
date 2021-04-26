@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "12ba9cdc239557852c52acd185d5b14fa57d90c8",
+    "filename": ".github/workflows/maven.yml",
+    "status": "added",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/jdi-templates/jdi-light-testng-template/blob/d635a8cd80651e53fe577969882291d440f6f1a0/.github/workflows/maven.yml",
+    "raw_url": "https://github.com/jdi-templates/jdi-light-testng-template/raw/d635a8cd80651e53fe577969882291d440f6f1a0/.github/workflows/maven.yml",
+    "contents_url": "https://api.github.com/repos/jdi-templates/jdi-light-testng-template/contents/.github/workflows/maven.yml?ref=d635a8cd80651e53fe577969882291d440f6f1a0",
+    "patch": "@@ -0,0 +1,58 @@\n+# This workflow will build a Java project with Maven\n+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven\n+\n+name: Java CI with Maven\n+env:\n+  ALLURE_VERSION: \"2.10.0\"\n+\n+on:\n+  push:\n+    branches: [ master ]\n+  pull_request:\n+    branches: [ master ]\n+\n+jobs:\n+  build:\n+    runs-on: ubuntu-latest\n+\n+    steps:\n+      - uses: actions/checkout@v2\n+      - name: Set up JDK 1.8\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: 1.8\n+\n+      - name: Build with Maven\n+        id: build\n+        run: mvn compile\n+\n+      - name: Get Allure history\n+        uses: actions/checkout@v2\n+        id: allure-setup\n+        if: steps.build.outcome == 'success'\n+        continue-on-error: true\n+        with:\n+          ref: gh-pages\n+          path: gh-pages\n+\n+      - name: Tests\n+        if: steps.allure-setup.outcome == 'success'\n+        timeout-minutes: 10\n+        continue-on-error: true\n+        run: mvn clean test\n+\n+      - name: Allure Report action from marketplace\n+        uses: simple-elf/allure-report-action@master\n+        if: always()\n+        with:\n+          allure_results: target/allure-results\n+          allure_history: allure-history\n+\n+      - name: Deploy report to Github Pages\n+        if: always()\n+        uses: peaceiris/actions-gh-pages@v2\n+        env:\n+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}\n+          PUBLISH_BRANCH: gh-pages\n+          PUBLISH_DIR: allure-history\n+        \n\\ No newline at end of file"
+  },
+  {
+    "sha": "36078c0604075d152a3dbab6cb6b2b2e3796d4e8",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/jdi-templates/jdi-light-testng-template/blob/d635a8cd80651e53fe577969882291d440f6f1a0/pom.xml",
+    "raw_url": "https://github.com/jdi-templates/jdi-light-testng-template/raw/d635a8cd80651e53fe577969882291d440f6f1a0/pom.xml",
+    "contents_url": "https://api.github.com/repos/jdi-templates/jdi-light-testng-template/contents/pom.xml?ref=d635a8cd80651e53fe577969882291d440f6f1a0",
+    "patch": "@@ -26,7 +26,7 @@\n         <dependency>\n             <groupId>com.epam.jdi</groupId>\n             <artifactId>jdi-light-html</artifactId>\n-            <version>1.3.7</version>\n+            <version>1.3.11</version>\n         </dependency>\n \n         <!--Allure-->"
+  },
+  {
+    "sha": "505ea14bc4c657f7ca9e28d5b7a5f04852567a29",
+    "filename": "src/test/java/org/mytests/tests/example/JDIPerformanceTests.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/jdi-templates/jdi-light-testng-template/blob/d635a8cd80651e53fe577969882291d440f6f1a0/src/test/java/org/mytests/tests/example/JDIPerformanceTests.java",
+    "raw_url": "https://github.com/jdi-templates/jdi-light-testng-template/raw/d635a8cd80651e53fe577969882291d440f6f1a0/src/test/java/org/mytests/tests/example/JDIPerformanceTests.java",
+    "contents_url": "https://api.github.com/repos/jdi-templates/jdi-light-testng-template/contents/src/test/java/org/mytests/tests/example/JDIPerformanceTests.java?ref=d635a8cd80651e53fe577969882291d440f6f1a0",
+    "patch": "@@ -62,10 +62,10 @@ public void bigDropdownTest() {\n     @Test\n     public void longTextTest() {\n         String text = \"Lorem ipsum dolor sit amet, eos numquam rationibus ad. Ius cu accumsan salutatus, ne pro purto ridens vulputate. Cu eum doctus tritani, munere sanctus complectitur vis id. Paulo vulputate te eos, suas tollit laudem nam id. His esse rebum reprimique ut, te solum atqui homero vim.\\\\n\\\\n\" +\n-                \"Labitur salutatus eos an. Vim ut dicam fuisset. Ex sed animal accommodare, utinam graeci iisque vim id, ea fugit scripta deleniti nec. Eos cu nisl veri meis. Affert audiam copiosae mel ne, fabulas menandri temporibus has et. Sed latine graecis ei, eu fugit soluta intellegam vis, nibh graeci meliore ad duo.\\\\n\\\\n\" +\n-                \"Et quis meis delenit mea, ius ea sumo laboramus vituperatoribus. Te simul luptatum tractatos nam, eam in causae constituam, quod stet ancillae nam ei. Ne his dico veniam legere, id has vidisse euismod sanctus. Vis putant volumus tincidunt et.\\\\n\\\\n\" +\n-                \"Has eirmod consequat ad. Sea illud clita ut, has quando accusata cotidieque an, volutpat iudicabit definitionem ut sea. Pri at atqui molestiae, nibh ullum consulatu vix at. Nec id nisl nonumes epicurei, et vitae possit probatus ius. Fierent delicata argumentum ut quo. Tation tincidunt sed eu, sit in nostrud democritum.\\\\n\\\\n\" +\n-                \"Usu esse utroque sapientem ad. Eam ut consul soleat sapientem, cu dolor consequuntur vis. Erat temporibus mea id, has ex dicam tritani. Pertinacia expetendis consectetuer eos ei, vidit malis periculis est ea, ne nam movet fuisset. Pro id habemus definitiones, in ferri solum reprehendunt mei. Vel eligendi honestatis liberavisse id.\";\n+            \"Labitur salutatus eos an. Vim ut dicam fuisset. Ex sed animal accommodare, utinam graeci iisque vim id, ea fugit scripta deleniti nec. Eos cu nisl veri meis. Affert audiam copiosae mel ne, fabulas menandri temporibus has et. Sed latine graecis ei, eu fugit soluta intellegam vis, nibh graeci meliore ad duo.\\\\n\\\\n\" +\n+            \"Et quis meis delenit mea, ius ea sumo laboramus vituperatoribus. Te simul luptatum tractatos nam, eam in causae constituam, quod stet ancillae nam ei. Ne his dico veniam legere, id has vidisse euismod sanctus. Vis putant volumus tincidunt et.\\\\n\\\\n\" +\n+            \"Has eirmod consequat ad. Sea illud clita ut, has quando accusata cotidieque an, volutpat iudicabit definitionem ut sea. Pri at atqui molestiae, nibh ullum consulatu vix at. Nec id nisl nonumes epicurei, et vitae possit probatus ius. Fierent delicata argumentum ut quo. Tation tincidunt sed eu, sit in nostrud democritum.\\\\n\\\\n\" +\n+            \"Usu esse utroque sapientem ad. Eam ut consul soleat sapientem, cu dolor consequuntur vis. Erat temporibus mea id, has ex dicam tritani. Pertinacia expetendis consectetuer eos ei, vidit malis periculis est ea, ne nam movet fuisset. Pro id habemus definitiones, in ferri solum reprehendunt mei. Vel eligendi honestatis liberavisse id.\";\n         StopWatch timer = StopWatch.createStarted();\n         textareaPerformance.setText(text + \"\\\\n\"+ text);\n         System.out.println(\"Long text test Time: \" + timer.getTime());"
+  },
+  {
+    "sha": "c31a28a764d70dd61f2c55ee8578e62c439b07d1",
+    "filename": "src/test/resources/common.properties",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/jdi-templates/jdi-light-testng-template/blob/d635a8cd80651e53fe577969882291d440f6f1a0/src/test/resources/common.properties",
+    "raw_url": "https://github.com/jdi-templates/jdi-light-testng-template/raw/d635a8cd80651e53fe577969882291d440f6f1a0/src/test/resources/common.properties",
+    "contents_url": "https://api.github.com/repos/jdi-templates/jdi-light-testng-template/contents/src/test/resources/common.properties?ref=d635a8cd80651e53fe577969882291d440f6f1a0",
+    "patch": "@@ -0,0 +1 @@\n+arguments=--headless"
+  },
+  {
+    "sha": "6af5034aae4467bffb86471b34beca84d3a0fc51",
+    "filename": "src/test/resources/general.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/jdi-templates/jdi-light-testng-template/blob/d635a8cd80651e53fe577969882291d440f6f1a0/src/test/resources/general.xml",
+    "raw_url": "https://github.com/jdi-templates/jdi-light-testng-template/raw/d635a8cd80651e53fe577969882291d440f6f1a0/src/test/resources/general.xml",
+    "contents_url": "https://api.github.com/repos/jdi-templates/jdi-light-testng-template/contents/src/test/resources/general.xml?ref=d635a8cd80651e53fe577969882291d440f6f1a0",
+    "patch": "@@ -1,6 +1,6 @@\n <?xml version=\"1.0\" encoding=\"WINDOWS-1251\"?>\n <!DOCTYPE suite SYSTEM \"http://testng.org/testng-1.0.dtd\">\n-<suite name=\"JDI-Light Performance\" parallel=\"classes\" thread-count=\"1\">\n+<suite name=\"JDI-Light Performance\" parallel=\"classes\" thread-count=\"6\">\n     <test name=\"Tests\">\n         <packages>\n             <package name=\"org.mytests.tests.example\"/>"
+  }
+]

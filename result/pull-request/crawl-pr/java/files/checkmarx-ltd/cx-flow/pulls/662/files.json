@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "93bfdcf13a8dbd9c01e34b44eafd0244568d274c",
+    "filename": ".dockerignore",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 3,
+    "changes": 5,
+    "blob_url": "https://github.com/checkmarx-ltd/cx-flow/blob/aef3429607a519d3f57eebef0f130269d8b4b579/.dockerignore",
+    "raw_url": "https://github.com/checkmarx-ltd/cx-flow/raw/aef3429607a519d3f57eebef0f130269d8b4b579/.dockerignore",
+    "contents_url": "https://api.github.com/repos/checkmarx-ltd/cx-flow/contents/.dockerignore?ref=aef3429607a519d3f57eebef0f130269d8b4b579",
+    "patch": "@@ -1,3 +1,2 @@\n-*\n-!build*.gradle\n-!build/libs/*\n\\ No newline at end of file\n+Dockerfile\n+Jenkinsfile\n\\ No newline at end of file"
+  },
+  {
+    "sha": "44b4224b17526219bfba428647f5f4479280487c",
+    "filename": ".gitattributes",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/checkmarx-ltd/cx-flow/blob/aef3429607a519d3f57eebef0f130269d8b4b579/.gitattributes",
+    "raw_url": "https://github.com/checkmarx-ltd/cx-flow/raw/aef3429607a519d3f57eebef0f130269d8b4b579/.gitattributes",
+    "contents_url": "https://api.github.com/repos/checkmarx-ltd/cx-flow/contents/.gitattributes?ref=aef3429607a519d3f57eebef0f130269d8b4b579",
+    "patch": "@@ -0,0 +1 @@\n+* eol=lf\n\\ No newline at end of file"
+  },
+  {
+    "sha": "22ac36378e7da6f0cf8feb701b81dbb6dd48d0dd",
+    "filename": "Dockerfile",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 11,
+    "changes": 29,
+    "blob_url": "https://github.com/checkmarx-ltd/cx-flow/blob/aef3429607a519d3f57eebef0f130269d8b4b579/Dockerfile",
+    "raw_url": "https://github.com/checkmarx-ltd/cx-flow/raw/aef3429607a519d3f57eebef0f130269d8b4b579/Dockerfile",
+    "contents_url": "https://api.github.com/repos/checkmarx-ltd/cx-flow/contents/Dockerfile?ref=aef3429607a519d3f57eebef0f130269d8b4b579",
+    "patch": "@@ -1,10 +1,26 @@\n+FROM openjdk:11-jdk as build\n+\n+WORKDIR /src\n+\n+# Cache gradle wrapper and dependencies\n+COPY gradle gradle\n+COPY gradlew *.gradle ./\n+RUN ./gradlew --no-daemon build 2>/dev/null || true\n+\n+# Build the actual project\n+COPY . .\n+RUN ./gradlew --no-daemon clean build \\\n+    && ./gradlew --no-daemon -b build-11.gradle --build-cache assemble \\\n+    && ./gradlew --no-daemon -q getVersion > build/libs/version.txt \\\n+\t&& mv build /build\n+\n FROM openjdk:8-jre-alpine AS java8\n \n WORKDIR app\n RUN apk update && \\\n     apk upgrade && \\\n     apk upgrade\n-COPY build/libs/*.jar cx-flow.jar\n+COPY --from=build /build/libs/*.jar cx-flow.jar\n ENTRYPOINT [\"java\", \"-Xms512m\", \"-Xmx2048m\", \"-Djava.security.egd=file:/dev/./urandom\", \"-Dspring.profiles.active=web\", \"-jar\", \"cx-flow.jar\"]\n EXPOSE 8080\n \n@@ -14,15 +30,6 @@ FROM openjdk:11-jre-slim AS java11\n WORKDIR app\n RUN apt update && \\\n     apt upgrade -y\n-COPY build/libs/java11/*.jar cx-flow.jar\n+COPY --from=build /build/libs/java11/*.jar cx-flow.jar\n ENTRYPOINT [\"java\", \"-Xms512m\", \"-Xmx2048m\",\"-Djava.security.egd=file:/dev/./urandom\", \"-Dspring.profiles.active=web\", \"-jar\", \"cx-flow.jar\"]\n EXPOSE 8080\n-\n-FROM openjdk:8-jre-alpine AS cxgo8\n-\n-WORKDIR app\n-RUN apk update && \\\n-    apk upgrade\n-COPY build/libs/cxgo/*.jar cx-flow.jar\n-ENTRYPOINT [\"java\", \"-Xms512m\", \"-Xmx2048m\", \"-Djava.security.egd=file:/dev/./urandom\", \"-Dspring.profiles.active=cxgo\", \"-jar\", \"cx-flow.jar\"]\n-EXPOSE 8080"
+  },
+  {
+    "sha": "e4944c90a2209bd44ecb97bcbbdf22d5afdd7e62",
+    "filename": "Jenkinsfile",
+    "status": "added",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/checkmarx-ltd/cx-flow/blob/aef3429607a519d3f57eebef0f130269d8b4b579/Jenkinsfile",
+    "raw_url": "https://github.com/checkmarx-ltd/cx-flow/raw/aef3429607a519d3f57eebef0f130269d8b4b579/Jenkinsfile",
+    "contents_url": "https://api.github.com/repos/checkmarx-ltd/cx-flow/contents/Jenkinsfile?ref=aef3429607a519d3f57eebef0f130269d8b4b579",
+    "patch": "@@ -0,0 +1,2 @@\n+library 'microservicePipeline' _\n+microservicePipeline(serviceNames: [\"CxFlow\"], runE2E: false, runUIE2E: false)"
+  }
+]

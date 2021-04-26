@@ -1,0 +1,121 @@
+[
+  {
+    "sha": "1b4395ffc2fd40f32d4b75715fa41ac9e0775286",
+    "filename": ".github/workflows/build.yml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/.github/workflows/build.yml",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/.github/workflows/build.yml",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/.github/workflows/build.yml?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace",
+    "patch": "@@ -59,7 +59,7 @@ jobs:\n           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}\n \n       - name: \"Deploy GH-Pages\"\n-        # if: github.ref == 'refs/heads/master' && github.event_name == 'push'\n+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'\n         uses: JamesIves/github-pages-deploy-action@3.7.1\n         with:\n           github_token: ${{ secrets.github_token }}"
+  },
+  {
+    "sha": "59d3cb095382057c67e537001315f9df6acb49a5",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/.gitignore",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/.gitignore",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/.gitignore?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace",
+    "patch": "@@ -31,4 +31,3 @@ package-lock.json\n \n .lighthouseci/\n \n-audit/"
+  },
+  {
+    "sha": "37c03126664d5b21cc1bd21d33091ab8f36245a3",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/README.md",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/README.md",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/README.md?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace",
+    "patch": "@@ -1,10 +1,10 @@\n [![Build Status](https://github.com/TAMULib/CAP/workflows/Build/badge.svg)](https://github.com/TAMULib/CAP/actions?query=workflow%3ABuild)\n [![Coverage Status](https://coveralls.io/repos/github/TAMULib/CAP/badge.svg)](https://coveralls.io/github/TAMULib/CAP)\n-<!--- [![Performance](https://tamulib.github.io/CAP/audit/assets/performance.svg)](https://tamulib.github.io/CAP/audit/#performance)\n+[![Performance](https://tamulib.github.io/CAP/audit/assets/performance.svg)](https://tamulib.github.io/CAP/audit/#performance)\n [![Accessibility](https://tamulib.github.io/CAP/audit/assets/accessibility.svg)](https://tamulib.github.io/CAP/audit/#accessibility)\n [![Best Practices](https://tamulib.github.io/CAP/audit/assets/best-practices.svg)](https://tamulib.github.io/CAP/audit/#best-practices)\n [![SEO](https://tamulib.github.io/CAP/audit/assets/seo.svg)](https://tamulib.github.io/CAP/audit/#seo)\n-[![Progressive Web App](https://tamulib.github.io/CAP/audit/assets/pwa.svg)](https://tamulib.github.io/CAP/audit/#pwa) --->\n+[![Progressive Web App](https://tamulib.github.io/CAP/audit/assets/pwa.svg)](https://tamulib.github.io/CAP/audit/#pwa)\n \n # CAP\n "
+  },
+  {
+    "sha": "918d0d733d9e68ad037c82847f89fc368605fdfd",
+    "filename": "scripts/build-cap-lighthouse-badges.js",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 9,
+    "changes": 30,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/scripts/build-cap-lighthouse-badges.js",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/scripts/build-cap-lighthouse-badges.js",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/scripts/build-cap-lighthouse-badges.js?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace",
+    "patch": "@@ -43,7 +43,7 @@ const createBadges = resultList => {\n   });\n }\n \n-const logSoreList = scoreList => {\n+const logScoreList = scoreList => {\n   console.log('Finished generating report');\n   console.log('Results:');\n   scoreList.forEach(s => {\n@@ -52,15 +52,27 @@ const logSoreList = scoreList => {\n }\n \n const createGhPagesDir = () => {\n+  const targetPath = 'target';\n+  const ghPagesPath = `src/main/resources/gh-pages`;\n+  const targetGhPagesPath = `${targetPath}/gh-pages`;\n   fs.ensureDir(ghPagesPath);\n-  const targetPath = 'target/';\n   fs.ensureDir(targetPath);\n-  fs.ensureDir(`${lighthousePath}`);\n-  fs.copy(`./${ghPagesPath}/index.html`, `${targetPath}/gh-pages/index.html`);\n-  fs.copy(`./${lighthousePath}/`, `${targetPath}/gh-pages/audit/`);\n-  fs.copy(`./${lighthousePath}/assets/`, `${targetPath}/gh-pages/audit/assets/`);\n-  fs.copy(`${targetPath}/generated-docs/`, `${targetPath}/gh-pages/api-docs/`);\n-}\n+\n+  fs.copy(`${targetPath}/generated-docs/`, `${targetGhPagesPath}/api-docs/`, err => {\n+    if (err) return console.error(' \\n Unable to copy generated-docs  to : ',`${targetGhPagesPath}/api-docs/` , '\\n', err);\n+    console.log(`Copied generated-docs to ${targetGhPagesPath}/api-docs/ !`);\n+  });\n+\n+  fs.copy(`./${ghPagesPath}/index.html`, `${targetGhPagesPath}/index.html`, err => {\n+    if (err) return console.error(' \\n Unable to copy src index file  to : ',`${targetGhPagesPath}/index.html` , '\\n', err);\n+    console.log(`Copied index file to ${targetGhPagesPath}/index.html !`);\n+  });\n+\n+  fs.copy(`./${ghPagesPath}/audit/`, `${targetGhPagesPath}/audit/`, err => {\n+    if (err) return console.error(' \\n Unable to copy src audit  to : ',`${targetGhPagesPath}/audit/` , '\\n', err);\n+    console.log(`Copied audit to ${targetGhPagesPath}/audit/ !`);\n+  });\n+};\n \n if(fs.existsSync(lighthouseCiPath)) {\n   fs.ensureDir(`${lighthousePath}`);\n@@ -71,7 +83,7 @@ if(fs.existsSync(lighthouseCiPath)) {\n   const scoreList = createScoreList(jsonReport);\n   createReport(htmlReportPath);\n   createBadges(scoreList);\n-  logSoreList(scoreList);\n+  logScoreList(scoreList);\n   createGhPagesDir();\n \n } else {"
+  },
+  {
+    "sha": "df9c08c7e7f9f6542c20582227117d9589548a6b",
+    "filename": "src/main/resources/gh-pages/audit/assets/accessibility.svg",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/accessibility.svg",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/accessibility.svg",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/src/main/resources/gh-pages/audit/assets/accessibility.svg?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace",
+    "patch": "@@ -0,0 +1 @@\n+<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"100\" height=\"20\" role=\"img\" aria-label=\"Accessibility: 96\"><title>Accessibility: 96</title><linearGradient id=\"s\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient><clipPath id=\"r\"><rect width=\"100\" height=\"20\" rx=\"3\" fill=\"#fff\"/></clipPath><g clip-path=\"url(#r)\"><rect width=\"77\" height=\"20\" fill=\"#555\"/><rect x=\"77\" width=\"23\" height=\"20\" fill=\"#4c1\"/><rect width=\"100\" height=\"20\" fill=\"url(#s)\"/></g><g fill=\"#fff\" text-anchor=\"middle\" font-family=\"Verdana,Geneva,DejaVu Sans,sans-serif\" text-rendering=\"geometricPrecision\" font-size=\"110\"><text aria-hidden=\"true\" x=\"395\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"670\">Accessibility</text><text x=\"395\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"670\">Accessibility</text><text aria-hidden=\"true\" x=\"875\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"130\">96</text><text x=\"875\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"130\">96</text></g></svg>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "251ab4d03105dfdbbdcf3baefadb022192a031ee",
+    "filename": "src/main/resources/gh-pages/audit/assets/best-practices.svg",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/best-practices.svg",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/best-practices.svg",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/src/main/resources/gh-pages/audit/assets/best-practices.svg?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace",
+    "patch": "@@ -0,0 +1 @@\n+<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"110\" height=\"20\" role=\"img\" aria-label=\"Best Practices: 79\"><title>Best Practices: 79</title><linearGradient id=\"s\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient><clipPath id=\"r\"><rect width=\"110\" height=\"20\" rx=\"3\" fill=\"#fff\"/></clipPath><g clip-path=\"url(#r)\"><rect width=\"87\" height=\"20\" fill=\"#555\"/><rect x=\"87\" width=\"23\" height=\"20\" fill=\"#fe7d37\"/><rect width=\"110\" height=\"20\" fill=\"url(#s)\"/></g><g fill=\"#fff\" text-anchor=\"middle\" font-family=\"Verdana,Geneva,DejaVu Sans,sans-serif\" text-rendering=\"geometricPrecision\" font-size=\"110\"><text aria-hidden=\"true\" x=\"445\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"770\">Best Practices</text><text x=\"445\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"770\">Best Practices</text><text aria-hidden=\"true\" x=\"975\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"130\">79</text><text x=\"975\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"130\">79</text></g></svg>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "c2c7c9ec6f4fed3693fdac5300cd97affc58f89f",
+    "filename": "src/main/resources/gh-pages/audit/assets/performance.svg",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/performance.svg",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/performance.svg",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/src/main/resources/gh-pages/audit/assets/performance.svg?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace",
+    "patch": "@@ -0,0 +1 @@\n+<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"102\" height=\"20\" role=\"img\" aria-label=\"Performance: 34\"><title>Performance: 34</title><linearGradient id=\"s\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient><clipPath id=\"r\"><rect width=\"102\" height=\"20\" rx=\"3\" fill=\"#fff\"/></clipPath><g clip-path=\"url(#r)\"><rect width=\"79\" height=\"20\" fill=\"#555\"/><rect x=\"79\" width=\"23\" height=\"20\" fill=\"#e05d44\"/><rect width=\"102\" height=\"20\" fill=\"url(#s)\"/></g><g fill=\"#fff\" text-anchor=\"middle\" font-family=\"Verdana,Geneva,DejaVu Sans,sans-serif\" text-rendering=\"geometricPrecision\" font-size=\"110\"><text aria-hidden=\"true\" x=\"405\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"690\">Performance</text><text x=\"405\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"690\">Performance</text><text aria-hidden=\"true\" x=\"895\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"130\">34</text><text x=\"895\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"130\">34</text></g></svg>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "8661e8556dac21fb92983aa9535026d9686f7af9",
+    "filename": "src/main/resources/gh-pages/audit/assets/pwa.svg",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/pwa.svg",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/pwa.svg",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/src/main/resources/gh-pages/audit/assets/pwa.svg?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace",
+    "patch": "@@ -0,0 +1 @@\n+<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"150\" height=\"20\" role=\"img\" aria-label=\"Progressive Web App: 21\"><title>Progressive Web App: 21</title><linearGradient id=\"s\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient><clipPath id=\"r\"><rect width=\"150\" height=\"20\" rx=\"3\" fill=\"#fff\"/></clipPath><g clip-path=\"url(#r)\"><rect width=\"127\" height=\"20\" fill=\"#555\"/><rect x=\"127\" width=\"23\" height=\"20\" fill=\"#e05d44\"/><rect width=\"150\" height=\"20\" fill=\"url(#s)\"/></g><g fill=\"#fff\" text-anchor=\"middle\" font-family=\"Verdana,Geneva,DejaVu Sans,sans-serif\" text-rendering=\"geometricPrecision\" font-size=\"110\"><text aria-hidden=\"true\" x=\"645\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"1170\">Progressive Web App</text><text x=\"645\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"1170\">Progressive Web App</text><text aria-hidden=\"true\" x=\"1375\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"130\">21</text><text x=\"1375\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"130\">21</text></g></svg>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "6d1616d32eced7881e00dcba462389c9606ea1a2",
+    "filename": "src/main/resources/gh-pages/audit/assets/seo.svg",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/seo.svg",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/assets/seo.svg",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/src/main/resources/gh-pages/audit/assets/seo.svg?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace",
+    "patch": "@@ -0,0 +1 @@\n+<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"56\" height=\"20\" role=\"img\" aria-label=\"SEO: 80\"><title>SEO: 80</title><linearGradient id=\"s\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient><clipPath id=\"r\"><rect width=\"56\" height=\"20\" rx=\"3\" fill=\"#fff\"/></clipPath><g clip-path=\"url(#r)\"><rect width=\"33\" height=\"20\" fill=\"#555\"/><rect x=\"33\" width=\"23\" height=\"20\" fill=\"#fe7d37\"/><rect width=\"56\" height=\"20\" fill=\"url(#s)\"/></g><g fill=\"#fff\" text-anchor=\"middle\" font-family=\"Verdana,Geneva,DejaVu Sans,sans-serif\" text-rendering=\"geometricPrecision\" font-size=\"110\"><text aria-hidden=\"true\" x=\"175\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"230\">SEO</text><text x=\"175\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"230\">SEO</text><text aria-hidden=\"true\" x=\"435\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"130\">80</text><text x=\"435\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"130\">80</text></g></svg>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "0a23e5ce7e3daf71756f076a43a690c610440bd5",
+    "filename": "src/main/resources/gh-pages/audit/index.html",
+    "status": "added",
+    "additions": 7572,
+    "deletions": 0,
+    "changes": 7572,
+    "blob_url": "https://github.com/TAMULib/CAP/blob/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/index.html",
+    "raw_url": "https://github.com/TAMULib/CAP/raw/bb58e3dbd6eb29e69f2d9e009e6d65230d0caace/src/main/resources/gh-pages/audit/index.html",
+    "contents_url": "https://api.github.com/repos/TAMULib/CAP/contents/src/main/resources/gh-pages/audit/index.html?ref=bb58e3dbd6eb29e69f2d9e009e6d65230d0caace"
+  }
+]

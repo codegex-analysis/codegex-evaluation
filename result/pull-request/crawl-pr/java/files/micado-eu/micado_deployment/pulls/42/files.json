@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+    "filename": "data_site_migrant/.gitignore",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/micado-eu/micado_deployment/blob/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/data_site_migrant/.gitignore",
+    "raw_url": "https://github.com/micado-eu/micado_deployment/raw/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/data_site_migrant/.gitignore",
+    "contents_url": "https://api.github.com/repos/micado-eu/micado_deployment/contents/data_site_migrant/.gitignore?ref=6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc",
+    "patch": "@@ -0,0 +1 @@\n+"
+  },
+  {
+    "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+    "filename": "data_site_ngo/.gitignore",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/micado-eu/micado_deployment/blob/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/data_site_ngo/.gitignore",
+    "raw_url": "https://github.com/micado-eu/micado_deployment/raw/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/data_site_ngo/.gitignore",
+    "contents_url": "https://api.github.com/repos/micado-eu/micado_deployment/contents/data_site_ngo/.gitignore?ref=6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc",
+    "patch": "@@ -0,0 +1 @@\n+"
+  },
+  {
+    "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+    "filename": "data_site_pa/.gitignore",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/micado-eu/micado_deployment/blob/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/data_site_pa/.gitignore",
+    "raw_url": "https://github.com/micado-eu/micado_deployment/raw/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/data_site_pa/.gitignore",
+    "contents_url": "https://api.github.com/repos/micado-eu/micado_deployment/contents/data_site_pa/.gitignore?ref=6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc",
+    "patch": "@@ -0,0 +1 @@\n+"
+  },
+  {
+    "sha": "0bdc000c77821268040529c2f1a331a39111d53a",
+    "filename": "docker-compose-prod.yaml",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/micado-eu/micado_deployment/blob/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/docker-compose-prod.yaml",
+    "raw_url": "https://github.com/micado-eu/micado_deployment/raw/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/docker-compose-prod.yaml",
+    "contents_url": "https://api.github.com/repos/micado-eu/micado_deployment/contents/docker-compose-prod.yaml?ref=6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc",
+    "patch": "@@ -655,10 +655,22 @@ volumes:\n       o: bind\n   data_site_migrant:\n     driver: local\n+    driver_opts:\n+      type: none\n+      device: $PWD/data_site_migrant\n+      o: bind\n   data_site_pa:\n     driver: local\n+    driver_opts:\n+      type: none\n+      device: $PWD/data_site_pa\n+      o: bind\n   data_site_ngo:\n     driver: local\n+    driver_opts:\n+      type: none\n+      device: $PWD/data_site_ngo\n+      o: bind\n   mongo_data:\n     driver: local\n     driver_opts:"
+  },
+  {
+    "sha": "47634d1ca62706d03a5012c7e7b1c001e74aad5e",
+    "filename": "install_micado.sh",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/micado-eu/micado_deployment/blob/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/install_micado.sh",
+    "raw_url": "https://github.com/micado-eu/micado_deployment/raw/6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc/install_micado.sh",
+    "contents_url": "https://api.github.com/repos/micado-eu/micado_deployment/contents/install_micado.sh?ref=6cc4916f65dc27092ddbdd96d4a1f5b9a07d45bc",
+    "patch": "@@ -211,6 +211,11 @@ then\n         (set -a; source prod.env; set +a; docker-compose -f docker-compose-prod.yaml up -d data_migrants)\n         (set -a; source prod.env; set +a; docker-compose -f docker-compose-prod.yaml up -d data_pa)\n         (set -a; source prod.env; set +a; docker-compose -f docker-compose-prod.yaml up -d data_ngo)\n+        sleep 5\n+        echo -e \"\\033[0;36m\\nAdding custom css links\\e[0m \"\n+        sed -i 's/<\\/head>/<link rel=\"stylesheet\" type=\"text\\/css\" href=\"\\/css\\/custom.css\"><\\/head>/' data_site_pa/index.html\n+        sed -i 's/<\\/head>/<link rel=\"stylesheet\" type=\"text\\/css\" href=\"\\/css\\/custom.css\"><\\/head>/' data_site_ngo/index.html \n+        sed -i 's/<\\/head>/<link rel=\"stylesheet\" type=\"text\\/css\" href=\"\\/css\\/custom.css\"><\\/head>/' data_site_migrant/index.html \n         echo -e \"\\033[0;36m\\nStarted MICADO applications\\e[0m \"\n \n     fi"
+  }
+]

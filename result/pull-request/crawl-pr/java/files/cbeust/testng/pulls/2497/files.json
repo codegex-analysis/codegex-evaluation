@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "d41d769addd1e13bd8f5cee797d389ec63ef1ade",
+    "filename": "CHANGES.txt",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/cbeust/testng/blob/0a9676b6f07ba274c7bfaad57d1dfc118e78f571/CHANGES.txt",
+    "raw_url": "https://github.com/cbeust/testng/raw/0a9676b6f07ba274c7bfaad57d1dfc118e78f571/CHANGES.txt",
+    "contents_url": "https://api.github.com/repos/cbeust/testng/contents/CHANGES.txt?ref=0a9676b6f07ba274c7bfaad57d1dfc118e78f571",
+    "patch": "@@ -2,6 +2,7 @@ Current\n Fixes: GITHUB-2493: Avoid NPE from TextReporter execution when a dataprovider method provides null (baflQA)\n Fixed: GITHUB-2483: Asymmetric not equals (cdalexndr)\n Fixed: GITHUB-2486: assertSame/assertNotSame broken after GITHUB-2296 (Vitalii Diravka)\n+Fixed: GITHUB-2490: assertNotEquals returns fast when argument is null, not calling equals(Object) (Anindya Roy)\n \n 7.4.0\n New  : GITHUB-2459: Support configurable start time - emailable report (Barry Evans)"
+  },
+  {
+    "sha": "d10298205c47e769c14c4ab19fed525cda0072ef",
+    "filename": "src/main/java/org/testng/Assert.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 5,
+    "changes": 10,
+    "blob_url": "https://github.com/cbeust/testng/blob/0a9676b6f07ba274c7bfaad57d1dfc118e78f571/src/main/java/org/testng/Assert.java",
+    "raw_url": "https://github.com/cbeust/testng/raw/0a9676b6f07ba274c7bfaad57d1dfc118e78f571/src/main/java/org/testng/Assert.java",
+    "contents_url": "https://api.github.com/repos/cbeust/testng/contents/src/main/java/org/testng/Assert.java?ref=0a9676b6f07ba274c7bfaad57d1dfc118e78f571",
+    "patch": "@@ -152,13 +152,13 @@ private static boolean areNotEqualImpl(Object actual, Object expected) {\n     if ((expected == null) && (actual == null)) {\n       return false;\n     }\n-    if (expected == null ^ actual == null) {\n-      return true;\n+    if (expected == null) {\n+      return actual.equals(actual);\n     }\n-    if (!expected.equals(actual) && !actual.equals(expected)) {\n-      return true;\n+    if (actual == null) {\n+      return expected.equals(expected);\n     }\n-    return false;\n+    return !expected.equals(actual);\n   }\n \n   private static boolean areEqualImpl(Object actual, Object expected) {"
+  },
+  {
+    "sha": "964555697b8f9dd6ec98d9df38c5806406d7bb69",
+    "filename": "src/test/java/org/testng/AssertTest.java",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/cbeust/testng/blob/0a9676b6f07ba274c7bfaad57d1dfc118e78f571/src/test/java/org/testng/AssertTest.java",
+    "raw_url": "https://github.com/cbeust/testng/raw/0a9676b6f07ba274c7bfaad57d1dfc118e78f571/src/test/java/org/testng/AssertTest.java",
+    "contents_url": "https://api.github.com/repos/cbeust/testng/contents/src/test/java/org/testng/AssertTest.java?ref=0a9676b6f07ba274c7bfaad57d1dfc118e78f571",
+    "patch": "@@ -381,6 +381,31 @@ public void testAssertSame() {\n     Assert.assertSame(object2, object);\r\n   }\r\n \r\n+  @Test(description = \"GITHUB-2490\")\r\n+  public void testAssertNotEqualsWithActualNull() {\r\n+    Assert.assertNotEquals(null, new BrokenEquals());\r\n+  }\r\n+\r\n+  @Test(description = \"GITHUB-2490\")\r\n+  public void testAssertNotEqualsWithExpectedNull() {\r\n+    Assert.assertNotEquals(new BrokenEquals(), null);\r\n+  }\r\n+\r\n+  @Test(description = \"GITHUB-2490\")\r\n+  public void testAssertNotEqualsWithExpectedNullAndNewObject() {\r\n+    Assert.assertNotEquals(new Object(), null);\r\n+  }\r\n+\r\n+  @Test\r\n+  public void testAssertNotEqualsWithActualNullExceptedEmptyString() {\r\n+    Assert.assertNotEquals(null, \"\");\r\n+  }\r\n+\r\n+  @Test\r\n+  public void testAssertNotEqualsWithActualEmptyStringExceptedNull() {\r\n+    Assert.assertNotEquals(\"\", null);\r\n+  }\r\n+\r\n   class Contrived {\r\n \r\n     int integer;\r\n@@ -465,4 +490,11 @@ public int hashCode() {\n       return Objects.hashCode(value);\r\n     }\r\n   }\r\n+\r\n+  static class BrokenEquals {\r\n+    @Override\r\n+    public boolean equals(Object o) {\r\n+      return true; // broken implementation\r\n+    }\r\n+  }\r\n }\r"
+  }
+]

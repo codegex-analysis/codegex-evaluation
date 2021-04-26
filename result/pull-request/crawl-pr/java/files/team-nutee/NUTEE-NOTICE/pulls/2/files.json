@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "6116174517134f2f94ed114b007aef46e5f41b49",
+    "filename": "src/main/java/kr/nutee/crawler/Controller/NoticeController.java",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/team-nutee/NUTEE-NOTICE/blob/068bd87ff277f1032be60c68bdd3b39949cd547e/src/main/java/kr/nutee/crawler/Controller/NoticeController.java",
+    "raw_url": "https://github.com/team-nutee/NUTEE-NOTICE/raw/068bd87ff277f1032be60c68bdd3b39949cd547e/src/main/java/kr/nutee/crawler/Controller/NoticeController.java",
+    "contents_url": "https://api.github.com/repos/team-nutee/NUTEE-NOTICE/contents/src/main/java/kr/nutee/crawler/Controller/NoticeController.java?ref=068bd87ff277f1032be60c68bdd3b39949cd547e",
+    "patch": "@@ -0,0 +1,30 @@\n+package kr.nutee.crawler.Controller;\n+\n+import kr.nutee.crawler.Service.NoticeService;\n+import kr.nutee.crawler.domain.entity.Notice;\n+import lombok.RequiredArgsConstructor;\n+import lombok.extern.slf4j.Slf4j;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.web.bind.annotation.*;\n+\n+import java.util.List;\n+\n+\n+@RestController\n+@RequiredArgsConstructor\n+@RequestMapping(value = \"/notice\")\n+@Slf4j\n+public class NoticeController {\n+    @Autowired\n+    NoticeService noticeService;\n+\n+    @GetMapping(path = \"/all\")\n+    public List<Notice> allNotice() {\n+        return noticeService.searchAllNotice();\n+    }\n+\n+    @GetMapping(path = \"/{category}\")\n+    public List<Notice> categoryNotice(@PathVariable(\"category\") String category) {\n+        return noticeService.searchByCategory(category);\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "8baab189eceefc6b89dd5f016836136aa1970d0c",
+    "filename": "src/main/java/kr/nutee/crawler/Service/NoticeService.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 3,
+    "changes": 14,
+    "blob_url": "https://github.com/team-nutee/NUTEE-NOTICE/blob/068bd87ff277f1032be60c68bdd3b39949cd547e/src/main/java/kr/nutee/crawler/Service/NoticeService.java",
+    "raw_url": "https://github.com/team-nutee/NUTEE-NOTICE/raw/068bd87ff277f1032be60c68bdd3b39949cd547e/src/main/java/kr/nutee/crawler/Service/NoticeService.java",
+    "contents_url": "https://api.github.com/repos/team-nutee/NUTEE-NOTICE/contents/src/main/java/kr/nutee/crawler/Service/NoticeService.java?ref=068bd87ff277f1032be60c68bdd3b39949cd547e",
+    "patch": "@@ -1,15 +1,15 @@\n package kr.nutee.crawler.Service;\n \n import java.util.stream.Collectors;\n+\n+\n import kr.nutee.crawler.domain.entity.Notice;\n import kr.nutee.crawler.repository.NoticeRepository;\n import lombok.RequiredArgsConstructor;\n import lombok.extern.slf4j.Slf4j;\n import org.jsoup.Jsoup;\n import org.jsoup.nodes.Document;\n-import org.springframework.stereotype.Component;\n import org.springframework.stereotype.Service;\n-\n import java.io.IOException;\n import java.util.*;\n \n@@ -58,4 +58,12 @@ private void addNewNotice(List<Notice> newNotices) {\n             noticeRepository.save(newNotice);\n         }\n     }\n-}\n+\n+    public List<Notice> searchAllNotice() {\n+        return noticeRepository.findAll();\n+    }\n+\n+    public List<Notice> searchByCategory(String category) {\n+        return noticeRepository.findAllByCategory(category);\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "fafbae1a07eb67b8c5d2411bd267d6dfe35be18e",
+    "filename": "src/main/java/kr/nutee/crawler/Service/SearchNotice.java",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/team-nutee/NUTEE-NOTICE/blob/068bd87ff277f1032be60c68bdd3b39949cd547e/src/main/java/kr/nutee/crawler/Service/SearchNotice.java",
+    "raw_url": "https://github.com/team-nutee/NUTEE-NOTICE/raw/068bd87ff277f1032be60c68bdd3b39949cd547e/src/main/java/kr/nutee/crawler/Service/SearchNotice.java",
+    "contents_url": "https://api.github.com/repos/team-nutee/NUTEE-NOTICE/contents/src/main/java/kr/nutee/crawler/Service/SearchNotice.java?ref=068bd87ff277f1032be60c68bdd3b39949cd547e",
+    "patch": "@@ -0,0 +1,39 @@\n+package kr.nutee.crawler.Service;\n+\n+import kr.nutee.crawler.domain.entity.Notice;\n+import kr.nutee.crawler.repository.NoticeRepository;\n+import lombok.Getter;\n+import lombok.RequiredArgsConstructor;\n+import lombok.Setter;\n+import lombok.extern.slf4j.Slf4j;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.stereotype.Service;\n+import org.springframework.web.bind.annotation.PathVariable;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+\n+@Service\n+@RequiredArgsConstructor\n+@Slf4j\n+public class SearchNotice {\n+    @Autowired\n+    NoticeRepository noticeRepository;\n+\n+\n+    public List<Notice> searchAllNotice() {\n+        return noticeRepository.findAll();\n+    }\n+\n+    public List<Notice> searchByCategory(String category) {\n+        int Table_Size = (int) noticeRepository.count();\n+        List<Notice> list = new ArrayList<>();\n+        for(int i = 0 ; i < Table_Size ; i++) {\n+            if(noticeRepository.findAll().get(i).getCategory().equals(category)) {\n+                list.add(noticeRepository.findAll().get(i));\n+            }\n+        }\n+        return list;\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "46c2f40f509618d5ae3f26b6b5b846c2d18f60b4",
+    "filename": "src/main/java/kr/nutee/crawler/repository/NoticeRepository.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/team-nutee/NUTEE-NOTICE/blob/068bd87ff277f1032be60c68bdd3b39949cd547e/src/main/java/kr/nutee/crawler/repository/NoticeRepository.java",
+    "raw_url": "https://github.com/team-nutee/NUTEE-NOTICE/raw/068bd87ff277f1032be60c68bdd3b39949cd547e/src/main/java/kr/nutee/crawler/repository/NoticeRepository.java",
+    "contents_url": "https://api.github.com/repos/team-nutee/NUTEE-NOTICE/contents/src/main/java/kr/nutee/crawler/repository/NoticeRepository.java?ref=068bd87ff277f1032be60c68bdd3b39949cd547e",
+    "patch": "@@ -2,7 +2,9 @@\n \n import kr.nutee.crawler.domain.entity.Notice;\n import org.springframework.data.jpa.repository.JpaRepository;\n+import java.util.List;\n \n public interface NoticeRepository extends JpaRepository<Notice,String> {\n     Notice findNoticeByHrefAndCategory(String href, String category);\n+    List<Notice> findAllByCategory(String category);\n }\n\\ No newline at end of file"
+  }
+]

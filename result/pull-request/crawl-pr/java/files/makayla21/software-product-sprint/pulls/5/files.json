@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "b597f2ff58b2b920da2ad1a10dc7f3d06e45ef17",
+    "filename": "portfolio/pom.xml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/makayla21/software-product-sprint/blob/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/pom.xml",
+    "raw_url": "https://github.com/makayla21/software-product-sprint/raw/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/pom.xml",
+    "contents_url": "https://api.github.com/repos/makayla21/software-product-sprint/contents/portfolio/pom.xml?ref=46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7",
+    "patch": "@@ -12,7 +12,7 @@\n     <maven.compiler.source>11</maven.compiler.source>\n     <maven.compiler.target>11</maven.compiler.target>\n     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n-    <jetty.version>11.0.0</jetty.version>\n+    <jetty.version>9.4.31.v20200723</jetty.version>\n \n     <!-- Project-specific properties -->\n     <exec.mainClass>com.google.sps.ServerMain</exec.mainClass>\n@@ -27,6 +27,13 @@\n       <version>4.0.1</version>\n     </dependency>\n \n+    <!-- Gson -->\n+    <dependency>\n+        <groupId>com.google.code.gson</groupId>\n+        <artifactId>gson</artifactId>\n+        <version>2.8.6</version>\n+    </dependency>\n+\n     <!-- Jetty -->\n     <dependency>\n       <groupId>org.eclipse.jetty</groupId>"
+  },
+  {
+    "sha": "07d9b92ba2d84e9a5d61b332ae727f5e7152441d",
+    "filename": "portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/makayla21/software-product-sprint/blob/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java",
+    "raw_url": "https://github.com/makayla21/software-product-sprint/raw/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java",
+    "contents_url": "https://api.github.com/repos/makayla21/software-product-sprint/contents/portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java?ref=46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7",
+    "patch": "@@ -0,0 +1,24 @@\n+package com.google.sps.servlets;\n+\n+import java.io.IOException;\n+import javax.servlet.annotation.WebServlet;\n+import javax.servlet.http.HttpServlet;\n+import javax.servlet.http.HttpServletRequest;\n+import javax.servlet.http.HttpServletResponse;\n+\n+@WebServlet(\"/form-handler\")\n+public class FormHandlerServlet extends HttpServlet {\n+\n+  @Override\n+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {\n+\n+    // Get the value entered in the form.\n+    String textValue = request.getParameter(\"text-input\");\n+\n+    // Print the value so you can see it in the server logs.\n+    System.out.println(\"You submitted: \" + textValue);\n+\n+    // Write the value to the response so the user can see it.\n+    response.getWriter().println(\"You submitted: \" + textValue);\n+  }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "fe45a3d96ec0e239dd79e3d996c765d0bbd2810c",
+    "filename": "portfolio/src/main/java/com/google/sps/servlets/HelloWorldServlet.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 1,
+    "changes": 16,
+    "blob_url": "https://github.com/makayla21/software-product-sprint/blob/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/src/main/java/com/google/sps/servlets/HelloWorldServlet.java",
+    "raw_url": "https://github.com/makayla21/software-product-sprint/raw/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/src/main/java/com/google/sps/servlets/HelloWorldServlet.java",
+    "contents_url": "https://api.github.com/repos/makayla21/software-product-sprint/contents/portfolio/src/main/java/com/google/sps/servlets/HelloWorldServlet.java?ref=46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7",
+    "patch": "@@ -1,18 +1,32 @@\n package com.google.sps.servlets;\n \n import java.io.IOException;\n+import java.util.ArrayList;\n+import java.util.Arrays;\n+\n import javax.servlet.annotation.WebServlet;\n import javax.servlet.http.HttpServlet;\n import javax.servlet.http.HttpServletRequest;\n import javax.servlet.http.HttpServletResponse;\n \n+import com.google.gson.Gson;\n+\n /** Handles requests sent to the /hello URL. Try running a server and navigating to /hello! */\n @WebServlet(\"/hello\")\n public class HelloWorldServlet extends HttpServlet {\n+    ArrayList<String> messageList = new ArrayList<>(Arrays.asList(\"I dislike chocolate \", \"I enjoy serial killer documentaries \", \"I have a dog named Magic \"));\n+    String json = convertToJsonUsingGson(messageList);\n+\n \n   @Override\n   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {\n     response.setContentType(\"text/html;\");\n-    response.getWriter().println(\"<h1>Hello world!</h1>\");\n+    response.getWriter().println(json);\n   }\n+\n+    private String convertToJsonUsingGson(ArrayList<String> messageList2) {\n+        Gson gson = new Gson();\n+        String json = gson.toJson(messageList2);\n+        return json;\n+    }\n }"
+  },
+  {
+    "sha": "a52ea9dc2b3e6da675abbec0863d4a1fc6cf4778",
+    "filename": "portfolio/src/main/webapp/index.html",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 1,
+    "changes": 14,
+    "blob_url": "https://github.com/makayla21/software-product-sprint/blob/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/src/main/webapp/index.html",
+    "raw_url": "https://github.com/makayla21/software-product-sprint/raw/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/src/main/webapp/index.html",
+    "contents_url": "https://api.github.com/repos/makayla21/software-product-sprint/contents/portfolio/src/main/webapp/index.html?ref=46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7",
+    "patch": "@@ -5,6 +5,7 @@\n     <title>My Portfolio</title>\n     <link rel=\"stylesheet\" href=\"style.css\">\n     <script src=\"script.js\"></script>\n+    <script src=\"newScript.js\"></script>\n   </head>\n   <body style=\"background-color:lightsteelblue;\">\n     <div id=\"content\">\n@@ -23,10 +24,21 @@ <h1>Makayla Price's Portfolio</h1>\n       <p>Click <a href=\"https://www.linkedin.com/in/makayla-price-a3b9381b6\">here</a> to view my LinkedIn Profile.</p>\n       <p>Click <a href=\"https://github.com/makayla21\">here</a> to view my GitHub Profile.</p>\n       <br>\n+      <p>Click this button to see the response made by the server.</p>\n+      <button onclick=\"showResponse();\">Get Response</button>\n+      <p id=\"response-container\"></p>\n       <p>Click <a href=\"/hello\">here</a> to see content created by server code.</p>\n       <p>Click here to get a random message😄:</p> \n       <button onclick=\"addRandomGreeting()\">Hello</button>\n-      <div id=\"greeting-container\"></div>  \n+      <div id=\"greeting-container\"></div> \n+      \n+      <form action = \"/form-handler\" method = \"POST\">\n+        \n+          <p>Enter email address for further contact:</p>\n+          <textarea name = \"text-input\"></textarea>\n+          <br/>\n+          <input type = \"submit\" />\n+      </form>\n     </div>\n   </body>\n </html>"
+  },
+  {
+    "sha": "60dd8fb3547c7c3c75c642cdabc47097e35b5a59",
+    "filename": "portfolio/src/main/webapp/newScript.js",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/makayla21/software-product-sprint/blob/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/src/main/webapp/newScript.js",
+    "raw_url": "https://github.com/makayla21/software-product-sprint/raw/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/portfolio/src/main/webapp/newScript.js",
+    "contents_url": "https://api.github.com/repos/makayla21/software-product-sprint/contents/portfolio/src/main/webapp/newScript.js?ref=46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7",
+    "patch": "@@ -0,0 +1,11 @@\n+/**Fethces the response from the server and adds it to the page */\n+async function showResponse() {\n+    const responseFromServer = await fetch('/hello');\n+    const myObject = await responseFromServer.json();\n+\n+    const message = myObject[Math.floor(Math.random() * myObject.length)]\n+    const responseContainer = document.getElementById('response-container');\n+    responseContainer.innerText = message;\n+\n+\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "6f29fad7aeec58055cb453b0f91f93d267ca787a",
+    "filename": "walkthroughs/week-2-server/examples/page-view-counter/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/makayla21/software-product-sprint/blob/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/walkthroughs/week-2-server/examples/page-view-counter/pom.xml",
+    "raw_url": "https://github.com/makayla21/software-product-sprint/raw/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/walkthroughs/week-2-server/examples/page-view-counter/pom.xml",
+    "contents_url": "https://api.github.com/repos/makayla21/software-product-sprint/contents/walkthroughs/week-2-server/examples/page-view-counter/pom.xml?ref=46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7",
+    "patch": "@@ -12,7 +12,7 @@\n     <maven.compiler.source>11</maven.compiler.source>\n     <maven.compiler.target>11</maven.compiler.target>\n     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n-    <jetty.version>11.0.0</jetty.version>\n+    <jetty.version>9.4.31.v20200723</jetty.version>\n \n     <!-- Project-specific properties -->\n     <exec.mainClass>com.google.sps.ServerMain</exec.mainClass>"
+  },
+  {
+    "sha": "9810a621e8c73cc036d095185673ad5bd954f588",
+    "filename": "walkthroughs/week-2-server/examples/server-date/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/makayla21/software-product-sprint/blob/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/walkthroughs/week-2-server/examples/server-date/pom.xml",
+    "raw_url": "https://github.com/makayla21/software-product-sprint/raw/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/walkthroughs/week-2-server/examples/server-date/pom.xml",
+    "contents_url": "https://api.github.com/repos/makayla21/software-product-sprint/contents/walkthroughs/week-2-server/examples/server-date/pom.xml?ref=46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7",
+    "patch": "@@ -12,7 +12,7 @@\n     <maven.compiler.source>11</maven.compiler.source>\n     <maven.compiler.target>11</maven.compiler.target>\n     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n-    <jetty.version>11.0.0</jetty.version>\n+    <jetty.version>9.4.31.v20200723</jetty.version>\n \n     <!-- Project-specific properties -->\n     <exec.mainClass>com.google.sps.ServerMain</exec.mainClass>"
+  },
+  {
+    "sha": "ba97e25d3e2009d6619a918b45e69545099cc99e",
+    "filename": "walkthroughs/week-2-server/examples/server-stats/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/makayla21/software-product-sprint/blob/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/walkthroughs/week-2-server/examples/server-stats/pom.xml",
+    "raw_url": "https://github.com/makayla21/software-product-sprint/raw/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/walkthroughs/week-2-server/examples/server-stats/pom.xml",
+    "contents_url": "https://api.github.com/repos/makayla21/software-product-sprint/contents/walkthroughs/week-2-server/examples/server-stats/pom.xml?ref=46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7",
+    "patch": "@@ -12,7 +12,7 @@\n     <maven.compiler.source>11</maven.compiler.source>\n     <maven.compiler.target>11</maven.compiler.target>\n     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n-    <jetty.version>11.0.0</jetty.version>\n+    <jetty.version>9.4.31.v20200723</jetty.version>\n \n     <!-- Project-specific properties -->\n     <exec.mainClass>com.google.sps.ServerMain</exec.mainClass>"
+  },
+  {
+    "sha": "3c60a9fb8364fb8feaf8466f7b565857f76f1052",
+    "filename": "walkthroughs/week-2-server/examples/text-processor/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/makayla21/software-product-sprint/blob/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/walkthroughs/week-2-server/examples/text-processor/pom.xml",
+    "raw_url": "https://github.com/makayla21/software-product-sprint/raw/46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7/walkthroughs/week-2-server/examples/text-processor/pom.xml",
+    "contents_url": "https://api.github.com/repos/makayla21/software-product-sprint/contents/walkthroughs/week-2-server/examples/text-processor/pom.xml?ref=46bb8ad7214bbdfb0d26f4f751064cbab6bab5d7",
+    "patch": "@@ -12,7 +12,7 @@\n     <maven.compiler.source>11</maven.compiler.source>\n     <maven.compiler.target>11</maven.compiler.target>\n     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n-    <jetty.version>11.0.0</jetty.version>\n+    <jetty.version>9.4.31.v20200723</jetty.version>\n \n     <!-- Project-specific properties -->\n     <exec.mainClass>com.google.sps.ServerMain</exec.mainClass>"
+  }
+]

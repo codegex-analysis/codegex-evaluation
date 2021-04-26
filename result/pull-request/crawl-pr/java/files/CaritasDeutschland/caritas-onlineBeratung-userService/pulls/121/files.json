@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "228f03334f4e3414e55acc49b0d6aaac41d2268c",
+    "filename": "api/userservice.yaml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 17,
+    "changes": 19,
+    "blob_url": "https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/blob/219d8037eb9aeae403d47d7f6a36bda64ebb71db/api/userservice.yaml",
+    "raw_url": "https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/raw/219d8037eb9aeae403d47d7f6a36bda64ebb71db/api/userservice.yaml",
+    "contents_url": "https://api.github.com/repos/CaritasDeutschland/caritas-onlineBeratung-userService/contents/api/userservice.yaml?ref=219d8037eb9aeae403d47d7f6a36bda64ebb71db",
+    "patch": "@@ -21,14 +21,12 @@ paths:\n       responses:\n         201:\n           description: CREATED - user was created successfully\n-          content:\n-            'application/json':\n-              schema:\n-                $ref: '#/components/schemas/CreateUserResponseDTO'\n         400:\n           description: BAD REQUEST - invalid/incomplete request or body object\n         403:\n           description: FORBIDDEN - no/invalid CSRF token\n+        409:\n+          description: CONFLICT - invalid/unavailable username\n         500:\n           description: INTERNAL SERVER ERROR - server encountered unexpected condition\n       security:\n@@ -1072,19 +1070,6 @@ components:\n           type: string\n           example: 3\n \n-    CreateUserResponseDTO:\n-      type: object\n-      required:\n-        - usernameAvailable\n-        - emailAvailable\n-      properties:\n-        usernameAvailable:\n-          type: integer\n-          example: 0\n-        emailAvailable:\n-          type: integer\n-          example: 1\n-\n     ConsultantSessionListResponseDTO:\n       type: object\n       required:"
+  },
+  {
+    "sha": "b9e1b199af8b5edfd63d0a739b5c6d34e3edacb7",
+    "filename": "src/main/java/de/caritas/cob/userservice/api/controller/UserController.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 24,
+    "changes": 26,
+    "blob_url": "https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/blob/219d8037eb9aeae403d47d7f6a36bda64ebb71db/src/main/java/de/caritas/cob/userservice/api/controller/UserController.java",
+    "raw_url": "https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/raw/219d8037eb9aeae403d47d7f6a36bda64ebb71db/src/main/java/de/caritas/cob/userservice/api/controller/UserController.java",
+    "contents_url": "https://api.github.com/repos/CaritasDeutschland/caritas-onlineBeratung-userService/contents/src/main/java/de/caritas/cob/userservice/api/controller/UserController.java?ref=219d8037eb9aeae403d47d7f6a36bda64ebb71db",
+    "patch": "@@ -1,7 +1,5 @@\n package de.caritas.cob.userservice.api.controller;\n \n-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_AVAILABLE;\n-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;\n import static java.util.Objects.isNull;\n import static java.util.Objects.nonNull;\n import static org.apache.commons.collections.CollectionUtils.isNotEmpty;\n@@ -11,8 +9,6 @@\n import de.caritas.cob.userservice.api.container.SessionListQueryParameter;\n import de.caritas.cob.userservice.api.controller.validation.MinValue;\n import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;\n-import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;\n-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;\n import de.caritas.cob.userservice.api.facade.CreateChatFacade;\n import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;\n import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;\n@@ -35,7 +31,6 @@\n import de.caritas.cob.userservice.api.model.ConsultantSessionDTO;\n import de.caritas.cob.userservice.api.model.ConsultantSessionListResponseDTO;\n import de.caritas.cob.userservice.api.model.CreateChatResponseDTO;\n-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;\n import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;\n import de.caritas.cob.userservice.api.model.EnquiryMessageDTO;\n import de.caritas.cob.userservice.api.model.MasterKeyDTO;\n@@ -73,7 +68,6 @@\n import javax.validation.constraints.NotNull;\n import lombok.RequiredArgsConstructor;\n import org.apache.commons.collections.MapUtils;\n-import org.springframework.http.HttpHeaders;\n import org.springframework.http.HttpStatus;\n import org.springframework.http.ResponseEntity;\n import org.springframework.web.bind.annotation.PathVariable;\n@@ -127,29 +121,13 @@\n    * @return {@link ResponseEntity} with possible registration conflict information in header\n    */\n   @Override\n-  public ResponseEntity<CreateUserResponseDTO> registerUser(@Valid @RequestBody UserDTO user) {\n+  public ResponseEntity<Void> registerUser(@Valid @RequestBody UserDTO user) {\n     user.setNewUserAccount(true);\n-    try {\n-      createUserFacade.createUserAndInitializeAccount(user);\n-    } catch (CustomValidationHttpStatusException exception) {\n-      return new ResponseEntity<>(buildCreateUserResponseDTO(exception.getCustomHttpHeader()),\n-          HttpStatus.CONFLICT);\n-    }\n+    createUserFacade.createUserAndInitializeAccount(user);\n \n     return new ResponseEntity<>(HttpStatus.CREATED);\n   }\n \n-  private CreateUserResponseDTO buildCreateUserResponseDTO(HttpHeaders header) {\n-    List<String> reasonList = header.get(\"X-Reason\");\n-    if (isNull(reasonList)) {\n-      throw new InternalServerErrorException(String.format(\"No X-Reason Header defined for \"\n-          + \"header: %s\", header));\n-    }\n-    return new CreateUserResponseDTO()\n-          .usernameAvailable(reasonList.contains(USERNAME_NOT_AVAILABLE.toString()) ? 0 : 1)\n-          .emailAvailable(reasonList.contains(EMAIL_NOT_AVAILABLE.toString()) ? 0 : 1);\n-  }\n-\n   /**\n    * Creates a new session or chat-agency relation depending on the provided consulting type.\n    *"
+  },
+  {
+    "sha": "1064d6bd9069a8353fa0fbe59c76989244d8519b",
+    "filename": "src/main/java/de/caritas/cob/userservice/api/exception/httpresponses/customheader/CustomHttpHeader.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/blob/219d8037eb9aeae403d47d7f6a36bda64ebb71db/src/main/java/de/caritas/cob/userservice/api/exception/httpresponses/customheader/CustomHttpHeader.java",
+    "raw_url": "https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/raw/219d8037eb9aeae403d47d7f6a36bda64ebb71db/src/main/java/de/caritas/cob/userservice/api/exception/httpresponses/customheader/CustomHttpHeader.java",
+    "contents_url": "https://api.github.com/repos/CaritasDeutschland/caritas-onlineBeratung-userService/contents/src/main/java/de/caritas/cob/userservice/api/exception/httpresponses/customheader/CustomHttpHeader.java?ref=219d8037eb9aeae403d47d7f6a36bda64ebb71db",
+    "patch": "@@ -1,6 +1,5 @@\n package de.caritas.cob.userservice.api.exception.httpresponses.customheader;\n \n-import lombok.Getter;\n import lombok.NonNull;\n import lombok.RequiredArgsConstructor;\n import org.springframework.http.HttpHeaders;\n@@ -9,7 +8,6 @@\n * Custom http header with X-Reason header.\n  */\n @RequiredArgsConstructor\n-@Getter\n public class CustomHttpHeader {\n \n   private final @NonNull HttpStatusExceptionReason httpStatusExceptionReason;"
+  },
+  {
+    "sha": "7425943982db538c4216a0a895832129436cd0c6",
+    "filename": "src/main/java/de/caritas/cob/userservice/api/model/keycloak/KeycloakCreateUserResponseDTO.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/blob/219d8037eb9aeae403d47d7f6a36bda64ebb71db/src/main/java/de/caritas/cob/userservice/api/model/keycloak/KeycloakCreateUserResponseDTO.java",
+    "raw_url": "https://github.com/CaritasDeutschland/caritas-onlineBeratung-userService/raw/219d8037eb9aeae403d47d7f6a36bda64ebb71db/src/main/java/de/caritas/cob/userservice/api/model/keycloak/KeycloakCreateUserResponseDTO.java",
+    "contents_url": "https://api.github.com/repos/CaritasDeutschland/caritas-onlineBeratung-userService/contents/src/main/java/de/caritas/cob/userservice/api/model/keycloak/KeycloakCreateUserResponseDTO.java?ref=219d8037eb9aeae403d47d7f6a36bda64ebb71db",
+    "patch": "@@ -1,6 +1,5 @@\n package de.caritas.cob.userservice.api.model.keycloak;\n \n-import de.caritas.cob.userservice.api.model.CreateUserResponseDTO;\n import lombok.AllArgsConstructor;\n import lombok.Getter;\n import lombok.NoArgsConstructor;\n@@ -18,7 +17,6 @@\n public class KeycloakCreateUserResponseDTO {\n \n   private HttpStatus status;\n-  private CreateUserResponseDTO responseDTO;\n   private String userId;\n \n   public KeycloakCreateUserResponseDTO(String userId) {"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "a0df04703ca9a7a3b07521a205214172c6eeef61",
+    "filename": "src/main/java/no/nav/veilarbperson/controller/PersonV2Controller.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/navikt/veilarbperson/blob/2a25db3e162338244e96424f3efbf5c856f87886/src/main/java/no/nav/veilarbperson/controller/PersonV2Controller.java",
+    "raw_url": "https://github.com/navikt/veilarbperson/raw/2a25db3e162338244e96424f3efbf5c856f87886/src/main/java/no/nav/veilarbperson/controller/PersonV2Controller.java",
+    "contents_url": "https://api.github.com/repos/navikt/veilarbperson/contents/src/main/java/no/nav/veilarbperson/controller/PersonV2Controller.java?ref=2a25db3e162338244e96424f3efbf5c856f87886",
+    "patch": "@@ -3,6 +3,7 @@\n import io.swagger.annotations.ApiOperation;\n import no.nav.common.types.identer.Fnr;\n import no.nav.veilarbperson.client.pdl.PersonV2Data;\n+import no.nav.veilarbperson.domain.Malform;\n import no.nav.veilarbperson.service.AuthService;\n import no.nav.veilarbperson.service.PersonV2Service;\n import org.springframework.beans.factory.annotation.Autowired;\n@@ -29,4 +30,13 @@ public PersonV2Data hentPerson(@PathVariable(\"fodselsnummer\") String fnr) throws\n         return personV2Service.hentFlettetPerson(fnr, authService.getInnloggetBrukerToken());\n     }\n \n+    @GetMapping(\"/{fodselsnummer}/malform\")\n+    @ApiOperation(value = \"Henter malform fra DKIF tjeneste\")\n+    public Malform malform(@PathVariable(\"fodselsnummer\") Fnr fnr) {\n+        authService.stoppHvisEksternBruker();\n+        authService.sjekkLesetilgang(fnr);\n+\n+        String malform = personV2Service.hentMalform(fnr);\n+        return new Malform(malform);\n+    }\n }"
+  }
+]

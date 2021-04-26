@@ -1,0 +1,99 @@
+[
+  {
+    "sha": "b63ed830da896755df62a0e40dd4cb8e00288d76",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/suhi13/qaguru10-owner/blob/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/build.gradle",
+    "raw_url": "https://github.com/suhi13/qaguru10-owner/raw/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/build.gradle",
+    "contents_url": "https://api.github.com/repos/suhi13/qaguru10-owner/contents/build.gradle?ref=c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97",
+    "patch": "@@ -9,7 +9,7 @@ repositories {\n }\n \n def allureVersion = \"2.13.8\",\n-    selenideVersion = \"5.18.0\",\n+    selenideVersion = \"5.19.0\",\n     junitVersion = \"5.7.0\",\n     ownerVersion = \"1.0.12\"\n "
+  },
+  {
+    "sha": "c61966dee0ade00c9140b7ddf1b13169570baa03",
+    "filename": "src/test/java/config/ConfigHelper.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/suhi13/qaguru10-owner/blob/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/config/ConfigHelper.java",
+    "raw_url": "https://github.com/suhi13/qaguru10-owner/raw/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/config/ConfigHelper.java",
+    "contents_url": "https://api.github.com/repos/suhi13/qaguru10-owner/contents/src/test/java/config/ConfigHelper.java?ref=c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97",
+    "patch": "@@ -0,0 +1,28 @@\n+/*\n+package config;\n+\n+import org.aeonbits.owner.ConfigFactory;\n+\n+public class ConfigHelper {\n+\n+    private static WebDriverConfig getConfig() {\n+       if (System.getProperty(\"environment\") == null) System.setProperty(\"environment\", \"local\"); // test, preprod\n+        return ConfigFactory.newInstance().create(WebDriverConfig.class, System.getProperties());\n+    }\n+\n+    public static String getBrowser() {\n+        return getConfig().getBrowser();\n+    }\n+\n+    public static String  getBrowserVersion() {\n+        return getConfig().getBrowserVersion();\n+    }\n+    public static boolean isRemote() {\n+        return getConfig().isRemote();\n+    }\n+    public static String getSelenoidUrl(){\n+        return getConfig().getSelenoidUrl();\n+    }\n+}\n+\n+ */\n\\ No newline at end of file"
+  },
+  {
+    "sha": "efaa1b50b22e6fff526a92bf4452f54b0021c29a",
+    "filename": "src/test/java/config/WebDriverConfig.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 6,
+    "changes": 11,
+    "blob_url": "https://github.com/suhi13/qaguru10-owner/blob/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/config/WebDriverConfig.java",
+    "raw_url": "https://github.com/suhi13/qaguru10-owner/raw/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/config/WebDriverConfig.java",
+    "contents_url": "https://api.github.com/repos/suhi13/qaguru10-owner/contents/src/test/java/config/WebDriverConfig.java?ref=c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97",
+    "patch": "@@ -2,9 +2,9 @@\n \n import org.aeonbits.owner.Config;\n \n-import static org.aeonbits.owner.Config.Sources;\n+@Config.Sources(\"classpath:${environment}.properties\")\n \n-@Sources(\"classpath:${environment}.properties\")\n+public\n interface WebDriverConfig extends Config {\n \n     @Key(\"browser\")\n@@ -13,9 +13,8 @@\n     @Key(\"browser.version\")\n     String getBrowserVersion();\n \n-    @Key(\"remote\")\n-    boolean isRemote();\n-\n     @Key(\"selenoid.url\")\n     String getSelenoidUrl();\n-}\n\\ No newline at end of file\n+}\n+//gradle test -Denvironment=local\n+//gradle test -Denvironment=remote"
+  },
+  {
+    "sha": "e6b68fcdb0f1585b08d60f05db68015eb68f010c",
+    "filename": "src/test/java/tests/AnnotatedStepsTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 39,
+    "changes": 42,
+    "blob_url": "https://github.com/suhi13/qaguru10-owner/blob/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/tests/AnnotatedStepsTest.java",
+    "raw_url": "https://github.com/suhi13/qaguru10-owner/raw/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/tests/AnnotatedStepsTest.java",
+    "contents_url": "https://api.github.com/repos/suhi13/qaguru10-owner/contents/src/test/java/tests/AnnotatedStepsTest.java?ref=c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97",
+    "patch": "@@ -1,26 +1,12 @@\n package tests;\n \n-import static com.codeborne.selenide.Selectors.withText;\n-import static com.codeborne.selenide.Selenide.$;\n-import static com.codeborne.selenide.Selenide.open;\n-\n-import com.codeborne.selenide.Condition;\n-\n+import io.qameta.allure.*;\n import org.junit.jupiter.api.DisplayName;\n import org.junit.jupiter.api.Tag;\n import org.junit.jupiter.api.Tags;\n import org.junit.jupiter.api.Test;\n-import org.openqa.selenium.By;\n \n-import io.qameta.allure.Feature;\n-import io.qameta.allure.Link;\n-import io.qameta.allure.Owner;\n-import io.qameta.allure.Severity;\n-import io.qameta.allure.SeverityLevel;\n-import io.qameta.allure.Step;\n-import io.qameta.allure.Story;\n-\n-public class AnnotatedStepsTest {\n+public class AnnotatedStepsTest extends BaseTest{\n \n     private final static String BASE_URL = \"https://github.com\";\n     private final static String REPOSITORY = \"suhi13/y_qaguru\";\n@@ -41,26 +27,4 @@ public void checkIssueDisplayTest() {\n         steps.openRepository(REPOSITORY);\n         steps.checkElementDisplay(\"Issues\");\n     }\n-\n-    public class BaseSteps {\n-        @Step(\"Open Base URL\")\n-        public void openBaseUrl() {\n-            open(\"https://github.com\");\n-        }\n-\n-        @Step(\"Search repository {repositoryName}\")\n-        public void searchRepository(String repositoryName) {\n-            $(\".header-search-input\").as(\"Search field\").setValue(repositoryName).submit();\n-        }\n-\n-        @Step(\"Open {repositoryName} repository in search results\")\n-        public void openRepository(String repositoryName) {\n-            $(By.linkText(repositoryName)).click();\n-        }\n-\n-        @Step(\"Make sure '{elementName}' element is displayed in left-side menu\")\n-        public void checkElementDisplay(String elementName) {\n-            $(withText(elementName)).shouldBe(Condition.visible);\n-        }\n-    }\n-}\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "ef7259c9c9ce6184ab4c5c21410b85e5274a1d0e",
+    "filename": "src/test/java/tests/BaseSteps.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/suhi13/qaguru10-owner/blob/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/tests/BaseSteps.java",
+    "raw_url": "https://github.com/suhi13/qaguru10-owner/raw/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/tests/BaseSteps.java",
+    "contents_url": "https://api.github.com/repos/suhi13/qaguru10-owner/contents/src/test/java/tests/BaseSteps.java?ref=c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97",
+    "patch": "@@ -0,0 +1,32 @@\n+package tests;\n+\n+import com.codeborne.selenide.Condition;\n+import io.qameta.allure.Step;\n+import org.openqa.selenium.By;\n+\n+import static com.codeborne.selenide.Selectors.withText;\n+import static com.codeborne.selenide.Selenide.$;\n+import static com.codeborne.selenide.Selenide.open;\n+\n+    public class BaseSteps extends BaseTest {\n+\n+        @Step(\"Open Base URL\")\n+        public void openBaseUrl() {\n+            open(\"https://github.com\");\n+        }\n+\n+        @Step(\"Search repository {repositoryName}\")\n+        public void searchRepository(String repositoryName) {\n+            $(\".header-search-input\").as(\"Search field\").setValue(repositoryName).submit();\n+        }\n+\n+        @Step(\"Open {repositoryName} repository in search results\")\n+        public void openRepository(String repositoryName) {\n+            $(By.linkText(repositoryName)).click();\n+        }\n+\n+        @Step(\"Make sure '{elementName}' element is displayed in left-side menu\")\n+        public void checkElementDisplay(String elementName) {\n+            $(withText(elementName)).shouldBe(Condition.visible);\n+        }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "6c535a0d57060c544620bd6e110275de32eaeea6",
+    "filename": "src/test/java/tests/BaseTest.java",
+    "status": "renamed",
+    "additions": 13,
+    "deletions": 15,
+    "changes": 28,
+    "blob_url": "https://github.com/suhi13/qaguru10-owner/blob/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/tests/BaseTest.java",
+    "raw_url": "https://github.com/suhi13/qaguru10-owner/raw/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/java/tests/BaseTest.java",
+    "contents_url": "https://api.github.com/repos/suhi13/qaguru10-owner/contents/src/test/java/tests/BaseTest.java?ref=c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97",
+    "patch": "@@ -1,37 +1,35 @@\n-package config;\n-\n-import static com.codeborne.selenide.Selenide.closeWebDriver;\n-import static com.codeborne.selenide.logevents.SelenideLogger.addListener;\n-import static helpers.AttachmentHelpers.attachAsText;\n-import static helpers.AttachmentHelpers.attachPageSource;\n-import static helpers.AttachmentHelpers.attachScreenshot;\n-import static helpers.AttachmentHelpers.attachVideo;\n-import static helpers.AttachmentHelpers.getConsoleLogs;\n+package tests;\n \n import com.codeborne.selenide.Configuration;\n-\n+import config.WebDriverConfig;\n+import io.qameta.allure.selenide.AllureSelenide;\n import org.aeonbits.owner.ConfigFactory;\n import org.junit.jupiter.api.AfterEach;\n import org.junit.jupiter.api.BeforeAll;\n import org.openqa.selenium.remote.DesiredCapabilities;\n \n-import io.qameta.allure.selenide.AllureSelenide;\n+import static com.codeborne.selenide.Selenide.closeWebDriver;\n+import static com.codeborne.selenide.logevents.SelenideLogger.addListener;\n+import static helpers.AttachmentHelpers.*;\n \n public class BaseTest {\n \n+    static final WebDriverConfig config = ConfigFactory.create(WebDriverConfig.class, System.getProperties());\n+\n     @BeforeAll\n     static void setup() {\n-        final WebDriverConfig config = ConfigFactory.create(WebDriverConfig.class, System.getProperties());\n         addListener(\"AllureSelenide\", new AllureSelenide().screenshots(true).savePageSource(true));\n+\n         Configuration.startMaximized = true;\n         Configuration.browser = config.getBrowser();\n         Configuration.browserVersion = config.getBrowserVersion();\n+\n         if (config.getSelenoidUrl() != null) {\n-            Configuration.remote = config.getSelenoidUrl();\n             DesiredCapabilities capabilities = new DesiredCapabilities();\n             capabilities.setCapability(\"enableVNC\", true);\n             capabilities.setCapability(\"enableVideo\", true);\n             Configuration.browserCapabilities = capabilities;\n+            Configuration.remote = config.getSelenoidUrl();\n         }\n     }\n \n@@ -42,7 +40,7 @@ public void afterEach() {\n         attachAsText(\"Browser console logs\", getConsoleLogs());\n         if (System.getProperty(\"video_storage\") != null)\n             attachVideo();\n+\n         closeWebDriver();\n     }\n-}\n-\n+}\n\\ No newline at end of file",
+    "previous_filename": "src/test/java/config/BaseTest.java"
+  },
+  {
+    "sha": "5661f8fe3298ee1ede81fa633e3bc12de0386fcc",
+    "filename": "src/test/resources/local.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/suhi13/qaguru10-owner/blob/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/resources/local.properties",
+    "raw_url": "https://github.com/suhi13/qaguru10-owner/raw/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/resources/local.properties",
+    "contents_url": "https://api.github.com/repos/suhi13/qaguru10-owner/contents/src/test/resources/local.properties?ref=c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97",
+    "patch": "@@ -1,2 +1,2 @@\n browser=firefox\n-browser.version=45.4.0\n\\ No newline at end of file\n+browser.version=86.0\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d9990a39f8c32bfbd883ccd7ec79848fa959c458",
+    "filename": "src/test/resources/remote.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/suhi13/qaguru10-owner/blob/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/resources/remote.properties",
+    "raw_url": "https://github.com/suhi13/qaguru10-owner/raw/c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97/src/test/resources/remote.properties",
+    "contents_url": "https://api.github.com/repos/suhi13/qaguru10-owner/contents/src/test/resources/remote.properties?ref=c7aa1a36d335e3c51fa54a3d518b166e3c6f4c97",
+    "patch": "@@ -1,3 +1,3 @@\n browser=chrome\n browser.version=89.0.4389.82\n-selenoid.url=https://user1:1234@selenoid.autotests.cloud:4444/wd/hub/\n\\ No newline at end of file\n+selenoid.url=https://user1:1234@selenoid.autotests.cloud:4444/wd/hub/"
+  }
+]

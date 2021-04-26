@@ -1,0 +1,37 @@
+[
+  {
+    "sha": "4c98c39266b4a060f77f1ea34cb27590707b75a4",
+    "filename": "ios/.DS_Store",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/capacitor-community/native-audio/blob/806ce936740260b1d35eabff7c9c7259874cbbb6/ios/.DS_Store",
+    "raw_url": "https://github.com/capacitor-community/native-audio/raw/806ce936740260b1d35eabff7c9c7259874cbbb6/ios/.DS_Store",
+    "contents_url": "https://api.github.com/repos/capacitor-community/native-audio/contents/ios/.DS_Store?ref=806ce936740260b1d35eabff7c9c7259874cbbb6"
+  },
+  {
+    "sha": "791541a9e2bed61f039cf38c1e46c3eeb745176a",
+    "filename": "ios/Plugin/AudioAsset.swift",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/capacitor-community/native-audio/blob/806ce936740260b1d35eabff7c9c7259874cbbb6/ios/Plugin/AudioAsset.swift",
+    "raw_url": "https://github.com/capacitor-community/native-audio/raw/806ce936740260b1d35eabff7c9c7259874cbbb6/ios/Plugin/AudioAsset.swift",
+    "contents_url": "https://api.github.com/repos/capacitor-community/native-audio/contents/ios/Plugin/AudioAsset.swift?ref=806ce936740260b1d35eabff7c9c7259874cbbb6",
+    "patch": "@@ -92,6 +92,18 @@ public class AudioAsset: NSObject, AVAudioPlayerDelegate {\n             }\n         }\n     }\n+\n+    func pause() {\n+        let player: AVAudioPlayer = channels.object(at: playIndex) as! AVAudioPlayer\n+        player.pause()\n+    }\n+\n+    func resume() {\n+        let player: AVAudioPlayer = channels.object(at: playIndex) as! AVAudioPlayer\n+        \n+        let timeOffset = player.deviceCurrentTime + 0.01\n+        player.play(atTime: timeOffset)\n+    }\n     \n     func loop() {\n         self.stop()"
+  },
+  {
+    "sha": "0c8a1730f003141bad4bcb943b6ba1839d798cd9",
+    "filename": "ios/Plugin/Plugin.swift",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 5,
+    "changes": 19,
+    "blob_url": "https://github.com/capacitor-community/native-audio/blob/806ce936740260b1d35eabff7c9c7259874cbbb6/ios/Plugin/Plugin.swift",
+    "raw_url": "https://github.com/capacitor-community/native-audio/raw/806ce936740260b1d35eabff7c9c7259874cbbb6/ios/Plugin/Plugin.swift",
+    "contents_url": "https://api.github.com/repos/capacitor-community/native-audio/contents/ios/Plugin/Plugin.swift?ref=806ce936740260b1d35eabff7c9c7259874cbbb6",
+    "patch": "@@ -97,13 +97,22 @@ public class NativeAudio: CAPPlugin {\n         }\n     }\n     \n-    @objc func resume(_ call: CAPPluginCall) {\n-//        let audioId = call.getString(Constant.AssetIdKey) ?? \"\"\n+    @objc func pause(_ call: CAPPluginCall) {\n+        guard let audioAsset: AudioAsset = self.getAudioAsset(call) else {\n+            return\n+        }\n+\n+        audioAsset.pause()\n         call.success()\n     }\n-    \n-    @objc func pause(_ call: CAPPluginCall) {\n-        call.success() // TODO: Implement pause\n+\n+     @objc func resume(_ call: CAPPluginCall) {\n+        guard let audioAsset: AudioAsset = self.getAudioAsset(call) else {\n+            return\n+        }\n+\n+        audioAsset.resume()\n+        call.success()\n     }\n     \n     @objc func stop(_ call: CAPPluginCall) {"
+  }
+]

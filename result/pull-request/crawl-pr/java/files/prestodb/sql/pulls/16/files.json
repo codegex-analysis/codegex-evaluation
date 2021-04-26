@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "ca3d3a3479acfc6b07bfe9c66315fdf1335c79c5",
+    "filename": "rewriter/src/main/java/com/facebook/coresql/rewriter/OrderByRewriter.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 13,
+    "changes": 22,
+    "blob_url": "https://github.com/prestodb/sql/blob/8277ae9531969f5b5c2c32fa7c82d0d95015e439/rewriter/src/main/java/com/facebook/coresql/rewriter/OrderByRewriter.java",
+    "raw_url": "https://github.com/prestodb/sql/raw/8277ae9531969f5b5c2c32fa7c82d0d95015e439/rewriter/src/main/java/com/facebook/coresql/rewriter/OrderByRewriter.java",
+    "contents_url": "https://api.github.com/repos/prestodb/sql/contents/rewriter/src/main/java/com/facebook/coresql/rewriter/OrderByRewriter.java?ref=8277ae9531969f5b5c2c32fa7c82d0d95015e439",
+    "patch": "@@ -23,9 +23,9 @@\n import com.facebook.coresql.parser.Unparser;\n \n import java.util.HashSet;\n+import java.util.Optional;\n import java.util.Set;\n \n-import static com.facebook.coresql.parser.ParserHelper.parseStatement;\n import static com.facebook.coresql.parser.SqlParserTreeConstants.JJTINSERT;\n import static com.facebook.coresql.parser.SqlParserTreeConstants.JJTLIMITCLAUSE;\n import static com.facebook.coresql.parser.SqlParserTreeConstants.JJTORDERBYCLAUSE;\n@@ -35,31 +35,29 @@\n public class OrderByRewriter\n         extends Rewriter\n {\n-    PatternMatcher<Set<AstNode>> matcher;\n     public Set<AstNode> patternMatchedNodes;\n     private static final String REWRITE_NAME = \"ORDER BY without LIMIT\";\n \n     public OrderByRewriter()\n     {\n-        this.matcher = new OrderByPatternMatcher();\n         this.patternMatchedNodes = new HashSet<>();\n     }\n \n-    @Override\n-    public boolean rewritePatternIsPresent(String sql)\n+    private boolean hasRewritePattern(AstNode root)\n     {\n-        AstNode root = requireNonNull(parseStatement(sql));\n-        patternMatchedNodes = matcher.matchPattern(root);\n+        requireNonNull(root, \"AST passed to rewriter was null\");\n+        patternMatchedNodes = new OrderByPatternMatcher().matchPattern(root);\n         return !patternMatchedNodes.isEmpty();\n     }\n \n     @Override\n-    public RewriteResult rewrite(String originalSql)\n+    public Optional<RewriteResult> rewrite(AstNode root)\n     {\n-        AstNode root = requireNonNull(parseStatement(originalSql));\n-        patternMatchedNodes = matcher.matchPattern(root);\n+        if (!hasRewritePattern(root)) {\n+            return Optional.empty();\n+        }\n         String rewrittenSql = Unparser.unparse(root, this);\n-        return new RewriteResult(REWRITE_NAME, originalSql, rewrittenSql);\n+        return Optional.of(new RewriteResult(REWRITE_NAME, rewrittenSql));\n     }\n \n     @Override\n@@ -73,7 +71,6 @@ public void visit(OrderByClause node, Void data)\n \n     private static class OrderByPatternMatcher\n             extends SqlParserDefaultVisitor\n-            implements PatternMatcher<Set<AstNode>>\n     {\n         private final Set<AstNode> matchedNodes;\n         private int depth;\n@@ -84,7 +81,6 @@ public OrderByPatternMatcher()\n             this.matchedNodes = new HashSet<>();\n         }\n \n-        @Override\n         public Set<AstNode> matchPattern(AstNode node)\n         {\n             requireNonNull(node, \"AST passed to pattern matcher was null\");"
+  },
+  {
+    "sha": "421a8449b632edf40bc4f7567519a5f9d3df3273",
+    "filename": "rewriter/src/main/java/com/facebook/coresql/rewriter/PatternMatcher.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 29,
+    "changes": 29,
+    "blob_url": "https://github.com/prestodb/sql/blob/ffc3e84a442b4ef2de42a44f7be44887fb116124/rewriter/src/main/java/com/facebook/coresql/rewriter/PatternMatcher.java",
+    "raw_url": "https://github.com/prestodb/sql/raw/ffc3e84a442b4ef2de42a44f7be44887fb116124/rewriter/src/main/java/com/facebook/coresql/rewriter/PatternMatcher.java",
+    "contents_url": "https://api.github.com/repos/prestodb/sql/contents/rewriter/src/main/java/com/facebook/coresql/rewriter/PatternMatcher.java?ref=ffc3e84a442b4ef2de42a44f7be44887fb116124",
+    "patch": "@@ -1,29 +0,0 @@\n-/*\n- * Licensed under the Apache License, Version 2.0 (the \"License\");\n- * you may not use this file except in compliance with the License.\n- * You may obtain a copy of the License at\n- *\n- *     http://www.apache.org/licenses/LICENSE-2.0\n- *\n- * Unless required by applicable law or agreed to in writing, software\n- * distributed under the License is distributed on an \"AS IS\" BASIS,\n- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n- * See the License for the specific language governing permissions and\n- * limitations under the License.\n- */\n-\n-package com.facebook.coresql.rewriter;\n-\n-import com.facebook.coresql.parser.AstNode;\n-\n-public interface PatternMatcher<T>\n-{\n-    /**\n-     * Searches for a pattern in an Abstract Syntax Tree (AST).\n-     *\n-     * @param root root of the AST\n-     * @return T An arbitrary data structure containing information found during the pattern matching routine\n-     * Example: T is a Set<AstNode> which contains nodes that match the given pattern.\n-     */\n-    T matchPattern(AstNode root);\n-}"
+  },
+  {
+    "sha": "a8e4098cba3abfdb961df010c75dbe14f9ba4b96",
+    "filename": "rewriter/src/main/java/com/facebook/coresql/rewriter/RewriteResult.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 9,
+    "changes": 9,
+    "blob_url": "https://github.com/prestodb/sql/blob/8277ae9531969f5b5c2c32fa7c82d0d95015e439/rewriter/src/main/java/com/facebook/coresql/rewriter/RewriteResult.java",
+    "raw_url": "https://github.com/prestodb/sql/raw/8277ae9531969f5b5c2c32fa7c82d0d95015e439/rewriter/src/main/java/com/facebook/coresql/rewriter/RewriteResult.java",
+    "contents_url": "https://api.github.com/repos/prestodb/sql/contents/rewriter/src/main/java/com/facebook/coresql/rewriter/RewriteResult.java?ref=8277ae9531969f5b5c2c32fa7c82d0d95015e439",
+    "patch": "@@ -22,17 +22,14 @@\n public class RewriteResult\n {\n     private String nameOfRewrite;\n-    private String originalSql;\n     private String rewrittenSql;\n \n     @JsonCreator\n     public RewriteResult(\n             @JsonProperty(\"nameOfRewrite\") String nameOfRewrite,\n-            @JsonProperty(\"originalSql\") String originalSql,\n             @JsonProperty(\"rewrittenSql\") String rewrittenSql)\n     {\n         this.nameOfRewrite = requireNonNull(nameOfRewrite, \"name of rewrite is null\");\n-        this.originalSql = requireNonNull(originalSql, \"original sql statement is null\");\n         this.rewrittenSql = requireNonNull(rewrittenSql, \"rewritten sql statement is null\");\n     }\n \n@@ -42,12 +39,6 @@ public String getNameOfRewrite()\n         return nameOfRewrite;\n     }\n \n-    @JsonProperty(\"originalSql\")\n-    public String getOriginalSql()\n-    {\n-        return originalSql;\n-    }\n-\n     @JsonProperty(\"rewrittenSql\")\n     public String getRewrittenSql()\n     {"
+  },
+  {
+    "sha": "254b7ad6b278dfded90013d7bd54e8f055b0481f",
+    "filename": "rewriter/src/main/java/com/facebook/coresql/rewriter/Rewriter.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 11,
+    "changes": 17,
+    "blob_url": "https://github.com/prestodb/sql/blob/8277ae9531969f5b5c2c32fa7c82d0d95015e439/rewriter/src/main/java/com/facebook/coresql/rewriter/Rewriter.java",
+    "raw_url": "https://github.com/prestodb/sql/raw/8277ae9531969f5b5c2c32fa7c82d0d95015e439/rewriter/src/main/java/com/facebook/coresql/rewriter/Rewriter.java",
+    "contents_url": "https://api.github.com/repos/prestodb/sql/contents/rewriter/src/main/java/com/facebook/coresql/rewriter/Rewriter.java?ref=8277ae9531969f5b5c2c32fa7c82d0d95015e439",
+    "patch": "@@ -14,24 +14,19 @@\n \n package com.facebook.coresql.rewriter;\n \n+import com.facebook.coresql.parser.AstNode;\n import com.facebook.coresql.parser.Unparser;\n \n+import java.util.Optional;\n+\n public abstract class Rewriter\n         extends Unparser\n {\n     /**\n      * Attempts to rewrite a SQL statement, storing the name of the rewriter, original string, and rewritten string in a RewriteResult object.\n      *\n-     * @param sql The statement that will be rewritten\n-     * @return A RewriteResult object containing the name of the rewriter, original string, and rewritten string\n-     */\n-    public abstract RewriteResult rewrite(String sql);\n-\n-    /**\n-     * Checks if the pattern we're trying to rewrite is present within a SQL statement.\n-     *\n-     * @param sql The statement we're checking\n-     * @return true if the rewrite pattern is present else false\n+     * @param root The root node of the AST representing the SQL statement that will be rewritten\n+     * @return A Optional object containing a information about the rewrite\n      */\n-    public abstract boolean rewritePatternIsPresent(String sql);\n+    public abstract Optional<RewriteResult> rewrite(AstNode root);\n }"
+  },
+  {
+    "sha": "d957997b6a652e650ad25a5f7a3057e3ced33902",
+    "filename": "rewriter/src/test/java/com/facebook/coresql/rewriter/TestOrderByRewriter.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 8,
+    "changes": 26,
+    "blob_url": "https://github.com/prestodb/sql/blob/8277ae9531969f5b5c2c32fa7c82d0d95015e439/rewriter/src/test/java/com/facebook/coresql/rewriter/TestOrderByRewriter.java",
+    "raw_url": "https://github.com/prestodb/sql/raw/8277ae9531969f5b5c2c32fa7c82d0d95015e439/rewriter/src/test/java/com/facebook/coresql/rewriter/TestOrderByRewriter.java",
+    "contents_url": "https://api.github.com/repos/prestodb/sql/contents/rewriter/src/test/java/com/facebook/coresql/rewriter/TestOrderByRewriter.java?ref=8277ae9531969f5b5c2c32fa7c82d0d95015e439",
+    "patch": "@@ -14,10 +14,15 @@\n \n package com.facebook.coresql.rewriter;\n \n+import com.facebook.coresql.parser.AstNode;\n import org.testng.annotations.Test;\n \n+import java.util.Optional;\n+\n+import static com.facebook.coresql.parser.ParserHelper.parseStatement;\n import static java.lang.String.format;\n import static org.testng.Assert.assertFalse;\n+import static org.testng.Assert.assertNotNull;\n import static org.testng.Assert.assertTrue;\n \n public class TestOrderByRewriter\n@@ -70,29 +75,34 @@\n \n     private void assertOrderByPatternIsMatchedOrUnmatched(String sql, boolean isMatched)\n     {\n+        AstNode ast = parseStatement(sql);\n+        assertNotNull(ast);\n+\n         Rewriter rewriter = new OrderByRewriter();\n+        Optional<RewriteResult> result = rewriter.rewrite(ast);\n+\n         if (isMatched) {\n-            assertTrue(rewriter.rewritePatternIsPresent(sql));\n+            assertTrue(result.isPresent());\n+            printRewriteResult(sql, result.get().getRewrittenSql());\n         }\n         else {\n-            assertFalse(rewriter.rewritePatternIsPresent(sql));\n+            assertFalse(result.isPresent());\n         }\n     }\n \n-    private void rewriteThenPrint(String sql)\n+    private void printRewriteResult(String originalSql, String rewrittenSql)\n     {\n-        RewriteResult result = new OrderByRewriter().rewrite(sql);\n-        System.out.println(format(\"Before --> %s\", sql));\n-        System.out.println(format(\"AFTER --> %s\", result.getRewrittenSql()));\n+        assertNotNull(parseStatement(rewrittenSql));\n+        System.out.println(format(\"Before --> %s\", originalSql));\n+        System.out.println(format(\"AFTER --> %s\", rewrittenSql));\n         System.out.println();\n     }\n \n     @Test\n-    public void patternDetectionAndRewriteTest()\n+    public void rewriteTest()\n     {\n         for (String sql : statementsThatNeedOrderByRewrite) {\n             assertOrderByPatternIsMatchedOrUnmatched(sql, true);\n-            rewriteThenPrint(sql);\n         }\n \n         for (String sql : statementsThatDontNeedAnyRewrite) {"
+  }
+]

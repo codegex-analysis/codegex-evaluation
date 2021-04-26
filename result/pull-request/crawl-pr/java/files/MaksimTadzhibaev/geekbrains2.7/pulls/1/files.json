@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "fb32771239e24f89a5902ebdf384dc2226a25312",
+    "filename": "command/src/main/java/commands/Command.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/MaksimTadzhibaev/geekbrains2.7/blob/218edfedfd0fc5f7d8f728094ae62cf67f000332/command/src/main/java/commands/Command.java",
+    "raw_url": "https://github.com/MaksimTadzhibaev/geekbrains2.7/raw/218edfedfd0fc5f7d8f728094ae62cf67f000332/command/src/main/java/commands/Command.java",
+    "contents_url": "https://api.github.com/repos/MaksimTadzhibaev/geekbrains2.7/contents/command/src/main/java/commands/Command.java?ref=218edfedfd0fc5f7d8f728094ae62cf67f000332",
+    "patch": "@@ -4,5 +4,5 @@\n     public static final String END = \"/end\";\n     public static final String AUTH = \"/auth\";\n     public static final String AUTH_OK = \"/authok\";\n-\n+    public static final String PRIVATE_MSG = \"/w\";;\n }"
+  },
+  {
+    "sha": "a6ff3c7515572a8c22e06771267ce1b5225d00d7",
+    "filename": "server/src/main/java/server/ClientHandler.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 5,
+    "changes": 19,
+    "blob_url": "https://github.com/MaksimTadzhibaev/geekbrains2.7/blob/218edfedfd0fc5f7d8f728094ae62cf67f000332/server/src/main/java/server/ClientHandler.java",
+    "raw_url": "https://github.com/MaksimTadzhibaev/geekbrains2.7/raw/218edfedfd0fc5f7d8f728094ae62cf67f000332/server/src/main/java/server/ClientHandler.java",
+    "contents_url": "https://api.github.com/repos/MaksimTadzhibaev/geekbrains2.7/contents/server/src/main/java/server/ClientHandler.java?ref=218edfedfd0fc5f7d8f728094ae62cf67f000332",
+    "patch": "@@ -57,12 +57,21 @@ public ClientHandler(Server server, Socket socket) {\n                     while (true) {\n                         String str = in.readUTF();\n \n-                        if (str.equals(Command.END)) {\n-                            out.writeUTF(Command.END);\n-                            break;\n+                        if (str.startsWith(\"/\")) {\n+                            if (str.equals(Command.END)) {\n+                                out.writeUTF(Command.END);\n+                                break;\n+                            }\n+                            if (str.startsWith(Command.PRIVATE_MSG)) {\n+                                String[] token = str.split(\"\\\\s\", 3);\n+                                if (token.length < 3) {\n+                                    continue;\n+                                }\n+                                server.privateMsg(this, token[1], token[2]);\n+                            }\n+                        } else {\n+                            server.broadcastMsg(this, str);\n                         }\n-\n-                        server.broadcastMsg(this, str);\n                     }\n                 } catch (RuntimeException e) {\n                     System.out.println(e.getMessage());"
+  },
+  {
+    "sha": "2fecfdd6977448ac2fd4536ea43181f6d7ae8d80",
+    "filename": "server/src/main/java/server/Server.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/MaksimTadzhibaev/geekbrains2.7/blob/218edfedfd0fc5f7d8f728094ae62cf67f000332/server/src/main/java/server/Server.java",
+    "raw_url": "https://github.com/MaksimTadzhibaev/geekbrains2.7/raw/218edfedfd0fc5f7d8f728094ae62cf67f000332/server/src/main/java/server/Server.java",
+    "contents_url": "https://api.github.com/repos/MaksimTadzhibaev/geekbrains2.7/contents/server/src/main/java/server/Server.java?ref=218edfedfd0fc5f7d8f728094ae62cf67f000332",
+    "patch": "@@ -59,6 +59,20 @@ public void broadcastMsg(ClientHandler sender, String msg){\n         }\n     }\n \n+    public void privateMsg(ClientHandler sender,String recipient, String msg){\n+        String message = String.format(\"[ %s ] to [ %s ]: %s\", sender.getNickname(), recipient, msg);\n+        for (ClientHandler c : clients) {\n+            if(c.getNickname().equals(recipient)){\n+                c.sendMsg(message);\n+                if(!c.equals(sender)){\n+                    sender.sendMsg(message);\n+                }\n+                return;\n+            }\n+        }\n+        sender.sendMsg(\"Не найден клиент \" + recipient);\n+    }\n+\n     public void subscribe(ClientHandler clientHandler){\n         clients.add(clientHandler);\n     }"
+  }
+]

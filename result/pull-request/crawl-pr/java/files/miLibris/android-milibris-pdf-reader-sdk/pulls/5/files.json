@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "16bf646eb3df0b89683fecd35c54ccaa14118c47",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 1,
+    "changes": 15,
+    "blob_url": "https://github.com/miLibris/android-milibris-pdf-reader-sdk/blob/6e3b1aeab12a1743e4d008c83a5d3ad973028f37/README.md",
+    "raw_url": "https://github.com/miLibris/android-milibris-pdf-reader-sdk/raw/6e3b1aeab12a1743e4d008c83a5d3ad973028f37/README.md",
+    "contents_url": "https://api.github.com/repos/miLibris/android-milibris-pdf-reader-sdk/contents/README.md?ref=6e3b1aeab12a1743e4d008c83a5d3ad973028f37",
+    "patch": "@@ -88,7 +88,20 @@ the activity.\n reader.startReaderActivity(this);\n ```\n \n-**3. Sample project**\n+\n+**3 Sharing an article\n+\n+If your miLibris content has articles, you can implement your own sharing solution by implementing shareArticleContent. Two examples are provided in the sample project:\n+\n+#### Share link to web kiosk\n+\n+Share the web kiosk URL of an article. The user can use the social app of his/her choice. This feature must be enabled on the web kiosk. Contact miLibris support for more info.\n+\n+#### Send article by email\n+\n+Send the content of an article by email.\n+\n+**4. Sample project**\n \n A sample project is provided to help you implement the reader integration. It contains an example to unpack a complete archive and to open if with PdfReader class.\n "
+  },
+  {
+    "sha": "241b9702883b29b237031f49b683f131717ff3ae",
+    "filename": "app/src/main/java/com/milibris/pdfreader/sampleapp/MainActivity.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 2,
+    "changes": 14,
+    "blob_url": "https://github.com/miLibris/android-milibris-pdf-reader-sdk/blob/6e3b1aeab12a1743e4d008c83a5d3ad973028f37/app/src/main/java/com/milibris/pdfreader/sampleapp/MainActivity.java",
+    "raw_url": "https://github.com/miLibris/android-milibris-pdf-reader-sdk/raw/6e3b1aeab12a1743e4d008c83a5d3ad973028f37/app/src/main/java/com/milibris/pdfreader/sampleapp/MainActivity.java",
+    "contents_url": "https://api.github.com/repos/miLibris/android-milibris-pdf-reader-sdk/contents/app/src/main/java/com/milibris/pdfreader/sampleapp/MainActivity.java?ref=6e3b1aeab12a1743e4d008c83a5d3ad973028f37",
+    "patch": "@@ -3,16 +3,18 @@\n import android.app.Activity;\n import android.content.res.AssetManager;\n import android.os.Bundle;\n-import androidx.appcompat.app.AppCompatActivity;\n import android.util.Log;\n import android.view.View;\n import android.widget.Toast;\n \n+import androidx.appcompat.app.AppCompatActivity;\n+\n import com.milibris.foundation.CompleteArchive;\n import com.milibris.foundation.Foundation;\n import com.milibris.foundation.FoundationContext;\n import com.milibris.lib.pdfreader.PdfReader;\n import com.milibris.lib.pdfreader.ui.PageListener;\n+import com.milibris.pdfreader.sampleapp.sharing.SharingUtils;\n \n import java.io.File;\n import java.io.FileOutputStream;\n@@ -66,7 +68,15 @@ public boolean isArticlesSharingEnabled() {\n                     @Override\n                     public void shareArticleContent(PdfReader.Article article, Activity activity) {\n                         Log.i(TAG, \"Share article: \" + article.title);\n-\n+                        //\n+                        //   This is an example for sharing the article content via the email\n+                        //   SharingUtils.INSTANCE.shareArticleViaMail(activity, article);\n+\n+                        //Second example to share the Article Url\n+                        SharingUtils.INSTANCE.shareArticleUrl(activity,\n+                                \"IssueMidExample\",\n+                                \"https://www.examplekiosk.milibris.com\",\n+                                article);\n                         // Implement custom sharing logic (Android Intent?)\n                     }\n "
+  },
+  {
+    "sha": "ce589791f0fa166fac283cdd433bd5741b3239ae",
+    "filename": "app/src/main/java/com/milibris/pdfreader/sampleapp/sharing/SharingUtils.kt",
+    "status": "added",
+    "additions": 75,
+    "deletions": 0,
+    "changes": 75,
+    "blob_url": "https://github.com/miLibris/android-milibris-pdf-reader-sdk/blob/6e3b1aeab12a1743e4d008c83a5d3ad973028f37/app/src/main/java/com/milibris/pdfreader/sampleapp/sharing/SharingUtils.kt",
+    "raw_url": "https://github.com/miLibris/android-milibris-pdf-reader-sdk/raw/6e3b1aeab12a1743e4d008c83a5d3ad973028f37/app/src/main/java/com/milibris/pdfreader/sampleapp/sharing/SharingUtils.kt",
+    "contents_url": "https://api.github.com/repos/miLibris/android-milibris-pdf-reader-sdk/contents/app/src/main/java/com/milibris/pdfreader/sampleapp/sharing/SharingUtils.kt?ref=6e3b1aeab12a1743e4d008c83a5d3ad973028f37",
+    "patch": "@@ -0,0 +1,75 @@\n+package com.milibris.pdfreader.sampleapp.sharing\n+\n+import android.app.Activity\n+import android.content.Context\n+import android.content.Intent\n+import android.net.Uri\n+import androidx.core.app.ShareCompat.IntentBuilder\n+import androidx.core.text.HtmlCompat\n+import com.milibris.lib.pdfreader.PdfReader\n+\n+object SharingUtils {\n+\n+    fun shareArticleUrl(\n+        activity: Activity,\n+        issueMid: String,\n+        kioskURL: String,\n+        article: PdfReader.Article\n+    ) {\n+\n+        val articleUrl = \"$kioskURL/share/article/$issueMid/${article.mid}\"\n+        val intentBuilder = IntentBuilder.from(activity)\n+            .setType(\"text/plain\")\n+            .setText(articleUrl)\n+        intentBuilder.startChooser()\n+    }\n+\n+    fun shareArticleViaMail(context: Context, article: PdfReader.Article) {\n+\n+\n+        val intent = Intent(Intent.ACTION_SENDTO)\n+        intent.data = Uri.parse(\"mailto:\")\n+        intent.putExtra(Intent.EXTRA_SUBJECT, mailSubject(article))\n+\n+        val contentBuilder =\n+            StringBuilder()\n+                .append(\"I thought you might be interested in this article:<br/><br/>\")\n+        article.title?.let {\n+            contentBuilder.append(\"$it<br/><br/>\")\n+        }\n+        val content = article.content\n+        val startHead = content.indexOf(\"<head>\")\n+        val endHead = content.indexOf(\"</head>\") + 7\n+        val contentNoHead = String.format(\n+            \"%s%s\",\n+            content.substring(0, startHead),\n+            content.substring(endHead)\n+        )\n+        contentBuilder.append(contentNoHead)\n+\n+\n+        intent.putExtra(\n+            Intent.EXTRA_TEXT, HtmlCompat.fromHtml(\n+                contentBuilder.toString(),\n+                HtmlCompat.FROM_HTML_MODE_LEGACY\n+            )\n+        )\n+\n+        if (intent.resolveActivity(context.packageManager) != null) {\n+            context.startActivity(intent)\n+        }\n+    }\n+\n+    private fun mailSubject(article: PdfReader.Article): String {\n+        // article_title (edition_title, edition_subtitle)\n+        return when {\n+            article.title.isNullOrEmpty() -> \"\"\n+            article.editionSubtitle.isNullOrEmpty() -> {\n+                \"${article.title} (${article.editionTitle})\"\n+            }\n+            else -> {\n+                \"${article.title} (${article.editionTitle}, ${article.editionSubtitle})\"\n+            }\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

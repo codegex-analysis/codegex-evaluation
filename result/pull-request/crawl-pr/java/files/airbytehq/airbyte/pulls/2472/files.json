@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "3eb7180b48f9dabd71124b455291abeca190c43b",
+    "filename": "airbyte-integrations/connectors/source-github-singer/setup.py",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/airbytehq/airbyte/blob/2a9c85c275b0210520c522bd53a8f1dffb429ec1/airbyte-integrations/connectors/source-github-singer/setup.py",
+    "raw_url": "https://github.com/airbytehq/airbyte/raw/2a9c85c275b0210520c522bd53a8f1dffb429ec1/airbyte-integrations/connectors/source-github-singer/setup.py",
+    "contents_url": "https://api.github.com/repos/airbytehq/airbyte/contents/airbyte-integrations/connectors/source-github-singer/setup.py?ref=2a9c85c275b0210520c522bd53a8f1dffb429ec1",
+    "patch": "@@ -31,7 +31,7 @@\n     author_email=\"contact@airbyte.io\",\n     packages=find_packages(),\n     install_requires=[\n-        \"tap-github @ https://github.com/airbytehq/tap-github/tarball/v1.9.3-airbyte\",\n+        \"tap-github @ https://github.com/vitaliizazmic/tap-github/tarball/handling_teams_stream\",\n         \"requests==2.20.0\",\n         \"airbyte-protocol\",\n         \"base-singer\","
+  },
+  {
+    "sha": "4e1eb33b10eba852a72d94ab12ff3664797a6afb",
+    "filename": "airbyte-integrations/connectors/source-github-singer/source_github_singer/source.py",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 9,
+    "changes": 10,
+    "blob_url": "https://github.com/airbytehq/airbyte/blob/2a9c85c275b0210520c522bd53a8f1dffb429ec1/airbyte-integrations/connectors/source-github-singer/source_github_singer/source.py",
+    "raw_url": "https://github.com/airbytehq/airbyte/raw/2a9c85c275b0210520c522bd53a8f1dffb429ec1/airbyte-integrations/connectors/source-github-singer/source_github_singer/source.py",
+    "contents_url": "https://api.github.com/repos/airbytehq/airbyte/contents/airbyte-integrations/connectors/source-github-singer/source_github_singer/source.py?ref=2a9c85c275b0210520c522bd53a8f1dffb429ec1",
+    "patch": "@@ -37,18 +37,10 @@ class SourceGithubSinger(SingerSource):\n     def _check_with_catalog(logger: AirbyteLogger, streams: List, config: json):\n         repositories = config[\"repository\"].split(\" \")\n         for repository in repositories:\n-            org = repository.split(\"/\")[0]\n             # requests for checking streams permissions\n             # first is for checking if user has access to Collaborators API\n             # if user is not one of the collaborators, request will return 403 error\n-            # third is for checking access and permission to Teams API\n-            # Teams API is only available to authenticated members of the team's organization,\n-            # in another case it will return 404 error\n-            # if user doesn't have permission, it will return 401 error\n-            check_streams = {\n-                \"collaborators\": f\"https://api.github.com/repos/{repository}/collaborators\",\n-                \"teams\": f\"https://api.github.com/orgs/{org}/teams?sort=created_at&direction=desc\",\n-            }\n+            check_streams = {\"collaborators\": f\"https://api.github.com/repos/{repository}/collaborators\"}\n             for stream in streams:\n                 if stream in check_streams:\n                     response = requests.get(check_streams[stream], auth=(config[\"access_token\"], \"\"))"
+  },
+  {
+    "sha": "1312d407ffb3dff55498ff0f21bd39c848478cf7",
+    "filename": "docs/integrations/sources/github.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/airbytehq/airbyte/blob/2a9c85c275b0210520c522bd53a8f1dffb429ec1/docs/integrations/sources/github.md",
+    "raw_url": "https://github.com/airbytehq/airbyte/raw/2a9c85c275b0210520c522bd53a8f1dffb429ec1/docs/integrations/sources/github.md",
+    "contents_url": "https://api.github.com/repos/airbytehq/airbyte/contents/docs/integrations/sources/github.md?ref=2a9c85c275b0210520c522bd53a8f1dffb429ec1",
+    "patch": "@@ -53,6 +53,6 @@ Log into Github and then generate a [personal access token](https://github.com/s\n Your token should have at least the `repo` scope. Depending on which streams you want to sync, the user generating the token needs more permissions:\n \n * For syncing Collaborators, the user which generates the personal access token must be a collaborator. To become a collaborator, they must be invited by an owner. Read more about access permissions [here](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/access-permissions-on-github).\n-* Syncing [Teams](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-organizations-and-teams/about-teams) is only available to authenticated members of a team's [organization](https://docs.github.com/en/free-pro-team@latest/rest/reference/orgs). [Personal user accounts](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/types-of-github-accounts) and repositories belonging to them don't have access to Teams features.\n+* Syncing [Teams](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-organizations-and-teams/about-teams) is only available to authenticated members of a team's [organization](https://docs.github.com/en/free-pro-team@latest/rest/reference/orgs). [Personal user accounts](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/types-of-github-accounts) and repositories belonging to them don't have access to Teams features. In this case no records will be synced, and you see warning message.\n * To sync the Projects stream, the repository must have the Projects feature enabled.\n "
+  }
+]

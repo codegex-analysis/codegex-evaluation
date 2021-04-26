@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "d85a25952beb078e35fcf8d245ea551f215273fb",
+    "filename": "DBMS/BestPractices/question1/question1.sql",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/meta-utkarsh-singh/GET2021/blob/811a149c4d3441fde6dc9e62d4991e7d8dfe51f3/DBMS/BestPractices/question1/question1.sql",
+    "raw_url": "https://github.com/meta-utkarsh-singh/GET2021/raw/811a149c4d3441fde6dc9e62d4991e7d8dfe51f3/DBMS/BestPractices/question1/question1.sql",
+    "contents_url": "https://api.github.com/repos/meta-utkarsh-singh/GET2021/contents/DBMS/BestPractices/question1/question1.sql?ref=811a149c4d3441fde6dc9e62d4991e7d8dfe51f3",
+    "patch": "@@ -0,0 +1,35 @@\n+DELIMITER //\n+CREATE FUNCTION number_of_orders (monthNo INT, yearNo INT)\n+RETURNS INT\n+BEGIN\n+    DECLARE ans INT;\n+    SELECT COUNT(*) INTO ans FROM orders \n+    WHERE MONTH(placed_date) = monthNo and  YEAR(placed_date) = yearNo;\n+    \n+    RETURN ans;\n+    \n+END //\n+\n+Select number_of_orders(03,2021)//\n+\n+DELIMITER ;\n+SELECT number_of_orders(03,2021);\n+SELECT * FROM orders;\n+\n+DELIMITER //\n+CREATE FUNCTION highest_order (yearNo INT)\n+    RETURNS INT \n+BEGIN\n+    DECLARE ans INT;\n+    SELECT month_loop.month_ans\n+    FROM\n+    (SELECT number_of_orders(MONTH(orders.placed_date), yearNo) AS month_order,\n+     MONTH(orders.placed_date) AS month_ans FROM orders WHERE\n+     orders.placed_date IS NOT NULL\n+     GROUP BY MONTH(orders.placed_date)\n+     ORDER BY month_order DESC LIMIT 1) month_loop\n+     INTO ans;\n+     RETURN ans;\n+END //\n+\n+SELECT highest_order (2021)//\n\\ No newline at end of file"
+  }
+]

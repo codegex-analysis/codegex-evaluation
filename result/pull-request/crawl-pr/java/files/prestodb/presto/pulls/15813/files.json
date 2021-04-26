@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c41e1ce6da2019fbf61d19c4539dd966a9a586cb",
+    "filename": "presto-docs/src/main/sphinx/functions/math.rst",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/prestodb/presto/blob/07cc08828de39f215bf9e8157dc0c528cbcc7af1/presto-docs/src/main/sphinx/functions/math.rst",
+    "raw_url": "https://github.com/prestodb/presto/raw/07cc08828de39f215bf9e8157dc0c528cbcc7af1/presto-docs/src/main/sphinx/functions/math.rst",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-docs/src/main/sphinx/functions/math.rst?ref=07cc08828de39f215bf9e8157dc0c528cbcc7af1",
+    "patch": "@@ -85,6 +85,19 @@ Mathematical Functions\n     The a, b parameters must be positive real numbers and value v must be a real value.\n     The value v must lie on the interval [0, 1].\n \n+.. function:: inverse_continuous_uniform_cdf(a, b, p) -> double\n+\n+    Compute the inverse of the continuous uniform cdf with given [a, b] boundaries.\n+    inf{x in R | P(X<=x) >= p} for 0 < p <= 1,\n+    inf{x in R | P(X<=x) > 0} for p = 0.\n+    The a, b parameters must be real numbers.\n+    The probability p must lie on the interval [0, 1].\n+\n+.. function:: continuous_uniform_cdf(a, b, v) -> double\n+\n+    Compute the continuous uniform cdf with given [a, b] boundaries:  P(X <= x).\n+    The a, b parameters must be real numbers and value v must be a real number.\n+\n .. function:: ln(x) -> double\n \n     Returns the natural logarithm of ``x``."
+  },
+  {
+    "sha": "69d4e3063b95015d95155098d94706ce5a8b8252",
+    "filename": "presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/prestodb/presto/blob/07cc08828de39f215bf9e8157dc0c528cbcc7af1/presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/07cc08828de39f215bf9e8157dc0c528cbcc7af1/presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/main/java/com/facebook/presto/operator/scalar/MathFunctions.java?ref=07cc08828de39f215bf9e8157dc0c528cbcc7af1",
+    "patch": "@@ -31,6 +31,7 @@\n import com.google.common.primitives.Doubles;\n import io.airlift.slice.Slice;\n import org.apache.commons.math3.distribution.BetaDistribution;\n+import org.apache.commons.math3.distribution.UniformRealDistribution;\n import org.apache.commons.math3.special.Erf;\n \n import java.math.BigDecimal;\n@@ -704,6 +705,33 @@ public static double betaCdf(\n         return distribution.cumulativeProbability(value);\n     }\n \n+    @Description(\"inverse of continuous uniform cdf given a, b parameters and probability\")\n+    @ScalarFunction\n+    @SqlType(StandardTypes.DOUBLE)\n+    public static double inverseContinuousUniformCdf(\n+            @SqlType(StandardTypes.DOUBLE) double a,\n+            @SqlType(StandardTypes.DOUBLE) double b,\n+            @SqlType(StandardTypes.DOUBLE) double p)\n+    {\n+        checkCondition(p >= 0 && p <= 1, INVALID_FUNCTION_ARGUMENT, \"p must be in the interval [0, 1]\");\n+        checkCondition(b > a, INVALID_FUNCTION_ARGUMENT, \"b must be > a\");\n+        UniformRealDistribution distribution = new UniformRealDistribution(a, b);\n+        return distribution.inverseCumulativeProbability(p);\n+    }\n+\n+    @Description(\"Continuous uniform cdf given the a, b parameters and value\")\n+    @ScalarFunction\n+    @SqlType(StandardTypes.DOUBLE)\n+    public static double continuousUniformCdf(\n+            @SqlType(StandardTypes.DOUBLE) double a,\n+            @SqlType(StandardTypes.DOUBLE) double b,\n+            @SqlType(StandardTypes.DOUBLE) double value)\n+    {\n+        checkCondition(b > a, INVALID_FUNCTION_ARGUMENT, \"b must be > a\");\n+        UniformRealDistribution distribution = new UniformRealDistribution(a, b);\n+        return distribution.cumulativeProbability(value);\n+    }\n+\n     @Description(\"round to nearest integer\")\n     @ScalarFunction(\"round\")\n     @SqlType(StandardTypes.TINYINT)"
+  },
+  {
+    "sha": "e0682ff2f28b0b50e70a4707ed02bd68ab763410",
+    "filename": "presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/prestodb/presto/blob/07cc08828de39f215bf9e8157dc0c528cbcc7af1/presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/07cc08828de39f215bf9e8157dc0c528cbcc7af1/presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/test/java/com/facebook/presto/operator/scalar/TestMathFunctions.java?ref=07cc08828de39f215bf9e8157dc0c528cbcc7af1",
+    "patch": "@@ -1372,6 +1372,32 @@ public void testBetaCdf()\n         assertInvalidFunction(\"beta_cdf(3, 5, 1.1)\", \"value must be in the interval [0, 1]\");\n     }\n \n+    @Test\n+    public void testInverseContinuousUniformCdf()\n+    {\n+        assertFunction(\"inverse_continuous_uniform_cdf(3.0, 4.0, 0.3)\", DOUBLE, 3.3);\n+        assertFunction(\"inverse_continuous_uniform_cdf(3.0, 4.0, 0.0)\", DOUBLE, 3.0);\n+        assertFunction(\"inverse_continuous_uniform_cdf(3.0, 4.0, 0.7)\", DOUBLE, 3.7);\n+        assertFunction(\"inverse_continuous_uniform_cdf(3.0, 4.0, 1.0)\", DOUBLE, 4.0);\n+\n+        assertInvalidFunction(\"inverse_continuous_uniform_cdf(7.0, 3.0, 0.5)\", \"b must be > a\");\n+        assertInvalidFunction(\"inverse_continuous_uniform_cdf(7.0, 7.0, 0.5)\", \"b must be > a\");\n+        assertInvalidFunction(\"inverse_beta_cdf(3.0, 5.0, -0.1)\", \"p must be in the interval [0, 1]\");\n+        assertInvalidFunction(\"inverse_beta_cdf(3.0, 5.0, 1.1)\", \"p must be in the interval [0, 1]\");\n+    }\n+\n+    @Test\n+    public void testContinuousUniformCdf()\n+            throws Exception\n+    {\n+        assertFunction(\"continuous_uniform_cdf(3.0, 4.0, 0.0)\", DOUBLE, 0.0);\n+        assertFunction(\"continuous_uniform_cdf(3.0, 4.0, 5.0)\", DOUBLE, 1.0);\n+        assertFunction(\"round(continuous_uniform_cdf(3.0, 4.0, 3.4), 12)\", DOUBLE, 0.4);\n+\n+        assertInvalidFunction(\"continuous_uniform_cdf(7.0, 3.0, 0.5)\", \"b must be > a\");\n+        assertInvalidFunction(\"continuous_uniform_cdf(7.0, 7.0, 0.5)\", \"b must be > a\");\n+    }\n+\n     @Test\n     public void testWilsonInterval()\n     {"
+  }
+]

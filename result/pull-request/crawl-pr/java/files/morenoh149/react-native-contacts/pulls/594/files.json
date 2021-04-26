@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "ee10ad7de7894f1e3b2a2a774fa4f11dd3cc9a98",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/morenoh149/react-native-contacts/blob/92b89f33ab4d414f8114919c13edbfa775f2d1cd/README.md",
+    "raw_url": "https://github.com/morenoh149/react-native-contacts/raw/92b89f33ab4d414f8114919c13edbfa775f2d1cd/README.md",
+    "contents_url": "https://api.github.com/repos/morenoh149/react-native-contacts/contents/README.md?ref=92b89f33ab4d414f8114919c13edbfa775f2d1cd",
+    "patch": "@@ -175,6 +175,7 @@ If you'd like to read/write the contact's notes, call the `iosEnableNotesUsage(t\n  * `deleteContact(contact)` - where contact is an object with a valid recordID  \n  * `getContactsMatchingString(string)`: Promise<Contact[]> - where string is any string to match a name (first, middle, family) to\n  * `getContactsByPhoneNumber(string)`: Promise<Contact[]> - where string is a phone number to match to.\n+ * `getContactsByPhoneNumbers(array)` : Promise<Contact[]> - where array is a list of phone numbers to match to.\n  * `getContactsByEmailAddress(string)`: Promise<Contact[]> - where string is an email address to match to.\n  * `checkPermission()`: Promise<string> - checks permission to access Contacts _ios only_\n  * `requestPermission()`: Promise<string> - request permission to access Contacts _ios only_"
+  },
+  {
+    "sha": "c62a37b344b5258d0c0d22b2d1d46276149101fe",
+    "filename": "android/src/main/java/com/rt2zz/reactnativecontacts/ContactsManager.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 1,
+    "changes": 29,
+    "blob_url": "https://github.com/morenoh149/react-native-contacts/blob/92b89f33ab4d414f8114919c13edbfa775f2d1cd/android/src/main/java/com/rt2zz/reactnativecontacts/ContactsManager.java",
+    "raw_url": "https://github.com/morenoh149/react-native-contacts/raw/92b89f33ab4d414f8114919c13edbfa775f2d1cd/android/src/main/java/com/rt2zz/reactnativecontacts/ContactsManager.java",
+    "contents_url": "https://api.github.com/repos/morenoh149/react-native-contacts/contents/android/src/main/java/com/rt2zz/reactnativecontacts/ContactsManager.java?ref=92b89f33ab4d414f8114919c13edbfa775f2d1cd",
+    "patch": "@@ -22,6 +22,8 @@\n import android.provider.ContactsContract.CommonDataKinds.StructuredName;\n import android.provider.ContactsContract.CommonDataKinds.Note;\n import android.provider.ContactsContract.RawContacts;\n+import android.util.Log;\n+\n import androidx.annotation.NonNull;\n import androidx.core.app.ActivityCompat;\n \n@@ -508,7 +510,7 @@ public void openExistingContact(ReadableMap contact, Promise promise) {\n             promise.reject(e.toString());\n         }\n     }\n-    \n+\n     /*\n      * Edit contact in native app\n      */\n@@ -1103,6 +1105,31 @@ public void deleteContact(ReadableMap contact, Promise promise) {\n             promise.reject(e.toString());\n         }\n     }\n+\n+\n+    /**\n+     * Retrieves contacts matching a list of phone numbers.\n+     * Uses raw URI when <code>rawUri</code> is <code>true</code>, makes assets copy otherwise.\n+     *\n+     * @param phoneNumbers an array of phone numbers to match\n+     */\n+    @ReactMethod\n+    public void getContactsByPhoneNumbers(final ReadableArray phoneNumbers, final Promise promise) {\n+        AsyncTask<Void,Void,Void> myAsyncTask = new AsyncTask<Void,Void,Void>() {\n+            @Override\n+            protected Void doInBackground(final Void ... params) {\n+                Context context = getReactApplicationContext();\n+                ContentResolver cr = context.getContentResolver();\n+                ContactsProvider contactsProvider = new ContactsProvider(cr);\n+                WritableArray contacts = contactsProvider.getContactsByPhoneNumbers(phoneNumbers);\n+\n+                promise.resolve(contacts);\n+                return null;\n+            }\n+        };\n+        myAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);\n+    }\n+\n     /*\n      * Check permission\n      */"
+  },
+  {
+    "sha": "2cedfc3f9c9255f392415c05b12917d542198c51",
+    "filename": "android/src/main/java/com/rt2zz/reactnativecontacts/ContactsProvider.java",
+    "status": "modified",
+    "additions": 54,
+    "deletions": 0,
+    "changes": 54,
+    "blob_url": "https://github.com/morenoh149/react-native-contacts/blob/92b89f33ab4d414f8114919c13edbfa775f2d1cd/android/src/main/java/com/rt2zz/reactnativecontacts/ContactsProvider.java",
+    "raw_url": "https://github.com/morenoh149/react-native-contacts/raw/92b89f33ab4d414f8114919c13edbfa775f2d1cd/android/src/main/java/com/rt2zz/reactnativecontacts/ContactsProvider.java",
+    "contents_url": "https://api.github.com/repos/morenoh149/react-native-contacts/contents/android/src/main/java/com/rt2zz/reactnativecontacts/ContactsProvider.java?ref=92b89f33ab4d414f8114919c13edbfa775f2d1cd",
+    "patch": "@@ -9,6 +9,7 @@\n import android.util.Log;\n \n import com.facebook.react.bridge.Arguments;\n+import com.facebook.react.bridge.ReadableArray;\n import com.facebook.react.bridge.WritableArray;\n import com.facebook.react.bridge.WritableMap;\n \n@@ -747,4 +748,57 @@ static String getLabel(Cursor cursor) {\n             }\n         }\n     }\n+\n+    public WritableArray getContactsByPhoneNumbers(ReadableArray phoneNumbers) {\n+        Map<String, Contact> matchingContacts;\n+        {\n+            Cursor cursor = contentResolver.query(\n+                    ContactsContract.Data.CONTENT_URI,\n+                    FULL_PROJECTION.toArray(new String[FULL_PROJECTION.size()]),\n+                    buildQueryString(phoneNumbers),\n+                    buildSelectionArgs(phoneNumbers),\n+                    null\n+            );\n+\n+            try {\n+                matchingContacts = loadContactsFrom(cursor);\n+            } finally {\n+                if (cursor != null) {\n+                    cursor.close();\n+                }\n+            }\n+        }\n+\n+        WritableArray contacts = Arguments.createArray();\n+        for (Contact contact : matchingContacts.values()) {\n+            contacts.pushMap(contact.toMap());\n+        }\n+        return contacts;\n+    }\n+\n+    private String buildQueryString(ReadableArray phoneNumbers) {\n+        String query = \"\";\n+        for (int i=0; i<phoneNumbers.size(); i++) {\n+            String numberQuery = ContactsContract.CommonDataKinds.Phone.NUMBER  + \" LIKE ? OR \" + ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER + \" LIKE ?\";\n+            if (i < phoneNumbers.size() - 1) {\n+                numberQuery += \" OR \";\n+            }\n+            query += numberQuery;\n+        }\n+        return query;\n+    }\n+\n+    private String[] buildSelectionArgs(ReadableArray phoneNumbers) {\n+        String[] selectionArgs = new String[phoneNumbers.size() * 2];\n+        for (int i=0; i<phoneNumbers.size(); i++) {\n+            if (i == 0) {\n+                selectionArgs[i] = '%' + phoneNumbers.getString(i) + '%';\n+                selectionArgs[i+1] = '%' + phoneNumbers.getString(i) + '%';\n+            } else {\n+                selectionArgs[i+1] = '%' + phoneNumbers.getString(i) + '%';\n+                selectionArgs[i+2] = '%' + phoneNumbers.getString(i) + '%';\n+            }\n+        }\n+        return selectionArgs;\n+    }\n }"
+  },
+  {
+    "sha": "b85cbea3617210a259b5a5980f7b34e481ee7748",
+    "filename": "example/App.js",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/morenoh149/react-native-contacts/blob/92b89f33ab4d414f8114919c13edbfa775f2d1cd/example/App.js",
+    "raw_url": "https://github.com/morenoh149/react-native-contacts/raw/92b89f33ab4d414f8114919c13edbfa775f2d1cd/example/App.js",
+    "contents_url": "https://api.github.com/repos/morenoh149/react-native-contacts/contents/example/App.js?ref=92b89f33ab4d414f8114919c13edbfa775f2d1cd",
+    "patch": "@@ -117,7 +117,7 @@ export default class App extends Component<Props> {\n       // Added new contact\n       this.setState(({ contacts }) => ({\n         contacts: [contact, ...contacts],\n-        loading: false \n+        loading: false\n       }));\n     })\n   }"
+  }
+]

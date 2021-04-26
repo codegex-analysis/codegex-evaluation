@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "e640068fa75e966865580d6173af2f27abc622c3",
+    "filename": "dao-abstract/src/main/java/jm/stockx/api/dao/SellingInfoDAO.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/NikitaNesterenko/JM-PROJECT/blob/2f3ea1db30b93419374a05b7cde720c5d67af6dc/dao-abstract/src/main/java/jm/stockx/api/dao/SellingInfoDAO.java",
+    "raw_url": "https://github.com/NikitaNesterenko/JM-PROJECT/raw/2f3ea1db30b93419374a05b7cde720c5d67af6dc/dao-abstract/src/main/java/jm/stockx/api/dao/SellingInfoDAO.java",
+    "contents_url": "https://api.github.com/repos/NikitaNesterenko/JM-PROJECT/contents/dao-abstract/src/main/java/jm/stockx/api/dao/SellingInfoDAO.java?ref=2f3ea1db30b93419374a05b7cde720c5d67af6dc",
+    "patch": "@@ -19,6 +19,8 @@\n \n     List<ItemTopInfoDto> getItemTopInfoDto(int maxResult);\n \n+    List<ItemTopSeillingInfoDto> getItemTopSeillingInfoDto(int maxResult);\n+\n     List<SellingItemDto> getAllSellingItemDtoToCurrentDate(Long itemId);\n \n     List<Item> getTopItemByPeriodAndCategory(LocalDateTime beginningPeriod,"
+  },
+  {
+    "sha": "2a7577d23df8bddb54e2a6139f35ec5ffde542b2",
+    "filename": "dao-impl/src/main/java/jm/stockx/api/dao/SellingInfoDaoImpl.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/NikitaNesterenko/JM-PROJECT/blob/2f3ea1db30b93419374a05b7cde720c5d67af6dc/dao-impl/src/main/java/jm/stockx/api/dao/SellingInfoDaoImpl.java",
+    "raw_url": "https://github.com/NikitaNesterenko/JM-PROJECT/raw/2f3ea1db30b93419374a05b7cde720c5d67af6dc/dao-impl/src/main/java/jm/stockx/api/dao/SellingInfoDaoImpl.java",
+    "contents_url": "https://api.github.com/repos/NikitaNesterenko/JM-PROJECT/contents/dao-impl/src/main/java/jm/stockx/api/dao/SellingInfoDaoImpl.java?ref=2f3ea1db30b93419374a05b7cde720c5d67af6dc",
+    "patch": "@@ -90,6 +90,23 @@ public int getCountSalesForPeriod(LocalDateTime beginningPeriod, LocalDateTime e\n                 .getResultList();\n     }\n \n+    @Override\n+    public List<ItemTopSeillingInfoDto> getItemTopSeillingInfoDto(int maxResult) {\n+        String sql = \"\" +\n+                \"SELECT NEW jm.stockx.dto.sellingInfo.ItemTopSeillingInfoDto(\" +\n+                \"i.id, \" +\n+                \"i.item.name, \" +\n+                \"COUNT(si.itemInfo)) \" +\n+                \"FROM SellingInfo as si \" +\n+                \"LEFT JOIN ItemInfo as i \" +\n+                \"ON si.itemInfo.id = i.id \" +\n+                \"GROUP BY 1, 2 \" +\n+                \"ORDER BY COUNT(si.itemInfo) DESC\";\n+        return entityManager.createQuery(sql, ItemTopSeillingInfoDto.class)\n+                .setMaxResults(maxResult)\n+                .getResultList();\n+    }\n+\n     @Override\n     public List<SellingItemDto> getSellingItemDtoByPeriodAndItemId(LocalDateTime begin, LocalDateTime end, Long itemId) {\n         return entityManager.createQuery(\"\" +"
+  },
+  {
+    "sha": "ef04f591520282f2e7e59cb532a8fdb5dfd5f68d",
+    "filename": "model/src/main/java/jm/stockx/dto/sellingInfo/ItemTopSeillingInfoDto.java",
+    "status": "added",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/NikitaNesterenko/JM-PROJECT/blob/2f3ea1db30b93419374a05b7cde720c5d67af6dc/model/src/main/java/jm/stockx/dto/sellingInfo/ItemTopSeillingInfoDto.java",
+    "raw_url": "https://github.com/NikitaNesterenko/JM-PROJECT/raw/2f3ea1db30b93419374a05b7cde720c5d67af6dc/model/src/main/java/jm/stockx/dto/sellingInfo/ItemTopSeillingInfoDto.java",
+    "contents_url": "https://api.github.com/repos/NikitaNesterenko/JM-PROJECT/contents/model/src/main/java/jm/stockx/dto/sellingInfo/ItemTopSeillingInfoDto.java?ref=2f3ea1db30b93419374a05b7cde720c5d67af6dc",
+    "patch": "@@ -0,0 +1,15 @@\n+package jm.stockx.dto.sellingInfo;\n+\n+import lombok.*;\n+import org.joda.money.Money;\n+\n+@Getter\n+@Setter\n+@ToString\n+@NoArgsConstructor\n+@AllArgsConstructor\n+public class ItemTopSeillingInfoDto {\n+        private Long id;\n+        private String name;\n+        private Long saleCount;\n+}"
+  },
+  {
+    "sha": "2bb86fdc78346c4c812e14bf4eaae0b1a43773ac",
+    "filename": "service-abstract/src/main/java/jm/stockx/SellingInfoService.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 5,
+    "changes": 8,
+    "blob_url": "https://github.com/NikitaNesterenko/JM-PROJECT/blob/2f3ea1db30b93419374a05b7cde720c5d67af6dc/service-abstract/src/main/java/jm/stockx/SellingInfoService.java",
+    "raw_url": "https://github.com/NikitaNesterenko/JM-PROJECT/raw/2f3ea1db30b93419374a05b7cde720c5d67af6dc/service-abstract/src/main/java/jm/stockx/SellingInfoService.java",
+    "contents_url": "https://api.github.com/repos/NikitaNesterenko/JM-PROJECT/contents/service-abstract/src/main/java/jm/stockx/SellingInfoService.java?ref=2f3ea1db30b93419374a05b7cde720c5d67af6dc",
+    "patch": "@@ -1,11 +1,7 @@\n package jm.stockx;\n \n import jm.stockx.dto.itemInfo.InfoTickerDto;\n-import jm.stockx.dto.sellingInfo.AverageSalePriceDto;\n-import jm.stockx.dto.sellingInfo.ItemPriceChangeDto;\n-import jm.stockx.dto.sellingInfo.ItemTopInfoDto;\n-import jm.stockx.dto.sellingInfo.SellerTopInfoDto;\n-import jm.stockx.dto.sellingInfo.SellingItemDto;\n+import jm.stockx.dto.sellingInfo.*;\n import jm.stockx.entity.SellingInfo;\n import jm.stockx.enums.ItemCategory;\n \n@@ -40,5 +36,7 @@\n \n     AverageSalePriceDto getAverageItemPriceById(Long itemId);\n \n+    List<ItemTopSeillingInfoDto> getItemTopSeillingInfoDto(int maxResult);\n+\n \n }"
+  },
+  {
+    "sha": "0ec2fa63ad0da98e243904c9d63e3d9740a7e572",
+    "filename": "service-impl/src/main/java/jm/stockx/SellingInfoServiceImpl.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 5,
+    "changes": 11,
+    "blob_url": "https://github.com/NikitaNesterenko/JM-PROJECT/blob/2f3ea1db30b93419374a05b7cde720c5d67af6dc/service-impl/src/main/java/jm/stockx/SellingInfoServiceImpl.java",
+    "raw_url": "https://github.com/NikitaNesterenko/JM-PROJECT/raw/2f3ea1db30b93419374a05b7cde720c5d67af6dc/service-impl/src/main/java/jm/stockx/SellingInfoServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/NikitaNesterenko/JM-PROJECT/contents/service-impl/src/main/java/jm/stockx/SellingInfoServiceImpl.java?ref=2f3ea1db30b93419374a05b7cde720c5d67af6dc",
+    "patch": "@@ -2,11 +2,7 @@\n \n import jm.stockx.api.dao.SellingInfoDAO;\n import jm.stockx.dto.itemInfo.InfoTickerDto;\n-import jm.stockx.dto.sellingInfo.AverageSalePriceDto;\n-import jm.stockx.dto.sellingInfo.ItemPriceChangeDto;\n-import jm.stockx.dto.sellingInfo.ItemTopInfoDto;\n-import jm.stockx.dto.sellingInfo.SellerTopInfoDto;\n-import jm.stockx.dto.sellingInfo.SellingItemDto;\n+import jm.stockx.dto.sellingInfo.*;\n import jm.stockx.entity.Item;\n import jm.stockx.entity.SellingInfo;\n import jm.stockx.enums.ItemCategory;\n@@ -131,6 +127,11 @@ public AverageSalePriceDto getAverageItemPriceById(Long itemId){\n         return averageSalePriceDto;\n     }\n \n+    @Override\n+    public List<ItemTopSeillingInfoDto> getItemTopSeillingInfoDto(int maxResult) {\n+        return sellingInfoDAO.getItemTopSeillingInfoDto(maxResult);\n+    }\n+\n     private double calculatePercentDifferenceInPrice(BigDecimal current, BigDecimal average){\n         return (average.doubleValue() - current.doubleValue()) / current.doubleValue() * 100;\n     }"
+  },
+  {
+    "sha": "67f13167614e6836f7e34459509bc7b4d398ae5d",
+    "filename": "webapp/src/main/java/jm/stockx/rest_controller/ItemRestController.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/NikitaNesterenko/JM-PROJECT/blob/2f3ea1db30b93419374a05b7cde720c5d67af6dc/webapp/src/main/java/jm/stockx/rest_controller/ItemRestController.java",
+    "raw_url": "https://github.com/NikitaNesterenko/JM-PROJECT/raw/2f3ea1db30b93419374a05b7cde720c5d67af6dc/webapp/src/main/java/jm/stockx/rest_controller/ItemRestController.java",
+    "contents_url": "https://api.github.com/repos/NikitaNesterenko/JM-PROJECT/contents/webapp/src/main/java/jm/stockx/rest_controller/ItemRestController.java?ref=2f3ea1db30b93419374a05b7cde720c5d67af6dc",
+    "patch": "@@ -5,6 +5,7 @@\n import jm.stockx.dto.itemInfo.ItemInfoDtoDecimal;\n import jm.stockx.dto.itemInfo.ItemSearchDto;\n import jm.stockx.dto.sellingInfo.ItemTopInfoDto;\n+import jm.stockx.dto.sellingInfo.ItemTopSeillingInfoDto;\n import jm.stockx.util.Response;\n import org.springframework.web.bind.annotation.GetMapping;\n import org.springframework.web.bind.annotation.RequestMapping;\n@@ -56,4 +57,13 @@ public ItemRestController(ItemInfoService itemInfoService,\n         List<ItemTopInfoDto> foundTodItems = sellingInfoService.getItemTopInfoDto(5);\n         return Response.ok(foundTodItems);\n     }\n+\n+    /**\n+     * список ДТО итемов, от большего количество продаж к меньшеу с указанием колиства продаж\n+     */\n+    @GetMapping(\"/mostseilling\")\n+    public Response<List<ItemTopSeillingInfoDto>> getMostSeillingItems() {\n+        List<ItemTopSeillingInfoDto> foundTopSeilling = sellingInfoService.getItemTopSeillingInfoDto(100);\n+        return Response.ok(foundTopSeilling);\n+    }\n }\n\\ No newline at end of file"
+  }
+]

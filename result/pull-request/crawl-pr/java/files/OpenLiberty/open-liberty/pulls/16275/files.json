@@ -1,0 +1,96 @@
+[
+  {
+    "sha": "990f43fdad436c8c613d21021afe7d09fcd7dd55",
+    "filename": "dev/com.ibm.ws.jdbc_fat_db2/fat/src/com/ibm/ws/jdbc/fat/db2/FATSuite.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/fat/src/com/ibm/ws/jdbc/fat/db2/FATSuite.java",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/fat/src/com/ibm/ws/jdbc/fat/db2/FATSuite.java",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.jdbc_fat_db2/fat/src/com/ibm/ws/jdbc/fat/db2/FATSuite.java?ref=cc99e621c0fd8645a75bb62f990259d2b3e1c986",
+    "patch": "@@ -43,7 +43,7 @@\n     }\n \n     // Updated docker image to use TLS1.2 for secure communication\n-    static final DockerImageName db2Image = DockerImageName.parse(\"gjwatts/db2-tls12:1.0\")\n+    static final DockerImageName db2Image = DockerImageName.parse(\"kyleaure/db2-ssl:2.0\")\n                     .asCompatibleSubstituteFor(\"ibmcom/db2\");\n \n     @ClassRule"
+  },
+  {
+    "sha": "9017402a6ed7a078e96bbb0ad2e0df7b3045f7a8",
+    "filename": "dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/Dockerfile",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 2,
+    "changes": 11,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/Dockerfile",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/Dockerfile",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/Dockerfile?ref=cc99e621c0fd8645a75bb62f990259d2b3e1c986",
+    "patch": "@@ -1,14 +1,21 @@\n FROM ibmcom/db2:11.5.5.0\n \n+# Copy custom startup script that will run when server starts\n RUN mkdir /var/custom\n-COPY certs/ /certs/\n COPY custom/ /var/custom/\n-\n RUN chmod 777 /var/custom/*\n \n+# Copy custom enablement script that will run when image is built\n+RUN mkdir /var/setup/\n+COPY setup/ /var/setup/\n+RUN chmod 777 /var/setup/*\n+RUN /var/setup/enable-ssl.sh\n+\n ENV LICENSE=accept\n ENV DB2INSTANCE=db2inst1\n ENV DB2INST1_PASSWORD=password\n ENV DBNAME=testdb\n ENV AUTOCONFIG=false\n ENV ARCHIVE_LOGS=false\n+\n+EXPOSE 50001\n\\ No newline at end of file"
+  },
+  {
+    "sha": "3dc54c793a76fe61d5a73e99d5e38d05a41fb268",
+    "filename": "dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/certs/server.kdb",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/475397ab057cd58ae114bd16c924f81ceed6c904/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/certs/server.kdb",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/475397ab057cd58ae114bd16c924f81ceed6c904/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/certs/server.kdb",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/certs/server.kdb?ref=475397ab057cd58ae114bd16c924f81ceed6c904"
+  },
+  {
+    "sha": "997448c5a58002bd1ba3f0b3b9085593c73d5ffa",
+    "filename": "dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/certs/server.sth",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/475397ab057cd58ae114bd16c924f81ceed6c904/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/certs/server.sth",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/475397ab057cd58ae114bd16c924f81ceed6c904/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/certs/server.sth",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/certs/server.sth?ref=475397ab057cd58ae114bd16c924f81ceed6c904",
+    "patch": "@@ -1 +0,0 @@\n-�f�v.�]��P!\u0012��\u0018_Ғ�Ѻ�(��4�\u0006E����j\u001C&@���t��CM-\u0002=p1膴���7�\u0007�\u0005z�̇�urmH\u0014�D\u0013%�����\u0014�[yOn\u0014)�*x�m���\t\u000E2��<�,E_g�{��*?\"x�v�7��P�9�۳?�5��\u000E�۹���8\u0012��m\\�\b΁��\u0017�m�1d��B�#��E��!/G'�Q�F��+�\u0018\u001B`&\u0010�a!>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "4d68a5e6956c9c33b66037de726ab08e1122a795",
+    "filename": "dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/release.sh",
+    "status": "added",
+    "additions": 43,
+    "deletions": 0,
+    "changes": 43,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/release.sh",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/release.sh",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/release.sh?ref=cc99e621c0fd8645a75bb62f990259d2b3e1c986",
+    "patch": "@@ -0,0 +1,43 @@\n+#!/bin/bash\n+\n+#Needs to be provided by user\n+USER_NAME=kyleaure\n+\n+#Version of docker image.  Increment if doing a new release\n+VERSION=2.0\n+\n+#Name of the final image\n+IMAGE_NAME=db2-ssl\n+\n+#Docker image signiture in form username/image:version\n+SIGNITURE=$USER_NAME/$IMAGE_NAME:$VERSION\n+\n+echo \"Attempting to build and push $SIGNITURE\"\n+\n+#Ensure user is logged in\n+docker login || (echo \"Unable to login to DockerHub\" && exit 1)\n+\n+#This script assumes it is in the same directory as the Dockerfile\n+docker build -t $SIGNITURE .\n+\n+#Extract wallet\n+SECURITY_DIR=../../servers/com.ibm.ws.jdbc.fat.db2/security/\n+CONTAINER=\"TMP-CONTAINER\"\n+\n+mkdir -p $SECURITY_DIR\n+\n+docker create --name $CONTAINER $SIGNITURE\n+docker cp $CONTAINER:/certs/db2-keystore.p12 $SECURITY_DIR\n+docker rm $CONTAINER\n+\n+#Make security files readable\n+chmod -R 755 $SECURITY_DIR\n+\n+# #Push image to DockerHub\n+# docker push \"$SIGNITURE\"\n+\n+# #Add a comment to the Dockerfile and script\n+# sed -i '' -e '/.*Currently tagged in DockerHub as.*/d' *Dockerfile\n+# cat << EOF >> *Dockerfile\n+# # Currently tagged in DockerHub as: $SIGNITURE\n+# EOF\n\\ No newline at end of file"
+  },
+  {
+    "sha": "b86ad22f55d5621ea9cb4674d57a0b6ee1e183db",
+    "filename": "dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/setup/enable-ssl.sh",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/setup/enable-ssl.sh",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/setup/enable-ssl.sh",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.jdbc_fat_db2/publish/files/db2/setup/enable-ssl.sh?ref=cc99e621c0fd8645a75bb62f990259d2b3e1c986",
+    "patch": "@@ -0,0 +1,42 @@\n+#!/bin/sh\n+\n+# This is an enablement script we want to run during image creation\n+\n+echoDebug() {\n+    local GREEN=\"\\033[32m\"\n+    local NOCOLOR=\"\\033[0m\"\n+    echo\n+    echo -e $GREEN$1$NOCOLOR\n+    echo\n+}\n+\n+# Project setup\n+CERTS=/certs\n+mkdir -p $CERTS\n+\n+# Setup utilities to follow guide\n+GSKIT=/opt/ibm/db2/V11.5/gskit\n+DB2=/opt/ibm/db2/V11.5\n+export PATH=$PATH:$GSKIT/bin:$DB2/bin\n+export LD_LIBRARY_PATH=/opt/ibm/db2/V11.5/lib64/gskit_db2/\n+ldconfig\n+\n+#These steps follow this guide:\n+# https://www.ibm.com/support/pages/how-configure-db2-ssl-self-signed-certificate-and-ms-certificate-store\n+echoDebug \"BEGIN >>> Create server certificate\"\n+\n+PASSWORD=\"db2test\"\n+LABEL=\"server_cert\"\n+DN=\"CN=localhost\"\n+KEY_DB=$CERTS/server.kdb\n+STASH=$CERTS/server.sth\n+CERT=$CERTS/server.crt\n+P12=$CERTS/db2-keystore.p12\n+\n+gsk8capicmd_64 -keydb -create  -db $KEY_DB -pw $PASSWORD -stash\n+gsk8capicmd_64 -cert  -create  -db $KEY_DB -stashed -label $LABEL -dn $DN -expire 36500 -size 1024 -sig_alg SHA256WithRSA\n+gsk8capicmd_64 -cert  -modify  -db $KEY_DB -stashed -label $LABEL -trust enable\n+gsk8capicmd_64 -cert  -details -db $KEY_DB -stashed -label $LABEL\n+gsk8capicmd_64 -cert  -export  -db $KEY_DB -stashed -label $LABEL -type kdb \\\n+               -target $P12 -target_pw $PASSWORD -target_type pkcs12\n+echoDebug \"END >>> Create server certificate\""
+  },
+  {
+    "sha": "ac0daebae1778799aa1de4988a2f9f88eddf1313",
+    "filename": "dev/com.ibm.ws.jdbc_fat_db2/publish/servers/com.ibm.ws.jdbc.fat.db2/jvm.options",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/servers/com.ibm.ws.jdbc.fat.db2/jvm.options",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/servers/com.ibm.ws.jdbc.fat.db2/jvm.options",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.jdbc_fat_db2/publish/servers/com.ibm.ws.jdbc.fat.db2/jvm.options?ref=cc99e621c0fd8645a75bb62f990259d2b3e1c986",
+    "patch": "@@ -0,0 +1 @@\n+-Djavax.net.debug=ssl:handshake:verbose:keymanager:trustmanager\n\\ No newline at end of file"
+  },
+  {
+    "sha": "847b0786d52e1862eb9ace68e64f81813227abb9",
+    "filename": "dev/com.ibm.ws.jdbc_fat_db2/publish/servers/com.ibm.ws.jdbc.fat.db2/security/db2-keystore.p12",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/servers/com.ibm.ws.jdbc.fat.db2/security/db2-keystore.p12",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/cc99e621c0fd8645a75bb62f990259d2b3e1c986/dev/com.ibm.ws.jdbc_fat_db2/publish/servers/com.ibm.ws.jdbc.fat.db2/security/db2-keystore.p12",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.jdbc_fat_db2/publish/servers/com.ibm.ws.jdbc.fat.db2/security/db2-keystore.p12?ref=cc99e621c0fd8645a75bb62f990259d2b3e1c986"
+  }
+]

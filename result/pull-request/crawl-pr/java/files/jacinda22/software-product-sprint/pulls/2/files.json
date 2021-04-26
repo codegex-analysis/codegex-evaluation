@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "bb695abdf3e91e7d77e648b467b8ef15d0b28146",
+    "filename": "portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/jacinda22/software-product-sprint/blob/9fbc4d71f17b4a837f02c97cc8fbf1e7f8cf7d93/portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java",
+    "raw_url": "https://github.com/jacinda22/software-product-sprint/raw/9fbc4d71f17b4a837f02c97cc8fbf1e7f8cf7d93/portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java",
+    "contents_url": "https://api.github.com/repos/jacinda22/software-product-sprint/contents/portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java?ref=9fbc4d71f17b4a837f02c97cc8fbf1e7f8cf7d93",
+    "patch": "@@ -0,0 +1,45 @@\n+package com.google.sps.servlets;\n+\n+import java.io.IOException;\n+import javax.servlet.annotation.WebServlet;\n+import javax.servlet.http.HttpServlet;\n+import javax.servlet.http.HttpServletRequest;\n+import javax.servlet.http.HttpServletResponse;\n+\n+@WebServlet(\"/form-handler\")\n+public class FormHandlerServlet extends HttpServlet {\n+\n+  @Override\n+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {\n+\n+    //Get the value(s) entered in the form.\n+    String textValue = request.getParameter(\"text-input\");\n+    boolean contactEmail = Boolean.parseBoolean(getParameter(request, \"contact-email\", \"false\"));\n+    boolean contactPhone = Boolean.parseBoolean(getParameter(request, \"contact-phone\", \"false\"));\n+    boolean contactGit = Boolean.parseBoolean(getParameter(request, \"contact-git\", \"false\"));\n+\n+    //Print what the user submitted/if they requested info in the server logs.\n+    if(contactEmail || contactPhone || contactGit)\n+        System.out.println(\"Submitted: \" + textValue + \"\\nContact information was requested.\");\n+    else\n+        System.out.println(\"Submitted: \" + textValue);\n+\n+    //Print what the user submitted/if they requested info\n+    if(contactEmail || contactPhone || contactGit)\n+        response.getWriter().println(\"You submitted: \" + textValue + \"\\nYou requested to receive contact informtation.\");\n+    else\n+        response.getWriter().println(\"You submitted: \" + textValue);\n+\n+    //redirect user to the main page: figure out how user can see above info & then be redirected\n+    //response.getWriter().println(\"You are now being redirected to the main page\");\n+    //response.sendRedirect(\"http://www.jsoto-sps-spring21.appspot.com/\");\n+  }\n+\n+  private String getParameter(HttpServletRequest request, String name, String defaultValue) {\n+    String value = request.getParameter(name);\n+    if (value == null) {\n+      return defaultValue;\n+    }\n+    return value;\n+  }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "1bd13bafe3bf3b516079fcb1372089aa250d7327",
+    "filename": "portfolio/src/main/webapp/index.html",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 3,
+    "changes": 30,
+    "blob_url": "https://github.com/jacinda22/software-product-sprint/blob/9fbc4d71f17b4a837f02c97cc8fbf1e7f8cf7d93/portfolio/src/main/webapp/index.html",
+    "raw_url": "https://github.com/jacinda22/software-product-sprint/raw/9fbc4d71f17b4a837f02c97cc8fbf1e7f8cf7d93/portfolio/src/main/webapp/index.html",
+    "contents_url": "https://api.github.com/repos/jacinda22/software-product-sprint/contents/portfolio/src/main/webapp/index.html?ref=9fbc4d71f17b4a837f02c97cc8fbf1e7f8cf7d93",
+    "patch": "@@ -10,11 +10,11 @@\n     <div id=\"content\">\n       <h1>Jacinda's Portfolio</h1>\n       <p>Welcome to my portfolio.</p>\n-      <img src = \"/images/tenor.gif\" />\n-      <button onclick = \"showSomething();\">\n+     <img src = \"/images/tenor.gif\" /> \n+      <button onclick = \"getRandomThoughts();\">\n         Click here for a surprise! :)\n     </button>\n-    <p id=\"servlet-container\"></p>\n+    <p id=\"servlet2-container\"></p>\n     \n       <p>Hi everyone! My full name is Jacinda Ryzel Soto. Right now you are visiting\n         my portfolio page which is kinda cool. I like to code (if that wasn't obvious), read,\n@@ -29,6 +29,30 @@ <h1>Jacinda's Portfolio</h1>\n       <p>Click below to get random fun facts about me.</p>\n       <button onclick=\"addRandomGreeting()\"> ☺️</button>\n       <div id=\"greeting-container\"></div>\n+\n+      <form action=\"/form-handler\" method=\"POST\">\n+\n+        <p>Choose contact information you want to receive:</p>\n+      <label>\n+        <input type=\"checkbox\" name=\"contact-email\" value=\"true\">\n+        Email\n+      </label>\n+       <label>\n+        <input type=\"checkbox\" name=\"contact-phone\" value=\"true\">\n+        Phone Number\n+      </label>\n+      <label>\n+        <input type=\"checkbox\" name=\"contact-git\" value=\"true\">\n+        Github\n+      </label>\n+\n+        <p>Enter your email here:</p>\n+        <textarea name=\"text-input\">hello world</textarea>\n+        <br/>\n+        <input type=\"submit\" />\n+        </form>\n     </div>\n+\n+    \n   </body>\n </html>"
+  },
+  {
+    "sha": "9c0944716dc5556127b56fd26aed97713d515ca7",
+    "filename": "portfolio/src/main/webapp/script.js",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 9,
+    "changes": 18,
+    "blob_url": "https://github.com/jacinda22/software-product-sprint/blob/9fbc4d71f17b4a837f02c97cc8fbf1e7f8cf7d93/portfolio/src/main/webapp/script.js",
+    "raw_url": "https://github.com/jacinda22/software-product-sprint/raw/9fbc4d71f17b4a837f02c97cc8fbf1e7f8cf7d93/portfolio/src/main/webapp/script.js",
+    "contents_url": "https://api.github.com/repos/jacinda22/software-product-sprint/contents/portfolio/src/main/webapp/script.js?ref=9fbc4d71f17b4a837f02c97cc8fbf1e7f8cf7d93",
+    "patch": "@@ -32,20 +32,20 @@ async function showSomething(){\n     const responseFromServer = await fetch('/hello');\n     const textFromResponse = await responseFromServer.text();\n \n-    const servletContainer = document.getElementById('servlet-container');\n+    const servletContainer = document.getElementById('servlet1-container');\n     servletContainer.innerText = textFromResponse;\n }\n \n-async function getServerStats(){\n+async function getRandomThoughts(){\n     //fetch function that will get info from /hello\n     const serverResponse = await fetch('/hello');\n-    //parsing to json\n-    const info = await serverResponse.json();\n \n-    //retrieving messages from arraylist: not working\n-    console.log(info);\n-    //console.log(\"info.get(1)\");\n-    //console.log(\"info.get(2)\");\n+    //parsing to json\n+    const ranInfo = await serverResponse.json();\n+    //gets a random element w/Math.random()\n+    const ranElement = ranInfo[Math.floor(Math.random()*ranInfo.length)];  \n \n+    //connecting with index.html to print array of random info\n+    const servletContainer = document.getElementById('servlet2-container');\n+    servletContainer.innerText = ranElement;\n }\n-"
+  }
+]

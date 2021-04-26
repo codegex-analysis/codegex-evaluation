@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "427a210ccfe97f0bf2e3a6dee553ab0b8840cc93",
+    "filename": "Parentheses.py",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/super30admin/BFS-3/blob/24642551e6fec46c2886331963d9b4f2b2cb5cd6/Parentheses.py",
+    "raw_url": "https://github.com/super30admin/BFS-3/raw/24642551e6fec46c2886331963d9b4f2b2cb5cd6/Parentheses.py",
+    "contents_url": "https://api.github.com/repos/super30admin/BFS-3/contents/Parentheses.py?ref=24642551e6fec46c2886331963d9b4f2b2cb5cd6",
+    "patch": "@@ -0,0 +1,42 @@\n+'''\n+Time Complexity : exponential O(2^n)\n+Space Complexity : O(l)- length of the queue\n+Approach : BFS. \n+ - At each level, we need to remove a bracket from the curr value, if its valid, add it to the result array and convert the boolean to true. \n+ - Next , Add all its children to the queue. Once the level is conpleted and the found boolean is True, do not proceed.\n+'''\n+class Solution:\n+    def removeInvalidParentheses(self, s: str) -> List[str]:\n+        result = []\n+        if not s:\n+            return [\"\"]\n+        queue = deque()\n+        found = False\n+        visited = set()\n+        queue.append(s)\n+        while queue and not found:\n+            size = len(queue)\n+            for i in range(size):\n+                curr = queue.popleft()\n+                if self.isValid(curr):\n+                    found = True\n+                    result.append(curr)\n+                for i in range(len(curr)):\n+                    if curr[i] not in '()':\n+                        continue\n+                    tempString = curr[:i]+curr[i+1:]\n+                    if tempString not in visited:\n+                        queue.append(tempString)\n+                        visited.add(tempString)\n+        return result\n+\n+    def isValid(self, s):\n+        count = 0\n+        for i in range(len(s)):\n+            if s[i] == '(':\n+                count += 1\n+            elif s[i] == ')':\n+                if count == 0:\n+                    return False\n+                count -= 1\n+        return count == 0\n\\ No newline at end of file"
+  },
+  {
+    "sha": "096f73b15dd00d635acefa6e5832fbd45019fd69",
+    "filename": "clone_graph.py",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/super30admin/BFS-3/blob/24642551e6fec46c2886331963d9b4f2b2cb5cd6/clone_graph.py",
+    "raw_url": "https://github.com/super30admin/BFS-3/raw/24642551e6fec46c2886331963d9b4f2b2cb5cd6/clone_graph.py",
+    "contents_url": "https://api.github.com/repos/super30admin/BFS-3/contents/clone_graph.py?ref=24642551e6fec46c2886331963d9b4f2b2cb5cd6",
+    "patch": "@@ -0,0 +1,35 @@\n+'''\n+Time Complexity - O( V + E)\n+Space Complexity - O(V + E)\n+Approach : BFS Approach\n+'''\n+\"\"\"\n+# Definition for a Node.\n+class Node:\n+    def __init__(self, val = 0, neighbors = None):\n+        self.val = val\n+        self.neighbors = neighbors if neighbors is not None else []\n+\"\"\"\n+\n+class Solution:\n+    def cloneGraph(self, node: 'Node') -> 'Node':\n+        \n+        if not node:\n+            return node\n+        hashmap = {}\n+        queue = collections.deque()\n+        cloned = Node(node.val)\n+        hashmap[node] = cloned\n+        queue.append(node)\n+        while queue:\n+            \n+            current = queue.popleft()\n+            for neighbor in current.neighbors:\n+                if neighbor not in hashmap:\n+                    copy = Node(neighbor.val)\n+                    hashmap[neighbor] = copy\n+                    queue.append(neighbor)\n+                hashmap[current].neighbors.append(hashmap[neighbor])\n+                \n+        return cloned\n+            \n\\ No newline at end of file"
+  }
+]

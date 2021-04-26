@@ -1,0 +1,140 @@
+[
+  {
+    "sha": "1d140170aa87acf55711796d56c83259d3957a50",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql.ui/icons/google_cloud_sql_logo.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql.ui/icons/google_cloud_sql_logo.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql.ui/icons/google_cloud_sql_logo.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql.ui/icons/google_cloud_sql_logo.png?ref=08546c898f69b8dc971db0cca333c982c3290211"
+  },
+  {
+    "sha": "9ca635a88a8e877eb0479f1a2a8a831a1a856781",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/internal/MySQLUIMessages.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/internal/MySQLUIMessages.java",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/internal/MySQLUIMessages.java",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/internal/MySQLUIMessages.java?ref=08546c898f69b8dc971db0cca333c982c3290211",
+    "patch": "@@ -36,6 +36,7 @@ private MySQLUIMessages() {\n \tpublic static String dialog_connection_general_tab;\n \tpublic static String dialog_connection_general_tab_tooltip;\n \tpublic static String dialog_connection_host;\n+\tpublic static String dialog_connection_cloud_instance;\n \tpublic static String dialog_connection_database;\n \tpublic static String dialog_connection_password;\n \tpublic static String dialog_connection_port;"
+  },
+  {
+    "sha": "a1f6cca0e624f142074b149ca11299e8ed40b67c",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/internal/MySQLUIMessages.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/internal/MySQLUIMessages.properties",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/internal/MySQLUIMessages.properties",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/internal/MySQLUIMessages.properties?ref=08546c898f69b8dc971db0cca333c982c3290211",
+    "patch": "@@ -4,6 +4,7 @@ dialog_connection_general_tab_tooltip=General connection properties\n dialog_connection_advanced_tab=Advanced\n dialog_connection_advanced_tab_tooltip=Advanced/custom driver properties\n dialog_connection_host=Server Host\n+dialog_connection_cloud_instance=Cloud instance\n dialog_connection_port=Port\n dialog_connection_database=Database\n dialog_connection_user_name=User name"
+  },
+  {
+    "sha": "4b293123644e63b9cb300b96e015e4555cdef73f",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/views/MySQLConnectionPage.java",
+    "status": "modified",
+    "additions": 35,
+    "deletions": 13,
+    "changes": 48,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/views/MySQLConnectionPage.java",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/views/MySQLConnectionPage.java",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql.ui/src/org/jkiss/dbeaver/ext/mysql/ui/views/MySQLConnectionPage.java?ref=08546c898f69b8dc971db0cca333c982c3290211",
+    "patch": "@@ -52,15 +52,18 @@\n     private Text dbText;\n     private ClientHomesSelector homesSelector;\n     private boolean activated = false;\n+    private boolean needsPort = true;\n \n     private Combo serverTimezoneCombo;\n \n     private final Image LOGO_MYSQL;\n     private final Image LOGO_MARIADB;\n+    private final Image LOGO_GCLOUD;\n \n     public MySQLConnectionPage() {\n         LOGO_MYSQL = createImage(\"icons/mysql_logo.png\");\n         LOGO_MARIADB = createImage(\"icons/mariadb_logo.png\");\n+        LOGO_GCLOUD = createImage(\"icons/google_cloud_sql_logo.png\");\n     }\n \n     @Override\n@@ -69,14 +72,19 @@ public void dispose()\n         super.dispose();\n         UIUtils.dispose(LOGO_MYSQL);\n         UIUtils.dispose(LOGO_MARIADB);\n+        UIUtils.dispose(LOGO_GCLOUD);\n     }\n \n     @Override\n     public Image getImage() {\n         // We set image only once at activation\n         // There is a bug in Eclipse which leads to SWTException after wizard image change\n-        if (getSite().getDriver().getId().equalsIgnoreCase(MySQLConstants.DRIVER_ID_MARIA_DB)) {\n+    \tString id = getSite().getDriver().getId();\n+        if (id.equalsIgnoreCase(MySQLConstants.DRIVER_ID_MARIA_DB)) {\n             return LOGO_MARIADB;\n+        } else if (id.equalsIgnoreCase(MySQLConstants.DRIVER_ID_GCLOUD_MYSQL8)\n+                || id.equalsIgnoreCase(MySQLConstants.DRIVER_ID_GCLOUD_MYSQL5)) {\n+            return LOGO_GCLOUD;\n         } else {\n             return LOGO_MYSQL;\n         }\n@@ -93,6 +101,9 @@ public void createControl(Composite composite)\n             }\n         };\n         final int fontHeight = UIUtils.getFontHeight(composite);\n+        DBPDriver driver = getSite().getDriver();\n+        boolean hostIsCloudInstance = CommonUtils.getBoolean(driver.getDriverParameter(\"hostIsCloudInstance\"), false);\n+        needsPort = CommonUtils.getBoolean(driver.getDriverParameter(\"needsPort\"), true);\n \n         Composite addrGroup = new Composite(composite, SWT.NONE);\n         addrGroup.setLayout(new GridLayout(1, false));\n@@ -101,18 +112,26 @@ public void createControl(Composite composite)\n \n         Group serverGroup = UIUtils.createControlGroup(addrGroup, \"Server\", 2, GridData.FILL_HORIZONTAL, 0);\n \n-        Label hostLabel = UIUtils.createControlLabel(serverGroup, MySQLUIMessages.dialog_connection_host);\n-        Composite hostComposite = UIUtils.createComposite(serverGroup, 3);\n+        String hostOrCloudInstance;\n+        if (hostIsCloudInstance) {\n+            hostOrCloudInstance = MySQLUIMessages.dialog_connection_cloud_instance;\n+        } else {\n+            hostOrCloudInstance = MySQLUIMessages.dialog_connection_host;\n+        }\n+        UIUtils.createControlLabel(serverGroup, hostOrCloudInstance);\n+        Composite hostComposite = UIUtils.createComposite(serverGroup, needsPort ? 3 : 2);\n         hostComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));\n \n         hostText = new Text(hostComposite, SWT.BORDER);\n         hostText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));\n         hostText.addModifyListener(textListener);\n-\n-        portText = UIUtils.createLabelText(hostComposite, MySQLUIMessages.dialog_connection_port, null, SWT.BORDER, new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));\n-        ((GridData)portText.getLayoutData()).widthHint = fontHeight * 10;\n-        portText.addVerifyListener(UIUtils.getIntegerVerifyListener(Locale.getDefault()));\n-        portText.addModifyListener(textListener);\n+\t    \n+        if (needsPort) {\n+            portText = UIUtils.createLabelText(hostComposite, MySQLUIMessages.dialog_connection_port, null, SWT.BORDER, new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));\n+            ((GridData)portText.getLayoutData()).widthHint = fontHeight * 10;\n+            portText.addVerifyListener(UIUtils.getIntegerVerifyListener(Locale.getDefault()));\n+            portText.addModifyListener(textListener);\n+        }\n \n         dbText = UIUtils.createLabelText(serverGroup, MySQLUIMessages.dialog_connection_database, null, SWT.BORDER, new GridData(GridData.FILL_HORIZONTAL));\n         dbText.addModifyListener(textListener);\n@@ -147,7 +166,7 @@ public boolean isComplete() {\n         return super.isComplete() &&\n             hostText != null && portText != null &&\n             !CommonUtils.isEmpty(hostText.getText()) &&\n-            !CommonUtils.isEmpty(portText.getText());\n+            !(needsPort && CommonUtils.isEmpty(portText.getText()));\n     }\n \n     @Override\n@@ -161,21 +180,24 @@ public void loadSettings() {\n         if (hostText != null) {\n             if (!CommonUtils.isEmpty(connectionInfo.getHostName())) {\n                 hostText.setText(connectionInfo.getHostName());\n+            } else if (driver.getDriverParameter(\"defaultHost\") != null) {\n+                hostText.setText(driver.getDriverParameter(\"defaultHost\").toString());\n             } else {\n                 hostText.setText(MySQLConstants.DEFAULT_HOST);\n             }\n         }\n         if (portText != null) {\n             if (!CommonUtils.isEmpty(connectionInfo.getHostPort())) {\n                 portText.setText(connectionInfo.getHostPort());\n-            } else if (site.getDriver().getDefaultPort() != null) {\n-                portText.setText(site.getDriver().getDefaultPort());\n+            } else if (driver.getDefaultPort() != null) {\n+                portText.setText(driver.getDefaultPort());\n             } else {\n                 portText.setText(\"\");\n             }\n         }\n+\n         if (dbText != null) {\n-            dbText.setText(CommonUtils.toString(connectionInfo.getDatabaseName(), CommonUtils.notEmpty(site.getDriver().getDefaultDatabase())));\n+            dbText.setText(CommonUtils.toString(connectionInfo.getDatabaseName(), CommonUtils.notEmpty(driver.getDefaultDatabase())));\n         }\n         if (serverTimezoneCombo != null) {\n             String tzProp = connectionInfo.getProviderProperty(MySQLConstants.PROP_SERVER_TIMEZONE);\n@@ -186,7 +208,7 @@ public void loadSettings() {\n             }\n         }\n \n-        homesSelector.populateHomes(site.getDriver(), connectionInfo.getClientHomeId(), site.isNew());\n+        homesSelector.populateHomes(driver, connectionInfo.getClientHomeId(), site.isNew());\n \n         activated = true;\n     }"
+  },
+  {
+    "sha": "4613d212d1b82deab3c0fef321ad08a0a78e842c",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon.png?ref=08546c898f69b8dc971db0cca333c982c3290211"
+  },
+  {
+    "sha": "05d4693579e77b0ae227d5440856616e38180cc1",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon@2x.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon@2x.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon@2x.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon@2x.png?ref=08546c898f69b8dc971db0cca333c982c3290211"
+  },
+  {
+    "sha": "faef77ec555f2a9cadadb3f36ef408b28195c04d",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon_big.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon_big.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon_big.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon_big.png?ref=08546c898f69b8dc971db0cca333c982c3290211"
+  },
+  {
+    "sha": "6ca216e24e764f6ae148f89f52fdd2270e58d5b4",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon_big@2x.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon_big@2x.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon_big@2x.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_icon_big@2x.png?ref=08546c898f69b8dc971db0cca333c982c3290211"
+  },
+  {
+    "sha": "1d140170aa87acf55711796d56c83259d3957a50",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_logo.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_logo.png",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_logo.png",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql/icons/google_cloud_sql_logo.png?ref=08546c898f69b8dc971db0cca333c982c3290211"
+  },
+  {
+    "sha": "787d14b25686a4d8fa478a0f17615918bdbb9cf5",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql/plugin.xml",
+    "status": "modified",
+    "additions": 60,
+    "deletions": 0,
+    "changes": 60,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/plugin.xml",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/plugin.xml",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql/plugin.xml?ref=08546c898f69b8dc971db0cca333c982c3290211",
+    "patch": "@@ -254,6 +254,66 @@\n                     <!--<property name=\"@dbeaver-default-resultset.format.datetime.native\" value=\"true\"/>-->\n                     <parameter name=\"krb5.enabled\" value=\"true\"/>\n                 </driver>\n+                <driver\n+                        id=\"mysql8-gcloud-jdbc\"\n+                        label=\"Google Cloud SQL - MySQL 8\"\n+                        icon=\"icons/google_cloud_sql_icon.png\"\n+                        iconBig=\"icons/google_cloud_sql_icon_big.png\"\n+\t                    class=\"com.mysql.cj.jdbc.Driver\"\n+                        sampleURL=\"jdbc:mysql:///[{database}]?cloudSqlInstance={host}\"\n+                        useURL=\"true\"\n+                        defaultPort=\"3306\"\n+                        defaultUser=\"root\"\n+                        webURL=\"https://www.mysql.com/products/connector/\"\n+                        propertiesURL=\"https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/blob/main/docs/jdbc-mysql.md#creating-thejdbc-url\"\n+                        description=\"Driver for Google Cloud SQL MySQL 8 and later\"\n+                        promoted=\"1\"\n+                        categories=\"sql\">\n+                        \n+                    <file type=\"jar\" path=\"maven:/mysql:mysql-connector-java:RELEASE[8.0.17]\" bundle=\"!drivers.mysql\"/>\n+                    <file type=\"jar\" path=\"maven:/com.google.cloud.sql:mysql-socket-factory-connector-j-8:RELEASE\"/>\n+                    \n+                    <file type=\"license\" path=\"drivers/mysql/LICENSE.txt\" bundle=\"drivers.mysql\"/>\n+                    <file type=\"jar\" path=\"drivers/mysql/mysql8\" bundle=\"drivers.mysql\"/>\n+                    <property name=\"connectTimeout\" value=\"20000\"/>\n+                    <property name=\"socketFactory\" value=\"com.google.cloud.sql.mysql.SocketFactory\"/>\n+                    <property name=\"@dbeaver-default-resultset.maxrows.sql\" value=\"true\"/>\n+                    <property name=\"@dbeaver-default-resultset.format.datetime.native\" value=\"true\"/>\n+                    <property name=\"@dbeaver-default-dataformat.type.timestamp.pattern\" value=\"yyyy-MM-dd HH:mm:ss\"/>\n+                    <parameter name=\"hostIsCloudInstance\" value=\"true\"/>\n+                    <parameter name=\"needsPort\" value=\"false\"/>\n+                    <parameter name=\"defaultHost\" value=\"project:region:instance\"/>\n+                </driver>\n+                <driver\n+                        id=\"mysql5-gcloud-jdbc\"\n+                        label=\"Google Cloud SQL - MySQL 5\"\n+                        icon=\"icons/google_cloud_sql_icon.png\"\n+                        iconBig=\"icons/google_cloud_sql_icon_big.png\"\n+                        class=\"com.mysql.jdbc.Driver\"\n+                        sampleURL=\"jdbc:mysql:///[{database}]?cloudSqlInstance={host}\"\n+                        useURL=\"true\"\n+                        defaultPort=\"3306\"\n+                        defaultUser=\"root\"\n+                        webURL=\"http://www.mysql.com/products/connector/\"\n+                        propertiesURL=\"https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/blob/main/docs/jdbc-mysql.md#creating-thejdbc-url\"\n+                        description=\"Driver for Google Cloud SQL MySQL 5.x\"\n+                        categories=\"sql\">\n+                    <replace provider=\"mysql\" driver=\"mysql3\"/>\n+\n+                    <file type=\"jar\" path=\"maven:/mysql:mysql-connector-java:RELEASE[5.1.44]\" bundle=\"!drivers.mysql\"/>\n+                    <file type=\"jar\" path=\"maven:/com.google.cloud.sql:mysql-socket-factory:RELEASE\"/>\n+                    \n+                    <file type=\"license\" path=\"drivers/mysql/LICENSE.txt\" bundle=\"drivers.mysql\"/>\n+                    <file type=\"jar\" path=\"drivers/mysql/mysql5\" bundle=\"drivers.mysql\"/>\n+                    <property name=\"connectTimeout\" value=\"20000\"/>\n+                    <property name=\"socketFactory\" value=\"com.google.cloud.sql.mysql.SocketFactory\"/>\n+                    <property name=\"@dbeaver-default-resultset.maxrows.sql\" value=\"true\"/>\n+                    <property name=\"@dbeaver-default-resultset.format.datetime.native\" value=\"true\"/>\n+                    <property name=\"@dbeaver-default-dataformat.type.timestamp.pattern\" value=\"yyyy-MM-dd HH:mm:ss\"/>\n+                    <parameter name=\"hostIsCloudInstance\" value=\"true\"/>\n+                    <parameter name=\"needsPort\" value=\"false\"/>\n+                    <parameter name=\"defaultHost\" value=\"project:region:instance\"/>\n+                </driver>\n             </drivers>\n \n             <nativeClients>"
+  },
+  {
+    "sha": "3be38972d86968c07d6de4ea1a28018f3d8eedc2",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql/src/org/jkiss/dbeaver/ext/mysql/MySQLConstants.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/src/org/jkiss/dbeaver/ext/mysql/MySQLConstants.java",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/src/org/jkiss/dbeaver/ext/mysql/MySQLConstants.java",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql/src/org/jkiss/dbeaver/ext/mysql/MySQLConstants.java?ref=08546c898f69b8dc971db0cca333c982c3290211",
+    "patch": "@@ -33,6 +33,8 @@\n     public static final String DRIVER_ID_MYSQL8 = \"mysql8\";\r\n     public static final String DRIVER_ID_MARIA_DB = \"mariaDB\";\r\n     public static final String DRIVER_CLASS_MARIA_DB = \"org.mariadb.jdbc.Driver\";\r\n+    public static final String DRIVER_ID_GCLOUD_MYSQL8 = \"mysql8-gcloud-jdbc\";\r\n+    public static final String DRIVER_ID_GCLOUD_MYSQL5 = \"mysql5-gcloud-jdbc\";\r\n \r\n     public static final String HANDLER_SSL = \"mysql_ssl\";\r\n \r"
+  },
+  {
+    "sha": "9f2459fb37c93da0f57aa7fa909dc20747c5060c",
+    "filename": "plugins/org.jkiss.dbeaver.ext.mysql/src/org/jkiss/dbeaver/ext/mysql/MySQLDataSourceProvider.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/dbeaver/dbeaver/blob/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/src/org/jkiss/dbeaver/ext/mysql/MySQLDataSourceProvider.java",
+    "raw_url": "https://github.com/dbeaver/dbeaver/raw/08546c898f69b8dc971db0cca333c982c3290211/plugins/org.jkiss.dbeaver.ext.mysql/src/org/jkiss/dbeaver/ext/mysql/MySQLDataSourceProvider.java",
+    "contents_url": "https://api.github.com/repos/dbeaver/dbeaver/contents/plugins/org.jkiss.dbeaver.ext.mysql/src/org/jkiss/dbeaver/ext/mysql/MySQLDataSourceProvider.java?ref=08546c898f69b8dc971db0cca333c982c3290211",
+    "patch": "@@ -27,6 +27,7 @@\n import org.jkiss.dbeaver.model.DBPDataSourceContainer;\r\n import org.jkiss.dbeaver.model.connection.*;\r\n import org.jkiss.dbeaver.model.impl.jdbc.JDBCDataSourceProvider;\r\n+import org.jkiss.dbeaver.model.impl.jdbc.JDBCURL;\r\n import org.jkiss.dbeaver.model.runtime.DBRProgressMonitor;\r\n import org.jkiss.dbeaver.utils.GeneralUtils;\r\n import org.jkiss.dbeaver.utils.RuntimeUtils;\r\n@@ -104,6 +105,10 @@ public String getConnectionURL(DBPDriver driver, DBPConnectionConfiguration conn\n         System.setProperty(\"javax.net.ssl.trustStorePassword\", \"changeit\");\r\n */\r\n \r\n+        if (driver.isUseURL()) {\r\n+            return JDBCURL.generateUrlByTemplate(driver, connectionInfo);\r\n+        }\r\n+\r\n         StringBuilder url = new StringBuilder();\r\n         url.append(\"jdbc:mysql://\")\r\n             .append(connectionInfo.getHostName());\r"
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "6309a2b0f7fdfe19ec81bebb66cc95ca47871539",
+    "filename": "src/by/it/group873602/yurush/lesson04/B_MergeSort.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Khmelov/PISL2021-02-01/blob/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson04/B_MergeSort.java",
+    "raw_url": "https://github.com/Khmelov/PISL2021-02-01/raw/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson04/B_MergeSort.java",
+    "contents_url": "https://api.github.com/repos/Khmelov/PISL2021-02-01/contents/src/by/it/group873602/yurush/lesson04/B_MergeSort.java?ref=b01a4a8374daf948f1e99263d261ba4f6ed82ab6",
+    "patch": "@@ -32,7 +32,7 @@\n             } else if (n >= ar_2.length & m < ar_1.length) {\n                 result[i] = ar_1[m];\n                 m++;\n-            } else if (ar_1[m] <= ar_2[n] & m < ar_1.length) {\n+            } else if (ar_1[m] <= ar_2[n]) {\n                 result[i] = ar_1[m];\n                 m++;\n             } else {"
+  },
+  {
+    "sha": "edcecbe3cecc6e15ad0760a757155d9b25b12b3d",
+    "filename": "src/by/it/group873602/yurush/lesson04/C_GetInversions.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/Khmelov/PISL2021-02-01/blob/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson04/C_GetInversions.java",
+    "raw_url": "https://github.com/Khmelov/PISL2021-02-01/raw/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson04/C_GetInversions.java",
+    "contents_url": "https://api.github.com/repos/Khmelov/PISL2021-02-01/contents/src/by/it/group873602/yurush/lesson04/C_GetInversions.java?ref=b01a4a8374daf948f1e99263d261ba4f6ed82ab6",
+    "patch": "@@ -52,8 +52,6 @@ int calc(InputStream stream) throws FileNotFoundException {\n \n         result = mergeSortAndCount(a, 0, n - 1);\n \n-\n-\n         //!!!!!!!!!!!!!!!!!!!!!!!!!     КОНЕЦ ЗАДАЧИ     !!!!!!!!!!!!!!!!!!!!!!!!!\n         return result;\n     }\n@@ -77,6 +75,7 @@ private int mergeAndCount(int[] arr, int l, int m, int r)\n             arr[k++] = left[i++];\n         while (j < right.length)\n             arr[k++] = right[j++];\n+\n         return swaps;\n     }\n "
+  },
+  {
+    "sha": "376f61f9d6fd427a8c28858c991b22c216b36b77",
+    "filename": "src/by/it/group873602/yurush/lesson05/A_QSort.java",
+    "status": "added",
+    "additions": 141,
+    "deletions": 0,
+    "changes": 141,
+    "blob_url": "https://github.com/Khmelov/PISL2021-02-01/blob/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/A_QSort.java",
+    "raw_url": "https://github.com/Khmelov/PISL2021-02-01/raw/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/A_QSort.java",
+    "contents_url": "https://api.github.com/repos/Khmelov/PISL2021-02-01/contents/src/by/it/group873602/yurush/lesson05/A_QSort.java?ref=b01a4a8374daf948f1e99263d261ba4f6ed82ab6",
+    "patch": "@@ -0,0 +1,141 @@\n+package by.it.group873602.yurush.lesson05;\n+\n+import java.io.FileInputStream;\n+import java.io.FileNotFoundException;\n+import java.io.InputStream;\n+import java.util.Scanner;\n+\n+/*\n+Видеорегистраторы и площадь.\n+На площади установлена одна или несколько камер.\n+Известны данные о том, когда каждая из них включалась и выключалась (отрезки работы)\n+Известен список событий на площади (время начала каждого события).\n+Вам необходимо определить для каждого события сколько камер его записали.\n+\n+В первой строке задано два целых числа:\n+    число включений камер (отрезки) 1<=n<=50000\n+    число событий (точки) 1<=m<=50000.\n+\n+Следующие n строк содержат по два целых числа ai и bi (ai<=bi) -\n+координаты концов отрезков (время работы одной какой-то камеры).\n+Последняя строка содержит m целых чисел - координаты точек.\n+Все координаты не превышают 10E8 по модулю (!).\n+\n+Точка считается принадлежащей отрезку, если она находится внутри него или на границе.\n+\n+Для каждой точки в порядке их появления во вводе выведите,\n+скольким отрезкам она принадлежит.\n+    Sample Input:\n+    2 3\n+    0 5\n+    7 10\n+    1 6 11\n+    Sample Output:\n+    1 0 0\n+\n+*/\n+\n+public class A_QSort {\n+\n+    //отрезок\n+    private class Segment  implements Comparable<Segment>{\n+        int start;\n+        int stop;\n+\n+        Segment(int start, int stop){\n+            if (start <= stop) {\n+                this.start = start;\n+                this.stop = stop;\n+            } else {\n+                this.start = stop;\n+                this.stop = start;\n+            }\n+            //тут вообще-то лучше доделать конструктор на случай если\n+            //концы отрезков придут в обратном порядке\n+        }\n+\n+        @Override\n+        public int compareTo(Segment o) {\n+            //подумайте, что должен возвращать компаратор отрезков\n+            if (this.start == o.start)\n+                return Integer.compare(this.stop, o.stop);\n+            return Integer.compare(this.start, o.start);\n+        }\n+    }\n+\n+\n+    int[] getAccessory(InputStream stream) throws FileNotFoundException {\n+        //подготовка к чтению данных\n+        Scanner scanner = new Scanner(stream);\n+        //!!!!!!!!!!!!!!!!!!!!!!!!!     НАЧАЛО ЗАДАЧИ     !!!!!!!!!!!!!!!!!!!!!!!!!\n+        //число отрезков отсортированного массива\n+        int n = scanner.nextInt();\n+        Segment[] segments=new Segment[n];\n+        //число точек\n+        int m = scanner.nextInt();\n+        int[] points=new int[m];\n+        int[] result=new int[m];\n+\n+        //читаем сами отрезки\n+        for (int i = 0; i < n; i++) {\n+            //читаем начало и конец каждого отрезка\n+            segments[i]=new Segment(scanner.nextInt(),scanner.nextInt());\n+        }\n+        //читаем точки\n+        for (int i = 0; i < m; i++) {\n+            points[i]=scanner.nextInt();\n+        }\n+        //тут реализуйте логику задачи с применением быстрой сортировки\n+        //в классе отрезка Segment реализуйте нужный для этой задачи компаратор\n+\n+\n+        quickSort(segments, 0, segments.length);\n+        for (int i = 0; i < n; i++) {\n+            for (int j = 0; j < n; j++){\n+                if (points[i] >= segments[j].start && points[i] <= segments[j].stop){\n+                    result[i]++;\n+                }\n+            }\n+        }\n+\n+        //!!!!!!!!!!!!!!!!!!!!!!!!!     КОНЕЦ ЗАДАЧИ     !!!!!!!!!!!!!!!!!!!!!!!!!\n+        return result;\n+    }\n+\n+    public static void quickSort(Segment[] array, int left, int right){\n+        if (left >= right)\n+            return;\n+\n+        // разбиение\n+        Segment segmentLeft = array[left];\n+        int j = left;\n+        for (int i = left + 1; i < right; i++){\n+            if (array[i].compareTo(segmentLeft) < 0){\n+                j++;\n+\n+                Segment tmp = array[j];\n+                array[j] = array[i];\n+                array[i] = tmp;\n+            }\n+        }\n+        Segment tmp = array[left];\n+        array[left] = array[j];\n+        array[j] = tmp;\n+\n+        int basic = j;\n+\n+        quickSort(array, left, basic - 1);\n+        quickSort(array, basic + 1, right);\n+    }\n+\n+    public static void main(String[] args) throws FileNotFoundException {\n+        String root = System.getProperty(\"user.dir\") + \"/src/\";\n+        InputStream stream = new FileInputStream(root + \"by/it/a_khmelev/lesson05/dataA.txt\");\n+        A_QSort instance = new A_QSort();\n+        int[] result=instance.getAccessory(stream);\n+        for (int index:result){\n+            System.out.print(index+\" \");\n+        }\n+    }\n+\n+}"
+  },
+  {
+    "sha": "d31604b72ddd3ca728d948fc100936f53ead3d92",
+    "filename": "src/by/it/group873602/yurush/lesson05/B_CountSort.java",
+    "status": "added",
+    "additions": 68,
+    "deletions": 0,
+    "changes": 68,
+    "blob_url": "https://github.com/Khmelov/PISL2021-02-01/blob/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/B_CountSort.java",
+    "raw_url": "https://github.com/Khmelov/PISL2021-02-01/raw/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/B_CountSort.java",
+    "contents_url": "https://api.github.com/repos/Khmelov/PISL2021-02-01/contents/src/by/it/group873602/yurush/lesson05/B_CountSort.java?ref=b01a4a8374daf948f1e99263d261ba4f6ed82ab6",
+    "patch": "@@ -0,0 +1,68 @@\n+package by.it.group873602.yurush.lesson05;\n+\n+import java.io.FileInputStream;\n+import java.io.FileNotFoundException;\n+import java.io.InputStream;\n+import java.util.Arrays;\n+import java.util.Scanner;\n+\n+/*\n+Первая строка содержит число 1<=n<=10000, вторая - n натуральных чисел, не превышающих 10.\n+Выведите упорядоченную по неубыванию последовательность этих чисел.\n+\n+При сортировке реализуйте метод со сложностью O(n)\n+\n+Пример: https://karussell.wordpress.com/2010/03/01/fast-integer-sorting-algorithm-on/\n+Вольный перевод: http://programador.ru/sorting-positive-int-linear-time/\n+*/\n+\n+public class B_CountSort {\n+\n+\n+    int[] countSort(InputStream stream) throws FileNotFoundException {\n+        //подготовка к чтению данных\n+        Scanner scanner = new Scanner(stream);\n+        //!!!!!!!!!!!!!!!!!!!!!!!!!     НАЧАЛО ЗАДАЧИ     !!!!!!!!!!!!!!!!!!!!!!!!!\n+        //размер массива\n+        int n = scanner.nextInt();\n+        int[] points=new int[n];\n+\n+        //читаем точки\n+        for (int i = 0; i < n; i++) {\n+            points[i]=scanner.nextInt();\n+        }\n+        //тут реализуйте логику задачи с применением сортировки подсчетом\n+\n+        int min = Arrays.stream(points).min().getAsInt();\n+        int max = Arrays.stream(points).max().getAsInt();\n+\n+        int[] countIntegers = new int[max - min + 1];\n+\n+        for (int point : points) {\n+            countIntegers[point - min]++;\n+        }\n+\n+        int insertPosition = 0;\n+        for (int i = min; i <= max; i++) {\n+            for (int j = 0; j < countIntegers[i - min]; j++) {\n+                points[insertPosition++] = i;\n+            }\n+        }\n+\n+\n+        //!!!!!!!!!!!!!!!!!!!!!!!!!     КОНЕЦ ЗАДАЧИ     !!!!!!!!!!!!!!!!!!!!!!!!!\n+        return points;\n+    }\n+\n+\n+    public static void main(String[] args) throws FileNotFoundException {\n+        String root = System.getProperty(\"user.dir\") + \"/src/\";\n+        InputStream stream = new FileInputStream(root + \"by/it/a_khmelev/lesson05/dataB.txt\");\n+        B_CountSort instance = new B_CountSort();\n+        int[] result=instance.countSort(stream);\n+        for (int index:result){\n+            System.out.print(index+\" \");\n+        }\n+    }\n+\n+}"
+  },
+  {
+    "sha": "f775009f6deaa91406d947ece451aef36ac1880a",
+    "filename": "src/by/it/group873602/yurush/lesson05/C_QSortOptimized.java",
+    "status": "added",
+    "additions": 93,
+    "deletions": 0,
+    "changes": 93,
+    "blob_url": "https://github.com/Khmelov/PISL2021-02-01/blob/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/C_QSortOptimized.java",
+    "raw_url": "https://github.com/Khmelov/PISL2021-02-01/raw/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/C_QSortOptimized.java",
+    "contents_url": "https://api.github.com/repos/Khmelov/PISL2021-02-01/contents/src/by/it/group873602/yurush/lesson05/C_QSortOptimized.java?ref=b01a4a8374daf948f1e99263d261ba4f6ed82ab6",
+    "patch": "@@ -0,0 +1,93 @@\n+package by.it.group873602.yurush.lesson05;\n+\n+import java.io.FileInputStream;\n+import java.io.FileNotFoundException;\n+import java.io.InputStream;\n+import java.util.Scanner;\n+\n+/*\n+Видеорегистраторы и площадь 2.\n+Условие то же что и в задаче А.\n+\n+        По сравнению с задачей A доработайте алгоритм так, чтобы\n+        1) он оптимально использовал время и память:\n+            - за стек отвечает элиминация хвостовой рекурсии,\n+            - за сам массив отрезков - сортировка на месте\n+            - рекурсионные вызовы должны проводится на основе 3-разбиения\n+\n+        2) при поиске подходящих отрезков для точки реализуйте метод бинарного поиска,\n+        помните при реализации, что поиск множественный\n+        (т.е. отрезков, подходящих для точки, может быть много)\n+\n+    Sample Input:\n+    2 3\n+    0 5\n+    7 10\n+    1 6 11\n+    Sample Output:\n+    1 0 0\n+\n+*/\n+\n+\n+public class C_QSortOptimized {\n+\n+    //отрезок\n+    private class Segment  implements Comparable{\n+        int start;\n+        int stop;\n+\n+        Segment(int start, int stop){\n+            this.start = start;\n+            this.stop = stop;\n+        }\n+\n+        @Override\n+        public int compareTo(Object o) {\n+            //подумайте, что должен возвращать компаратор отрезков\n+            return 0;\n+        }\n+    }\n+\n+\n+    int[] getAccessory2(InputStream stream) throws FileNotFoundException {\n+        //подготовка к чтению данных\n+        Scanner scanner = new Scanner(stream);\n+        //!!!!!!!!!!!!!!!!!!!!!!!!!     НАЧАЛО ЗАДАЧИ     !!!!!!!!!!!!!!!!!!!!!!!!!\n+        //число отрезков отсортированного массива\n+        int n = scanner.nextInt();\n+        Segment[] segments=new Segment[n];\n+        //число точек\n+        int m = scanner.nextInt();\n+        int[] points=new int[m];\n+        int[] result=new int[m];\n+\n+        //читаем сами отрезки\n+        for (int i = 0; i < n; i++) {\n+            //читаем начало и конец каждого отрезка\n+            segments[i]=new Segment(scanner.nextInt(),scanner.nextInt());\n+        }\n+        //читаем точки\n+        for (int i = 0; i < n; i++) {\n+            points[i]=scanner.nextInt();\n+        }\n+        //тут реализуйте логику задачи с применением быстрой сортировки\n+        //в классе отрезка Segment реализуйте нужный для этой задачи компаратор\n+\n+\n+        //!!!!!!!!!!!!!!!!!!!!!!!!!     КОНЕЦ ЗАДАЧИ     !!!!!!!!!!!!!!!!!!!!!!!!!\n+        return result;\n+    }\n+\n+\n+    public static void main(String[] args) throws FileNotFoundException {\n+        String root = System.getProperty(\"user.dir\") + \"/src/\";\n+        InputStream stream = new FileInputStream(root + \"by/it/a_khmelev/lesson05/dataC.txt\");\n+        C_QSortOptimized instance = new C_QSortOptimized();\n+        int[] result=instance.getAccessory2(stream);\n+        for (int index:result){\n+            System.out.print(index+\" \");\n+        }\n+    }\n+\n+}"
+  },
+  {
+    "sha": "a4a6d509f38a360e0e50c34f75bb857f93a9a5d2",
+    "filename": "src/by/it/group873602/yurush/lesson05/Lesson5Test.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/Khmelov/PISL2021-02-01/blob/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/Lesson5Test.java",
+    "raw_url": "https://github.com/Khmelov/PISL2021-02-01/raw/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/Lesson5Test.java",
+    "contents_url": "https://api.github.com/repos/Khmelov/PISL2021-02-01/contents/src/by/it/group873602/yurush/lesson05/Lesson5Test.java?ref=b01a4a8374daf948f1e99263d261ba4f6ed82ab6",
+    "patch": "@@ -0,0 +1,44 @@\n+package by.it.group873602.yurush.lesson05;\n+\n+import org.junit.Test;\n+\n+import java.io.FileInputStream;\n+import java.io.InputStream;\n+import java.util.Arrays;\n+\n+import static org.junit.Assert.assertTrue;\n+\n+public class Lesson5Test {\n+    @Test\n+    public void A() throws Exception {\n+        String root = System.getProperty(\"user.dir\") + \"/src/\";\n+        InputStream stream = new FileInputStream(root + \"by/it/a_khmelev/lesson05/dataA.txt\");\n+        A_QSort instance = new A_QSort();\n+        int[] result=instance.getAccessory(stream);\n+        boolean ok=Arrays.equals(result,new int[]{1,0,0});\n+        assertTrue(\"A failed\", ok);\n+    }\n+\n+\n+    @Test\n+    public void B() throws Exception {\n+        String root = System.getProperty(\"user.dir\") + \"/src/\";\n+        InputStream stream = new FileInputStream(root + \"by/it/a_khmelev/lesson05/dataB.txt\");\n+        B_CountSort instance = new B_CountSort();\n+        int[] result=instance.countSort(stream);\n+        boolean ok=Arrays.equals(result,new int[]{2,2,3,9,9});\n+        assertTrue(\"B failed\", ok);\n+    }\n+\n+\n+    @Test\n+    public void C() throws Exception {\n+        String root = System.getProperty(\"user.dir\") + \"/src/\";\n+        InputStream stream = new FileInputStream(root + \"by/it/a_khmelev/lesson05/dataC.txt\");\n+        C_QSortOptimized instance = new C_QSortOptimized();\n+        int[] result=instance.getAccessory2(stream);\n+        boolean ok=Arrays.equals(result,new int[]{1,0,0});\n+        assertTrue(\"C failed\", ok);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "e5667e7bc8cfab2696d4d88b39c907ad94fc044f",
+    "filename": "src/by/it/group873602/yurush/lesson05/dataA.txt",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/Khmelov/PISL2021-02-01/blob/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/dataA.txt",
+    "raw_url": "https://github.com/Khmelov/PISL2021-02-01/raw/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/dataA.txt",
+    "contents_url": "https://api.github.com/repos/Khmelov/PISL2021-02-01/contents/src/by/it/group873602/yurush/lesson05/dataA.txt?ref=b01a4a8374daf948f1e99263d261ba4f6ed82ab6",
+    "patch": "@@ -0,0 +1,4 @@\n+2 3\n+0 5\n+7 10\n+1 6 11\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d55c9cc43bafba5b7ceff7092ad66f3035e2604d",
+    "filename": "src/by/it/group873602/yurush/lesson05/dataB.txt",
+    "status": "added",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/Khmelov/PISL2021-02-01/blob/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/dataB.txt",
+    "raw_url": "https://github.com/Khmelov/PISL2021-02-01/raw/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/dataB.txt",
+    "contents_url": "https://api.github.com/repos/Khmelov/PISL2021-02-01/contents/src/by/it/group873602/yurush/lesson05/dataB.txt?ref=b01a4a8374daf948f1e99263d261ba4f6ed82ab6",
+    "patch": "@@ -0,0 +1,2 @@\n+5\n+2 3 9 2 9\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e5667e7bc8cfab2696d4d88b39c907ad94fc044f",
+    "filename": "src/by/it/group873602/yurush/lesson05/dataC.txt",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/Khmelov/PISL2021-02-01/blob/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/dataC.txt",
+    "raw_url": "https://github.com/Khmelov/PISL2021-02-01/raw/b01a4a8374daf948f1e99263d261ba4f6ed82ab6/src/by/it/group873602/yurush/lesson05/dataC.txt",
+    "contents_url": "https://api.github.com/repos/Khmelov/PISL2021-02-01/contents/src/by/it/group873602/yurush/lesson05/dataC.txt?ref=b01a4a8374daf948f1e99263d261ba4f6ed82ab6",
+    "patch": "@@ -0,0 +1,4 @@\n+2 3\n+0 5\n+7 10\n+1 6 11\n\\ No newline at end of file"
+  }
+]

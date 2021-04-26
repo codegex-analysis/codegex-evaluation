@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "2b10b44ee38e12e2e9bab62dacc42be152878ee8",
+    "filename": "LabJavaIO/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/blob/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/pom.xml",
+    "raw_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/raw/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/pom.xml",
+    "contents_url": "https://api.github.com/repos/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/contents/LabJavaIO/pom.xml?ref=269ca5d8ec069e4017b1f2323e0cb3897dd1783f",
+    "patch": "@@ -55,6 +55,7 @@\n       <plugin>\n         <groupId>org.apache.maven.plugins</groupId>\n         <artifactId>maven-compiler-plugin</artifactId>\n+        <version>3.1</version>\n         <configuration>\n           <source>11</source>\n           <target>11</target>"
+  },
+  {
+    "sha": "f4551ea2ed07b60476d9104054a8e4f7037e1c3f",
+    "filename": "LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/Application.java",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 5,
+    "changes": 36,
+    "blob_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/blob/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/Application.java",
+    "raw_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/raw/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/Application.java",
+    "contents_url": "https://api.github.com/repos/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/contents/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/Application.java?ref=269ca5d8ec069e4017b1f2323e0cb3897dd1783f",
+    "patch": "@@ -9,11 +9,9 @@\n import ch.heigvd.res.labio.quotes.QuoteClient;\n import org.apache.commons.io.FileUtils;\n \n-import java.io.File;\n-import java.io.IOException;\n-import java.io.StringWriter;\n-import java.io.Writer;\n+import java.io.*;\n import java.net.URISyntaxException;\n+import java.nio.charset.StandardCharsets;\n import java.util.logging.Level;\n import java.util.logging.Logger;\n \n@@ -98,6 +96,7 @@ public void fetchAndStoreQuotes(int numberOfQuotes) throws IOException {\n          * one method provided by this class, which is responsible for storing the content of the\n          * quote in a text file (and for generating the directories based on the tags).\n          */\n+        storeQuote(quote, String.format(\"quote-%d\", i));\n         LOG.info(\"Received a new joke with \" + quote.getTags().size() + \" tags.\");\n         for (String tag : quote.getTags()) {\n           LOG.info(\"> \" + tag);\n@@ -133,7 +132,25 @@ void clearOutputDirectory() throws IOException {\n    * @throws IOException \n    */\n   void storeQuote(Quote quote, String filename) throws IOException {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    StringBuilder sbpath = new StringBuilder();\n+    sbpath.append(WORKSPACE_DIRECTORY).append(\"/\");\n+\n+    for (String tag: quote.getTags())\n+      sbpath.append(tag).append(\"/\");\n+\n+    String path = sbpath.toString();\n+\n+    File f = new File(path);\n+    f.mkdirs();\n+\n+    OutputStreamWriter oswriter = new OutputStreamWriter(\n+            new FileOutputStream(path + filename + \".utf8\"), StandardCharsets.UTF_8\n+    );\n+\n+    oswriter.write(quote.getQuote());\n+    oswriter.flush();\n+    oswriter.close();\n   }\n   \n   /**\n@@ -150,6 +167,15 @@ public void visit(File file) {\n          * of the the IFileVisitor interface inline. You just have to add the body of the visit method, which should\n          * be pretty easy (we want to write the filename, including the path, to the writer passed in argument).\n          */\n+        if (file == null)\n+          return;\n+\n+        try {\n+          writer.write(file.getPath());\n+          writer.write(System.lineSeparator());\n+        } catch (IOException ioe) {\n+          throw new RuntimeException(ioe);\n+        }\n       }\n     });\n   }"
+  },
+  {
+    "sha": "62f304900367bd710f73947df454396cd1348e95",
+    "filename": "LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/Utils.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 1,
+    "changes": 26,
+    "blob_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/blob/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/Utils.java",
+    "raw_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/raw/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/Utils.java",
+    "contents_url": "https://api.github.com/repos/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/contents/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/Utils.java?ref=269ca5d8ec069e4017b1f2323e0cb3897dd1783f",
+    "patch": "@@ -10,6 +10,23 @@\n \n   private static final Logger LOG = Logger.getLogger(Utils.class.getName());\n \n+  /**\n+   * découverte des lookahead et lookbehind grâce à :\n+   * - https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html\n+   *   pour ce qui est de la structure d'une regex\n+   * - https://www.regular-expressions.info/lookaround.html\n+   *   pour l'utilisation des lookahead et lookbehind\n+   *   - (?<=X)      : si X se trouve bien avant le caractère\n+   *   - (?!X)       : si X ne se trouve pas après le caractère\n+   *   - (?<=X(?!Y)) : si X se trouve avant le caractère mais qu'il n'est pas\n+   *                   suivi par Y\n+   *   - lookahead et lookbehind permettent de faire des comparaisons sur les\n+   *     String sans que ceux-ci ne soient consommés : ils permettent de dire\n+   *     si le String match ou non la regexe\n+   */\n+  private static final String REGEX = \"(?<=(\\r\\n))|(?<=\\n)|(?<=\\r(?!\\n))\";\n+\n+\n   /**\n    * This method looks for the next new line separators (\\r, \\n, \\r\\n) to extract\n    * the next line in the string passed in arguments. \n@@ -20,7 +37,14 @@\n    * contain any line separator, then the first element is an empty string.\n    */\n   public static String[] getNextLine(String lines) {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    String[] result = lines.split(REGEX, 2);\n+\n+    if (result.length == 2)\n+      return result;\n+    else\n+      return new String[]{\"\", result[0]};\n+\n   }\n \n }"
+  },
+  {
+    "sha": "0355c25728abe0b7503fb3b1f02e074735e868f2",
+    "filename": "LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/explorers/DFSFileExplorer.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 1,
+    "changes": 23,
+    "blob_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/blob/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/explorers/DFSFileExplorer.java",
+    "raw_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/raw/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/explorers/DFSFileExplorer.java",
+    "contents_url": "https://api.github.com/repos/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/contents/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/explorers/DFSFileExplorer.java?ref=269ca5d8ec069e4017b1f2323e0cb3897dd1783f",
+    "patch": "@@ -2,6 +2,9 @@\n \n import ch.heigvd.res.labio.interfaces.IFileExplorer;\n import ch.heigvd.res.labio.interfaces.IFileVisitor;\n+import java.util.ArrayList;\n+import java.util.Arrays;\n+\n \n import java.io.File;\n \n@@ -17,7 +20,25 @@\n \n   @Override\n   public void explore(File rootDirectory, IFileVisitor vistor) {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    if (rootDirectory == null)\n+      return;\n+\n+    vistor.visit(rootDirectory);\n+\n+    File[] childFiles = rootDirectory.listFiles();\n+\n+    if(childFiles == null)\n+      return;\n+\n+    Arrays.sort(childFiles);\n+\n+    for (File f : childFiles) {\n+      if (f.isDirectory())\n+        explore(f, vistor);\n+      else\n+        vistor.visit(f);\n+    }\n   }\n \n }"
+  },
+  {
+    "sha": "74298a44038cfd82d3e6f5f78134a0ec2c6a629d",
+    "filename": "LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/filters/FileNumberingFilterWriter.java",
+    "status": "modified",
+    "additions": 43,
+    "deletions": 3,
+    "changes": 46,
+    "blob_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/blob/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/filters/FileNumberingFilterWriter.java",
+    "raw_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/raw/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/filters/FileNumberingFilterWriter.java",
+    "contents_url": "https://api.github.com/repos/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/contents/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/filters/FileNumberingFilterWriter.java?ref=269ca5d8ec069e4017b1f2323e0cb3897dd1783f",
+    "patch": "@@ -18,24 +18,64 @@\n public class FileNumberingFilterWriter extends FilterWriter {\n \n   private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());\n+  private int lineNumber;\n+  private boolean beginning;\n+  private boolean newline;\n \n   public FileNumberingFilterWriter(Writer out) {\n     super(out);\n+    lineNumber = 0;\n+    beginning = true;\n+    newline = false;\n   }\n \n   @Override\n   public void write(String str, int off, int len) throws IOException {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    write(str.toCharArray(), off, len);\n   }\n \n   @Override\n   public void write(char[] cbuf, int off, int len) throws IOException {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    for (int i = 0; i < len; ++i)\n+      write(cbuf[off + i]);\n+\n+    // ajout de la dernière ligne (assez artificiel)\n+    write(0);\n+  }\n+\n+  /**\n+   * Écrit un numéro de ligne suivi d'un tab à chaque nouvelle ligne\n+   * @throws IOException si erreur à l'écriture sur le flux\n+   */\n+  public void newline() throws IOException {\n+    out.write(++lineNumber + \"\\t\");\n   }\n \n   @Override\n   public void write(int c) throws IOException {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    if (beginning) {\n+      beginning = false;\n+      newline();\n+      out.write(c);\n+    } else {\n+      if (c == '\\r' || c == '\\n') {\n+        if (!newline)\n+          newline = true;\n+\n+        out.write(c);\n+      } else {\n+        if (newline)\n+          newline();\n+\n+        newline = false;\n+\n+        if (c != 0)\n+          out.write(c);\n+      }\n+    }\n   }\n \n }"
+  },
+  {
+    "sha": "dcfc790ca50a388313c09028d3e1c50da3b034e5",
+    "filename": "LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/filters/UpperCaseFilterWriter.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 3,
+    "changes": 11,
+    "blob_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/blob/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/filters/UpperCaseFilterWriter.java",
+    "raw_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/raw/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/filters/UpperCaseFilterWriter.java",
+    "contents_url": "https://api.github.com/repos/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/contents/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/filters/UpperCaseFilterWriter.java?ref=269ca5d8ec069e4017b1f2323e0cb3897dd1783f",
+    "patch": "@@ -16,17 +16,22 @@ public UpperCaseFilterWriter(Writer wrappedWriter) {\n \n   @Override\n   public void write(String str, int off, int len) throws IOException {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    out.write(str.substring(off, off + len).toUpperCase());\n   }\n \n   @Override\n   public void write(char[] cbuf, int off, int len) throws IOException {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    for (int i = 0; i < len; ++i) {\n+      out.write(Character.toUpperCase(cbuf[off + i]));\n+    }\n   }\n \n   @Override\n   public void write(int c) throws IOException {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    out.write(Character.toUpperCase(c));\n   }\n \n }"
+  },
+  {
+    "sha": "b35c0005bede8f9d02114a2a5658ceae34d2f86b",
+    "filename": "LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/CompleteFileTransformer.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 3,
+    "changes": 9,
+    "blob_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/blob/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/CompleteFileTransformer.java",
+    "raw_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/raw/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/CompleteFileTransformer.java",
+    "contents_url": "https://api.github.com/repos/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/contents/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/CompleteFileTransformer.java?ref=269ca5d8ec069e4017b1f2323e0cb3897dd1783f",
+    "patch": "@@ -1,5 +1,8 @@\n package ch.heigvd.res.labio.impl.transformers;\n \n+import ch.heigvd.res.labio.impl.filters.FileNumberingFilterWriter;\n+import ch.heigvd.res.labio.impl.filters.UpperCaseFilterWriter;\n+\n import java.io.Writer;\n \n /**\n@@ -15,16 +18,16 @@\n \n   @Override\n   public Writer decorateWithFilters(Writer writer) {\n-    if (true) {\n+    /*if (true) {\n       throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n-    }\n+    }*/\n     /*\n      * If you uncomment the following line (and get rid of th 3 previous lines...), you will restore the decoration \n      * of the writer (connected to the file. You can see that you first decorate the writer with an UpperCaseFilterWriter, which you then\n      * decorate with a FileNumberingFilterWriter. The resulting writer is used by the abstract class to write the characters read from the\n      * input files. So, the input is first prefixed with line numbers, then transformed to uppercase, then sent to the output file.f\n      */\n-    //writer = new FileNumberingFilterWriter(new UpperCaseFilterWriter(writer));\n+    writer = new FileNumberingFilterWriter(new UpperCaseFilterWriter(writer));\n     return writer; \n   }\n "
+  },
+  {
+    "sha": "60335845695a127177d22f0c6b4775c98b79f667",
+    "filename": "LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/FileTransformer.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/blob/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/FileTransformer.java",
+    "raw_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/raw/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/FileTransformer.java",
+    "contents_url": "https://api.github.com/repos/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/contents/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/FileTransformer.java?ref=269ca5d8ec069e4017b1f2323e0cb3897dd1783f",
+    "patch": "@@ -52,6 +52,10 @@ public void visit(File file) {\n        * writer has been decorated by the concrete subclass!). You need to write a loop to read the\n        * characters and write them to the writer.\n        */\n+\n+      int c;\n+      while ((c = reader.read()) != -1)\n+        writer.write(c);\n       \n       reader.close();\n       writer.flush();"
+  },
+  {
+    "sha": "71477a0ea242f46795c72bd2800f4366d0989e70",
+    "filename": "LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/NoOpFileTransformer.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/blob/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/NoOpFileTransformer.java",
+    "raw_url": "https://github.com/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/raw/269ca5d8ec069e4017b1f2323e0cb3897dd1783f/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/NoOpFileTransformer.java",
+    "contents_url": "https://api.github.com/repos/SoftEng-HEIGVD/https-github.com-SoftEng-HEIGVD-Teaching-HEIGVD-RES-2021-Labo-Java-IO/contents/LabJavaIO/src/main/java/ch/heigvd/res/labio/impl/transformers/NoOpFileTransformer.java?ref=269ca5d8ec069e4017b1f2323e0cb3897dd1783f",
+    "patch": "@@ -13,14 +13,14 @@\n \n   @Override\n   public Writer decorateWithFilters(Writer writer) {\n-    throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n+    // throw new UnsupportedOperationException(\"The student has not implemented this method yet.\");\n     /*\n      * The NoOpFileTransformer does not apply any transformation of the character stream\n      * (no uppercase, no line number, etc.). So, we don't need to decorate the writer connected to\n      * the output file at all. Just uncomment the following line and get rid of the UnsupportedOperationException and\n      * you will be all set.\n      */\n-    //return writer;\n+    return writer;\n   }\n \n }"
+  }
+]

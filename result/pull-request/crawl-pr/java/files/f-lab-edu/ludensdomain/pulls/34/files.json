@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "285243d1700e28050e3ac034313961914eca3d84",
+    "filename": "src/main/java/com/ludensdomain/advice/ExceptionAdvice.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/f-lab-edu/ludensdomain/blob/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/advice/ExceptionAdvice.java",
+    "raw_url": "https://github.com/f-lab-edu/ludensdomain/raw/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/advice/ExceptionAdvice.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/ludensdomain/contents/src/main/java/com/ludensdomain/advice/ExceptionAdvice.java?ref=c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb",
+    "patch": "@@ -2,6 +2,7 @@\n \n import com.ludensdomain.advice.exceptions.InsertFailedException;\n import com.ludensdomain.advice.exceptions.UnauthorizedUserException;\n+import com.ludensdomain.advice.exceptions.UpdateFailedException;\n import lombok.RequiredArgsConstructor;\n import org.springframework.http.HttpStatus;\n import org.springframework.web.bind.annotation.ExceptionHandler;\n@@ -26,6 +27,13 @@ protected ExceptionResponse insertFailedException() {\n         return getResult(\"게임 추가에 실패했습니다.\");\n     }\n \n+    @ExceptionHandler(UpdateFailedException.class)\n+    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)\n+    protected ExceptionResponse updateFailedException() {\n+\n+        return getResult(\"게임 정보 업데이트에 실패했습니다.\");\n+    }\n+\n     /*\n      * 모든 예외 클래스 객체의 메세지를 담는 util method\n      */"
+  },
+  {
+    "sha": "686b9aa2e81e54196f24cac88ac76762c97472e7",
+    "filename": "src/main/java/com/ludensdomain/advice/exceptions/UpdateFailedException.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/f-lab-edu/ludensdomain/blob/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/advice/exceptions/UpdateFailedException.java",
+    "raw_url": "https://github.com/f-lab-edu/ludensdomain/raw/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/advice/exceptions/UpdateFailedException.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/ludensdomain/contents/src/main/java/com/ludensdomain/advice/exceptions/UpdateFailedException.java?ref=c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb",
+    "patch": "@@ -0,0 +1,8 @@\n+package com.ludensdomain.advice.exceptions;\n+\n+public class UpdateFailedException extends RuntimeException {\n+\n+    public UpdateFailedException() {\n+        super();\n+    }\n+}"
+  },
+  {
+    "sha": "cfab55a62de4bed8304c08af9c1ca5d4ce2d0d61",
+    "filename": "src/main/java/com/ludensdomain/controller/GameController.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 6,
+    "changes": 15,
+    "blob_url": "https://github.com/f-lab-edu/ludensdomain/blob/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/controller/GameController.java",
+    "raw_url": "https://github.com/f-lab-edu/ludensdomain/raw/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/controller/GameController.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/ludensdomain/contents/src/main/java/com/ludensdomain/controller/GameController.java?ref=c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb",
+    "patch": "@@ -8,11 +8,15 @@\n import com.ludensdomain.service.GameService;\n import lombok.RequiredArgsConstructor;\n import lombok.extern.log4j.Log4j2;\n-import org.slf4j.Logger;\n-import org.slf4j.LoggerFactory;\n import org.springframework.cache.annotation.Cacheable;\n import org.springframework.http.ResponseEntity;\n-import org.springframework.web.bind.annotation.*;\n+import org.springframework.web.bind.annotation.DeleteMapping;\n+import org.springframework.web.bind.annotation.GetMapping;\n+import org.springframework.web.bind.annotation.PathVariable;\n+import org.springframework.web.bind.annotation.PostMapping;\n+import org.springframework.web.bind.annotation.PutMapping;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RestController;\n \n import java.util.List;\n \n@@ -26,7 +30,6 @@\n public class GameController {\n \n     private final GameService gameService;\n-//    private static final Logger logger = LoggerFactory.getLogger(GameController.class);\n \n     @LoginCheck(authLevel = AuthLevel.USER)\n     @GetMapping(\"/{gameId}\")\n@@ -63,9 +66,9 @@ public void insertNewGame(GameDto gameDto) {\n      */\n     @LoginCheck(authLevel = AuthLevel.COMPANY)\n     @PutMapping(\"/{gameId}\")\n-    public ResponseEntity<Void> updateGameInfo(@PathVariable long gameId) {\n+    public void updateGameInfo(@PathVariable long gameId, GameDto gameDto) {\n \n-        return RESPONSE_OK;\n+        gameService.updateGame(gameId, gameDto);\n     }\n \n     @LoginCheck(authLevel = AuthLevel.ADMIN)"
+  },
+  {
+    "sha": "25040df8a6ae66568dfe77823d008d4f9eb86363",
+    "filename": "src/main/java/com/ludensdomain/controller/UserController.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 3,
+    "changes": 4,
+    "blob_url": "https://github.com/f-lab-edu/ludensdomain/blob/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/controller/UserController.java",
+    "raw_url": "https://github.com/f-lab-edu/ludensdomain/raw/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/controller/UserController.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/ludensdomain/contents/src/main/java/com/ludensdomain/controller/UserController.java?ref=c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb",
+    "patch": "@@ -17,9 +17,7 @@\n \n import javax.validation.Valid;\n \n-import static com.ludensdomain.util.ResponseEntityConstants.RESPONSE_BAD_REQUEST;\n-import static com.ludensdomain.util.ResponseEntityConstants.RESPONSE_OK;\n-import static com.ludensdomain.util.ResponseEntityConstants.RESPONSE_USER_CREATED;\n+import static com.ludensdomain.util.ResponseEntityConstants.*;\n \n @Log4j2\n @RestController"
+  },
+  {
+    "sha": "7e1ba3cac4cfe5aa28d192429c976fbf115fe2e6",
+    "filename": "src/main/java/com/ludensdomain/dto/GameDto.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/f-lab-edu/ludensdomain/blob/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/dto/GameDto.java",
+    "raw_url": "https://github.com/f-lab-edu/ludensdomain/raw/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/dto/GameDto.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/ludensdomain/contents/src/main/java/com/ludensdomain/dto/GameDto.java?ref=c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb",
+    "patch": "@@ -40,4 +40,12 @@\n \n     int status;\n \n+    String genreName;\n+\n+    String publisherName;\n+\n+    String developerName;\n+\n+    String statusName;\n+\n }"
+  },
+  {
+    "sha": "e375dc68488d6c30149b16a2d3b546d195ba6aa2",
+    "filename": "src/main/java/com/ludensdomain/mapper/GameMapper.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/f-lab-edu/ludensdomain/blob/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/mapper/GameMapper.java",
+    "raw_url": "https://github.com/f-lab-edu/ludensdomain/raw/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/mapper/GameMapper.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/ludensdomain/contents/src/main/java/com/ludensdomain/mapper/GameMapper.java?ref=c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb",
+    "patch": "@@ -15,4 +15,6 @@\n \n     void insertGame(GameDto gameDto);\n \n+    void updateGame(GameDto gameDto);\n+\n }"
+  },
+  {
+    "sha": "b3454cf0852688fb42f17fb188390e9bc0d74d79",
+    "filename": "src/main/java/com/ludensdomain/service/GameService.java",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/f-lab-edu/ludensdomain/blob/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/service/GameService.java",
+    "raw_url": "https://github.com/f-lab-edu/ludensdomain/raw/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/service/GameService.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/ludensdomain/contents/src/main/java/com/ludensdomain/service/GameService.java?ref=c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb",
+    "patch": "@@ -1,13 +1,18 @@\n package com.ludensdomain.service;\n \n+import com.ludensdomain.advice.exceptions.InsertFailedException;\n+import com.ludensdomain.advice.exceptions.UpdateFailedException;\n import com.ludensdomain.dto.GameDto;\n import com.ludensdomain.dto.GamePagingDto;\n import com.ludensdomain.mapper.GameMapper;\n import lombok.RequiredArgsConstructor;\n+import lombok.extern.log4j.Log4j2;\n import org.springframework.stereotype.Service;\n \n import java.util.List;\n+import java.util.Optional;\n \n+@Log4j2\n @Service\n @RequiredArgsConstructor\n public class GameService {\n@@ -29,4 +34,30 @@ public void insertGame(GameDto gameDto) {\n         gameMapper.insertGame(gameDto);\n     }\n \n+    public void updateGame(long id, GameDto game) {\n+        Optional<GameDto> checkGame = Optional.ofNullable(getGameInfo(id));\n+\n+        if(checkGame.isPresent()) {\n+            GameDto updatedGame = buildGame(id, game);\n+            gameMapper.updateGame(updatedGame);\n+        } else {\n+            log.error(\"Error updating game[\" + id + \"]\");\n+            throw new UpdateFailedException();\n+        }\n+    }\n+\n+    public GameDto buildGame(long id, GameDto game) {\n+        return GameDto.builder()\n+                .id(id)\n+                .title(game.getTitle())\n+                .genre(game.getGenre())\n+                .description(game.getDescription())\n+                .releaseDate(game.getReleaseDate())\n+                .price(game.getPrice())\n+                .developer(game.getDeveloper())\n+                .publisher(game.getPublisher())\n+                .status(game.getStatus())\n+                .build();\n+    }\n+\n }"
+  },
+  {
+    "sha": "e1b43fe756ed87db26346db89aa6231e3ee3aeea",
+    "filename": "src/main/java/com/ludensdomain/service/UserService.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 5,
+    "changes": 5,
+    "blob_url": "https://github.com/f-lab-edu/ludensdomain/blob/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/service/UserService.java",
+    "raw_url": "https://github.com/f-lab-edu/ludensdomain/raw/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/java/com/ludensdomain/service/UserService.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/ludensdomain/contents/src/main/java/com/ludensdomain/service/UserService.java?ref=c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb",
+    "patch": "@@ -24,11 +24,6 @@ public void insertUserInfo(UserDto user) {\n         userMapper.insertUserInfo(encryptedUser);\n     }\n \n-    public UserDto findUserById(long id) {\n-\n-        return userMapper.selectUserById(id);\n-    }\n-\n     /**\n      * 비밀번호를 암호화한 사용자 정보를 build.\n      *"
+  },
+  {
+    "sha": "e9c979c1c6c5126f6e0aa178896d172b8a25e57f",
+    "filename": "src/main/resources/mapper/GameMapper.xml",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 8,
+    "changes": 29,
+    "blob_url": "https://github.com/f-lab-edu/ludensdomain/blob/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/resources/mapper/GameMapper.xml",
+    "raw_url": "https://github.com/f-lab-edu/ludensdomain/raw/c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb/src/main/resources/mapper/GameMapper.xml",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/ludensdomain/contents/src/main/resources/mapper/GameMapper.xml?ref=c0d5abdccc3bbf763beb0ee7290c2d73fdaf42fb",
+    "patch": "@@ -16,10 +16,10 @@\n                G.rating,\n                G.sales,\n                G.status,\n-               R.name,\n-               D.name,\n-               P.name,\n-               S.name\n+               R.name genreName,\n+               D.name developerName,\n+               P.name publisherName,\n+               S.name statusName\n         FROM game G, genre R, developer D, publisher P, status S\n                  LEFT OUTER JOIN genre ON G.genre = genre.id\n                  LEFT OUTER JOIN developer ON G.developer = developer.id\n@@ -41,10 +41,10 @@\n                G.rating,\n                G.sales,\n                G.status,\n-               R.name,\n-               D.name,\n-               P.name,\n-               S.name\n+               R.name genreName,\n+               D.name developerName,\n+               P.name publisherName,\n+               S.name statusName\n         FROM game G, genre R, developer D, publisher P, status S\n         LEFT OUTER JOIN genre ON G.genre = genre.id\n         LEFT OUTER JOIN developer ON G.developer = developer.id\n@@ -91,5 +91,18 @@\n                 )\n     </insert>\n \n+    <update id=\"updateGame\" parameterType=\"com.ludensdomain.dto.GameDto\">\n+        UPDATE game\n+        SET title = #{title},\n+            genre = #{genre},\n+            description = #{description},\n+            release_date = #{releaseDate},\n+            price = #{price},\n+            developer = #{developer},\n+            publisher = #{publisher},\n+            status = #{status}\n+        WHERE id = #{id}\n+    </update>\n+\n </mapper>\n "
+  }
+]

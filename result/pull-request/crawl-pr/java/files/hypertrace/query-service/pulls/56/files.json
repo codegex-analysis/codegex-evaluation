@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "c5a553b24114b2f0b5508c86873f2b7f9ca196ee",
+    "filename": ".github/workflows/pr-test.yml",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 1,
+    "changes": 13,
+    "blob_url": "https://github.com/hypertrace/query-service/blob/cf090f6e077ab88c275c6c1c6a63d49c2833bbb2/.github/workflows/pr-test.yml",
+    "raw_url": "https://github.com/hypertrace/query-service/raw/cf090f6e077ab88c275c6c1c6a63d49c2833bbb2/.github/workflows/pr-test.yml",
+    "contents_url": "https://api.github.com/repos/hypertrace/query-service/contents/.github/workflows/pr-test.yml?ref=cf090f6e077ab88c275c6c1c6a63d49c2833bbb2",
+    "patch": "@@ -27,7 +27,6 @@ jobs:\n             gradle-packages-${{ runner.os }}-${{ github.job }}\n             gradle-packages-${{ runner.os }}\n \n-\n       - name: Unit test\n         uses: hypertrace/github-actions/gradle@main\n         with: \n@@ -40,6 +39,18 @@ jobs:\n           fail_ci_if_error: true\n           flags: unit\n \n+      - name: Integration test\n+        uses: hypertrace/github-actions/gradle@main\n+        with:\n+          args: jacocoIntegrationTestReport\n+\n+      - name: Upload coverage to Codecov\n+        uses: codecov/codecov-action@v1\n+        with:\n+          name: integration test reports\n+          fail_ci_if_error: true\n+          flags: integration\n+\n       - name: copy test reports\n         uses: hypertrace/github-actions/gradle@main\n         with: "
+  },
+  {
+    "sha": "f094868aa017b5abd4861824a9fb65ef4dbe4e7c",
+    "filename": "build.gradle.kts",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/hypertrace/query-service/blob/cf090f6e077ab88c275c6c1c6a63d49c2833bbb2/build.gradle.kts",
+    "raw_url": "https://github.com/hypertrace/query-service/raw/cf090f6e077ab88c275c6c1c6a63d49c2833bbb2/build.gradle.kts",
+    "contents_url": "https://api.github.com/repos/hypertrace/query-service/contents/build.gradle.kts?ref=cf090f6e077ab88c275c6c1c6a63d49c2833bbb2",
+    "patch": "@@ -3,6 +3,7 @@ plugins {\n   id(\"org.hypertrace.ci-utils-plugin\") version \"0.1.1\"\n   id(\"org.hypertrace.publish-plugin\") version \"0.3.0\" apply false\n   id(\"org.hypertrace.jacoco-report-plugin\") version \"0.1.0\" apply false\n+  id(\"org.hypertrace.integration-test-plugin\") version \"0.1.0\" apply false\n }\n \n subprojects {"
+  },
+  {
+    "sha": "bfdc6db39662be1b79d8c9539a36c37e9a1bc213",
+    "filename": "query-service/build.gradle.kts",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/hypertrace/query-service/blob/cf090f6e077ab88c275c6c1c6a63d49c2833bbb2/query-service/build.gradle.kts",
+    "raw_url": "https://github.com/hypertrace/query-service/raw/cf090f6e077ab88c275c6c1c6a63d49c2833bbb2/query-service/build.gradle.kts",
+    "contents_url": "https://api.github.com/repos/hypertrace/query-service/contents/query-service/build.gradle.kts?ref=cf090f6e077ab88c275c6c1c6a63d49c2833bbb2",
+    "patch": "@@ -1,8 +1,11 @@\n plugins {\n   java\n   application\n+  jacoco\n   id(\"org.hypertrace.docker-java-application-plugin\") version \"0.8.1\"\n   id(\"org.hypertrace.docker-publish-plugin\") version \"0.8.1\"\n+  id(\"org.hypertrace.integration-test-plugin\")\n+  id(\"org.hypertrace.jacoco-report-plugin\")\n }\n \n dependencies {\n@@ -21,6 +24,9 @@ dependencies {\n   runtimeOnly(\"org.apache.logging.log4j:log4j-slf4j-impl:2.13.3\")\n \n   implementation(\"com.typesafe:config:1.4.0\")\n+\n+  integrationTestImplementation(\"org.hypertrace.core.serviceframework:integrationtest-service-framework:0.1.19\")\n+  integrationTestImplementation(\"org.junit.jupiter:junit-jupiter:5.6.2\")\n }\n \n application {\n@@ -38,4 +44,13 @@ hypertraceDocker {\n       port.set(8090)\n     }\n   }\n+}\n+\n+tasks.integrationTest {\n+  useJUnitPlatform()\n+}\n+\n+tasks.jacocoIntegrationTestReport {\n+  sourceSets(project(\":query-service-impl\").sourceSets.getByName(\"main\"))\n+  sourceSets(project(\":query-service-client\").sourceSets.getByName(\"main\"))\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "1f684b287ae6c131cfff466f5c6c2514977d7a8a",
+    "filename": "query-service/src/integrationTest/java/org/hypertrace/core/service/query/htqueries/HTPinotQueriesTest.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/hypertrace/query-service/blob/cf090f6e077ab88c275c6c1c6a63d49c2833bbb2/query-service/src/integrationTest/java/org/hypertrace/core/service/query/htqueries/HTPinotQueriesTest.java",
+    "raw_url": "https://github.com/hypertrace/query-service/raw/cf090f6e077ab88c275c6c1c6a63d49c2833bbb2/query-service/src/integrationTest/java/org/hypertrace/core/service/query/htqueries/HTPinotQueriesTest.java",
+    "contents_url": "https://api.github.com/repos/hypertrace/query-service/contents/query-service/src/integrationTest/java/org/hypertrace/core/service/query/htqueries/HTPinotQueriesTest.java?ref=cf090f6e077ab88c275c6c1c6a63d49c2833bbb2",
+    "patch": "@@ -0,0 +1,12 @@\n+package org.hypertrace.core.service.query.htqueries;\n+\n+import org.junit.jupiter.api.Assertions;\n+import org.junit.jupiter.api.Test;\n+\n+public class HTPinotQueriesTest {\n+\n+  @Test\n+  public void test() {\n+    Assertions.assertTrue(true);\n+  }\n+}"
+  }
+]

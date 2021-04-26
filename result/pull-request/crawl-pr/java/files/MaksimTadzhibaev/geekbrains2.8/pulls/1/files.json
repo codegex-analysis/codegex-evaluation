@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "87dc4d83385dff13a2abeb205d7ce1ef33b471f6",
+    "filename": "client/src/main/java/client/RegController.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/MaksimTadzhibaev/geekbrains2.8/blob/d97b7169ff8109bbc022b73f4f978bfb6eb35a31/client/src/main/java/client/RegController.java",
+    "raw_url": "https://github.com/MaksimTadzhibaev/geekbrains2.8/raw/d97b7169ff8109bbc022b73f4f978bfb6eb35a31/client/src/main/java/client/RegController.java",
+    "contents_url": "https://api.github.com/repos/MaksimTadzhibaev/geekbrains2.8/contents/client/src/main/java/client/RegController.java?ref=d97b7169ff8109bbc022b73f4f978bfb6eb35a31",
+    "patch": "@@ -28,7 +28,7 @@ public void setResultTryToReg(String command) {\n             textArea.appendText(\"Регистрация прошла успешно\\n\");\n         }\n         if (command.equals(Command.REG_NO)) {\n-            textArea.appendText(\"Логин или никнейм уже заняты\\n\");\n+            textArea.appendText(\"Логин или никнейм уже заняты.\\nУ вас 120 секунд для регистрации\");\n         }\n     }\n "
+  },
+  {
+    "sha": "54dce47230d9ca96e903d8e56ee7f4d8a475d876",
+    "filename": "server/src/main/java/server/ClientHandler.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 5,
+    "changes": 20,
+    "blob_url": "https://github.com/MaksimTadzhibaev/geekbrains2.8/blob/d97b7169ff8109bbc022b73f4f978bfb6eb35a31/server/src/main/java/server/ClientHandler.java",
+    "raw_url": "https://github.com/MaksimTadzhibaev/geekbrains2.8/raw/d97b7169ff8109bbc022b73f4f978bfb6eb35a31/server/src/main/java/server/ClientHandler.java",
+    "contents_url": "https://api.github.com/repos/MaksimTadzhibaev/geekbrains2.8/contents/server/src/main/java/server/ClientHandler.java?ref=d97b7169ff8109bbc022b73f4f978bfb6eb35a31",
+    "patch": "@@ -6,6 +6,7 @@\n import java.io.DataOutputStream;\n import java.io.IOException;\n import java.net.Socket;\n+import java.net.SocketTimeoutException;\n \n public class ClientHandler {\n     private Server server;\n@@ -22,12 +23,10 @@ public ClientHandler(Server server, Socket socket) {\n             this.socket = socket;\n             in = new DataInputStream(socket.getInputStream());\n             out = new DataOutputStream(socket.getOutputStream());\n-\n             new Thread(() -> {\n                 try {\n                     // установка сокет тайм аут\n-//                    socket.setSoTimeout(5000);\n-\n+                    socket.setSoTimeout(120000);\n                     // цикл аутентификации\n                     while (true) {\n                         String str = in.readUTF();\n@@ -54,17 +53,19 @@ public ClientHandler(Server server, Socket socket) {\n                                     server.subscribe(this);\n                                     System.out.println(\"client: \" + socket.getRemoteSocketAddress() +\n                                             \" connected with nick: \" + nickname);\n+                                    socket.setSoTimeout(0);\n                                     break;\n                                 } else {\n-                                    sendMsg(\"Данная учетная запись уже используется\");\n+                                    sendMsg(\"Данная учетная запись уже используется.\\nУ вас 120 секунд для повторного подключения\");\n                                 }\n                             } else {\n-                                sendMsg(\"Неверный логин / пароль\");\n+                                sendMsg(\"Неверный логин / пароль.\\nУ вас 120 секунд для повторного подключения\");\n                             }\n                         }\n \n                         //если команда регистрация\n                         if (str.startsWith(Command.REG)) {\n+                            socket.setSoTimeout(0);\n                             String[] token = str.split(\"\\\\s\", 4);\n                             if (token.length < 4) {\n                                 continue;\n@@ -75,6 +76,7 @@ public ClientHandler(Server server, Socket socket) {\n                                 sendMsg(Command.REG_OK);\n                             } else {\n                                 sendMsg(Command.REG_NO);\n+                                socket.setSoTimeout(120000);\n                             }\n                         }\n \n@@ -100,6 +102,14 @@ public ClientHandler(Server server, Socket socket) {\n                             server.broadcastMsg(this, str);\n                         }\n                     }\n+                }catch(SocketTimeoutException e) {\n+                    System.out.println(\"Закончилось время для подключения\");\n+                    try {\n+                        out.writeUTF(Command.END);\n+                    } catch (IOException ex) {\n+                        ex.printStackTrace();\n+                    }\n+\n                     //SocketTimeoutException\n                 } catch (RuntimeException e) {\n                     System.out.println(e.getMessage());"
+  }
+]

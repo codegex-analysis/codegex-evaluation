@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "2ff3387f10bd4fb75958580142cb6612082f8cd4",
+    "filename": "dev/com.ibm.ws.security.openidconnect.clients.common/src/com/ibm/ws/security/openidconnect/clients/common/OidcClientUtil.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 12,
+    "changes": 18,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/5626f9bfb1fa0d54f4410f5717fe0d449294e6c8/dev/com.ibm.ws.security.openidconnect.clients.common/src/com/ibm/ws/security/openidconnect/clients/common/OidcClientUtil.java",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/5626f9bfb1fa0d54f4410f5717fe0d449294e6c8/dev/com.ibm.ws.security.openidconnect.clients.common/src/com/ibm/ws/security/openidconnect/clients/common/OidcClientUtil.java",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.security.openidconnect.clients.common/src/com/ibm/ws/security/openidconnect/clients/common/OidcClientUtil.java?ref=5626f9bfb1fa0d54f4410f5717fe0d449294e6c8",
+    "patch": "@@ -1,5 +1,5 @@\n /*******************************************************************************\n- * Copyright (c) 2013, 2020 IBM Corporation and others.\n+ * Copyright (c) 2013, 2021 IBM Corporation and others.\n  * All rights reserved. This program and the accompanying materials\n  * are made available under the terms of the Eclipse Public License v1.0\n  * which accompanies this distribution, and is available at\n@@ -433,22 +433,16 @@ public static void setCookieForRequestParameter(HttpServletRequest request, Http\n         response.addCookie(c);\n     }\n \n-    /**\n-     * @param encodedReqParams\n-     * @param clientSecret\n-     * @return\n-     */\n     public static String calculateOidcCodeCookieValue(String encoded, ConvergedClientConfig clientCfg) {\n \n         String retVal = new String(encoded);\n-        String clientidsecret = clientCfg.toString();\n-        if (clientCfg.getClientSecret() != null) {\n-            clientidsecret = clientidsecret.concat(clientCfg.getClientSecret());\n+        String uniqueSecretValue = clientCfg.getClientSecret();\n+        if (uniqueSecretValue == null) {\n+            uniqueSecretValue = clientCfg.toString();\n         }\n \n-        String tmpStr = new String(encoded);\n-        tmpStr = tmpStr.concat(\"_\").concat(clientidsecret);\n-        retVal = retVal.concat(\"_\").concat(HashUtils.digest(tmpStr)); // digest encoded request params and clientid+client_secret\n+        String signatureValue = (new String(encoded)) + \"_\" + uniqueSecretValue;\n+        retVal = retVal + \"_\" + HashUtils.digest(signatureValue); // digest encoded request params and client_secret/client-specific value\n \n         return retVal;\n     }"
+  },
+  {
+    "sha": "504c255efbf84b036c80b42e6f81327ac3d38ebc",
+    "filename": "dev/com.ibm.ws.security.social/src/com/ibm/ws/security/social/internal/OidcLoginConfigImpl.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/OpenLiberty/open-liberty/blob/5626f9bfb1fa0d54f4410f5717fe0d449294e6c8/dev/com.ibm.ws.security.social/src/com/ibm/ws/security/social/internal/OidcLoginConfigImpl.java",
+    "raw_url": "https://github.com/OpenLiberty/open-liberty/raw/5626f9bfb1fa0d54f4410f5717fe0d449294e6c8/dev/com.ibm.ws.security.social/src/com/ibm/ws/security/social/internal/OidcLoginConfigImpl.java",
+    "contents_url": "https://api.github.com/repos/OpenLiberty/open-liberty/contents/dev/com.ibm.ws.security.social/src/com/ibm/ws/security/social/internal/OidcLoginConfigImpl.java?ref=5626f9bfb1fa0d54f4410f5717fe0d449294e6c8",
+    "patch": "@@ -873,4 +873,21 @@ public String getKeyManagementKeyAlias() {\n         return null;\n     }\n \n+    @Override\n+    public String toString() {\n+        StringBuffer sb = new StringBuffer();\n+        sb.append(\"{\");\n+        sb.append(\"Id: \" + uniqueId);\n+        sb.append(\" clientId: \" + clientId);\n+        sb.append(\" grantType: \" + grantType);\n+        sb.append(\" responseType: \" + responseType);\n+        sb.append(\" scope: \" + scope);\n+        sb.append(\" redirectToRPHostAndPort: \" + redirectToRPHostAndPort);\n+        sb.append(\" issuerIdentifier: \" + getIssuerIdentifier());\n+        sb.append(\" tokenEndpointUrl: \" + tokenEndpoint);\n+        sb.append(\" userInfoEndpointUrl: \" + userInfoEndpoint);\n+        sb.append(\"}\");\n+        return sb.toString();\n+    }\n+\n }"
+  }
+]

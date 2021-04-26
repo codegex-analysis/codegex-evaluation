@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "e966bd22437080a61a7b70f8b37c09148b789a39",
+    "filename": "xmppserver/src/main/java/org/jivesoftware/openfire/http/HttpSession.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 1,
+    "changes": 14,
+    "blob_url": "https://github.com/igniterealtime/Openfire/blob/b3aab0641df8c5c44bdb0ef33951d0b321b696ce/xmppserver/src/main/java/org/jivesoftware/openfire/http/HttpSession.java",
+    "raw_url": "https://github.com/igniterealtime/Openfire/raw/b3aab0641df8c5c44bdb0ef33951d0b321b696ce/xmppserver/src/main/java/org/jivesoftware/openfire/http/HttpSession.java",
+    "contents_url": "https://api.github.com/repos/igniterealtime/Openfire/contents/xmppserver/src/main/java/org/jivesoftware/openfire/http/HttpSession.java?ref=b3aab0641df8c5c44bdb0ef33951d0b321b696ce",
+    "patch": "@@ -1043,10 +1043,22 @@ private void closeSession() {\n             // not eligible to receive data. These facts combines should rule out the need to flush pending elements to\n             // open connections in this method.\n             synchronized (connectionQueue) {\n+                boolean isFirst = true;\n                 for (HttpConnection toClose : connectionQueue) {\n                     try {\n+                        // XEP-0124, section 13: \"The connection manager SHOULD acknowledge the session termination on\n+                        // the oldest connection with a HTTP 200 OK containing a <body/> element of the type\n+                        // 'terminate'. On all other open connections, the connection manager SHOULD respond with an\n+                        // HTTP 200 OK containing an empty <body/> element.\n                         if (!toClose.isClosed()) {\n-                            toClose.deliverBody(null, true);\n+                            final String body;\n+                            if (isFirst) {\n+                                isFirst = false;\n+                                body = this.createEmptyBody(true);\n+                            } else {\n+                                body = null;\n+                            }\n+                            toClose.deliverBody(body, true);\n                         }\n                     } catch (HttpConnectionClosedException e) {\n                         // Probably benign."
+  }
+]

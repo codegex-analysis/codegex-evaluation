@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "1e8842fbbcd62eccb71425ea0c94ae6cb13ac77a",
+    "filename": "src/main/java/org/bahmni/batch/form/FormListProcessor.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 2,
+    "changes": 14,
+    "blob_url": "https://github.com/endtb/bahmni-endtb-batch/blob/fd835ede6b72a07d1868289c8a0c04e8e854d731/src/main/java/org/bahmni/batch/form/FormListProcessor.java",
+    "raw_url": "https://github.com/endtb/bahmni-endtb-batch/raw/fd835ede6b72a07d1868289c8a0c04e8e854d731/src/main/java/org/bahmni/batch/form/FormListProcessor.java",
+    "contents_url": "https://api.github.com/repos/endtb/bahmni-endtb-batch/contents/src/main/java/org/bahmni/batch/form/FormListProcessor.java?ref=fd835ede6b72a07d1868289c8a0c04e8e854d731",
+    "patch": "@@ -4,6 +4,7 @@\n import org.bahmni.batch.form.domain.Concept;\n import org.bahmni.batch.form.service.ObsService;\n import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.beans.factory.annotation.Value;\n import org.springframework.stereotype.Component;\n \n import java.util.ArrayList;\n@@ -13,7 +14,8 @@\n @Component\n public class FormListProcessor {\n \n-\tpublic static final String ALL_FORMS = \"All Observation Templates\";\n+\t@Value(\"${allForms:All Observation Templates}\")\n+\tprivate String allForms;\n \n \t@Autowired\n \tprivate ObsService obsService;\n@@ -23,7 +25,7 @@\n \n \n \tpublic List<BahmniForm> retrieveAllForms(){\n-\t\tList<Concept> allFormConcepts = obsService.getChildConcepts(ALL_FORMS);\n+\t\tList<Concept> allFormConcepts = obsService.getChildConcepts(allForms);\n \t\tallFormConcepts.add(obsService.getConceptsByNames(\"Bacteriology Concept Set\").get(0));\n \n \t\tList<BahmniForm> forms = new ArrayList<>();\n@@ -52,4 +54,12 @@ public void setObsService(ObsService obsService) {\n \tpublic void setBahmniFormFactory(BahmniFormFactory bahmniFormFactory) {\n \t\tthis.bahmniFormFactory = bahmniFormFactory;\n \t}\n+\n+\tpublic String getAllForms() {\n+\t\treturn allForms;\n+\t}\n+\n+\tpublic void setAllForms(String allForms) {\n+\t\tthis.allForms = allForms;\n+\t}\n }"
+  },
+  {
+    "sha": "4aa57034b98542dbde518dc449456ddefcd2c64a",
+    "filename": "src/main/resources/application.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/endtb/bahmni-endtb-batch/blob/fd835ede6b72a07d1868289c8a0c04e8e854d731/src/main/resources/application.properties",
+    "raw_url": "https://github.com/endtb/bahmni-endtb-batch/raw/fd835ede6b72a07d1868289c8a0c04e8e854d731/src/main/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/endtb/bahmni-endtb-batch/contents/src/main/resources/application.properties?ref=fd835ede6b72a07d1868289c8a0c04e8e854d731",
+    "patch": "@@ -11,6 +11,7 @@ templates=file:src/main/resources/templates\n bahmniConfigFolder=file:/var/www/bahmni_config\n externalCohortTypes=${EXTERNAL_COHORT_TYPES}\n jobName=${JOB_NAME}\n+allForms=All Observation Templates\n \n treatmentRegistrationHeaders=id_emr,dob,age,sex,tbregtype,regnum,d_reg,reg_facility,status,patient_id,patient_program_id,date_created,date_changed\n tbDrugOrderHeaders=regnum,tbdrug,tbdose,unit,tbroute,tbdrugfreq,d_tbdrugstart,addlinstr,d_tbdrugend,reas_tbd_stop,id_aenum_reas_d_stop_oth,date_created,date_changed"
+  },
+  {
+    "sha": "0da61de90c3ea23dfbc6860fe42eba8fb255b687",
+    "filename": "src/test/java/org/bahmni/batch/form/FormListProcessorTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/endtb/bahmni-endtb-batch/blob/fd835ede6b72a07d1868289c8a0c04e8e854d731/src/test/java/org/bahmni/batch/form/FormListProcessorTest.java",
+    "raw_url": "https://github.com/endtb/bahmni-endtb-batch/raw/fd835ede6b72a07d1868289c8a0c04e8e854d731/src/test/java/org/bahmni/batch/form/FormListProcessorTest.java",
+    "contents_url": "https://api.github.com/repos/endtb/bahmni-endtb-batch/contents/src/test/java/org/bahmni/batch/form/FormListProcessorTest.java?ref=fd835ede6b72a07d1868289c8a0c04e8e854d731",
+    "patch": "@@ -32,7 +32,7 @@ public void setup(){\n \t\tformListProcessor = new FormListProcessor();\n \t\tformListProcessor.setObsService(obsService);\n \t\tformListProcessor.setBahmniFormFactory(bahmniFormFactory);\n-\n+\t\tformListProcessor.setAllForms(\"All Observation Templates\");\n \t}\n \n \t@Test\n@@ -42,7 +42,7 @@ public void shouldRetrieveAllForms(){\n \t\tList<Concept> conceptList = new ArrayList();\n \t\tconceptList.add(conceptA);\n \n-\t\twhen(obsService.getChildConcepts(FormListProcessor.ALL_FORMS)).thenReturn(conceptList);\n+\t\twhen(obsService.getChildConcepts(formListProcessor.getAllForms())).thenReturn(conceptList);\n \n \t\twhen(obsService.getConceptsByNames(\"Bacteriology Concept Set\")).thenReturn(Arrays.asList(\n \t\t\t\tbacteriologyConceptSet));"
+  }
+]

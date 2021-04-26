@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "4e9d68476016e09a2c9acceaa4bef4277ce4d0c7",
+    "filename": "dcm4chee-arc-keycloak/src/main/java/org/dcm4chee/arc/keycloak/AccessTokenRequestor.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/mklassen/dcm4chee-arc-light/blob/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-keycloak/src/main/java/org/dcm4chee/arc/keycloak/AccessTokenRequestor.java",
+    "raw_url": "https://github.com/mklassen/dcm4chee-arc-light/raw/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-keycloak/src/main/java/org/dcm4chee/arc/keycloak/AccessTokenRequestor.java",
+    "contents_url": "https://api.github.com/repos/mklassen/dcm4chee-arc-light/contents/dcm4chee-arc-keycloak/src/main/java/org/dcm4chee/arc/keycloak/AccessTokenRequestor.java?ref=0f689da59727b7f5b5b2ad0539226a2916617241",
+    "patch": "@@ -151,8 +151,8 @@ private void parseToken(AccessToken token, KeycloakClient kc, IdentityConfigurer\n \n         if (identityConfigurer != null) {\n             String resource;\n-            if (token.getOtherClaims().get(\"azp\") != null)\n-                resource = token.getOtherClaims().get(\"azp\").toString();\n+            if (token.getIssuedFor() != null)\n+                resource = token.getIssuedFor();\n             else if (kc != null)\n                 resource = kc.getKeycloakRealm();\n             else"
+  },
+  {
+    "sha": "34320484b08aa747a6637b8672494f953e16725c",
+    "filename": "dcm4chee-arc-keycloak/src/main/java/org/dcm4chee/arc/keycloak/ClientRoles.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/mklassen/dcm4chee-arc-light/blob/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-keycloak/src/main/java/org/dcm4chee/arc/keycloak/ClientRoles.java",
+    "raw_url": "https://github.com/mklassen/dcm4chee-arc-light/raw/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-keycloak/src/main/java/org/dcm4chee/arc/keycloak/ClientRoles.java",
+    "contents_url": "https://api.github.com/repos/mklassen/dcm4chee-arc-light/contents/dcm4chee-arc-keycloak/src/main/java/org/dcm4chee/arc/keycloak/ClientRoles.java?ref=0f689da59727b7f5b5b2ad0539226a2916617241",
+    "patch": "@@ -41,6 +41,7 @@\n import org.keycloak.representations.AccessToken;\n \n import java.util.Collections;\n+import java.util.HashSet;\n import java.util.Set;\n \n /**\n@@ -78,4 +79,19 @@\n \n         return access.getRoles();\n     }\n+\n+    public static Set<String> filterRoles(Set<String> accepted, Set<String> limit) {\n+        Set<String> filtered;\n+\n+        if (accepted != null) {\n+            // Only roles that are accepted and in limit\n+            filtered = new HashSet<>(accepted);\n+            filtered.retainAll(limit);\n+        } else {\n+            // null accepted mean no limits have been been defined, so just use limit\n+            filtered = new HashSet<>(limit);\n+        }\n+\n+        return filtered;\n+    }\n }"
+  },
+  {
+    "sha": "73aab4638c4d18a7bac37a20e0dbecfb48e3b625",
+    "filename": "dcm4chee-arc-query/src/main/java/org/dcm4chee/arc/query/impl/QueryContextImpl.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 18,
+    "changes": 29,
+    "blob_url": "https://github.com/mklassen/dcm4chee-arc-light/blob/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-query/src/main/java/org/dcm4chee/arc/query/impl/QueryContextImpl.java",
+    "raw_url": "https://github.com/mklassen/dcm4chee-arc-light/raw/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-query/src/main/java/org/dcm4chee/arc/query/impl/QueryContextImpl.java",
+    "contents_url": "https://api.github.com/repos/mklassen/dcm4chee-arc-light/contents/dcm4chee-arc-query/src/main/java/org/dcm4chee/arc/query/impl/QueryContextImpl.java?ref=0f689da59727b7f5b5b2ad0539226a2916617241",
+    "patch": "@@ -45,24 +45,24 @@\n import org.dcm4che3.data.Tag;\n import org.dcm4che3.net.ApplicationEntity;\n import org.dcm4che3.net.Association;\n-import org.dcm4che3.net.pdu.UserIdentityAC;\n import org.dcm4che3.net.service.QueryRetrieveLevel2;\n import org.dcm4che3.util.ReverseDNS;\n import org.dcm4che3.util.SafeClose;\n+import org.dcm4chee.arc.UserAccessControl;\n import org.dcm4chee.arc.conf.ArchiveAEExtension;\n import org.dcm4chee.arc.conf.ArchiveDeviceExtension;\n import org.dcm4chee.arc.keycloak.HttpServletRequestInfo;\n-import org.dcm4chee.arc.keycloak.ClientRoles;\n import org.dcm4chee.arc.query.QueryService;\n import org.dcm4chee.arc.query.QueryContext;\n import org.dcm4chee.arc.query.util.OrderByTag;\n import org.dcm4chee.arc.query.util.QueryParam;\n import org.dcm4chee.arc.storage.Storage;\n-import org.dcm4chee.arc.ArchiveUserIdentityAC;\n \n import java.util.HashMap;\n import java.util.List;\n import java.util.Set;\n+import java.util.HashSet;\n+import java.util.Arrays;\n \n /**\n  * @author Gunter Zeilinger <gunterze@gmail.com>\n@@ -269,20 +269,13 @@ public void close() {\n     }\n \n     @Override\n-    public String [] getAccessControlIDs() {\n-        Set<String> clientRoles = ClientRoles.get(this.httpRequest);\n-        if (this.as != null && this.as.getAAssociateAC() != null) {\n-            UserIdentityAC userIdentityAC = this.as.getAAssociateAC().getUserIdentityAC();\n-            if (userIdentityAC instanceof ArchiveUserIdentityAC) {\n-                clientRoles = ((ArchiveUserIdentityAC) userIdentityAC).filterRolesByClientRoles(clientRoles);\n-            }\n-        }\n-        if (clientRoles != null && clientRoles.isEmpty()) {\n-            // The user has no client roles, so only '*' studies may be accessed\n-            // To ensure that at least one accessControlID is present so they do not see everything\n-            clientRoles.add(\"*\");\n-        }\n-        // null clientRoles means do not filter\n-        return clientRoles != null ? clientRoles.toArray(new String[0]) : new String[0];\n+    public String[] getAccessControlIDs() {\n+        Set<String> arcAEAccessControlIDSet = new HashSet<>(Arrays.asList(this.getArchiveAEExtension().getAccessControlIDs()));\n+\n+        return UserAccessControl.getAccessControlIDs(\n+                arcAEAccessControlIDSet,\n+                this.httpRequest,\n+                this.getAssociation()\n+        );\n     }\n }"
+  },
+  {
+    "sha": "3c31b4b7c85493a1db9ed418a435d64201ec2427",
+    "filename": "dcm4chee-arc-retrieve/src/main/java/org/dcm4chee/arc/retrieve/impl/RetrieveContextImpl.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 14,
+    "changes": 23,
+    "blob_url": "https://github.com/mklassen/dcm4chee-arc-light/blob/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-retrieve/src/main/java/org/dcm4chee/arc/retrieve/impl/RetrieveContextImpl.java",
+    "raw_url": "https://github.com/mklassen/dcm4chee-arc-light/raw/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-retrieve/src/main/java/org/dcm4chee/arc/retrieve/impl/RetrieveContextImpl.java",
+    "contents_url": "https://api.github.com/repos/mklassen/dcm4chee-arc-light/contents/dcm4chee-arc-retrieve/src/main/java/org/dcm4chee/arc/retrieve/impl/RetrieveContextImpl.java?ref=0f689da59727b7f5b5b2ad0539226a2916617241",
+    "patch": "@@ -51,12 +51,14 @@\n import org.dcm4che3.util.ReverseDNS;\n import org.dcm4che3.util.SafeClose;\n import org.dcm4che3.util.StringUtils;\n+import org.dcm4chee.arc.UserAccessControl;\n import org.dcm4chee.arc.conf.*;\n import org.dcm4chee.arc.entity.Location;\n import org.dcm4chee.arc.entity.Series;\n import org.dcm4chee.arc.retrieve.*;\n import org.dcm4chee.arc.storage.Storage;\n import org.dcm4chee.arc.keycloak.HttpServletRequestInfo;\n+import org.dcm4chee.arc.keycloak.ClientRoles;\n import org.dcm4chee.arc.store.InstanceLocations;\n import org.dcm4chee.arc.store.UpdateLocation;\n import org.dcm4chee.arc.ArchiveUserIdentityAC;\n@@ -195,20 +197,13 @@ public ArchiveAEExtension getArchiveAEExtension() {\n \n     @Override\n     public String[] getAccessControlIDs() {\n-        String [] accessControlIDs = arcAE.getAccessControlIDs();\n-        if (null != requestAssociation)\n-        {\n-            AAssociateAC ac = requestAssociation.getAAssociateAC();\n-            if (null != ac) {\n-                UserIdentityAC userIdentityAC = ac.getUserIdentityAC();\n-                if (userIdentityAC instanceof ArchiveUserIdentityAC) {\n-                    Set<String> set = new HashSet<>(Arrays.asList(accessControlIDs));\n-                    ((ArchiveUserIdentityAC) userIdentityAC).filterRolesByClientRoles(set);\n-                    accessControlIDs = (String[]) set.toArray();\n-                }\n-            }\n-        }\n-        return accessControlIDs;\n+        Set<String> arcAEAccessControlIDSet = new HashSet<>(Arrays.asList(arcAE.getAccessControlIDs()));\n+\n+        return UserAccessControl.getAccessControlIDs(\n+                arcAEAccessControlIDSet,\n+                this.httpServletRequestInfo,\n+                this.requestAssociation\n+        );\n     }\n \n     @Override"
+  },
+  {
+    "sha": "cc1afac6c3bfa02558d4915cf7a4224e54503364",
+    "filename": "dcm4chee-arc-service/src/main/java/org/dcm4chee/arc/ArchiveUserIdentityAC.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 18,
+    "changes": 22,
+    "blob_url": "https://github.com/mklassen/dcm4chee-arc-light/blob/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-service/src/main/java/org/dcm4chee/arc/ArchiveUserIdentityAC.java",
+    "raw_url": "https://github.com/mklassen/dcm4chee-arc-light/raw/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-service/src/main/java/org/dcm4chee/arc/ArchiveUserIdentityAC.java",
+    "contents_url": "https://api.github.com/repos/mklassen/dcm4chee-arc-light/contents/dcm4chee-arc-service/src/main/java/org/dcm4chee/arc/ArchiveUserIdentityAC.java?ref=0f689da59727b7f5b5b2ad0539226a2916617241",
+    "patch": "@@ -38,6 +38,7 @@\n package org.dcm4chee.arc;\n \n import org.dcm4che3.net.pdu.UserIdentityAC;\n+import org.dcm4chee.arc.keycloak.ClientRoles;\n \n import java.util.Arrays;\n import java.util.HashSet;\n@@ -72,31 +73,16 @@ public void addClientRoles(Set<String> clientRoles) {\n         this.clientRoles.addAll(clientRoles);\n     }\n \n-    private static Set<String> filterRoles(Set<String> accepted, Set<String> limit) {\n-        Set<String> filtered;\n-\n-        if (accepted != null) {\n-            // Only roles that are accepted and in limit\n-            filtered = new HashSet<>(accepted);\n-            filtered.retainAll(limit);\n-        } else {\n-            // null accepted mean no limits have been been defined, so just use limit\n-            filtered = new HashSet<>(limit);\n-        }\n-\n-        return filtered;\n-    }\n-\n     public static Set<String> filterRoles(String[] accepted, Set<String> limit) {\n         Set<String> acceptedRoles = new HashSet<>(Arrays.asList(accepted));\n-        return filterRoles(acceptedRoles, limit);\n+        return ClientRoles.filterRoles(acceptedRoles, limit);\n     }\n \n     public final Set<String> filterRolesByClientRoles(Set<String> accepted) {\n-        return filterRoles(accepted, clientRoles);\n+        return ClientRoles.filterRoles(accepted, clientRoles);\n     }\n \n     public final Set<String> filterRolesByRealmRoles(Set<String> accepted) {\n-        return filterRoles(accepted, realmRoles);\n+        return ClientRoles.filterRoles(accepted, realmRoles);\n     }\n }"
+  },
+  {
+    "sha": "bccf9e9778d0dfe92bffbab2d3dc9b6d0b7e672e",
+    "filename": "dcm4chee-arc-service/src/main/java/org/dcm4chee/arc/UserAccessControl.java",
+    "status": "added",
+    "additions": 50,
+    "deletions": 0,
+    "changes": 50,
+    "blob_url": "https://github.com/mklassen/dcm4chee-arc-light/blob/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-service/src/main/java/org/dcm4chee/arc/UserAccessControl.java",
+    "raw_url": "https://github.com/mklassen/dcm4chee-arc-light/raw/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-service/src/main/java/org/dcm4chee/arc/UserAccessControl.java",
+    "contents_url": "https://api.github.com/repos/mklassen/dcm4chee-arc-light/contents/dcm4chee-arc-service/src/main/java/org/dcm4chee/arc/UserAccessControl.java?ref=0f689da59727b7f5b5b2ad0539226a2916617241",
+    "patch": "@@ -0,0 +1,50 @@\n+package org.dcm4chee.arc;\n+\n+import org.dcm4che3.net.Association;\n+import org.dcm4che3.net.pdu.AAssociateAC;\n+import org.dcm4che3.net.pdu.UserIdentityAC;\n+\n+import org.dcm4chee.arc.keycloak.ClientRoles;\n+import org.dcm4chee.arc.keycloak.HttpServletRequestInfo;\n+\n+import java.util.HashSet;\n+import java.util.Set;\n+\n+public class UserAccessControl {\n+    public static String[] getAccessControlIDs(Set<String> arcAEAccessControlIDSet, HttpServletRequestInfo httpServletRequestInfo, Association requestAssociation) {\n+\n+        Set<String> accessControlIDSet = new HashSet<>();\n+\n+        // Assign roles found in the HTTP request, if any\n+        Set<String> httpRequestAccessControlIDset = ClientRoles.get(httpServletRequestInfo);\n+        if(httpRequestAccessControlIDset != null)\n+            accessControlIDSet.addAll(httpRequestAccessControlIDset);\n+\n+        // Assign roles found in the DICOM association, if any\n+        if (null != requestAssociation)\n+        {\n+            AAssociateAC ac = requestAssociation.getAAssociateAC();\n+            if (null != ac) {\n+                UserIdentityAC userIdentityAC = ac.getUserIdentityAC();\n+\n+                if (userIdentityAC instanceof ArchiveUserIdentityAC) {\n+                    accessControlIDSet.addAll(\n+                            ((ArchiveUserIdentityAC) userIdentityAC).getClientRoles()\n+                    );\n+                }\n+            }\n+        }\n+\n+        // Filter roles to only include those that are defined for AE (if any are defined for AE)\n+        if(arcAEAccessControlIDSet.size() > 0)\n+            accessControlIDSet = ClientRoles.filterRoles(accessControlIDSet, arcAEAccessControlIDSet);\n+\n+        if (accessControlIDSet.isEmpty()) {\n+            // The user has no client roles, so only '*' studies may be accessed\n+            // To ensure that at least one accessControlID is present so they do not see everything\n+            accessControlIDSet.add(\"*\");\n+        }\n+\n+        return accessControlIDSet.toArray(new String[0]);\n+    }\n+}"
+  },
+  {
+    "sha": "7edda8357d96517dcce59b2b3a595dd27725f4f8",
+    "filename": "dcm4chee-arc-war/src/main/webxml/web-secure.xml",
+    "status": "modified",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/mklassen/dcm4chee-arc-light/blob/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-war/src/main/webxml/web-secure.xml",
+    "raw_url": "https://github.com/mklassen/dcm4chee-arc-light/raw/0f689da59727b7f5b5b2ad0539226a2916617241/dcm4chee-arc-war/src/main/webxml/web-secure.xml",
+    "contents_url": "https://api.github.com/repos/mklassen/dcm4chee-arc-light/contents/dcm4chee-arc-war/src/main/webxml/web-secure.xml?ref=0f689da59727b7f5b5b2ad0539226a2916617241",
+    "patch": "@@ -56,6 +56,36 @@\n       <role-name>${auth-user-role:user}</role-name>\n     </auth-constraint>\n   </security-constraint>\n+\n+  <security-constraint>\n+    <!--\n+     Only admin users should be allowed access to CTRL-RS\n+       (Start/Stop/Reload Archive)\n+    -->\n+    <web-resource-collection>\n+      <web-resource-name>dcm4chee-arc-rs-ctrl</web-resource-name>\n+      <url-pattern>/ctrl/*</url-pattern>\n+      <http-method-omission>OPTIONS</http-method-omission>\n+    </web-resource-collection>\n+    <auth-constraint>\n+      <role-name>${super-user-role:admin}</role-name>\n+    </auth-constraint>\n+  </security-constraint>\n+\n+  <security-constraint>\n+    <!--\n+     Users in reload group should be allowed reload the archive\n+    -->\n+    <web-resource-collection>\n+      <web-resource-name>dcm4chee-arc-rs-ctrl-reload</web-resource-name>\n+      <url-pattern>/ctrl/reload</url-pattern>\n+      <http-method-omission>OPTIONS</http-method-omission>\n+    </web-resource-collection>\n+    <auth-constraint>\n+      <role-name>${reload-user-role:${super-user-role}}</role-name>\n+    </auth-constraint>\n+  </security-constraint>\n+\n   <login-config>\n     <auth-method>KEYCLOAK</auth-method>\n     <realm-name>${realm-name:dcm4che}</realm-name>"
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "0190afdbf99bab6b7dfd93322eeb76e82780392f",
+    "filename": "hw05-logging/build.gradle",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/futurer1/otus-hw/blob/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/build.gradle",
+    "raw_url": "https://github.com/futurer1/otus-hw/raw/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/build.gradle",
+    "contents_url": "https://api.github.com/repos/futurer1/otus-hw/contents/hw05-logging/build.gradle?ref=45d51b31221cf475b81731e0bc1cef370a928108",
+    "patch": "@@ -0,0 +1,25 @@\n+plugins {\n+    id 'java'\n+    id 'com.github.johnrengelman.shadow'\n+}\n+\n+sourceCompatibility = JavaVersion.VERSION_15\n+targetCompatibility = JavaVersion.VERSION_15\n+\n+group 'ru.otus'\n+version 'unspecified'\n+\n+dependencies {\n+\n+}\n+\n+shadowJar {\n+    archiveBaseName.set('automationLogging')\n+    archiveVersion.set('0.1')\n+    archiveClassifier.set('')\n+    manifest {\n+        attributes 'Main-Class': 'ru.otus.autologging.Demo'\n+    }\n+}\n+\n+tasks.build.dependsOn tasks.shadowJar"
+  },
+  {
+    "sha": "a73d733fe65064186a14db47dedf7f7ad2f9494e",
+    "filename": "hw05-logging/src/main/java/ru/otus/autologging/Demo.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/futurer1/otus-hw/blob/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/Demo.java",
+    "raw_url": "https://github.com/futurer1/otus-hw/raw/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/Demo.java",
+    "contents_url": "https://api.github.com/repos/futurer1/otus-hw/contents/hw05-logging/src/main/java/ru/otus/autologging/Demo.java?ref=45d51b31221cf475b81731e0bc1cef370a928108",
+    "patch": "@@ -0,0 +1,34 @@\n+package ru.otus.autologging;\n+\n+import java.lang.reflect.InvocationHandler;\n+import java.lang.reflect.Proxy;\n+\n+\n+public class Demo {\n+\n+    public static void main(String[] args) {\n+\n+        TestLoggingInterface testClass = createMyClass();\n+\n+        int res1 = testClass.calculation(6);\n+        System.out.println(\"Result: \" + res1);\n+\n+        int res2 = testClass.calculation(5, 4);\n+        System.out.println(\"Result: \" + res2);\n+\n+        String res3 = testClass.calculation(5, 4, \"kmh\");\n+        System.out.println(\"Result: \" + res3);\n+\n+        int res4 = testClass.calculation(5, 4, 1); // not Log\n+        System.out.println(\"Result: \" + res4);\n+    }\n+\n+    private static TestLoggingInterface createMyClass() {\n+        InvocationHandler handler = new DemoHandler(new TestLogging());\n+        return (TestLoggingInterface) Proxy.newProxyInstance(\n+                Demo.class.getClassLoader(),\n+                new Class<?>[]{TestLoggingInterface.class},\n+                handler\n+        );\n+    }\n+}"
+  },
+  {
+    "sha": "6f9b1ff8fa86890584098226c9b9ec51936976cb",
+    "filename": "hw05-logging/src/main/java/ru/otus/autologging/DemoHandler.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/futurer1/otus-hw/blob/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/DemoHandler.java",
+    "raw_url": "https://github.com/futurer1/otus-hw/raw/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/DemoHandler.java",
+    "contents_url": "https://api.github.com/repos/futurer1/otus-hw/contents/hw05-logging/src/main/java/ru/otus/autologging/DemoHandler.java?ref=45d51b31221cf475b81731e0bc1cef370a928108",
+    "patch": "@@ -0,0 +1,44 @@\n+package ru.otus.autologging;\n+\n+import ru.otus.autologging.annotations.Log;\n+import java.lang.reflect.InvocationHandler;\n+import java.lang.reflect.Method;\n+import java.util.ArrayList;\n+import java.util.HashSet;\n+import java.util.Set;\n+\n+public class DemoHandler implements InvocationHandler {\n+\n+    private final TestLoggingInterface testClass;\n+\n+    private final Set<Method> methodsLog = new HashSet<>();\n+\n+    public DemoHandler(TestLoggingInterface testClass) {\n+        this.testClass = testClass;\n+        for (Method testClassMethod : TestLoggingInterface.class.getMethods()) {\n+            if (testClassMethod.getAnnotation(Log.class) != null) {\n+                // метод имеет аннотацию Log, добавим его в список логирования\n+                methodsLog.add(testClassMethod);\n+            }\n+        }\n+    }\n+\n+    @Override\n+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {\n+        if (methodsLog.contains(method)) {\n+            ArrayList argsValues = new ArrayList<String>();\n+            for (Object arg : args) {\n+                String str =  String.valueOf(arg);\n+                argsValues.add(str);\n+            }\n+\n+            System.out.println(\n+                String.format(\"executed method: %s, params: %s\",\n+                    method.getName(),\n+                    String.join(\", \", argsValues)\n+                )\n+            );\n+        }\n+        return method.invoke(testClass, args);\n+    }\n+}"
+  },
+  {
+    "sha": "70d6dfd49fb15beb60dbfc66f69d18541daa49c3",
+    "filename": "hw05-logging/src/main/java/ru/otus/autologging/TestLogging.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/futurer1/otus-hw/blob/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/TestLogging.java",
+    "raw_url": "https://github.com/futurer1/otus-hw/raw/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/TestLogging.java",
+    "contents_url": "https://api.github.com/repos/futurer1/otus-hw/contents/hw05-logging/src/main/java/ru/otus/autologging/TestLogging.java?ref=45d51b31221cf475b81731e0bc1cef370a928108",
+    "patch": "@@ -0,0 +1,24 @@\n+package ru.otus.autologging;\n+\n+public class TestLogging implements TestLoggingInterface {\n+\n+    @Override\n+    public int calculation(int param1) {\n+        return param1;\n+    }\n+\n+    @Override\n+    public int calculation(int param1, int param2) {\n+        return param1 + param2;\n+    }\n+\n+    @Override\n+    public String calculation(int param1, int param2, String param3) {\n+        return String.format(\"%d %s\", param1 - param2, param3);\n+    }\n+\n+    @Override\n+    public int calculation(int param1, int param2, int param3) {\n+        return param1 + param2 + param3;\n+    }\n+}"
+  },
+  {
+    "sha": "0d66a3eac532ffaa630d407d238656e322d28043",
+    "filename": "hw05-logging/src/main/java/ru/otus/autologging/TestLoggingInterface.java",
+    "status": "added",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/futurer1/otus-hw/blob/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/TestLoggingInterface.java",
+    "raw_url": "https://github.com/futurer1/otus-hw/raw/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/TestLoggingInterface.java",
+    "contents_url": "https://api.github.com/repos/futurer1/otus-hw/contents/hw05-logging/src/main/java/ru/otus/autologging/TestLoggingInterface.java?ref=45d51b31221cf475b81731e0bc1cef370a928108",
+    "patch": "@@ -0,0 +1,18 @@\n+package ru.otus.autologging;\n+\n+import ru.otus.autologging.annotations.Log;\n+\n+public interface TestLoggingInterface {\n+\n+    @Log\n+    public int calculation(int param1);\n+\n+    @Log\n+    public int calculation(int param1, int param2);\n+\n+    @Log\n+    public String calculation(int param1, int param2, String param3);\n+\n+    // not Log\n+    public int calculation(int param1, int param2, int param3);\n+}"
+  },
+  {
+    "sha": "a868013348cf2c100f2a1bd12adde206febd483b",
+    "filename": "hw05-logging/src/main/java/ru/otus/autologging/annotations/Log.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/futurer1/otus-hw/blob/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/annotations/Log.java",
+    "raw_url": "https://github.com/futurer1/otus-hw/raw/45d51b31221cf475b81731e0bc1cef370a928108/hw05-logging/src/main/java/ru/otus/autologging/annotations/Log.java",
+    "contents_url": "https://api.github.com/repos/futurer1/otus-hw/contents/hw05-logging/src/main/java/ru/otus/autologging/annotations/Log.java?ref=45d51b31221cf475b81731e0bc1cef370a928108",
+    "patch": "@@ -0,0 +1,12 @@\n+package ru.otus.autologging.annotations;\n+\n+import java.lang.annotation.ElementType;\n+import java.lang.annotation.Retention;\n+import java.lang.annotation.RetentionPolicy;\n+import java.lang.annotation.Target;\n+\n+@Retention(RetentionPolicy.RUNTIME)\n+@Target(ElementType.METHOD)\n+public @interface Log {\n+\n+}"
+  },
+  {
+    "sha": "0b687edd38d20c21b05942ac8676482438c29902",
+    "filename": "settings.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/futurer1/otus-hw/blob/45d51b31221cf475b81731e0bc1cef370a928108/settings.gradle",
+    "raw_url": "https://github.com/futurer1/otus-hw/raw/45d51b31221cf475b81731e0bc1cef370a928108/settings.gradle",
+    "contents_url": "https://api.github.com/repos/futurer1/otus-hw/contents/settings.gradle?ref=45d51b31221cf475b81731e0bc1cef370a928108",
+    "patch": "@@ -5,4 +5,5 @@ include 'hw01-gradle'\n include 'hw02-generics'\n include 'hw03-testframework'\n include 'hw04-gc'\n+include 'hw05-logging'\n "
+  }
+]

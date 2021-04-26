@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "328242287b3b32e4334e6a842da0ab1364f34b74",
+    "filename": "lecture02/src/main/java/ru/atom/geometry/Bar.java",
+    "status": "added",
+    "additions": 70,
+    "deletions": 0,
+    "changes": 70,
+    "blob_url": "https://github.com/rybalkinsd/atom/blob/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/main/java/ru/atom/geometry/Bar.java",
+    "raw_url": "https://github.com/rybalkinsd/atom/raw/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/main/java/ru/atom/geometry/Bar.java",
+    "contents_url": "https://api.github.com/repos/rybalkinsd/atom/contents/lecture02/src/main/java/ru/atom/geometry/Bar.java?ref=eb6b84b1790692a5a822332c0b00fa4a363cfd7f",
+    "patch": "@@ -0,0 +1,70 @@\n+package ru.atom.geometry;\n+\n+import java.util.Objects;\n+\n+public class Bar implements Collider {\n+\n+    private final Point lowerLeft;\n+    private final Point upperRight;\n+\n+    public Bar(int firstCornerX, int firstCornerY, int secondCornerX, int secondCornerY) {\n+        lowerLeft = new Point(Math.min(firstCornerX, secondCornerX), Math.min(firstCornerY, secondCornerY));\n+        upperRight = new Point(Math.max(firstCornerX, secondCornerX), Math.max(firstCornerY, secondCornerY));\n+    }\n+\n+    @Override\n+    public boolean equals(Object o) {\n+        if (this == o) {\n+            return true;\n+        }\n+        if (o == null || getClass() != o.getClass()) {\n+            return false;\n+        }\n+        Bar otherBar = (Bar) o;\n+        return Objects.equals(lowerLeft, otherBar.lowerLeft) && Objects.equals(upperRight, otherBar.upperRight);\n+    }\n+\n+    @Override\n+    public boolean isColliding(Collider other) {\n+        if (other instanceof Point) {\n+            return this.contains((Point) other);\n+        }\n+        if (other instanceof Bar) {\n+            return this.intersects((Bar) other);\n+        }\n+        return false;\n+    }\n+\n+    private boolean intersects(Bar other) {\n+        double thisCenterX = average(lowerLeft.getX(), upperRight.getX());\n+        double otherCenterX = average(other.lowerLeft.getX(), other.upperRight.getX());\n+        if (Math.abs(thisCenterX - otherCenterX) > average(this.width(), other.width())) {\n+            return false;\n+        }\n+\n+        double thisCenterY = average(lowerLeft.getY(), upperRight.getY());\n+        double otherCenterY = average(other.lowerLeft.getY(), other.upperRight.getY());\n+        return Math.abs(thisCenterY - otherCenterY) <= average(this.height(), other.height());\n+    }\n+\n+    public int width() {\n+        return upperRight.getX() - lowerLeft.getX();\n+    }\n+\n+    public int height() {\n+        return upperRight.getY() - lowerLeft.getY();\n+    }\n+\n+    private double average(int from, int to) {\n+        return (from + to) / 2.0;\n+    }\n+\n+    private boolean contains(Point point) {\n+        return isInside(point.getX(), lowerLeft.getX(), upperRight.getX())\n+                && isInside(point.getY(), lowerLeft.getY(), upperRight.getY());\n+    }\n+\n+    private boolean isInside(int value, int start, int end) {\n+        return value >= start && value <= end;\n+    }\n+}"
+  },
+  {
+    "sha": "5799a6de1cc24360096be2469b4c448e5ccb6b76",
+    "filename": "lecture02/src/main/java/ru/atom/geometry/Geometry.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 9,
+    "changes": 20,
+    "blob_url": "https://github.com/rybalkinsd/atom/blob/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/main/java/ru/atom/geometry/Geometry.java",
+    "raw_url": "https://github.com/rybalkinsd/atom/raw/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/main/java/ru/atom/geometry/Geometry.java",
+    "contents_url": "https://api.github.com/repos/rybalkinsd/atom/contents/lecture02/src/main/java/ru/atom/geometry/Geometry.java?ref=eb6b84b1790692a5a822332c0b00fa4a363cfd7f",
+    "patch": "@@ -1,16 +1,16 @@\n package ru.atom.geometry;\n \n /**\n- *  ^ Y\n- *  |\n- *  |\n- *  |\n- *  |          X\n- *  .---------->\n+ * ^ Y\n+ * |\n+ * |\n+ * |\n+ * |          X\n+ * .---------->\n  */\n \n public final class Geometry {\n-    \n+\n     private Geometry() {\n     }\n \n@@ -19,17 +19,19 @@ private Geometry() {\n      * Like selection bar in desktop, this bar is defined by two opposite corners\n      * Bar is not oriented\n      * (It is not relevant, which opposite corners you choose to define bar)\n+     *\n      * @return new Bar\n      */\n     public static Collider createBar(int firstCornerX, int firstCornerY, int secondCornerX, int secondCornerY) {\n-        throw new UnsupportedOperationException();\n+        return new Bar(firstCornerX, firstCornerY, secondCornerX, secondCornerY);\n     }\n \n     /**\n      * 2D point\n+     *\n      * @return new Point\n      */\n     public static Collider createPoint(int x, int y) {\n-        throw new UnsupportedOperationException();\n+        return new Point(x, y);\n     }\n }"
+  },
+  {
+    "sha": "b6ab79e5a9bf266e32aada53231d663fab4c4282",
+    "filename": "lecture02/src/main/java/ru/atom/geometry/Point.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 5,
+    "changes": 31,
+    "blob_url": "https://github.com/rybalkinsd/atom/blob/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/main/java/ru/atom/geometry/Point.java",
+    "raw_url": "https://github.com/rybalkinsd/atom/raw/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/main/java/ru/atom/geometry/Point.java",
+    "contents_url": "https://api.github.com/repos/rybalkinsd/atom/contents/lecture02/src/main/java/ru/atom/geometry/Point.java?ref=eb6b84b1790692a5a822332c0b00fa4a363cfd7f",
+    "patch": "@@ -3,9 +3,23 @@\n /**\n  * Template class for\n  */\n-public class Point /* super class and interfaces here if necessary */ {\n-    // fields\n-    // and methods\n+public class Point implements Collider {\n+\n+    private final int x;\n+    private final int y;\n+\n+    public Point(int x, int y) {\n+        this.x = x;\n+        this.y = y;\n+    }\n+\n+    public int getX() {\n+        return x;\n+    }\n+\n+    public int getY() {\n+        return y;\n+    }\n \n     /**\n      * @param o - other object to check equality with\n@@ -19,7 +33,14 @@ public boolean equals(Object o) {\n         // cast from Object to Point\n         Point point = (Point) o;\n \n-        // your code here\n-        throw new UnsupportedOperationException();\n+        return this.x == point.x && this.y == point.y;\n+    }\n+\n+    @Override\n+    public boolean isColliding(Collider other) {\n+        if (other instanceof Point) {\n+            return this.equals(other);\n+        }\n+        return false;\n     }\n }"
+  },
+  {
+    "sha": "50ddf3bd2c2e2e26fc716512adc972ad0a097b9c",
+    "filename": "lecture02/src/test/java/ru/atom/geometry/BarBarCollisionTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/rybalkinsd/atom/blob/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/test/java/ru/atom/geometry/BarBarCollisionTest.java",
+    "raw_url": "https://github.com/rybalkinsd/atom/raw/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/test/java/ru/atom/geometry/BarBarCollisionTest.java",
+    "contents_url": "https://api.github.com/repos/rybalkinsd/atom/contents/lecture02/src/test/java/ru/atom/geometry/BarBarCollisionTest.java?ref=eb6b84b1790692a5a822332c0b00fa4a363cfd7f",
+    "patch": "@@ -1,12 +1,11 @@\n package ru.atom.geometry;\n \n-import org.junit.Ignore;\n import org.junit.Test;\n \n import static junit.framework.TestCase.assertTrue;\n import static org.junit.Assert.assertFalse;\n \n-@Ignore\n+\n public class BarBarCollisionTest {\n     @Test\n     public void barSelfCollide() {"
+  },
+  {
+    "sha": "1baffc2d4ac3354b3c29638f5d54b3ace5d8cf26",
+    "filename": "lecture02/src/test/java/ru/atom/geometry/BarPointCollisionTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/rybalkinsd/atom/blob/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/test/java/ru/atom/geometry/BarPointCollisionTest.java",
+    "raw_url": "https://github.com/rybalkinsd/atom/raw/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/test/java/ru/atom/geometry/BarPointCollisionTest.java",
+    "contents_url": "https://api.github.com/repos/rybalkinsd/atom/contents/lecture02/src/test/java/ru/atom/geometry/BarPointCollisionTest.java?ref=eb6b84b1790692a5a822332c0b00fa4a363cfd7f",
+    "patch": "@@ -1,12 +1,11 @@\n package ru.atom.geometry;\n \n-import org.junit.Ignore;\n import org.junit.Test;\n \n import static junit.framework.TestCase.assertTrue;\n import static org.junit.Assert.assertFalse;\n \n-@Ignore\n+\n public class BarPointCollisionTest {\n     @Test\n     public void pointInsideBar() {"
+  },
+  {
+    "sha": "6b47f8a524d125f16b96d8f2b4d212f7f017e322",
+    "filename": "lecture02/src/test/java/ru/atom/geometry/PointPointCollisionTest.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/rybalkinsd/atom/blob/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/test/java/ru/atom/geometry/PointPointCollisionTest.java",
+    "raw_url": "https://github.com/rybalkinsd/atom/raw/eb6b84b1790692a5a822332c0b00fa4a363cfd7f/lecture02/src/test/java/ru/atom/geometry/PointPointCollisionTest.java",
+    "contents_url": "https://api.github.com/repos/rybalkinsd/atom/contents/lecture02/src/test/java/ru/atom/geometry/PointPointCollisionTest.java?ref=eb6b84b1790692a5a822332c0b00fa4a363cfd7f",
+    "patch": "@@ -1,12 +1,10 @@\n package ru.atom.geometry;\n \n-import org.junit.Ignore;\n import org.junit.Test;\n \n import static junit.framework.TestCase.assertTrue;\n import static org.junit.Assert.assertFalse;\n \n-@Ignore\n public class PointPointCollisionTest {\n     @Test\n     public void pointSelfCollide() {"
+  }
+]

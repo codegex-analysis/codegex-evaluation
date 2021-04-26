@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "183a4684c1d6a71021033ab149b151ba6a5956a9",
+    "filename": "src/main/java/org/prebid/server/auction/StoredResponseProcessor.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/prebid/prebid-server-java/blob/26f4a8781c7d2517948967608ca165f053e174e4/src/main/java/org/prebid/server/auction/StoredResponseProcessor.java",
+    "raw_url": "https://github.com/prebid/prebid-server-java/raw/26f4a8781c7d2517948967608ca165f053e174e4/src/main/java/org/prebid/server/auction/StoredResponseProcessor.java",
+    "contents_url": "https://api.github.com/repos/prebid/prebid-server-java/contents/src/main/java/org/prebid/server/auction/StoredResponseProcessor.java?ref=26f4a8781c7d2517948967608ca165f053e174e4",
+    "patch": "@@ -177,6 +177,10 @@ private ExtImp getExtImp(ObjectNode extImpNode, String impId) {\n             final String id = storedIdToImpId.getKey();\n             final String impId = storedIdToImpId.getValue();\n             final String rowSeatBid = idToStoredResponses.get(id);\n+            if (rowSeatBid == null) {\n+                throw new InvalidRequestException(String.format(\"Failed to fetch stored auction response for\"\n+                        + \" impId = %s and storedAuctionResponse id = %s.\", impId, id));\n+            }\n             final List<SeatBid> seatBids = parseSeatBid(id, rowSeatBid);\n             validateStoredSeatBid(seatBids);\n             resolvedSeatBids.addAll(seatBids.stream()"
+  },
+  {
+    "sha": "eb8db31babe7d64173df577dfce7b0b6df31d248",
+    "filename": "src/test/java/org/prebid/server/auction/StoredResponseProcessorTest.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/prebid/prebid-server-java/blob/26f4a8781c7d2517948967608ca165f053e174e4/src/test/java/org/prebid/server/auction/StoredResponseProcessorTest.java",
+    "raw_url": "https://github.com/prebid/prebid-server-java/raw/26f4a8781c7d2517948967608ca165f053e174e4/src/test/java/org/prebid/server/auction/StoredResponseProcessorTest.java",
+    "contents_url": "https://api.github.com/repos/prebid/prebid-server-java/contents/src/test/java/org/prebid/server/auction/StoredResponseProcessorTest.java?ref=26f4a8781c7d2517948967608ca165f053e174e4",
+    "patch": "@@ -209,6 +209,24 @@ public void getStoredResponseResultShouldReturnResultForBidAndAuctionStoredRespo\n                 singletonMap(\"impId2\", singletonMap(\"rubicon\", \"storedBidResponse\"))));\n     }\n \n+    @Test\n+    public void getStoredResponseResultShouldThrowInvalidRequestExceptionWhenStoredAuctionResponseWasNotFound() {\n+        // given\n+        final Imp imp1 = givenImp(\"impId1\", ExtStoredAuctionResponse.of(\"storedAuctionResponseId\"), null);\n+        given(applicationSettings.getStoredResponses(any(), any())).willReturn(\n+                Future.succeededFuture(StoredResponseDataResult.of(emptyMap(), emptyList())));\n+\n+        // when\n+        final Future<StoredResponseResult> result =\n+                storedResponseProcessor.getStoredResponseResult(singletonList(imp1), timeout);\n+\n+        // then\n+        assertThat(result.failed()).isTrue();\n+        assertThat(result.cause()).isInstanceOf(InvalidRequestException.class)\n+                .hasMessage(\"Failed to fetch stored auction response for impId = impId1 and storedAuctionResponse id \"\n+                        + \"= storedAuctionResponseId.\");\n+    }\n+\n     @Test\n     public void getStoredResponseResultShouldMergeStoredSeatBidsForTheSameBidder() throws JsonProcessingException {\n         // given"
+  }
+]

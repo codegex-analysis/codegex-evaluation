@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "b4d2cfe5aed5877c9b37583e1218d8377e1948d2",
+    "filename": "portfolio/src/main/java/com/google/sps/servlets/CountryListServlet.java",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/EthanBechtol/software-product-sprint/blob/7731db502d3dedb6d9ab996aa718c652ace45413/portfolio/src/main/java/com/google/sps/servlets/CountryListServlet.java",
+    "raw_url": "https://github.com/EthanBechtol/software-product-sprint/raw/7731db502d3dedb6d9ab996aa718c652ace45413/portfolio/src/main/java/com/google/sps/servlets/CountryListServlet.java",
+    "contents_url": "https://api.github.com/repos/EthanBechtol/software-product-sprint/contents/portfolio/src/main/java/com/google/sps/servlets/CountryListServlet.java?ref=7731db502d3dedb6d9ab996aa718c652ace45413",
+    "patch": "@@ -0,0 +1,36 @@\n+package com.google.sps.servlets;\n+\n+import java.io.IOException;\n+import javax.servlet.annotation.WebServlet;\n+import javax.servlet.http.HttpServlet;\n+import javax.servlet.http.HttpServletRequest;\n+import javax.servlet.http.HttpServletResponse;\n+import com.google.gson.*;\n+import java.util.ArrayList;\n+import java.util.Arrays;\n+\n+/** Handles requests sent to the /country-list-json URL.\n+ *  This servlet simply returns a json formatted list of countries I've visited.\n+*/\n+@WebServlet(\"/country-list-json\")\n+public class CountryListServlet extends HttpServlet {\n+    private class CountryList {\n+        public ArrayList<String> countries;\n+    }\n+\n+    @Override\n+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {\n+        response.setContentType(\"application/json;\");\n+        response.getWriter().println(getCountryJSON());\n+    }\n+\n+    private String getCountryJSON() {\n+        CountryList listObject = new CountryList();\n+        listObject.countries = new ArrayList<>(\n+            Arrays.asList(\"United States\", \"Costa Rica\", \"Israel\", \"Poland\", \"Spain\", \"France\")\n+        );\n+        \n+        Gson gson = new Gson();\n+        return gson.toJson(listObject);\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d1a3bc55a63144c3731480f060f9b313291d7ea0",
+    "filename": "portfolio/src/main/webapp/index.html",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 1,
+    "changes": 14,
+    "blob_url": "https://github.com/EthanBechtol/software-product-sprint/blob/7731db502d3dedb6d9ab996aa718c652ace45413/portfolio/src/main/webapp/index.html",
+    "raw_url": "https://github.com/EthanBechtol/software-product-sprint/raw/7731db502d3dedb6d9ab996aa718c652ace45413/portfolio/src/main/webapp/index.html",
+    "contents_url": "https://api.github.com/repos/EthanBechtol/software-product-sprint/contents/portfolio/src/main/webapp/index.html?ref=7731db502d3dedb6d9ab996aa718c652ace45413",
+    "patch": "@@ -6,7 +6,7 @@\n     <link rel=\"stylesheet\" href=\"style.css\">\n     <script src=\"script.js\"></script>\n </head>\n-<body>\n+<body onload=\"showRandomVisitedCountry();\">\n <div id=\"content\">\n     <!-- Portfolio header (name, profile picture, title, and LinkedIn/GitHub links) -->\n     <div class=\"portfolio-header\">\n@@ -58,6 +58,7 @@ <h1>About Me</h1>\n             computer science has taken that to a whole new level. It's something I enjoy and know I will continue to enjoy\n             for the forseeable future.\n         </p>\n+        <p><b>A random country I've visited:</b> <span id=\"visited-country-container\" style:\"inline-block\">loading...</span></p>\n     </div>\n     <br>\n \n@@ -82,6 +83,17 @@ <h2>TicTacToe Unlimited (Python) <a href=\"https://github.com/EthanBechtol/WordSe\n     <!-- Image gallery link -->\n     <h2>See more images in the <a href=\"gallery.html\">image gallery</a></h2>\n \n+    <hr>\n+    <!-- Week 2 Step 2 Fetch Example -->\n+    <h2>Walkthrough examples</h2>\n+    <h4>Week 2 step 2 fetch():</h4>\n+    <p id=\"simple-string-response\"></p>\n+    <button onclick=\"showSimpleString();\">\n+      Get a simple string\n+    </button>\n+\n+    <h4>Week 2 step 3 JSON response:</h4>\n+\n     <div class=\"description\" style=\"display: none\">\n         <p>This is my portfolio.</p>\n         <p>This is another paragraph!</p>"
+  },
+  {
+    "sha": "4be382eca2f1a7fe7f5e469e5cdf557b6fce52ec",
+    "filename": "portfolio/src/main/webapp/script.js",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 1,
+    "changes": 30,
+    "blob_url": "https://github.com/EthanBechtol/software-product-sprint/blob/7731db502d3dedb6d9ab996aa718c652ace45413/portfolio/src/main/webapp/script.js",
+    "raw_url": "https://github.com/EthanBechtol/software-product-sprint/raw/7731db502d3dedb6d9ab996aa718c652ace45413/portfolio/src/main/webapp/script.js",
+    "contents_url": "https://api.github.com/repos/EthanBechtol/software-product-sprint/contents/portfolio/src/main/webapp/script.js?ref=7731db502d3dedb6d9ab996aa718c652ace45413",
+    "patch": "@@ -48,4 +48,32 @@ function cycleSubtitle() {\n     }, 1000)\n }\n \n-window.setInterval(cycleSubtitle, 10_000);\n\\ No newline at end of file\n+window.setInterval(cycleSubtitle, 10_000);\n+\n+\n+/**\n+ * Fetches the string returned by /simple-string and sets the element with id=simple-string-response to it.\n+ */\n+async function showSimpleString() {\n+  const serverResponse = await fetch('/simple-string');\n+  const textResponse = await serverResponse.text();\n+\n+  const dateContainer = document.getElementById('simple-string-response');\n+  dateContainer.innerText = textResponse;\n+}\n+\n+/**\n+ * Fetches a list of countries I've visited, and chooses a random one to display on the page.\n+ */\n+async function showRandomVisitedCountry() {\n+    const responseFromServer = await fetch('/country-list-json');\n+    // The json() function returns an object that contains fields that we can\n+    // reference to create HTML.\n+    const jsonResponse = await responseFromServer.json();\n+\n+    const countryList = jsonResponse[\"countries\"];\n+    const selectedCountry = countryList[Math.floor(Math.random() * countryList.length)];\n+\n+    const countryElement = document.getElementById('visited-country-container');\n+    countryElement.innerText = selectedCountry;\n+}\n\\ No newline at end of file"
+  }
+]

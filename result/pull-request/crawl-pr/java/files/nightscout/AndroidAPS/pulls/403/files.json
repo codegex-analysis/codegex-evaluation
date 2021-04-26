@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "c65ed117d9325c1b85896ce8817c9b00b02e7227",
+    "filename": "app/src/main/java/info/nightscout/androidaps/plugins/pump/virtual/VirtualPumpPlugin.kt",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 3,
+    "changes": 8,
+    "blob_url": "https://github.com/nightscout/AndroidAPS/blob/27b6aeb4b2d537fbbc0660598ac2305193711f34/app/src/main/java/info/nightscout/androidaps/plugins/pump/virtual/VirtualPumpPlugin.kt",
+    "raw_url": "https://github.com/nightscout/AndroidAPS/raw/27b6aeb4b2d537fbbc0660598ac2305193711f34/app/src/main/java/info/nightscout/androidaps/plugins/pump/virtual/VirtualPumpPlugin.kt",
+    "contents_url": "https://api.github.com/repos/nightscout/AndroidAPS/contents/app/src/main/java/info/nightscout/androidaps/plugins/pump/virtual/VirtualPumpPlugin.kt?ref=27b6aeb4b2d537fbbc0660598ac2305193711f34",
+    "patch": "@@ -367,9 +367,11 @@ class VirtualPumpPlugin @Inject constructor(\n     }\n \n     fun refreshConfiguration() {\n-        val pumpType = sp.getString(R.string.key_virtualpump_type, PumpType.GenericAAPS.description)\n-        val pumpTypeNew = PumpType.getByDescription(pumpType)\n-        aapsLogger.debug(LTag.PUMP, \"Pump in configuration: $pumpType, PumpType object: $pumpTypeNew\")\n+        var pumpTypeDesc: String = sp.getString(R.string.key_virtualpump_type, PumpType.GenericAAPS.description)\n+        if (pumpTypeDesc.equals(\"MDI\")) // this shouldn't happen, but in case it does\n+            pumpTypeDesc = PumpType.GenericAAPS.description\n+        val pumpTypeNew = PumpType.getByDescription(pumpTypeDesc)\n+        aapsLogger.debug(LTag.PUMP, \"Pump in configuration: $pumpTypeDesc, PumpType object: $pumpTypeNew\")\n         if (this.pumpType == pumpTypeNew) return\n         aapsLogger.debug(LTag.PUMP, \"New pump configuration found ($pumpTypeNew), changing from previous (${this.pumpType})\")\n         pumpDescription.setPumpDescription(pumpTypeNew)"
+  },
+  {
+    "sha": "2b0bcb9513cc348cba04b5e290086cbd39e74b36",
+    "filename": "core/src/main/java/info/nightscout/androidaps/plugins/configBuilder/RunningConfiguration.kt",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 5,
+    "changes": 10,
+    "blob_url": "https://github.com/nightscout/AndroidAPS/blob/27b6aeb4b2d537fbbc0660598ac2305193711f34/core/src/main/java/info/nightscout/androidaps/plugins/configBuilder/RunningConfiguration.kt",
+    "raw_url": "https://github.com/nightscout/AndroidAPS/raw/27b6aeb4b2d537fbbc0660598ac2305193711f34/core/src/main/java/info/nightscout/androidaps/plugins/configBuilder/RunningConfiguration.kt",
+    "contents_url": "https://api.github.com/repos/nightscout/AndroidAPS/contents/core/src/main/java/info/nightscout/androidaps/plugins/configBuilder/RunningConfiguration.kt?ref=27b6aeb4b2d537fbbc0660598ac2305193711f34",
+    "patch": "@@ -1,6 +1,5 @@\n package info.nightscout.androidaps.plugins.configBuilder\n \n-import info.nightscout.androidaps.core.R\n import info.nightscout.androidaps.interfaces.ActivePluginProvider\n import info.nightscout.androidaps.interfaces.ConfigBuilderInterface\n import info.nightscout.androidaps.interfaces.InsulinInterface\n@@ -80,10 +79,11 @@ class RunningConfiguration @Inject constructor(\n         }\n \n         if (configuration.has(\"pump\")) {\n-            val pumpType = JsonHelper.safeGetString(configuration, \"pump\", PumpType.GenericAAPS.description)\n-            sp.putString(R.string.key_virtualpump_type, pumpType)\n-            activePlugin.activePump.pumpDescription.setPumpDescription(PumpType.getByDescription(pumpType))\n-            aapsLogger.debug(LTag.CORE, \"Changing pump type to $pumpType\")\n+            var pumpTypeDesc = JsonHelper.safeGetString(configuration, \"pump\", PumpType.GenericAAPS.description)\n+            if (!\"MDI\".equals(pumpTypeDesc)) {\n+                activePlugin.activePump.pumpDescription.setPumpDescription(PumpType.getByDescription(pumpTypeDesc))\n+                aapsLogger.debug(LTag.CORE, \"Changing pump type to $pumpTypeDesc\")\n+            }\n         }\n \n         if (configuration.has(\"overviewConfiguration\"))"
+  }
+]

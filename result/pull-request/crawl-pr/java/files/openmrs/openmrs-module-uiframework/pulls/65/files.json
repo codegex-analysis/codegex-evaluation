@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "ebb34c8291b1c40e48b15d19e7bbeed85c8f74ea",
+    "filename": "api/src/main/java/org/openmrs/ui/framework/FormatterImpl.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 4,
+    "changes": 14,
+    "blob_url": "https://github.com/openmrs/openmrs-module-uiframework/blob/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/ui/framework/FormatterImpl.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-uiframework/raw/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/ui/framework/FormatterImpl.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-uiframework/contents/api/src/main/java/org/openmrs/ui/framework/FormatterImpl.java?ref=76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728",
+    "patch": "@@ -1,18 +1,18 @@\n package org.openmrs.ui.framework;\r\n \r\n import java.text.DateFormat;\r\n-import java.util.ArrayList;\r\n-import java.util.Calendar;\r\n import java.util.Date;\r\n import java.util.HashMap;\r\n-import java.util.List;\r\n import java.util.Locale;\r\n import java.util.Map;\r\n+import java.util.Calendar;\r\n+import java.util.List;\r\n+import java.util.ArrayList;\r\n \r\n import org.apache.commons.beanutils.BeanUtils;\r\n import org.apache.commons.beanutils.MethodUtils;\r\n+import org.apache.commons.lang.BooleanUtils;\r\n import org.apache.commons.lang.StringUtils;\r\n-import org.apache.commons.lang.time.DateFormatUtils;\r\n import org.openmrs.Concept;\r\n import org.openmrs.ConceptName;\r\n import org.openmrs.ConceptNumeric;\r\n@@ -34,6 +34,8 @@\n import org.openmrs.ui.framework.formatter.FormatterService;\r\n import org.springframework.context.MessageSource;\r\n \r\n+import static org.openmrs.util.TimeZoneUtil.toRFC3339;\r\n+\r\n /**\r\n  * Contains default formatting for most OpenMRS classes, which can be override with {@link FormatterFactory} instances.\r\n  * Do not construct this class directly, but rather use {@link FormatterService#getFormatter()}.\r\n@@ -113,6 +115,10 @@ private boolean wholeNumber(Number n) {\n \r\n     private String format(Date d, Locale locale) {\r\n         DateFormat df;\r\n+        if(BooleanUtils.toBoolean(\r\n+                administrationService.getGlobalProperty(UiFrameworkConstants.GP_HANDLE_TIMEZONES))){\r\n+            return (toRFC3339(d));\r\n+        }\r\n         if (hasTimeComponent(d)) {\r\n             df = UiFrameworkUtil.getDateTimeFormat(administrationService, locale);\r\n         } else {\r"
+  },
+  {
+    "sha": "b810e260a6a556eef8c81d8481802aba53cc75db",
+    "filename": "api/src/main/java/org/openmrs/ui/framework/UiFrameworkConstants.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/openmrs/openmrs-module-uiframework/blob/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/ui/framework/UiFrameworkConstants.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-uiframework/raw/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/ui/framework/UiFrameworkConstants.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-uiframework/contents/api/src/main/java/org/openmrs/ui/framework/UiFrameworkConstants.java?ref=76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728",
+    "patch": "@@ -24,7 +24,8 @@\n     public static final String GP_FORMATTER_TIME_FORMAT = \"uiframework.formatter.timeFormat\";\n     public static final String GP_FORMATTER_JS_DATETIME_FORMAT = \"uiframework.formatter.JSdateAndTimeFormat\";\n     public static final String GP_FORMATTER_JS_DATE_FORMAT = \"uiframework.formatter.JSdateFormat\";\n-    \n+    public final static String GP_HANDLE_TIMEZONES = \"uiframework.handleTimezones\";\n+\n     public static final String MAP_RESOURCE_EXTENSION_POINT_ID = \"org.openmrs.ui.framework.mapResource\";\n \n "
+  },
+  {
+    "sha": "a665dddaf005d7a35c4a9567c713f8a012d599cb",
+    "filename": "api/src/main/java/org/openmrs/ui/framework/UiUtils.java",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/openmrs/openmrs-module-uiframework/blob/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/ui/framework/UiUtils.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-uiframework/raw/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/ui/framework/UiUtils.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-uiframework/contents/api/src/main/java/org/openmrs/ui/framework/UiUtils.java?ref=76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728",
+    "patch": "@@ -1,5 +1,6 @@\n package org.openmrs.ui.framework;\n \n+import org.apache.commons.lang.BooleanUtils;\n import org.apache.commons.lang.StringUtils;\n import org.apache.commons.lang.time.DateFormatUtils;\n import org.codehaus.jackson.map.ObjectMapper;\n@@ -583,7 +584,38 @@ public Locale getLocale() {\n \t\treturn Context.getLocale();\n \t}\n \n+\t/**\n+\t * Change the current locale.\n+\t *\n+\t * @param locale The locale.\n+\t */\n \tpublic void setLocale(Locale locale) {\n \t\tthis.locale = locale;\n \t}\n+\n+\t/**\n+\t * @return the value of the Global Propriety Handle Timezones \n+\t */\n+\tpublic boolean handleTimeZones(){\n+\t\treturn  BooleanUtils.toBoolean(\n+\t\t\t\tContext.getAdministrationService().getGlobalProperty(UiFrameworkConstants.GP_HANDLE_TIMEZONES));\n+\t}\n+\n+\tpublic String getJSDatetimeFormat(){\n+\t\treturn Context.getAdministrationService().getGlobalProperty(UiFrameworkConstants.GP_FORMATTER_JS_DATETIME_FORMAT);\n+\t}\n+\tpublic String getJSDateFormat(){\n+\t\treturn Context.getAdministrationService().getGlobalProperty(UiFrameworkConstants.GP_FORMATTER_JS_DATE_FORMAT);\n+\t}\n+\tpublic String getDatetimeFormat(){\n+\t\treturn\tContext.getAdministrationService().getGlobalProperty(UiFrameworkConstants.GP_FORMATTER_DATETIME_FORMAT);\n+\t}\n+\tpublic String getDateFormat(){\n+\t\treturn  Context.getAdministrationService().getGlobalProperty(UiFrameworkConstants.GP_FORMATTER_DATE_FORMAT);\n+\t}\n+\n+\tpublic String getTimeFormat(){\n+\t\treturn  Context.getAdministrationService().getGlobalProperty(UiFrameworkConstants.GP_FORMATTER_TIME_FORMAT);\n+\t}\n+\n }"
+  },
+  {
+    "sha": "0b3b204bca02c4e77aed19343559181fe35ffd23",
+    "filename": "api/src/main/java/org/openmrs/ui/framework/converter/StringToDateConverter.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/openmrs/openmrs-module-uiframework/blob/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/ui/framework/converter/StringToDateConverter.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-uiframework/raw/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/ui/framework/converter/StringToDateConverter.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-uiframework/contents/api/src/main/java/org/openmrs/ui/framework/converter/StringToDateConverter.java?ref=76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728",
+    "patch": "@@ -5,6 +5,7 @@\n import java.util.Date;\r\n \r\n import org.openmrs.ui.framework.WebConstants;\r\n+import org.openmrs.util.TimeZoneUtil;\r\n import org.springframework.core.convert.ConversionFailedException;\r\n import org.springframework.core.convert.TypeDescriptor;\r\n import org.springframework.core.convert.converter.Converter;\r\n@@ -17,7 +18,13 @@ public Date convert(String ymdhmsms) {\n \t\tif (ymdhmsms.isEmpty()) {\r\n \t\t\treturn null;\r\n \t\t}\r\n-\t\t\r\n+\r\n+\t\t//try to parse date with format ISO 8601\r\n+\t\ttry {\r\n+\t\t\treturn TimeZoneUtil.fromISO8601(ymdhmsms);\r\n+\t\t}\r\n+\t\tcatch (Exception ex) {}\r\n+\r\n \t\ttry {\r\n \t\t\tSimpleDateFormat sdf = new SimpleDateFormat(WebConstants.DATE_FORMAT_TIMESTAMP);\r\n \t\t\treturn sdf.parse(ymdhmsms);\r"
+  },
+  {
+    "sha": "90f852148a116cc89622a2d9fc268d1165b075ce",
+    "filename": "api/src/main/java/org/openmrs/util/TimeZoneUtil.java",
+    "status": "added",
+    "additions": 65,
+    "deletions": 0,
+    "changes": 65,
+    "blob_url": "https://github.com/openmrs/openmrs-module-uiframework/blob/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/util/TimeZoneUtil.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-uiframework/raw/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/main/java/org/openmrs/util/TimeZoneUtil.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-uiframework/contents/api/src/main/java/org/openmrs/util/TimeZoneUtil.java?ref=76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728",
+    "patch": "@@ -0,0 +1,65 @@\n+/**\n+ * This Source Code Form is subject to the terms of the Mozilla Public License,\n+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can\n+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under\n+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.\n+ *\n+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS\n+ * graphic logo is a trademark of OpenMRS Inc.\n+ */\n+package org.openmrs.util;\n+\n+import org.joda.time.DateTime;\n+import org.joda.time.format.DateTimeFormatter;\n+import org.joda.time.format.ISODateTimeFormat;\n+\n+import java.util.Calendar;\n+import java.util.Date;\n+\n+import static org.joda.time.DateTimeZone.UTC;\n+\n+/**\n+ * Helps provide tools to support recommended OpenMRS time zones conventions.\n+ * \n+ * @see https://wiki.openmrs.org/display/docs/Time+Zones+Conventions\n+ */\n+public class TimeZoneUtil {\n+\t\n+\t/**\n+\t * Formats a date as its RFC 3339 string representation.\n+\t * \n+\t * @param date The date.\n+\t * @return The date formated as RFC 3339.\n+\t */\n+\tpublic static String toRFC3339(Date date) {\n+\t\treturn ISODateTimeFormat.dateTime().print(new DateTime(date.getTime(), UTC));\n+\t}\n+\t\n+\t/**\n+\t * Gets the Calendar instance for the date set in UTC. This always returns a GregorianCalendar\n+\t * subclass.\n+\t * \n+\t * @param date The date.\n+\t * @return The GregorianCalendar set in UTC for the date.\n+\t */\n+\tpublic static Calendar toUTCCalendar(Date date) {\n+\t\treturn new DateTime(date.getTime(), UTC).toGregorianCalendar();\n+\t}\n+\n+\n+\t/**\n+\t * Get a Date out of its ISO 8601 string representation.\n+\t *\n+\t * @param isoDateString A date formatted as ISO 8601.\n+\t * @return The Date object.\n+\t * @Throws IllegalArgumentException – if string parameter does not conform to lexical value space\n+\t */\n+\tpublic static Date fromISO8601(String isoDateString) throws\n+\t\t\tIllegalArgumentException {\n+\t\tDateTimeFormatter parser = ISODateTimeFormat.dateTime();\n+\t\treturn parser.parseDateTime(isoDateString).toDate();\n+\t}\n+\n+}\n+\n+"
+  },
+  {
+    "sha": "4422469b21a41102bda1a9f5f246b865ecf02786",
+    "filename": "api/src/test/java/org/openmrs/ui/framework/FormatterImplTest.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/openmrs/openmrs-module-uiframework/blob/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/test/java/org/openmrs/ui/framework/FormatterImplTest.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-uiframework/raw/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/api/src/test/java/org/openmrs/ui/framework/FormatterImplTest.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-uiframework/contents/api/src/test/java/org/openmrs/ui/framework/FormatterImplTest.java?ref=76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728",
+    "patch": "@@ -40,14 +40,14 @@\n \n     AdministrationService administrationService;\n     MockMessageSource messageSource;\n-\n+    UiUtils ui;\n     FormatterImpl formatter;\n \n     @Before\n     public void setUp() {\n         administrationService = mock(AdministrationService.class);\n         messageSource = new MockMessageSource();\n-\n+        ui = mock(UiUtils.class);\n         formatter = new FormatterImpl(messageSource, administrationService);\n     }\n \n@@ -139,6 +139,7 @@ public void testFormattingRoleWithOverriddenMetadataName()  throws Exception {\n     @Test\n     public void testFormattingADateWithNoTime() throws Exception {\n         when(administrationService.getGlobalProperty(UiFrameworkConstants.GP_FORMATTER_DATE_FORMAT, \"dd.MMM.yyyy\")).thenReturn(\"dd.MMM.yyyy\");\n+        when(administrationService.getGlobalProperty(UiFrameworkConstants.GP_HANDLE_TIMEZONES)).thenReturn(\"false\");\n \n         Locale locale = Locale.ENGLISH;\n         Date date = new SimpleDateFormat(\"yyyy-MM-dd\").parse(\"2003-02-01\");\n@@ -150,6 +151,7 @@ public void testFormattingADateWithNoTime() throws Exception {\n     @Test\n     public void testFormattingADateWithATime() throws Exception {\n         when(administrationService.getGlobalProperty(UiFrameworkConstants.GP_FORMATTER_DATETIME_FORMAT, \"dd.MMM.yyyy, HH:mm:ss\")).thenReturn(\"dd.MMM.yyyy, HH:mm:ss\");\n+        when(administrationService.getGlobalProperty(UiFrameworkConstants.GP_HANDLE_TIMEZONES)).thenReturn(\"false\");\n \n         Locale locale = Locale.ENGLISH;\n         Date date = new SimpleDateFormat(\"yyyy-MM-dd HH:mm:ss.SSS\").parse(\"2003-02-01 14:25:07.123\");"
+  },
+  {
+    "sha": "16cf01f3a09b60ee9d17b98052f407fc6da2bdfd",
+    "filename": "omod/src/main/resources/config.xml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/openmrs/openmrs-module-uiframework/blob/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/omod/src/main/resources/config.xml",
+    "raw_url": "https://github.com/openmrs/openmrs-module-uiframework/raw/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/omod/src/main/resources/config.xml",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-uiframework/contents/omod/src/main/resources/config.xml?ref=76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728",
+    "patch": "@@ -89,6 +89,13 @@\n \t\t\tFormat used by Javascript functions for dates that have a time component\n \t\t</description>\n \t</globalProperty>\n+\n+\t<globalProperty>\n+\t\t<property>uiframework.handleTimezones</property>\n+\t\t<defaultValue>true</defaultValue>\n+\t\t<description>When set to true dates are sent from the server to the client as UTC dates and parsed from the client to the server as holding the client timezone information.\n+\t\t</description>\n+\t</globalProperty>\n \t\n \t<servlet>\n \t\t<servlet-name>resource</servlet-name>"
+  },
+  {
+    "sha": "29a5cd5d15abeb7a23a84e998403f978ec734931",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/openmrs/openmrs-module-uiframework/blob/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/pom.xml",
+    "raw_url": "https://github.com/openmrs/openmrs-module-uiframework/raw/76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728/pom.xml",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-uiframework/contents/pom.xml?ref=76f0b88fa4e57e6daa7e7f7ad95db50d67e8c728",
+    "patch": "@@ -61,6 +61,16 @@\n             <version>3.19.0-GA</version>\n             <scope>test</scope>\n         </dependency>\n+        <dependency>\n+            <groupId>joda-time</groupId>\n+            <artifactId>joda-time</artifactId>\n+            <version>2.9.2</version>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.joda</groupId>\n+            <artifactId>joda-convert</artifactId>\n+            <version>1.2</version>\n+        </dependency>\n     </dependencies>\n \n     <dependencyManagement>"
+  }
+]

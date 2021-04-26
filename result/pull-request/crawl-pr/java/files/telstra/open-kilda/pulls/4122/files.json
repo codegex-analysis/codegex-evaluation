@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "74f0997800685ecba817dcf91e7338d2fe3f36cb",
+    "filename": "src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/bolts/FlowCacheBolt.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 4,
+    "changes": 9,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/a177c73099ea1c2b605ab9cc3238fae288ee663f/src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/bolts/FlowCacheBolt.java",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/a177c73099ea1c2b605ab9cc3238fae288ee663f/src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/bolts/FlowCacheBolt.java",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/bolts/FlowCacheBolt.java?ref=a177c73099ea1c2b605ab9cc3238fae288ee663f",
+    "patch": "@@ -90,22 +90,23 @@ protected void handleInput(Tuple input) throws PipelineException {\n     @Override\n     public void emitCalculateFlowLatencyRequest(String flowId, FlowDirection direction,\n                                                 List<Link> flowPath, Long maxLatency, Long maxLatencyTier2) {\n-        emit(getCurrentTuple(), new Values(flowId, direction, flowPath, maxLatency, maxLatencyTier2));\n+        emit(getCurrentTuple(), new Values(flowId, direction, flowPath, maxLatency, maxLatencyTier2,\n+                getCommandContext()));\n     }\n \n     @Override\n     public void emitCheckFlowLatencyRequest(String flowId, FlowDirection direction, long latency,\n                                             Long maxLatency, Long maxLatencyTier2) {\n         emit(ACTION_STREAM_ID.name(), getCurrentTuple(), new Values(flowId, direction, latency,\n-                maxLatency, maxLatencyTier2));\n+                maxLatency, maxLatencyTier2, getCommandContext()));\n     }\n \n     @Override\n     public void declareOutputFields(OutputFieldsDeclarer declarer) {\n         declarer.declare(new Fields(FLOW_ID_FIELD, FLOW_DIRECTION_FIELD,\n-                FLOW_PATH_FIELD, MAX_LATENCY_FIELD, MAX_LATENCY_TIER_2_FIELD));\n+                FLOW_PATH_FIELD, MAX_LATENCY_FIELD, MAX_LATENCY_TIER_2_FIELD, FIELD_ID_CONTEXT));\n         declarer.declareStream(ACTION_STREAM_ID.name(), new Fields(FLOW_ID_FIELD, FLOW_DIRECTION_FIELD,\n-                LATENCY_FIELD, MAX_LATENCY_FIELD, MAX_LATENCY_TIER_2_FIELD));\n+                LATENCY_FIELD, MAX_LATENCY_FIELD, MAX_LATENCY_TIER_2_FIELD, FIELD_ID_CONTEXT));\n         declarer.declareStream(ZkStreams.ZK.toString(), new Fields(ZooKeeperBolt.FIELD_ID_STATE,\n                 ZooKeeperBolt.FIELD_ID_CONTEXT));\n     }"
+  },
+  {
+    "sha": "0faf7617e2897c560aa27fc1271462da23b6e9b1",
+    "filename": "src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/bolts/IslCacheBolt.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/a177c73099ea1c2b605ab9cc3238fae288ee663f/src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/bolts/IslCacheBolt.java",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/a177c73099ea1c2b605ab9cc3238fae288ee663f/src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/bolts/IslCacheBolt.java",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/bolts/IslCacheBolt.java?ref=a177c73099ea1c2b605ab9cc3238fae288ee663f",
+    "patch": "@@ -117,7 +117,8 @@ protected void handleInput(Tuple input) throws PipelineException {\n \n             long latency = islCacheService.calculateLatencyForPath(flowPath);\n \n-            emit(ACTION_STREAM_ID.name(), input, new Values(flowId, direction, latency, maxLatency, maxLatencyTier2));\n+            emit(ACTION_STREAM_ID.name(), input, new Values(flowId, direction, latency, maxLatency, maxLatencyTier2,\n+                    getCommandContext()));\n         } else {\n             unhandledInput(input);\n         }\n@@ -126,7 +127,7 @@ protected void handleInput(Tuple input) throws PipelineException {\n     @Override\n     public void declareOutputFields(OutputFieldsDeclarer declarer) {\n         declarer.declareStream(ACTION_STREAM_ID.name(), new Fields(FLOW_ID_FIELD, FLOW_DIRECTION_FIELD,\n-                LATENCY_FIELD, MAX_LATENCY_FIELD, MAX_LATENCY_TIER_2_FIELD));\n+                LATENCY_FIELD, MAX_LATENCY_FIELD, MAX_LATENCY_TIER_2_FIELD, FIELD_ID_CONTEXT));\n         declarer.declareStream(ZkStreams.ZK.toString(), new Fields(ZooKeeperBolt.FIELD_ID_STATE,\n                 ZooKeeperBolt.FIELD_ID_CONTEXT));\n     }"
+  }
+]

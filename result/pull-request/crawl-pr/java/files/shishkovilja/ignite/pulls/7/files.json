@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "7b105593855f3201e72cd9c549ed3d2d18193e3b",
+    "filename": "modules/core/src/main/java/org/apache/ignite/IgniteSystemProperties.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/shishkovilja/ignite/blob/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/IgniteSystemProperties.java",
+    "raw_url": "https://github.com/shishkovilja/ignite/raw/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/IgniteSystemProperties.java",
+    "contents_url": "https://api.github.com/repos/shishkovilja/ignite/contents/modules/core/src/main/java/org/apache/ignite/IgniteSystemProperties.java?ref=ca743325d90686cb99d1eccef5559d31c0767644",
+    "patch": "@@ -1351,6 +1351,11 @@\n      */\n     public static final String IGNITE_PERF_STAT_CACHED_STRINGS_THRESHOLD = \"IGNITE_PERF_STAT_CACHED_STRINGS_THRESHOLD\";\n \n+    /** Thin client compatibility flag for Ignite SE 4.290 clients with Ignite SE 4.281 servers.\n+     * NOTE: in order to enable client compatibility mode, this option must be set to <code>true</code>\n+     * on the <em>thin client side</em>. Default value is <code>false</code>. */\n+    public static final String IGNITE_SE_281_THIN_CLIENT_COMPATIBLE = \"IGNITE_SE_281_THIN_CLIENT_COMPATIBLE\";\n+\n     /**\n      * Enforces singleton.\n      */"
+  },
+  {
+    "sha": "749cec4413b357e0efff17615a7ee6baa84c672c",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/client/thin/ProtocolContext.java",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/shishkovilja/ignite/blob/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/client/thin/ProtocolContext.java",
+    "raw_url": "https://github.com/shishkovilja/ignite/raw/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/client/thin/ProtocolContext.java",
+    "contents_url": "https://api.github.com/repos/shishkovilja/ignite/contents/modules/core/src/main/java/org/apache/ignite/internal/client/thin/ProtocolContext.java?ref=ca743325d90686cb99d1eccef5559d31c0767644",
+    "patch": "@@ -18,8 +18,11 @@\n package org.apache.ignite.internal.client.thin;\n \n import java.util.EnumSet;\n+import org.apache.ignite.IgniteSystemProperties;\n import org.apache.ignite.client.ClientFeatureNotSupportedByServerException;\n \n+import static org.apache.ignite.IgniteSystemProperties.IGNITE_SE_281_THIN_CLIENT_COMPATIBLE;\n+\n /**\n  * Protocol Context.\n  */\n@@ -30,13 +33,26 @@\n     /** Features. */\n     private final EnumSet<ProtocolBitmaskFeature> features;\n \n+    /** */\n+    private final boolean ise281Compatible;\n+\n     /**\n      * @param ver Protocol version.\n      * @param features Supported features.\n      */\n     public ProtocolContext(ProtocolVersion ver, EnumSet<ProtocolBitmaskFeature> features) {\n+        this(ver, features, false);\n+    }\n+\n+    /**\n+     * @param ver Protocol version.\n+     * @param features Supported features.\n+     * @param ise281Compatible Ignite SE 4.281 compatibility flag.\n+     */\n+    public ProtocolContext(ProtocolVersion ver, EnumSet<ProtocolBitmaskFeature> features, boolean ise281Compatible) {\n         this.ver = ver;\n         this.features = features != null ? features : EnumSet.noneOf(ProtocolBitmaskFeature.class);\n+        this.ise281Compatible = ise281Compatible;\n     }\n \n     /**\n@@ -87,4 +103,17 @@ public ProtocolVersion version() {\n     public static boolean isFeatureSupported(ProtocolVersion ver, ProtocolVersionFeature feature) {\n         return ver.compareTo(feature.verIntroduced()) >= 0;\n     }\n+\n+    /** */\n+    public boolean isIse281Compatible() {\n+        return ise281Compatible;\n+    }\n+\n+    /**\n+     * @param ver Protocol version.\n+     */\n+    public static boolean isIse281Compatible(ProtocolVersion ver) {\n+        return IgniteSystemProperties.getBoolean(IGNITE_SE_281_THIN_CLIENT_COMPATIBLE, false) &&\n+            ProtocolVersion.V1_7_0.equals(ver);\n+    }\n }"
+  },
+  {
+    "sha": "2e561dcccfa5c14cecb404e3e5baa77ef1ef106b",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/client/thin/TcpClientChannel.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 8,
+    "changes": 29,
+    "blob_url": "https://github.com/shishkovilja/ignite/blob/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/client/thin/TcpClientChannel.java",
+    "raw_url": "https://github.com/shishkovilja/ignite/raw/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/client/thin/TcpClientChannel.java",
+    "contents_url": "https://api.github.com/repos/shishkovilja/ignite/contents/modules/core/src/main/java/org/apache/ignite/internal/client/thin/TcpClientChannel.java?ref=ca743325d90686cb99d1eccef5559d31c0767644",
+    "patch": "@@ -509,7 +509,7 @@ private void handshakeReq(ProtocolVersion proposedVer, String user, String pwd,\n \n             writer.writeByte(ClientListenerNioListener.THIN_CLIENT);\n \n-            if (protocolCtx.isFeatureSupported(BITMAP_FEATURES)) {\n+            if (protocolCtx.isFeatureSupported(BITMAP_FEATURES) && !protocolCtx.isIse281Compatible()) {\n                 byte[] features = ProtocolBitmaskFeature.featuresAsBytes(protocolCtx.features());\n                 writer.writeByteArray(features);\n             }\n@@ -536,10 +536,17 @@ private void handshakeReq(ProtocolVersion proposedVer, String user, String pwd,\n      */\n     private ProtocolContext protocolContextFromVersion(ProtocolVersion ver) {\n         EnumSet<ProtocolBitmaskFeature> features = null;\n-        if (ProtocolContext.isFeatureSupported(ver, BITMAP_FEATURES))\n-            features = ProtocolBitmaskFeature.allFeaturesAsEnumSet();\n \n-        return new ProtocolContext(ver, features);\n+        final boolean isIse281Compatible = ProtocolContext.isIse281Compatible(ver);\n+\n+        if (ProtocolContext.isFeatureSupported(ver, BITMAP_FEATURES)) {\n+            if (isIse281Compatible)\n+                features = EnumSet.of(USER_ATTRIBUTES);\n+            else\n+                features = ProtocolBitmaskFeature.allFeaturesAsEnumSet();\n+        }\n+\n+        return new ProtocolContext(ver, features, isIse281Compatible);\n     }\n \n     /** Receive and handle handshake response. */\n@@ -556,12 +563,18 @@ private void handshakeRes(ProtocolVersion proposedVer, String user, String pwd,\n             boolean success = res.readBoolean();\n \n             if (success) {\n-                byte[] features = new byte[0];\n+                EnumSet<ProtocolBitmaskFeature> features = null;\n \n-                if (ProtocolContext.isFeatureSupported(proposedVer, BITMAP_FEATURES))\n-                    features = reader.readByteArray();\n+                final boolean ise281Compatible = ProtocolContext.isIse281Compatible(proposedVer);\n+\n+                if (ProtocolContext.isFeatureSupported(proposedVer, BITMAP_FEATURES)) {\n+                    if (ise281Compatible)\n+                        features = EnumSet.of(USER_ATTRIBUTES);\n+                    else\n+                        features = ProtocolBitmaskFeature.enumSet(reader.readByteArray());\n+                }\n \n-                protocolCtx = new ProtocolContext(proposedVer, ProtocolBitmaskFeature.enumSet(features));\n+                protocolCtx = new ProtocolContext(proposedVer, features, ise281Compatible);\n \n                 if (protocolCtx.isFeatureSupported(PARTITION_AWARENESS)) {\n                     // Reading server UUID"
+  },
+  {
+    "sha": "08896f9575cd04cf849207302683557d0efc4a1f",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientConnectionContext.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 4,
+    "changes": 21,
+    "blob_url": "https://github.com/shishkovilja/ignite/blob/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientConnectionContext.java",
+    "raw_url": "https://github.com/shishkovilja/ignite/raw/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientConnectionContext.java",
+    "contents_url": "https://api.github.com/repos/shishkovilja/ignite/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientConnectionContext.java?ref=ca743325d90686cb99d1eccef5559d31c0767644",
+    "patch": "@@ -30,6 +30,8 @@\n import org.apache.ignite.configuration.ThinClientConfiguration;\n import org.apache.ignite.internal.GridKernalContext;\n import org.apache.ignite.internal.binary.BinaryReaderExImpl;\n+import org.apache.ignite.internal.binary.GridBinaryMarshaller;\n+import org.apache.ignite.internal.binary.streams.BinaryInputStream;\n import org.apache.ignite.internal.processors.affinity.AffinityTopologyVersion;\n import org.apache.ignite.internal.processors.authentication.AuthorizationContext;\n import org.apache.ignite.internal.processors.odbc.ClientListenerAbstractConnectionContext;\n@@ -185,13 +187,24 @@ public ClientProtocolContext currentProtocolContext() {\n \n         EnumSet<ClientBitmaskFeature> features = null;\n \n+        boolean ise281Compatible = false;\n         if (ClientProtocolContext.isFeatureSupported(ver, BITMAP_FEATURES)) {\n-            byte[] cliFeatures = reader.readByteArray();\n-\n-            features = ClientBitmaskFeature.enumSet(cliFeatures);\n+            BinaryInputStream stream = reader.in();\n+            int initPos = stream.position();\n+            byte flag = stream.readByte();\n+            stream.position(initPos);\n+            if (flag == GridBinaryMarshaller.BYTE_ARR) {\n+                byte[] cliFeatures = reader.readByteArray();\n+\n+                features = ClientBitmaskFeature.enumSet(cliFeatures);\n+            }\n+            else {\n+                features = EnumSet.of(USER_ATTRIBUTES);\n+                ise281Compatible = true;\n+            }\n         }\n \n-        currentProtocolContext = new ClientProtocolContext(ver, features);\n+        currentProtocolContext = new ClientProtocolContext(ver, features, ise281Compatible);\n \n         String user = null;\n         String pwd = null;"
+  },
+  {
+    "sha": "a3eab645148b767d357d42d23a4fb99ed7c69203",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientProtocolContext.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/shishkovilja/ignite/blob/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientProtocolContext.java",
+    "raw_url": "https://github.com/shishkovilja/ignite/raw/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientProtocolContext.java",
+    "contents_url": "https://api.github.com/repos/shishkovilja/ignite/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientProtocolContext.java?ref=ca743325d90686cb99d1eccef5559d31c0767644",
+    "patch": "@@ -31,13 +31,27 @@\n     /** Features. */\n     private final EnumSet<ClientBitmaskFeature> features;\n \n+    /** */\n+    private boolean ise281Compatible;\n+\n     /**\n      * @param ver Protocol version.\n      * @param features Supported features.\n      */\n     public ClientProtocolContext(ClientListenerProtocolVersion ver, EnumSet<ClientBitmaskFeature> features) {\n+        this(ver, features,false);\n+    }\n+\n+    /**\n+     * @param ver Protocol version.\n+     * @param features Supported features.\n+     * @param ise281Compatible Ignite SE 4.281.3 compatibility flag.\n+     */\n+    public ClientProtocolContext(ClientListenerProtocolVersion ver,\n+        EnumSet<ClientBitmaskFeature> features, boolean ise281Compatible) {\n         this.ver = ver;\n         this.features = features != null ? features : EnumSet.noneOf(ClientBitmaskFeature.class);\n+        this.ise281Compatible = ise281Compatible;\n     }\n \n     /**\n@@ -84,4 +98,9 @@ public ClientListenerProtocolVersion version() {\n     public static boolean isFeatureSupported(ClientListenerProtocolVersion ver, ClientProtocolVersionFeature feature) {\n         return ver.compareTo(feature.verIntroduced()) >= 0;\n     }\n+\n+    /** */\n+    public boolean isIse281Compatible() {\n+        return ise281Compatible;\n+    }\n }"
+  },
+  {
+    "sha": "577e05008ba96094be0ccf5ac79a415de31743bb",
+    "filename": "modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientRequestHandler.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/shishkovilja/ignite/blob/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientRequestHandler.java",
+    "raw_url": "https://github.com/shishkovilja/ignite/raw/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientRequestHandler.java",
+    "contents_url": "https://api.github.com/repos/shishkovilja/ignite/contents/modules/core/src/main/java/org/apache/ignite/internal/processors/platform/client/ClientRequestHandler.java?ref=ca743325d90686cb99d1eccef5559d31c0767644",
+    "patch": "@@ -122,7 +122,7 @@\n     @Override public void writeHandshake(BinaryWriterExImpl writer) {\n         writer.writeBoolean(true);\n \n-        if (protocolCtx.isFeatureSupported(BITMAP_FEATURES))\n+        if (protocolCtx.isFeatureSupported(BITMAP_FEATURES) && !protocolCtx.isIse281Compatible())\n             writer.writeByteArray(protocolCtx.featureBytes());\n \n         if (protocolCtx.isFeatureSupported(PARTITION_AWARENESS))"
+  },
+  {
+    "sha": "c60dd80ae98a56002c08826d91b1d839cfd8c4ca",
+    "filename": "modules/core/src/test/java/org/apache/ignite/internal/processors/security/client/ThinClientPermissionCheckSecurityWith281CompatibilityTest.java",
+    "status": "added",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/shishkovilja/ignite/blob/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/test/java/org/apache/ignite/internal/processors/security/client/ThinClientPermissionCheckSecurityWith281CompatibilityTest.java",
+    "raw_url": "https://github.com/shishkovilja/ignite/raw/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/test/java/org/apache/ignite/internal/processors/security/client/ThinClientPermissionCheckSecurityWith281CompatibilityTest.java",
+    "contents_url": "https://api.github.com/repos/shishkovilja/ignite/contents/modules/core/src/test/java/org/apache/ignite/internal/processors/security/client/ThinClientPermissionCheckSecurityWith281CompatibilityTest.java?ref=ca743325d90686cb99d1eccef5559d31c0767644",
+    "patch": "@@ -0,0 +1,33 @@\n+/*\n+ * Licensed to the Apache Software Foundation (ASF) under one or more\n+ * contributor license agreements.  See the NOTICE file distributed with\n+ * this work for additional information regarding copyright ownership.\n+ * The ASF licenses this file to You under the Apache License, Version 2.0\n+ * (the \"License\"); you may not use this file except in compliance with\n+ * the License.  You may obtain a copy of the License at\n+ *\n+ *      http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Unless required by applicable law or agreed to in writing, software\n+ * distributed under the License is distributed on an \"AS IS\" BASIS,\n+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+ * See the License for the specific language governing permissions and\n+ * limitations under the License.\n+ */\n+\n+package org.apache.ignite.internal.processors.security.client;\n+\n+import org.apache.ignite.testframework.junits.WithSystemProperty;\n+import org.junit.runner.RunWith;\n+import org.junit.runners.JUnit4;\n+\n+import static org.apache.ignite.IgniteSystemProperties.IGNITE_SE_281_THIN_CLIENT_COMPATIBLE;\n+\n+/**\n+ * Security tests for thin client with turned on ISE 4.281 compatibility mode.\n+ */\n+@RunWith(JUnit4.class)\n+@WithSystemProperty(key = IGNITE_SE_281_THIN_CLIENT_COMPATIBLE, value = \"true\")\n+public class ThinClientPermissionCheckSecurityWith281CompatibilityTest extends ThinClientPermissionCheckSecurityTest {\n+    // NO-OP\n+}"
+  },
+  {
+    "sha": "92ea16f5e3b6ed0282d9f72cb7d071a3ade1ff52",
+    "filename": "modules/core/src/test/java/org/apache/ignite/testsuites/SecurityTestSuite.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/shishkovilja/ignite/blob/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/test/java/org/apache/ignite/testsuites/SecurityTestSuite.java",
+    "raw_url": "https://github.com/shishkovilja/ignite/raw/ca743325d90686cb99d1eccef5559d31c0767644/modules/core/src/test/java/org/apache/ignite/testsuites/SecurityTestSuite.java",
+    "contents_url": "https://api.github.com/repos/shishkovilja/ignite/contents/modules/core/src/test/java/org/apache/ignite/testsuites/SecurityTestSuite.java?ref=ca743325d90686cb99d1eccef5559d31c0767644",
+    "patch": "@@ -35,6 +35,7 @@\n import org.apache.ignite.internal.processors.security.client.AttributeSecurityCheckTest;\n import org.apache.ignite.internal.processors.security.client.IgniteClientContainSubjectAddressTest;\n import org.apache.ignite.internal.processors.security.client.ThinClientPermissionCheckSecurityTest;\n+import org.apache.ignite.internal.processors.security.client.ThinClientPermissionCheckSecurityWith281CompatibilityTest;\n import org.apache.ignite.internal.processors.security.client.ThinClientPermissionCheckTest;\n import org.apache.ignite.internal.processors.security.client.ThinClientSecurityContextOnRemoteNodeTest;\n import org.apache.ignite.internal.processors.security.client.ThinClientSslPermissionCheckTest;\n@@ -81,6 +82,7 @@\n     ComputePermissionCheckTest.class,\n     ThinClientPermissionCheckTest.class,\n     ThinClientPermissionCheckSecurityTest.class,\n+    ThinClientPermissionCheckSecurityWith281CompatibilityTest.class,\n     ContinuousQueryPermissionCheckTest.class,\n     IgniteClientContainSubjectAddressTest.class,\n     SnapshotPermissionCheckTest.class,"
+  }
+]

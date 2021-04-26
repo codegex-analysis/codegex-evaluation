@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "7f09568af7f64d4b87faa9e01274f80bd1af89d8",
+    "filename": "Ghidra/Framework/Graph/src/main/java/ghidra/graph/algo/ChkDominanceAlgorithm.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/NationalSecurityAgency/ghidra/blob/7eb9b4729ff1d921690c869e9ce72741c4d9f9ba/Ghidra/Framework/Graph/src/main/java/ghidra/graph/algo/ChkDominanceAlgorithm.java",
+    "raw_url": "https://github.com/NationalSecurityAgency/ghidra/raw/7eb9b4729ff1d921690c869e9ce72741c4d9f9ba/Ghidra/Framework/Graph/src/main/java/ghidra/graph/algo/ChkDominanceAlgorithm.java",
+    "contents_url": "https://api.github.com/repos/NationalSecurityAgency/ghidra/contents/Ghidra/Framework/Graph/src/main/java/ghidra/graph/algo/ChkDominanceAlgorithm.java?ref=7eb9b4729ff1d921690c869e9ce72741c4d9f9ba",
+    "patch": "@@ -122,7 +122,7 @@ private void computeDominance(TaskMonitor monitor) throws CancelledException {\n \n \t\t\t\twhile (iterator.hasNext()) {\n \t\t\t\t\tV p = iterator.next();\n-\t\t\t\t\tif (p == newIdom) {\n+\t\t\t\t\tif (newIdom.equals(p)) {\n \t\t\t\t\t\tcontinue;\n \t\t\t\t\t}\n \t\t\t\t\tif (dominatorMap.containsKey(p)) {\n@@ -131,7 +131,7 @@ private void computeDominance(TaskMonitor monitor) throws CancelledException {\n \t\t\t\t}\n \n \t\t\t\tV idom = dominatorMap.get(b);\n-\t\t\t\tif (idom != newIdom) {\n+\t\t\t\tif (!newIdom.equals(idom)) {\n \t\t\t\t\tV last = dominatorMap.put(b, newIdom);\n \t\t\t\t\tdominatedMap.get(newIdom).add(b);\n \t\t\t\t\tif (last != null) {\n@@ -148,7 +148,7 @@ private V intersect(V v1, V v2, Map<V, Integer> map) {\n \t\tV finger2 = v2;\n \t\tint finger1Index = map.get(finger1);\n \t\tint finger2Index = map.get(finger2);\n-\t\twhile (finger1 != finger2) {\n+\t\twhile (!finger1.equals(finger2)) {\n \t\t\twhile (finger1Index < finger2Index) {\n \t\t\t\tfinger1 = dominatorMap.get(finger1);\n \t\t\t\tfinger1Index = map.get(finger1);\n@@ -197,7 +197,7 @@ private void doGetDominated(V a, Set<V> results) {\n \t\tSet<V> dominators = new HashSet<>();\n \t\tdominators.add(a);\n \n-\t\twhile (a != root) {\n+\t\twhile (!root.equals(a)) {\n \t\t\ta = dominatorMap.get(a); // immediate dominator\n \t\t\tadd(a, dominators);\n \t\t}"
+  },
+  {
+    "sha": "c24917d455c86cbc11cde8b46d484e0428a4fb13",
+    "filename": "Ghidra/Framework/Graph/src/test/java/ghidra/graph/AbstractGraphAlgorithmsTest.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 28,
+    "changes": 54,
+    "blob_url": "https://github.com/NationalSecurityAgency/ghidra/blob/7eb9b4729ff1d921690c869e9ce72741c4d9f9ba/Ghidra/Framework/Graph/src/test/java/ghidra/graph/AbstractGraphAlgorithmsTest.java",
+    "raw_url": "https://github.com/NationalSecurityAgency/ghidra/raw/7eb9b4729ff1d921690c869e9ce72741c4d9f9ba/Ghidra/Framework/Graph/src/test/java/ghidra/graph/AbstractGraphAlgorithmsTest.java",
+    "contents_url": "https://api.github.com/repos/NationalSecurityAgency/ghidra/contents/Ghidra/Framework/Graph/src/test/java/ghidra/graph/AbstractGraphAlgorithmsTest.java?ref=7eb9b4729ff1d921690c869e9ce72741c4d9f9ba",
+    "patch": "@@ -273,34 +273,32 @@ public String toString() {\n \t\t\treturn id;\n \t\t}\n \n-// TODO put this in\t\t\n-//\n-//\t\t@Override\n-//\t\tpublic int hashCode() {\n-//\t\t\tfinal int prime = 31;\n-//\t\t\tint result = 1;\n-//\t\t\tresult = prime * result + ((id == null) ? 0 : id.hashCode());\n-//\t\t\treturn result;\n-//\t\t}\n-//\n-//\t\t@Override\n-//\t\tpublic boolean equals(Object obj) {\n-//\t\t\tif (this == obj) {\n-//\t\t\t\treturn true;\n-//\t\t\t}\n-//\t\t\tif (obj == null) {\n-//\t\t\t\treturn false;\n-//\t\t\t}\n-//\t\t\tif (getClass() != obj.getClass()) {\n-//\t\t\t\treturn false;\n-//\t\t\t}\n-//\n-//\t\t\tTestV other = (TestV) obj;\n-//\t\t\tif (!Objects.equals(id, other.id)) {\n-//\t\t\t\treturn false;\n-//\t\t\t}\n-//\t\t\treturn true;\n-//\t\t}\n+\t\t@Override\n+\t\tpublic int hashCode() {\n+\t\t\tfinal int prime = 31;\n+\t\t\tint result = 1;\n+\t\t\tresult = prime * result + ((id == null) ? 0 : id.hashCode());\n+\t\t\treturn result;\n+\t\t}\n+\n+\t\t@Override\n+\t\tpublic boolean equals(Object obj) {\n+\t\t\tif (this == obj) {\n+\t\t\t\treturn true;\n+\t\t\t}\n+\t\t\tif (obj == null) {\n+\t\t\t\treturn false;\n+\t\t\t}\n+\t\t\tif (getClass() != obj.getClass()) {\n+\t\t\t\treturn false;\n+\t\t\t}\n+\n+\t\t\tTestV other = (TestV) obj;\n+\t\t\tif (!Objects.equals(id, other.id)) {\n+\t\t\t\treturn false;\n+\t\t\t}\n+\t\t\treturn true;\n+\t\t}\n \t}\n \n \tprotected static class TestE extends DefaultGEdge<TestV> {"
+  },
+  {
+    "sha": "f78d6c5c802faa756be62810165a9b1e67c65288",
+    "filename": "Ghidra/Framework/Graph/src/test/java/ghidra/graph/GraphAlgorithmsTest.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 1,
+    "changes": 12,
+    "blob_url": "https://github.com/NationalSecurityAgency/ghidra/blob/7eb9b4729ff1d921690c869e9ce72741c4d9f9ba/Ghidra/Framework/Graph/src/test/java/ghidra/graph/GraphAlgorithmsTest.java",
+    "raw_url": "https://github.com/NationalSecurityAgency/ghidra/raw/7eb9b4729ff1d921690c869e9ce72741c4d9f9ba/Ghidra/Framework/Graph/src/test/java/ghidra/graph/GraphAlgorithmsTest.java",
+    "contents_url": "https://api.github.com/repos/NationalSecurityAgency/ghidra/contents/Ghidra/Framework/Graph/src/test/java/ghidra/graph/GraphAlgorithmsTest.java?ref=7eb9b4729ff1d921690c869e9ce72741c4d9f9ba",
+    "patch": "@@ -46,7 +46,7 @@\n \tpublic void testGetSources() {\n \t\tTestV v1 = vertex(1);\n \t\tTestV v2 = vertex(2);\n-\t\tTestV v3 = vertex(2);\n+\t\tTestV v3 = vertex(3);\n \n \t\tg.addVertex(v1);\n \t\tg.addVertex(v2);\n@@ -1004,6 +1004,16 @@ public void testPostDominated_MultipleSinks() {\n \t\t//@formatter:on\n \t}\n \n+\t@Test\n+\tpublic void testDominanceEquality() throws CancelledException {\n+\t\t// Regression test for https://github.com/NationalSecurityAgency/ghidra/issues/2836\n+\t\t// Make sure that Object.equals() is used, not ==.\n+\t\tedge(vertex(1), vertex(2));\n+\t\tedge(vertex(1), vertex(3));\n+\n+\t\tGraphAlgorithms.findDominanceTree(g, TaskMonitor.DUMMY);\n+\t}\n+\n \t@Test\n \tpublic void testDepthFirstPostOrder() {\n \t\t//   V1 -> V3 -> V6"
+  }
+]

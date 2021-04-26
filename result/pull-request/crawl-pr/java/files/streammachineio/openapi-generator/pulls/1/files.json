@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "242b402e7ba9bcc62ee9fb0c69d965cb5880d299",
+    "filename": "modules/openapi-generator/src/main/resources/kotlin-client/libraries/jvm-okhttp/infrastructure/ApiClient.kt.mustache",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/modules/openapi-generator/src/main/resources/kotlin-client/libraries/jvm-okhttp/infrastructure/ApiClient.kt.mustache",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/modules/openapi-generator/src/main/resources/kotlin-client/libraries/jvm-okhttp/infrastructure/ApiClient.kt.mustache",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/modules/openapi-generator/src/main/resources/kotlin-client/libraries/jvm-okhttp/infrastructure/ApiClient.kt.mustache?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -47,6 +47,9 @@ import com.google.gson.reflect.TypeToken\n {{#jackson}}\n import com.fasterxml.jackson.core.type.TypeReference\n {{/jackson}}\n+{{#moshi}}\n+import com.squareup.moshi.adapter\n+{{/moshi}}\n \n {{#nonPublicApi}}internal {{/nonPublicApi}}open class ApiClient(val baseUrl: String) {\n     {{#nonPublicApi}}internal {{/nonPublicApi}}companion object {\n@@ -166,6 +169,9 @@ import com.fasterxml.jackson.core.type.TypeReference\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    {{#moshi}}\n+    @OptIn(ExperimentalStdlibApi::class)\n+    {{/moshi}}\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -175,7 +181,7 @@ import com.fasterxml.jackson.core.type.TypeReference\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> {{#moshi}}Serializer.moshi.adapter(T::class.java).fromJson(bodyContent){{/moshi}}{{#gson}}Serializer.gson.fromJson(bodyContent, (object: TypeToken<T>(){}).getType()){{/gson}}{{#jackson}}Serializer.jacksonObjectMapper.readValue(bodyContent, object: TypeReference<T>() {}){{/jackson}}\n+            JsonMediaType -> {{#moshi}}Serializer.moshi.adapter<T>().fromJson(bodyContent){{/moshi}}{{#gson}}Serializer.gson.fromJson(bodyContent, (object: TypeToken<T>(){}).getType()){{/gson}}{{#jackson}}Serializer.jacksonObjectMapper.readValue(bodyContent, object: TypeReference<T>() {}){{/jackson}}\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  },
+  {
+    "sha": "9b17660a5ee8fa400c1b2c3c9fb9a9d903381c0e",
+    "filename": "samples/client/petstore/kotlin-json-request-string/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-json-request-string/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-json-request-string/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/samples/client/petstore/kotlin-json-request-string/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -20,6 +20,7 @@ import java.time.LocalDateTime\n import java.time.LocalTime\n import java.time.OffsetDateTime\n import java.time.OffsetTime\n+import com.squareup.moshi.adapter\n \n open class ApiClient(val baseUrl: String) {\n     companion object {\n@@ -106,6 +107,7 @@ open class ApiClient(val baseUrl: String) {\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    @OptIn(ExperimentalStdlibApi::class)\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -115,7 +117,7 @@ open class ApiClient(val baseUrl: String) {\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(bodyContent)\n+            JsonMediaType -> Serializer.moshi.adapter<T>().fromJson(bodyContent)\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  },
+  {
+    "sha": "8a64a7abeb1474cc7e3c559507470ca0bb7e86a8",
+    "filename": "samples/client/petstore/kotlin-moshi-codegen/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-moshi-codegen/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-moshi-codegen/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/samples/client/petstore/kotlin-moshi-codegen/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -20,6 +20,7 @@ import java.time.LocalDateTime\n import java.time.LocalTime\n import java.time.OffsetDateTime\n import java.time.OffsetTime\n+import com.squareup.moshi.adapter\n \n open class ApiClient(val baseUrl: String) {\n     companion object {\n@@ -106,6 +107,7 @@ open class ApiClient(val baseUrl: String) {\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    @OptIn(ExperimentalStdlibApi::class)\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -115,7 +117,7 @@ open class ApiClient(val baseUrl: String) {\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(bodyContent)\n+            JsonMediaType -> Serializer.moshi.adapter<T>().fromJson(bodyContent)\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  },
+  {
+    "sha": "c3a2709dc6195598c0fa84436406bda6024d58b7",
+    "filename": "samples/client/petstore/kotlin-nonpublic/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-nonpublic/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-nonpublic/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/samples/client/petstore/kotlin-nonpublic/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -20,6 +20,7 @@ import java.time.LocalDateTime\n import java.time.LocalTime\n import java.time.OffsetDateTime\n import java.time.OffsetTime\n+import com.squareup.moshi.adapter\n \n internal open class ApiClient(val baseUrl: String) {\n     internal companion object {\n@@ -106,6 +107,7 @@ internal open class ApiClient(val baseUrl: String) {\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    @OptIn(ExperimentalStdlibApi::class)\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -115,7 +117,7 @@ internal open class ApiClient(val baseUrl: String) {\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(bodyContent)\n+            JsonMediaType -> Serializer.moshi.adapter<T>().fromJson(bodyContent)\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  },
+  {
+    "sha": "8a64a7abeb1474cc7e3c559507470ca0bb7e86a8",
+    "filename": "samples/client/petstore/kotlin-nullable/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-nullable/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-nullable/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/samples/client/petstore/kotlin-nullable/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -20,6 +20,7 @@ import java.time.LocalDateTime\n import java.time.LocalTime\n import java.time.OffsetDateTime\n import java.time.OffsetTime\n+import com.squareup.moshi.adapter\n \n open class ApiClient(val baseUrl: String) {\n     companion object {\n@@ -106,6 +107,7 @@ open class ApiClient(val baseUrl: String) {\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    @OptIn(ExperimentalStdlibApi::class)\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -115,7 +117,7 @@ open class ApiClient(val baseUrl: String) {\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(bodyContent)\n+            JsonMediaType -> Serializer.moshi.adapter<T>().fromJson(bodyContent)\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  },
+  {
+    "sha": "b50cb76c7fe51ac1df598e0bb40d4b455031442d",
+    "filename": "samples/client/petstore/kotlin-okhttp3/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-okhttp3/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-okhttp3/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/samples/client/petstore/kotlin-okhttp3/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -18,6 +18,7 @@ import java.time.LocalDateTime\n import java.time.LocalTime\n import java.time.OffsetDateTime\n import java.time.OffsetTime\n+import com.squareup.moshi.adapter\n \n open class ApiClient(val baseUrl: String) {\n     companion object {\n@@ -104,6 +105,7 @@ open class ApiClient(val baseUrl: String) {\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    @OptIn(ExperimentalStdlibApi::class)\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -113,7 +115,7 @@ open class ApiClient(val baseUrl: String) {\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(bodyContent)\n+            JsonMediaType -> Serializer.moshi.adapter<T>().fromJson(bodyContent)\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  },
+  {
+    "sha": "8a64a7abeb1474cc7e3c559507470ca0bb7e86a8",
+    "filename": "samples/client/petstore/kotlin-string/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-string/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-string/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/samples/client/petstore/kotlin-string/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -20,6 +20,7 @@ import java.time.LocalDateTime\n import java.time.LocalTime\n import java.time.OffsetDateTime\n import java.time.OffsetTime\n+import com.squareup.moshi.adapter\n \n open class ApiClient(val baseUrl: String) {\n     companion object {\n@@ -106,6 +107,7 @@ open class ApiClient(val baseUrl: String) {\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    @OptIn(ExperimentalStdlibApi::class)\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -115,7 +117,7 @@ open class ApiClient(val baseUrl: String) {\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(bodyContent)\n+            JsonMediaType -> Serializer.moshi.adapter<T>().fromJson(bodyContent)\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  },
+  {
+    "sha": "b75024aa9a220dea59deb8a2916507ddd3dd6dfa",
+    "filename": "samples/client/petstore/kotlin-threetenbp/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-threetenbp/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-threetenbp/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/samples/client/petstore/kotlin-threetenbp/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -20,6 +20,7 @@ import org.threeten.bp.LocalDateTime\n import org.threeten.bp.LocalTime\n import org.threeten.bp.OffsetDateTime\n import org.threeten.bp.OffsetTime\n+import com.squareup.moshi.adapter\n \n open class ApiClient(val baseUrl: String) {\n     companion object {\n@@ -106,6 +107,7 @@ open class ApiClient(val baseUrl: String) {\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    @OptIn(ExperimentalStdlibApi::class)\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -115,7 +117,7 @@ open class ApiClient(val baseUrl: String) {\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(bodyContent)\n+            JsonMediaType -> Serializer.moshi.adapter<T>().fromJson(bodyContent)\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  },
+  {
+    "sha": "c2ccb32c7d0b1e17b20c44b4578ed98f20cf7704",
+    "filename": "samples/client/petstore/kotlin-uppercase-enum/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-uppercase-enum/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin-uppercase-enum/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/samples/client/petstore/kotlin-uppercase-enum/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -20,6 +20,7 @@ import java.time.LocalDateTime\n import java.time.LocalTime\n import java.time.OffsetDateTime\n import java.time.OffsetTime\n+import com.squareup.moshi.adapter\n \n open class ApiClient(val baseUrl: String) {\n     companion object {\n@@ -106,6 +107,7 @@ open class ApiClient(val baseUrl: String) {\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    @OptIn(ExperimentalStdlibApi::class)\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -115,7 +117,7 @@ open class ApiClient(val baseUrl: String) {\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(bodyContent)\n+            JsonMediaType -> Serializer.moshi.adapter<T>().fromJson(bodyContent)\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  },
+  {
+    "sha": "8a64a7abeb1474cc7e3c559507470ca0bb7e86a8",
+    "filename": "samples/client/petstore/kotlin/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/streammachineio/openapi-generator/blob/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "raw_url": "https://github.com/streammachineio/openapi-generator/raw/1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8/samples/client/petstore/kotlin/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt",
+    "contents_url": "https://api.github.com/repos/streammachineio/openapi-generator/contents/samples/client/petstore/kotlin/src/main/kotlin/org/openapitools/client/infrastructure/ApiClient.kt?ref=1f94ae81d39d613ec6f9e27eeddd9fb1f3f12bf8",
+    "patch": "@@ -20,6 +20,7 @@ import java.time.LocalDateTime\n import java.time.LocalTime\n import java.time.OffsetDateTime\n import java.time.OffsetTime\n+import com.squareup.moshi.adapter\n \n open class ApiClient(val baseUrl: String) {\n     companion object {\n@@ -106,6 +107,7 @@ open class ApiClient(val baseUrl: String) {\n             else -> throw UnsupportedOperationException(\"requestBody currently only supports JSON body and File body.\")\n         }\n \n+    @OptIn(ExperimentalStdlibApi::class)\n     protected inline fun <reified T: Any?> responseBody(body: ResponseBody?, mediaType: String? = JsonMediaType): T? {\n         if(body == null) {\n             return null\n@@ -115,7 +117,7 @@ open class ApiClient(val baseUrl: String) {\n             return null\n         }\n         return when(mediaType) {\n-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(bodyContent)\n+            JsonMediaType -> Serializer.moshi.adapter<T>().fromJson(bodyContent)\n             else ->  throw UnsupportedOperationException(\"responseBody currently only supports JSON body.\")\n         }\n     }"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "333325c5d01d2b5f326a0f858cc8373ba8c58c89",
+    "filename": ".github/workflows/test-runner-resiliency-test.yml",
+    "status": "added",
+    "additions": 87,
+    "deletions": 0,
+    "changes": 87,
+    "blob_url": "https://github.com/DataBiosphere/terra-workspace-manager/blob/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/.github/workflows/test-runner-resiliency-test.yml",
+    "raw_url": "https://github.com/DataBiosphere/terra-workspace-manager/raw/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/.github/workflows/test-runner-resiliency-test.yml",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-workspace-manager/contents/.github/workflows/test-runner-resiliency-test.yml?ref=38f8b3d847b0bea9a807b659fb9aceb6ce1f4781",
+    "patch": "@@ -0,0 +1,87 @@\n+# This workflow will build and run a workspace manager resiliency test against the terra-wsmtest namespace\n+\n+name: Test Runner Resiliency Test\n+\n+on:\n+  push:\n+    branches: [ dev ]\n+  pull_request:\n+    branches: [ '**' ]\n+\n+jobs:\n+  test-runner-resiliency:\n+\n+    runs-on: ubuntu-latest\n+\n+    services:\n+      postgres:\n+        image: postgres:13.1\n+        env:\n+          POSTGRES_PASSWORD: postgres\n+        options: >-\n+          --health-cmd pg_isready\n+          --health-interval 10s\n+          --health-timeout 5s\n+          --health-retries 5\n+        ports:\n+          - 5432:5432\n+\n+    steps:\n+      - name: Check out this repository\n+        uses: actions/checkout@v2\n+      - name: Set up AdoptOpenJDK 11\n+        uses: joschi/setup-jdk@v2\n+        with:\n+          java-version: 11\n+      # This step caches Gradle packages for reuse in the same VM instance.\n+      - name: Cache Gradle packages\n+        uses: actions/cache@v2\n+        with:\n+          path: |\n+            ~/.gradle/caches\n+            ~/.gradle/wrapper\n+          key: v1-${{ runner.os }}-gradle-${{ hashfiles('**/gradle-wrapper.properties') }}-${{ hashFiles('**/*.gradle') }}\n+          restore-keys: v1-${{ runner.os }}-gradle-${{ hashfiles('**/gradle-wrapper.properties') }}\n+      - name: Grant execute permission for gradlew\n+        run: chmod +x gradlew\n+\n+      - name: Get Vault token\n+        id: vault-token-step\n+        env:\n+          VAULT_ADDR: https://clotho.broadinstitute.org:8200\n+        run: |\n+          VAULT_TOKEN=$(docker run --rm --cap-add IPC_LOCK \\\n+            -e \"VAULT_ADDR=${VAULT_ADDR}\" \\\n+            vault:1.1.0 \\\n+            vault write -field token \\\n+              auth/approle/login role_id=${{ secrets.VAULT_APPROLE_ROLE_ID }} \\\n+              secret_id=${{ secrets.VAULT_APPROLE_SECRET_ID }})\n+          echo ::set-output name=vault-token::$VAULT_TOKEN\n+          echo ::add-mask::$VAULT_TOKEN\n+\n+      - name: Build the WSM client\n+        run: |\n+          echo \"Building WSM client library\"\n+          ./gradlew :workspace-manager-client:clean :workspace-manager-client:assemble\n+          cd workspace-manager-clienttests\n+          export ORG_GRADLE_PROJECT_workspacemanagerclientjar=$(find .. -type f -name \"workspace-manager-client*.jar\")\n+          echo \"ORG_GRADLE_PROJECT_workspacemanagerclientjar = ${ORG_GRADLE_PROJECT_workspacemanagerclientjar}\"\n+\n+      # We can also set the env var (TEST_RUNNER_SERVER_SPECIFICATION_FILE) in the GH action script to specify which server we are testing against.\n+      # This will be particularly helpful once we switch over to testing against any test env -- then it's just a change to the env var.\n+      # Please refer to https://github.com/DataBiosphere/terra-test-runner#override-the-server-from-the-command-line for more information.\n+      - name: Run a basic Resiliency test suite against a namespace\n+        run: |\n+          cd workspace-manager-clienttests\n+          echo \"Test Runner config\"\n+          ./render-config.sh ${{ steps.vault-token-step.outputs.vault-token }}\n+          ./render-k8s-config.sh wsmtest ${{ steps.vault-token-step.outputs.vault-token }}\n+          echo \"Running test suite\"\n+          ./gradlew runTest --args=\"suites/WsmTestResiliency.json /tmp/TestRunnerResults\"\n+\n+      - name: Upload test results to Google Bucket\n+        if: ${{ always() }}\n+        run: |\n+          cd workspace-manager-clienttests\n+          echo \"Upload test results to Google Bucket\"\n+          ./gradlew uploadResults --args=\"CompressDirectoryToTerraKernelK8S.json /tmp/TestRunnerResults\""
+  },
+  {
+    "sha": "f9de69123b1d3f40d45a1a1580abc8bf28424ea3",
+    "filename": "workspace-manager-clienttests/build.gradle",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/DataBiosphere/terra-workspace-manager/blob/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/build.gradle",
+    "raw_url": "https://github.com/DataBiosphere/terra-workspace-manager/raw/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/build.gradle",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-workspace-manager/contents/workspace-manager-clienttests/build.gradle?ref=38f8b3d847b0bea9a807b659fb9aceb6ce1f4781",
+    "patch": "@@ -1,12 +1,9 @@\n-import org.gradle.api.JavaVersion\n-import org.gradle.api.tasks.JavaExec\n-\n plugins {\n     id 'java'\n     // Apply the application plugin to add support for building a CLI application in Java.\n     id 'application'\n     // Terra Test Runner Plugin\n-    id 'bio.terra.test-runner-plugin' version '0.0.3-20210311.184005-30'\n+    id 'bio.terra.test-runner-plugin' version '0.0.3-SNAPSHOT'\n }\n \n repositories {\n@@ -40,7 +37,7 @@ dependencies {\n \n         workspacemanagerClient = \"0.9.0-SNAPSHOT\"\n         datarepoClient = \"1.0.155-SNAPSHOT\"\n-        testRunner = \"0.0.3-20210311.184005-30\"\n+        testRunner = \"0.0.3-SNAPSHOT\"\n     }\n     implementation group: 'org.apache.commons', name: 'commons-math3', version: \"${apacheMath}\"\n     compileOnly \"com.google.code.findbugs:annotations:${findbugsAnnotations}\""
+  },
+  {
+    "sha": "5a3ceb4c6be8799b22eaef380de8dbf989818c14",
+    "filename": "workspace-manager-clienttests/render-k8s-config.sh",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 3,
+    "changes": 12,
+    "blob_url": "https://github.com/DataBiosphere/terra-workspace-manager/blob/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/render-k8s-config.sh",
+    "raw_url": "https://github.com/DataBiosphere/terra-workspace-manager/raw/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/render-k8s-config.sh",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-workspace-manager/contents/workspace-manager-clienttests/render-k8s-config.sh?ref=38f8b3d847b0bea9a807b659fb9aceb6ce1f4781",
+    "patch": "@@ -1,12 +1,18 @@\n #!/bin/bash\n \n # This script renders the k8s service account secrets for namespace access\n-# NAME_SPACE: ichang, zloery, or preview namespace etc.\n+# NAME_SPACE: ichang, wsmtest or preview namespace etc.\n NAMESPACE=${1}\n+if [ -z \"$1\" ]\n+  then\n+    echo \"Please provide a namespace as input argument as in the following example.\"\n+    echo \"Usage: ./render-k8s-config.sh <namespace: e.g. wsmtest>\"\n+    exit 1;\n+fi\n VAULT_TOKEN=${2:-$(cat \"$HOME\"/.vault-token)}\n TESTRUNNER_K8S_SERVICE_ACCOUNT_VAULT_PATH=secret/dsde/terra/kernel/integration/${NAMESPACE}/testrunner-k8s-sa\n-TESTRUNNER_K8S_SERVICE_ACCOUNT_CA_OUTPUT_PATH=$(dirname \"$0\")/rendered/testrunner-k8s-sa-client-key-data.crt\n-TESTRUNNER_K8S_SERVICE_ACCOUNT_TOKEN_OUTPUT_PATH=$(dirname \"$0\")/rendered/testrunner-k8s-sa-token\n+TESTRUNNER_K8S_SERVICE_ACCOUNT_CA_OUTPUT_PATH=$(dirname \"$0\")/rendered/testrunner-k8s-${NAMESPACE}-sa-client-key-data.crt\n+TESTRUNNER_K8S_SERVICE_ACCOUNT_TOKEN_OUTPUT_PATH=$(dirname \"$0\")/rendered/testrunner-k8s-${NAMESPACE}-sa-token\n \n DSDE_TOOLBOX_DOCKER_IMAGE=broadinstitute/dsde-toolbox:consul-0.20.0\n "
+  },
+  {
+    "sha": "76f8d89b6bd8e42b58a365e0a6934a1de8c6474a",
+    "filename": "workspace-manager-clienttests/src/main/resources/configs/resiliency/DeleteInitialPods.json",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 15,
+    "changes": 22,
+    "blob_url": "https://github.com/DataBiosphere/terra-workspace-manager/blob/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/configs/resiliency/DeleteInitialPods.json",
+    "raw_url": "https://github.com/DataBiosphere/terra-workspace-manager/raw/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/configs/resiliency/DeleteInitialPods.json",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-workspace-manager/contents/workspace-manager-clienttests/src/main/resources/configs/resiliency/DeleteInitialPods.json?ref=38f8b3d847b0bea9a807b659fb9aceb6ce1f4781",
+    "patch": "@@ -1,7 +1,7 @@\n {\n-  \"name\": \"DeleteInitialPods\",\n+  \"name\": \"CheckStatusWhileDeletePods\",\n   \"description\": \"Run two Service Status tests concurrently with an artificial delay, while incrementally deleting pods.\",\n-  \"serverSpecificationFile\": \"workspace-resiliency.json\",\n+  \"serverSpecificationFile\": \"workspace-wsmtest-resiliency.json\",\n   \"kubernetes\": {\n     \"numberOfInitialPods\" : 2\n   },\n@@ -15,20 +15,12 @@\n   \"testScripts\": [\n     {\n       \"name\": \"ServiceStatus\",\n-      \"parameters\": [90],\n-      \"numberOfUserJourneyThreadsToRun\": 1,\n-      \"userJourneyThreadPoolSize\": 1,\n-      \"expectedTimeForEach\": 90,\n-      \"expectedTimeForEachUnit\": \"SECONDS\"\n-    },\n-    {\n-      \"name\": \"ServiceStatus\",\n-      \"parameters\": [90],\n-      \"numberOfUserJourneyThreadsToRun\": 1,\n-      \"userJourneyThreadPoolSize\": 1,\n-      \"expectedTimeForEach\": 90,\n+      \"parameters\": [120],\n+      \"numberOfUserJourneyThreadsToRun\": 2,\n+      \"userJourneyThreadPoolSize\": 2,\n+      \"expectedTimeForEach\": 120,\n       \"expectedTimeForEachUnit\": \"SECONDS\"\n     }\n   ],\n   \"testUserFiles\": []\n-}\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "53212d72fa7746dec59e7e18e423acc7a806db12",
+    "filename": "workspace-manager-clienttests/src/main/resources/servers/workspace-wsmtest-resiliency.json",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/DataBiosphere/terra-workspace-manager/blob/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/servers/workspace-wsmtest-resiliency.json",
+    "raw_url": "https://github.com/DataBiosphere/terra-workspace-manager/raw/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/servers/workspace-wsmtest-resiliency.json",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-workspace-manager/contents/workspace-manager-clienttests/src/main/resources/servers/workspace-wsmtest-resiliency.json?ref=38f8b3d847b0bea9a807b659fb9aceb6ce1f4781",
+    "patch": "@@ -0,0 +1,24 @@\n+{\n+  \"name\": \"workspace-wsmtest-resiliency\",\n+  \"description\": \"Workspace Manager Resiliency Environment\",\n+\n+  \"samUri\": \"https://sam.dsde-dev.broadinstitute.org\",\n+  \"datarepoUri\": \"https://jade.datarepo-dev.broadinstitute.org/\",\n+  \"workspaceManagerUri\": \"https://workspace.wsmtest.integ.envs.broadinstitute.org/\",\n+\n+  \"cluster\": {\n+    \"clusterName\": \"gke_terra-kernel-k8s_us-central1-a_terra-integration\",\n+    \"clusterShortName\": \"terra-integration\",\n+    \"region\": \"us-central1\",\n+    \"zone\": \"us-central1-a\",\n+    \"project\": \"terra-kernel-k8s\",\n+    \"namespace\": \"terra-wsmtest\",\n+    \"containerName\": \"workspacemanager-deployment\"\n+  },\n+  \"deploymentScript\": {},\n+  \"testRunnerServiceAccountFile\": \"testrunner-iam-sa.json\",\n+  \"testRunnerK8SServiceAccountFile\": \"testrunner-k8s-wsmtest-sa.json\",\n+\n+  \"skipDeployment\": true,\n+  \"skipKubernetes\": false\n+}"
+  },
+  {
+    "sha": "acde62f89db70bd6aecc4fb80b6d63d820bf15b6",
+    "filename": "workspace-manager-clienttests/src/main/resources/serviceaccounts/testrunner-k8s-wsmtest-sa.json",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/DataBiosphere/terra-workspace-manager/blob/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/serviceaccounts/testrunner-k8s-wsmtest-sa.json",
+    "raw_url": "https://github.com/DataBiosphere/terra-workspace-manager/raw/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/serviceaccounts/testrunner-k8s-wsmtest-sa.json",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-workspace-manager/contents/workspace-manager-clienttests/src/main/resources/serviceaccounts/testrunner-k8s-wsmtest-sa.json?ref=38f8b3d847b0bea9a807b659fb9aceb6ce1f4781",
+    "patch": "@@ -0,0 +1,6 @@\n+{\n+  \"name\": \"testrunner-k8s-sa\",\n+  \"clientKeyFilename\": \"testrunner-k8s-wsmtest-sa-client-key-data.crt\",\n+  \"tokenFilename\": \"testrunner-k8s-wsmtest-sa-token\",\n+  \"clientKeyDirectoryPath\": \"./rendered\"\n+}"
+  },
+  {
+    "sha": "084487bb6ab9a5e458dd8576d61919b27d7b017c",
+    "filename": "workspace-manager-clienttests/src/main/resources/suites/WsmTestResiliency.json",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/DataBiosphere/terra-workspace-manager/blob/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/suites/WsmTestResiliency.json",
+    "raw_url": "https://github.com/DataBiosphere/terra-workspace-manager/raw/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/suites/WsmTestResiliency.json",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-workspace-manager/contents/workspace-manager-clienttests/src/main/resources/suites/WsmTestResiliency.json?ref=38f8b3d847b0bea9a807b659fb9aceb6ce1f4781",
+    "patch": "@@ -0,0 +1,8 @@\n+{\n+  \"name\": \"WsmTestResiliency\",\n+  \"description\": \"Test deleting all initially created pods\",\n+  \"serverSpecificationFile\": \"workspace-wsmtest-resiliency.json\",\n+  \"testConfigurationFiles\": [\n+    \"resiliency/DeleteInitialPods.json\"\n+  ]\n+}"
+  },
+  {
+    "sha": "06cb3360b9f53fbc1165bc33a597cc8254a295a0",
+    "filename": "workspace-manager-clienttests/src/main/resources/uploadlists/CompressDirectoryToTerraKernelK8S.json",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/DataBiosphere/terra-workspace-manager/blob/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/uploadlists/CompressDirectoryToTerraKernelK8S.json",
+    "raw_url": "https://github.com/DataBiosphere/terra-workspace-manager/raw/38f8b3d847b0bea9a807b659fb9aceb6ce1f4781/workspace-manager-clienttests/src/main/resources/uploadlists/CompressDirectoryToTerraKernelK8S.json",
+    "contents_url": "https://api.github.com/repos/DataBiosphere/terra-workspace-manager/contents/workspace-manager-clienttests/src/main/resources/uploadlists/CompressDirectoryToTerraKernelK8S.json?ref=38f8b3d847b0bea9a807b659fb9aceb6ce1f4781",
+    "patch": "@@ -0,0 +1,12 @@\n+{\n+  \"name\": \"CompressDirectoryToBucket\",\n+  \"description\": \"Compress results directory to the terra-kernel-k8s-testrunner-results bucket\",\n+  \"uploaderServiceAccountFile\": \"testrunner-iam-sa.json\",\n+  \"uploadScripts\": [\n+    {\n+      \"name\": \"CompressDirectoryToBucket\",\n+      \"description\": \"Save the compressed results directory to a bucket.\",\n+      \"parameters\": [\"gs://terra-kernel-k8s-testrunner-results\"]\n+    }\n+  ]\n+}"
+  }
+]

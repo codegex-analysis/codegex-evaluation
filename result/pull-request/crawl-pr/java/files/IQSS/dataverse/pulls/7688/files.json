@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "69a1d75776930cd1f7e214fb6a2261ade0a5129d",
+    "filename": "doc/release-notes/7687-curate-command.md",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/IQSS/dataverse/blob/c3ef44418dd274e7a032275c2868821e0643d6ef/doc/release-notes/7687-curate-command.md",
+    "raw_url": "https://github.com/IQSS/dataverse/raw/c3ef44418dd274e7a032275c2868821e0643d6ef/doc/release-notes/7687-curate-command.md",
+    "contents_url": "https://api.github.com/repos/IQSS/dataverse/contents/doc/release-notes/7687-curate-command.md?ref=c3ef44418dd274e7a032275c2868821e0643d6ef",
+    "patch": "@@ -0,0 +1,9 @@\n+## Notes for Dataverse Installation Administrators\n+\n+### DB Cleanup for Superusers Releasing without Version Updates\n+\n+In datasets where a superuser has run the Curate command and the update included a change to the fileaccessrequest flag, those changes would not be reflected appropriately in the published version. This should be a rare occurrence.\n+\n+Instead of an automated solution, we recommend inspecting the affected datasets and correcting the fileaccessrequest flag as appropriate. You can identify the affected datasets this via a query, which is available in the folder here:\n+\n+https://github.com/IQSS/dataverse/raw/develop/scripts/issues/7687/\n\\ No newline at end of file"
+  },
+  {
+    "sha": "a96b9dfab1bcc56ee49fc4e943e0fe9a63dfef9b",
+    "filename": "scripts/issues/7687/file_access_flag_update_bug.txt",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/IQSS/dataverse/blob/c3ef44418dd274e7a032275c2868821e0643d6ef/scripts/issues/7687/file_access_flag_update_bug.txt",
+    "raw_url": "https://github.com/IQSS/dataverse/raw/c3ef44418dd274e7a032275c2868821e0643d6ef/scripts/issues/7687/file_access_flag_update_bug.txt",
+    "contents_url": "https://api.github.com/repos/IQSS/dataverse/contents/scripts/issues/7687/file_access_flag_update_bug.txt?ref=c3ef44418dd274e7a032275c2868821e0643d6ef",
+    "patch": "@@ -0,0 +1,11 @@\n+-- this query will identify datasets where a superuser has run the Curate command and the update included a change to the fileaccessrequest flag, resulting in the file access request updates not being reflected in the published version\n+\n+select da.id, dv.id, ta.id, da.fileaccessrequest, ta.fileaccessrequest, dv.releasetime \n+from datasetversion dv, termsofuseandaccess ta, dataset da \n+where dv.dataset_id=da.id \n+and dv.termsofuseandaccess_id=ta.id \n+and ta.fileaccessrequest != da.fileaccessrequest \n+and dv.versionstate='RELEASED' \n+and dv.releasetime in (select max(releasetime) \n+from datasetversion \n+where dataset_id=da.id);\n\\ No newline at end of file"
+  },
+  {
+    "sha": "a308e6637f3cf86491dc8c7345ef1b183e81ff6d",
+    "filename": "src/main/java/edu/harvard/iq/dataverse/engine/command/impl/CuratePublishedDatasetVersionCommand.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 3,
+    "changes": 7,
+    "blob_url": "https://github.com/IQSS/dataverse/blob/c3ef44418dd274e7a032275c2868821e0643d6ef/src/main/java/edu/harvard/iq/dataverse/engine/command/impl/CuratePublishedDatasetVersionCommand.java",
+    "raw_url": "https://github.com/IQSS/dataverse/raw/c3ef44418dd274e7a032275c2868821e0643d6ef/src/main/java/edu/harvard/iq/dataverse/engine/command/impl/CuratePublishedDatasetVersionCommand.java",
+    "contents_url": "https://api.github.com/repos/IQSS/dataverse/contents/src/main/java/edu/harvard/iq/dataverse/engine/command/impl/CuratePublishedDatasetVersionCommand.java?ref=c3ef44418dd274e7a032275c2868821e0643d6ef",
+    "patch": "@@ -61,7 +61,7 @@ public Dataset execute(CommandContext ctxt) throws CommandException {\n         // final DatasetVersion editVersion = getDataset().getEditVersion();\n         tidyUpFields(updateVersion);\n \n-        // Merge the new version into out JPA context\n+        // Merge the new version into our JPA context\n         ctxt.em().merge(updateVersion);\n \n \n@@ -71,7 +71,8 @@ public Dataset execute(CommandContext ctxt) throws CommandException {\n         updateVersion.setTermsOfUseAndAccess(newTerms);\n         //Put old terms on version that will be deleted....\n         getDataset().getEditVersion().setTermsOfUseAndAccess(oldTerms);\n-        \n+        //Also set the fileaccessrequest boolean on the dataset to match the new terms\n+        getDataset().setFileAccessRequest(updateVersion.getTermsOfUseAndAccess().isFileAccessRequest());\n         List<WorkflowComment> newComments = getDataset().getEditVersion().getWorkflowComments();\n         if (newComments!=null && newComments.size() >0) {\n             for(WorkflowComment wfc: newComments) {\n@@ -162,7 +163,7 @@ public Dataset execute(CommandContext ctxt) throws CommandException {\n         // Update modification time on the published version and the dataset\n         updateVersion.setLastUpdateTime(getTimestamp());\n         tempDataset.setModificationTime(getTimestamp());\n-\n+        ctxt.em().merge(updateVersion);\n         Dataset savedDataset = ctxt.em().merge(tempDataset);\n \n         // Flush before calling DeleteDatasetVersion which calls"
+  }
+]

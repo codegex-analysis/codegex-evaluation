@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "663ff5d910786d1f2132e7088d9c59f812f0c847",
+    "filename": "src/main/java/newbank/server/Account.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 2,
+    "changes": 17,
+    "blob_url": "https://github.com/Group14-Newbank/newbank/blob/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/Account.java",
+    "raw_url": "https://github.com/Group14-Newbank/newbank/raw/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/Account.java",
+    "contents_url": "https://api.github.com/repos/Group14-Newbank/newbank/contents/src/main/java/newbank/server/Account.java?ref=c10c48f42c165e2b5c5527f3859999cee0c4d1bc",
+    "patch": "@@ -1,11 +1,24 @@\n package newbank.server;\n \n-public class Account {\n+import newbank.server.exceptions.AccountInvalidNameException;\n \n+public class Account {\n   private String accountName;\n   private double openingBalance;\n \n-  public Account(String accountName, double openingBalance) {\n+  public static final int MIN_NAME_LENGTH = 4;\n+  public static final int MAX_NAME_LENGTH = 12;\n+\n+  public Account(String accountName, double openingBalance) throws AccountInvalidNameException {\n+    if (accountName.length() < MIN_NAME_LENGTH || accountName.length() > MAX_NAME_LENGTH) {\n+      throw new AccountInvalidNameException(\n+          \"Length must be between \" + MIN_NAME_LENGTH + \" and \" + MAX_NAME_LENGTH + \"!\");\n+    }\n+\n+    if (!accountName.matches(\"[a-zA-Z]+\")) {\n+      throw new AccountInvalidNameException(\"Only letters are allowed!\");\n+    }\n+\n     this.accountName = accountName;\n     this.openingBalance = openingBalance;\n   }"
+  },
+  {
+    "sha": "7f4d46adb1f4e236cff8aca1bb2aef04907f4974",
+    "filename": "src/main/java/newbank/server/Customer.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/Group14-Newbank/newbank/blob/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/Customer.java",
+    "raw_url": "https://github.com/Group14-Newbank/newbank/raw/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/Customer.java",
+    "contents_url": "https://api.github.com/repos/Group14-Newbank/newbank/contents/src/main/java/newbank/server/Customer.java?ref=c10c48f42c165e2b5c5527f3859999cee0c4d1bc",
+    "patch": "@@ -2,11 +2,15 @@\n \n import java.util.ArrayList;\n \n+import newbank.server.exceptions.CustomerMaxAccountsException;\n+\n public class Customer {\n   private String username;\n   private String password;\n   private ArrayList<Account> accounts;\n \n+  public static final int MAX_ACCOUNTS = 5;\n+\n   public Customer(final String username, final String password) {\n     this.username = username;\n     this.password = password;\n@@ -21,7 +25,11 @@ public String accountsToString() {\n     return s;\n   }\n \n-  public void addAccount(Account account) {\n+  public void addAccount(Account account) throws CustomerMaxAccountsException {\n+    if (accounts.size() >= MAX_ACCOUNTS) {\n+      throw new CustomerMaxAccountsException(MAX_ACCOUNTS);\n+    }\n+\n     accounts.add(account);\n   }\n "
+  },
+  {
+    "sha": "1ddcf50ba23bdcfd728e510844320f3850e4ef8e",
+    "filename": "src/main/java/newbank/server/NewBank.java",
+    "status": "modified",
+    "additions": 56,
+    "deletions": 19,
+    "changes": 75,
+    "blob_url": "https://github.com/Group14-Newbank/newbank/blob/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/NewBank.java",
+    "raw_url": "https://github.com/Group14-Newbank/newbank/raw/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/NewBank.java",
+    "contents_url": "https://api.github.com/repos/Group14-Newbank/newbank/contents/src/main/java/newbank/server/NewBank.java?ref=c10c48f42c165e2b5c5527f3859999cee0c4d1bc",
+    "patch": "@@ -2,6 +2,9 @@\n \n import java.util.HashMap;\n \n+import newbank.server.exceptions.AccountInvalidNameException;\n+import newbank.server.exceptions.CustomerMaxAccountsException;\n+\n public class NewBank {\n \n   private static final NewBank bank = new NewBank();\n@@ -13,17 +16,21 @@ private NewBank() {\n   }\n \n   private void addTestData() {\n-    Customer bhagy = new Customer(\"Bhagy\", \"bhagy\");\n-    bhagy.addAccount(new Account(\"Main\", 1000.0));\n-    customers.put(\"Bhagy\", bhagy);\n+    try {\n+      Customer bhagy = new Customer(\"Bhagy\", \"bhagy\");\n+      bhagy.addAccount(new Account(\"Main\", 1000.0));\n+      customers.put(\"Bhagy\", bhagy);\n+\n+      Customer christina = new Customer(\"Christina\", \"christina\");\n+      christina.addAccount(new Account(\"Savings\", 1500.0));\n+      customers.put(\"Christina\", christina);\n \n-    Customer christina = new Customer(\"Christina\", \"christina\");\n-    christina.addAccount(new Account(\"Savings\", 1500.0));\n-    customers.put(\"Christina\", christina);\n+      Customer john = new Customer(\"John\", \"john\");\n+      john.addAccount(new Account(\"Checking\", 250.0));\n+      customers.put(\"John\", john);\n+    } catch (Exception e) {\n \n-    Customer john = new Customer(\"John\", \"john\");\n-    john.addAccount(new Account(\"Checking\", 250.0));\n-    customers.put(\"John\", john);\n+    }\n   }\n \n   /**\n@@ -63,19 +70,49 @@ private boolean credentialsAreValid(final String username, final String password\n   }\n \n   // commands from the NewBank customer are processed in this method\n-  public synchronized String processRequest(CustomerID customer, String request) {\n-    if (customers.containsKey(customer.getKey())) {\n-      switch (request) {\n-        case \"SHOWMYACCOUNTS\":\n-          return showMyAccounts(customer);\n-        default:\n-          return \"FAIL\";\n+  public synchronized String processRequest(CustomerID customerID, String request) {\n+    Customer customer = customers.get(customerID.getKey());\n+    if (customer == null) {\n+      return \"FAIL: Customer not found!\";\n+    }\n+\n+    String[] args = request.split(\"\\\\s+\");\n+    if (args.length == 0) {\n+      return \"FAIL: Invalid command!\";\n+    }\n+\n+    String command = args[0];\n+    switch (command) {\n+    case \"SHOWMYACCOUNTS\":\n+      return showMyAccounts(customer);\n+\n+    case \"NEWACCOUNT\":\n+      if (args.length != 2) {\n+        return \"FAIL: The proper syntax is: NEWACCOUNT <Name>\";\n       }\n+\n+      return newAccount(customer, args[1]);\n+\n+    default:\n+      return \"FAIL: Unknown command!\";\n     }\n-    return \"FAIL\";\n   }\n \n-  private String showMyAccounts(CustomerID customer) {\n-    return (customers.get(customer.getKey())).accountsToString();\n+  private String showMyAccounts(Customer customer) {\n+    return customer.accountsToString();\n+  }\n+\n+  private String newAccount(Customer customer, String accountName) {\n+    try {\n+      Account account = new Account(accountName, 0);\n+\n+      customer.addAccount(account);\n+\n+      return \"The account has been created successfully.\";\n+    } catch (CustomerMaxAccountsException e) {\n+      return \"FAIL: Maximum number of accounts is: \" + e.getMaxAccounts();\n+    } catch (AccountInvalidNameException e) {\n+      return \"FAIL: Invalid account name: \" + e.getMessage();\n+    }\n   }\n }"
+  },
+  {
+    "sha": "eee78591cdba4effb85e1a77bfd7a5b1821d4af6",
+    "filename": "src/main/java/newbank/server/exceptions/AccountInvalidNameException.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/Group14-Newbank/newbank/blob/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/exceptions/AccountInvalidNameException.java",
+    "raw_url": "https://github.com/Group14-Newbank/newbank/raw/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/exceptions/AccountInvalidNameException.java",
+    "contents_url": "https://api.github.com/repos/Group14-Newbank/newbank/contents/src/main/java/newbank/server/exceptions/AccountInvalidNameException.java?ref=c10c48f42c165e2b5c5527f3859999cee0c4d1bc",
+    "patch": "@@ -0,0 +1,7 @@\n+package newbank.server.exceptions;\n+\n+public class AccountInvalidNameException extends Exception {\n+  public AccountInvalidNameException(String message) {\n+    super(message);\n+  }\n+}"
+  },
+  {
+    "sha": "d3d48a8d191085ca9cf99471593f722481d222c0",
+    "filename": "src/main/java/newbank/server/exceptions/CustomerMaxAccountsException.java",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/Group14-Newbank/newbank/blob/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/exceptions/CustomerMaxAccountsException.java",
+    "raw_url": "https://github.com/Group14-Newbank/newbank/raw/c10c48f42c165e2b5c5527f3859999cee0c4d1bc/src/main/java/newbank/server/exceptions/CustomerMaxAccountsException.java",
+    "contents_url": "https://api.github.com/repos/Group14-Newbank/newbank/contents/src/main/java/newbank/server/exceptions/CustomerMaxAccountsException.java?ref=c10c48f42c165e2b5c5527f3859999cee0c4d1bc",
+    "patch": "@@ -0,0 +1,13 @@\n+package newbank.server.exceptions;\n+\n+public class CustomerMaxAccountsException extends Exception {\n+  private int maxAccounts;\n+\n+  public CustomerMaxAccountsException(int maxAccounts) {\n+    this.maxAccounts = maxAccounts;\n+  }\n+\n+  public int getMaxAccounts() {\n+    return maxAccounts;\n+  }\n+}"
+  }
+]

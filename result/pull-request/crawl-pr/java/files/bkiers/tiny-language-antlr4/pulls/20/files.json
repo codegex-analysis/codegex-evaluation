@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c61d7e2915a748360e389b526a588432f5b0f918",
+    "filename": "src/main/antlr4/tl/antlr4/TL.g4",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/bkiers/tiny-language-antlr4/blob/e3275b6c3fc41ca74de800bcbf77dcd70853cd05/src/main/antlr4/tl/antlr4/TL.g4",
+    "raw_url": "https://github.com/bkiers/tiny-language-antlr4/raw/e3275b6c3fc41ca74de800bcbf77dcd70853cd05/src/main/antlr4/tl/antlr4/TL.g4",
+    "contents_url": "https://api.github.com/repos/bkiers/tiny-language-antlr4/contents/src/main/antlr4/tl/antlr4/TL.g4?ref=e3275b6c3fc41ca74de800bcbf77dcd70853cd05",
+    "patch": "@@ -50,6 +50,7 @@ functionDecl\n \n forStatement\n  : For Identifier '=' expression To expression Do block End\n+ | For Identifier '=' expression Until expression Do block End\n  ;\n \n whileStatement\n@@ -107,6 +108,7 @@ Return   : 'return';\n For      : 'for';\n While    : 'while';\n To       : 'to';\n+Until    : 'until';\n Do       : 'do';\n End      : 'end';\n In       : 'in';"
+  },
+  {
+    "sha": "ea2a3ad69ce4c795e59eeb4991ef1e51c484a4c3",
+    "filename": "src/main/java/tl/antlr4/EvalVisitor.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/bkiers/tiny-language-antlr4/blob/e3275b6c3fc41ca74de800bcbf77dcd70853cd05/src/main/java/tl/antlr4/EvalVisitor.java",
+    "raw_url": "https://github.com/bkiers/tiny-language-antlr4/raw/e3275b6c3fc41ca74de800bcbf77dcd70853cd05/src/main/java/tl/antlr4/EvalVisitor.java",
+    "contents_url": "https://api.github.com/repos/bkiers/tiny-language-antlr4/contents/src/main/java/tl/antlr4/EvalVisitor.java?ref=e3275b6c3fc41ca74de800bcbf77dcd70853cd05",
+    "patch": "@@ -630,12 +630,16 @@ public TLValue visitBlock(BlockContext ctx) {\n     }\n     \n     // forStatement\n-    // : For Identifier '=' expression To expression OBrace block CBrace\n+    // : For Identifier '=' expression To expression Do block End\n+    // | For Identifier '=' expression Until expression Do block End\n     // ;\n     @Override\n     public TLValue visitForStatement(ForStatementContext ctx) {\n         int start = this.visit(ctx.expression(0)).asDouble().intValue();\n         int stop = this.visit(ctx.expression(1)).asDouble().intValue();\n+        if (ctx.Until() != null) {\n+            stop -= 1;\n+        }\n         for(int i = start; i <= stop; i++) {\n             scope.assign(ctx.Identifier().getText(), new TLValue(i));\n             TLValue returnValue = this.visit(ctx.block());"
+  },
+  {
+    "sha": "33dfbba90eb993249a2ac352704dcf2d789d878f",
+    "filename": "src/main/tl/test.tl",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/bkiers/tiny-language-antlr4/blob/e3275b6c3fc41ca74de800bcbf77dcd70853cd05/src/main/tl/test.tl",
+    "raw_url": "https://github.com/bkiers/tiny-language-antlr4/raw/e3275b6c3fc41ca74de800bcbf77dcd70853cd05/src/main/tl/test.tl",
+    "contents_url": "https://api.github.com/repos/bkiers/tiny-language-antlr4/contents/src/main/tl/test.tl?ref=e3275b6c3fc41ca74de800bcbf77dcd70853cd05",
+    "patch": "@@ -47,6 +47,12 @@ for i=1 to 10 do\n end\n assert(a == (1+2+3+4+5+6+7+8+9+10));\n \n+a = 0;\n+for i=1 until 10 do\n+  a = a + i;\n+end\n+assert(a == (1+2+3+4+5+6+7+8+9));\n+\n b = -10;\n c = 0;\n while b < 0 do "
+  }
+]

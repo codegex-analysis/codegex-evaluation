@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "f14463f2c24f75e1fefec9b93969783966787ae1",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/README.md",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/README.md",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/README.md?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -275,3 +275,15 @@ public class Race {\n    Вх: [ 1 2 4 4 2 3 4 1 7 ] -> вых: [ 1 7 ].\n 3. Написать метод, который проверяет состав массива из чисел 1 и 4. Если в нем нет хоть одной четверки или единицы, то \n    метод вернет false; Написать набор тестов для этого метода (по 3-4 варианта входных данных).\n+\n+\n+### Занятие 7\n+\n+Создать класс, который может выполнять «тесты», в качестве тестов выступают классы с наборами методов с аннотациями\n+@Test. Для этого у него должен быть статический метод start(), которому в качестве параметра передается или объект\n+типа Class, или имя класса. Из «класса-теста» вначале должен быть запущен метод с аннотацией @BeforeSuite, если такой\n+имеется, далее запущены методы с аннотациями @Test, а по завершению всех тестов – метод с аннотацией @AfterSuite. К\n+каждому тесту необходимо также добавить приоритеты (int числа от 1 до 10), в соответствии с которыми будет выбираться\n+порядок их выполнения, если приоритет одинаковый, то порядок не имеет значения. Методы с аннотациями @BeforeSuite и\n+@AfterSuite должны присутствовать в единственном экземпляре, иначе необходимо бросить RuntimeException при запуске\n+«тестирования».\n\\ No newline at end of file"
+  },
+  {
+    "sha": "b310c468652ec7e97f8af9b5a0d0247debb1dedb",
+    "filename": "src/main/java/lesson_7/SimpleMethods.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/SimpleMethods.java",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/SimpleMethods.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/src/main/java/lesson_7/SimpleMethods.java?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -0,0 +1,11 @@\n+package lesson_7;\n+\n+public class SimpleMethods {\n+    public int sum(int x, int y) {\n+        return x+y;\n+    }\n+\n+    public int multi(int x, int y) {\n+        return x*y;\n+    }\n+}"
+  },
+  {
+    "sha": "7d037425f295261912f5de1b64f85311e72bfcf3",
+    "filename": "src/main/java/lesson_7/SimpleMethodsTest.java",
+    "status": "added",
+    "additions": 58,
+    "deletions": 0,
+    "changes": 58,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/SimpleMethodsTest.java",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/SimpleMethodsTest.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/src/main/java/lesson_7/SimpleMethodsTest.java?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -0,0 +1,58 @@\n+package lesson_7;\n+\n+import lesson_7.annotations.AfterSuite;\n+import lesson_7.annotations.BeforeSuite;\n+import lesson_7.annotations.Test;\n+\n+public class SimpleMethodsTest {\n+    private static SimpleMethods simpleMethods;\n+\n+    @BeforeSuite\n+    public static void init() {\n+        System.out.println(\"Init class\");\n+        simpleMethods = new SimpleMethods();\n+    }\n+\n+//    @BeforeSuite\n+//    public static void init2() {\n+//        System.out.println(\"Init class\");\n+//        simpleMethods = new SimpleMethods();\n+//    }\n+\n+    @AfterSuite\n+    public static void destroy() {\n+        System.out.println(\"Destroy class\");\n+        simpleMethods = null;\n+    }\n+\n+//    @AfterSuite\n+//    public static void destroy2() {\n+//        System.out.println(\"Destroy class\");\n+//        simpleMethods = null;\n+//    }\n+\n+    @Test(priority = 5)\n+    public static Boolean testSum01() {\n+        int x = 1;\n+        int y = 2;\n+        int result = 3;\n+        return result == simpleMethods.sum(x, y);\n+    }\n+\n+    @Test(priority = 2)\n+    public static Boolean testSum02() {\n+        int x = 2;\n+        int y = 2;\n+        int result = 4;\n+        return result == simpleMethods.sum(x, y);\n+    }\n+\n+    @Test(priority = 8)\n+    public static Boolean testMulti01() {\n+        int x = 2;\n+        int y = 2;\n+        int result = 5;\n+        return result == simpleMethods.multi(x, y);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "ac1691cb478fb7d0551d12aa3d0cb2cf3682fcda",
+    "filename": "src/main/java/lesson_7/annotations/AfterSuite.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/annotations/AfterSuite.java",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/annotations/AfterSuite.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/src/main/java/lesson_7/annotations/AfterSuite.java?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -0,0 +1,11 @@\n+package lesson_7.annotations;\n+\n+import java.lang.annotation.ElementType;\n+import java.lang.annotation.Retention;\n+import java.lang.annotation.RetentionPolicy;\n+import java.lang.annotation.Target;\n+\n+@Retention(RetentionPolicy.RUNTIME)\n+@Target({ElementType.METHOD})\n+public @interface AfterSuite {\n+}"
+  },
+  {
+    "sha": "4dc06cf5757000d652d78b7fbbd65cdeca98e396",
+    "filename": "src/main/java/lesson_7/annotations/BeforeSuite.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/annotations/BeforeSuite.java",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/annotations/BeforeSuite.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/src/main/java/lesson_7/annotations/BeforeSuite.java?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -0,0 +1,12 @@\n+package lesson_7.annotations;\n+\n+\n+import java.lang.annotation.ElementType;\n+import java.lang.annotation.Retention;\n+import java.lang.annotation.RetentionPolicy;\n+import java.lang.annotation.Target;\n+\n+@Retention(RetentionPolicy.RUNTIME)\n+@Target({ElementType.METHOD})\n+public @interface BeforeSuite {\n+}"
+  },
+  {
+    "sha": "8cee02abaf29739b726f597573735965b6874739",
+    "filename": "src/main/java/lesson_7/annotations/Test.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/annotations/Test.java",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/annotations/Test.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/src/main/java/lesson_7/annotations/Test.java?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -0,0 +1,12 @@\n+package lesson_7.annotations;\n+\n+import java.lang.annotation.ElementType;\n+import java.lang.annotation.Retention;\n+import java.lang.annotation.RetentionPolicy;\n+import java.lang.annotation.Target;\n+\n+@Retention(RetentionPolicy.RUNTIME)\n+@Target({ElementType.METHOD})\n+public @interface Test {\n+    int priority() default 5;\n+}"
+  },
+  {
+    "sha": "ccac15b8120f20e7798c21eeabbd6e19c6d4731f",
+    "filename": "src/main/java/lesson_7/exceptions/TestRuntimeException.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/exceptions/TestRuntimeException.java",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/exceptions/TestRuntimeException.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/src/main/java/lesson_7/exceptions/TestRuntimeException.java?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -0,0 +1,7 @@\n+package lesson_7.exceptions;\n+\n+public class TestRuntimeException extends RuntimeException {\n+    public TestRuntimeException(String message) {\n+        super(message);\n+    }\n+}"
+  },
+  {
+    "sha": "ccb310aa463810da32245ba4e439b3f0c217541c",
+    "filename": "src/main/java/lesson_7/tester/Tester.java",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/tester/Tester.java",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/tester/Tester.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/src/main/java/lesson_7/tester/Tester.java?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -0,0 +1,6 @@\n+package lesson_7.tester;\n+\n+public interface Tester {\n+    public void start(Class<?> className);\n+    public void start(String className) throws ClassNotFoundException;\n+}"
+  },
+  {
+    "sha": "73af46e1bdccceaf541416c82befb30dceceaaa4",
+    "filename": "src/main/java/lesson_7/tester/TesterImpl.java",
+    "status": "added",
+    "additions": 111,
+    "deletions": 0,
+    "changes": 111,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/tester/TesterImpl.java",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/tester/TesterImpl.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/src/main/java/lesson_7/tester/TesterImpl.java?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -0,0 +1,111 @@\n+package lesson_7.tester;\n+\n+import lesson_7.annotations.AfterSuite;\n+import lesson_7.annotations.BeforeSuite;\n+import lesson_7.annotations.Test;\n+import lesson_7.exceptions.TestRuntimeException;\n+\n+import java.lang.annotation.Annotation;\n+import java.lang.reflect.Method;\n+import java.util.Collections;\n+import java.util.SortedMap;\n+import java.util.TreeMap;\n+\n+public class TesterImpl implements Tester {\n+\n+    private Class<?> aClass;\n+\n+    private Method afterSuite;\n+    private Method beforeSuite;\n+    private SortedMap<Integer, Method> tests = new TreeMap<>(Collections.reverseOrder());\n+\n+\n+    @Override\n+    public void start(Class<?> aClass) {\n+        System.out.println(\"Testing started\");\n+\n+        this.aClass = aClass;\n+        parsingMethods();\n+        startBeforeSuite();\n+        startTests();\n+        startAfterSuite();\n+\n+        System.out.println(\"Testing ended\");\n+    }\n+\n+    @Override\n+    public void start(String className) throws ClassNotFoundException {\n+        this.start(Class.forName(className));\n+    }\n+\n+    private void startBeforeSuite() {\n+        if (beforeSuite == null) {\n+            return;\n+        }\n+        System.out.println(\"Start BeforeSuite\");\n+\n+        try {\n+            beforeSuite.invoke(null);\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        }\n+        System.out.println();\n+    }\n+\n+    private void startTests() {\n+        for (Method method : tests.values()) {\n+            System.out.format(\"Method %s is testing%n\", method.toString());\n+            boolean result = false;\n+            try {\n+                result = (Boolean)method.invoke(null);\n+            } catch (Exception e) {\n+                e.printStackTrace();\n+            }\n+            if (result) {\n+                System.out.println(\"Testing is passing\");\n+            } else {\n+                System.out.println(\"Testing is NOT passing\");\n+            }\n+            System.out.println();\n+        }\n+    }\n+\n+    private void startAfterSuite() {\n+        if (afterSuite == null) {\n+            return;\n+        }\n+        System.out.println(\"Start AfterSuite\");\n+\n+        try {\n+            afterSuite.invoke(null);\n+        } catch (Exception e) {\n+            e.printStackTrace();\n+        }\n+    }\n+\n+    private void parsingMethods() {\n+        for (Method method : aClass.getDeclaredMethods()) {\n+            for (Annotation annotation : method.getDeclaredAnnotations()) {\n+                if (annotation.annotationType().equals(BeforeSuite.class)) {\n+                    if (beforeSuite != null) {\n+                        throw new TestRuntimeException(\"Only one BeforeSuite available\");\n+                    }\n+                    beforeSuite = method;\n+                }\n+\n+                else if (annotation.annotationType().equals(AfterSuite.class)) {\n+                    if (afterSuite != null) {\n+                        throw new TestRuntimeException(\"Only one AfterSuite available\");\n+                    }\n+\n+                    afterSuite = method;\n+                }\n+\n+                else if (annotation.annotationType().equals(Test.class)) {\n+                    Test a = (Test)annotation;\n+                    tests.put(a.priority(), method);\n+                }\n+            }\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "ca4a4a193e441415c2f8a66b8f68e04959d15cc9",
+    "filename": "src/main/java/lesson_7/tester/TesterRunner.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/eska-ru/java-class-3/blob/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/tester/TesterRunner.java",
+    "raw_url": "https://github.com/eska-ru/java-class-3/raw/4fc3f0404c127ba7a2315e76a574d53569d0a556/src/main/java/lesson_7/tester/TesterRunner.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/java-class-3/contents/src/main/java/lesson_7/tester/TesterRunner.java?ref=4fc3f0404c127ba7a2315e76a574d53569d0a556",
+    "patch": "@@ -0,0 +1,7 @@\n+package lesson_7.tester;\n+\n+public class TesterRunner {\n+    public static void main(String[] args) throws ClassNotFoundException {\n+        new TesterImpl().start(\"lesson_7.SimpleMethodsTest\");\n+    }\n+}"
+  }
+]

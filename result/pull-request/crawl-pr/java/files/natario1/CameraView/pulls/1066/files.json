@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "f2b160b61f97cec16689224af778cd99a6801007",
+    "filename": "cameraview/src/androidTest/java/com/otaliastudios/cameraview/CameraViewTest.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/natario1/CameraView/blob/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/androidTest/java/com/otaliastudios/cameraview/CameraViewTest.java",
+    "raw_url": "https://github.com/natario1/CameraView/raw/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/androidTest/java/com/otaliastudios/cameraview/CameraViewTest.java",
+    "contents_url": "https://api.github.com/repos/natario1/CameraView/contents/cameraview/src/androidTest/java/com/otaliastudios/cameraview/CameraViewTest.java?ref=bfd1b6c78644f395a057526c2adabe1344cc61e2",
+    "patch": "@@ -902,6 +902,14 @@ public void testFrameProcessingExecutors_throws() {\n         cameraView.setFrameProcessingExecutors(0);\n     }\n \n+    @Test\n+    public void testDrawHardwareOverlays() {\n+        cameraView.setDrawHardwareOverlays(true);\n+        assertTrue(cameraView.getDrawHardwareOverlays());\n+        cameraView.setDrawHardwareOverlays(false);\n+        assertFalse(cameraView.getDrawHardwareOverlays());\n+    }\n+\n     //endregion\n \n     //region Lists of listeners and processors"
+  },
+  {
+    "sha": "ea253cf7e132f5c0c1d0315e8284d277a42a5966",
+    "filename": "cameraview/src/main/java/com/otaliastudios/cameraview/CameraView.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/natario1/CameraView/blob/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/java/com/otaliastudios/cameraview/CameraView.java",
+    "raw_url": "https://github.com/natario1/CameraView/raw/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/java/com/otaliastudios/cameraview/CameraView.java",
+    "contents_url": "https://api.github.com/repos/natario1/CameraView/contents/cameraview/src/main/java/com/otaliastudios/cameraview/CameraView.java?ref=bfd1b6c78644f395a057526c2adabe1344cc61e2",
+    "patch": "@@ -226,6 +226,8 @@ private void initialize(@NonNull Context context, @Nullable AttributeSet attrs)\n         int frameExecutors = a.getInteger(R.styleable.CameraView_cameraFrameProcessingExecutors,\n                 DEFAULT_FRAME_PROCESSING_EXECUTORS);\n \n+        boolean drawHardwareOverlays = a.getBoolean(R.styleable.CameraView_cameraDrawHardwareOverlays, false);\n+\n         // Size selectors and gestures\n         SizeSelectorParser sizeSelectors = new SizeSelectorParser(a);\n         GestureParser gestures = new GestureParser(a);\n@@ -259,6 +261,7 @@ private void initialize(@NonNull Context context, @Nullable AttributeSet attrs)\n         setUseDeviceOrientation(useDeviceOrientation);\n         setGrid(controls.getGrid());\n         setGridColor(gridColor);\n+        setDrawHardwareOverlays(drawHardwareOverlays);\n \n         // Apply camera engine params\n         // Adding new ones? See setEngine().\n@@ -2148,6 +2151,25 @@ public boolean isTakingPicture() {\n         return mCameraEngine.isTakingPicture();\n     }\n \n+    /**\n+     * Sets the overlay layout hardware canvas capture mode to allow hardware\n+     * accelerated views to be captured in snapshots\n+     *\n+     * @param on true if enabled\n+     */\n+    public void setDrawHardwareOverlays(boolean on) {\n+        mOverlayLayout.setHardwareCanvasEnabled(on);\n+    }\n+\n+    /**\n+     * Returns true if the overlay layout is set to capture the hardware canvas\n+     * of child views\n+     *\n+     * @return boolean indicating hardware canvas capture is enabled\n+     */\n+    public boolean getDrawHardwareOverlays() {\n+        return mOverlayLayout.getHardwareCanvasEnabled();\n+    }\n     //endregion\n \n     //region Callbacks and dispatching"
+  },
+  {
+    "sha": "038702af5e7763d22a58db577a67499068c22886",
+    "filename": "cameraview/src/main/java/com/otaliastudios/cameraview/overlay/Overlay.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/natario1/CameraView/blob/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/java/com/otaliastudios/cameraview/overlay/Overlay.java",
+    "raw_url": "https://github.com/natario1/CameraView/raw/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/java/com/otaliastudios/cameraview/overlay/Overlay.java",
+    "contents_url": "https://api.github.com/repos/natario1/CameraView/contents/cameraview/src/main/java/com/otaliastudios/cameraview/overlay/Overlay.java?ref=bfd1b6c78644f395a057526c2adabe1344cc61e2",
+    "patch": "@@ -30,4 +30,18 @@\n      * @return true to draw on it\n      */\n     boolean drawsOn(@NonNull Target target);\n+\n+    /**\n+     * Sets the overlay renderer to lock and capture the hardware canvas in order\n+     * to capture hardware accelerated views such as video players\n+     *\n+     * @param on enabled\n+     */\n+    void setHardwareCanvasEnabled(boolean on);\n+\n+    /**\n+     * Returns true if hardware canvas capture is enabled, false by default\n+     * @return true if capturing hardware surfaces\n+     */\n+    boolean getHardwareCanvasEnabled();\n }"
+  },
+  {
+    "sha": "940b80bad17b067323a1ed1ac6c020e65cfe8204",
+    "filename": "cameraview/src/main/java/com/otaliastudios/cameraview/overlay/OverlayDrawer.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/natario1/CameraView/blob/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/java/com/otaliastudios/cameraview/overlay/OverlayDrawer.java",
+    "raw_url": "https://github.com/natario1/CameraView/raw/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/java/com/otaliastudios/cameraview/overlay/OverlayDrawer.java",
+    "contents_url": "https://api.github.com/repos/natario1/CameraView/contents/cameraview/src/main/java/com/otaliastudios/cameraview/overlay/OverlayDrawer.java?ref=bfd1b6c78644f395a057526c2adabe1344cc61e2",
+    "patch": "@@ -6,6 +6,7 @@\n import android.graphics.SurfaceTexture;\n import android.opengl.GLES11Ext;\n import android.opengl.GLES20;\n+import android.os.Build;\n import android.view.Surface;\n \n import androidx.annotation.NonNull;\n@@ -63,7 +64,12 @@ public OverlayDrawer(@NonNull Overlay overlay, @NonNull Size size) {\n      */\n     public void draw(@NonNull Overlay.Target target) {\n         try {\n-            final Canvas surfaceCanvas = mSurface.lockCanvas(null);\n+            final Canvas surfaceCanvas;\n+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && mOverlay.getHardwareCanvasEnabled()) {\n+                surfaceCanvas = mSurface.lockHardwareCanvas();\n+            } else {\n+                surfaceCanvas = mSurface.lockCanvas(null);\n+            }\n             surfaceCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);\n             mOverlay.drawOn(target, surfaceCanvas);\n             mSurface.unlockCanvasAndPost(surfaceCanvas);"
+  },
+  {
+    "sha": "ba5dec361721672fe7a3c16d475640817f58767d",
+    "filename": "cameraview/src/main/java/com/otaliastudios/cameraview/overlay/OverlayLayout.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 1,
+    "changes": 15,
+    "blob_url": "https://github.com/natario1/CameraView/blob/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/java/com/otaliastudios/cameraview/overlay/OverlayLayout.java",
+    "raw_url": "https://github.com/natario1/CameraView/raw/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/java/com/otaliastudios/cameraview/overlay/OverlayLayout.java",
+    "contents_url": "https://api.github.com/repos/natario1/CameraView/contents/cameraview/src/main/java/com/otaliastudios/cameraview/overlay/OverlayLayout.java?ref=bfd1b6c78644f395a057526c2adabe1344cc61e2",
+    "patch": "@@ -26,6 +26,8 @@\n \n     @VisibleForTesting Target currentTarget = Target.PREVIEW;\n \n+    private boolean mHardwareCanvasEnabled;\n+\n     /**\n      * We set {@link #setWillNotDraw(boolean)} to false even if we don't draw anything.\n      * This ensures that the View system will call {@link #draw(Canvas)} on us instead\n@@ -99,6 +101,16 @@ public boolean drawsOn(@NonNull Target target) {\n         return false;\n     }\n \n+    @Override\n+    public void setHardwareCanvasEnabled(boolean on) {\n+        mHardwareCanvasEnabled = on;\n+    }\n+\n+    @Override\n+    public boolean getHardwareCanvasEnabled() {\n+        return mHardwareCanvasEnabled;\n+    }\n+\n     /**\n      * For {@link Target#PREVIEW}, this method is called by the View hierarchy. We will\n      * just forward the call to super.\n@@ -132,7 +144,8 @@ public void drawOn(@NonNull Target target, @NonNull Canvas canvas) {\n                             \"canvas:\", canvas.getWidth() + \"x\" + canvas.getHeight(),\n                             \"view:\", getWidth() + \"x\" + getHeight(),\n                             \"widthScale:\", widthScale,\n-                            \"heightScale:\", heightScale\n+                            \"heightScale:\", heightScale,\n+                            \"hardwareCanvasMode:\", mHardwareCanvasEnabled\n                     );\n                     canvas.scale(widthScale, heightScale);\n                     dispatchDraw(canvas);"
+  },
+  {
+    "sha": "1b4418daaa9ca6da5109bddfca08fe4e5f8f3bba",
+    "filename": "cameraview/src/main/res/values/attrs.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/natario1/CameraView/blob/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/res/values/attrs.xml",
+    "raw_url": "https://github.com/natario1/CameraView/raw/bfd1b6c78644f395a057526c2adabe1344cc61e2/cameraview/src/main/res/values/attrs.xml",
+    "contents_url": "https://api.github.com/repos/natario1/CameraView/contents/cameraview/src/main/res/values/attrs.xml?ref=bfd1b6c78644f395a057526c2adabe1344cc61e2",
+    "patch": "@@ -169,6 +169,8 @@\n         <attr name=\"cameraRequestPermissions\" format=\"boolean|reference\"/>\n         <attr name=\"cameraExperimental\" format=\"boolean|reference\" />\n \n+        <attr name=\"cameraDrawHardwareOverlays\" format=\"boolean\"/>\n+\n     </declare-styleable>\n \n     <declare-styleable name=\"CameraView_Layout\">"
+  },
+  {
+    "sha": "751dc65b28b1d7cae76d2fdc88b24e7b9cef88a5",
+    "filename": "docs/_docs/watermarks-and-overlays.md",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/natario1/CameraView/blob/bfd1b6c78644f395a057526c2adabe1344cc61e2/docs/_docs/watermarks-and-overlays.md",
+    "raw_url": "https://github.com/natario1/CameraView/raw/bfd1b6c78644f395a057526c2adabe1344cc61e2/docs/_docs/watermarks-and-overlays.md",
+    "contents_url": "https://api.github.com/repos/natario1/CameraView/contents/docs/_docs/watermarks-and-overlays.md?ref=bfd1b6c78644f395a057526c2adabe1344cc61e2",
+    "patch": "@@ -82,3 +82,19 @@ params.drawOnVideoSnapshot = false; // do not draw on video snapshots\n // When done, apply\n overlay.setLayoutParams(params);\n ```\n+\n+To capture a hardware rendered View such as a video rendered to a TextureView, enable the\n+`cameraDrawHardwareOverlays` flag:\n+\n+```xml\n+<com.otaliastudios.cameraview.CameraView\n+    android:layout_width=\"wrap_content\"\n+    android:layout_height=\"wrap_content\"\n+    app:cameraDrawHardwareOverlays=\"true\"/>\n+```\n+\n+Alternatively you can enable it in code with `setDrawHardwareOverlays()`:\n+\n+```java\n+cameraView.setDrawHardwareOverlays(true);\n+```\n\\ No newline at end of file"
+  }
+]

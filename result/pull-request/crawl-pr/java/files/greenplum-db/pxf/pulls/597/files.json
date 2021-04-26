@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "f840c6cf23df5e4675598d384a88fca3cb8726c7",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 3,
+    "changes": 9,
+    "blob_url": "https://github.com/greenplum-db/pxf/blob/73155728c4ddf33948e77818e882b8882a2217dd/README.md",
+    "raw_url": "https://github.com/greenplum-db/pxf/raw/73155728c4ddf33948e77818e882b8882a2217dd/README.md",
+    "contents_url": "https://api.github.com/repos/greenplum-db/pxf/contents/README.md?ref=73155728c4ddf33948e77818e882b8882a2217dd",
+    "patch": "@@ -336,11 +336,14 @@ $PXF_HOME/bin/pxf start\n \n - Start IntelliJ. Click \"Open\" and select the directory to which you cloned the `pxf` repo.\n - Select `File > Project Structure`.\n-- Make sure you have a JDK selected.\n-- In the `Project Settings > Modules` section, import two modules for the `pxf/server` and `pxf/automation` directories. The first time you'll get an error saying that there's\n+- Make sure you have a JDK (version 1.8) selected.\n+- In the `Project Settings > Modules` section, select `Import Module`, pick the `pxf/server` directory and import as a Gradle module. You may see an error saying that there's\n no JDK set for Gradle. Just cancel and retry. It goes away the second time.\n+- Import a second module, giving the `pxf/automation` directory, select \"Import module from external model\", pick `Maven` then click Finish.\n - Restart IntelliJ\n-- Check that it worked by running a test (Cmd+O)\n+- Check that it worked by running a unit test (cannot currently run automation tests from IntelliJ) and making sure that imports, variables, and auto-completion function in the two modules.\n+- Optionally you can replace `${PXF_TMP_DIR}` with `${GPHOME}/pxf/tmp` in `automation/pom.xml`\n+- Select `Tools > Create Command-line Launcher...` to enable starting Intellij with the `idea` command, e.g. `cd ~/workspace/pxf && idea .`.\n \n ## Debugging the locally running instance of PXF server using IntelliJ\n "
+  },
+  {
+    "sha": "44034f5d385183fc35363042e2a8a88f4d575f7d",
+    "filename": "automation/README.md",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/greenplum-db/pxf/blob/73155728c4ddf33948e77818e882b8882a2217dd/automation/README.md",
+    "raw_url": "https://github.com/greenplum-db/pxf/raw/73155728c4ddf33948e77818e882b8882a2217dd/automation/README.md",
+    "contents_url": "https://api.github.com/repos/greenplum-db/pxf/contents/automation/README.md?ref=73155728c4ddf33948e77818e882b8882a2217dd",
+    "patch": "@@ -10,17 +10,17 @@ In order to run PXF automation tests the following are needed\n \n 1. Running Hadoop cluster \n 2. Running GPDB\n-3. JRE 1.7\n+3. JRE 1.8\n \n Build & Test\n ===================================\n \n-Set necessary Environment Vars##\n+Set necessary Environment Vars\n ```\n export GPHD_ROOT=<parent directory containing hadoop,hive,etc>\n export PGPORT=<gpdb port>\n export GPHOME=<your gphome>\n-export PXF_HOME=$GPHOME/pxf\n+export PXF_HOME=/usr/local/pxf\n ```\n \n Run all tests for GPDB"
+  },
+  {
+    "sha": "837ffc28295485b7183fe933987bb6468ebd1747",
+    "filename": "concourse/README.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/greenplum-db/pxf/blob/73155728c4ddf33948e77818e882b8882a2217dd/concourse/README.md",
+    "raw_url": "https://github.com/greenplum-db/pxf/raw/73155728c4ddf33948e77818e882b8882a2217dd/concourse/README.md",
+    "contents_url": "https://api.github.com/repos/greenplum-db/pxf/contents/concourse/README.md?ref=73155728c4ddf33948e77818e882b8882a2217dd",
+    "patch": "@@ -101,8 +101,7 @@ fly -t ud set-pipeline \\\n     -c ~/workspace/pxf/concourse/pipelines/longevity_pipeline.yml \\\n     -l ~/workspace/gp-continuous-integration/secrets/gpdb_common-ci-secrets.yml \\\n     -l ~/workspace/pxf/concourse/settings/pxf-multinode-params.yml \\\n-    -l ~/workspace/gp-continuous-integration/secrets/ccp_ci_secrets_ud.yml \\\n-    -l ~/workspace/gp-continuous-integration/secrets/ccp_ci_secrets_ud_kerberos.yml \\\n+    -l ~/workspace/gp-continuous-integration/secrets/pxf_secrets.yml \\\n     -v folder-prefix=dev/pivotal -v test-env=dev \\\n     -v icw_green_bucket=gpdb5-assert-concourse-builds \\\n     -v gcs-bucket-intermediates=pivotal-gpdb-concourse-resources-intermediates-prod \\"
+  },
+  {
+    "sha": "c0bf072067a677516fdeda384ad3e53eaa8d411b",
+    "filename": "server/Makefile",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/greenplum-db/pxf/blob/73155728c4ddf33948e77818e882b8882a2217dd/server/Makefile",
+    "raw_url": "https://github.com/greenplum-db/pxf/raw/73155728c4ddf33948e77818e882b8882a2217dd/server/Makefile",
+    "contents_url": "https://api.github.com/repos/greenplum-db/pxf/contents/server/Makefile?ref=73155728c4ddf33948e77818e882b8882a2217dd",
+    "patch": "@@ -34,6 +34,7 @@ help:\n \t@echo\t\"  - clean - cleans the workspace of all produced artifacts\"\n \t@echo\t\"  - compile - compiles all PXF modules and builds their JAR files\"\n \t@echo\t\"  - test - runs unit tests for all PXF modules\"\n+\t@echo   \"  - coverage - runs unit tests for all PXF modules and gives a coverage report\"\n \t@echo\t\"  - install - setup PXF in the configured deployPath\"\n \t@echo\t\"  - stage - build PXF server and stage resulting artifacts for packaging\"\n \t@echo\t\"  - doc - creates aggregate javadoc under docs\"\n@@ -62,6 +63,12 @@ test unittest:\n \tfi\n \t./gradlew $(PXF_GRADLE_PROPERTIES) ${GRADLEW_TEST_PARAMS}\n \n+coverage:\n+\t./gradlew $(PXF_GRADLE_PROPERTIES) ${GRADLEW_TEST_PARAMS} jacocoTestReport\n+\t@echo\n+\t@echo  \"Coverage reports can be found within each server module under <module-name>/build/reports/jacoco\"\n+\t@echo  \"For example, the pxf-service coverage report is located at $(shell pwd)/pxf-service/build/reports/jacoco/test/html/index.html\"\n+\n .PHONY: stage\n stage:\n \t./gradlew $(PXF_GRADLE_PROPERTIES) test stage"
+  }
+]

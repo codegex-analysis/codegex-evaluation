@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "7ac6b175cf061d63d1a7ceafcdf38ad64ad280c1",
+    "filename": "substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/LinkerInvocation.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/oracle/graal/blob/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/LinkerInvocation.java",
+    "raw_url": "https://github.com/oracle/graal/raw/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/LinkerInvocation.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/LinkerInvocation.java?ref=2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a",
+    "patch": "@@ -61,6 +61,8 @@\n \n     void addAdditionalPreOption(String option);\n \n+    void addNativeLinkerOption(String option);\n+\n     List<String> getImageSymbols(boolean onlyGlobal);\n \n     Path getTempDirectory();"
+  },
+  {
+    "sha": "8f2695f1db89ebab2bd2b319b8f210741b8335b8",
+    "filename": "substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/jdk/SystemPropertiesSupport.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/oracle/graal/blob/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/jdk/SystemPropertiesSupport.java",
+    "raw_url": "https://github.com/oracle/graal/raw/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/jdk/SystemPropertiesSupport.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/jdk/SystemPropertiesSupport.java?ref=2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a",
+    "patch": "@@ -36,7 +36,6 @@\n import org.graalvm.nativeimage.Platform;\n import org.graalvm.nativeimage.Platforms;\n \n-import com.oracle.svm.core.OS;\n import com.oracle.svm.core.VM;\n import com.oracle.svm.core.config.ConfigurationValues;\n \n@@ -114,7 +113,7 @@ protected SystemPropertiesSupport() {\n \n         initializeProperty(ImageInfo.PROPERTY_IMAGE_CODE_KEY, ImageInfo.PROPERTY_IMAGE_CODE_VALUE_RUNTIME);\n \n-        if (OS.getCurrent() == OS.LINUX && JavaVersionUtil.JAVA_SPEC == 11) {\n+        if (JavaVersionUtil.JAVA_SPEC <= 11) {\n             /* AWT system properties are no longer used after JDK 11. */\n             initializeProperty(\"awt.toolkit\", System.getProperty(\"awt.toolkit\"));\n             initializeProperty(\"java.awt.graphicsenv\", System.getProperty(\"java.awt.graphicsenv\"));"
+  },
+  {
+    "sha": "5422bd5d07b380850cee4944e61132377ea34933",
+    "filename": "substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/image/CCLinkerInvocation.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 1,
+    "changes": 18,
+    "blob_url": "https://github.com/oracle/graal/blob/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/image/CCLinkerInvocation.java",
+    "raw_url": "https://github.com/oracle/graal/raw/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/image/CCLinkerInvocation.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/image/CCLinkerInvocation.java?ref=2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a",
+    "patch": "@@ -26,8 +26,11 @@\n \n import java.nio.file.Path;\n import java.util.ArrayList;\n+import java.util.Collection;\n import java.util.Collections;\n import java.util.List;\n+import java.util.stream.Collectors;\n+import java.util.stream.Stream;\n \n import org.graalvm.compiler.options.Option;\n import org.graalvm.nativeimage.ImageSingletons;\n@@ -45,6 +48,7 @@\n     }\n \n     protected final List<String> additionalPreOptions = new ArrayList<>();\n+    protected final List<String> nativeLinkerOptions = new ArrayList<>();\n     protected final List<Path> inputFilenames = new ArrayList<>();\n     protected final List<String> rpaths = new ArrayList<>();\n     protected final List<String> libpaths = new ArrayList<>();\n@@ -162,7 +166,9 @@ public void addLinkedLibrary(int index, String libname) {\n         }\n \n         cmd.addAll(getLibrariesCommand());\n-        cmd.addAll(Options.NativeLinkerOption.getValue().values());\n+\n+        cmd.addAll(getNativeLinkerOptions());\n+\n         return cmd;\n     }\n \n@@ -182,4 +188,14 @@ public void addLinkedLibrary(int index, String libname) {\n     public void addAdditionalPreOption(String option) {\n         additionalPreOptions.add(option);\n     }\n+\n+    @Override\n+    public void addNativeLinkerOption(String option) {\n+        nativeLinkerOptions.add(option);\n+    }\n+\n+    protected List<String> getNativeLinkerOptions() {\n+        return Stream.of(nativeLinkerOptions, Options.NativeLinkerOption.getValue().values())\n+                        .flatMap(Collection::stream).collect(Collectors.toList());\n+    }\n }"
+  },
+  {
+    "sha": "070ebe09407f04d86fb6cc67ff936a900f9f70dc",
+    "filename": "substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/image/NativeImageViaCC.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/oracle/graal/blob/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/image/NativeImageViaCC.java",
+    "raw_url": "https://github.com/oracle/graal/raw/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/image/NativeImageViaCC.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/image/NativeImageViaCC.java?ref=2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a",
+    "patch": "@@ -334,7 +334,8 @@ protected void setOutputKind(List<String> cmd) {\n                 cmd.add(\"setargv.obj\");\n             }\n \n-            cmd.addAll(Options.NativeLinkerOption.getValue().values());\n+            cmd.addAll(getNativeLinkerOptions());\n+\n             return cmd;\n         }\n     }"
+  },
+  {
+    "sha": "1fbae0accd3e009fc573f85e0c385e72d4f8c04e",
+    "filename": "substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/jdk/JNIRegistrationAWTSupport.java",
+    "status": "added",
+    "additions": 107,
+    "deletions": 0,
+    "changes": 107,
+    "blob_url": "https://github.com/oracle/graal/blob/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/jdk/JNIRegistrationAWTSupport.java",
+    "raw_url": "https://github.com/oracle/graal/raw/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/jdk/JNIRegistrationAWTSupport.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/jdk/JNIRegistrationAWTSupport.java?ref=2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a",
+    "patch": "@@ -0,0 +1,107 @@\n+/*\n+ * Copyright (c) 2021, 2021, Oracle and/or its affiliates. All rights reserved.\n+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.\n+ *\n+ * This code is free software; you can redistribute it and/or modify it\n+ * under the terms of the GNU General Public License version 2 only, as\n+ * published by the Free Software Foundation.  Oracle designates this\n+ * particular file as subject to the \"Classpath\" exception as provided\n+ * by Oracle in the LICENSE file that accompanied this code.\n+ *\n+ * This code is distributed in the hope that it will be useful, but WITHOUT\n+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or\n+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License\n+ * version 2 for more details (a copy is included in the LICENSE file that\n+ * accompanied this code).\n+ *\n+ * You should have received a copy of the GNU General Public License version\n+ * 2 along with this work; if not, write to the Free Software Foundation,\n+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.\n+ *\n+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA\n+ * or visit www.oracle.com if you need additional information or have any\n+ * questions.\n+ */\n+package com.oracle.svm.hosted.jdk;\n+\n+import org.graalvm.compiler.serviceprovider.JavaVersionUtil;\n+import org.graalvm.nativeimage.Platform;\n+import org.graalvm.nativeimage.Platforms;\n+import org.graalvm.nativeimage.hosted.Feature;\n+\n+import com.oracle.svm.core.annotate.AutomaticFeature;\n+import com.oracle.svm.hosted.FeatureImpl.BeforeImageWriteAccessImpl;\n+\n+@Platforms(Platform.WINDOWS.class)\n+@AutomaticFeature\n+public class JNIRegistrationAWTSupport implements Feature {\n+    @Override\n+    public void beforeImageWrite(BeforeImageWriteAccess access) {\n+        JNIRegistrationSupport jniRegistrationSupport = JNIRegistrationSupport.singleton();\n+        if (jniRegistrationSupport.isRegisteredLibrary(\"awt\")) {\n+            jniRegistrationSupport.addJvmShimExports(\n+                            \"JVM_CurrentTimeMillis\",\n+                            \"JVM_RaiseSignal\",\n+                            \"jio_snprintf\");\n+            jniRegistrationSupport.addJavaShimExports(\n+                            \"JDK_LoadSystemLibrary\",\n+                            \"JNU_CallMethodByName\",\n+                            \"JNU_CallMethodByNameV\",\n+                            \"JNU_CallStaticMethodByName\",\n+                            \"JNU_ClassString\",\n+                            \"JNU_GetEnv\",\n+                            \"JNU_GetFieldByName\",\n+                            \"JNU_GetStaticFieldByName\",\n+                            \"JNU_IsInstanceOfByName\",\n+                            \"JNU_NewObjectByName\",\n+                            \"JNU_NewStringPlatform\",\n+                            \"JNU_SetFieldByName\",\n+                            \"JNU_ThrowArrayIndexOutOfBoundsException\",\n+                            \"JNU_ThrowByName\",\n+                            \"JNU_ThrowIOException\",\n+                            \"JNU_ThrowIllegalArgumentException\",\n+                            \"JNU_ThrowInternalError\",\n+                            \"JNU_ThrowNullPointerException\",\n+                            \"JNU_ThrowOutOfMemoryError\",\n+                            \"getEncodingFromLangID\",\n+                            \"getJavaIDFromLangID\");\n+            ((BeforeImageWriteAccessImpl) access).registerLinkerInvocationTransformer(linkerInvocation -> {\n+                /* Force otherwise unused symbols necessary for the java.dll shim ... */\n+                linkerInvocation.addNativeLinkerOption(\"/include:JDK_LoadSystemLibrary\");\n+                linkerInvocation.addNativeLinkerOption(\"/include:getEncodingFromLangID\");\n+                linkerInvocation.addNativeLinkerOption(\"/include:getJavaIDFromLangID\");\n+                /* ... and add a Windows library that is pulled in as a side effect. */\n+                linkerInvocation.addNativeLinkerOption(\"shell32.lib\");\n+                return linkerInvocation;\n+            });\n+        }\n+        if (jniRegistrationSupport.isRegisteredLibrary(\"dcpr\") && JavaVersionUtil.JAVA_SPEC == 8) {\n+            jniRegistrationSupport.addJavaShimExports(\n+                            \"JNU_ThrowClassNotFoundException\");\n+        }\n+        if (jniRegistrationSupport.isRegisteredLibrary(\"fontmanager\") && JavaVersionUtil.JAVA_SPEC >= 11) {\n+            /*\n+             * Dependency on `harfbuzz` may not be expressed in Java, so we register it manually\n+             * here just in case.\n+             */\n+            jniRegistrationSupport.registerLibrary(\"harfbuzz\");\n+        }\n+        if (jniRegistrationSupport.isRegisteredLibrary(\"javaaccessbridge\") && JavaVersionUtil.JAVA_SPEC > 8) {\n+            /* Dependency on `jawt` is not expressed in Java, so we register it manually here. */\n+            jniRegistrationSupport.registerLibrary(\"jawt\");\n+        }\n+        if (jniRegistrationSupport.isRegisteredLibrary(JavaVersionUtil.JAVA_SPEC > 8 ? \"javajpeg\" : \"jpeg\")) {\n+            jniRegistrationSupport.addJavaShimExports(\n+                            \"JNU_GetEnv\",\n+                            \"JNU_ThrowByName\",\n+                            \"JNU_ThrowNullPointerException\",\n+                            \"jio_snprintf\");\n+        }\n+        if (jniRegistrationSupport.isRegisteredLibrary(\"jpeg\") && JavaVersionUtil.JAVA_SPEC == 8) {\n+            jniRegistrationSupport.addJavaShimExports(\n+                            \"JNU_CallMethodByName\",\n+                            \"JNU_CallStaticMethodByName\",\n+                            \"JNU_NewObjectByName\");\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "9066de9bb0ccb55842adf6440252e8f0b03fad1c",
+    "filename": "substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/jdk/JNIRegistrationSupport.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 10,
+    "changes": 23,
+    "blob_url": "https://github.com/oracle/graal/blob/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/jdk/JNIRegistrationSupport.java",
+    "raw_url": "https://github.com/oracle/graal/raw/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/jdk/JNIRegistrationSupport.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.hosted/src/com/oracle/svm/hosted/jdk/JNIRegistrationSupport.java?ref=2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a",
+    "patch": "@@ -106,23 +106,26 @@ public boolean apply(GraphBuilderContext b, ResolvedJavaMethod targetMethod, Rec\n                  * String arguments.\n                  */\n                 if (libnameNode.isConstant()) {\n-                    String libname = (String) SubstrateObjectConstant.asObject(libnameNode.asConstant());\n-                    if (libname != null && registeredLibraries.putIfAbsent(libname, Boolean.TRUE) != Boolean.TRUE) {\n-                        /*\n-                         * If a library is in our list of static standard libraries, add the library\n-                         * to the linker command.\n-                         */\n-                        if (NativeLibrarySupport.singleton().isPreregisteredBuiltinLibrary(libname)) {\n-                            nativeLibraries.addStaticJniLibrary(libname);\n-                        }\n-                    }\n+                    registerLibrary((String) SubstrateObjectConstant.asObject(libnameNode.asConstant()));\n                 }\n                 /* We never want to do any actual intrinsification, process the original invoke. */\n                 return false;\n             }\n         });\n     }\n \n+    void registerLibrary(String libname) {\n+        if (libname != null && registeredLibraries.putIfAbsent(libname, Boolean.TRUE) != Boolean.TRUE) {\n+            /*\n+             * If a library is in our list of static standard libraries, add the library to the\n+             * linker command.\n+             */\n+            if (NativeLibrarySupport.singleton().isPreregisteredBuiltinLibrary(libname)) {\n+                nativeLibraries.addStaticJniLibrary(libname);\n+            }\n+        }\n+    }\n+\n     boolean isRegisteredLibrary(String libname) {\n         return registeredLibraries.containsKey(libname);\n     }"
+  },
+  {
+    "sha": "d3533b8d617577d3dcfb6df9c4ec7840a106f07f",
+    "filename": "substratevm/src/com.oracle.svm.native.jvm.posix/src/JvmFuncs.c",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 9,
+    "changes": 24,
+    "blob_url": "https://github.com/oracle/graal/blob/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.native.jvm.posix/src/JvmFuncs.c",
+    "raw_url": "https://github.com/oracle/graal/raw/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.native.jvm.posix/src/JvmFuncs.c",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.native.jvm.posix/src/JvmFuncs.c?ref=2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a",
+    "patch": "@@ -281,17 +281,23 @@ int jio_vsnprintf(char *str, size_t count, const char *fmt, va_list args) {\n }\n \n #ifdef JNI_VERSION_9\n-int jio_snprintf(char *str, size_t count, const char *fmt, ...) {\n-  va_list args;\n-  int len;\n-  va_start(args, fmt);\n-  len = jio_vsnprintf(str, count, fmt, args);\n-  va_end(args);\n-  return len;\n+/*\n+ * Both `jio_snprintf` and `jio_fprintf` as defined in `src/java.base/share/native/libjava/jio.c`\n+ * are no longer part of `STATIC_BUILD`, which is used to build static JDK libraries, so we redefine\n+ * them here.\n+ */\n+JNIEXPORT int jio_snprintf(char *str, size_t count, const char *fmt, ...) {\n+    int len;\n+\n+    va_list args;\n+    va_start(args, fmt);\n+    len = jio_vsnprintf(str, count, fmt, args);\n+    va_end(args);\n+\n+    return len;\n }\n \n-int jio_fprintf(FILE *fp, const char *fmt, ...)\n-{\n+JNIEXPORT int jio_fprintf(FILE *fp, const char *fmt, ...) {\n     int len;\n \n     va_list args;"
+  },
+  {
+    "sha": "2cff045f086765cb8164d7fb226d052f7b42e16b",
+    "filename": "substratevm/src/com.oracle.svm.native.jvm.windows/src/JvmFuncs.c",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 9,
+    "changes": 24,
+    "blob_url": "https://github.com/oracle/graal/blob/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.native.jvm.windows/src/JvmFuncs.c",
+    "raw_url": "https://github.com/oracle/graal/raw/2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a/substratevm/src/com.oracle.svm.native.jvm.windows/src/JvmFuncs.c",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.native.jvm.windows/src/JvmFuncs.c?ref=2de5f6dedce3bc07fea4c29c6a6a59c92bbfb39a",
+    "patch": "@@ -271,17 +271,23 @@ int jio_vsnprintf(char *str, size_t count, const char *fmt, va_list args) {\n }\n \n #ifdef JNI_VERSION_9\n-int jio_snprintf(char *str, size_t count, const char *fmt, ...) {\n-  va_list args;\n-  int len;\n-  va_start(args, fmt);\n-  len = jio_vsnprintf(str, count, fmt, args);\n-  va_end(args);\n-  return len;\n+/*\n+ * Both `jio_snprintf` and `jio_fprintf` as defined in `src/java.base/share/native/libjava/jio.c`\n+ * are no longer part of `STATIC_BUILD`, which is used to build static JDK libraries, so we redefine\n+ * them here.\n+ */\n+JNIEXPORT int jio_snprintf(char *str, size_t count, const char *fmt, ...) {\n+    int len;\n+\n+    va_list args;\n+    va_start(args, fmt);\n+    len = jio_vsnprintf(str, count, fmt, args);\n+    va_end(args);\n+\n+    return len;\n }\n \n-int jio_fprintf(FILE *fp, const char *fmt, ...)\n-{\n+JNIEXPORT int jio_fprintf(FILE *fp, const char *fmt, ...) {\n     int len;\n \n     va_list args;"
+  }
+]

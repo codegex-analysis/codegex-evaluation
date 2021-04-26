@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "c505144f011cf3220b377310ef9499930e64a207",
+    "filename": "docker/appserver/Tomcat/test/src/scripts/catalinaAdditionalTest.properties",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/ibissource/iaf/blob/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/appserver/Tomcat/test/src/scripts/catalinaAdditionalTest.properties",
+    "raw_url": "https://github.com/ibissource/iaf/raw/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/appserver/Tomcat/test/src/scripts/catalinaAdditionalTest.properties",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/docker/appserver/Tomcat/test/src/scripts/catalinaAdditionalTest.properties?ref=ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d",
+    "patch": "@@ -1,3 +1,4 @@\n web.protocol=http\n web.port=8080\n-web.contextpath=/iaf\n\\ No newline at end of file\n+web.contextpath=/iaf\n+jms.createDestination=true\n\\ No newline at end of file"
+  },
+  {
+    "sha": "8b4003611897f2601a9d39904573b941df4378ad",
+    "filename": "docker/appserver/Tomcat/test/src/scripts/start-with-mssql-and-activemq.bat",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/ibissource/iaf/blob/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/appserver/Tomcat/test/src/scripts/start-with-mssql-and-activemq.bat",
+    "raw_url": "https://github.com/ibissource/iaf/raw/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/appserver/Tomcat/test/src/scripts/start-with-mssql-and-activemq.bat",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/docker/appserver/Tomcat/test/src/scripts/start-with-mssql-and-activemq.bat?ref=ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d",
+    "patch": "@@ -0,0 +1,4 @@\n+cd %~dp0/../..\n+docker container stop iaf-test-tomcat\n+docker container rm iaf-test-tomcat\n+docker run --publish 80:8080 --mount type=bind,source=\"%~dp0/../../../../../../test/src/test/testtool\",target=/opt/frank/testtool-ext -e active.jms=true -e jdbc.dbms.default=mssql --name iaf-test-tomcat iaf-test-tomcat\n\\ No newline at end of file"
+  },
+  {
+    "sha": "831b14bbd3ea0ce02d62a61918234757027c0aca",
+    "filename": "docker/mq/ActiveMQ/Dockerfile",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/ibissource/iaf/blob/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/mq/ActiveMQ/Dockerfile",
+    "raw_url": "https://github.com/ibissource/iaf/raw/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/mq/ActiveMQ/Dockerfile",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/docker/mq/ActiveMQ/Dockerfile?ref=ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d",
+    "patch": "@@ -0,0 +1,28 @@\n+FROM openjdk:8-jre-alpine\n+\n+ENV ACTIVEMQ_VERSION 5.6.0\n+ENV ACTIVEMQ apache-activemq-$ACTIVEMQ_VERSION\n+ENV ACTIVEMQ_TCP=61616 ACTIVEMQ_AMQP=5672 ACTIVEMQ_STOMP=61613 ACTIVEMQ_MQTT=1883 ACTIVEMQ_WS=61614 ACTIVEMQ_UI=8161\n+\n+ENV ACTIVEMQ_HOME /opt/activemq\n+\n+RUN set -x && \\\n+    mkdir -p /opt && \\\n+    apk --update add --virtual build-dependencies curl && \\\n+    curl https://archive.apache.org/dist/activemq/apache-activemq/$ACTIVEMQ_VERSION/$ACTIVEMQ-bin.tar.gz -o $ACTIVEMQ-bin.tar.gz\n+\n+\n+RUN tar xzf $ACTIVEMQ-bin.tar.gz -C  /opt && \\\n+    ln -s /opt/$ACTIVEMQ $ACTIVEMQ_HOME && \\\n+    addgroup -S activemq && adduser -S -H -G activemq -h $ACTIVEMQ_HOME activemq && \\\n+    chown -R activemq:activemq /opt/$ACTIVEMQ && \\\n+    chown -h activemq:activemq $ACTIVEMQ_HOME && \\\n+    apk del build-dependencies && \\\n+    rm -rf /var/cache/apk/*\n+\n+USER activemq\n+\n+WORKDIR $ACTIVEMQ_HOME\n+EXPOSE $ACTIVEMQ_TCP $ACTIVEMQ_AMQP $ACTIVEMQ_STOMP $ACTIVEMQ_MQTT $ACTIVEMQ_WS $ACTIVEMQ_UI\n+\n+CMD [\"/bin/sh\", \"-c\", \"bin/activemq console\"]\n\\ No newline at end of file"
+  },
+  {
+    "sha": "1a23289cce82eda7a4c4371d91b9959f7b223ac1",
+    "filename": "docker/mq/ActiveMQ/docker-compose.yml",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/ibissource/iaf/blob/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/mq/ActiveMQ/docker-compose.yml",
+    "raw_url": "https://github.com/ibissource/iaf/raw/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/mq/ActiveMQ/docker-compose.yml",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/docker/mq/ActiveMQ/docker-compose.yml?ref=ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d",
+    "patch": "@@ -0,0 +1,7 @@\n+version: \"3.1\"\n+services:\n+  postgresql:\n+    image: iaf-test-mq-activemq\n+    restart: unless-stopped\n+    ports:\n+      - 61616:61616\n\\ No newline at end of file"
+  },
+  {
+    "sha": "a3186659aaf45f84b227f6ec4e6375c61137b687",
+    "filename": "docker/mq/ActiveMQ/rebuild.bat",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/ibissource/iaf/blob/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/mq/ActiveMQ/rebuild.bat",
+    "raw_url": "https://github.com/ibissource/iaf/raw/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/mq/ActiveMQ/rebuild.bat",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/docker/mq/ActiveMQ/rebuild.bat?ref=ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d",
+    "patch": "@@ -0,0 +1,8 @@\n+cd %~dp0\n+docker-compose down --volumes --remove-orphans\n+docker image prune --force\n+docker volume prune --force\n+\n+docker build -t iaf-test-mq-activemq .\n+\n+docker-compose up --build\n\\ No newline at end of file"
+  },
+  {
+    "sha": "df44bb783145b014053cdd783b8f9f857797c487",
+    "filename": "docker/mq/ActiveMQ/start.bat",
+    "status": "added",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/ibissource/iaf/blob/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/mq/ActiveMQ/start.bat",
+    "raw_url": "https://github.com/ibissource/iaf/raw/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/docker/mq/ActiveMQ/start.bat",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/docker/mq/ActiveMQ/start.bat?ref=ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d",
+    "patch": "@@ -0,0 +1,2 @@\n+cd %~dp0\n+docker-compose up\n\\ No newline at end of file"
+  },
+  {
+    "sha": "cb1bd193a9b2a6abc9add505f2e5f82ea08d7259",
+    "filename": "test/src/main/webapp/META-INF/context.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/ibissource/iaf/blob/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/test/src/main/webapp/META-INF/context.xml",
+    "raw_url": "https://github.com/ibissource/iaf/raw/ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d/test/src/main/webapp/META-INF/context.xml",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/test/src/main/webapp/META-INF/context.xml?ref=ebf513b8c4c6bcc9d81dafcc6819e0d67dbc7d6d",
+    "patch": "@@ -149,7 +149,7 @@\n \t\tname=\"jms/qcf-activemq\"\n \t\tfactory=\"org.apache.naming.factory.BeanFactory\"\n \t\ttype=\"org.apache.activemq.ActiveMQXAConnectionFactory\"\n-\t\tbrokerURL=\"vm://localhost\"\n+\t\tbrokerURL=\"tcp://host.docker.internal:61616\"\n \t/>\n-\t\n+\n </Context>\n\\ No newline at end of file"
+  }
+]

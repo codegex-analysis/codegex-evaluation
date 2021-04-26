@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "1579023c880bc7d21d52f4f5102b4cd2cef5a2b7",
+    "filename": "mycore-user2/src/test/java/org/mycore/user2/MCRUserManagerTest.java",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/MyCoRe-Org/mycore/blob/78a4d4375de445e72fdfe46c350e68701e836206/mycore-user2/src/test/java/org/mycore/user2/MCRUserManagerTest.java",
+    "raw_url": "https://github.com/MyCoRe-Org/mycore/raw/78a4d4375de445e72fdfe46c350e68701e836206/mycore-user2/src/test/java/org/mycore/user2/MCRUserManagerTest.java",
+    "contents_url": "https://api.github.com/repos/MyCoRe-Org/mycore/contents/mycore-user2/src/test/java/org/mycore/user2/MCRUserManagerTest.java?ref=78a4d4375de445e72fdfe46c350e68701e836206",
+    "patch": "@@ -27,6 +27,7 @@\n import java.io.IOException;\n import java.util.Date;\n import java.util.List;\n+import java.util.stream.Collectors;\n \n import org.jdom2.Document;\n import org.jdom2.Element;\n@@ -122,12 +123,40 @@ public final void testUpdateUser() {\n         this.user.setEMail(eMail);\n         String groupName = \"admin\";\n         this.user.getSystemRoleIDs().add(groupName);\n+        this.user.getAttributes().add(new MCRUserAttribute(\"id_key1\", \"value1\"));\n+        this.user.getAttributes().add(new MCRUserAttribute(\"id_key1\", \"value2\"));\n+\n         MCRUserManager.updateUser(this.user);\n         startNewTransaction();\n         MCRUser user = MCRUserManager.getUser(this.user.getUserName(), this.user.getRealm());\n         assertEquals(\"User information was not updated\", eMail, user.getEMailAddress());\n         assertEquals(\"User was created not updated\", 1, MCRUserManager.countUsers(null, null, null, null));\n         assertTrue(\"User is not in group \" + groupName, user.getSystemRoleIDs().contains(groupName));\n+\n+        final List<MCRUserAttribute> attributes = user.getAttributes()\n+                .stream()\n+                .filter(attr -> attr.getName().equals(\"id_key1\"))\n+                .collect(Collectors.toList());\n+\n+        assertEquals(\"There should be two (id_key1) attributes\", 2, attributes.size());\n+\n+        final MCRUserAttribute value2Attr = attributes\n+                .stream()\n+                .filter(attr-> attr.getValue().equals(\"value2\"))\n+                .findFirst()\n+                .get();\n+\n+        user.getAttributes().retainAll(List.of(value2Attr));\n+        MCRUserManager.updateUser(user);\n+        startNewTransaction();\n+        user = MCRUserManager.getUser(this.user.getUserName(), this.user.getRealm());\n+\n+        /*\n+         * currently both attributes get removed if retain all is used\n+         * Hibernate: delete from MCRUserAttr where id=? and name=? // this is the default attribute junit=test\n+         * Hibernate: delete from MCRUserAttr where id=? and name=? // this is the id_key1 attribute(s)\n+         */\n+        assertEquals(\"There should be one attribute\", 1, user.getAttributes().size());\n     }\n \n     /**"
+  },
+  {
+    "sha": "9e8ee821b4fcdfe241ae314f53c8aae8c277f1cf",
+    "filename": "mycore-user2/src/test/resources/META-INF/persistence.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/MyCoRe-Org/mycore/blob/78a4d4375de445e72fdfe46c350e68701e836206/mycore-user2/src/test/resources/META-INF/persistence.xml",
+    "raw_url": "https://github.com/MyCoRe-Org/mycore/raw/78a4d4375de445e72fdfe46c350e68701e836206/mycore-user2/src/test/resources/META-INF/persistence.xml",
+    "contents_url": "https://api.github.com/repos/MyCoRe-Org/mycore/contents/mycore-user2/src/test/resources/META-INF/persistence.xml?ref=78a4d4375de445e72fdfe46c350e68701e836206",
+    "patch": "@@ -12,7 +12,7 @@\n       <property name=\"javax.persistence.jdbc.password\" value=\"\" />\n       <property name=\"hibernate.cache.use_second_level_cache\" value=\"false\" />\n       <property name=\"hibernate.jdbc.batch_size\" value=\"0\" />\n-      <property name=\"hibernate.show_sql\" value=\"false\" />\n+      <property name=\"hibernate.show_sql\" value=\"true\"/>\n     </properties>\n   </persistence-unit>\n </persistence>"
+  }
+]

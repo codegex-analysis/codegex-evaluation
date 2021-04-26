@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "7c44fca3668169856978ed9c77821e130aec8233",
+    "filename": "src/main/java/ArrayStorage.java",
+    "status": "modified",
+    "additions": 38,
+    "deletions": 3,
+    "changes": 41,
+    "blob_url": "https://github.com/Yamatoirina/elementary-java/blob/0ed918dc1e1255289c0538882380abd9876d00b7/src/main/java/ArrayStorage.java",
+    "raw_url": "https://github.com/Yamatoirina/elementary-java/raw/0ed918dc1e1255289c0538882380abd9876d00b7/src/main/java/ArrayStorage.java",
+    "contents_url": "https://api.github.com/repos/Yamatoirina/elementary-java/contents/src/main/java/ArrayStorage.java?ref=0ed918dc1e1255289c0538882380abd9876d00b7",
+    "patch": "@@ -1,30 +1,65 @@\n+import java.util.Arrays;\n+\n /**\n  * Array based storage for Employees\n  */\n public class ArrayStorage {\n-    Employee[] storage = new Employee[10000];\n+    private Employee[] storage = new Employee[10000];\n+    private int counter = 0;\n+\n \n     void clear() {\n+        Arrays.fill(storage, null);\n+        System.out.println(\"List is clear\");\n+        counter = 0;\n     }\n \n+\n+\n     void save(Employee employee) {\n+        if (employee == null) {\n+            System.out.println(\"Employee is absent. Add employee to save\");\n+            return;\n+        }\n+        if (storage.length == size()) {\n+            System.out.println(\"No free slots\");\n+        } else {\n+            storage[size()] = employee.clone();\n+            this.counter++;\n+        }\n     }\n \n+\n+\n     Employee get(String uuid) {\n+        for (int i = 0; i < storage.length; i++) {\n+            if (storage[i] != null && storage[i].getUuid().equals(uuid)) {\n+                return storage[i];\n+            }\n+        }\n+        System.out.println(\"No such employee \" + uuid);\n         return null;\n     }\n \n+\n+\n     void delete(String uuid) {\n+        for (int i = 0; i < size(); i++)\n+            if (storage[i].getUuid().equals(uuid)) {\n+                storage[i] = storage[size() - 1];\n+                storage[size() - 1] = null;\n+                counter--;\n+            }\n     }\n \n     /**\n      * @return array, contains only Employees in storage (without null)\n      */\n     Employee[] getAll() {\n-        return new Employee[0];\n+        return Arrays.copyOfRange(storage, 0, counter);\n     }\n \n     int size() {\n-        return 0;\n+        return counter;\n     }\n }"
+  },
+  {
+    "sha": "9588b0472c1c4b7315cde34017f2096cb788a12f",
+    "filename": "src/main/java/Employee.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 1,
+    "changes": 18,
+    "blob_url": "https://github.com/Yamatoirina/elementary-java/blob/0ed918dc1e1255289c0538882380abd9876d00b7/src/main/java/Employee.java",
+    "raw_url": "https://github.com/Yamatoirina/elementary-java/raw/0ed918dc1e1255289c0538882380abd9876d00b7/src/main/java/Employee.java",
+    "contents_url": "https://api.github.com/repos/Yamatoirina/elementary-java/contents/src/main/java/Employee.java?ref=0ed918dc1e1255289c0538882380abd9876d00b7",
+    "patch": "@@ -1,13 +1,29 @@\n+\n /**\n  * Initial employee class\n  */\n public class Employee {\n \n+    public String getUuid() {\n+        return uuid;\n+    }\n+\n+    public void setUuid(String uuid) {\n+        this.uuid = uuid;\n+    }\n+\n     // Unique identifier\n-    String uuid;\n+    private String uuid;\n \n     @Override\n     public String toString() {\n         return uuid;\n     }\n+\n+    public Employee clone()\n+    {\n+        Employee employee = new Employee();\n+        employee.uuid = this.uuid;\n+        return employee;\n+    }\n }"
+  },
+  {
+    "sha": "f01cbac819bf154a74accd58368c0d126f008a8e",
+    "filename": "src/main/java/MainArray.java",
+    "status": "added",
+    "additions": 80,
+    "deletions": 0,
+    "changes": 80,
+    "blob_url": "https://github.com/Yamatoirina/elementary-java/blob/0ed918dc1e1255289c0538882380abd9876d00b7/src/main/java/MainArray.java",
+    "raw_url": "https://github.com/Yamatoirina/elementary-java/raw/0ed918dc1e1255289c0538882380abd9876d00b7/src/main/java/MainArray.java",
+    "contents_url": "https://api.github.com/repos/Yamatoirina/elementary-java/contents/src/main/java/MainArray.java?ref=0ed918dc1e1255289c0538882380abd9876d00b7",
+    "patch": "@@ -0,0 +1,80 @@\n+import java.util.Scanner;\n+\n+public class MainArray {\n+\n+    private static final ArrayStorage ARRAY_STORAGE1 = new ArrayStorage();\n+\n+\n+    public static void main(String[] args) {\n+\n+        manipulationWithEmployees();\n+    }\n+\n+\n+    private static void manipulationWithEmployees() {\n+        System.out.print(\"Enter command in next format- (list | save uuid | delete uuid | get uuid | size | clear | exit): \");\n+        Scanner scanner = new Scanner(System.in);\n+        String command[] = scanner.nextLine().split(\" \");\n+        Employee employee = new Employee();\n+\n+        while (!command[0].equals(\"exit\")) {\n+            if (command[0].equals(\"list\") || command[0].equals(\"save\") || command[0].equals(\"delete\") || command[0].equals(\"get\") ||\n+                    command[0].equals(\"size\") || command[0].equals(\"clear\")) {\n+\n+                if (command.length > 1) {\n+                    employee.setUuid(command[1]);\n+                }\n+                switchingOperations(command, employee);\n+            } else {\n+                System.out.println(\"Enter correct command\");\n+            }\n+            System.out.print(\"Enter command in next format- (list | save uuid | delete uuid | get uuid | size | clear | exit): \");\n+            command = scanner.nextLine().split(\" \");\n+        }\n+        System.out.println(\"Thanks. Bye.\");\n+    }\n+\n+\n+    private static void switchingOperations(String[] command, Employee employee) {\n+\n+        switch (command[0]) {\n+            case \"list\":\n+                printAll();\n+                break;\n+            case \"save\":\n+                ARRAY_STORAGE1.save(employee);\n+                printAll();\n+                break;\n+            case \"delete\":\n+                ARRAY_STORAGE1.delete(command[1]);\n+                printAll();\n+                break;\n+            case \"get\":\n+                System.out.println(\"Get employee: \" + ARRAY_STORAGE1.get(command[1]));\n+                break;\n+            case \"size\":\n+                System.out.println(\"Storage size: \" + ARRAY_STORAGE1.size());\n+                break;\n+            case \"clear\":\n+                ARRAY_STORAGE1.clear();\n+                printAll();\n+                break;\n+            case \"exit\":\n+                System.out.println(\"Thanks. Bye.\");\n+                break;\n+        }\n+    }\n+\n+\n+    static void printAll() {\n+        if ((ARRAY_STORAGE1.size() == 0)) {\n+            System.out.println(\"List is empty now\");\n+        } else {\n+            for (Employee employee : ARRAY_STORAGE1.getAll()) {\n+                System.out.println(employee);\n+            }\n+        }\n+\n+    }\n+\n+}"
+  },
+  {
+    "sha": "faeb3762089712e503d571f8182397d256b38e60",
+    "filename": "src/main/java/MainTestArrayStorage.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 7,
+    "changes": 14,
+    "blob_url": "https://github.com/Yamatoirina/elementary-java/blob/0ed918dc1e1255289c0538882380abd9876d00b7/src/main/java/MainTestArrayStorage.java",
+    "raw_url": "https://github.com/Yamatoirina/elementary-java/raw/0ed918dc1e1255289c0538882380abd9876d00b7/src/main/java/MainTestArrayStorage.java",
+    "contents_url": "https://api.github.com/repos/Yamatoirina/elementary-java/contents/src/main/java/MainTestArrayStorage.java?ref=0ed918dc1e1255289c0538882380abd9876d00b7",
+    "patch": "@@ -6,29 +6,29 @@\n \n     public static void main(String[] args) {\n         Employee employee1 = new Employee();\n-        employee1.uuid = \"uuid1\";\n+        employee1.setUuid(\"uuid1\");\n         Employee employee2 = new Employee();\n-        employee2.uuid = \"uuid2\";\n+        employee2.setUuid(\"uuid2\");\n         Employee employee3 = new Employee();\n-        employee3.uuid = \"uuid3\";\n+        employee3.setUuid(\"uuid3\");\n         Employee employee4 = new Employee();\n-        employee4.uuid = \"uuid4\";\n+        employee4.setUuid(\"uuid4\");\n         Employee employee5 = new Employee();\n-        employee5.uuid = \"uuid5\";\n+        employee5.setUuid(\"uuid5\");\n \n         ARRAY_STORAGE.save(employee1);\n         ARRAY_STORAGE.save(employee2);\n         ARRAY_STORAGE.save(employee3);\n         ARRAY_STORAGE.save(employee4);\n         ARRAY_STORAGE.save(employee5);\n \n-        System.out.println(\"Get employee1: \" + ARRAY_STORAGE.get(employee1.uuid));\n+        System.out.println(\"Get employee1: \" + ARRAY_STORAGE.get(employee1.getUuid()));\n         System.out.println(\"Size: \" + ARRAY_STORAGE.size());\n \n         System.out.println(\"Get dummy: \" + ARRAY_STORAGE.get(\"dummy\"));\n \n         printAll();\n-        ARRAY_STORAGE.delete(employee1.uuid);\n+        ARRAY_STORAGE.delete(employee1.getUuid());\n         printAll();\n         ARRAY_STORAGE.clear();\n         printAll();"
+  }
+]

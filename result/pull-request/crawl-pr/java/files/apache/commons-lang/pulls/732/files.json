@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "f4a8e1b31ecbb451c1b875ba18a2d74d9599a19c",
+    "filename": "src/main/java/org/apache/commons/lang3/reflect/FieldUtils.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/apache/commons-lang/blob/7242ca9c891ba4bb3bea96fb4f739c63747a70a5/src/main/java/org/apache/commons/lang3/reflect/FieldUtils.java",
+    "raw_url": "https://github.com/apache/commons-lang/raw/7242ca9c891ba4bb3bea96fb4f739c63747a70a5/src/main/java/org/apache/commons/lang3/reflect/FieldUtils.java",
+    "contents_url": "https://api.github.com/repos/apache/commons-lang/contents/src/main/java/org/apache/commons/lang3/reflect/FieldUtils.java?ref=7242ca9c891ba4bb3bea96fb4f739c63747a70a5",
+    "patch": "@@ -261,6 +261,17 @@ public static Field getDeclaredField(final Class<?> cls, final String fieldName,\n         return annotatedFields;\n     }\n \n+    /**\n+     * Determine whether the given field is a \"public static final\" constant.\n+     * @param field the field to check\n+     * @return {@code true} if {@code field} is a \"public static final\" constant, {@code false} otherwise.\n+     * @since 3.13.0\n+     */\n+    public static boolean isConstant(final Field field) {\n+        final int mod = field.getModifiers();\n+        return (Modifier.isPublic(mod) && Modifier.isStatic(mod) && Modifier.isFinal(mod));\n+    }\n+\n     /**\n      * Reads an accessible {@code static} {@link Field}.\n      *"
+  },
+  {
+    "sha": "45bf8fb429e05a7d9f6b91ecb312253efac16101",
+    "filename": "src/test/java/org/apache/commons/lang3/reflect/FieldUtilsTest.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/apache/commons-lang/blob/7242ca9c891ba4bb3bea96fb4f739c63747a70a5/src/test/java/org/apache/commons/lang3/reflect/FieldUtilsTest.java",
+    "raw_url": "https://github.com/apache/commons-lang/raw/7242ca9c891ba4bb3bea96fb4f739c63747a70a5/src/test/java/org/apache/commons/lang3/reflect/FieldUtilsTest.java",
+    "contents_url": "https://api.github.com/repos/apache/commons-lang/contents/src/test/java/org/apache/commons/lang3/reflect/FieldUtilsTest.java?ref=7242ca9c891ba4bb3bea96fb4f739c63747a70a5",
+    "patch": "@@ -42,6 +42,7 @@\n import org.apache.commons.lang3.reflect.testbed.Ambig;\n import org.apache.commons.lang3.reflect.testbed.Annotated;\n import org.apache.commons.lang3.reflect.testbed.Foo;\n+import org.apache.commons.lang3.reflect.testbed.GenericTypeHolder;\n import org.apache.commons.lang3.reflect.testbed.PrivatelyShadowedChild;\n import org.apache.commons.lang3.reflect.testbed.PublicChild;\n import org.apache.commons.lang3.reflect.testbed.PubliclyShadowedChild;\n@@ -339,6 +340,12 @@ public void testGetDeclaredFieldForceAccessIllegalArgumentException4() {\n         assertThrows(IllegalArgumentException.class, () -> FieldUtils.getDeclaredField(PublicChild.class, \" \", true));\n     }\n \n+    @Test\n+    public void testIsConstantField() {\n+        assertTrue(FieldUtils.isConstant(FieldUtils.getField(Foo.class, \"VALUE\")));\n+        assertFalse(FieldUtils.isConstant(FieldUtils.getField(GenericTypeHolder.class, \"stringParent\")));\n+    }\n+\n     @Test\n     public void testReadStaticField() throws Exception {\n         assertEquals(Foo.VALUE, FieldUtils.readStaticField(FieldUtils.getField(Foo.class, \"VALUE\")));"
+  }
+]

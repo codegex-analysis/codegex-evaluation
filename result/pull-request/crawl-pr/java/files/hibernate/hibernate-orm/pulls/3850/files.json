@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "599e4fe4a67d8f4e7cff8d64d3eae051202e8c8e",
+    "filename": "hibernate-core/src/main/java/org/hibernate/dialect/OracleDialect.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 83,
+    "changes": 83,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/dialect/OracleDialect.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/dialect/OracleDialect.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/main/java/org/hibernate/dialect/OracleDialect.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -29,7 +29,6 @@\n import org.hibernate.exception.spi.SQLExceptionConversionDelegate;\n import org.hibernate.exception.spi.TemplatedViolatedConstraintNameExtractor;\n import org.hibernate.exception.spi.ViolatedConstraintNameExtractor;\n-import org.hibernate.internal.CoreLogging;\n import org.hibernate.internal.util.JdbcExceptionHelper;\n import org.hibernate.internal.util.StringHelper;\n import org.hibernate.metamodel.mapping.EntityMappingType;\n@@ -57,18 +56,11 @@\n import org.hibernate.tool.schema.extract.internal.SequenceInformationExtractorOracleDatabaseImpl;\n import org.hibernate.tool.schema.extract.spi.SequenceInformationExtractor;\n import org.hibernate.type.StandardBasicTypes;\n-import org.hibernate.type.descriptor.JdbcTypeNameMapper;\n-import org.hibernate.type.descriptor.ValueBinder;\n-import org.hibernate.type.descriptor.WrapperOptions;\n-import org.hibernate.type.descriptor.java.JavaTypeDescriptor;\n-import org.hibernate.type.descriptor.sql.BasicBinder;\n import org.hibernate.type.descriptor.sql.BlobTypeDescriptor;\n-import org.hibernate.type.descriptor.sql.BooleanTypeDescriptor;\n import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;\n import org.hibernate.type.descriptor.sql.spi.SqlTypeDescriptorRegistry;\n \n import java.sql.CallableStatement;\n-import java.sql.PreparedStatement;\n import java.sql.ResultSet;\n import java.sql.SQLException;\n import java.sql.Types;\n@@ -78,8 +70,6 @@\n \n import javax.persistence.TemporalType;\n \n-import org.jboss.logging.Logger;\n-\n import static org.hibernate.exception.spi.TemplatedViolatedConstraintNameExtractor.extractUsingTemplate;\n import static org.hibernate.query.TemporalUnit.*;\n \n@@ -653,79 +643,6 @@ public void contributeTypes(TypeContributions typeContributions, ServiceRegistry\n \n \t\t\ttypeContributions.contributeSqlTypeDescriptor( descriptor );\n \t\t}\n-\t\ttypeContributions.contributeSqlTypeDescriptor( new OracleBooleanTypeDescriptor() );\n-\t}\n-\n-\tprivate static final class OracleBooleanTypeDescriptor extends BooleanTypeDescriptor {\n-\n-\t\tprivate static final Logger log = CoreLogging.logger( BasicBinder.class );\n-\n-\t\t@Override\n-\t\tpublic <X> ValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {\n-\t\t\treturn new ValueBinder<X>() {\n-\n-\t\t\t\tprivate static final String BIND_MSG_TEMPLATE = \"binding parameter [%s] as [%s] - [%s]\";\n-\t\t\t\tprivate static final String NULL_BIND_MSG_TEMPLATE = \"binding parameter [%s] as [%s] - [null]\";\n-\n-\t\t\t\t@Override\n-\t\t\t\tpublic final void bind(PreparedStatement st, X value, int index, WrapperOptions options) throws SQLException {\n-\t\t\t\t\tif ( value == null ) {\n-\t\t\t\t\t\tif ( log.isTraceEnabled() ) {\n-\t\t\t\t\t\t\tlog.trace(\n-\t\t\t\t\t\t\t\t\tString.format(\n-\t\t\t\t\t\t\t\t\t\t\tNULL_BIND_MSG_TEMPLATE,\n-\t\t\t\t\t\t\t\t\t\t\tindex,\n-\t\t\t\t\t\t\t\t\t\t\tJdbcTypeNameMapper.getTypeName( Types.BOOLEAN )\n-\t\t\t\t\t\t\t\t\t)\n-\t\t\t\t\t\t\t);\n-\t\t\t\t\t\t}\n-\t\t\t\t\t\tst.setNull( index, Types.BIT );\n-\t\t\t\t\t}\n-\t\t\t\t\telse {\n-\t\t\t\t\t\tif ( log.isTraceEnabled() ) {\n-\t\t\t\t\t\t\tlog.trace(\n-\t\t\t\t\t\t\t\t\tString.format(\n-\t\t\t\t\t\t\t\t\t\t\tBIND_MSG_TEMPLATE,\n-\t\t\t\t\t\t\t\t\t\t\tindex,\n-\t\t\t\t\t\t\t\t\t\t\tJdbcTypeNameMapper.getTypeName( Types.BOOLEAN ),\n-\t\t\t\t\t\t\t\t\t\t\tjavaTypeDescriptor.extractLoggableRepresentation( value )\n-\t\t\t\t\t\t\t\t\t)\n-\t\t\t\t\t\t\t);\n-\t\t\t\t\t\t}\n-\t\t\t\t\t\tst.setBoolean( index, javaTypeDescriptor.unwrap( value, Boolean.class, options ) );\n-\t\t\t\t\t}\n-\t\t\t\t}\n-\n-\t\t\t\t@Override\n-\t\t\t\tpublic final void bind(CallableStatement st, X value, String name, WrapperOptions options) throws SQLException {\n-\t\t\t\t\tif ( value == null ) {\n-\t\t\t\t\t\tif ( log.isTraceEnabled() ) {\n-\t\t\t\t\t\t\tlog.trace(\n-\t\t\t\t\t\t\t\t\tString.format(\n-\t\t\t\t\t\t\t\t\t\t\tNULL_BIND_MSG_TEMPLATE,\n-\t\t\t\t\t\t\t\t\t\t\tname,\n-\t\t\t\t\t\t\t\t\t\t\tJdbcTypeNameMapper.getTypeName( Types.BOOLEAN )\n-\t\t\t\t\t\t\t\t\t)\n-\t\t\t\t\t\t\t);\n-\t\t\t\t\t\t}\n-\t\t\t\t\t\tst.setNull( name, Types.BIT );\n-\t\t\t\t\t}\n-\t\t\t\t\telse {\n-\t\t\t\t\t\tif ( log.isTraceEnabled() ) {\n-\t\t\t\t\t\t\tlog.trace(\n-\t\t\t\t\t\t\t\t\tString.format(\n-\t\t\t\t\t\t\t\t\t\t\tBIND_MSG_TEMPLATE,\n-\t\t\t\t\t\t\t\t\t\t\tname,\n-\t\t\t\t\t\t\t\t\t\t\tJdbcTypeNameMapper.getTypeName( Types.BOOLEAN ),\n-\t\t\t\t\t\t\t\t\t\t\tjavaTypeDescriptor.extractLoggableRepresentation( value )\n-\t\t\t\t\t\t\t\t\t)\n-\t\t\t\t\t\t\t);\n-\t\t\t\t\t\t}\n-\t\t\t\t\t\tst.setBoolean( name, javaTypeDescriptor.unwrap( value, Boolean.class, options ) );\n-\t\t\t\t\t}\n-\t\t\t\t}\n-\t\t\t};\n-\t\t}\n \t}\n \n \t@Override"
+  },
+  {
+    "sha": "831da51f8e499659e80a50c3d59b3338c20f7d41",
+    "filename": "hibernate-core/src/main/java/org/hibernate/engine/spi/AbstractDelegatingWrapperOptions.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/engine/spi/AbstractDelegatingWrapperOptions.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/engine/spi/AbstractDelegatingWrapperOptions.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/main/java/org/hibernate/engine/spi/AbstractDelegatingWrapperOptions.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -28,6 +28,11 @@ public boolean useStreamForLobBinding() {\n \t\treturn delegate().useStreamForLobBinding();\n \t}\n \n+\t@Override\n+\tpublic int getPreferredSqlTypeCodeForBoolean() {\n+\t\treturn delegate().getPreferredSqlTypeCodeForBoolean();\n+\t}\n+\n \t@Override\n \tpublic LobCreator getLobCreator() {\n \t\treturn delegate().getLobCreator();"
+  },
+  {
+    "sha": "b3caaa247265ad8eb47e919de769062428cfae39",
+    "filename": "hibernate-core/src/main/java/org/hibernate/engine/spi/SessionDelegatorBaseImpl.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/engine/spi/SessionDelegatorBaseImpl.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/engine/spi/SessionDelegatorBaseImpl.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/main/java/org/hibernate/engine/spi/SessionDelegatorBaseImpl.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -1095,6 +1095,11 @@ public boolean useStreamForLobBinding() {\n \t\treturn delegate.useStreamForLobBinding();\n \t}\n \n+\t@Override\n+\tpublic int getPreferredSqlTypeCodeForBoolean() {\n+\t\treturn delegate.getPreferredSqlTypeCodeForBoolean();\n+\t}\n+\n \t@Override\n \tpublic LobCreator getLobCreator() {\n \t\treturn delegate.getLobCreator();"
+  },
+  {
+    "sha": "9861ba82aca8d9d301871d72a1b762d7e259474c",
+    "filename": "hibernate-core/src/main/java/org/hibernate/internal/AbstractSharedSessionContract.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/internal/AbstractSharedSessionContract.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/internal/AbstractSharedSessionContract.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/main/java/org/hibernate/internal/AbstractSharedSessionContract.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -558,6 +558,11 @@ public boolean useStreamForLobBinding() {\n \t\treturn fastSessionServices.useStreamForLobBinding;\n \t}\n \n+\t@Override\n+\tpublic int getPreferredSqlTypeCodeForBoolean() {\n+\t\treturn fastSessionServices.preferredSqlTypeCodeForBoolean;\n+\t}\n+\n \t@Override\n \tpublic LobCreator getLobCreator() {\n \t\treturn Hibernate.getLobCreator( this );"
+  },
+  {
+    "sha": "37270e0de02bfb090fef7bd241f72574a14b7c22",
+    "filename": "hibernate-core/src/main/java/org/hibernate/internal/FastSessionServices.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/internal/FastSessionServices.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/internal/FastSessionServices.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/main/java/org/hibernate/internal/FastSessionServices.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -142,6 +142,7 @@\n \t//Intentionally Package private:\n \tfinal boolean disallowOutOfTransactionUpdateOperations;\n \tfinal boolean useStreamForLobBinding;\n+\tfinal int preferredSqlTypeCodeForBoolean;\n \tfinal boolean requiresMultiTenantConnectionProvider;\n \tfinal ConnectionProvider connectionProvider;\n \tfinal MultiTenantConnectionProvider multiTenantConnectionProvider;\n@@ -210,6 +211,7 @@\n \t\tthis.dialect = jdbcServices.getJdbcEnvironment().getDialect();\n \t\tthis.disallowOutOfTransactionUpdateOperations = !sessionFactoryOptions.isAllowOutOfTransactionUpdateOperations();\n \t\tthis.useStreamForLobBinding = Environment.useStreamsForBinary() || dialect.useInputStreamToInsertBlob();\n+\t\tthis.preferredSqlTypeCodeForBoolean = sessionFactoryOptions.getPreferredSqlTypeCodeForBoolean();\n \t\tthis.requiresMultiTenantConnectionProvider = sf.getSettings().getMultiTenancyStrategy().requiresMultiTenantConnectionProvider();\n \n \t\t//Some \"hot\" services:\n@@ -343,4 +345,8 @@ public boolean useStreamForLobBinding() {\n \tpublic void firePostLoadEvent(final PostLoadEvent postLoadEvent) {\n \t\teventListenerGroup_POST_LOAD.fireEventOnEachListener( postLoadEvent, PostLoadEventListener::onPostLoad );\n \t}\n+\n+\tpublic int getPreferredSqlTypeCodeForBoolean() {\n+\t\treturn preferredSqlTypeCodeForBoolean;\n+\t}\n }"
+  },
+  {
+    "sha": "3121aa31cd47ae381322cb9ebfa59a4cf1f50a1f",
+    "filename": "hibernate-core/src/main/java/org/hibernate/sql/ast/spi/AbstractSqlAstTranslator.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/sql/ast/spi/AbstractSqlAstTranslator.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/sql/ast/spi/AbstractSqlAstTranslator.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/main/java/org/hibernate/sql/ast/spi/AbstractSqlAstTranslator.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -260,6 +260,11 @@ public boolean useStreamForLobBinding() {\n \t\t\treturn sessionFactory.getFastSessionServices().useStreamForLobBinding();\n \t\t}\n \n+\t\t@Override\n+\t\tpublic int getPreferredSqlTypeCodeForBoolean() {\n+\t\t\treturn sessionFactory.getFastSessionServices().getPreferredSqlTypeCodeForBoolean();\n+\t\t}\n+\n \t\t@Override\n \t\tpublic SqlTypeDescriptor remapSqlTypeDescriptor(SqlTypeDescriptor sqlTypeDescriptor) {\n \t\t\treturn sessionFactory.getFastSessionServices().remapSqlTypeDescriptor( sqlTypeDescriptor );"
+  },
+  {
+    "sha": "62f3e7caec7069ce1912a3907bffb2313a945af6",
+    "filename": "hibernate-core/src/main/java/org/hibernate/type/descriptor/WrapperOptions.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/type/descriptor/WrapperOptions.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/type/descriptor/WrapperOptions.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/main/java/org/hibernate/type/descriptor/WrapperOptions.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -33,6 +33,11 @@\n \t */\n \tboolean useStreamForLobBinding();\n \n+\t/**\n+\t * Get the JDBC {@link java.sql.Types type code} used to bind a null boolean value\n+\t */\n+\tint getPreferredSqlTypeCodeForBoolean();\n+\n \t/**\n \t * Obtain access to the {@link LobCreator}\n \t *"
+  },
+  {
+    "sha": "b12ffa5fd083bd0c86409e66baeba988ce16f9c8",
+    "filename": "hibernate-core/src/main/java/org/hibernate/type/descriptor/sql/BasicBinder.java",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 3,
+    "changes": 32,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/type/descriptor/sql/BasicBinder.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/type/descriptor/sql/BasicBinder.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/main/java/org/hibernate/type/descriptor/sql/BasicBinder.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -57,7 +57,7 @@ public final void bind(PreparedStatement st, J value, int index, WrapperOptions\n \t\t\t\t\t\t)\n \t\t\t\t);\n \t\t\t}\n-\t\t\tst.setNull( index, sqlDescriptor.getSqlType() );\n+\t\t\tdoBindNull( st, index, options );\n \t\t}\n \t\telse {\n \t\t\tif ( log.isTraceEnabled() ) {\n@@ -86,7 +86,7 @@ public final void bind(CallableStatement st, J value, String name, WrapperOption\n \t\t\t\t\t\t)\n \t\t\t\t);\n \t\t\t}\n-\t\t\tst.setNull( name, sqlDescriptor.getSqlType() );\n+\t\t\tdoBindNull( st, name, options );\n \t\t}\n \t\telse {\n \t\t\tif ( log.isTraceEnabled() ) {\n@@ -103,6 +103,32 @@ public final void bind(CallableStatement st, J value, String name, WrapperOption\n \t\t}\n \t}\n \n+\t/**\n+\t * Perform the null binding.\n+\t *\n+\t * @param st The prepared statement\n+\t * @param index The index at which to bind\n+\t * @param options The binding options\n+\t *\n+\t * @throws SQLException Indicates a problem binding to the prepared statement.\n+\t */\n+\tprotected void doBindNull(PreparedStatement st, int index, WrapperOptions options) throws SQLException {\n+\t\tst.setNull( index, sqlDescriptor.getSqlType() );\n+\t}\n+\n+\t/**\n+\t * Perform the null binding.\n+\t *\n+\t * @param st The CallableStatement\n+\t * @param name The name at which to bind\n+\t * @param options The binding options\n+\t *\n+\t * @throws SQLException Indicates a problem binding to the callable statement.\n+\t */\n+\tprotected void doBindNull(CallableStatement st, String name, WrapperOptions options) throws SQLException {\n+\t\tst.setNull( name, sqlDescriptor.getSqlType() );\n+\t}\n+\n \t/**\n \t * Perform the binding.  Safe to assume that value is not null.\n \t *\n@@ -124,7 +150,7 @@ protected abstract void doBind(PreparedStatement st, J value, int index, Wrapper\n \t * @param name The name at which to bind\n \t * @param options The binding options\n \t *\n-\t * @throws SQLException Indicates a problem binding to the prepared statement.\n+\t * @throws SQLException Indicates a problem binding to the callable statement.\n \t */\n \tprotected abstract void doBind(CallableStatement st, J value, String name, WrapperOptions options)\n \t\t\tthrows SQLException;"
+  },
+  {
+    "sha": "8db3f433b3b2d869a5532d9c22106015405c6893",
+    "filename": "hibernate-core/src/main/java/org/hibernate/type/descriptor/sql/BooleanTypeDescriptor.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 1,
+    "changes": 11,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/type/descriptor/sql/BooleanTypeDescriptor.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/main/java/org/hibernate/type/descriptor/sql/BooleanTypeDescriptor.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/main/java/org/hibernate/type/descriptor/sql/BooleanTypeDescriptor.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -12,7 +12,6 @@\n import java.sql.SQLException;\n import java.sql.Types;\n \n-import org.hibernate.dialect.Dialect;\n import org.hibernate.type.descriptor.ValueBinder;\n import org.hibernate.type.descriptor.ValueExtractor;\n import org.hibernate.type.descriptor.WrapperOptions;\n@@ -64,6 +63,16 @@ public boolean canBeRemapped() {\n \n \tpublic <X> ValueBinder<X> getBinder(final JavaTypeDescriptor<X> javaTypeDescriptor) {\n \t\treturn new BasicBinder<X>( javaTypeDescriptor, this ) {\n+\t\t\t@Override\n+\t\t\tprotected void doBindNull(PreparedStatement st, int index, WrapperOptions options) throws SQLException {\n+\t\t\t\tst.setNull( index, options.getPreferredSqlTypeCodeForBoolean() );\n+\t\t\t}\n+\n+\t\t\t@Override\n+\t\t\tprotected void doBindNull(CallableStatement st, String name, WrapperOptions options) throws SQLException {\n+\t\t\t\tst.setNull( name, options.getPreferredSqlTypeCodeForBoolean() );;\n+\t\t\t}\n+\n \t\t\t@Override\n \t\t\tprotected void doBind(PreparedStatement st, X value, int index, WrapperOptions options) throws SQLException {\n \t\t\t\tst.setBoolean( index, javaTypeDescriptor.unwrap( value, Boolean.class, options ) );"
+  },
+  {
+    "sha": "507759b90fc0bce275755177836ba6cd92cb709f",
+    "filename": "hibernate-core/src/test/java/org/hibernate/test/nationalized/MaterializedNClobBindTest.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/hibernate/hibernate-orm/blob/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/test/java/org/hibernate/test/nationalized/MaterializedNClobBindTest.java",
+    "raw_url": "https://github.com/hibernate/hibernate-orm/raw/a09d953a555d7ad504b8989ea94785faecf32e95/hibernate-core/src/test/java/org/hibernate/test/nationalized/MaterializedNClobBindTest.java",
+    "contents_url": "https://api.github.com/repos/hibernate/hibernate-orm/contents/hibernate-core/src/test/java/org/hibernate/test/nationalized/MaterializedNClobBindTest.java?ref=a09d953a555d7ad504b8989ea94785faecf32e95",
+    "patch": "@@ -12,6 +12,7 @@\n import java.sql.CallableStatement;\n import java.sql.PreparedStatement;\n import java.sql.SQLException;\n+import java.sql.Types;\n import java.util.TimeZone;\n \n import org.hibernate.engine.jdbc.LobCreator;\n@@ -98,6 +99,11 @@ public boolean useStreamForLobBinding() {\n \t\t\treturn useStreamForLobBinding;\n \t\t}\n \n+\t\t@Override\n+\t\tpublic int getPreferredSqlTypeCodeForBoolean() {\n+\t\t\treturn Types.BOOLEAN;\n+\t\t}\n+\n \t\t@Override\n \t\tpublic LobCreator getLobCreator() {\n \t\t\treturn NonContextualLobCreator.INSTANCE;"
+  }
+]

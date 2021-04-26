@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "959ec302073b67a844b57902101aa3bbbc8c5d5e",
+    "filename": "src/main/javassist/CtClassType.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 6,
+    "changes": 25,
+    "blob_url": "https://github.com/jboss-javassist/javassist/blob/64e15350cfdb7aa42a627e374d5c5de880fc9bed/src/main/javassist/CtClassType.java",
+    "raw_url": "https://github.com/jboss-javassist/javassist/raw/64e15350cfdb7aa42a627e374d5c5de880fc9bed/src/main/javassist/CtClassType.java",
+    "contents_url": "https://api.github.com/repos/jboss-javassist/javassist/contents/src/main/javassist/CtClassType.java?ref=64e15350cfdb7aa42a627e374d5c5de880fc9bed",
+    "patch": "@@ -179,24 +179,37 @@ public ClassFile getClassFile2() {\n     }\n \n     public ClassFile getClassFile3(boolean doCompress) {\n+        // quick path - no locking\n         ClassFile cfile = classfile;\n         if (cfile != null)\n             return cfile;\n \n         if (doCompress)\n             classPool.compress();\n \n-        if (rawClassfile != null) {\n+        byte[] rcfile;\n+        synchronized (this) {\n+            // repeat under lock to make sure we get a consistent result (classfile might have been set by another thread)\n+            cfile = classfile;\n+            if (cfile != null)\n+                return cfile;\n+\n+            rcfile = rawClassfile;\n+        }\n+\n+        if (rcfile != null) {\n+            final ClassFile cf;\n             try {\n-                ClassFile cf = new ClassFile(new DataInputStream(\n-                                             new ByteArrayInputStream(rawClassfile)));\n-                rawClassfile = null;\n-                getCount = GET_THRESHOLD;\n-                return setClassFile(cf);\n+                cf = new ClassFile(new DataInputStream(new ByteArrayInputStream(rcfile)));\n             }\n             catch (IOException e) {\n                 throw new RuntimeException(e.toString(), e);\n             }\n+            getCount = GET_THRESHOLD;\n+            synchronized (this) {\n+                rawClassfile = null;\n+                return setClassFile(cf);\n+            }\n         }\n \n         InputStream fin = null;"
+  }
+]

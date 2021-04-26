@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "574cf1954d32227930147cf9140a62ff0374cd32",
+    "filename": "CHANGELOG.md",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/applandinc/appmap-java/blob/ab4e7883107b45527e8d964586cf1d263040395c/CHANGELOG.md",
+    "raw_url": "https://github.com/applandinc/appmap-java/raw/ab4e7883107b45527e8d964586cf1d263040395c/CHANGELOG.md",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-java/contents/CHANGELOG.md?ref=ab4e7883107b45527e8d964586cf1d263040395c",
+    "patch": "@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.\n \n The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),\n and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n+## [0.5.2] - 2021-03-13\n+### Added\n+- Unnecessary return method info is removed before persisting.\n+\n ## [0.5.1] - 2021-03-09\n ### Added\n - System.err logs on configuration failures."
+  },
+  {
+    "sha": "37f5a9c384ec266eca1eff136065721a43d9e75b",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/applandinc/appmap-java/blob/ab4e7883107b45527e8d964586cf1d263040395c/build.gradle",
+    "raw_url": "https://github.com/applandinc/appmap-java/raw/ab4e7883107b45527e8d964586cf1d263040395c/build.gradle",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-java/contents/build.gradle?ref=ab4e7883107b45527e8d964586cf1d263040395c",
+    "patch": "@@ -20,7 +20,8 @@ repositories {\n   mavenCentral()\n }\n \n-version = '0.5.1'\n+version = '0.5.2'\n+\n \n dependencies {\n   implementation 'org.yaml:snakeyaml:1.25'"
+  },
+  {
+    "sha": "77ce47ff1f1421a6d4bb1a65627250d57a311e32",
+    "filename": "src/main/java/com/appland/appmap/output/v1/Event.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/applandinc/appmap-java/blob/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/output/v1/Event.java",
+    "raw_url": "https://github.com/applandinc/appmap-java/raw/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/output/v1/Event.java",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-java/contents/src/main/java/com/appland/appmap/output/v1/Event.java?ref=ab4e7883107b45527e8d964586cf1d263040395c",
+    "patch": "@@ -1,6 +1,7 @@\n package com.appland.appmap.output.v1;\n \n import com.alibaba.fastjson.annotation.JSONField;\n+import com.appland.appmap.transform.annotations.MethodEvent;\n import javassist.CtBehavior;\n \n import java.lang.reflect.Method;\n@@ -434,4 +435,10 @@ public Event freeze() {\n \n     return this;\n   }\n+\n+  public boolean isParentEventOf(Event other) {\n+    return this.definedClass.equals(other.definedClass)\n+            && this.methodId.equals(other.methodId)\n+            && this.lineNumber.equals(other.lineNumber);\n+  }\n }"
+  },
+  {
+    "sha": "c6a80bab0b991437d64486f872b7eebfe87b3b28",
+    "filename": "src/main/java/com/appland/appmap/output/v1/ExceptionValue.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 7,
+    "changes": 7,
+    "blob_url": "https://github.com/applandinc/appmap-java/blob/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/output/v1/ExceptionValue.java",
+    "raw_url": "https://github.com/applandinc/appmap-java/raw/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/output/v1/ExceptionValue.java",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-java/contents/src/main/java/com/appland/appmap/output/v1/ExceptionValue.java?ref=ab4e7883107b45527e8d964586cf1d263040395c",
+    "patch": "@@ -1,13 +1,6 @@\n package com.appland.appmap.output.v1;\n \n import com.alibaba.fastjson.annotation.JSONField;\n-import com.alibaba.fastjson.serializer.JSONSerializer;\n-import com.alibaba.fastjson.serializer.ObjectSerializer;\n-import com.alibaba.fastjson.serializer.SerializeConfig;\n-import com.alibaba.fastjson.serializer.SerializeWriter;\n-\n-import java.io.IOException;\n-import java.lang.reflect.Type;\n \n /**\n  * A serializable snapshot of a runtime exception."
+  },
+  {
+    "sha": "4342943be78b243cc1529b01aef959008cd5c93f",
+    "filename": "src/main/java/com/appland/appmap/record/Recorder.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 7,
+    "changes": 25,
+    "blob_url": "https://github.com/applandinc/appmap-java/blob/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/record/Recorder.java",
+    "raw_url": "https://github.com/applandinc/appmap-java/raw/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/record/Recorder.java",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-java/contents/src/main/java/com/appland/appmap/record/Recorder.java?ref=ab4e7883107b45527e8d964586cf1d263040395c",
+    "patch": "@@ -1,19 +1,15 @@\n package com.appland.appmap.record;\n \n-import java.io.File;\n-import java.io.FileWriter;\n import java.io.IOException;\n-import java.nio.file.Paths;\n-import java.util.Collection;\n-import java.util.HashMap;\n-import java.util.LinkedList;\n-import java.util.Map;\n+import java.util.*;\n \n import com.appland.appmap.output.v1.CodeObject;\n import com.appland.appmap.output.v1.Event;\n import com.appland.appmap.record.IRecordingSession.Metadata;\n import com.appland.appmap.util.Logger;\n \n+import static com.appland.appmap.util.EventUtil.*;\n+\n /**\n  * Recorder is a singleton responsible for managing recording sessions and routing events to any\n  * active session. It also maintains a code object tree containing every known package/class/method.\n@@ -25,6 +21,7 @@\n   private IRecordingSession activeSession = null;\n   private CodeObjectTree globalCodeObjects = new CodeObjectTree();\n   private Map<Long, Event> queuedEvents = new HashMap<Long, Event>();\n+  private Stack<Event> callStack = new Stack<>();\n \n   private static Recorder instance = new Recorder();\n \n@@ -138,6 +135,20 @@ private void queueEvent(Event event) throws ActiveSessionException {\n \n       recordingSession = this.activeSession;\n       pendingEvent = this.queuedEvents.get(event.threadId);\n+\n+      if (isReturnEvent(event)) {\n+            Event lastEventInStack = callStack.peek();\n+            if (lastEventInStack.isParentEventOf(event) ) {\n+              callStack.pop();\n+              event.setParentId(lastEventInStack.id);\n+              removeUnnecessaryInfoForReturnEvents(event);\n+            } else {\n+              callStack.push(event);\n+            }\n+      } else {\n+        callStack.push(event);\n+      }\n+\n       this.queuedEvents.put(event.threadId, event);\n     }\n "
+  },
+  {
+    "sha": "28c02a92b116b0a181ba200f72e46b0b56836901",
+    "filename": "src/main/java/com/appland/appmap/record/RecordingSessionGeneric.java",
+    "status": "modified",
+    "additions": 47,
+    "deletions": 34,
+    "changes": 81,
+    "blob_url": "https://github.com/applandinc/appmap-java/blob/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/record/RecordingSessionGeneric.java",
+    "raw_url": "https://github.com/applandinc/appmap-java/raw/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/record/RecordingSessionGeneric.java",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-java/contents/src/main/java/com/appland/appmap/record/RecordingSessionGeneric.java?ref=ab4e7883107b45527e8d964586cf1d263040395c",
+    "patch": "@@ -2,44 +2,57 @@\n \n import com.appland.appmap.output.v1.CodeObject;\n import com.appland.appmap.output.v1.Event;\n-import com.appland.appmap.util.Logger;\n \n-import java.util.Vector;\n import java.util.HashSet;\n+import java.util.Optional;\n+import java.util.Vector;\n \n public class RecordingSessionGeneric implements IRecordingSession {\n-  protected Vector<Event> events = new Vector<Event>();\n-  protected HashSet<String> classReferences = new HashSet<>();\n-\n-  public synchronized void add(Event event) {\n-    this.events.add(event);\n-\n-    final String key = event.definedClass +\n-      \":\" + event.methodId +\n-      \":\" + event.isStatic + \n-      \":\" + event.lineNumber;\n-    this.classReferences.add(key);\n-  }\n-\n-  public void start() {\n-    throw new UnsupportedOperationException();\n-  }\n-\n-  public String stop() {\n-    throw new UnsupportedOperationException();\n-  }\n-\n-  protected CodeObjectTree getClassMap() {\n-    CodeObjectTree registeredObjects = Recorder.getInstance().getRegisteredObjects();\n-    CodeObjectTree classMap = new CodeObjectTree();\n-    for (String key: this.classReferences) {\n-      String[] parts = key.split(\":\");\n-     \n-      CodeObject methodBranch = registeredObjects.getMethodBranch(parts[0], parts[1], Boolean.valueOf(parts[2]), Integer.valueOf(parts[3]));\n-      if (methodBranch != null)\n-        classMap.add(methodBranch);\n+    protected Vector<Event> events = new Vector<Event>();\n+    protected HashSet<String> classReferences = new HashSet<>();\n+\n+    public synchronized void add(Event event) {\n+        this.events.add(event);\n+\n+        if (event.parentId == null) {\n+            this.classReferences.add(\n+                    event.definedClass +\n+                            \":\" + event.methodId +\n+                            \":\" + event.isStatic +\n+                            \":\" + event.lineNumber);\n+        } else {\n+          Optional.ofNullable(events.stream()\n+                    .filter(it -> it.id == event.parentId)\n+                    .findFirst()\n+                    .orElseThrow(() -> new IllegalArgumentException(\"Missing parent Event.\")))\n+                  .ifPresent( parentEvent ->\n+                          this.classReferences.add(parentEvent.definedClass +\n+                                  \":\" + parentEvent.methodId +\n+                                  \":\" + parentEvent.isStatic +\n+                                  \":\" + parentEvent.lineNumber)\n+                  );\n+        }\n     }\n \n-    return classMap;\n-  }\n+    public void start() {\n+        throw new UnsupportedOperationException();\n+    }\n+\n+    public String stop() {\n+        throw new UnsupportedOperationException();\n+    }\n+\n+    protected CodeObjectTree getClassMap() {\n+        CodeObjectTree registeredObjects = Recorder.getInstance().getRegisteredObjects();\n+        CodeObjectTree classMap = new CodeObjectTree();\n+        for (String key : this.classReferences) {\n+            String[] parts = key.split(\":\");\n+\n+            CodeObject methodBranch = registeredObjects.getMethodBranch(parts[0], parts[1], Boolean.valueOf(parts[2]), Integer.valueOf(parts[3]));\n+            if (methodBranch != null)\n+                classMap.add(methodBranch);\n+        }\n+\n+        return classMap;\n+    }\n }"
+  },
+  {
+    "sha": "99b818134dfaf23a572cacbad1745f033bfa493d",
+    "filename": "src/main/java/com/appland/appmap/util/EventUtil.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/applandinc/appmap-java/blob/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/util/EventUtil.java",
+    "raw_url": "https://github.com/applandinc/appmap-java/raw/ab4e7883107b45527e8d964586cf1d263040395c/src/main/java/com/appland/appmap/util/EventUtil.java",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-java/contents/src/main/java/com/appland/appmap/util/EventUtil.java?ref=ab4e7883107b45527e8d964586cf1d263040395c",
+    "patch": "@@ -0,0 +1,29 @@\n+package com.appland.appmap.util;\n+\n+import com.appland.appmap.output.v1.Event;\n+import com.appland.appmap.transform.annotations.MethodEvent;\n+\n+public class EventUtil {\n+\n+    /**\n+     *\n+     * @param event\n+     * @return true is the event is of type return\n+     */\n+    public static boolean isReturnEvent(Event event) {\n+        return event.event.equalsIgnoreCase(MethodEvent.METHOD_RETURN.getEventString());\n+    }\n+\n+    /**\n+     * Removes unnecessary or duplicated fields depending on the event type\n+     */\n+    public static void removeUnnecessaryInfoForReturnEvents(Event event) {\n+        if (event != null && event.event != null && isReturnEvent(event)) {\n+            if(event.path!=null) event.path = null;\n+            if(event.lineNumber!=null) event.lineNumber = null;\n+            if(event.isStatic != null) event.isStatic = null;\n+            if(event.definedClass!=null) event.definedClass= null;\n+            if(event.methodId != null) event.methodId = null;\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "1b91a14e690637b314edd3fcd62c4a549e2ddfd3",
+    "filename": "src/test/java/com/appland/appmap/record/RecorderTest.java",
+    "status": "modified",
+    "additions": 81,
+    "deletions": 25,
+    "changes": 106,
+    "blob_url": "https://github.com/applandinc/appmap-java/blob/ab4e7883107b45527e8d964586cf1d263040395c/src/test/java/com/appland/appmap/record/RecorderTest.java",
+    "raw_url": "https://github.com/applandinc/appmap-java/raw/ab4e7883107b45527e8d964586cf1d263040395c/src/test/java/com/appland/appmap/record/RecorderTest.java",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-java/contents/src/test/java/com/appland/appmap/record/RecorderTest.java?ref=ab4e7883107b45527e8d964586cf1d263040395c",
+    "patch": "@@ -1,22 +1,23 @@\n package com.appland.appmap.record;\n \n-import static org.junit.Assert.assertEquals;\n-\n import com.appland.appmap.output.v1.Event;\n \n import org.apache.commons.lang3.StringUtils;\n+import org.junit.After;\n import org.junit.Before;\n import org.junit.Test;\n \n-public class RecorderTest {\n+import static org.junit.Assert.*;\n \n-  @Before\n-  public void before() throws Exception {\n-    final IRecordingSession.Metadata metadata =\n-        new IRecordingSession.Metadata();\n+public class RecorderTest {\n \n-    Recorder.getInstance().start(metadata);\n-  }\n+    @Before\n+    public void before() throws Exception {\n+        final IRecordingSession.Metadata metadata =\n+                new IRecordingSession.Metadata();\n+        if (!Recorder.getInstance().hasActiveSession())\n+            Recorder.getInstance().start(metadata);\n+    }\n \n   @Test\n   public void testAllEventsWritten() {\n@@ -28,22 +29,77 @@ public void testAllEventsWritten() {\n       new Event(),\n     };\n \n-    for (int i = 0; i < events.length; i++) {\n-      final Event event = events[i];\n-      event\n-        .setDefinedClass(\"SomeClass\")\n-        .setMethodId(\"SomeMethod\")\n-        .setStatic(false)\n-        .setLineNumber(315)\n-        .setThreadId(threadId);\n-\n-      recorder.add(event);\n-      assertEquals(event, recorder.getLastEvent());\n+      for (int i = 0; i < events.length; i++) {\n+          final Event event = events[i];\n+          event\n+                    .setDefinedClass(\"org.springframework.mock.web.MockFilterChain$ServletFilterProxy\")\n+                    .setEvent(\"call\")\n+                    .setHttpClientRequest(\"GET\", \"/owners/edit\", \"HTTP/1.1\")\n+                    .setLineNumber(167)\n+                    .setMethodId(\"doFilter\")\n+                    .setPath(\"src/main/java/org/springframework/mock/web/MockFilterChain.java\")\n+                    .setStatic(false)\n+                    .setThreadId(threadId);\n+\n+            recorder.add(event);\n+            assertEquals(event, recorder.getLastEvent());\n+        }\n+\n+        final String appmapJson = recorder.stop();\n+        final String expectedJson = \"\\\"thread_id\\\":\" + threadId.toString();\n+        final int numMatches = StringUtils.countMatches(appmapJson, expectedJson);\n+        assertEquals(numMatches, events.length);\n     }\n \n-    final String appmapJson = recorder.stop();\n-    final String expectedJson = \"\\\"thread_id\\\":\" + threadId.toString();\n-    final int numMatches = StringUtils.countMatches(appmapJson, expectedJson);\n-    assertEquals(numMatches, events.length);\n-  }\n+    @Test\n+    public void testReturnEventIsLinkedToParentEvent() {\n+        Recorder recorder = Recorder.getInstance();\n+        final Long threadId = Thread.currentThread().getId();\n+\n+        final Event parentEvent = new Event()\n+                .setDefinedClass(\"org.springframework.mock.web.MockFilterChain$ServletFilterProxy\")\n+                .setEvent(\"call\")\n+                .setHttpClientRequest(\"GET\", \"/owners/new\", \"HTTP/1.1\")\n+                .setLineNumber(167)\n+                .setMethodId(\"doFilter\")\n+                .setPath(\"src/main/java/org/springframework/mock/web/MockFilterChain.java\")\n+                .setStatic(false)\n+                .setThreadId(threadId);\n+\n+        final Event returnEvent = new Event()\n+                .setDefinedClass(\"org.springframework.mock.web.MockFilterChain$ServletFilterProxy\")\n+                .setEvent(\"return\")\n+                .setHttpClientResponse(200, \"text/html;charset=UTF-8\")\n+                .setLineNumber(167)\n+                .setMethodId(\"doFilter\")\n+                .setPath(\"src/main/java/org/springframework/mock/web/MockFilterChain.java\")\n+                .setStatic(false)\n+                .setThreadId(threadId);\n+\n+        assertNull(returnEvent.parentId);\n+\n+        recorder.add(parentEvent);\n+        recorder.add(returnEvent);\n+\n+        assertRecordedReturnEventProperties(recorder.getLastEvent());\n+        assertNotNull(recorder.getLastEvent().parentId);\n+        assertEquals(parentEvent.id, recorder.getLastEvent().parentId);\n+\n+    }\n+\n+    private void assertRecordedReturnEventProperties(Event event) {\n+        assertNull(event.definedClass);\n+        assertNull(event.httpClientRequest);\n+        assertNull(event.sqlQuery);\n+        assertNull(event.lineNumber);\n+        assertNull(event.path);\n+        assertNull(event.isStatic);\n+        assertNull(event.methodId);\n+    }\n+\n+    @After\n+    public void tearDown(){\n+        if (Recorder.getInstance().hasActiveSession())\n+            Recorder.getInstance().stop();\n+    }\n }"
+  }
+]

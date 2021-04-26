@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "cd003487e2429a33ef77420c990d7bd49a02e4bb",
+    "filename": "src/main/java/com/project/smartStore/SmartStoreApplication.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/f-lab-edu/smart-store/blob/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/SmartStoreApplication.java",
+    "raw_url": "https://github.com/f-lab-edu/smart-store/raw/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/SmartStoreApplication.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/smart-store/contents/src/main/java/com/project/smartStore/SmartStoreApplication.java?ref=0bb0dd80e7a146f5004c320bd270713c05147013",
+    "patch": "@@ -1,7 +1,13 @@\n package com.project.smartStore;\n \n+import javax.sql.DataSource;\n+import org.apache.ibatis.session.SqlSessionFactory;\n+import org.mybatis.spring.SqlSessionFactoryBean;\n import org.springframework.boot.SpringApplication;\n import org.springframework.boot.autoconfigure.SpringBootApplication;\n+import org.springframework.context.annotation.Bean;\n+import org.springframework.core.io.Resource;\n+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;\n \n @SpringBootApplication\n public class SmartStoreApplication {\n@@ -10,4 +16,15 @@ public static void main(String[] args) {\n \t\tSpringApplication.run(SmartStoreApplication.class, args);\n \t}\n \n+\t@Bean\n+\tpublic SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {\n+\t\tSqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();\n+\t\tsessionFactory.setDataSource(dataSource);\n+\n+\t\tResource[] res = new PathMatchingResourcePatternResolver().getResources(\"classpath:mappers/*Mapper.xml\");\n+\t\tsessionFactory.setMapperLocations(res);\n+\n+\t\treturn sessionFactory.getObject();\n+\t}\n+\n }"
+  },
+  {
+    "sha": "8d31f1cbe5ed317d21383a7df0c62eb3308c44d0",
+    "filename": "src/main/java/com/project/smartStore/customer/CustomerController.java",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/f-lab-edu/smart-store/blob/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerController.java",
+    "raw_url": "https://github.com/f-lab-edu/smart-store/raw/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerController.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/smart-store/contents/src/main/java/com/project/smartStore/customer/CustomerController.java?ref=0bb0dd80e7a146f5004c320bd270713c05147013",
+    "patch": "@@ -0,0 +1,52 @@\n+package com.project.smartStore.customer;\n+\n+import org.springframework.web.bind.annotation.DeleteMapping;\n+import org.springframework.web.bind.annotation.GetMapping;\n+import org.springframework.web.bind.annotation.PathVariable;\n+import org.springframework.web.bind.annotation.PostMapping;\n+import org.springframework.web.bind.annotation.PutMapping;\n+import org.springframework.web.bind.annotation.RequestBody;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RestController;\n+\n+@RestController\n+@RequestMapping(\"/customer\")\n+public class CustomerController {\n+\n+  private final CustomerService customerService;\n+\n+  public CustomerController(CustomerService customerService) {\n+    this.customerService = customerService;\n+  }\n+\n+  @PostMapping\n+  public boolean registerCustomer(@RequestBody CustomerDTO customerDTO){\n+    return customerService.registerCustomer(customerDTO);\n+  }\n+\n+  @GetMapping(\"/{id}\")\n+  public CustomerDTO getCustomerDetail(@PathVariable String id){\n+    return customerService.getCustomerDetailById(id);\n+  }\n+\n+  @PutMapping(\"/pwd/{id}\")\n+  public boolean modifyCustomerPwd(@PathVariable String id, @RequestBody CustomerDTO customerDTO){\n+    return customerService.modifiyPwd(id, customerDTO.getPassword());\n+  }\n+\n+  @PutMapping(\"/name/{id}\")\n+  public boolean modifyCustomerName(@PathVariable String id, @RequestBody CustomerDTO customerDTO){\n+    return customerService.modifiyName(id, customerDTO.getName());\n+  }\n+\n+  @PutMapping(\"/phone-num/{id}\")\n+  public boolean modifyCustomerPhoneNum(@PathVariable String id, @RequestBody CustomerDTO customerDTO){\n+    return customerService.modifiyPhoneNum(id, customerDTO.getPhoneNum());\n+  }\n+\n+  @DeleteMapping(\"/{id}\")\n+  public boolean deleteCustomer(@PathVariable String id){\n+    return customerService.deleteCustomer(id);\n+  }\n+\n+}"
+  },
+  {
+    "sha": "ce833cef9f970c54d48e0cce9bbd6f50ebb06d54",
+    "filename": "src/main/java/com/project/smartStore/customer/CustomerDTO.java",
+    "status": "added",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/f-lab-edu/smart-store/blob/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerDTO.java",
+    "raw_url": "https://github.com/f-lab-edu/smart-store/raw/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerDTO.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/smart-store/contents/src/main/java/com/project/smartStore/customer/CustomerDTO.java?ref=0bb0dd80e7a146f5004c320bd270713c05147013",
+    "patch": "@@ -0,0 +1,20 @@\n+package com.project.smartStore.customer;\n+\n+import lombok.AllArgsConstructor;\n+import lombok.Getter;\n+import lombok.NoArgsConstructor;\n+import lombok.Setter;\n+import lombok.ToString;\n+\n+@AllArgsConstructor\n+@NoArgsConstructor\n+@Getter\n+@Setter\n+@ToString\n+public class CustomerDTO {\n+\n+  private String id;\n+  private String password;\n+  private String name;\n+  private String phoneNum;\n+}"
+  },
+  {
+    "sha": "1701824f782e2d5c0583de8d4e17c647d395d6a5",
+    "filename": "src/main/java/com/project/smartStore/customer/CustomerMapper.java",
+    "status": "added",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/f-lab-edu/smart-store/blob/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerMapper.java",
+    "raw_url": "https://github.com/f-lab-edu/smart-store/raw/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerMapper.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/smart-store/contents/src/main/java/com/project/smartStore/customer/CustomerMapper.java?ref=0bb0dd80e7a146f5004c320bd270713c05147013",
+    "patch": "@@ -0,0 +1,17 @@\n+package com.project.smartStore.customer;\n+\n+import java.sql.SQLIntegrityConstraintViolationException;\n+import org.apache.ibatis.annotations.Mapper;\n+\n+@Mapper\n+public interface CustomerMapper {\n+\n+  CustomerDTO selectCustomerDetailById(String id);\n+  void insertCustomer(CustomerDTO params) throws SQLIntegrityConstraintViolationException;\n+  int updateCustomerPwd(String id, String updatePwd);\n+  int updateCustomerName(String id, String updateName);\n+  int updateCustomerPhoneNum(String id, String updatePhoneNum);\n+  int deleteCustomerById(String id);\n+\n+\n+}"
+  },
+  {
+    "sha": "8232d3fd2f25e2670e8791e571f0900dc9f4a82a",
+    "filename": "src/main/java/com/project/smartStore/customer/CustomerService.java",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/f-lab-edu/smart-store/blob/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerService.java",
+    "raw_url": "https://github.com/f-lab-edu/smart-store/raw/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerService.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/smart-store/contents/src/main/java/com/project/smartStore/customer/CustomerService.java?ref=0bb0dd80e7a146f5004c320bd270713c05147013",
+    "patch": "@@ -0,0 +1,13 @@\n+package com.project.smartStore.customer;\n+\n+public interface CustomerService {\n+\n+  boolean registerCustomer(CustomerDTO params);\n+  CustomerDTO getCustomerDetailById(String id);\n+  boolean modifiyPwd(String email, String pwd);\n+  boolean modifiyName(String email, String name);\n+  boolean modifiyPhoneNum(String email, String phoneNum);\n+  boolean deleteCustomer(String email);\n+\n+\n+}"
+  },
+  {
+    "sha": "3694e696be0ebfed4db6d051aa444f018cfb4b20",
+    "filename": "src/main/java/com/project/smartStore/customer/CustomerServiceImpl.java",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/f-lab-edu/smart-store/blob/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerServiceImpl.java",
+    "raw_url": "https://github.com/f-lab-edu/smart-store/raw/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/java/com/project/smartStore/customer/CustomerServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/smart-store/contents/src/main/java/com/project/smartStore/customer/CustomerServiceImpl.java?ref=0bb0dd80e7a146f5004c320bd270713c05147013",
+    "patch": "@@ -0,0 +1,52 @@\n+package com.project.smartStore.customer;\n+\n+import java.sql.SQLIntegrityConstraintViolationException;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.stereotype.Service;\n+\n+@Service\n+public class CustomerServiceImpl implements CustomerService{\n+\n+  @Autowired\n+  private CustomerMapper customerMapper;\n+\n+  @Override\n+  public boolean registerCustomer(CustomerDTO params){\n+    try{\n+      customerMapper.insertCustomer(params);\n+    }catch (Exception e){\n+      e.printStackTrace();\n+      return false;\n+    }\n+    return true;\n+  }\n+  @Override\n+  public CustomerDTO getCustomerDetailById(String id) {\n+    return customerMapper.selectCustomerDetailById(id);\n+  }\n+\n+  @Override\n+  public boolean modifiyPwd(String id, String pwd) {\n+    int result = customerMapper.updateCustomerPwd(id, pwd);\n+    return result == 1;\n+  }\n+\n+  @Override\n+  public boolean modifiyName(String id, String name) {\n+    int result = customerMapper.updateCustomerName(id, name);\n+    return result == 1;\n+  }\n+\n+  @Override\n+  public boolean modifiyPhoneNum(String id, String phoneNum) {\n+    int result = customerMapper.updateCustomerPhoneNum(id, phoneNum);\n+    return result == 1;\n+  }\n+\n+\n+  @Override\n+  public boolean deleteCustomer(String id) {\n+    int result = customerMapper.deleteCustomerById(id);\n+    return result == 1;\n+  }\n+}"
+  },
+  {
+    "sha": "219b39a3584056f1deb85d9d59cbfe29fbb9dd4d",
+    "filename": "src/main/resources/application.properties",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 3,
+    "changes": 7,
+    "blob_url": "https://github.com/f-lab-edu/smart-store/blob/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/resources/application.properties",
+    "raw_url": "https://github.com/f-lab-edu/smart-store/raw/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/smart-store/contents/src/main/resources/application.properties?ref=0bb0dd80e7a146f5004c320bd270713c05147013",
+    "patch": "@@ -5,6 +5,7 @@ server.port=8080\n \n # DataBase\n spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver\n-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/local_db_account?serverTimezone=UTC&useUniCode=yes&characterEncoding=UTF-8\n-spring.datasource.username=yourid\n-spring.datasource.password=yourpw\n\\ No newline at end of file\n+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/smartstore_db?serverTimezone=UTC&useUniCode=yes&characterEncoding=UTF-8\n+spring.datasource.username=root\n+spring.datasource.password=1234\n+"
+  },
+  {
+    "sha": "7e85115012534330c02c54a3d766b5fed5e8e7da",
+    "filename": "src/main/resources/mappers/CustomerMapper.xml",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/f-lab-edu/smart-store/blob/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/resources/mappers/CustomerMapper.xml",
+    "raw_url": "https://github.com/f-lab-edu/smart-store/raw/0bb0dd80e7a146f5004c320bd270713c05147013/src/main/resources/mappers/CustomerMapper.xml",
+    "contents_url": "https://api.github.com/repos/f-lab-edu/smart-store/contents/src/main/resources/mappers/CustomerMapper.xml?ref=0bb0dd80e7a146f5004c320bd270713c05147013",
+    "patch": "@@ -0,0 +1,39 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\"\n+  \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n+\n+<mapper namespace=\"com.project.smartStore.customer.CustomerMapper\">\n+\n+  <insert id=\"insertCustomer\"\n+    parameterType=\"com.project.smartStore.customer.CustomerDTO\">\n+    INSERT INTO customer (id, password, name, phone_num)\n+        values\n+        (#{id}, #{password}, #{name}, #{phoneNum})\n+  </insert>\n+\n+  <select id=\"selectCustomerDetailById\"\n+    parameterType=\"String\" resultType=\"com.project.smartStore.customer.CustomerDTO\">\n+    SELECT id, name, phone_num as phoneNum FROM customer where id = #{id};\n+  </select>\n+\n+  <update id=\"updateCustomerPwd\"\n+    parameterType=\"String\" >\n+    UPDATE customer SET password = #{updatePwd} WHERE id = #{id};\n+  </update>\n+\n+  <update id=\"updateCustomerName\"\n+    parameterType=\"String\" >\n+    UPDATE customer SET name = #{updateName} WHERE id = #{id};\n+  </update>\n+\n+  <update id=\"updateCustomerPhoneNum\"\n+    parameterType=\"String\" >\n+    UPDATE customer SET phone_num = #{updatePhoneNum} WHERE id = #{id};\n+  </update>\n+\n+  <delete id=\"deleteCustomerById\"\n+    parameterType=\"String\">\n+    DELETE FROM customer WHERE id = #{id};\n+  </delete>\n+\n+</mapper>\n\\ No newline at end of file"
+  }
+]

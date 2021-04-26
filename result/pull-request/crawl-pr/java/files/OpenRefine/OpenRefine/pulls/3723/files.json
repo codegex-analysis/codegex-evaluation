@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "438a3bd8a08abde0599437bf6364cf51c2c1e0b3",
+    "filename": "extensions/wikidata/src/org/openrefine/wikidata/schema/WbDateVariable.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/src/org/openrefine/wikidata/schema/WbDateVariable.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/src/org/openrefine/wikidata/schema/WbDateVariable.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/src/org/openrefine/wikidata/schema/WbDateVariable.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -53,6 +53,9 @@ public WbDateVariable(String columnName) {\n     @Override\n     public TimeValue fromCell(Cell cell, ExpressionContext ctxt)\n             throws SkipSchemaExpressionException {\n+        if (cell == null || cell.value == null) {\n+            throw new SkipSchemaExpressionException();\n+        }\n         try {\n             // parsed dates are accepted by converting them to strings\n             return WbDateConstant.parse(cell.value.toString());"
+  },
+  {
+    "sha": "25b9b2db19efcd2ea5db86ebd178fcb5117d00aa",
+    "filename": "extensions/wikidata/src/org/openrefine/wikidata/schema/WbLocationVariable.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/src/org/openrefine/wikidata/schema/WbLocationVariable.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/src/org/openrefine/wikidata/schema/WbLocationVariable.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/src/org/openrefine/wikidata/schema/WbLocationVariable.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -46,6 +46,9 @@ public WbLocationVariable(String columnName) {\n     @Override\n     public GlobeCoordinatesValue fromCell(Cell cell, ExpressionContext ctxt)\n             throws SkipSchemaExpressionException {\n+        if (cell == null || cell.value == null) {\n+            throw new SkipSchemaExpressionException();\n+        }\n         String expr = cell.value.toString();\n         try {\n             return WbLocationConstant.parse(expr);"
+  },
+  {
+    "sha": "6ecbfa9c71aa27c593aba547bdae4da58750edbf",
+    "filename": "extensions/wikidata/src/org/openrefine/wikidata/schema/WbStringVariable.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/src/org/openrefine/wikidata/schema/WbStringVariable.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/src/org/openrefine/wikidata/schema/WbStringVariable.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/src/org/openrefine/wikidata/schema/WbStringVariable.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -56,7 +56,7 @@ public WbStringVariable(String columnName) {\n     @Override\n     public StringValue fromCell(Cell cell, ExpressionContext ctxt)\n             throws SkipSchemaExpressionException {\n-        if (!cell.value.toString().isEmpty()) {\n+        if (cell != null && !cell.value.toString().isEmpty()) {\n         \tString stringValue = cell.value.toString();\n         \tif (cell.value instanceof Double && ((Double)cell.value) % 1 == 0) {\n         \t\tstringValue = Long.toString(((Double)cell.value).longValue());"
+  },
+  {
+    "sha": "a68b1e9811bf8d7de7f50ee92006cb48d1260160",
+    "filename": "extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbDateVariableTest.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbDateVariableTest.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbDateVariableTest.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbDateVariableTest.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -61,6 +61,16 @@ public void testSkipped() {\n         isSkipped(\"  2018-XX\");\n         isSkipped(\"invalid format\");\n     }\n+    \n+    @Test\n+    public void testNullStringValue() {\n+        isSkipped((String) null);\n+    }\n+    \n+    @Test\n+    public void testNullCell() {\n+        isSkipped((Cell) null);\n+    }\n \n     @Test\n     public void testNumber() {"
+  },
+  {
+    "sha": "bf9363aa85e05f7ed7ee37f7ba4586fdc8e63822",
+    "filename": "extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbItemVariableTest.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbItemVariableTest.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbItemVariableTest.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbItemVariableTest.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -82,6 +82,16 @@ public void testInvalidSpace() {\n     public void testUnreconciledCell() {\n         isSkipped(\"some value\");\n     }\n+    \n+    @Test\n+    public void testNullCell() {\n+        isSkipped((Cell) null);\n+    }\n+    \n+    @Test\n+    public void testNullStringValue() {\n+        isSkipped((String) null);\n+    }\n \n     @Test\n     public void testSerialize() {"
+  },
+  {
+    "sha": "e1187ee323e644e7afa7ecb4308a2d0289de71c7",
+    "filename": "extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbLanguageVariableTest.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbLanguageVariableTest.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbLanguageVariableTest.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbLanguageVariableTest.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -26,6 +26,8 @@\n import org.openrefine.wikidata.testing.JacksonSerializationTest;\n import org.testng.annotations.Test;\n \n+import com.google.refine.model.Cell;\n+\n public class WbLanguageVariableTest extends WbVariableTest<String> {\n \n     @Override\n@@ -46,6 +48,11 @@ public void testInvalidLanguageCode() {\n         isSkipped((String) null);\n         isSkipped(\"\");\n     }\n+    \n+    @Test\n+    public void testNullCell() {\n+        isSkipped((Cell) null);\n+    }\n \n     @Test\n     public void testSerialize() {"
+  },
+  {
+    "sha": "5c7407a0beea3c000b62315a6a1384ccadb87449",
+    "filename": "extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbLocationVariableTest.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbLocationVariableTest.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbLocationVariableTest.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbLocationVariableTest.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -28,6 +28,8 @@\n import org.wikidata.wdtk.datamodel.helpers.Datamodel;\n import org.wikidata.wdtk.datamodel.interfaces.GlobeCoordinatesValue;\n \n+import com.google.refine.model.Cell;\n+\n public class WbLocationVariableTest extends WbVariableTest<GlobeCoordinatesValue> {\n \n     @Override\n@@ -62,6 +64,15 @@ public void testOnlyOneValue() {\n     public void testEmpty() {\n         isSkipped(\"\");\n     }\n+    \n+    @Test\n+    public void testNullStringValue() {\n+        isSkipped((String) null);\n+    }\n+    \n+    public void testNullCell() {\n+        isSkipped((Cell) null);\n+    }\n \n     @Test\n     public void testSerialize() {"
+  },
+  {
+    "sha": "b30889e1269ac56d3faa9c2386be6d76ad594829",
+    "filename": "extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbStringVariableTest.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbStringVariableTest.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbStringVariableTest.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/extensions/wikidata/tests/src/org/openrefine/wikidata/schema/WbStringVariableTest.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -40,6 +40,19 @@\n     public void testEmpty() {\n         isSkipped(\"\");\n     }\n+    \n+    /**\n+     * This should not normally happen: cell values should\n+     * never be null (only whole cells can be null).\n+     * But better safe than sorry!\n+     */\n+    public void testNullStringValue() {\n+        isSkipped((String) null);\n+    }\n+    \n+    public void testNullCell() {\n+        isSkipped((Cell) null);\n+    }\n \n     @Test\n     public void testSimpleString() {"
+  },
+  {
+    "sha": "a3ee4c61d57a365c90ddaa6851ebf5caf8d84b70",
+    "filename": "main/src/com/google/refine/model/changes/DataExtensionChange.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/main/src/com/google/refine/model/changes/DataExtensionChange.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/main/src/com/google/refine/model/changes/DataExtensionChange.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/main/src/com/google/refine/model/changes/DataExtensionChange.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -270,7 +270,7 @@ protected void extendRow(\n                 }\n                 cell = new Cell(rc.name, recon);\n             } else {\n-                cell = new Cell((Serializable) value, null);\n+                cell = value == null ? null : new Cell((Serializable) value, null);\n             }\n             \n             row.setCell(_firstNewCellIndex + c, cell);"
+  },
+  {
+    "sha": "c1cc3dc9ce8178c6de91fe43c2e65db0b458926a",
+    "filename": "main/tests/server/src/com/google/refine/operations/recon/ExtendDataOperationTests.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/OpenRefine/OpenRefine/blob/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/main/tests/server/src/com/google/refine/operations/recon/ExtendDataOperationTests.java",
+    "raw_url": "https://github.com/OpenRefine/OpenRefine/raw/747f0086e689ede5f4cd73ecfc3bd1de10291d7e/main/tests/server/src/com/google/refine/operations/recon/ExtendDataOperationTests.java",
+    "contents_url": "https://api.github.com/repos/OpenRefine/OpenRefine/contents/main/tests/server/src/com/google/refine/operations/recon/ExtendDataOperationTests.java?ref=747f0086e689ede5f4cd73ecfc3bd1de10291d7e",
+    "patch": "@@ -249,7 +249,7 @@ public void testFetchStrings() throws Exception {\n       \t\t  \"{\"\n   \t\t\t+ \"\\\"rows\\\": {\"\n   \t\t\t+ \"    \\\"Q794\\\": {\\\"P297\\\": [{\\\"str\\\": \\\"IR\\\"}]},\"\n-  \t\t\t+ \"    \\\"Q863\\\": {\\\"P297\\\": [{\\\"str\\\": \\\"TJ\\\"}]},\"\n+  \t\t\t+ \"    \\\"Q863\\\": {\\\"P297\\\": []},\"\n   \t\t\t+ \"    \\\"Q30\\\": {\\\"P297\\\": [{\\\"str\\\": \\\"US\\\"}]},\"\n   \t\t\t+ \"    \\\"Q17\\\": {\\\"P297\\\": [{\\\"str\\\": \\\"JP\\\"}]}\"\n   \t\t\t+ \"},\"\n@@ -270,7 +270,7 @@ public void testFetchStrings() throws Exception {\n         // Inspect rows\n         Assert.assertTrue(\"IR\".equals(project.rows.get(0).getCellValue(1)), \"Bad country code for Iran.\");\n         Assert.assertTrue(\"JP\".equals(project.rows.get(1).getCellValue(1)), \"Bad country code for Japan.\");\n-        Assert.assertTrue(\"TJ\".equals(project.rows.get(2).getCellValue(1)), \"Bad country code for Tajikistan.\");\n+        Assert.assertNull(project.rows.get(2).getCell(1), \"Expected a null country code.\");\n         Assert.assertTrue(\"US\".equals(project.rows.get(3).getCellValue(1)), \"Bad country code for United States.\");\n \n         // Make sure we did not create any recon stats for that column (no reconciled value)"
+  }
+]

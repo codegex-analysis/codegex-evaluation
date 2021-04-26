@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "97c6e1af689b3411ceae05c338e5ef6b5a2113f7",
+    "filename": "x-pack/plugin/security/src/test/java/org/elasticsearch/xpack/security/authc/RealmsTests.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/70898c1167c84a5dd782a20cf5f0eaedae26add3/x-pack/plugin/security/src/test/java/org/elasticsearch/xpack/security/authc/RealmsTests.java",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/70898c1167c84a5dd782a20cf5f0eaedae26add3/x-pack/plugin/security/src/test/java/org/elasticsearch/xpack/security/authc/RealmsTests.java",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/x-pack/plugin/security/src/test/java/org/elasticsearch/xpack/security/authc/RealmsTests.java?ref=70898c1167c84a5dd782a20cf5f0eaedae26add3",
+    "patch": "@@ -493,7 +493,6 @@ public void testUnlicensedWithNonStandardRealms() throws Exception {\n         assertThat(realm.name(), equalTo(\"foo\"));\n     }\n \n-    @AwaitsFix(bugUrl = \"https://github.com/elastic/elasticsearch/issues/70378\")\n     public void testDisabledRealmsAreNotAdded() throws Exception {\n         Settings.Builder builder = Settings.builder()\n                 .put(\"path.home\", createTempDir());\n@@ -504,9 +503,11 @@ public void testDisabledRealmsAreNotAdded() throws Exception {\n         }\n         Collections.shuffle(orders, random());\n         Map<Integer, Integer> orderToIndex = new HashMap<>();\n+        boolean anyEnabled = false;\n         for (int i = 0; i < randomRealmTypesCount; i++) {\n             builder.put(\"xpack.security.authc.realms.type_\" + i + \".realm_\" + i + \".order\", orders.get(i));\n             boolean enabled = randomBoolean();\n+            anyEnabled = anyEnabled || enabled;\n             builder.put(\"xpack.security.authc.realms.type_\" + i + \".realm_\" + i + \".enabled\", enabled);\n             if (enabled) {\n                 orderToIndex.put(orders.get(i), i);\n@@ -516,6 +517,11 @@ public void testDisabledRealmsAreNotAdded() throws Exception {\n         Settings settings = builder.build();\n         Environment env = TestEnvironment.newEnvironment(settings);\n         Realms realms = new Realms(settings, env, factories, licenseState, threadContext, reservedRealm);\n+        if (false == anyEnabled) {\n+            assertWarnings(\"Found explicitly disabled basic realms: [file,native]. \" +\n+                \"But they will be enabled because no other realms are configured or enabled. \" +\n+                \"In next major release, explicitly disabled basic realms will remain disabled.\");\n+        }\n         Iterator<Realm> iterator = realms.iterator();\n         Realm realm = iterator.next();\n         assertThat(realm, is(reservedRealm));"
+  }
+]

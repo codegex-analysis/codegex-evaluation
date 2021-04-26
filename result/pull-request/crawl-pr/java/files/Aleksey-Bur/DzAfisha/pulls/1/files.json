@@ -1,0 +1,99 @@
+[
+  {
+    "sha": "681d740a879d08ef1b91b29bc2b54f7043c3ef8a",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 40,
+    "deletions": 3,
+    "changes": 43,
+    "blob_url": "https://github.com/Aleksey-Bur/DzAfisha/blob/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/pom.xml",
+    "raw_url": "https://github.com/Aleksey-Bur/DzAfisha/raw/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/pom.xml",
+    "contents_url": "https://api.github.com/repos/Aleksey-Bur/DzAfisha/contents/pom.xml?ref=d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330",
+    "patch": "@@ -5,7 +5,7 @@\n     <modelVersion>4.0.0</modelVersion>\n \n     <groupId>ru.netology</groupId>\n-    <artifactId>cart</artifactId>\n+    <artifactId>Afisha</artifactId>\n     <version>1.0-SNAPSHOT</version>\n \n     <properties>\n@@ -18,13 +18,13 @@\n         <dependency>\n             <groupId>org.projectlombok</groupId>\n             <artifactId>lombok</artifactId>\n-            <version>1.18.12</version>\n+            <version>1.18.18</version>\n             <scope>provided</scope>\n         </dependency>\n         <dependency>\n             <groupId>org.junit.jupiter</groupId>\n             <artifactId>junit-jupiter</artifactId>\n-            <version>5.4.2</version>\n+            <version>5.7.0</version>\n             <scope>test</scope>\n         </dependency>\n     </dependencies>\n@@ -35,6 +35,43 @@\n                 <groupId>org.apache.maven.plugins</groupId>\n                 <artifactId>maven-surefire-plugin</artifactId>\n                 <version>2.22.2</version>\n+                <configuration>\n+                    <failIfNoTests>true</failIfNoTests>\n+                </configuration>\n+            </plugin>\n+            <plugin>\n+                <groupId>org.jacoco</groupId>\n+                <artifactId>jacoco-maven-plugin</artifactId>\n+                <version>0.8.5</version>\n+                <executions>\n+                    <execution>\n+                        <id>prepare-agent</id>\n+                        <phase>initialize</phase>\n+                        <goals>\n+                            <goal>prepare-agent</goal>\n+                        </goals>\n+                    </execution>\n+                    <execution>\n+                        <id>report</id>\n+                        <phase>verify</phase>\n+                        <goals>\n+                            <goal>report</goal>\n+                        </goals>\n+                    </execution>\n+                </executions>\n+                <configuration>\n+                    <rules>\n+                        <rule>\n+                            <limits>\n+                                <limit>\n+                                    <counter>BRANCH</counter>\n+                                    <value>COVEREDRATIO</value>\n+                                    <minimum>100%</minimum>\n+                                </limit>\n+                            </limits>\n+                        </rule>\n+                    </rules>\n+                </configuration>\n             </plugin>\n         </plugins>\n     </build>"
+  },
+  {
+    "sha": "f85f2eabc2d94d086533eb61348ee13a943ae332",
+    "filename": "src/main/java/ru/netology/domain/Movie.java",
+    "status": "renamed",
+    "additions": 6,
+    "deletions": 6,
+    "changes": 12,
+    "blob_url": "https://github.com/Aleksey-Bur/DzAfisha/blob/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/src/main/java/ru/netology/domain/Movie.java",
+    "raw_url": "https://github.com/Aleksey-Bur/DzAfisha/raw/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/src/main/java/ru/netology/domain/Movie.java",
+    "contents_url": "https://api.github.com/repos/Aleksey-Bur/DzAfisha/contents/src/main/java/ru/netology/domain/Movie.java?ref=d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330",
+    "patch": "@@ -7,10 +7,10 @@\n @NoArgsConstructor\n @AllArgsConstructor\n @Data\n-public class PurchaseItem {\n-  private int id;\n-  private int productId;\n-  private String productName;\n-  private int productPrice;\n-  private int count;\n+\n+public class Movie {\n+    private int id;\n+    private int movieId;\n+    private String movieName;\n+    private String genre;\n }",
+    "previous_filename": "src/main/java/ru/netology/domain/PurchaseItem.java"
+  },
+  {
+    "sha": "ad2119e707787305e98358992ab81b753263c907",
+    "filename": "src/main/java/ru/netology/manager/AfishaManager.java",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/Aleksey-Bur/DzAfisha/blob/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/src/main/java/ru/netology/manager/AfishaManager.java",
+    "raw_url": "https://github.com/Aleksey-Bur/DzAfisha/raw/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/src/main/java/ru/netology/manager/AfishaManager.java",
+    "contents_url": "https://api.github.com/repos/Aleksey-Bur/DzAfisha/contents/src/main/java/ru/netology/manager/AfishaManager.java?ref=d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330",
+    "patch": "@@ -0,0 +1,41 @@\n+package ru.netology.manager;\n+\n+import ru.netology.domain.Movie;\n+\n+public class AfishaManager {\n+    private Movie[] items = new Movie[0];\n+    int returnMovies = 10;\n+\n+\n+    public AfishaManager(int returnMovies) {\n+        this.returnMovies = returnMovies;\n+    }\n+\n+    public AfishaManager() {\n+    }\n+\n+    public void add(Movie item) {\n+        int length = items.length + 1;\n+        Movie[] tmp = new Movie[length];\n+        System.arraycopy(items, 0, tmp, 0, items.length);\n+        int lastIndex = tmp.length - 1;\n+        tmp[lastIndex] = item;\n+        items = tmp;\n+    }\n+\n+    public Movie[] showLast() {\n+        int length = returnMovies;\n+        if (length > items.length) {\n+            length = items.length;\n+        }\n+        if (returnMovies <= 0) {\n+            length = items.length;\n+        }\n+        Movie[] result = new Movie[length];\n+        for (int i = 0; i < length; i++) {\n+            int index = items.length - i - 1;\n+            result[i] = items[index];\n+        }\n+        return result;\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "4da613024056dc112d030e33afa4c4e4c543c1ab",
+    "filename": "src/main/java/ru/netology/manager/CartManager.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 49,
+    "changes": 49,
+    "blob_url": "https://github.com/Aleksey-Bur/DzAfisha/blob/cfeff49bd03d0648be2fe1b36afebfa420ebd5fe/src/main/java/ru/netology/manager/CartManager.java",
+    "raw_url": "https://github.com/Aleksey-Bur/DzAfisha/raw/cfeff49bd03d0648be2fe1b36afebfa420ebd5fe/src/main/java/ru/netology/manager/CartManager.java",
+    "contents_url": "https://api.github.com/repos/Aleksey-Bur/DzAfisha/contents/src/main/java/ru/netology/manager/CartManager.java?ref=cfeff49bd03d0648be2fe1b36afebfa420ebd5fe",
+    "patch": "@@ -1,49 +0,0 @@\n-package ru.netology.manager;\n-\n-import ru.netology.domain.PurchaseItem;\n-\n-public class CartManager {\n-  private PurchaseItem[] items = new PurchaseItem[0];\n-\n-  public void add(PurchaseItem item) {\n-    // создаём новый массив размером на единицу больше\n-    int length = items.length + 1;\n-    PurchaseItem[] tmp = new PurchaseItem[length];\n-    // itar + tab\n-    // копируем поэлементно\n-    // for (int i = 0; i < items.length; i++) {\n-    //   tmp[i] = items[i];\n-    // }\n-    System.arraycopy(items, 0, tmp, 0, items.length);\n-    // кладём последним наш элемент\n-    int lastIndex = tmp.length - 1;\n-    tmp[lastIndex] = item;\n-    items = tmp;\n-  }\n-\n-  public PurchaseItem[] getAll() {\n-    PurchaseItem[] result = new PurchaseItem[items.length];\n-    // перебираем массив в прямом порядке\n-    // но кладём в результаты в обратном\n-    for (int i = 0; i < result.length; i++) {\n-      int index = items.length - i - 1;\n-      result[i] = items[index];\n-    }\n-    return result;\n-  }\n-\n-  // наивная реализация\n-  public void removeById(int id) {\n-    int length = items.length - 1;\n-    PurchaseItem[] tmp = new PurchaseItem[length];\n-    int index = 0;\n-    for (PurchaseItem item : items) {\n-      if (item.getId() != id) {\n-        tmp[index] = item;\n-        index++;\n-      }\n-    }\n-    // меняем наши элементы\n-    items = tmp;\n-  }\n-}"
+  },
+  {
+    "sha": "203c256563b0fea041bd783f9ec03ef71f8160e2",
+    "filename": "src/test/java/ru/netology/manager/AfishaCustomManagerTest.java",
+    "status": "added",
+    "additions": 49,
+    "deletions": 0,
+    "changes": 49,
+    "blob_url": "https://github.com/Aleksey-Bur/DzAfisha/blob/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/src/test/java/ru/netology/manager/AfishaCustomManagerTest.java",
+    "raw_url": "https://github.com/Aleksey-Bur/DzAfisha/raw/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/src/test/java/ru/netology/manager/AfishaCustomManagerTest.java",
+    "contents_url": "https://api.github.com/repos/Aleksey-Bur/DzAfisha/contents/src/test/java/ru/netology/manager/AfishaCustomManagerTest.java?ref=d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330",
+    "patch": "@@ -0,0 +1,49 @@\n+package ru.netology.manager;\n+\n+import org.junit.jupiter.api.BeforeEach;\n+import org.junit.jupiter.api.Test;\n+import ru.netology.domain.Movie;\n+\n+import static org.junit.jupiter.api.Assertions.assertArrayEquals;\n+\n+public class AfishaCustomManagerTest {\n+    private AfishaManager manager = new AfishaManager(5);\n+    private Movie first = new Movie(1, 1, \"movie1\", \"genre1\");\n+    private Movie second = new Movie(2, 2, \"movie2\", \"genre2\");\n+    private Movie third = new Movie(3, 3, \"movie3\", \"genre3\");\n+    private Movie fourth = new Movie(4, 4, \"movie4\", \"genre4\");\n+    private Movie fifth = new Movie(5, 5, \"movie5\", \"genre5\");\n+    private Movie sixth = new Movie(6, 6, \"movie6\", \"genre6\");\n+\n+    @BeforeEach\n+    void setUp() {\n+        manager.add(first);\n+        manager.add(second);\n+        manager.add(third);\n+        manager.add(fourth);\n+    }\n+\n+    @Test\n+    void shouldGetLessThenLengthMovie() {\n+        Movie[] actual = manager.showLast();\n+        Movie[] expected = new Movie[]{fourth, third, second, first};\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void shouldGetMoreThenLengthMovie() {\n+        manager.add(fifth);\n+        manager.add(sixth);\n+        Movie[] actual = manager.showLast();\n+        Movie[] expected = new Movie[]{sixth, fifth, fourth, third, second};\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void shouldGetEqualLengthMovie() {\n+        manager.add(fifth);\n+        Movie[] actual = manager.showLast();\n+        Movie[] expected = new Movie[]{fifth, fourth, third, second, first};\n+        assertArrayEquals(expected, actual);\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "5107a80c2359fce34648b7ea0ec472104b49d13d",
+    "filename": "src/test/java/ru/netology/manager/AfishaManagerTest.java",
+    "status": "added",
+    "additions": 59,
+    "deletions": 0,
+    "changes": 59,
+    "blob_url": "https://github.com/Aleksey-Bur/DzAfisha/blob/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/src/test/java/ru/netology/manager/AfishaManagerTest.java",
+    "raw_url": "https://github.com/Aleksey-Bur/DzAfisha/raw/d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330/src/test/java/ru/netology/manager/AfishaManagerTest.java",
+    "contents_url": "https://api.github.com/repos/Aleksey-Bur/DzAfisha/contents/src/test/java/ru/netology/manager/AfishaManagerTest.java?ref=d35f7a50a53b45f8ad9c8f3e9f4cafd21c9f0330",
+    "patch": "@@ -0,0 +1,59 @@\n+package ru.netology.manager;\n+\n+import org.junit.jupiter.api.BeforeEach;\n+import org.junit.jupiter.api.Test;\n+import ru.netology.domain.Movie;\n+\n+import static org.junit.jupiter.api.Assertions.assertArrayEquals;\n+\n+public class AfishaManagerTest {\n+    private AfishaManager manager = new AfishaManager();\n+    private Movie first = new Movie(1, 1, \"movie1\", \"genre1\");\n+    private Movie second = new Movie(2, 2, \"movie2\", \"genre2\");\n+    private Movie third = new Movie(3, 3, \"movie3\", \"genre3\");\n+    private Movie fourth = new Movie(4, 4, \"movie4\", \"genre4\");\n+    private Movie fifth = new Movie(5, 5, \"movie5\", \"genre5\");\n+    private Movie sixth = new Movie(6, 6, \"movie6\", \"genre6\");\n+    private Movie seventh = new Movie(7, 7, \"movie7\", \"genre7\");\n+    private Movie eight = new Movie(8, 8, \"movie8\", \"genre8\");\n+    private Movie ninth = new Movie(9, 9, \"movie9\", \"genre9\");\n+    private Movie tenth = new Movie(10, 10, \"movie10\", \"genre10\");\n+    private Movie eleventh = new Movie(11, 11, \"movie11\", \"genre11\");\n+\n+    @BeforeEach\n+        void setUp() {\n+        manager.add(first);\n+        manager.add(second);\n+        manager.add(third);\n+        manager.add(fourth);\n+        manager.add(fifth);\n+        manager.add(sixth);\n+        manager.add(seventh);\n+        manager.add(eight);\n+        manager.add(ninth);\n+    }\n+\n+    @Test\n+    void shouldGetLessThenLengthMovie() {\n+        Movie[] actual = manager.showLast();\n+        Movie[] expected = new Movie[]{ninth, eight, seventh, sixth, fifth, fourth, third, second, first};\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void shouldGetMoreThenLengthMovie() {\n+        manager.add(tenth);\n+        manager.add(eleventh);\n+        Movie[] actual = manager.showLast();\n+        Movie[] expected = new Movie[]{eleventh, tenth, ninth, eight, seventh, sixth, fifth, fourth, third, second};\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void shouldGetEqualLengthMovie() {\n+        manager.add(tenth);\n+        Movie[] actual = manager.showLast();\n+        Movie[] expected = new Movie[]{tenth, ninth, eight, seventh, sixth, fifth, fourth, third, second, first};\n+        assertArrayEquals(expected, actual);\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d8382e7291f768a51028556a8c0275949865dcad",
+    "filename": "src/test/java/ru/netology/manager/CartManagerTestNonEmpty.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 48,
+    "changes": 48,
+    "blob_url": "https://github.com/Aleksey-Bur/DzAfisha/blob/cfeff49bd03d0648be2fe1b36afebfa420ebd5fe/src/test/java/ru/netology/manager/CartManagerTestNonEmpty.java",
+    "raw_url": "https://github.com/Aleksey-Bur/DzAfisha/raw/cfeff49bd03d0648be2fe1b36afebfa420ebd5fe/src/test/java/ru/netology/manager/CartManagerTestNonEmpty.java",
+    "contents_url": "https://api.github.com/repos/Aleksey-Bur/DzAfisha/contents/src/test/java/ru/netology/manager/CartManagerTestNonEmpty.java?ref=cfeff49bd03d0648be2fe1b36afebfa420ebd5fe",
+    "patch": "@@ -1,48 +0,0 @@\n-package ru.netology.manager;\n-\n-import org.junit.jupiter.api.Test;\n-import ru.netology.domain.PurchaseItem;\n-import ru.netology.manager.CartManager;\n-\n-import static org.junit.jupiter.api.Assertions.*;\n-\n-public class CartManagerTestNonEmpty {\n-  @Test\n-  public void shouldRemoveIfExists() {\n-    CartManager manager = new CartManager();\n-    int idToRemove = 1;\n-    PurchaseItem first = new PurchaseItem(1, 1, \"first\", 1, 1);\n-    PurchaseItem second = new PurchaseItem(2, 2, \"second\", 1, 1);\n-    PurchaseItem third = new PurchaseItem(3, 3, \"third\", 1, 1);\n-    manager.add(first);\n-    manager.add(second);\n-    manager.add(third);\n-\n-    manager.removeById(idToRemove);\n-\n-    PurchaseItem[] actual = manager.getAll();\n-    PurchaseItem[] expected = new PurchaseItem[]{third, second};\n-\n-//    assertEquals(expected, actual);\n-    assertArrayEquals(expected, actual);\n-  }\n-\n-  @Test\n-  public void shouldNotRemoveIfNotExists() {\n-    CartManager manager = new CartManager();\n-    int idToRemove = 4;\n-    PurchaseItem first = new PurchaseItem(1, 1, \"first\", 1, 1);\n-    PurchaseItem second = new PurchaseItem(2, 2, \"second\", 1, 1);\n-    PurchaseItem third = new PurchaseItem(3, 3, \"third\", 1, 1);\n-    manager.add(first);\n-    manager.add(second);\n-    manager.add(third);\n-\n-    manager.removeById(idToRemove);\n-\n-    PurchaseItem[] actual = manager.getAll();\n-    PurchaseItem[] expected = new PurchaseItem[]{third, second, first};\n-\n-    assertArrayEquals(expected, actual);\n-  }\n-}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "999db31ce6bf72eab8ecfddb68bf631255b5002b",
+    "filename": "src/test/java/ru/netology/manager/CartManagerTestNonEmptyWithSetup.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 46,
+    "changes": 46,
+    "blob_url": "https://github.com/Aleksey-Bur/DzAfisha/blob/cfeff49bd03d0648be2fe1b36afebfa420ebd5fe/src/test/java/ru/netology/manager/CartManagerTestNonEmptyWithSetup.java",
+    "raw_url": "https://github.com/Aleksey-Bur/DzAfisha/raw/cfeff49bd03d0648be2fe1b36afebfa420ebd5fe/src/test/java/ru/netology/manager/CartManagerTestNonEmptyWithSetup.java",
+    "contents_url": "https://api.github.com/repos/Aleksey-Bur/DzAfisha/contents/src/test/java/ru/netology/manager/CartManagerTestNonEmptyWithSetup.java?ref=cfeff49bd03d0648be2fe1b36afebfa420ebd5fe",
+    "patch": "@@ -1,46 +0,0 @@\n-package ru.netology.manager;\n-\n-import org.junit.jupiter.api.BeforeEach;\n-import org.junit.jupiter.api.Test;\n-import ru.netology.domain.PurchaseItem;\n-import ru.netology.manager.CartManager;\n-\n-import static org.junit.jupiter.api.Assertions.assertArrayEquals;\n-\n-public class CartManagerTestNonEmptyWithSetup {\n-  private CartManager manager = new CartManager();\n-  private PurchaseItem first = new PurchaseItem(1, 1, \"first\", 1, 1);\n-  private PurchaseItem second = new PurchaseItem(2, 2, \"second\", 1, 1);\n-  private PurchaseItem third = new PurchaseItem(3, 3, \"third\", 1, 1);\n-\n-  @BeforeEach\n-  public void setUp() {\n-    manager.add(first);\n-    manager.add(second);\n-    manager.add(third);\n-  }\n-\n-  @Test\n-  public void shouldRemoveIfExists() {\n-    int idToRemove = 1;\n-    manager.removeById(idToRemove);\n-\n-    PurchaseItem[] actual = manager.getAll();\n-    PurchaseItem[] expected = new PurchaseItem[]{third, second};\n-\n-//    assertEquals(expected, actual);\n-    assertArrayEquals(expected, actual);\n-  }\n-\n-  @Test\n-  public void shouldNotRemoveIfNotExists() {\n-    int idToRemove = 4;\n-\n-    manager.removeById(idToRemove);\n-\n-    PurchaseItem[] actual = manager.getAll();\n-    PurchaseItem[] expected = new PurchaseItem[]{third, second, first};\n-\n-    assertArrayEquals(expected, actual);\n-  }\n-}\n\\ No newline at end of file"
+  }
+]

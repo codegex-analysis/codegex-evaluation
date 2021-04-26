@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "51eade9bc64b19bc8aa2774ff2913a1fdc918750",
+    "filename": "connector/src/main/java/org/geysermc/connector/network/session/GeyserSession.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 6,
+    "changes": 10,
+    "blob_url": "https://github.com/GeyserMC/Geyser/blob/1293a235470b9ca693f12a5feb05770adc1bb468/connector/src/main/java/org/geysermc/connector/network/session/GeyserSession.java",
+    "raw_url": "https://github.com/GeyserMC/Geyser/raw/1293a235470b9ca693f12a5feb05770adc1bb468/connector/src/main/java/org/geysermc/connector/network/session/GeyserSession.java",
+    "contents_url": "https://api.github.com/repos/GeyserMC/Geyser/contents/connector/src/main/java/org/geysermc/connector/network/session/GeyserSession.java?ref=1293a235470b9ca693f12a5feb05770adc1bb468",
+    "patch": "@@ -415,11 +415,10 @@ public void connect(RemoteServer remoteServer) {\n \n         UpdateAttributesPacket attributesPacket = new UpdateAttributesPacket();\n         attributesPacket.setRuntimeEntityId(getPlayerEntity().getGeyserId());\n-        List<AttributeData> attributes = new ArrayList<>();\n         // Default move speed\n         // Bedrock clients move very fast by default until they get an attribute packet correcting the speed\n-        attributes.add(new AttributeData(\"minecraft:movement\", 0.0f, 1024f, 0.1f, 0.1f));\n-        attributesPacket.setAttributes(attributes);\n+        attributesPacket.setAttributes(Collections.singletonList(\n+                new AttributeData(\"minecraft:movement\", 0.0f, 1024f, 0.1f, 0.1f)));\n         upstream.sendPacket(attributesPacket);\n \n         GameRulesChangedPacket gamerulePacket = new GameRulesChangedPacket();\n@@ -624,7 +623,7 @@ public void connected(ConnectedEvent event) {\n \n                 // Let the user know there locale may take some time to download\n                 // as it has to be extracted from a JAR\n-                if (locale.toLowerCase().equals(\"en_us\") && !LocaleUtils.LOCALE_MAPPINGS.containsKey(\"en_us\")) {\n+                if (locale.equalsIgnoreCase(\"en_us\") && !LocaleUtils.LOCALE_MAPPINGS.containsKey(\"en_us\")) {\n                     // This should probably be left hardcoded as it will only show for en_us clients\n                     sendMessage(\"Loading your locale (en_us); if this isn't already downloaded, this may take some time\");\n                 }\n@@ -1026,7 +1025,7 @@ public void sendAdventureSettings() {\n         noClip = gameMode == GameMode.SPECTATOR;\n         worldImmutable = gameMode == GameMode.ADVENTURE || gameMode == GameMode.SPECTATOR;\n \n-        Set<AdventureSetting> flags = new HashSet<>();\n+        Set<AdventureSetting> flags = adventureSettingsPacket.getSettings();\n         if (canFly) {\n             flags.add(AdventureSetting.MAY_FLY);\n         }\n@@ -1045,7 +1044,6 @@ public void sendAdventureSettings() {\n \n         flags.add(AdventureSetting.AUTO_JUMP);\n \n-        adventureSettingsPacket.getSettings().addAll(flags);\n         sendUpstreamPacket(adventureSettingsPacket);\n     }\n "
+  },
+  {
+    "sha": "df2d0817ac3af070380e054913502a81648cbd5a",
+    "filename": "connector/src/main/java/org/geysermc/connector/network/translators/java/world/JavaPlayEffectTranslator.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 7,
+    "changes": 10,
+    "blob_url": "https://github.com/GeyserMC/Geyser/blob/1293a235470b9ca693f12a5feb05770adc1bb468/connector/src/main/java/org/geysermc/connector/network/translators/java/world/JavaPlayEffectTranslator.java",
+    "raw_url": "https://github.com/GeyserMC/Geyser/raw/1293a235470b9ca693f12a5feb05770adc1bb468/connector/src/main/java/org/geysermc/connector/network/translators/java/world/JavaPlayEffectTranslator.java",
+    "contents_url": "https://api.github.com/repos/GeyserMC/Geyser/contents/connector/src/main/java/org/geysermc/connector/network/translators/java/world/JavaPlayEffectTranslator.java?ref=1293a235470b9ca693f12a5feb05770adc1bb468",
+    "patch": "@@ -25,7 +25,6 @@\n \n package org.geysermc.connector.network.translators.java.world;\n \n-import com.github.steveice10.mc.protocol.data.game.world.effect.ParticleEffect;\n import com.github.steveice10.mc.protocol.data.game.world.effect.*;\n import com.github.steveice10.mc.protocol.packet.ingame.server.world.ServerPlayEffectPacket;\n import com.nukkitx.math.vector.Vector3f;\n@@ -38,13 +37,12 @@\n import org.geysermc.connector.network.session.GeyserSession;\n import org.geysermc.connector.network.translators.PacketTranslator;\n import org.geysermc.connector.network.translators.Translator;\n-import org.geysermc.connector.network.translators.world.block.BlockTranslator;\n import org.geysermc.connector.network.translators.effect.Effect;\n import org.geysermc.connector.network.translators.effect.EffectRegistry;\n+import org.geysermc.connector.network.translators.world.block.BlockTranslator;\n import org.geysermc.connector.utils.LocaleUtils;\n \n-import java.util.ArrayList;\n-import java.util.List;\n+import java.util.Collections;\n import java.util.Locale;\n \n @Translator(packet = ServerPlayEffectPacket.class)\n@@ -76,10 +74,8 @@ public void translate(ServerPlayEffectPacket packet, GeyserSession session) {\n                 textPacket.setPlatformChatId(\"\");\n                 textPacket.setSourceName(null);\n                 textPacket.setMessage(\"record.nowPlaying\");\n-                List<String> params = new ArrayList<>();\n                 String recordString = \"%item.\" + soundEvent.name().toLowerCase(Locale.ROOT) + \".desc\";\n-                params.add(LocaleUtils.getLocaleString(recordString, session.getLocale()));\n-                textPacket.setParameters(params);\n+                textPacket.setParameters(Collections.singletonList(LocaleUtils.getLocaleString(recordString, session.getLocale())));\n                 session.sendUpstreamPacket(textPacket);\n             }\n             return;"
+  },
+  {
+    "sha": "8846e477cf16654c15a5fb42bc7ce49e38d23122",
+    "filename": "connector/src/main/java/org/geysermc/connector/utils/FireworkColor.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/GeyserMC/Geyser/blob/1293a235470b9ca693f12a5feb05770adc1bb468/connector/src/main/java/org/geysermc/connector/utils/FireworkColor.java",
+    "raw_url": "https://github.com/GeyserMC/Geyser/raw/1293a235470b9ca693f12a5feb05770adc1bb468/connector/src/main/java/org/geysermc/connector/utils/FireworkColor.java",
+    "contents_url": "https://api.github.com/repos/GeyserMC/Geyser/contents/connector/src/main/java/org/geysermc/connector/utils/FireworkColor.java?ref=1293a235470b9ca693f12a5feb05770adc1bb468",
+    "patch": "@@ -69,9 +69,9 @@\n     private static final FireworkColor[] VALUES = values();\n \n     @Getter\n-    private byte bedrockID;\n+    private final byte bedrockID;\n     @Getter\n-    private int javaID;\n+    private final int javaID;\n \n     FireworkColor(byte bedrockID, int javaID) {\n         this.bedrockID = bedrockID;"
+  }
+]

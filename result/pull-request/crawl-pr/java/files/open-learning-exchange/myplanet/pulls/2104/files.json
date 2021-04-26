@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "5bbc3a41cc4a0e7ba69a1c6d94bf9b52daa41c57",
+    "filename": "app/src/main/java/org/ole/planet/myplanet/base/BaseContainerFragment.kt",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/open-learning-exchange/myplanet/blob/83102d215d384c6b14c0ca25e1ba9a821f5cf195/app/src/main/java/org/ole/planet/myplanet/base/BaseContainerFragment.kt",
+    "raw_url": "https://github.com/open-learning-exchange/myplanet/raw/83102d215d384c6b14c0ca25e1ba9a821f5cf195/app/src/main/java/org/ole/planet/myplanet/base/BaseContainerFragment.kt",
+    "contents_url": "https://api.github.com/repos/open-learning-exchange/myplanet/contents/app/src/main/java/org/ole/planet/myplanet/base/BaseContainerFragment.kt?ref=83102d215d384c6b14c0ca25e1ba9a821f5cf195",
+    "patch": "@@ -136,6 +136,8 @@ abstract class BaseContainerFragment : BaseResourceFragment() {\n             Utilities.toast(activity, \"Unable to open resource\")\n             return\n         }\n+        if (profileDbHandler == null)\n+            profileDbHandler = UserProfileDbHandler(activity)\n         profileDbHandler.setResourceOpenCount(items, KEY_RESOURCE_OPEN)\n         if (mimetype.startsWith(\"video\")) {\n             playVideo(videotype, items)"
+  },
+  {
+    "sha": "58605fd07659abb2b28838c5a37ee5f43457cf2f",
+    "filename": "app/src/main/java/org/ole/planet/myplanet/ui/course/CourseDetailFragment.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/open-learning-exchange/myplanet/blob/83102d215d384c6b14c0ca25e1ba9a821f5cf195/app/src/main/java/org/ole/planet/myplanet/ui/course/CourseDetailFragment.java",
+    "raw_url": "https://github.com/open-learning-exchange/myplanet/raw/83102d215d384c6b14c0ca25e1ba9a821f5cf195/app/src/main/java/org/ole/planet/myplanet/ui/course/CourseDetailFragment.java",
+    "contents_url": "https://api.github.com/repos/open-learning-exchange/myplanet/contents/app/src/main/java/org/ole/planet/myplanet/ui/course/CourseDetailFragment.java?ref=83102d215d384c6b14c0ca25e1ba9a821f5cf195",
+    "patch": "@@ -9,6 +9,7 @@\n import android.widget.LinearLayout;\n import android.widget.TextView;\n \n+import androidx.annotation.NonNull;\n import androidx.annotation.Nullable;\n import androidx.recyclerview.widget.LinearLayoutManager;\n import androidx.recyclerview.widget.RecyclerView;\n@@ -79,6 +80,11 @@ public void onActivityCreated(@Nullable Bundle savedInstanceState) {\n         setCourseData();\n     }\n \n+    @Override\n+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {\n+        super.onViewCreated(view, savedInstanceState);\n+    }\n+\n     private void initView(View v) {\n         description = v.findViewById(R.id.description);\n         subjectLevel = v.findViewById(R.id.subject_level);"
+  },
+  {
+    "sha": "7c9455d1d86c1f59f37729d96292aa3625e06578",
+    "filename": "app/src/main/java/org/ole/planet/myplanet/ui/sync/SyncActivity.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 5,
+    "changes": 13,
+    "blob_url": "https://github.com/open-learning-exchange/myplanet/blob/83102d215d384c6b14c0ca25e1ba9a821f5cf195/app/src/main/java/org/ole/planet/myplanet/ui/sync/SyncActivity.java",
+    "raw_url": "https://github.com/open-learning-exchange/myplanet/raw/83102d215d384c6b14c0ca25e1ba9a821f5cf195/app/src/main/java/org/ole/planet/myplanet/ui/sync/SyncActivity.java",
+    "contents_url": "https://api.github.com/repos/open-learning-exchange/myplanet/contents/app/src/main/java/org/ole/planet/myplanet/ui/sync/SyncActivity.java?ref=83102d215d384c6b14c0ca25e1ba9a821f5cf195",
+    "patch": "@@ -297,12 +297,15 @@ public void onSyncFailed(final String s) {\n \n     @Override\n     public void onSyncComplete() {\n-        syncIconDrawable = (AnimationDrawable) syncIcon.getDrawable();\n-        syncIconDrawable.stop();\n-        syncIconDrawable.selectDrawable(0);\n-        syncIcon.invalidateDrawable(syncIconDrawable);\n-        DialogUtils.showSnack(findViewById(android.R.id.content), \"Sync Completed\");\n         progressDialog.dismiss();\n+        runOnUiThread(() -> {\n+            syncIconDrawable = (AnimationDrawable) syncIcon.getDrawable();\n+            syncIconDrawable.stop();\n+            syncIconDrawable.selectDrawable(0);\n+            syncIcon.invalidateDrawable(syncIconDrawable);\n+        });\n+        DialogUtils.showSnack(findViewById(android.R.id.content), \"Sync Completed\");\n+\n         if (settings.getBoolean(\"isChild\", false)) {\n             runOnUiThread(() -> setUpChildMode());\n         }"
+  }
+]

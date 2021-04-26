@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "51184c2a5c5e41d46bc7e481123be09d102800ac",
+    "filename": "BinaryTreeFromPostorderInorder.java",
+    "status": "added",
+    "additions": 54,
+    "deletions": 0,
+    "changes": 54,
+    "blob_url": "https://github.com/super30admin/Trees-2/blob/04786d1fe2b5e06dfd5c0a935470b5e7e6eb84cb/BinaryTreeFromPostorderInorder.java",
+    "raw_url": "https://github.com/super30admin/Trees-2/raw/04786d1fe2b5e06dfd5c0a935470b5e7e6eb84cb/BinaryTreeFromPostorderInorder.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Trees-2/contents/BinaryTreeFromPostorderInorder.java?ref=04786d1fe2b5e06dfd5c0a935470b5e7e6eb84cb",
+    "patch": "@@ -0,0 +1,54 @@\n+/**\n+ * Definition for a binary tree node.\n+ * public class TreeNode {\n+ *     int val;\n+ *     TreeNode left;\n+ *     TreeNode right;\n+ *     TreeNode() {}\n+ *     TreeNode(int val) { this.val = val; }\n+ *     TreeNode(int val, TreeNode left, TreeNode right) {\n+ *         this.val = val;\n+ *         this.left = left;\n+ *         this.right = right;\n+ *     }\n+ * }\n+ */\n+class BinaryTreeFromPostorderInorder {\n+\n+    // Time Complexity: O(n)    (where n -> no. of nodes in the tree)\n+    // Space Complexity: O(n)\n+\n+    public TreeNode buildTree(int[] inorder, int[] postorder) {\n+        int n = inorder.length;\n+        // Edge Case Checking\n+        if(n == 0)\n+            return null;\n+        return helper(inorder, 0, n, postorder, 0, n);\n+    }\n+    \n+    private TreeNode helper(int[] inorder, int i1, int i2, int[] postorder, int p1, int p2){\n+        // If our left and right pointers cross each other then we stop\n+        if(i1 >= i2 || p1 >= p2)\n+            return null;\n+        \n+        // Create a new node everytime from the end of the postorder array\n+        TreeNode root = new TreeNode(postorder[p2-1]);\n+        int root_location = 0;\n+\n+        // Find the current node in the inorder array\n+        for(int i = i1; i < i2; i++){\n+            if(postorder[p2-1] == inorder[i]){\n+                root_location = i;\n+                break;\n+            }\n+        }\n+        \n+        int left = root_location - i1;\n+        // Make recursive calls by choosing correct left and right subtrees from both inorder and postorder array\n+        root.left = helper(inorder, i1, i1+left, postorder, p1, p1+left);\n+        root.right = helper(inorder, root_location+1, i2, postorder, p1+left, p2-1);\n+        \n+        return root;\n+    }\n+    \n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "f4bf6d728f975dee5b81f6509793334260edc8a1",
+    "filename": "SumRootToLeaf.java",
+    "status": "added",
+    "additions": 46,
+    "deletions": 0,
+    "changes": 46,
+    "blob_url": "https://github.com/super30admin/Trees-2/blob/04786d1fe2b5e06dfd5c0a935470b5e7e6eb84cb/SumRootToLeaf.java",
+    "raw_url": "https://github.com/super30admin/Trees-2/raw/04786d1fe2b5e06dfd5c0a935470b5e7e6eb84cb/SumRootToLeaf.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Trees-2/contents/SumRootToLeaf.java?ref=04786d1fe2b5e06dfd5c0a935470b5e7e6eb84cb",
+    "patch": "@@ -0,0 +1,46 @@\n+/**\n+ * Definition for a binary tree node.\n+ * public class TreeNode {\n+ *     int val;\n+ *     TreeNode left;\n+ *     TreeNode right;\n+ *     TreeNode() {}\n+ *     TreeNode(int val) { this.val = val; }\n+ *     TreeNode(int val, TreeNode left, TreeNode right) {\n+ *         this.val = val;\n+ *         this.left = left;\n+ *         this.right = right;\n+ *     }\n+ * }\n+ */\n+class SumRootToLeaf {\n+\n+    // Time Complexity: O(n)    (where n -> no. of nodes in the tree)\n+    // Space Complexity: O(h)   (where h -> height of the tree)\n+\n+    int result = 0;\n+    public int sumNumbers(TreeNode root) {\n+        // Edge Case Checking\n+        if(root == null)\n+            return result;\n+        dfs(root, 0);\n+        return result;\n+    }\n+    \n+    private void dfs(TreeNode root, int sum){\n+        // Everytime we add the number to our sum till that point.\n+        sum = sum*10 + root.val;\n+\n+        // Make recursive calls to move further down in the tree\n+        if(root.left != null)\n+            dfs(root.left, sum);\n+        if(root.right != null)\n+            dfs(root.right, sum);\n+        \n+        // When we reach the leaf node we add the sum value to our result and backtrack.\n+        if(root.left == null && root.right == null){\n+            result += sum;\n+            return;\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

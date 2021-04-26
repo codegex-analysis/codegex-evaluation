@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "709b39f5607f2d934448f1ee913fdc89a82a2de2",
+    "filename": ".gitattributes",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/checkstyle/checkstyle/blob/09ca1281417578135d6d7689e9d3ef426da2ba64/.gitattributes",
+    "raw_url": "https://github.com/checkstyle/checkstyle/raw/09ca1281417578135d6d7689e9d3ef426da2ba64/.gitattributes",
+    "contents_url": "https://api.github.com/repos/checkstyle/checkstyle/contents/.gitattributes?ref=09ca1281417578135d6d7689e9d3ef426da2ba64",
+    "patch": "@@ -14,3 +14,4 @@\n # Test resources that need specific eol\n /src/test/resources/com/puppycrawl/tools/checkstyle/checks/newlineatendoffile/InputNewlineAtEndOfFileCrlf.java eol=crlf\n /src/test/resources/com/puppycrawl/tools/checkstyle/checks/newlineatendoffile/InputNewlineAtEndOfFileCr.java -text\n+/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/xpath/xpathquerygenerator/InputXpathQueryGeneratorTextBlockCrlf.java eol=crlf"
+  },
+  {
+    "sha": "e087256b13f0cc09724d79fb19ff84daa692f5e5",
+    "filename": "src/main/java/com/puppycrawl/tools/checkstyle/utils/XpathUtil.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 1,
+    "changes": 16,
+    "blob_url": "https://github.com/checkstyle/checkstyle/blob/09ca1281417578135d6d7689e9d3ef426da2ba64/src/main/java/com/puppycrawl/tools/checkstyle/utils/XpathUtil.java",
+    "raw_url": "https://github.com/checkstyle/checkstyle/raw/09ca1281417578135d6d7689e9d3ef426da2ba64/src/main/java/com/puppycrawl/tools/checkstyle/utils/XpathUtil.java",
+    "contents_url": "https://api.github.com/repos/checkstyle/checkstyle/contents/src/main/java/com/puppycrawl/tools/checkstyle/utils/XpathUtil.java?ref=09ca1281417578135d6d7689e9d3ef426da2ba64",
+    "patch": "@@ -25,6 +25,7 @@\n import java.util.List;\n import java.util.Locale;\n import java.util.Set;\n+import java.util.regex.Pattern;\n import java.util.stream.Collectors;\n import java.util.stream.Stream;\n \n@@ -104,9 +105,20 @@\n     private static final Set<Integer> TOKEN_TYPES_WITH_TEXT_ATTRIBUTE =\n         Stream.of(\n             TokenTypes.IDENT, TokenTypes.STRING_LITERAL, TokenTypes.CHAR_LITERAL,\n-            TokenTypes.NUM_LONG, TokenTypes.NUM_INT, TokenTypes.NUM_DOUBLE, TokenTypes.NUM_FLOAT)\n+            TokenTypes.NUM_LONG, TokenTypes.NUM_INT, TokenTypes.NUM_DOUBLE, TokenTypes.NUM_FLOAT,\n+            TokenTypes.TEXT_BLOCK_CONTENT)\n         .collect(Collectors.toSet());\n \n+    /**\n+     * This regexp is used to convert new line to newline tag.\n+     */\n+    private static final Pattern NEWLINE_TO_TAG = Pattern.compile(\"\\n\");\n+\n+    /**\n+     * This regexp is used to convert carriage return to carriage-return tag.\n+     */\n+    private static final Pattern CARRIAGE_RETURN_TO_TAG = Pattern.compile(\"\\r\");\n+\n     /** Delimiter to separate xpath results. */\n     private static final String DELIMITER = \"---------\" + System.lineSeparator();\n \n@@ -157,6 +169,8 @@ public static String getTextAttributeValue(DetailAST ast) {\n         if (ast.getType() == TokenTypes.STRING_LITERAL) {\n             text = text.substring(1, text.length() - 1);\n         }\n+        text = CARRIAGE_RETURN_TO_TAG.matcher(text).replaceAll(\"\\\\\\\\r\");\n+        text = NEWLINE_TO_TAG.matcher(text).replaceAll(\"\\\\\\\\n\");\n         return text;\n     }\n "
+  },
+  {
+    "sha": "cec5d9a5d2b6a23f2aab32c98b2d03a3729491fe",
+    "filename": "src/test/java/com/puppycrawl/tools/checkstyle/xpath/XpathQueryGeneratorTest.java",
+    "status": "modified",
+    "additions": 63,
+    "deletions": 9,
+    "changes": 72,
+    "blob_url": "https://github.com/checkstyle/checkstyle/blob/09ca1281417578135d6d7689e9d3ef426da2ba64/src/test/java/com/puppycrawl/tools/checkstyle/xpath/XpathQueryGeneratorTest.java",
+    "raw_url": "https://github.com/checkstyle/checkstyle/raw/09ca1281417578135d6d7689e9d3ef426da2ba64/src/test/java/com/puppycrawl/tools/checkstyle/xpath/XpathQueryGeneratorTest.java",
+    "contents_url": "https://api.github.com/repos/checkstyle/checkstyle/contents/src/test/java/com/puppycrawl/tools/checkstyle/xpath/XpathQueryGeneratorTest.java?ref=09ca1281417578135d6d7689e9d3ef426da2ba64",
+    "patch": "@@ -19,6 +19,7 @@\n \n package com.puppycrawl.tools.checkstyle.xpath;\n \n+import static com.google.common.truth.Truth.assertWithMessage;\n import static org.junit.jupiter.api.Assertions.assertEquals;\n import static org.junit.jupiter.api.Assertions.assertTrue;\n \n@@ -514,17 +515,70 @@ public void testTextBlocks() throws Exception {\n                 JavaParser.parseFile(testFile, JavaParser.Options.WITHOUT_COMMENTS);\n         final int tabWidth = 8;\n \n-        final int lineNumberOne = 6;\n-        final int columnNumberOne = 25;\n-        final XpathQueryGenerator queryGeneratorOne = new XpathQueryGenerator(detailAst,\n-                lineNumberOne, columnNumberOne, testFileText, tabWidth);\n-        final List<String> actualTestOne = queryGeneratorOne.generate();\n-        final List<String> expectedTestOne = Collections.singletonList(\n+        final int lineNumber = 6;\n+        final int columnNumber = 25;\n+        final XpathQueryGenerator queryGenerator = new XpathQueryGenerator(detailAst,\n+                lineNumber, columnNumber, testFileText, tabWidth);\n+        final List<String> actual = queryGenerator.generate();\n+        final List<String> expected = Collections.singletonList(\n             \"/CLASS_DEF[./IDENT[@text='InputXpathQueryGeneratorTextBlock']]/OBJBLOCK/\"\n                     + \"VARIABLE_DEF[./IDENT[@text='testOne']]/ASSIGN/EXPR/\"\n-                    + \"TEXT_BLOCK_LITERAL_BEGIN/TEXT_BLOCK_CONTENT\"\n+                    + \"TEXT_BLOCK_LITERAL_BEGIN/TEXT_BLOCK_CONTENT[@text='\\\\n        \"\n+                    + \"&amp;1line\\\\n        &gt;2line\\\\n        &lt;3line\\\\n        ']\"\n             );\n-        assertEquals(expectedTestOne, actualTestOne,\n-                \"Generated queries do not match expected ones\");\n+        assertWithMessage(\"Generated queries do not match expected ones\")\n+                .that(expected).isEqualTo(actual);\n+    }\n+\n+    @Test\n+    public void testTextBlocksWithNewLine() throws Exception {\n+        final File testFile = new File(getNonCompilablePath(\n+                \"InputXpathQueryGeneratorTextBlockNewLine.java\"));\n+        final FileText testFileText = new FileText(testFile,\n+                StandardCharsets.UTF_8.name());\n+        final DetailAST detailAst =\n+                JavaParser.parseFile(testFile, JavaParser.Options.WITHOUT_COMMENTS);\n+        final int tabWidth = 8;\n+\n+        final int lineNumber = 6;\n+        final int columnNumber = 25;\n+        final XpathQueryGenerator queryGenerator = new XpathQueryGenerator(detailAst,\n+                lineNumber, columnNumber, testFileText, tabWidth);\n+        final List<String> actual = queryGenerator.generate();\n+        final List<String> expected = Collections.singletonList(\n+                \"/CLASS_DEF[./IDENT[@text='InputXpathQueryGeneratorTextBlockNewLine']]/OBJBLOCK/\"\n+                        + \"VARIABLE_DEF[./IDENT[@text='testOne']]/ASSIGN/EXPR/\"\n+                        + \"TEXT_BLOCK_LITERAL_BEGIN/TEXT_BLOCK_CONTENT[@text='\\\\n        \"\n+                        + \"&amp;1line\\\\n\\\\n        &gt;2line\\\\n        &lt;3line\\\\n        ']\"\n+        );\n+        assertWithMessage(\"Generated queries do not match expected ones\")\n+                .that(expected).isEqualTo(actual);\n     }\n+\n+    @Test\n+    public void testTextBlocksWithNewCrlf() throws Exception {\n+        final File testFile = new File(getNonCompilablePath(\n+                \"InputXpathQueryGeneratorTextBlockCrlf.java\"));\n+        final FileText testFileText = new FileText(testFile,\n+                StandardCharsets.UTF_8.name());\n+        final DetailAST detailAst =\n+                JavaParser.parseFile(testFile, JavaParser.Options.WITHOUT_COMMENTS);\n+        final int tabWidth = 8;\n+\n+        final int lineNumber = 6;\n+        final int columnNumber = 25;\n+        final XpathQueryGenerator queryGenerator = new XpathQueryGenerator(detailAst,\n+                lineNumber, columnNumber, testFileText, tabWidth);\n+        final List<String> actual = queryGenerator.generate();\n+        final List<String> expected = Collections.singletonList(\n+                \"/CLASS_DEF[./IDENT[@text='InputXpathQueryGeneratorTextBlockCrlf']]/OBJBLOCK/\"\n+                        + \"VARIABLE_DEF[./IDENT[@text='testOne']]/ASSIGN/EXPR/\"\n+                        + \"TEXT_BLOCK_LITERAL_BEGIN/TEXT_BLOCK_CONTENT[@text='\\\\r\\\\n        \"\n+                        + \"&amp;1line\\\\r\\\\n\\\\r\\\\n        &gt;2line\\\\r\\\\n        &lt;3line\\\\r\\\\n\"\n+                        + \"        ']\"\n+        );\n+        assertWithMessage(\"Generated queries do not match expected ones\")\n+                .that(expected).isEqualTo(actual);\n+    }\n+\n }"
+  },
+  {
+    "sha": "d30c133d099a04d595d1747d1c30423862821035",
+    "filename": "src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/xpath/xpathquerygenerator/InputXpathQueryGeneratorTextBlockCrlf.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/checkstyle/checkstyle/blob/09ca1281417578135d6d7689e9d3ef426da2ba64/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/xpath/xpathquerygenerator/InputXpathQueryGeneratorTextBlockCrlf.java",
+    "raw_url": "https://github.com/checkstyle/checkstyle/raw/09ca1281417578135d6d7689e9d3ef426da2ba64/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/xpath/xpathquerygenerator/InputXpathQueryGeneratorTextBlockCrlf.java",
+    "contents_url": "https://api.github.com/repos/checkstyle/checkstyle/contents/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/xpath/xpathquerygenerator/InputXpathQueryGeneratorTextBlockCrlf.java?ref=09ca1281417578135d6d7689e9d3ef426da2ba64",
+    "patch": "@@ -0,0 +1,12 @@\n+//non-compiled with javac: Compilable with Java14\n+package com.puppycrawl.tools.checkstyle.xpath.xpathquerygenerator;\n+\n+public class InputXpathQueryGeneratorTextBlockCrlf {\n+\n+    String testOne = \"\"\"\n+        &1line\n+\n+        >2line\n+        <3line\n+        \"\"\";\n+}"
+  },
+  {
+    "sha": "d4d61f5b669c52712afedde281aea1899ad479e8",
+    "filename": "src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/xpath/xpathquerygenerator/InputXpathQueryGeneratorTextBlockNewLine.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/checkstyle/checkstyle/blob/09ca1281417578135d6d7689e9d3ef426da2ba64/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/xpath/xpathquerygenerator/InputXpathQueryGeneratorTextBlockNewLine.java",
+    "raw_url": "https://github.com/checkstyle/checkstyle/raw/09ca1281417578135d6d7689e9d3ef426da2ba64/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/xpath/xpathquerygenerator/InputXpathQueryGeneratorTextBlockNewLine.java",
+    "contents_url": "https://api.github.com/repos/checkstyle/checkstyle/contents/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/xpath/xpathquerygenerator/InputXpathQueryGeneratorTextBlockNewLine.java?ref=09ca1281417578135d6d7689e9d3ef426da2ba64",
+    "patch": "@@ -0,0 +1,12 @@\n+//non-compiled with javac: Compilable with Java14\n+package com.puppycrawl.tools.checkstyle.xpath.xpathquerygenerator;\n+\n+public class InputXpathQueryGeneratorTextBlockNewLine {\n+\n+    String testOne = \"\"\"\n+        &1line\n+\n+        >2line\n+        <3line\n+        \"\"\";\n+}"
+  }
+]

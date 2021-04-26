@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "b4790dbc5f040e8a41bdb729c3f310a99bda7337",
+    "filename": "src/main/java/frc/robot/Constants.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 1,
+    "changes": 19,
+    "blob_url": "https://github.com/systemoverloadrobotics/fullrobot2021/blob/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/Constants.java",
+    "raw_url": "https://github.com/systemoverloadrobotics/fullrobot2021/raw/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/Constants.java",
+    "contents_url": "https://api.github.com/repos/systemoverloadrobotics/fullrobot2021/contents/src/main/java/frc/robot/Constants.java?ref=0f9d414e0cb9b72a0bc29866c5c5212690dc8d11",
+    "patch": "@@ -6,6 +6,7 @@\n /*----------------------------------------------------------------------------*/\n package frc.robot;\n \n+import edu.wpi.first.wpilibj.util.Units;\n \n public final class CONSTANTS {\n \n@@ -19,6 +20,7 @@\n \t */\n     public static final double NEUTRAL_DEADBAND = 0.05;\n     public static final int UNITS_PER_REVOLUTION = 2048; /* this is constant for Talon FX */\n+    public static final double GEAR_RATIO = 0.5;\n     \n     //Gains\n     public static final int TALON_PRIMARY_CLOSED_LOOP = 0;\n@@ -36,11 +38,26 @@\n \n     //Shooter Constants\n     public static final double SHOOTER_DEADBAND = 0.02;\n+    public static final double SHOOTER_ANGLE = 26.5;//in degrees\n+    public static final double GRAVITY = -9.8;// in m/s^2\n+\n+    //PID Constnats\n+    public static final double KP = 0;\n+    public static final double KI = 0;\n+    public static final double KD = 0;\n+    //Limelight Constants\n+    public static final double MOUNTED_ANGLE = 26.5;//in degrees\n+    public static final double PORT_HEIGHT = Units.inchesToMeters(98.25);\n+    public static final double HEIGHT_ABOVE_GROUND = 30;//tbd in meter also\n+\n+    //Pigeon Constants\n+    public static final int PIGEON_PORT = 0;\n+  \n \n     \n \n \n-    // Subsystem Constants\n+    //DriveTrain and Driver Controller Constants\n     public static final class DRIVE {\n         public static final int FORWARD_CHANNEL_ID = 2;\n         public static final int REVERSE_CHANNEL_ID = 3;"
+  },
+  {
+    "sha": "2ea65a8910432187d6a3d022bb5ac8d85c7db5a0",
+    "filename": "src/main/java/frc/robot/RobotContainer.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 2,
+    "changes": 15,
+    "blob_url": "https://github.com/systemoverloadrobotics/fullrobot2021/blob/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/RobotContainer.java",
+    "raw_url": "https://github.com/systemoverloadrobotics/fullrobot2021/raw/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/RobotContainer.java",
+    "contents_url": "https://api.github.com/repos/systemoverloadrobotics/fullrobot2021/contents/src/main/java/frc/robot/RobotContainer.java?ref=0f9d414e0cb9b72a0bc29866c5c5212690dc8d11",
+    "patch": "@@ -7,10 +7,15 @@\n import edu.wpi.first.wpilibj.GenericHID;\n import edu.wpi.first.wpilibj.XboxController;\n import frc.robot.commands.ArcadeDrive;\n+import frc.robot.commands.AutoAim;\n import frc.robot.subsystems.DriveTrain;\n import frc.robot.commands.ExampleCommand;\n import frc.robot.subsystems.ExampleSubsystem;\n+import frc.robot.subsystems.Limelight;\n+import frc.robot.subsystems.Shooter;\n+import frc.robot.subsystems.Turret;\n import edu.wpi.first.wpilibj2.command.Command;\n+import edu.wpi.first.wpilibj2.command.ScheduleCommand;\n import edu.wpi.first.wpilibj.Joystick;\n import edu.wpi.first.wpilibj2.command.button.JoystickButton;\n import frc.robot.CONSTANTS.*;\n@@ -29,22 +34,28 @@\n \n   //Subsystems\n   private final DriveTrain driveTrain = new DriveTrain();\n+  public static final Turret turret = new Turret();\n+  public static final Shooter shooter = new Shooter();\n+  public static final Limelight limelight = new Limelight();\n+\n   //Commands\n   private final ArcadeDrive arcadeDrive = new ArcadeDrive(driveTrain,\n \t\t\t() -> movementJoystick.getY(),\n \t\t\t() -> movementJoystick.getX(),\n \t\t\t() -> movementJoystick.getRawButtonPressed(CONTROLS.JOYSTICK.TRIGGER),\n \t\t\t() -> movementJoystick.getRawButtonReleased(CONTROLS.JOYSTICK.TRIGGER));\n-\n+  private final AutoAim autoAim = new AutoAim(turret, limelight);\n   /**\n    * The container for the robot.  Contains subsystems, OI devices, and commands.\n    */\n   public RobotContainer() {\n     // Configure the button bindings\n-\n+    final JoystickButton autoAimButton = new JoystickButton(movementJoystick, CONSTANTS.CONTROLS.JOYSTICK.TRIGGER);\n     driveTrain.setDefaultCommand(arcadeDrive);\n \n+    autoAimButton.whenHeld(autoAim);\n     configureButtonBindings();\n+\n   }\n \n   /**"
+  },
+  {
+    "sha": "d8d6aee023ac19add4c7902ca80c0c8dc22985a7",
+    "filename": "src/main/java/frc/robot/commands/AutoAim.java",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/systemoverloadrobotics/fullrobot2021/blob/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/commands/AutoAim.java",
+    "raw_url": "https://github.com/systemoverloadrobotics/fullrobot2021/raw/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/commands/AutoAim.java",
+    "contents_url": "https://api.github.com/repos/systemoverloadrobotics/fullrobot2021/contents/src/main/java/frc/robot/commands/AutoAim.java?ref=0f9d414e0cb9b72a0bc29866c5c5212690dc8d11",
+    "patch": "@@ -0,0 +1,30 @@\n+package frc.robot.commands;\n+\n+import edu.wpi.first.wpilibj2.command.CommandBase;\n+\n+import frc.robot.CONSTANTS;\n+import frc.robot.subsystems.*;\n+\n+public class AutoAim extends CommandBase {\n+    \n+    Turret m_turret;\n+    Limelight m_limelight;\n+\n+    public AutoAim(Turret turret, Limelight limelight){\n+        m_turret = turret;\n+        m_limelight = limelight;\n+        addRequirements(turret);\n+        addRequirements(limelight);\n+    }\n+\n+    @Override\n+    public void execute(){\n+\n+        if(m_turret.found()){\n+            m_turret.aim(m_turret.getAngle() + m_limelight.getHorizontalAngle());\n+        }\n+        else if(m_turret.onTarget()){\n+            m_turret.stop();\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "660912268a60eeb79f51507b7b31f56c6eb56b26",
+    "filename": "src/main/java/frc/robot/subsystems/DriveTrain.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 1,
+    "changes": 20,
+    "blob_url": "https://github.com/systemoverloadrobotics/fullrobot2021/blob/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/subsystems/DriveTrain.java",
+    "raw_url": "https://github.com/systemoverloadrobotics/fullrobot2021/raw/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/subsystems/DriveTrain.java",
+    "contents_url": "https://api.github.com/repos/systemoverloadrobotics/fullrobot2021/contents/src/main/java/frc/robot/subsystems/DriveTrain.java?ref=0f9d414e0cb9b72a0bc29866c5c5212690dc8d11",
+    "patch": "@@ -2,14 +2,17 @@\n \n import edu.wpi.first.wpilibj2.command.SubsystemBase;\n import frc.robot.CONSTANTS.DRIVE;\n-import edu.wpi.first.wpilibj.SpeedController;\n import com.revrobotics.CANSparkMax;\n import com.revrobotics.CANSparkMaxLowLevel.MotorType;\n+import com.ctre.phoenix.sensors.PigeonIMU;\n import com.revrobotics.CANEncoder;\n import edu.wpi.first.wpilibj.DoubleSolenoid;\n import edu.wpi.first.wpilibj.DoubleSolenoid.Value;\n import edu.wpi.first.wpilibj.SpeedControllerGroup;\n import edu.wpi.first.wpilibj.drive.DifferentialDrive;\n+import edu.wpi.first.wpilibj.geometry.Rotation2d;\n+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;\n+\n import com.revrobotics.EncoderType;\n import frc.robot.CONSTANTS;\n \n@@ -36,6 +39,12 @@\n \n     public DifferentialDrive robotDrive = new DifferentialDrive(leftGroup, rightGroup);\n \n+    private double[] ypr = new double[3];\n+    private PigeonIMU pidgey = new PigeonIMU(CONSTANTS.PIGEON_PORT);\n+\n+    private DifferentialDriveOdometry odometry;\n+\n+\n \n     public DriveTrain() {\n         rightMaster.restoreFactoryDefaults();\n@@ -44,6 +53,14 @@ public DriveTrain() {\n         leftMaster.restoreFactoryDefaults();\n         leftFollower1.restoreFactoryDefaults();\n         leftFollower2.restoreFactoryDefaults();\n+\n+        pidgey.getRawGyro(ypr);\n+        odometry =  new DifferentialDriveOdometry(getRotation());\n+\n+    }\n+\n+    public Rotation2d getRotation(){\n+        return new Rotation2d(ypr[1]);\n     }\n \n     public void driveArcade(double speed, double turn) {\n@@ -70,4 +87,5 @@ public double getRightMasterEncoderValue() {\n         return rightMasterEncoder.getPosition();\n     }\n \n+\n }"
+  },
+  {
+    "sha": "15946f3ea9313f484053e5ae788ce9e76cc52ae9",
+    "filename": "src/main/java/frc/robot/subsystems/Limelight.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 3,
+    "changes": 18,
+    "blob_url": "https://github.com/systemoverloadrobotics/fullrobot2021/blob/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/subsystems/Limelight.java",
+    "raw_url": "https://github.com/systemoverloadrobotics/fullrobot2021/raw/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/subsystems/Limelight.java",
+    "contents_url": "https://api.github.com/repos/systemoverloadrobotics/fullrobot2021/contents/src/main/java/frc/robot/subsystems/Limelight.java?ref=0f9d414e0cb9b72a0bc29866c5c5212690dc8d11",
+    "patch": "@@ -4,6 +4,7 @@\n import edu.wpi.first.networktables.NetworkTableEntry;\n import edu.wpi.first.networktables.NetworkTableInstance;\n import edu.wpi.first.wpilibj2.command.SubsystemBase;\n+import frc.robot.CONSTANTS;\n \n public class Limelight extends SubsystemBase {\n \n@@ -31,7 +32,9 @@ public Limelight() {\n \n     }\n \n-    /** @return a horizontal angle from -27 to 27 between the target and the camera */\n+    /**\n+     * @return a horizontal angle from -27 to 27 between the target and the camera\n+     */\n     public double getHorizontalAngle() {\n         return horizontalAngleOffSet.getDouble(0);\n     }\n@@ -42,15 +45,24 @@ public double getVerticalAngle() {\n     }\n \n     /** @return If the limelight is connected */\n-    public boolean connected(){\n+    public boolean connected() {\n         return networkTable.getEntry(\"tx\").exists();\n     }\n \n     /** @return If the limelight has found a target */\n     public boolean canSeeTarget() {\n         return targetEntry.getNumber(0).intValue() > 0;\n     }\n-    \n+\n+    // returns the size of the target\n+    public double getTargetArea() {\n+        return ta.getNumber(0).doubleValue();\n+    }\n+\n+    public double calculateDistance() {\n+        return (CONSTANTS.PORT_HEIGHT - CONSTANTS.HEIGHT_ABOVE_GROUND)\n+                / Math.tan(Math.toRadians(y) + Math.toRadians(CONSTANTS.MOUNTED_ANGLE));\n+    }\n \n     public void periodic() {\n "
+  },
+  {
+    "sha": "6094fe940c78d90651cff3a580fc40ff0702e7ba",
+    "filename": "src/main/java/frc/robot/subsystems/Shooter.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 7,
+    "changes": 29,
+    "blob_url": "https://github.com/systemoverloadrobotics/fullrobot2021/blob/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/subsystems/Shooter.java",
+    "raw_url": "https://github.com/systemoverloadrobotics/fullrobot2021/raw/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/subsystems/Shooter.java",
+    "contents_url": "https://api.github.com/repos/systemoverloadrobotics/fullrobot2021/contents/src/main/java/frc/robot/subsystems/Shooter.java?ref=0f9d414e0cb9b72a0bc29866c5c5212690dc8d11",
+    "patch": "@@ -2,13 +2,9 @@\n \n import java.util.logging.Logger;\n \n-import com.ctre.phoenix.CANifier;\n import com.ctre.phoenix.motorcontrol.ControlMode;\n import com.ctre.phoenix.motorcontrol.FeedbackDevice;\n-import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;\n-import com.ctre.phoenix.motorcontrol.LimitSwitchSource;\n import com.ctre.phoenix.motorcontrol.NeutralMode;\n-import com.ctre.phoenix.motorcontrol.RemoteLimitSwitchSource;\n import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;\n \n import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;\n@@ -19,7 +15,7 @@\n \n     private Logger logger = Logger.getLogger(this.getClass().getName());\n     private double motorSetPoint;\n-    private int numberOfBallsFired;\n+    // private int numberOfBallsFired;\n \n     private WPI_TalonSRX shooter = new WPI_TalonSRX(1); // config id later\n \n@@ -47,6 +43,25 @@ public Shooter() {\n         subsystemActive = true;\n     }\n \n+    public double linerToAngular(double linear) {\n+        // (velocity(m/s) * 60)/ (2pi * radius)\n+        return 0.0;\n+    }\n+\n+    public double calculate(double distance) {\n+        double height = CONSTANTS.PORT_HEIGHT - CONSTANTS.HEIGHT_ABOVE_GROUND;\n+        double angleRad = Math.toRadians(CONSTANTS.SHOOTER_ANGLE);\n+        double velocity = distance / Math.cos(Math.toRadians(angleRad))\n+                * Math.sqrt((2 * (height - (distance * Math.tan(angleRad))) / CONSTANTS.GRAVITY));\n+        return velocity; // in m/s\n+        /*\n+         * return Math.sqrt(-2 * CONSTANTS.GRAVITY * (CONSTANTS.PORT_HEIGHT -\n+         * CONSTANTS.HEIGHT_ABOVE_GROUND)) /\n+         * Math.sin(Math.toRadians(CONSTANTS.SHOOTER_ANGLE));//in m/s need to convert to\n+         * rpm\n+         */\n+    }\n+\n     public void spin(double speed) {\n         motorSetPoint = speed;\n         shooter.set(ControlMode.Velocity, motorSetPoint);\n@@ -68,8 +83,8 @@ public void set(double rpm) {\n     }\n \n     public boolean shooterAtSetpoint() {\n-        if (shooter.getSelectedSensorVelocity() >= motorSetPoint * ( 1 - CONSTANTS.SHOOTER_DEADBAND)\n-                && shooter.getSelectedSensorVelocity() <= motorSetPoint * ( 1 + CONSTANTS.SHOOTER_DEADBAND)) {\n+        if (shooter.getSelectedSensorVelocity() >= motorSetPoint * (1 - CONSTANTS.SHOOTER_DEADBAND)\n+                && shooter.getSelectedSensorVelocity() <= motorSetPoint * (1 + CONSTANTS.SHOOTER_DEADBAND)) {\n             return true;\n         }\n         return false;"
+  },
+  {
+    "sha": "6ca3bea202cbf45309911b745878c68a1be2825f",
+    "filename": "src/main/java/frc/robot/subsystems/Turret.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 8,
+    "changes": 32,
+    "blob_url": "https://github.com/systemoverloadrobotics/fullrobot2021/blob/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/subsystems/Turret.java",
+    "raw_url": "https://github.com/systemoverloadrobotics/fullrobot2021/raw/0f9d414e0cb9b72a0bc29866c5c5212690dc8d11/src/main/java/frc/robot/subsystems/Turret.java",
+    "contents_url": "https://api.github.com/repos/systemoverloadrobotics/fullrobot2021/contents/src/main/java/frc/robot/subsystems/Turret.java?ref=0f9d414e0cb9b72a0bc29866c5c5212690dc8d11",
+    "patch": "@@ -4,12 +4,16 @@\n import com.ctre.phoenix.motorcontrol.FeedbackDevice;\n import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;\n \n+import edu.wpi.first.wpilibj.Encoder;\n import edu.wpi.first.wpilibj2.command.SubsystemBase;\n import frc.robot.CONSTANTS;\n+import frc.robot.RobotContainer;\n \n public class Turret extends SubsystemBase {\n \n-    private WPI_TalonSRX turret = new WPI_TalonSRX(2); // config id later    \n+    private WPI_TalonSRX turret = new WPI_TalonSRX(2); // config id later\n+\n+    private double encoderPosition;\n \n     public Turret() {\n \n@@ -23,29 +27,41 @@ public Turret() {\n         turret.config_kI(CONSTANTS.TURRET_PID_SLOT, CONSTANTS.I_TURRET);\n         turret.config_kD(CONSTANTS.TURRET_PID_SLOT, CONSTANTS.D_TURRET);\n         turret.config_IntegralZone(CONSTANTS.TURRET_PID_SLOT, CONSTANTS.IZONE_TURRET);\n-\n+        \n         //Soft Limit\n         turret.configForwardSoftLimitEnable(true, CONSTANTS.TURRET_ENCODER_LIMIT);\n-\n-\n+        \n+        \n     }\n \n-    public void aim(){\n-        \n+    public void aim(double angle){\n+        turret.set(ControlMode.Position, (angle/CONSTANTS.GEAR_RATIO) * CONSTANTS.UNITS_PER_REVOLUTION);\n     }\n \n     public double getVel() {\n         return turret.getSelectedSensorVelocity();\n     }\n \n-\n     public void stop() {\n         turret.stopMotor();\n+    }   \n+\n+    public boolean found(){\n+        return RobotContainer.limelight.canSeeTarget() && RobotContainer.limelight.getTargetArea() > 0.8;\n+    }\n+\n+    public boolean onTarget(){\n+        return found() && RobotContainer.limelight.getHorizontalAngle() < 1.5;\n     }\n \n+    public double getAngle(){\n+        return (encoderPosition/CONSTANTS.UNITS_PER_REVOLUTION) * CONSTANTS.GEAR_RATIO; //Dummy gear ratio\n+    }\n+\n+\n     @Override\n     public void periodic() {\n-        // This method will be called once per scheduler run\n+        encoderPosition = turret.getSelectedSensorPosition();\n     }\n \n }"
+  }
+]

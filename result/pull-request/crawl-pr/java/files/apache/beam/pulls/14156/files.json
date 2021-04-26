@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "9d7ac3fdc6ba0a3b74d41c163c3745e39b0783b8",
+    "filename": "CHANGES.md",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/beam/blob/4b63f9c0a9797a3227f281cade87622313c4172c/CHANGES.md",
+    "raw_url": "https://github.com/apache/beam/raw/4b63f9c0a9797a3227f281cade87622313c4172c/CHANGES.md",
+    "contents_url": "https://api.github.com/repos/apache/beam/contents/CHANGES.md?ref=4b63f9c0a9797a3227f281cade87622313c4172c",
+    "patch": "@@ -36,6 +36,8 @@\n ## Breaking Changes\n \n * X behavior was changed ([BEAM-X](https://issues.apache.org/jira/browse/BEAM-X)).\n+* Python Row objects are now sensitive to field order. So `Row(x=3, y=4)` is no\n+  longer considered equal to `Row(y=4, x=3)` (BEAM-11929).\n \n ## Deprecations\n "
+  },
+  {
+    "sha": "8b1159cdaa3e16a54a6531d338e052500fff0ea1",
+    "filename": "sdks/python/apache_beam/dataframe/schemas_test.py",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/apache/beam/blob/4b63f9c0a9797a3227f281cade87622313c4172c/sdks/python/apache_beam/dataframe/schemas_test.py",
+    "raw_url": "https://github.com/apache/beam/raw/4b63f9c0a9797a3227f281cade87622313c4172c/sdks/python/apache_beam/dataframe/schemas_test.py",
+    "contents_url": "https://api.github.com/repos/apache/beam/contents/sdks/python/apache_beam/dataframe/schemas_test.py?ref=4b63f9c0a9797a3227f281cade87622313c4172c",
+    "patch": "@@ -122,6 +122,25 @@ def test_simple_df(self):\n           | schemas.BatchRowsAsDataFrame(min_batch_size=10, max_batch_size=10))\n       assert_that(res, matches_df(expected))\n \n+  def test_simple_df_with_beam_row(self):\n+    expected = pd.DataFrame({\n+        'name': list(unicode(i) for i in range(5)),\n+        'id': list(range(5)),\n+        'height': list(float(i) for i in range(5))\n+    },\n+                            columns=['name', 'id', 'height'])\n+\n+    with TestPipeline() as p:\n+      res = (\n+          p\n+          | beam.Create([(str(i), i, float(i)) for i in range(5)])\n+          | beam.Select(\n+              name=lambda r: str(r[0]),\n+              id=lambda r: int(r[1]),\n+              height=lambda r: float(r[2]))\n+          | schemas.BatchRowsAsDataFrame(min_batch_size=10, max_batch_size=10))\n+      assert_that(res, matches_df(expected))\n+\n   def test_generate_proxy(self):\n     expected = pd.DataFrame({\n         'animal': pd.Series(dtype=pd.StringDtype()),"
+  },
+  {
+    "sha": "a7eb22c90c3111af98a318d8bd5b51a95ce61acb",
+    "filename": "sdks/python/apache_beam/pvalue.py",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 6,
+    "changes": 15,
+    "blob_url": "https://github.com/apache/beam/blob/4b63f9c0a9797a3227f281cade87622313c4172c/sdks/python/apache_beam/pvalue.py",
+    "raw_url": "https://github.com/apache/beam/raw/4b63f9c0a9797a3227f281cade87622313c4172c/sdks/python/apache_beam/pvalue.py",
+    "contents_url": "https://api.github.com/repos/apache/beam/contents/sdks/python/apache_beam/pvalue.py?ref=4b63f9c0a9797a3227f281cade87622313c4172c",
+    "patch": "@@ -658,6 +658,9 @@ class Row(object):\n \n   when applied to a PCollection of ints will produce a PCollection with schema\n   `(x=int, y=float)`.\n+\n+  Note that in Beam 2.30.0 and later, Row objects are sensitive to field order.\n+  So `Row(x=3, y=4)` is not considered equal to `Row(y=4, x=3)`.\n   \"\"\"\n   def __init__(self, **kwargs):\n     self.__dict__.update(kwargs)\n@@ -666,24 +669,24 @@ def as_dict(self):\n     return dict(self.__dict__)\n \n   def __iter__(self):\n-    for _, value in sorted(self.__dict__.items()):\n+    for _, value in self.__dict__.items():\n       yield value\n \n   def __repr__(self):\n-    return 'Row(%s)' % ', '.join(\n-        '%s=%r' % kv for kv in sorted(self.__dict__.items()))\n+    return 'Row(%s)' % ', '.join('%s=%r' % kv for kv in self.__dict__.items())\n \n   def __hash__(self):\n-    return hash(type(sorted(self.__dict__.items())))\n+    return hash(self.__dict__.items())\n \n   def __eq__(self, other):\n-    return type(self) == type(other) and self.__dict__ == other.__dict__\n+    return type(self) == type(other) and all(\n+        s == o for s, o in zip(self.__dict__.items(), other.__dict__.items()))\n \n   def __ne__(self, other):\n     return not self == other\n \n   def __reduce__(self):\n-    return _make_Row, tuple(sorted(self.__dict__.items()))\n+    return _make_Row, tuple(self.__dict__.items())\n \n \n def _make_Row(*items):"
+  }
+]

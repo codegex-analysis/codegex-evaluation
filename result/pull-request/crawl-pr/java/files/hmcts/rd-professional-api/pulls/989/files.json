@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "6904fc6fbe004f25d1dbf1a0fe4746f1e45eff6e",
+    "filename": "src/integrationTest/java/uk/gov/hmcts/reform/professionalapi/RetrieveOrganisationsTest.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 2,
+    "changes": 12,
+    "blob_url": "https://github.com/hmcts/rd-professional-api/blob/4e78d58559559ccabad8efba67aadd82d8d2d63d/src/integrationTest/java/uk/gov/hmcts/reform/professionalapi/RetrieveOrganisationsTest.java",
+    "raw_url": "https://github.com/hmcts/rd-professional-api/raw/4e78d58559559ccabad8efba67aadd82d8d2d63d/src/integrationTest/java/uk/gov/hmcts/reform/professionalapi/RetrieveOrganisationsTest.java",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-professional-api/contents/src/integrationTest/java/uk/gov/hmcts/reform/professionalapi/RetrieveOrganisationsTest.java?ref=4e78d58559559ccabad8efba67aadd82d8d2d63d",
+    "patch": "@@ -68,8 +68,6 @@ public void persists_and_returns_organisation_details() {\n         Map<String, Object> dxAddress = ((List<Map<String, Object>>) contactInfo.get(\"dxAddress\")).get(0);\r\n         assertThat(dxAddress.get(\"dxNumber\")).isEqualTo(\"DX 1234567890\");\r\n         assertThat(dxAddress.get(\"dxExchange\")).isEqualTo(\"dxExchange\");\r\n-\r\n-        //RetrieveOrganisationsTest:Received response to retrieve an organisation details\r\n     }\r\n \r\n     @Test\r\n@@ -435,4 +433,14 @@ public void return_organisation_payload_with_200_status_code_for_pui_caa_manager\n \r\n     }\r\n \r\n+    @Test\r\n+    public void find_all_active_orgs_with_200_for_caseworker_publiclaw_systemupdate() {\r\n+        createAndActivateOrganisation();\r\n+        Map<String, Object> orgResponse =\r\n+                professionalReferenceDataClient.retrieveAllOrganisationDetailsByStatusTest(ACTIVE, fplaSystemUpdate);\r\n+        assertThat(orgResponse.get(\"organisations\")).isNotNull();\r\n+        assertThat(orgResponse.get(\"organisations\")).asList().isNotEmpty();\r\n+        assertThat(orgResponse.get(\"http_status\").toString().contains(\"OK\"));\r\n+    }\r\n+\r\n }\r"
+  },
+  {
+    "sha": "e5b6e7fb18ea40d717b2f9615ddef2e236808dff",
+    "filename": "src/integrationTest/java/uk/gov/hmcts/reform/professionalapi/util/AuthorizationEnabledIntegrationTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/hmcts/rd-professional-api/blob/4e78d58559559ccabad8efba67aadd82d8d2d63d/src/integrationTest/java/uk/gov/hmcts/reform/professionalapi/util/AuthorizationEnabledIntegrationTest.java",
+    "raw_url": "https://github.com/hmcts/rd-professional-api/raw/4e78d58559559ccabad8efba67aadd82d8d2d63d/src/integrationTest/java/uk/gov/hmcts/reform/professionalapi/util/AuthorizationEnabledIntegrationTest.java",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-professional-api/contents/src/integrationTest/java/uk/gov/hmcts/reform/professionalapi/util/AuthorizationEnabledIntegrationTest.java?ref=4e78d58559559ccabad8efba67aadd82d8d2d63d",
+    "patch": "@@ -141,6 +141,9 @@\n     @Value(\"${prd.security.roles.prd-aac-system}\")\n     protected String systemUser;\n \n+    @Value(\"${prd.security.roles.fpla-systemupdate-role}\")\n+    protected String fplaSystemUpdate;\n+\n     @Value(\"${resendInterval}\")\n     protected String resendInterval;\n "
+  },
+  {
+    "sha": "2a634d39b7f903bdcfcf02d40cb8c0f5cd3b501b",
+    "filename": "src/integrationTest/resources/application.yml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/hmcts/rd-professional-api/blob/4e78d58559559ccabad8efba67aadd82d8d2d63d/src/integrationTest/resources/application.yml",
+    "raw_url": "https://github.com/hmcts/rd-professional-api/raw/4e78d58559559ccabad8efba67aadd82d8d2d63d/src/integrationTest/resources/application.yml",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-professional-api/contents/src/integrationTest/resources/application.yml?ref=4e78d58559559ccabad8efba67aadd82d8d2d63d",
+    "patch": "@@ -48,6 +48,7 @@ prd:\n       pui-caa: pui-caa\n       caseworker-caa: caseworker-caa\n       prd-aac-system: prd-aac-system\n+      fpla-systemupdate-role: caseworker-publiclaw-systemupdate\n \n ## user profile feign connection\n user.profile.api.url: ${USER_PROFILE_URL:http://127.0.0.1:8091}"
+  },
+  {
+    "sha": "ee2ec1a5c78dd636e1904946c15b0c7f1d779f71",
+    "filename": "src/main/java/uk/gov/hmcts/reform/professionalapi/controller/internal/OrganisationInternalController.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/hmcts/rd-professional-api/blob/4e78d58559559ccabad8efba67aadd82d8d2d63d/src/main/java/uk/gov/hmcts/reform/professionalapi/controller/internal/OrganisationInternalController.java",
+    "raw_url": "https://github.com/hmcts/rd-professional-api/raw/4e78d58559559ccabad8efba67aadd82d8d2d63d/src/main/java/uk/gov/hmcts/reform/professionalapi/controller/internal/OrganisationInternalController.java",
+    "contents_url": "https://api.github.com/repos/hmcts/rd-professional-api/contents/src/main/java/uk/gov/hmcts/reform/professionalapi/controller/internal/OrganisationInternalController.java?ref=4e78d58559559ccabad8efba67aadd82d8d2d63d",
+    "patch": "@@ -133,7 +133,7 @@\n             )\r\n     })\r\n \r\n-    @Secured(\"prd-admin\")\r\n+    @Secured({\"prd-admin\", \"caseworker-publiclaw-systemupdate\"})\r\n     @GetMapping(produces = APPLICATION_JSON_VALUE)\r\n     public ResponseEntity<Object> retrieveOrganisations(\r\n             @Pattern(regexp = ORGANISATION_IDENTIFIER_FORMAT_REGEX, message = ORG_ID_VALIDATION_ERROR_MESSAGE)\r"
+  }
+]

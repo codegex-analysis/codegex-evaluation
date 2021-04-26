@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "3512e2e085b219748d0865ffed08e86afbf514e3",
+    "filename": "spring-cloud-kubernetes-config/src/main/java/org/springframework/cloud/kubernetes/config/reload/ConfigurationChangeDetector.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/blob/d9469e97f747d206fb281a02a3f2bb7b32ee32f4/spring-cloud-kubernetes-config/src/main/java/org/springframework/cloud/kubernetes/config/reload/ConfigurationChangeDetector.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/raw/d9469e97f747d206fb281a02a3f2bb7b32ee32f4/spring-cloud-kubernetes-config/src/main/java/org/springframework/cloud/kubernetes/config/reload/ConfigurationChangeDetector.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-kubernetes/contents/spring-cloud-kubernetes-config/src/main/java/org/springframework/cloud/kubernetes/config/reload/ConfigurationChangeDetector.java?ref=d9469e97f747d206fb281a02a3f2bb7b32ee32f4",
+    "patch": "@@ -102,6 +102,15 @@ protected boolean changed(List<? extends MapPropertySource> l1,\n \t\t\tthis.log.warn(\n \t\t\t\t\t\"The current number of ConfigMap PropertySources does not match \"\n \t\t\t\t\t\t\t+ \"the ones loaded from the Kubernetes - No reload will take place\");\n+\n+\t\t\tif (log.isDebugEnabled()) {\n+\t\t\t\tthis.log.debug(String.format(\"source 1: %d\", l1.size()));\n+\t\t\t\tl1.forEach(item -> log.debug(item));\n+\n+\t\t\t\tthis.log.debug(String.format(\"source 2: %d\", l2.size()));\n+\t\t\t\tl2.forEach(item -> log.debug(item));\n+\t\t\t}\n+\n \t\t\treturn false;\n \t\t}\n \n@@ -142,6 +151,11 @@ protected boolean changed(List<? extends MapPropertySource> l1,\n \n \t\tLinkedList<PropertySource<?>> sources = toLinkedList(\n \t\t\t\tthis.environment.getPropertySources());\n+\n+\t\tthis.log.debug(\"findPropertySources\");\n+\t\tthis.log.debug(String.format(\"environment: %s\", this.environment));\n+\t\tthis.log.debug(String.format(\"environment sources: %s\", sources));\n+\n \t\twhile (!sources.isEmpty()) {\n \t\t\tPropertySource<?> source = sources.pop();\n \t\t\tif (source instanceof CompositePropertySource) {\n@@ -197,6 +211,10 @@ else if (propertySource instanceof CompositePropertySource) {\n \t\t\t\t\t+ propertySource.getClass());\n \t\t}\n \n+\t\tthis.log.debug(\"locateMapPropertySources\");\n+\t\tthis.log.debug(String.format(\"environment: %s\", environment));\n+\t\tthis.log.debug(String.format(\"sources: %s\", result));\n+\n \t\treturn result;\n \t}\n "
+  },
+  {
+    "sha": "8981985fcbd85e9dfeebd7c52b2d7c1ca85b58e9",
+    "filename": "spring-cloud-kubernetes-config/src/main/java/org/springframework/cloud/kubernetes/config/reload/EventBasedConfigurationChangeDetector.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/blob/d9469e97f747d206fb281a02a3f2bb7b32ee32f4/spring-cloud-kubernetes-config/src/main/java/org/springframework/cloud/kubernetes/config/reload/EventBasedConfigurationChangeDetector.java",
+    "raw_url": "https://github.com/spring-cloud/spring-cloud-kubernetes/raw/d9469e97f747d206fb281a02a3f2bb7b32ee32f4/spring-cloud-kubernetes-config/src/main/java/org/springframework/cloud/kubernetes/config/reload/EventBasedConfigurationChangeDetector.java",
+    "contents_url": "https://api.github.com/repos/spring-cloud/spring-cloud-kubernetes/contents/spring-cloud-kubernetes-config/src/main/java/org/springframework/cloud/kubernetes/config/reload/EventBasedConfigurationChangeDetector.java?ref=d9469e97f747d206fb281a02a3f2bb7b32ee32f4",
+    "patch": "@@ -141,6 +141,9 @@ public void unwatch() {\n \t}\n \n \tprivate void onEvent(ConfigMap configMap) {\n+\n+\t\tthis.log.debug(String.format(\"onEvent configMap: %s\", configMap.toString()));\n+\n \t\tboolean changed = changed(\n \t\t\t\tlocateMapPropertySources(this.configMapPropertySourceLocator,\n \t\t\t\t\t\tthis.environment),\n@@ -152,6 +155,9 @@ private void onEvent(ConfigMap configMap) {\n \t}\n \n \tprivate void onEvent(Secret secret) {\n+\n+\t\tthis.log.debug(String.format(\"onEvent configMap: %s\", secret.toString()));\n+\n \t\tboolean changed = changed(\n \t\t\t\tlocateMapPropertySources(this.secretsPropertySourceLocator,\n \t\t\t\t\t\tthis.environment),"
+  }
+]

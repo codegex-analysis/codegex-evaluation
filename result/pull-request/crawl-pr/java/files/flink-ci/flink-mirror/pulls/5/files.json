@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "184fcae7ffa7f36782d8e41105db6987c9c4825b",
+    "filename": "flink-connectors/flink-connector-elasticsearch6/src/test/java/org/apache/flink/streaming/connectors/elasticsearch/table/Elasticsearch6DynamicSinkITCase.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/flink-ci/flink-mirror/blob/adf702c01166ed209781bdc55f49e2df25243ed2/flink-connectors/flink-connector-elasticsearch6/src/test/java/org/apache/flink/streaming/connectors/elasticsearch/table/Elasticsearch6DynamicSinkITCase.java",
+    "raw_url": "https://github.com/flink-ci/flink-mirror/raw/adf702c01166ed209781bdc55f49e2df25243ed2/flink-connectors/flink-connector-elasticsearch6/src/test/java/org/apache/flink/streaming/connectors/elasticsearch/table/Elasticsearch6DynamicSinkITCase.java",
+    "contents_url": "https://api.github.com/repos/flink-ci/flink-mirror/contents/flink-connectors/flink-connector-elasticsearch6/src/test/java/org/apache/flink/streaming/connectors/elasticsearch/table/Elasticsearch6DynamicSinkITCase.java?ref=adf702c01166ed209781bdc55f49e2df25243ed2",
+    "patch": "@@ -34,6 +34,7 @@\n import org.apache.flink.table.data.TimestampData;\n import org.apache.flink.table.types.DataType;\n import org.apache.flink.types.RowKind;\n+import org.apache.flink.util.TestLogger;\n \n import org.elasticsearch.action.get.GetRequest;\n import org.elasticsearch.client.Client;\n@@ -60,7 +61,7 @@\n import static org.junit.Assert.assertThat;\n \n /** IT tests for {@link Elasticsearch6DynamicSink}. */\n-public class Elasticsearch6DynamicSinkITCase {\n+public class Elasticsearch6DynamicSinkITCase extends TestLogger {\n \n     @ClassRule\n     public static ElasticsearchContainer elasticsearchContainer ="
+  },
+  {
+    "sha": "01f650b513dc8e04bcf75cd6e3aa438b951b818c",
+    "filename": "tools/ci/log4j.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/flink-ci/flink-mirror/blob/adf702c01166ed209781bdc55f49e2df25243ed2/tools/ci/log4j.properties",
+    "raw_url": "https://github.com/flink-ci/flink-mirror/raw/adf702c01166ed209781bdc55f49e2df25243ed2/tools/ci/log4j.properties",
+    "contents_url": "https://api.github.com/repos/flink-ci/flink-mirror/contents/tools/ci/log4j.properties?ref=adf702c01166ed209781bdc55f49e2df25243ed2",
+    "patch": "@@ -16,7 +16,7 @@\n # limitations under the License.\n ################################################################################\n \n-rootLogger.level = INFO\n+rootLogger.level = DEBUG\n rootLogger.appenderRef.out.ref = FileAppender\n \n # -----------------------------------------------------------------------------"
+  },
+  {
+    "sha": "350dae15910ab04880c686273ba925c9d6484a13",
+    "filename": "tools/ci/test_controller.sh",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 5,
+    "changes": 23,
+    "blob_url": "https://github.com/flink-ci/flink-mirror/blob/adf702c01166ed209781bdc55f49e2df25243ed2/tools/ci/test_controller.sh",
+    "raw_url": "https://github.com/flink-ci/flink-mirror/raw/adf702c01166ed209781bdc55f49e2df25243ed2/tools/ci/test_controller.sh",
+    "contents_url": "https://api.github.com/repos/flink-ci/flink-mirror/contents/tools/ci/test_controller.sh?ref=adf702c01166ed209781bdc55f49e2df25243ed2",
+    "patch": "@@ -49,7 +49,8 @@ if [ ! -d \"$DEBUG_FILES_OUTPUT_DIR\" ] ; then\n fi\n \n if [ -z \"$STAGE\" ] ; then\n-\techo \"ERROR: Environment variable 'STAGE' is not set but expected by test_controller.sh. THe variable refers to the stage being executed.\"\n+\techo \"ERROR: Argument 'STAGE' is not set but expected by test_controller.sh. The variable refers to the stage being executed.\"\n+\techo \"Usage: $0 STAGE\"\n \texit 1\n fi\n \n@@ -100,12 +101,12 @@ fi\n # Step 2: Run tests\n # =============================================================================\n \n-if [ $STAGE == $STAGE_PYTHON ]; then\n+if [ \"$STAGE\" == \"$STAGE_PYTHON\" ]; then\n \trun_with_watchdog \"./flink-python/dev/lint-python.sh\" $CALLBACK_ON_TIMEOUT\n \tEXIT_CODE=$?\n else\n \tMVN_TEST_OPTIONS=\"-Dflink.tests.with-openssl\"\n-\tif [ $STAGE = $STAGE_LEGACY_SLOT_MANAGEMENT ]; then\n+\tif [ \"$STAGE\" = \"$STAGE_LEGACY_SLOT_MANAGEMENT\" ]; then\n \t\tif [[ ${PROFILE} == *\"enable-adaptive-scheduler\"* ]]; then\n \t\t\techo \"Skipping legacy slot management test stage in adaptive scheduler job\"\n \t\t\texit 0\n@@ -121,8 +122,20 @@ else\n \tfi\n \tMVN_TEST_MODULES=$(get_test_modules_for_stage ${STAGE})\n \n-\trun_with_watchdog \"run_mvn $MVN_COMMON_OPTIONS $MVN_TEST_OPTIONS $PROFILE $MVN_TEST_MODULES verify\" $CALLBACK_ON_TIMEOUT\n-\tEXIT_CODE=$?\n+  # for ... -Dtest=\"\"\n+  # change debug log\n+  # 1. reproduce locally\n+  # 2. reproduce on azure + logs\n+  #  -> artifacts -> job -> download -> mvn logs\n+  # each test appears twice\n+  TEST=\"org.apache.flink.streaming.connectors.elasticsearch.table.Elasticsearch6DynamicSinkITCase#testWritingDocuments\"\n+  for _ in {1..5000}; do\n+    run_with_watchdog \"run_mvn $MVN_COMMON_OPTIONS $MVN_TEST_OPTIONS $PROFILE $MVN_TEST_MODULES verify -Dtest=$TEST -DfailIfNoTests=false\" $CALLBACK_ON_TIMEOUT\n+    EXIT_CODE=$?\n+    if [ \"${EXIT_CODE}\" != \"0\" ]; then\n+     break\n+    fi\n+\tdone\n fi\n \n # ============================================================================="
+  }
+]

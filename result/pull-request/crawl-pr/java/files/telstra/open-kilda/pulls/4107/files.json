@@ -1,0 +1,94 @@
+[
+  {
+    "sha": "2dafe91cc3a3a394c5d3476267bea18ae9aa33db",
+    "filename": "docs/design/flow-traffic-mirroring/create-mirror-point.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/create-mirror-point.png",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/create-mirror-point.png",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/docs/design/flow-traffic-mirroring/create-mirror-point.png?ref=17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a"
+  },
+  {
+    "sha": "ff6036a03fd6da30408c4421eab4a525552d4586",
+    "filename": "docs/design/flow-traffic-mirroring/create-mirror-point.puml",
+    "status": "added",
+    "additions": 69,
+    "deletions": 0,
+    "changes": 69,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/create-mirror-point.puml",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/create-mirror-point.puml",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/docs/design/flow-traffic-mirroring/create-mirror-point.puml?ref=17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a",
+    "patch": "@@ -0,0 +1,69 @@\n+@startuml\n+title Create flow traffic mirror point\n+\n+boundary Northbound\n+participant FlowCreateMirrorPointHub\n+participant FlowValidator\n+participant PathComputer\n+participant FlowResourcesManager\n+participant CommandBuilder\n+database OrientDB\n+participant SpeakerWorker\n+\n+Northbound -> FlowCreateMirrorPointHub : Create flow mirror point\n+activate FlowCreateMirrorPointHub\n+ ==Validation==\n+FlowCreateMirrorPointHub -> FlowValidator : Validate flow\n+FlowValidator -> FlowValidator : Validate flow\n+FlowCreateMirrorPointHub <- FlowValidator : Flow validation result\n+alt error\n+    Northbound <- FlowCreateMirrorPointHub : Flow mirror point creation error\n+end\n+\n+ == Path calculation and resource allocation ==\n+FlowCreateMirrorPointHub -> PathComputer : Find path\n+FlowCreateMirrorPointHub <- PathComputer : Mirror path\n+alt Path is not found\n+    Northbound <- FlowCreateMirrorPointHub : Flow mirror point creation error\n+else Path is found\n+    Northbound <- FlowCreateMirrorPointHub : Flow mirror point creation\\n is in progress\n+end\n+\n+FlowCreateMirrorPointHub -> FlowResourcesManager : Allocate resources\n+activate FlowResourcesManager\n+FlowResourcesManager -> OrientDB : Allocate resources\n+FlowResourcesManager <- OrientDB : Cookie and vlan\n+FlowCreateMirrorPointHub <- FlowResourcesManager : Allocated resources\n+deactivate FlowResourcesManager\n+\n+FlowCreateMirrorPointHub -> OrientDB : Save flow mirror path\n+FlowCreateMirrorPointHub -> OrientDB : Save flow segments\n+FlowCreateMirrorPointHub -> OrientDB : Update ISLs available bandwidth\n+\n+ == Flow installation ==\n+FlowCreateMirrorPointHub -> CommandBuilder : Create Switch Rules\n+CommandBuilder -> CommandBuilder : Build commands\n+\n+FlowCreateMirrorPointHub <- CommandBuilder: Flow mirroring path installation commands\n+loop for each command in commands\n+    FlowCreateMirrorPointHub -> SpeakerWorker : Send install rule command\n+end\n+deactivate FlowCreateMirrorPointHub\n+\n+loop for each installed rule\n+    FlowCreateMirrorPointHub <- SpeakerWorker : a rule has been installed\n+    activate FlowCreateMirrorPointHub\n+    FlowCreateMirrorPointHub -> FlowCreateMirrorPointHub : mark corresponding rule as installed\n+end\n+\n+loop for each installed rule\n+    FlowCreateMirrorPointHub -> SpeakerWorker : Validate \n+end\n+deactivate FlowCreateMirrorPointHub\n+\n+loop for each validated rule\n+    FlowCreateMirrorPointHub <- SpeakerWorker : Rule are installed and valid\n+end\n+\n+\n+@enduml\n\\ No newline at end of file"
+  },
+  {
+    "sha": "b6d00ee67514f10c6ae2dba1890ab1082028869d",
+    "filename": "docs/design/flow-traffic-mirroring/delete-mirror-point.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/delete-mirror-point.png",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/delete-mirror-point.png",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/docs/design/flow-traffic-mirroring/delete-mirror-point.png?ref=17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a"
+  },
+  {
+    "sha": "87d6fc8871d7b2747fa084ec98ab5f96076cff7b",
+    "filename": "docs/design/flow-traffic-mirroring/delete-mirror-point.puml",
+    "status": "added",
+    "additions": 51,
+    "deletions": 0,
+    "changes": 51,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/delete-mirror-point.puml",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/delete-mirror-point.puml",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/docs/design/flow-traffic-mirroring/delete-mirror-point.puml?ref=17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a",
+    "patch": "@@ -0,0 +1,51 @@\n+@startuml\n+title Delete flow traffic mirror point\n+\n+boundary Northbound\n+participant FlowDeleteMirrorPointHub\n+participant PathComputer\n+participant FlowResourcesManager\n+participant CommandBuilder\n+database OrientDB\n+participant SpeakerWorker\n+\n+Northbound -> FlowDeleteMirrorPointHub : Delete flow mirror point\n+activate FlowDeleteMirrorPointHub\n+ ==Validation==\n+FlowDeleteMirrorPointHub -> OrientDB : Get flow\n+FlowDeleteMirrorPointHub <- OrientDB : Requested flow\n+alt The flow mirror point exists\n+    Northbound <- FlowDeleteMirrorPointHub : Flow mirror point details\n+else The flow mirror point not found\n+    Northbound <- FlowDeleteMirrorPointHub : Flow mirror point deletion error\n+end\n+\n+ == Flow mirror point rules deinstallation ==\n+FlowDeleteMirrorPointHub -> CommandBuilder : Create Switch Rules\n+CommandBuilder -> CommandBuilder : Build commands\n+\n+FlowDeleteMirrorPointHub <- CommandBuilder: Flow mirroring path deinstallation commands\n+loop for each command in commands\n+    FlowDeleteMirrorPointHub -> SpeakerWorker : Send remove rule command\n+    deactivate FlowDeleteMirrorPointHub\n+end\n+\n+loop for each removed rule\n+    FlowDeleteMirrorPointHub <- SpeakerWorker : a rule has been removed\n+    activate FlowDeleteMirrorPointHub\n+    FlowDeleteMirrorPointHub -> FlowDeleteMirrorPointHub : mark corresponding rule as removed\n+end\n+deactivate FlowDeleteMirrorPointHub\n+\n+alt received responses for a commands\n+    FlowDeleteMirrorPointHub -> FlowDeleteMirrorPointHub\n+    activate FlowDeleteMirrorPointHub\n+    FlowDeleteMirrorPointHub -> OrientDB : remove flow path and segments\n+    FlowDeleteMirrorPointHub -> OrientDB : update ISL's available bandwidth\n+    FlowDeleteMirrorPointHub -> FlowResourcesManager : deallocate resources\n+    FlowResourcesManager -> OrientDB : release used cookie and vlan\n+    FlowDeleteMirrorPointHub -> OrientDB : remove flow mirror point\n+deactivate FlowDeleteMirrorPointHub\n+end\n+\n+@enduml\n\\ No newline at end of file"
+  },
+  {
+    "sha": "256509f799b447a9930894306e1e77cb28af8947",
+    "filename": "docs/design/flow-traffic-mirroring/flow-traffic-mirroring.md",
+    "status": "added",
+    "additions": 172,
+    "deletions": 0,
+    "changes": 172,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/flow-traffic-mirroring.md",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/flow-traffic-mirroring.md",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/docs/design/flow-traffic-mirroring/flow-traffic-mirroring.md?ref=17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a",
+    "patch": "@@ -0,0 +1,172 @@\n+# Flow traffic mirroring\n+\n+## Idea\n+There must be an ability to mirror traffic on a given flow and send it to a specific switch+port+vlan.\n+\n+## Model\n+FlowPath has a list of FlowMirrorPoints, which will contain MirrorGroupId for multicasting on the switch. \n+FlowMirrorPoint itself has a list of MirrorFlowPaths. MirrorFlowPaths contains the endpoint \n+where the traffic should be mirrored and other necessary information to build the path.\n+\n+![DB model](./model.png \"DB model\")\n+\n+If the receiver point is on the mirroring source switch, then no segments will be built for such a MirrorFlowPath, \n+and we will work with it like the paths in one switch flow.\n+\n+## API\n+* Create mirror point:\n+  \n+  `PUT /flows/{flow_id}/mirror`\n+  \n+  payload:\n+  ```\n+  {\n+      \"mirror_point_id\": string,\n+      \"flow_id\": string,\n+      \"mirror_direction\": string [FORWARD|REVERSE],\n+      \"mirror_point_switch_id\": string,\n+      \"receiver_point\": {\n+         \"switch_id\": string,\n+         \"port\": int,\n+         \"inner_vlan\": int,\n+         \"outer_vlan\": int\n+      }\n+  }\n+  ```\n+\n+* Delete mirror point:\n+\n+  `DELETE /flows/{flow_id}/mirror/{mirror_point_id}`\n+\n+\n+* Get mirror points:\n+\n+  `GET /flows/{flow_id}/mirror`\n+\n+  Response payload:\n+  ```\n+  {\n+      \"flow_id\": string,\n+      \"points\":[\n+          {\n+              \"mirror_point_id\": string,\n+              \"mirror_direction\": string [FORWARD|REVERSE],\n+              \"mirror_point_switch_id\": string,\n+              \"receiver_point\": {\n+                  \"switch_id\": string,\n+                  \"port\": int,\n+                  \"inner_vlan\": int,\n+                  \"outer_vlan\": int\n+              }\n+          }\n+      ]\n+  }\n+  ```\n+\n+\n+* API that needs to be updated: \n+  - Need to add information about the state of the mirror paths in the flow payload.\n+  - It is necessary to add information about built mirror paths to API `GET /flows/{flow_id}/path`\n+\n+## Workflow\n+\n+Creation and deletion flow mirror points in the FlowHSTopology:\n+\n+![Create flow traffic mirror point](./create-mirror-point.png \"Create flow traffic mirror point\")\n+![Delete flow traffic mirror point](./delete-mirror-point.png \"Delete flow traffic mirror point\")\n+\n+Getting flow mirror points in the NbWorkerTopology:\n+\n+![Get flow traffic mirror point](./get-mirror-point.png \"Get flow traffic mirror point\")\n+\n+## Affected kilda components\n+* need to add mirror groups to the Floodlight;\n+* need to update RerouteTopology to react to the network events for the mirror paths;\n+* add logic to the flow update operation when updating flow endpoints;\n+* update switch and flow validation.\n+\n+## Limitations\n+It is allowed to use a transit switch as a mirror point only if flow is pinned.\n+\n+## Related issues\n+There are currently no asymmetric bandwidth ISLs in the system. This feature sets paths in one direction only. \n+This results in asymmetric ISLs appearing in the system. This effect on the system requires more in-depth research.\n+\n+A possible solution to this issue is to create a dummy path that will consume bandwidth in the opposite direction.\n+\n+## Switch rules\n+Examples of rules for VLAN transit encapsulation:\n+* _Group_:\n+```\n+{\n+   \"dpid\": dpid,\n+   \"type\": \"ALL\",\n+   \"group_id\": GROUP_ID,\n+   \"buckets\":[\n+      {\n+         \"actions\":[\n+            {\n+               \"type\": \"SET_FIELD\", \n+               \"field\": \"vlan_vid\",\n+               \"value\": vid\n+            },\n+            {\n+               \"type\": \"OUTPUT\",\n+               \"port\": first_out_port\n+            }\n+         ]\n+      },\n+      {\n+         \"actions\":[\n+            {\n+               \"type\": \"SET_FIELD\", \n+               \"field\": \"vlan_vid\",\n+               \"value\": vid\n+            },\n+            {\n+               \"type\": \"OUTPUT\",\n+               \"port\": second_out_port\n+            }\n+         ]\n+      }\n+   ]\n+}\n+```\n+* _Mirror rule_ for egress rule:\n+```\n+{\n+   \"dpid\": dpid,\n+   \"cookie\": MIRROR_FLOW_COOKIE,\n+   \"table_id\": EGRESS_TABLE_ID,\n+   \"priority\": priority,\n+   \"match\":{\n+      \"in_port\": in_port,\n+      \"vlan_vid\": transit_vid\n+   },\n+   \"actions\":[\n+      {\n+         \"type\":\"GROUP\",\n+         \"group_id\":\"GROUP_ID\"\n+      }\n+   ]\n+}  \n+```\n+* _Mirror rule_ for ingress rule:\n+```\n+{\n+   \"dpid\": dpid,\n+   \"cookie\": MIRROR_FLOW_COOKIE,\n+   \"table_id\": INGRESS_TABLE_ID,\n+   \"priority\": priority,\n+   \"match\":{\n+      \"metadata\": metadata,\n+      \"in_port\": in_port,\n+   },\n+   \"actions\":[\n+      {\n+         \"type\":\"GROUP\",\n+         \"group_id\":\"GROUP_ID\"\n+      }\n+   ]\n+}  \n+```"
+  },
+  {
+    "sha": "9da69b3705320d4f53c8308d0b6dd564bd75094f",
+    "filename": "docs/design/flow-traffic-mirroring/get-mirror-point.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/get-mirror-point.png",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/get-mirror-point.png",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/docs/design/flow-traffic-mirroring/get-mirror-point.png?ref=17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a"
+  },
+  {
+    "sha": "22e90fab9bb03a82a3422c469b0aad0ae1782c83",
+    "filename": "docs/design/flow-traffic-mirroring/get-mirror-point.puml",
+    "status": "added",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/get-mirror-point.puml",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/get-mirror-point.puml",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/docs/design/flow-traffic-mirroring/get-mirror-point.puml?ref=17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a",
+    "patch": "@@ -0,0 +1,18 @@\n+@startuml\n+title Get flow traffic mirror points\n+\n+boundary Northbound\n+participant FlowOperationsBolt\n+database OrientDB\n+\n+Northbound -> FlowOperationsBolt : Get flow mirror points\n+activate FlowOperationsBolt\n+FlowOperationsBolt -> OrientDB : Get flow mirror points\n+FlowOperationsBolt <- OrientDB : Requested flow mirror points\n+alt The flow mirror points exists\n+    Northbound <- FlowOperationsBolt : Flow mirror points\n+else The flow mirror points not found\n+    Northbound <- FlowOperationsBolt : Flow mirror points not found\n+end\n+\n+@enduml\n\\ No newline at end of file"
+  },
+  {
+    "sha": "5cf2ff52adf749a754a9417eba669ee3013a4508",
+    "filename": "docs/design/flow-traffic-mirroring/model.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/model.png",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a/docs/design/flow-traffic-mirroring/model.png",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/docs/design/flow-traffic-mirroring/model.png?ref=17e03c0bcc039fff8ca8437eba42e6ecfc0afe0a"
+  }
+]

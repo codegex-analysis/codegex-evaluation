@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "c128bc8d8de513844e73cd9503543f6c0a0e760f",
+    "filename": ".github/workflows/gradle.yml",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/blob/552d639fb900246e1345d3f63dea152b5907be8d/.github/workflows/gradle.yml",
+    "raw_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/raw/552d639fb900246e1345d3f63dea152b5907be8d/.github/workflows/gradle.yml",
+    "contents_url": "https://api.github.com/repos/OpenTimelineIO/OpenTimelineIO-Java-Bindings/contents/.github/workflows/gradle.yml?ref=552d639fb900246e1345d3f63dea152b5907be8d",
+    "patch": "@@ -43,6 +43,25 @@ jobs:\n         name: Package-${{ matrix.os }}\n         path: build/natives/bin/Release\n \n+  android:\n+    name: Build for android\n+    runs-on: ubuntu-latest\n+    steps:\n+      - name: Install NDK and CMake\n+        shell: bash\n+        run: $ANDROID_HOME/tools/bin/sdkmanager \"ndk;22.0.7026061\" \"cmake;3.10.2.4988404\"\n+      - uses: actions/checkout@v2\n+        with:\n+          submodules: 'recursive'\n+      - name: Build\n+        shell: bash\n+        run: ./gradlew build -x test -PandroidBuild -Psdk_path=$ANDROID_HOME\n+      - name: Upload artifact\n+        uses: actions/upload-artifact@v2\n+        with:\n+          name: Android-JAR\n+          path: build/libs\n+  \n   combine:\n     name: Download platform-specific binaries and combine into single JAR\n     needs: [build]"
+  },
+  {
+    "sha": "09a9254e1e8e1ee5ffe3418afa0aacd83a271cdc",
+    "filename": ".gitmodules",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/blob/552d639fb900246e1345d3f63dea152b5907be8d/.gitmodules",
+    "raw_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/raw/552d639fb900246e1345d3f63dea152b5907be8d/.gitmodules",
+    "contents_url": "https://api.github.com/repos/OpenTimelineIO/OpenTimelineIO-Java-Bindings/contents/.gitmodules?ref=552d639fb900246e1345d3f63dea152b5907be8d",
+    "patch": "@@ -1,4 +1,3 @@\n [submodule \"deps/OpenTimelineIO\"]\n \tpath = deps/OpenTimelineIO\n \turl = https://github.com/PixarAnimationStudios/OpenTimelineIO\n-\tbranch = master"
+  },
+  {
+    "sha": "e33cbd614c1f8f85d7703ba9074c01068bf2aaf8",
+    "filename": "CMakeLists.txt",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 2,
+    "changes": 16,
+    "blob_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/blob/552d639fb900246e1345d3f63dea152b5907be8d/CMakeLists.txt",
+    "raw_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/raw/552d639fb900246e1345d3f63dea152b5907be8d/CMakeLists.txt",
+    "contents_url": "https://api.github.com/repos/OpenTimelineIO/OpenTimelineIO-Java-Bindings/contents/CMakeLists.txt?ref=552d639fb900246e1345d3f63dea152b5907be8d",
+    "patch": "@@ -1,4 +1,4 @@\n-cmake_minimum_required(VERSION 3.13 FATAL_ERROR)\n+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)\n \n project(jotio VERSION 0.14.0 LANGUAGES CXX)\n \n@@ -11,7 +11,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/$<CONFIG>/${CMAKE_SYS\n set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/${CMAKE_SYSTEM_NAME})\n \n # jvm\n-find_package(Java REQUIRED)\n+if(NOT DEFINED ANDROID_ABI)\n+    find_package(Java REQUIRED)\n+else()\n+    set(JAVA_INCLUDE_PATH2 NotNeeded)\n+endif()\n # https://stackoverflow.com/questions/51047978/cmake-could-not-find-jni\n set(JAVA_AWT_LIBRARY NotNeeded)\n set(JAVA_JVM_LIBRARY NotNeeded)\n@@ -36,6 +40,14 @@ if(NOT CMAKE_BUILD_TYPE)\n       FORCE)\n endif()\n \n+set(OTIO_PYTHON_INSTALL OFF CACHE BOOL \"\")\n+set(OTIO_CXX_INSTALL OFF CACHE BOOL \"\")\n+set(OTIO_DEPENDENCIES_INSTALL OFF CACHE BOOL \"\")\n+set(OTIO_INSTALL_COMMANDLINE_TOOLS OFF CACHE BOOL \"\")\n+set(OTIO_SHARED_LIBS ON)\n+\n+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)\n+\n include_directories(src/main/include)\n add_subdirectory(deps/OpenTimelineIO build/natives)\n add_subdirectory(src/main/cpp)\n\\ No newline at end of file"
+  },
+  {
+    "sha": "39bac4f3ddee00b619e8086ed5eeb09d3e69d44c",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 64,
+    "deletions": 0,
+    "changes": 64,
+    "blob_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/blob/552d639fb900246e1345d3f63dea152b5907be8d/README.md",
+    "raw_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/raw/552d639fb900246e1345d3f63dea152b5907be8d/README.md",
+    "contents_url": "https://api.github.com/repos/OpenTimelineIO/OpenTimelineIO-Java-Bindings/contents/README.md?ref=552d639fb900246e1345d3f63dea152b5907be8d",
+    "patch": "@@ -65,6 +65,70 @@ gradle build # this builds and runs all tests\n \n You can find the generated jar file in the `build/libs` directory.\n \n+Building OpenTimelineIO-Java-Bindings for Android\n+------------------------\n+\n+This has been built and tested on Ubuntu 18.04LTS.\n+\n+Install Android Studio according to these [steps](https://developer.android.com/studio).\n+\n+Install NDK and CMake using [sdkmanager](https://developer.android.com/studio/command-line/sdkmanager) as follows:\n+\n+`sdkmanager \"ndk;22.0.7026061\" \"cmake;3.10.2.4988404\"`\n+\n+You can find `sdkmanager` in `$ANDROID_HOME/tools/bin/`. `$ANDROID_HOME` is the location of Android SDK which is generally `~/Android/Sdk`.\n+\n+Set the `ANDROID_HOME` environment variable and from the root directory of the project run:\n+\n+```console\n+gradle clean\n+gradle build -x test -PandroidBuild -Psdk_path=$ANDROID_HOME\n+```\n+\n+You'll find the JAR in `build/libs`\n+\n+#### How to include the Android JAR in your project\n+\n+Copy the JAR to the `libs` directory and add this to the app level `build.gradle`:\n+\n+```groovy\n+android {\n+    ...\n+    \n+    ndkVersion '22.0.7026061'\n+\n+    compileOptions {\n+        sourceCompatibility JavaVersion.VERSION_1_8\n+        targetCompatibility JavaVersion.VERSION_1_8\n+    }\n+    ...\n+}\n+\n+task unjar {\n+    ant.unzip(src: 'libs/java-opentimelineio-0.14.0.jar', dest: 'JARUnzip')\n+\n+    copy {\n+        from 'JARUnzip/arm64-v8a'\n+        into 'src/main/jniLibs/arm64-v8a'\n+    }\n+    copy {\n+        from 'JARUnzip/x86_64'\n+        into 'src/main/jniLibs/x86_64'\n+    }\n+}\n+\n+build.dependsOn unjar\n+\n+dependencies {\n+    ...\n+    implementation fileTree(dir: \"libs\", include: [\"*.jar\"])\n+    implementation files('libs/java-opentimelineio-0.14.0.jar')\n+    ...\n+}\n+\n+```\n+\n+\n Examples\n --------\n "
+  },
+  {
+    "sha": "f0247fc2ae3d767cca0688c9575541f45e2f76cc",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 1,
+    "changes": 26,
+    "blob_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/blob/552d639fb900246e1345d3f63dea152b5907be8d/build.gradle",
+    "raw_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/raw/552d639fb900246e1345d3f63dea152b5907be8d/build.gradle",
+    "contents_url": "https://api.github.com/repos/OpenTimelineIO/OpenTimelineIO-Java-Bindings/contents/build.gradle?ref=552d639fb900246e1345d3f63dea152b5907be8d",
+    "patch": "@@ -66,7 +66,31 @@ task compileJNI {\n             if (OperatingSystem.current().isLinux() ||\n                     OperatingSystem.current().isMacOsX() ||\n                     OperatingSystem.current().isUnix()) {\n-                commandLine 'sh', '-c', 'mkdir -p build/natives && cd build/natives && cmake ../.. && cmake --build . --config Release'\n+                if (project.hasProperty(\"androidBuild\") && project.hasProperty(\"sdk_path\")){\n+                    def sdk_path = project.getProperties().getAt('sdk_path').toString()\n+//                    commandLine 'sh', '-c', 'mkdir -p build/natives && ' +\n+//                            'cd build/natives && ' +\n+//                            '/home/karthik/Android/Sdk/cmake/3.10.2.4988404/bin/cmake -G\"Ninja\" -DANDROID_ABI=arm64-v8a -DANDROID_NDK=/home/karthik/Android/Sdk/ndk/22.0.7026061 -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/home/karthik/Android/Sdk/cmake/3.10.2.4988404/bin/ninja -DCMAKE_TOOLCHAIN_FILE=/home/karthik/Android/Sdk/ndk/22.0.7026061/build/cmake/android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL=23 -DANDROID_TOOLCHAIN=clang ../.. && ' +\n+//                            'cmake --build . --config Release && ' +\n+//                            'mv lib/Release/Android/ lib/Release/arm64-v8a && ' +\n+//                            'rm CMakeCache.txt && ' +\n+//                            '/home/karthik/Android/Sdk/cmake/3.10.2.4988404/bin/cmake -G\"Ninja\" -DANDROID_ABI=x86_64 -DANDROID_NDK=/home/karthik/Android/Sdk/ndk/22.0.7026061 -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/home/karthik/Android/Sdk/cmake/3.10.2.4988404/bin/ninja -DCMAKE_TOOLCHAIN_FILE=/home/karthik/Android/Sdk/ndk/22.0.7026061/build/cmake/android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL=23 -DANDROID_TOOLCHAIN=clang ../.. && ' +\n+//                            'cmake --build . --config Release && ' +\n+//                            'mv lib/Release/Android/ lib/Release/x86_64'\n+                    commandLine 'sh', '-c', 'mkdir -p build/natives && ' +\n+                            'cd build/natives && ' +\n+                            'cmake -G\"Ninja\" -DANDROID_ABI=arm64-v8a -DANDROID_NDK='+sdk_path+'/ndk/22.0.7026061 -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM='+sdk_path+'/cmake/3.10.2.4988404/bin/ninja -DCMAKE_TOOLCHAIN_FILE='+sdk_path+'/ndk/22.0.7026061/build/cmake/android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL=23 -DANDROID_TOOLCHAIN=clang ../.. && ' +\n+                            'cmake --build . --config Release && ' +\n+                            'mv lib/Release/Android/ lib/Release/arm64-v8a && ' +\n+                            'rm CMakeCache.txt && ' +\n+                            'cmake -G\"Ninja\" -DANDROID_ABI=x86_64 -DANDROID_NDK='+sdk_path+'/ndk/22.0.7026061 -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM='+sdk_path+'/cmake/3.10.2.4988404/bin/ninja -DCMAKE_TOOLCHAIN_FILE='+sdk_path+'/ndk/22.0.7026061/build/cmake/android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL=23 -DANDROID_TOOLCHAIN=clang ../.. && ' +\n+                            'cmake --build . --config Release && ' +\n+                            'mv lib/Release/Android/ lib/Release/x86_64'\n+                }\n+                else {\n+                    commandLine 'sh', '-c', 'mkdir -p build/natives && cd build/natives && cmake ../.. && cmake --build . --config Release'\n+                }\n+//                commandLine 'sh', '-c', 'mkdir -p build/natives && cd build/natives && cmake ../.. && cmake --build . --config Release'\n             } else if (OperatingSystem.current().isWindows()) {\n                 commandLine \"cmd\", \"/c\", 'if not exist \"build\\\\natives\" mkdir build\\\\natives && cd build\\\\natives && cmake ..\\\\.. && cmake --build . --config Release'\n             }"
+  },
+  {
+    "sha": "84af5e5a30e4d14cf3434d6d055631e115ac1ee5",
+    "filename": "deps/OpenTimelineIO",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": null,
+    "raw_url": null,
+    "contents_url": "https://api.github.com/repos/OpenTimelineIO/OpenTimelineIO-Java-Bindings/contents/deps/OpenTimelineIO?ref=552d639fb900246e1345d3f63dea152b5907be8d",
+    "patch": "@@ -1 +1 @@\n-Subproject commit 675fdcd2a032dd88354f61ef9e60060d407dd4c8\n+Subproject commit 84af5e5a30e4d14cf3434d6d055631e115ac1ee5"
+  },
+  {
+    "sha": "116d16bb6ee853408fb8b53751d9b50373e72fda",
+    "filename": "src/main/cpp/CMakeLists.txt",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 5,
+    "changes": 12,
+    "blob_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/blob/552d639fb900246e1345d3f63dea152b5907be8d/src/main/cpp/CMakeLists.txt",
+    "raw_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/raw/552d639fb900246e1345d3f63dea152b5907be8d/src/main/cpp/CMakeLists.txt",
+    "contents_url": "https://api.github.com/repos/OpenTimelineIO/OpenTimelineIO-Java-Bindings/contents/src/main/cpp/CMakeLists.txt?ref=552d639fb900246e1345d3f63dea152b5907be8d",
+    "patch": "@@ -1,4 +1,4 @@\n-add_library(jotio-${CMAKE_PROJECT_VERSION} SHARED\n+add_library(jotio SHARED\n         io_opentimeline_OTIOFinalizer.cpp\n         class_codes.cpp\n         utilities.cpp\n@@ -41,8 +41,10 @@ add_library(jotio-${CMAKE_PROJECT_VERSION} SHARED\n         io_opentimeline_opentimelineio_Deserialization.cpp\n         io_opentimeline_opentimelineio_OTIOTest.cpp)\n \n-target_include_directories(jotio-${CMAKE_PROJECT_VERSION} PUBLIC\n-        \"${PROJECT_SOURCE_DIR}/../\")\n+target_include_directories(jotio PUBLIC\n+        \"${PROJECT_SOURCE_DIR}/deps/OpenTimelineIO/src\"\n+        \"${PROJECT_SOURCE_DIR}/deps/OpenTimelineIO/src/deps\"\n+        \"${PROJECT_SOURCE_DIR}/deps/OpenTimelineIO/src/deps/optional-lite/include\")\n \n-target_link_libraries(jotio-${CMAKE_PROJECT_VERSION} opentime)\n-target_link_libraries(jotio-${CMAKE_PROJECT_VERSION} opentimelineio)\n\\ No newline at end of file\n+target_link_libraries(jotio opentime)\n+target_link_libraries(jotio opentimelineio)\n\\ No newline at end of file"
+  },
+  {
+    "sha": "aa6a494272948031da6813754dad25586dbdbd4b",
+    "filename": "src/main/java/io/opentimeline/LibraryLoader.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/blob/552d639fb900246e1345d3f63dea152b5907be8d/src/main/java/io/opentimeline/LibraryLoader.java",
+    "raw_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/raw/552d639fb900246e1345d3f63dea152b5907be8d/src/main/java/io/opentimeline/LibraryLoader.java",
+    "contents_url": "https://api.github.com/repos/OpenTimelineIO/OpenTimelineIO-Java-Bindings/contents/src/main/java/io/opentimeline/LibraryLoader.java?ref=552d639fb900246e1345d3f63dea152b5907be8d",
+    "patch": "@@ -18,14 +18,18 @@ private static String getOSName() {\n         String osName = System.getProperty(\"os.name\").toLowerCase();\n         if (osName.contains(\"win\")) return \"Windows\";\n         else if (osName.contains(\"mac\")) return \"Darwin\";\n-        else if (osName.contains(\"nux\")) return \"Linux\";\n+        else if (osName.contains(\"nux\")) {\n+            if(System.getProperty(\"java.vm.name\").toLowerCase().contains(\"dalvik\"))\n+                return \"Android\";\n+            return \"Linux\";\n+        }\n         return \"\";\n     }\n \n     public static void load(String name) {\n         if (libLoaded)\n             return;\n-        name += (\"-\" + OTIO_VERSION);\n+//        name += (\"-\" + OTIO_VERSION);\n         final String libname = System.mapLibraryName(name);\n         final String opentimelibname = System.mapLibraryName(\"opentime\");\n         final String OTIOlibname = System.mapLibraryName(\"opentimelineio\");"
+  },
+  {
+    "sha": "bb8443a25c42b34ee94eb86a8b46841d9c28b9b2",
+    "filename": "src/main/java/io/opentimeline/NativeUtils.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/blob/552d639fb900246e1345d3f63dea152b5907be8d/src/main/java/io/opentimeline/NativeUtils.java",
+    "raw_url": "https://github.com/OpenTimelineIO/OpenTimelineIO-Java-Bindings/raw/552d639fb900246e1345d3f63dea152b5907be8d/src/main/java/io/opentimeline/NativeUtils.java",
+    "contents_url": "https://api.github.com/repos/OpenTimelineIO/OpenTimelineIO-Java-Bindings/contents/src/main/java/io/opentimeline/NativeUtils.java?ref=552d639fb900246e1345d3f63dea152b5907be8d",
+    "patch": "@@ -99,9 +99,11 @@ public static void loadLibraryFromJar(String path) throws IOException {\n         try (InputStream is = NativeUtils.class.getResourceAsStream(path)) {\n             Files.copy(is, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);\n         } catch (IOException e) {\n+            System.out.println(\"here1\");\n             temp.delete();\n             throw e;\n         } catch (NullPointerException e) {\n+            System.out.println(\"here2: \" + path);\n             temp.delete();\n             throw new FileNotFoundException(\"File \" + path + \" was not found inside JAR.\");\n         }"
+  }
+]

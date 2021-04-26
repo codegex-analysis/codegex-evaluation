@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "f3a6eddb8e6d038d53162d0e8a950046710aaaab",
+    "filename": "src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/controller/SubsidySchemeController.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 2,
+    "changes": 9,
+    "blob_url": "https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/blob/2ac81eb8cf2d13bcd6fef6424feee282f38544ed/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/controller/SubsidySchemeController.java",
+    "raw_url": "https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/raw/2ac81eb8cf2d13bcd6fef6424feee282f38544ed/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/controller/SubsidySchemeController.java",
+    "contents_url": "https://api.github.com/repos/UKGovernmentBEIS/transparency-db-ga-schemes-service/contents/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/controller/SubsidySchemeController.java?ref=2ac81eb8cf2d13bcd6fef6424feee282f38544ed",
+    "patch": "@@ -68,11 +68,16 @@\n     @PostMapping(\n             value = \"/add\"\n     )\n-    public String addSchemeDetails(@RequestHeader(\"userPrinciple\") HttpHeaders userPrinciple,@Valid @RequestBody SchemeDetailsRequest scheme) {\n+    public String addSchemeDetails(@RequestHeader(\"userPrinciple\") HttpHeaders userPrinciple,\n+    \t\t@Valid @RequestBody SchemeDetailsRequest scheme) {\n     \t\n     \t//check user role here\n     \tSearchUtils.isSchmeRoleValidation(objectMapper, userPrinciple,\"Add Subsidy Schema\");\n-        return subsidySchemeService.addSubsidySchemeDetails(scheme);\n+    \tif(!subsidySchemeService.findSubsidySchemeByName(scheme.getSubsidyMeasureTitle(), scheme.getGaName())) {\n+    \t    return subsidySchemeService.addSubsidySchemeDetails(scheme);\n+    \t}else {\n+    \t\treturn \"417\";\n+    \t}\n     }\n \n     @PostMapping("
+  },
+  {
+    "sha": "b858aeeac7039302fc2e4c0702b8c121e85cb15d",
+    "filename": "src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/repository/SubsidyMeasureRepository.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/blob/2ac81eb8cf2d13bcd6fef6424feee282f38544ed/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/repository/SubsidyMeasureRepository.java",
+    "raw_url": "https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/raw/2ac81eb8cf2d13bcd6fef6424feee282f38544ed/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/repository/SubsidyMeasureRepository.java",
+    "contents_url": "https://api.github.com/repos/UKGovernmentBEIS/transparency-db-ga-schemes-service/contents/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/repository/SubsidyMeasureRepository.java?ref=2ac81eb8cf2d13bcd6fef6424feee282f38544ed",
+    "patch": "@@ -1,14 +1,18 @@\n package com.beis.subsidy.ga.schemes.dbpublishingservice.repository;\n \n-import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;\n+import java.util.List;\n+\n import org.springframework.data.jpa.repository.JpaRepository;\n import org.springframework.data.jpa.repository.JpaSpecificationExecutor;\n \n+import com.beis.subsidy.ga.schemes.dbpublishingservice.model.SubsidyMeasure;\n+\n /**\n  * \n  * Interface for Subsidy Measure repository to get subsidy measure details from database \n  *\n  */\n public interface SubsidyMeasureRepository extends JpaRepository<SubsidyMeasure, String>, JpaSpecificationExecutor<SubsidyMeasure> {\n \n+\tList<SubsidyMeasure>findBySubsidyMeasureTitle(String subsidyMeasureTitle);\n }"
+  },
+  {
+    "sha": "31f9e96841042851683c6e8f2b069137a97ac6ae",
+    "filename": "src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/service/SubsidySchemeService.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/blob/2ac81eb8cf2d13bcd6fef6424feee282f38544ed/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/service/SubsidySchemeService.java",
+    "raw_url": "https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/raw/2ac81eb8cf2d13bcd6fef6424feee282f38544ed/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/service/SubsidySchemeService.java",
+    "contents_url": "https://api.github.com/repos/UKGovernmentBEIS/transparency-db-ga-schemes-service/contents/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/service/SubsidySchemeService.java?ref=2ac81eb8cf2d13bcd6fef6424feee282f38544ed",
+    "patch": "@@ -15,4 +15,8 @@\n     String updateSubsidySchemeDetails(SchemeDetailsRequest scheme);\n \n     SubsidyMeasureResponse findSubsidySchemeById(String scNumber);\n+    \n+    boolean findSubsidySchemeByName(String scName,String gaName);\n+    \n+    \n }"
+  },
+  {
+    "sha": "b89ff6b83aec5340373894beeb5e1cb2b6cfd15c",
+    "filename": "src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/service/impl/SubsidySchemeServiceImpl.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 1,
+    "changes": 26,
+    "blob_url": "https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/blob/2ac81eb8cf2d13bcd6fef6424feee282f38544ed/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/service/impl/SubsidySchemeServiceImpl.java",
+    "raw_url": "https://github.com/UKGovernmentBEIS/transparency-db-ga-schemes-service/raw/2ac81eb8cf2d13bcd6fef6424feee282f38544ed/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/service/impl/SubsidySchemeServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/UKGovernmentBEIS/transparency-db-ga-schemes-service/contents/src/main/java/com/beis/subsidy/ga/schemes/dbpublishingservice/service/impl/SubsidySchemeServiceImpl.java?ref=2ac81eb8cf2d13bcd6fef6424feee282f38544ed",
+    "patch": "@@ -227,6 +227,29 @@ public SubsidyMeasureResponse findSubsidySchemeById(String scNumber) {\n         SubsidyMeasure subsidyMeasure = subsidyMeasureRepository.findById(scNumber).get();\n         return new SubsidyMeasureResponse(subsidyMeasure);\n     }\n+    \n+    @Override\n+    public boolean findSubsidySchemeByName(String scName,String gaName) {\n+    \tlog.info(\"inside findSubsidySchemeByName* \"+scName+ \" :: \"+gaName);\n+    \tSubsidyMeasure searchScheme = new SubsidyMeasure();\n+    \tsearchScheme.setSubsidyMeasureTitle(scName);\n+    \tsearchScheme.setStatus(\"Active\");\n+    \tif(! StringUtils.isEmpty(gaName)){\n+            Long gaId = gaRepository.findByGrantingAuthorityName(gaName).getGaId();\n+            searchScheme.setGaId(gaId);\n+        }\n+        List<SubsidyMeasure> subsidyMeasuresList = subsidyMeasureRepository.findBySubsidyMeasureTitle(scName);\n+       Optional<SubsidyMeasure> dbsubsidyMeasure=subsidyMeasuresList.stream().filter(subsidyMeasure->\"Active\".equalsIgnoreCase(subsidyMeasure.getStatus()) && searchScheme.getGaId()==subsidyMeasure.getGaId()).findAny();\n+       \n+       log.warn(\"inside findSubsidySchemeByName value \"+dbsubsidyMeasure);\n+        if(dbsubsidyMeasure.isPresent()) {\n+        log.info(\" subsidyMeasure from db,status \"+dbsubsidyMeasure.get().getSubsidyMeasureTitle()+\" : \"+dbsubsidyMeasure.get().getStatus()+\" : \"+dbsubsidyMeasure.get().getGaId());\n+        return true;\n+        }else {\n+        \treturn false;\n+        }\n+       \n+    }\n \n \n     private Map<String, Long> schemeCounts(List<SubsidyMeasure> schemeList) {\n@@ -315,4 +338,5 @@ private Long getGrantingAuthorityIdByName(String gaName){\n     public  Specification<SubsidyMeasure> subsidyMeasureByGa(Long gaId) {\n         return (root, query, builder) -> builder.equal(root.get(\"grantingAuthority\").get(\"gaId\"), gaId);\n     }\n-}\n+    \n+  }"
+  }
+]

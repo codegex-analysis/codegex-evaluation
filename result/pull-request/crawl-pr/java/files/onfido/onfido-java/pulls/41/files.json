@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "940ce0643e72d6ab6a9dcbd245485f1906972e1b",
+    "filename": "onfido-java/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/onfido/onfido-java/blob/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/pom.xml",
+    "raw_url": "https://github.com/onfido/onfido-java/raw/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/pom.xml",
+    "contents_url": "https://api.github.com/repos/onfido/onfido-java/contents/onfido-java/pom.xml?ref=8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01",
+    "patch": "@@ -4,7 +4,7 @@\n \n     <groupId>com.onfido</groupId>\n     <artifactId>onfido-api-java</artifactId>\n-    <version>1.5.0</version>\n+    <version>1.6.0</version>\n \n     <name>Onfido API Java Client</name>\n     <description>Official Java API client library for the Onfido API</description>"
+  },
+  {
+    "sha": "2846a7801bfa90fb98996eacceb982d966496fdf",
+    "filename": "onfido-java/src/main/java/com/onfido/CheckManager.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/onfido/onfido-java/blob/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/main/java/com/onfido/CheckManager.java",
+    "raw_url": "https://github.com/onfido/onfido-java/raw/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/main/java/com/onfido/CheckManager.java",
+    "contents_url": "https://api.github.com/repos/onfido/onfido-java/contents/onfido-java/src/main/java/com/onfido/CheckManager.java?ref=8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01",
+    "patch": "@@ -2,6 +2,7 @@\n \n import com.onfido.api.ApiJson;\n import com.onfido.api.Config;\n+import com.onfido.api.FileDownload;\n import com.onfido.api.ResourceManager;\n import com.onfido.exceptions.OnfidoException;\n import com.onfido.models.Check;\n@@ -62,4 +63,15 @@ public Check find(String checkId) throws OnfidoException {\n   public void resume(String checkId) throws OnfidoException {\n     post(checkId + \"/resume\", \"\");\n   }\n+\n+  /**\n+   * Downloads a check.\n+   *\n+   * @param checkId the check id\n+   * @return the downloaded file as a FileDownload\n+   * @throws OnfidoException the onfido exception\n+   */\n+  public FileDownload download(String checkId) throws OnfidoException {\n+    return downloadRequest(checkId + \"/download\");\n+  }\n }"
+  },
+  {
+    "sha": "93ed4f079f450ec56ccc4ae45660513bf0ad2000",
+    "filename": "onfido-java/src/main/java/com/onfido/Onfido.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/onfido/onfido-java/blob/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/main/java/com/onfido/Onfido.java",
+    "raw_url": "https://github.com/onfido/onfido-java/raw/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/main/java/com/onfido/Onfido.java",
+    "contents_url": "https://api.github.com/repos/onfido/onfido-java/contents/onfido-java/src/main/java/com/onfido/Onfido.java?ref=8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01",
+    "patch": "@@ -8,9 +8,9 @@\n public final class Onfido {\n   private static final OkHttpClient CLIENT = new OkHttpClient();\n \n-  private static final String DEFAULT_API_URL = \"https://api.onfido.com/v3/\";\n-  private static final String US_API_URL = \"https://api.us.onfido.com/v3/\";\n-  private static final String CA_API_URL = \"https://api.ca.onfido.com/v3/\";\n+  private static final String DEFAULT_API_URL = \"https://api.onfido.com/v3.1/\";\n+  private static final String US_API_URL = \"https://api.us.onfido.com/v3.1/\";\n+  private static final String CA_API_URL = \"https://api.ca.onfido.com/v3.1/\";\n \n   /** The Configuration for the instance. */\n   public final Config config;"
+  },
+  {
+    "sha": "4f4cc3e0bfb1f7b6bcdc137093a9ee727dea84fb",
+    "filename": "onfido-java/src/main/models/check.json",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/onfido/onfido-java/blob/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/main/models/check.json",
+    "raw_url": "https://github.com/onfido/onfido-java/raw/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/main/models/check.json",
+    "contents_url": "https://api.github.com/repos/onfido/onfido-java/contents/onfido-java/src/main/models/check.json?ref=8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01",
+    "patch": "@@ -100,8 +100,14 @@\n     },\n     \"privacy_notices_read_consent_given\": {\n       \"type\": \"boolean\",\n-      \"writeOnly\": true,\n       \"description\": \"Indicates that the privacy notices and terms of service have been read and, where specific laws require, that consent has been given for Onfido.\"\n+    },\n+    \"webhook_ids\": {\n+      \"type\": \"array\",\n+      \"items\": {\n+        \"type\": \"string\"\n+      },\n+      \"description\": \"Array of strings describing which webhooks to trigger for a check.\"\n     }\n   }\n }"
+  },
+  {
+    "sha": "3f81cab9f1f28628a1afeb5d28b0496d04dbd21f",
+    "filename": "onfido-java/src/test/java/com/onfido/OnfidoTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/onfido/onfido-java/blob/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/OnfidoTest.java",
+    "raw_url": "https://github.com/onfido/onfido-java/raw/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/OnfidoTest.java",
+    "contents_url": "https://api.github.com/repos/onfido/onfido-java/contents/onfido-java/src/test/java/com/onfido/OnfidoTest.java?ref=8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01",
+    "patch": "@@ -18,12 +18,12 @@ public void throwsExceptionForNullApiToken() {\n   @Test()\n   public void usesUSRegionApiUrl() {\n     Onfido onfido = Onfido.builder().apiToken(\"token\").regionUS().build();\n-    assertEquals(\"https://api.us.onfido.com/v3/\", onfido.config.getApiUrl());\n+    assertEquals(\"https://api.us.onfido.com/v3.1/\", onfido.config.getApiUrl());\n   }\n \n   @Test()\n   public void usesCanadaRegionApiUrl() {\n     Onfido onfido = Onfido.builder().apiToken(\"token\").regionCA().build();\n-    assertEquals(\"https://api.ca.onfido.com/v3/\", onfido.config.getApiUrl());\n+    assertEquals(\"https://api.ca.onfido.com/v3.1/\", onfido.config.getApiUrl());\n   }\n }"
+  },
+  {
+    "sha": "75e6b64927debcf96839a7cb094526d8f58a1519",
+    "filename": "onfido-java/src/test/java/com/onfido/integration/CheckManagerTest.java",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/onfido/onfido-java/blob/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/integration/CheckManagerTest.java",
+    "raw_url": "https://github.com/onfido/onfido-java/raw/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/integration/CheckManagerTest.java",
+    "contents_url": "https://api.github.com/repos/onfido/onfido-java/contents/onfido-java/src/test/java/com/onfido/integration/CheckManagerTest.java?ref=8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01",
+    "patch": "@@ -4,6 +4,7 @@\n \n import com.onfido.JsonObject;\n import com.onfido.Onfido;\n+import com.onfido.api.FileDownload;\n import com.onfido.models.Check;\n import java.util.Arrays;\n import java.util.List;\n@@ -97,4 +98,22 @@ public void resumeCheck() throws Exception {\n     RecordedRequest request = server.takeRequest();\n     assertEquals(\"/checks/id/resume\", request.getPath());\n   }\n+\n+  @Test\n+  public void downloadCheck() throws Exception {\n+    MockWebServer server = mockFileRequestResponse(\"test\", \"application/pdf\");\n+\n+    Onfido onfido =\n+        Onfido.builder().apiToken(\"token\").unknownApiUrl(server.url(\"/\").toString()).build();\n+\n+    FileDownload download = onfido.check.download(\"check_id\");\n+\n+    // Correct path\n+    RecordedRequest request = server.takeRequest();\n+    assertEquals(\"/checks/check_id/download\", request.getPath());\n+\n+    // Correct response body\n+    assertEquals(\"test\", new String(download.content));\n+    assertEquals(\"application/pdf\", download.contentType);\n+  }\n }"
+  },
+  {
+    "sha": "8dc25b4bc10e65499f425583db78a0882fa53654",
+    "filename": "onfido-java/src/test/java/com/onfido/integration/DocumentManagerTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/onfido/onfido-java/blob/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/integration/DocumentManagerTest.java",
+    "raw_url": "https://github.com/onfido/onfido-java/raw/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/integration/DocumentManagerTest.java",
+    "contents_url": "https://api.github.com/repos/onfido/onfido-java/contents/onfido-java/src/test/java/com/onfido/integration/DocumentManagerTest.java?ref=8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01",
+    "patch": "@@ -63,11 +63,11 @@ public void downloadDocument() throws Exception {\n     Onfido onfido =\n         Onfido.builder().apiToken(\"token\").unknownApiUrl(server.url(\"/\").toString()).build();\n \n-    FileDownload download = onfido.document.download(\"document id\");\n+    FileDownload download = onfido.document.download(\"document_id\");\n \n     // Correct path\n     RecordedRequest request = server.takeRequest();\n-    assertEquals(\"/documents/document%20id/download\", request.getPath());\n+    assertEquals(\"/documents/document_id/download\", request.getPath());\n \n     // Correct response body\n     assertEquals(\"test\", new String(download.content));"
+  },
+  {
+    "sha": "51dd4b9e2e28781bec99cb9faf961f847f3fabc6",
+    "filename": "onfido-java/src/test/java/com/onfido/integration/LivePhotoManagerTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/onfido/onfido-java/blob/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/integration/LivePhotoManagerTest.java",
+    "raw_url": "https://github.com/onfido/onfido-java/raw/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/integration/LivePhotoManagerTest.java",
+    "contents_url": "https://api.github.com/repos/onfido/onfido-java/contents/onfido-java/src/test/java/com/onfido/integration/LivePhotoManagerTest.java?ref=8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01",
+    "patch": "@@ -54,11 +54,11 @@ public void downloadLivePhoto() throws Exception {\n     Onfido onfido =\n         Onfido.builder().apiToken(\"token\").unknownApiUrl(server.url(\"/\").toString()).build();\n \n-    FileDownload download = onfido.livePhoto.download(\"live photo id\");\n+    FileDownload download = onfido.livePhoto.download(\"live_photo_id\");\n \n     // Correct path\n     RecordedRequest request = server.takeRequest();\n-    assertEquals(\"/live_photos/live%20photo%20id/download\", request.getPath());\n+    assertEquals(\"/live_photos/live_photo_id/download\", request.getPath());\n \n     // Correct response body\n     assertEquals(\"test\", new String(download.content));\n@@ -73,7 +73,7 @@ public void downloadError() throws Exception {\n         Onfido.builder().apiToken(\"token\").unknownApiUrl(server.url(\"/\").toString()).build();\n \n     try {\n-      onfido.livePhoto.download(\"live photo id\");\n+      onfido.livePhoto.download(\"live_photo_id\");\n       Assert.fail();\n     } catch (ApiException ex) {\n       Assert.assertEquals(403, ex.getStatusCode());"
+  },
+  {
+    "sha": "02b926ed73680205f1b5cc505576225704298438",
+    "filename": "onfido-java/src/test/java/com/onfido/integration/LiveVideoManagerTest.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/onfido/onfido-java/blob/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/integration/LiveVideoManagerTest.java",
+    "raw_url": "https://github.com/onfido/onfido-java/raw/8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01/onfido-java/src/test/java/com/onfido/integration/LiveVideoManagerTest.java",
+    "contents_url": "https://api.github.com/repos/onfido/onfido-java/contents/onfido-java/src/test/java/com/onfido/integration/LiveVideoManagerTest.java?ref=8b540d0ba596279cfa3cb0749ab51fe7bd3a6a01",
+    "patch": "@@ -23,11 +23,11 @@ public void downloadLiveVideo() throws Exception {\n     Onfido onfido =\n         Onfido.builder().apiToken(\"token\").unknownApiUrl(server.url(\"/\").toString()).build();\n \n-    FileDownload download = onfido.liveVideo.download(\"live video id\");\n+    FileDownload download = onfido.liveVideo.download(\"live_video_id\");\n \n     // Correct path\n     RecordedRequest request = server.takeRequest();\n-    assertEquals(\"/live_videos/live%20video%20id/download\", request.getPath());\n+    assertEquals(\"/live_videos/live_video_id/download\", request.getPath());\n \n     // Correct response body\n     assertEquals(\"test\", new String(download.content));\n@@ -41,11 +41,11 @@ public void downloadLiveVideoFrame() throws Exception {\n     Onfido onfido =\n         Onfido.builder().apiToken(\"token\").unknownApiUrl(server.url(\"/\").toString()).build();\n \n-    FileDownload download = onfido.liveVideo.downloadFrame(\"live video id\");\n+    FileDownload download = onfido.liveVideo.downloadFrame(\"live_video_id\");\n \n     // Correct path\n     RecordedRequest request = server.takeRequest();\n-    assertEquals(\"/live_videos/live%20video%20id/frame\", request.getPath());\n+    assertEquals(\"/live_videos/live_video_id/frame\", request.getPath());\n \n     // Correct response body\n     assertEquals(\"test\", new String(download.content));"
+  }
+]

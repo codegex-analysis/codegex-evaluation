@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "dfad2353bb72c75d88a88b325f37b6e805ed66cd",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 4,
+    "changes": 16,
+    "blob_url": "https://github.com/bennettpeter/android-MythTV-Leanfront/blob/3ba5dfefaa43bed83223cfd1ea0daf0463753944/README.md",
+    "raw_url": "https://github.com/bennettpeter/android-MythTV-Leanfront/raw/3ba5dfefaa43bed83223cfd1ea0daf0463753944/README.md",
+    "contents_url": "https://api.github.com/repos/bennettpeter/android-MythTV-Leanfront/contents/README.md?ref=3ba5dfefaa43bed83223cfd1ea0daf0463753944",
+    "patch": "@@ -368,9 +368,16 @@ The following items will need api changes on the backend\n ## Building\n \n - Download and install [Android Studio][studio]. Also download the latest ndk and Cmake from within android studio. Look in the \"Build\" tab for a message about this. If you encounter this, switch to the requested NDK version.\n-- Note the ndk version is referenced in the app/build.gradle file. You need to either download the version that is specified there or else update there to match the version you downloaded.\n-- In the $HOME/Android directory create a link to the ndk, for example android-ndk -> Sdk/ndk/20.0.5594570\n-- In the app/src/main/jni/ directory, run download_ffmpeg.sh and build_ffmpeg.sh.\n+- Note the ndk version is referenced in the `app/build.gradle` file. You need to either download the version that is specified there or else update there to match the version you downloaded.\n+- In the `$HOME/Android` on Linux or `$HOME/Library/Android` on OSX directory create a link to the ndk. For example\n+  ```\n+  ln -s sdk/ndk/23.0.7123448 android-ndk\n+  ```\n+- In the `app/src/main/jni/` directory, run\n+  ```\n+  ./download_ffmpeg.sh\n+  ./build_ffmpeg.sh\n+  ```\n - Open the project in [Android Studio][studio].\n - Compile and deploy to your Android TV device (such as a Shield or Amazon fire stick). \n - It can also be run with an android emulator, but the emulator that comes with android studio does not support MPEG2 playback, so you need to play an h264 or h265 recording.\n@@ -393,4 +400,5 @@ Licensed under the GNU GPL version 3 or later. See the [LICENSE file][license] f\n [studio]: https://developer.android.com/tools/studio/index.html\n [license]: LICENSE\n [bintray]: https://dl.bintray.com/bennettpeter/generic/mythtv_leanfront/android\n-[downloads]: https://dl.orangedox.com/pCBmBm\n\\ No newline at end of file\n+[downloads]: https://dl.orangedox.com/pCBmBm\n+"
+  },
+  {
+    "sha": "25e9ba4690b6374a5e9b0a3172835f47b4a40d12",
+    "filename": "app/build.gradle",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/bennettpeter/android-MythTV-Leanfront/blob/3ba5dfefaa43bed83223cfd1ea0daf0463753944/app/build.gradle",
+    "raw_url": "https://github.com/bennettpeter/android-MythTV-Leanfront/raw/3ba5dfefaa43bed83223cfd1ea0daf0463753944/app/build.gradle",
+    "contents_url": "https://api.github.com/repos/bennettpeter/android-MythTV-Leanfront/contents/app/build.gradle?ref=3ba5dfefaa43bed83223cfd1ea0daf0463753944",
+    "patch": "@@ -49,6 +49,11 @@ android {\n             path file('src/main/jni/Android.mk')\n         }\n     }\n+\n+    packagingOptions {\n+        pickFirst '**/*.so'\n+    }\n+\n     ndkVersion '21.3.6528147'\n }\n "
+  },
+  {
+    "sha": "6525ba4792ff665be21cbe0ec0f028b665eb9132",
+    "filename": "app/src/main/jni/build_ffmpeg.sh",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 16,
+    "changes": 34,
+    "blob_url": "https://github.com/bennettpeter/android-MythTV-Leanfront/blob/3ba5dfefaa43bed83223cfd1ea0daf0463753944/app/src/main/jni/build_ffmpeg.sh",
+    "raw_url": "https://github.com/bennettpeter/android-MythTV-Leanfront/raw/3ba5dfefaa43bed83223cfd1ea0daf0463753944/app/src/main/jni/build_ffmpeg.sh",
+    "contents_url": "https://api.github.com/repos/bennettpeter/android-MythTV-Leanfront/contents/app/src/main/jni/build_ffmpeg.sh?ref=3ba5dfefaa43bed83223cfd1ea0daf0463753944",
+    "patch": "@@ -23,9 +23,8 @@\n # along with MythTV-leanfront.  If not, see <https://www.gnu.org/licenses/>.\n #\n \n-scriptname=`readlink -e \"$0\"`\n-scriptpath=`dirname \"$scriptname\"`\n-scriptname=`basename \"$scriptname\" .sh`\n+scriptpath=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" >/dev/null && pwd )\"\n+scriptname=$(basename \"$0\")\n set -e\n \n cd \"$scriptpath\"\n@@ -34,9 +33,17 @@ cd \"$scriptpath\"\n rm -rf ffmpeg/android-libs/*\n \n FFMPEG_EXT_PATH=\"$PWD\"\n-NDK_PATH=$HOME/Android/android-ndk\n-HOST_PLATFORM=\"linux-x86_64\"\n-ENABLED_DECODERS=(mp3 aac ac3 eac3 dca truehd mlp vorbis opus flac alac pcm_mulaw pcm_alaw)\n+\n+if [ \"$(uname -s)\" = \"Darwin\" ];\n+then\n+  NDK_PATH=$HOME/Library/Android/android-ndk\n+  HOST_PLATFORM=\"darwin-x86_64\"\n+else\n+  NDK_PATH=$HOME/Android/android-ndk\n+  HOST_PLATFORM=\"linux-x86_64\"\n+fi\n+\n+TOOLCHAIN_PREFIX=\"${NDK_PATH}/toolchains/llvm/prebuilt/${HOST_PLATFORM}/bin\"\n # --enable-avresample no longer needed\n COMMON_OPTIONS=\"\n     --target-os=android\n@@ -52,8 +59,10 @@ COMMON_OPTIONS=\"\n     --disable-avfilter\n     --disable-symver\n     --enable-swresample\n+    --strip=${TOOLCHAIN_PREFIX}/llvm-strip\n+    --nm=${TOOLCHAIN_PREFIX}/llvm-nm\n     \"\n-TOOLCHAIN_PREFIX=\"${NDK_PATH}/toolchains/llvm/prebuilt/${HOST_PLATFORM}/bin\"\n+ENABLED_DECODERS=(mp3 aac ac3 eac3 dca truehd mlp vorbis opus flac alac pcm_mulaw pcm_alaw)\n for decoder in \"${ENABLED_DECODERS[@]}\"\n do\n     COMMON_OPTIONS=\"${COMMON_OPTIONS} --enable-decoder=${decoder}\"\n@@ -67,8 +76,6 @@ git checkout release/4.2\n     --arch=arm \\\n     --cpu=armv7-a \\\n     --cross-prefix=\"${TOOLCHAIN_PREFIX}/armv7a-linux-androideabi16-\" \\\n-    --nm=\"${TOOLCHAIN_PREFIX}/arm-linux-androideabi-nm\" \\\n-    --strip=\"${TOOLCHAIN_PREFIX}/arm-linux-androideabi-strip\" \\\n     --extra-cflags=\"-march=armv7-a -mfloat-abi=softfp\" \\\n     --extra-ldflags=\"-Wl,--fix-cortex-a8\" \\\n     --extra-ldexeflags=-pie \\\n@@ -81,8 +88,6 @@ make clean\n     --arch=aarch64 \\\n     --cpu=armv8-a \\\n     --cross-prefix=\"${TOOLCHAIN_PREFIX}/aarch64-linux-android21-\" \\\n-    --nm=\"${TOOLCHAIN_PREFIX}/aarch64-linux-android-nm\" \\\n-    --strip=\"${TOOLCHAIN_PREFIX}/aarch64-linux-android-strip\" \\\n     --extra-ldexeflags=-pie \\\n     ${COMMON_OPTIONS}\n make -j4\n@@ -93,8 +98,6 @@ make clean\n     --arch=x86 \\\n     --cpu=i686 \\\n     --cross-prefix=\"${TOOLCHAIN_PREFIX}/i686-linux-android16-\" \\\n-    --nm=\"${TOOLCHAIN_PREFIX}/i686-linux-android-nm\" \\\n-    --strip=\"${TOOLCHAIN_PREFIX}/i686-linux-android-strip\" \\\n     --extra-ldexeflags=-pie \\\n     --disable-asm \\\n     ${COMMON_OPTIONS}\n@@ -106,8 +109,6 @@ make clean\n     --arch=x86_64 \\\n     --cpu=x86_64 \\\n     --cross-prefix=\"${TOOLCHAIN_PREFIX}/x86_64-linux-android29-\" \\\n-    --nm=\"${TOOLCHAIN_PREFIX}/x86_64-linux-android-nm\" \\\n-    --strip=\"${TOOLCHAIN_PREFIX}/x86_64-linux-android-strip\" \\\n     --extra-ldexeflags=-pie \\\n     --disable-asm \\\n     ${COMMON_OPTIONS}\n@@ -120,4 +121,5 @@ rm -rf ../jnilibs\n mkdir ../jnilibs\n cp -a ffmpeg/android-libs/* ../jnilibs/\n \n-echo \"ffmpeg build successfully completed\"\n\\ No newline at end of file\n+echo \"ffmpeg build successfully completed\"\n+"
+  },
+  {
+    "sha": "117596972e82e89c8bbbd0d1921cfa2ee942fdde",
+    "filename": "app/src/main/jni/download_ffmpeg.sh",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 4,
+    "changes": 6,
+    "blob_url": "https://github.com/bennettpeter/android-MythTV-Leanfront/blob/3ba5dfefaa43bed83223cfd1ea0daf0463753944/app/src/main/jni/download_ffmpeg.sh",
+    "raw_url": "https://github.com/bennettpeter/android-MythTV-Leanfront/raw/3ba5dfefaa43bed83223cfd1ea0daf0463753944/app/src/main/jni/download_ffmpeg.sh",
+    "contents_url": "https://api.github.com/repos/bennettpeter/android-MythTV-Leanfront/contents/app/src/main/jni/download_ffmpeg.sh?ref=3ba5dfefaa43bed83223cfd1ea0daf0463753944",
+    "patch": "@@ -23,10 +23,8 @@\n # along with MythTV-leanfront.  If not, see <https://www.gnu.org/licenses/>.\n #\n \n-scriptname=`readlink -e \"$0\"`\n-scriptpath=`dirname \"$scriptname\"`\n-scriptname=`basename \"$scriptname\" .sh`\n+scriptpath=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" >/dev/null && pwd )\"\n \n cd \"$scriptpath\"\n \n-(git -C ffmpeg pull || git clone git@github.com:FFmpeg/FFmpeg.git ffmpeg)\n+(git -C ffmpeg pull || git clone git://source.ffmpeg.org/ffmpeg ffmpeg)"
+  }
+]

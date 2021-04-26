@@ -1,0 +1,130 @@
+[
+  {
+    "sha": "bf7f66a0c189d7be9e4dd55c0cfb90e15651ab64",
+    "filename": "app/src/main/java/com/example/notes/Note.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/java/com/example/notes/Note.java",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/java/com/example/notes/Note.java",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/java/com/example/notes/Note.java?ref=8365898f6140dcfe1d88525ccd95f69fb554a821",
+    "patch": "@@ -19,6 +19,7 @@ public Note(String title, String desc) {\n     protected Note(Parcel in) {\n         title = in.readString();\n         desc = in.readString();\n+        date = new Date(in.readLong());\n     }\n \n     public static final Creator<Note> CREATOR = new Creator<Note>() {\n@@ -63,5 +64,7 @@ public int describeContents() {\n     public void writeToParcel(Parcel dest, int flags) {\n         dest.writeString(title);\n         dest.writeString(desc);\n+        dest.writeLong(date.getTime());\n+\n     }\n }"
+  },
+  {
+    "sha": "a8f0aecda0707de68f133e0463153a14be975b51",
+    "filename": "app/src/main/java/com/example/notes/NoteFragment.java",
+    "status": "modified",
+    "additions": 41,
+    "deletions": 8,
+    "changes": 49,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/java/com/example/notes/NoteFragment.java",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/java/com/example/notes/NoteFragment.java",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/java/com/example/notes/NoteFragment.java?ref=8365898f6140dcfe1d88525ccd95f69fb554a821",
+    "patch": "@@ -1,5 +1,6 @@\n package com.example.notes;\n \n+import android.app.DatePickerDialog;\n import android.os.Bundle;\n \n import androidx.annotation.NonNull;\n@@ -13,15 +14,19 @@\n import android.view.MenuItem;\n import android.view.View;\n import android.view.ViewGroup;\n+import android.widget.DatePicker;\n+import android.widget.EditText;\n import android.widget.TextView;\n import android.widget.Toast;\n \n+import java.util.Calendar;\n \n-public class NoteFragment extends Fragment implements Observer {\n+\n+public class NoteFragment extends Fragment implements Observer, DatePickerDialog.OnDateSetListener {\n \n     private static final String NOTE = \"note\";\n-    private TextView titleTextView;\n-    private TextView descTextView;\n+    private EditText titleEditText;\n+    private EditText descEditText;\n     private TextView dateTextView;\n \n \n@@ -37,20 +42,33 @@ public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup c\n     @Override\n     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {\n         super.onViewCreated(view, savedInstanceState);\n-        titleTextView = view.findViewById(R.id.tv_title);\n-        descTextView = view.findViewById(R.id.tv_desc);\n-        descTextView.setMovementMethod(new ScrollingMovementMethod());\n+        titleEditText = view.findViewById(R.id.et_title);\n+        descEditText = view.findViewById(R.id.et_desc);\n+        descEditText.setMovementMethod(new ScrollingMovementMethod());\n         dateTextView = view.findViewById(R.id.tv_date);\n         Bundle bundle = getArguments();\n         if (bundle != null) {\n             openNote(bundle.getParcelable(NOTE));\n         }\n     }\n \n+\n+    @Override\n+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {\n+        super.onActivityCreated(savedInstanceState);\n+        dateTextView.setOnClickListener(new View.OnClickListener() {\n+                                            @Override\n+                                            public void onClick(View v) {\n+                                                showDatePicker();\n+                                            }\n+                                        }\n+        );\n+    }\n+\n     @Override\n     public void openNote(Note note) {\n-        titleTextView.setText(note.getTitle());\n-        descTextView.setText(note.getDesc());\n+        titleEditText.setText(note.getTitle());\n+        descEditText.setText(note.getDesc());\n         dateTextView.setText(note.getDate());\n     }\n \n@@ -80,4 +98,19 @@ public boolean onOptionsItemSelected(@NonNull MenuItem item) {\n         return super.onOptionsItemSelected(item);\n     }\n \n+    private void showDatePicker() {\n+        final Calendar c = Calendar.getInstance();\n+        int year = c.get(Calendar.YEAR);\n+        int month = c.get(Calendar.MONTH);\n+        int day = c.get(Calendar.DAY_OF_MONTH);\n+\n+        new DatePickerDialog(getActivity(), this, year, month, day).show();\n+    }\n+\n+\n+    @Override\n+    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {\n+        String date = String.format(\"%s.%s.%s\", dayOfMonth, month + 1, year);\n+        dateTextView.setText(date);\n+    }\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "5fc18ee0e23ad5fe4723611fe86aa45e14a05a54",
+    "filename": "app/src/main/java/com/example/notes/NotesAdapter.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 2,
+    "changes": 13,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/java/com/example/notes/NotesAdapter.java",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/java/com/example/notes/NotesAdapter.java",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/java/com/example/notes/NotesAdapter.java?ref=8365898f6140dcfe1d88525ccd95f69fb554a821",
+    "patch": "@@ -1,11 +1,11 @@\n package com.example.notes;\n \n-import android.text.method.ScrollingMovementMethod;\n import android.view.LayoutInflater;\n import android.view.View;\n import android.view.ViewGroup;\n \n import androidx.annotation.NonNull;\n+import androidx.fragment.app.Fragment;\n import androidx.recyclerview.widget.RecyclerView;\n \n import com.google.android.material.textview.MaterialTextView;\n@@ -17,9 +17,11 @@\n \n     private final List<Note> noteList = new ArrayList<>();\n     private final Observer observer;\n+    private final Fragment fragment;\n \n-    public NotesAdapter(Observer observer) {\n+    public NotesAdapter(Observer observer, Fragment fragment) {\n         this.observer = observer;\n+        this.fragment = fragment;\n     }\n \n \n@@ -54,6 +56,7 @@ public int getItemCount() {\n         public NotesViewHolder(@NonNull View itemView) {\n             super(itemView);\n             textView = itemView.findViewById(R.id.item_title);\n+            registerContextMenu(itemView);\n         }\n \n         public void onBind(Note model, int position) {\n@@ -63,5 +66,11 @@ public void onBind(Note model, int position) {\n         }\n     }\n \n+    private void registerContextMenu(View itemView) {\n+        if (fragment != null) {\n+            fragment.registerForContextMenu(itemView);\n+        }\n+    }\n+\n \n }"
+  },
+  {
+    "sha": "ccbda4add32eeb9f1992ae5f2b08f841ca78388e",
+    "filename": "app/src/main/java/com/example/notes/NotesListFragment.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 1,
+    "changes": 26,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/java/com/example/notes/NotesListFragment.java",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/java/com/example/notes/NotesListFragment.java",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/java/com/example/notes/NotesListFragment.java?ref=8365898f6140dcfe1d88525ccd95f69fb554a821",
+    "patch": "@@ -8,9 +8,13 @@\n import androidx.recyclerview.widget.LinearLayoutManager;\n import androidx.recyclerview.widget.RecyclerView;\n \n+import android.view.ContextMenu;\n import android.view.LayoutInflater;\n+import android.view.MenuInflater;\n+import android.view.MenuItem;\n import android.view.View;\n import android.view.ViewGroup;\n+import android.widget.Toast;\n \n import java.util.ArrayList;\n import java.util.List;\n@@ -20,7 +24,7 @@\n \n     private List<Observer> noteListObservers;\n     private ArrayList<Note> noteList;\n-    private final NotesAdapter notesAdapter = new NotesAdapter(this::noteClicked);\n+    private final NotesAdapter notesAdapter = new NotesAdapter(this::noteClicked, this);\n     private static final String NOTE_LIST = \"notes\";\n \n     public NotesListFragment() {\n@@ -85,5 +89,25 @@ public void noteClicked(Note note) {\n         }\n     }\n \n+    @Override\n+    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {\n+        super.onCreateContextMenu(menu, v, menuInfo);\n+        MenuInflater inflater = requireActivity().getMenuInflater();\n+        inflater.inflate(R.menu.note_menu, menu);\n+    }\n+\n+    @Override\n+    public boolean onContextItemSelected(@NonNull MenuItem item) {\n+        switch (item.getItemId()) {\n+            case R.id.action_update:\n+                Toast.makeText(getContext(), \"Редактируем заметку\", Toast.LENGTH_SHORT).show();\n+                return true;\n+            case R.id.action_delete:\n+                Toast.makeText(getContext(), \"Удаляем заметку\", Toast.LENGTH_SHORT).show();\n+                return true;\n+        }\n+        return super.onContextItemSelected(item);\n+    }\n+\n \n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e9fedc1867789a68a6273b1b40d07d609e9f6046",
+    "filename": "app/src/main/res/drawable-anydpi/ic_action_cal.xml",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-anydpi/ic_action_cal.xml",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-anydpi/ic_action_cal.xml",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/res/drawable-anydpi/ic_action_cal.xml?ref=8365898f6140dcfe1d88525ccd95f69fb554a821",
+    "patch": "@@ -0,0 +1,11 @@\n+<vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n+    android:width=\"24dp\"\n+    android:height=\"24dp\"\n+    android:viewportWidth=\"24\"\n+    android:viewportHeight=\"24\"\n+    android:tint=\"#333333\"\n+    android:alpha=\"0.6\">\n+  <path\n+      android:fillColor=\"@android:color/white\"\n+      android:pathData=\"M20,3h-1L19,1h-2v2L7,3L7,1L5,1v2L4,3c-1.1,0 -2,0.9 -2,2v16c0,1.1 0.9,2 2,2h16c1.1,0 2,-0.9 2,-2L22,5c0,-1.1 -0.9,-2 -2,-2zM20,21L4,21L4,8h16v13z\"/>\n+</vector>"
+  },
+  {
+    "sha": "3342be1580131e311acf60185944698c8ef8f17d",
+    "filename": "app/src/main/res/drawable-hdpi/ic_action_cal.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-hdpi/ic_action_cal.png",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-hdpi/ic_action_cal.png",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/res/drawable-hdpi/ic_action_cal.png?ref=8365898f6140dcfe1d88525ccd95f69fb554a821"
+  },
+  {
+    "sha": "b32607202799879198144299bc09e3aa31f2653a",
+    "filename": "app/src/main/res/drawable-mdpi/ic_action_cal.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-mdpi/ic_action_cal.png",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-mdpi/ic_action_cal.png",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/res/drawable-mdpi/ic_action_cal.png?ref=8365898f6140dcfe1d88525ccd95f69fb554a821"
+  },
+  {
+    "sha": "53575474fa8ff6583d8294d63f24b5463b6c18f1",
+    "filename": "app/src/main/res/drawable-xhdpi/ic_action_cal.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-xhdpi/ic_action_cal.png",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-xhdpi/ic_action_cal.png",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/res/drawable-xhdpi/ic_action_cal.png?ref=8365898f6140dcfe1d88525ccd95f69fb554a821"
+  },
+  {
+    "sha": "cb3c1e47919e403f0fce39cbc0ded777a83c600f",
+    "filename": "app/src/main/res/drawable-xxhdpi/ic_action_cal.png",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-xxhdpi/ic_action_cal.png",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/drawable-xxhdpi/ic_action_cal.png",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/res/drawable-xxhdpi/ic_action_cal.png?ref=8365898f6140dcfe1d88525ccd95f69fb554a821"
+  },
+  {
+    "sha": "46e1f7afbecb9d73e4959b3b628c27b61b09e696",
+    "filename": "app/src/main/res/layout/fragment_note.xml",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 5,
+    "changes": 17,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/layout/fragment_note.xml",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/layout/fragment_note.xml",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/res/layout/fragment_note.xml?ref=8365898f6140dcfe1d88525ccd95f69fb554a821",
+    "patch": "@@ -7,26 +7,33 @@\n     android:orientation=\"vertical\"\n     tools:context=\".NoteFragment\">\n \n-    <androidx.appcompat.widget.AppCompatTextView\n-        android:id=\"@+id/tv_title\"\n+    <androidx.appcompat.widget.AppCompatEditText\n+        android:id=\"@+id/et_title\"\n         android:layout_width=\"match_parent\"\n         android:layout_height=\"wrap_content\"\n+        android:layout_marginStart=\"@dimen/padding_h\"\n+        android:layout_marginEnd=\"@dimen/padding_h\"\n         android:textSize=\"@dimen/text_title_size\" />\n \n     <androidx.appcompat.widget.AppCompatTextView\n         android:id=\"@+id/tv_date\"\n         android:layout_width=\"match_parent\"\n-        android:layout_height=\"wrap_content\" />\n+        android:layout_height=\"wrap_content\"\n+        android:layout_marginStart=\"@dimen/padding_h\"\n+        android:layout_marginEnd=\"@dimen/padding_h\"\n+        android:drawableRight=\"@drawable/ic_action_cal\" />\n \n     <View\n         android:layout_width=\"wrap_content\"\n         android:layout_height=\"@dimen/stroke\"\n         android:background=\"@drawable/et_style\" />\n \n-    <androidx.appcompat.widget.AppCompatTextView\n-        android:id=\"@+id/tv_desc\"\n+    <androidx.appcompat.widget.AppCompatEditText\n+        android:id=\"@+id/et_desc\"\n         android:layout_width=\"match_parent\"\n         android:layout_height=\"wrap_content\"\n+        android:layout_marginStart=\"@dimen/padding_h\"\n+        android:layout_marginEnd=\"@dimen/padding_h\"\n         android:scrollbars=\"vertical\"\n         android:textSize=\"@dimen/text_desc_size\" />\n "
+  },
+  {
+    "sha": "271ec4669220a671e763e6f14787bb8ae12e2a72",
+    "filename": "app/src/main/res/menu/note_menu.xml",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/klotoz/Notes/blob/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/menu/note_menu.xml",
+    "raw_url": "https://github.com/klotoz/Notes/raw/8365898f6140dcfe1d88525ccd95f69fb554a821/app/src/main/res/menu/note_menu.xml",
+    "contents_url": "https://api.github.com/repos/klotoz/Notes/contents/app/src/main/res/menu/note_menu.xml?ref=8365898f6140dcfe1d88525ccd95f69fb554a821",
+    "patch": "@@ -0,0 +1,11 @@\n+<?xml version=\"1.0\" encoding=\"utf-8\"?>\n+<menu xmlns:android=\"http://schemas.android.com/apk/res/android\">\n+    <item\n+        android:id=\"@+id/action_update\"\n+        android:orderInCategory=\"10\"\n+        android:title=\"@string/setCh\" />\n+    <item\n+        android:id=\"@+id/action_delete\"\n+        android:orderInCategory=\"20\"\n+        android:title=\"@string/delete\" />\n+</menu>\n\\ No newline at end of file"
+  }
+]

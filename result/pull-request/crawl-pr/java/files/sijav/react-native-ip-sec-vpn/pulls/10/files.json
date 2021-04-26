@@ -1,0 +1,49 @@
+[
+  {
+    "sha": "152132c717c6c381ab096ab7a21b0e7b36b5f959",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 3,
+    "changes": 18,
+    "blob_url": "https://github.com/sijav/react-native-ip-sec-vpn/blob/c2bd8c11dee58bdede38fb4a8ebf62796a16522b/README.md",
+    "raw_url": "https://github.com/sijav/react-native-ip-sec-vpn/raw/c2bd8c11dee58bdede38fb4a8ebf62796a16522b/README.md",
+    "contents_url": "https://api.github.com/repos/sijav/react-native-ip-sec-vpn/contents/README.md?ref=c2bd8c11dee58bdede38fb4a8ebf62796a16522b",
+    "patch": "@@ -1,12 +1,24 @@\n-# react-native-ip-sec-vpn\n+# @jackywxd/react-native-ip-sec-vpn\n+\n+This package is forked from https://github.com/sijav/react-native-ip-sec-vpn, with some minor modifications to fit my usage:\n+1. Load the VPN config before the notification so getCurrentState() can return correct state after App is relaunched from background\n+2. Support strong crypto:\n+\t<key>DiffieHellmanGroup</key>\n+\t<integer>20</integer>\n+\t<key>EncryptionAlgorithm</key>\n+\t<string>AES-256-GCM</string>\n+\t<key>IntegrityAlgorithm</key>\n+\t<string>SHA2-512</string>\n+\t<key>LifeTimeInMinutes</key>\n+\t<integer>1440</integer>\n \n ## Getting started\n \n Plugin can be installed using npm<br>\n With yarn:<br>\n-`$ yarn add react-native-ip-sec-vpn --save`<br>\n+`$ yarn add @jackywxd/react-native-ip-sec-vpn --save`<br>\n Or with npm:<br>\n-`$ npm install react-native-ip-sec-vpn --save`<br>\n+`$ npm install @jackywxd/react-native-ip-sec-vpn --save`<br>\n \n ### Mostly automatic installation\n "
+  },
+  {
+    "sha": "096d19e7135eab137d6fb0dd933df96074a5163b",
+    "filename": "ios/RNIpSecVpn.swift",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 2,
+    "changes": 27,
+    "blob_url": "https://github.com/sijav/react-native-ip-sec-vpn/blob/c2bd8c11dee58bdede38fb4a8ebf62796a16522b/ios/RNIpSecVpn.swift",
+    "raw_url": "https://github.com/sijav/react-native-ip-sec-vpn/raw/c2bd8c11dee58bdede38fb4a8ebf62796a16522b/ios/RNIpSecVpn.swift",
+    "contents_url": "https://api.github.com/repos/sijav/react-native-ip-sec-vpn/contents/ios/RNIpSecVpn.swift?ref=c2bd8c11dee58bdede38fb4a8ebf62796a16522b",
+    "patch": "@@ -84,9 +84,19 @@ class RNIpSecVpn: RCTEventEmitter {\n         return [ \"stateChanged\" ]\n     }\n     \n+\n     @objc\n     func prepare(_ findEventsWithResolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) -> Void {\n-\n+        let vpnManager = NEVPNManager.shared()\n+        //https://stackoverflow.com/questions/39056600/nevpnmanager-check-is-connected-after-restart-the-app/47689509\n+        vpnManager.loadFromPreferences { (error) in\n+            if error != nil {\n+                print(error.debugDescription)\n+            }\n+            else{\n+                print(\"No error from loading VPN viewDidLoad\")\n+            }\n+        }\n         // Register to be notified of changes in the status. These notifications only work when app is in foreground.\n         NotificationCenter.default.addObserver(forName: NSNotification.Name.NEVPNStatusDidChange, object : nil , queue: nil) {\n             notification in let nevpnconn = notification.object as! NEVPNConnection\n@@ -115,9 +125,22 @@ class RNIpSecVpn: RCTEventEmitter {\n                 p.passwordReference = kcs.load(key: \"password\")\n                 p.authenticationMethod = NEVPNIKEAuthenticationMethod.none\n \n+                //Set IKE SA (Security Association) Params...\n+                p.ikeSecurityAssociationParameters.encryptionAlgorithm = .algorithmAES256GCM\n+                p.ikeSecurityAssociationParameters.integrityAlgorithm = .SHA512\n+                p.ikeSecurityAssociationParameters.diffieHellmanGroup = .group20\n+                p.ikeSecurityAssociationParameters.lifetimeMinutes = 1440\n+                //p.ikeSecurityAssociationParameters.isProxy() = false\n+\n+                //Set CHILD SA (Security Association) Params...\n+                p.childSecurityAssociationParameters.encryptionAlgorithm = .algorithmAES256GCM\n+                p.childSecurityAssociationParameters.integrityAlgorithm = .SHA512\n+                p.childSecurityAssociationParameters.diffieHellmanGroup = .group20\n+                p.childSecurityAssociationParameters.lifetimeMinutes = 1440\n                 p.useExtendedAuthentication = true\n                 p.disconnectOnSleep = false\n-\n+                p.enablePFS = true\n+                \n                 vpnManager.protocolConfiguration = p\n                 vpnManager.isEnabled = true\n                 "
+  },
+  {
+    "sha": "c936a059b601a43d705515295e0467b013121ee8",
+    "filename": "package-lock.json",
+    "status": "modified",
+    "additions": 1768,
+    "deletions": 2490,
+    "changes": 4258,
+    "blob_url": "https://github.com/sijav/react-native-ip-sec-vpn/blob/c2bd8c11dee58bdede38fb4a8ebf62796a16522b/package-lock.json",
+    "raw_url": "https://github.com/sijav/react-native-ip-sec-vpn/raw/c2bd8c11dee58bdede38fb4a8ebf62796a16522b/package-lock.json",
+    "contents_url": "https://api.github.com/repos/sijav/react-native-ip-sec-vpn/contents/package-lock.json?ref=c2bd8c11dee58bdede38fb4a8ebf62796a16522b"
+  },
+  {
+    "sha": "937c17695adc6ba0275facbfc98ba9d624c2bb1f",
+    "filename": "package.json",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 8,
+    "changes": 16,
+    "blob_url": "https://github.com/sijav/react-native-ip-sec-vpn/blob/c2bd8c11dee58bdede38fb4a8ebf62796a16522b/package.json",
+    "raw_url": "https://github.com/sijav/react-native-ip-sec-vpn/raw/c2bd8c11dee58bdede38fb4a8ebf62796a16522b/package.json",
+    "contents_url": "https://api.github.com/repos/sijav/react-native-ip-sec-vpn/contents/package.json?ref=c2bd8c11dee58bdede38fb4a8ebf62796a16522b",
+    "patch": "@@ -1,9 +1,9 @@\n {\n-  \"name\": \"react-native-ip-sec-vpn\",\n+  \"name\": \"@jackywxd/react-native-ip-sec-vpn\",\n   \"title\": \"React Native Ip Sec Vpn\",\n-  \"version\": \"1.1.0\",\n+  \"version\": \"1.1.1\",\n   \"description\": \"React Native IPSec VPN Module\",\n-  \"homepage\": \"https://github.com/sijav/react-native-ip-sec-vpn#readme\",\n+  \"homepage\": \"https://github.com/jackywxd/react-native-ip-sec-vpn#readme\",\n   \"main\": \"index.js\",\n   \"types\": \"index.d.ts\",\n   \"files\": [\n@@ -21,8 +21,8 @@\n   },\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git+https://github.com/sijav/react-native-ip-sec-vpn.git\",\n-    \"baseUrl\": \"https://github.com/sijav/react-native-ip-sec-vpn\"\n+    \"url\": \"git+https://github.com/jackywxd/react-native-ip-sec-vpn.git\",\n+    \"baseUrl\": \"https://github.com/jackywxd/react-native-ip-sec-vpn\"\n   },\n   \"keywords\": [\n     \"react-native\",\n@@ -32,8 +32,8 @@\n     \"vpn\"\n   ],\n   \"author\": {\n-    \"name\": \"Sijav\",\n-    \"email\": \"sinajavaheri@gmail.com\"\n+    \"name\": \"jackywxd\",\n+    \"email\": \"me@jackywu.ca\"\n   },\n   \"license\": \"MIT\",\n   \"licenseFilename\": \"LICENSE\",\n@@ -46,7 +46,7 @@\n     \"@types/react-native\": \"0.63.2\",\n     \"prettier\": \"2.0.5\",\n     \"react\": \"16.13.1\",\n-    \"react-native\": \"0.63.2\",\n+    \"react-native\": \"^0.64.0\",\n     \"typescript\": \"3.9.7\"\n   }\n }"
+  }
+]

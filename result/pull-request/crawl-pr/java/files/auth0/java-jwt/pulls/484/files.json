@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "f5fa0f0ee0e5d354bbc84a0f68e70d609a2f75bf",
+    "filename": "lib/build.gradle",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 3,
+    "changes": 27,
+    "blob_url": "https://github.com/auth0/java-jwt/blob/3c5dbe19296e481a722bbc51dca993a0982dd67a/lib/build.gradle",
+    "raw_url": "https://github.com/auth0/java-jwt/raw/3c5dbe19296e481a722bbc51dca993a0982dd67a/lib/build.gradle",
+    "contents_url": "https://api.github.com/repos/auth0/java-jwt/contents/lib/build.gradle?ref=3c5dbe19296e481a722bbc51dca993a0982dd67a",
+    "patch": "@@ -32,13 +32,18 @@ oss {\n \n java {\n     toolchain {\n-        languageVersion = JavaLanguageVersion.of(8)\n+        languageVersion = JavaLanguageVersion.of(11)\n     }\n }\n \n compileJava {\n-    sourceCompatibility '1.8'\n-    targetCompatibility '1.8'\n+    exclude 'module-info.java'\n+\n+    options.compilerArgs = ['--release', '8']\n+}\n+\n+javadoc {\n+    exclude 'module-info.java'\n }\n \n dependencies {\n@@ -63,3 +68,19 @@ test {\n         exceptionFormat \"short\"\n     }\n }\n+\n+task compileModuleInfoJava(type: JavaCompile) {\n+    classpath = files()\n+    source = 'src/main/java/module-info.java'\n+    destinationDir = compileJava.destinationDir\n+\n+    doFirst {\n+        options.compilerArgs = [\n+                '--release', '9',\n+                '--module-path', compileJava.classpath.asPath\n+        ]\n+    }\n+}\n+\n+compileModuleInfoJava.dependsOn compileJava\n+classes.dependsOn compileModuleInfoJava\n\\ No newline at end of file"
+  },
+  {
+    "sha": "0316d76454565f8198dcbfb3bd21fb2d0a2cca9d",
+    "filename": "lib/src/main/java/module-info.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/auth0/java-jwt/blob/3c5dbe19296e481a722bbc51dca993a0982dd67a/lib/src/main/java/module-info.java",
+    "raw_url": "https://github.com/auth0/java-jwt/raw/3c5dbe19296e481a722bbc51dca993a0982dd67a/lib/src/main/java/module-info.java",
+    "contents_url": "https://api.github.com/repos/auth0/java-jwt/contents/lib/src/main/java/module-info.java?ref=3c5dbe19296e481a722bbc51dca993a0982dd67a",
+    "patch": "@@ -0,0 +1,9 @@\n+module com.auth0.jwt {\n+    requires com.fasterxml.jackson.databind;\n+\n+    exports com.auth0.jwt;\n+    exports com.auth0.jwt.algorithms;\n+    exports com.auth0.jwt.exceptions;\n+    exports com.auth0.jwt.impl;\n+    exports com.auth0.jwt.interfaces;\n+}\n\\ No newline at end of file"
+  }
+]

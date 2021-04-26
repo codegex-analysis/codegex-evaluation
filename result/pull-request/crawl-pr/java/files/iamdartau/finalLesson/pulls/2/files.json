@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "0d1b1fe3b30067e49298e8348e80921495e82897",
+    "filename": "src/com/company/Client.java",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 6,
+    "changes": 38,
+    "blob_url": "https://github.com/iamdartau/finalLesson/blob/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/Client.java",
+    "raw_url": "https://github.com/iamdartau/finalLesson/raw/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/Client.java",
+    "contents_url": "https://api.github.com/repos/iamdartau/finalLesson/contents/src/com/company/Client.java?ref=50ca5d3dee877844d2876419fbb4f46a16bddd9f",
+    "patch": "@@ -1,25 +1,51 @@\n package com.company;\n \n+import com.company.front.MainFrame;\n+\n import java.io.ObjectInputStream;\n import java.io.ObjectOutputStream;\n import java.net.Socket;\n-import java.rmi.UnmarshalException;\n import java.util.Scanner;\n \n public class Client {\n     public static void main(String[] args) {\n+        MainFrame frame = new MainFrame();\n+        frame.setVisible(true);\n \n-        Students students = new Students(\"newName\", \"NesSurname\", 89);\n-        DAO dao = new DaoImpl();\n-        dao.addStident(students);\n-\n-        Scanner in = new Scanner(System.in);\n+        Scanner scanner = new Scanner(System.in);\n         try {\n             Socket socket = new Socket(\"127.0.0.1\", 9889);\n             ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());\n             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());\n             PackageData data;\n             while (true) {\n+                System.out.println(\"1 list\");\n+                System.out.println(\"2 add\");\n+                System.out.println(\"0 end\");\n+                String choice = scanner.next();\n+                if (choice.equalsIgnoreCase(\"list\")) {\n+                    data = new PackageData(choice, null, null);\n+                    outputStream.writeObject(data);\n+                    outputStream.reset();\n+                    PackageData list;\n+                    if ((list = (PackageData) inputStream.readObject()) != null) {\n+                        System.out.println(list.getStudents());\n+                    }\n+                    outputStream.reset();\n+                } else if (choice.equalsIgnoreCase(\"add\")) {\n+                    System.out.println(\"name\");\n+                    String name = scanner.next();\n+                    System.out.println(\"surname\");\n+                    String surname = scanner.next();\n+                    System.out.println(\"age\");\n+                    int age = scanner.nextInt();\n+                    Students student = new Students(name,surname,age);\n+                    data = new PackageData(choice,null,student);\n+                    outputStream.writeObject(data);\n+                    outputStream.reset();\n+                } else if (choice.equalsIgnoreCase(\"end\")) {\n+                    System.exit(0);\n+                }\n \n             }\n         } catch (Exception e) {"
+  },
+  {
+    "sha": "37edc071fd22bc4d3f7930615091aac8931ac571",
+    "filename": "src/com/company/ClientHandler.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 3,
+    "changes": 8,
+    "blob_url": "https://github.com/iamdartau/finalLesson/blob/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/ClientHandler.java",
+    "raw_url": "https://github.com/iamdartau/finalLesson/raw/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/ClientHandler.java",
+    "contents_url": "https://api.github.com/repos/iamdartau/finalLesson/contents/src/com/company/ClientHandler.java?ref=50ca5d3dee877844d2876419fbb4f46a16bddd9f",
+    "patch": "@@ -17,18 +17,20 @@ public void run() {\n         try {\n             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());\n             ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());\n-            PackageData data = null;\n+            PackageData data;\n             PackageData response = null;\n+            DAO dao = new DaoImpl();\n             while ((data = (PackageData) inputStream.readObject()) != null) {\n                 if (data.getOperationType().equalsIgnoreCase(\"list\")) {\n-                    DAO dao = new DaoImpl();\n                     response = new PackageData(\"list\",dao.getStudensts(),null);\n+                }else if (data.getOperationType().equalsIgnoreCase(\"add\")){\n+                    dao.addStident(data.getStudent());\n                 }\n                 outputStream.writeObject(response);\n                 outputStream.reset();\n             }\n         } catch (Exception e) {\n-\n+            e.printStackTrace();\n         }\n     }\n }"
+  },
+  {
+    "sha": "7d82c737b813e90ec2bdc821bcbc3c3854769202",
+    "filename": "src/com/company/Students.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/iamdartau/finalLesson/blob/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/Students.java",
+    "raw_url": "https://github.com/iamdartau/finalLesson/raw/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/Students.java",
+    "contents_url": "https://api.github.com/repos/iamdartau/finalLesson/contents/src/com/company/Students.java?ref=50ca5d3dee877844d2876419fbb4f46a16bddd9f",
+    "patch": "@@ -1,6 +1,8 @@\n package com.company;\n \n-public class Students {\n+import java.io.Serializable;\n+\n+public class Students implements Serializable {\n \n     Long id;\n     String name;"
+  },
+  {
+    "sha": "b66f8783aa646395e2543b38b497c29daaa291c4",
+    "filename": "src/com/company/front/FirstPage.java",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/iamdartau/finalLesson/blob/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/front/FirstPage.java",
+    "raw_url": "https://github.com/iamdartau/finalLesson/raw/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/front/FirstPage.java",
+    "contents_url": "https://api.github.com/repos/iamdartau/finalLesson/contents/src/com/company/front/FirstPage.java?ref=50ca5d3dee877844d2876419fbb4f46a16bddd9f",
+    "patch": "@@ -0,0 +1,36 @@\n+package com.company.front;\n+\n+import javax.swing.*;\n+import java.awt.event.ActionEvent;\n+import java.awt.event.ActionListener;\n+\n+public class FirstPage extends JPanel {\n+\n+    private MainFrame parent;\n+\n+    private JLabel label;\n+    private JButton back;\n+\n+    public FirstPage(MainFrame parent) {\n+        this.parent = parent;\n+        setSize(500,500);\n+        setLayout(null);\n+\n+        label = new JLabel(\"add student\");\n+        label.setSize(300,30);\n+        label.setLocation(100,100);\n+        add(label);\n+\n+        back = new JButton(\"Back\");\n+        back.setSize(300,30);\n+        back.setLocation(100,150);\n+        add(back);\n+        back.addActionListener(new ActionListener() {\n+            @Override\n+            public void actionPerformed(ActionEvent actionEvent) {\n+                parent.getFirstPage().setVisible(false);\n+                parent.getMainMenuPage().setVisible(true);\n+            }\n+        });\n+    }\n+}"
+  },
+  {
+    "sha": "0ad72cc816507b83d39b335256a597ff0e200bcb",
+    "filename": "src/com/company/front/MainFrame.java",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/iamdartau/finalLesson/blob/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/front/MainFrame.java",
+    "raw_url": "https://github.com/iamdartau/finalLesson/raw/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/front/MainFrame.java",
+    "contents_url": "https://api.github.com/repos/iamdartau/finalLesson/contents/src/com/company/front/MainFrame.java?ref=50ca5d3dee877844d2876419fbb4f46a16bddd9f",
+    "patch": "@@ -0,0 +1,45 @@\n+package com.company.front;\n+\n+import javax.swing.*;\n+import java.awt.event.ActionEvent;\n+import java.awt.event.ActionListener;\n+\n+public class MainFrame extends JFrame {\n+    private MainMenu mainMenuPage;\n+    private FirstPage firstPage;\n+    private SecondPage secondPage;\n+\n+    public MainMenu getMainMenuPage() {\n+        return mainMenuPage;\n+    }\n+\n+    public FirstPage getFirstPage() {\n+        return firstPage;\n+    }\n+\n+    public SecondPage getSecondPage() {\n+        return secondPage;\n+    }\n+\n+    public MainFrame() {\n+\n+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n+        setTitle(\"BITLAB Application\");\n+        setSize(500,500);\n+        setLayout(null);\n+\n+        mainMenuPage = new MainMenu(this);\n+        mainMenuPage.setVisible(true);\n+        add(mainMenuPage);\n+\n+        firstPage = new FirstPage(this);\n+        firstPage.setVisible(false);\n+        add(firstPage);\n+\n+        secondPage = new SecondPage(this);\n+        secondPage.setVisible(false);\n+        add(secondPage);\n+\n+\n+    }\n+}"
+  },
+  {
+    "sha": "996050348ec155ef1ac99e164461a9c512541f70",
+    "filename": "src/com/company/front/MainMenu.java",
+    "status": "added",
+    "additions": 54,
+    "deletions": 0,
+    "changes": 54,
+    "blob_url": "https://github.com/iamdartau/finalLesson/blob/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/front/MainMenu.java",
+    "raw_url": "https://github.com/iamdartau/finalLesson/raw/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/front/MainMenu.java",
+    "contents_url": "https://api.github.com/repos/iamdartau/finalLesson/contents/src/com/company/front/MainMenu.java?ref=50ca5d3dee877844d2876419fbb4f46a16bddd9f",
+    "patch": "@@ -0,0 +1,54 @@\n+package com.company.front;\n+\n+import javax.swing.*;\n+import java.awt.event.ActionEvent;\n+import java.awt.event.ActionListener;\n+\n+public class MainMenu extends JPanel {\n+\n+    private MainFrame parent;\n+    private JButton firstPageButton;\n+    private JButton secondPageButton;\n+    private JButton exitButton;\n+\n+    public MainMenu(MainFrame parent) {\n+        this.parent = parent;\n+        setSize(500,500);\n+        setLayout(null);\n+\n+        firstPageButton = new JButton(\"add student\");\n+        firstPageButton.setSize(300,30);\n+        firstPageButton.setLocation(100,100);\n+        add(firstPageButton);\n+        firstPageButton.addActionListener(new ActionListener() {\n+            @Override\n+            public void actionPerformed(ActionEvent actionEvent) {\n+                parent.getMainMenuPage().setVisible(false);\n+                parent.getFirstPage().setVisible(true);\n+            }\n+        });\n+        secondPageButton = new JButton(\"list students\");\n+        secondPageButton.setSize(300,30);\n+        secondPageButton.setLocation(100,150);\n+        add(secondPageButton);\n+        secondPageButton.addActionListener(new ActionListener() {\n+            @Override\n+            public void actionPerformed(ActionEvent actionEvent) {\n+//                parent.getSecondPage().generateTable(parent.getPlayers());\n+                parent.getMainMenuPage().setVisible(false);\n+                parent.getSecondPage().setVisible(true);\n+            }\n+        });\n+\n+        exitButton = new JButton(\"Exit\");\n+        exitButton.setSize(300,30);\n+        exitButton.setLocation(100,200);\n+        add(exitButton);\n+        exitButton.addActionListener(new ActionListener() {\n+            @Override\n+            public void actionPerformed(ActionEvent actionEvent) {\n+                System.exit(0);\n+            }\n+        });\n+    }\n+}"
+  },
+  {
+    "sha": "8bd58b444461b603c4d5fc7dc839bb248158abfa",
+    "filename": "src/com/company/front/SecondPage.java",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/iamdartau/finalLesson/blob/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/front/SecondPage.java",
+    "raw_url": "https://github.com/iamdartau/finalLesson/raw/50ca5d3dee877844d2876419fbb4f46a16bddd9f/src/com/company/front/SecondPage.java",
+    "contents_url": "https://api.github.com/repos/iamdartau/finalLesson/contents/src/com/company/front/SecondPage.java?ref=50ca5d3dee877844d2876419fbb4f46a16bddd9f",
+    "patch": "@@ -0,0 +1,39 @@\n+package com.company.front;\n+\n+import javax.swing.*;\n+import java.awt.event.ActionEvent;\n+import java.awt.event.ActionListener;\n+\n+public class SecondPage extends JPanel {\n+\n+\n+    private MainFrame parent;\n+\n+    private JLabel label;\n+    private JButton back;\n+\n+\n+    public SecondPage(MainFrame parent) {\n+        this.parent = parent;\n+\n+        setSize(500,500);\n+        setLayout(null);\n+\n+        label = new JLabel(\"list users\");\n+        label.setSize(300,30);\n+        label.setLocation(100,100);\n+        add(label);\n+\n+        back = new JButton(\"Back\");\n+        back.setSize(300,30);\n+        back.setLocation(100,150);\n+        add(back);\n+        back.addActionListener(new ActionListener() {\n+            @Override\n+            public void actionPerformed(ActionEvent actionEvent) {\n+                parent.getSecondPage().setVisible(false);\n+                parent.getMainMenuPage().setVisible(true);\n+            }\n+        });\n+    }\n+}"
+  }
+]

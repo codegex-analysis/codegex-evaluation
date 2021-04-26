@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "a654fd5902b7ae45b8b0a0b4c51a090cb1bfd0de",
+    "filename": "src/main/java/edu/kpi/testcourse/controller/UrlController.java",
+    "status": "added",
+    "additions": 77,
+    "deletions": 0,
+    "changes": 77,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-last/blob/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/controller/UrlController.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-last/raw/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/controller/UrlController.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-last/contents/src/main/java/edu/kpi/testcourse/controller/UrlController.java?ref=ecec0b56433a6120d0fcb6bf73e460d476e3b953",
+    "patch": "@@ -0,0 +1,77 @@\n+package edu.kpi.testcourse.controller;\n+\n+import com.fasterxml.jackson.core.JsonProcessingException;\n+import edu.kpi.testcourse.logic.UrlService;\n+import io.micronaut.http.*;\n+import io.micronaut.http.annotation.Body;\n+import io.micronaut.http.annotation.Controller;\n+import io.micronaut.http.annotation.Get;\n+import io.micronaut.http.annotation.Post;\n+import io.micronaut.security.annotation.Secured;\n+import io.micronaut.security.rules.SecurityRule;\n+import javax.inject.Inject;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+import edu.kpi.testcourse.model.UrlShortenRequest;\n+import edu.kpi.testcourse.model.UrlShortenResponse;\n+import edu.kpi.testcourse.model.ErrorResponse;\n+import edu.kpi.testcourse.repository.UrlRepository.AliasAlreadyExist;\n+import io.micronaut.http.server.util.HttpHostResolver;\n+import edu.kpi.testcourse.serialization.JsonTool;\n+\n+import java.security.Principal;\n+\n+\n+/**\n+ * Controller that handles requests to /urls/*.\n+ */\n+\n+@Controller(\"/urls\")\n+public class UrlController {\n+\n+  private static final Logger logger = LoggerFactory.getLogger(UserController.class);\n+  private final HttpHostResolver httpHostResolver;\n+  private final JsonTool json;\n+  private final UrlService urlService;\n+\n+  /**\n+   * This constructor is used by the DI to create singleton.\n+   *\n+   * @param urlService service for work with url\n+   * @param httpHostResolver micronaut httpHostResolver\n+   * @param json JSON serialization tool\n+   */\n+  @Inject\n+  public UrlController(\n+    UrlService urlService,\n+    HttpHostResolver httpHostResolver,\n+    JsonTool json\n+  )\n+  {\n+    this.urlService = urlService;\n+    this.httpHostResolver = httpHostResolver;\n+    this.json = json;\n+  }\n+\n+  @Secured(SecurityRule.IS_AUTHENTICATED)\n+  @Post(value = \"/shorten\", processes = MediaType.APPLICATION_JSON)\n+  public HttpResponse<String> shorten(\n+    @Body UrlShortenRequest request,\n+    Principal principal,\n+    HttpRequest<?> httpRequest\n+  ) throws JsonProcessingException {\n+    String email = principal.getName();\n+    try {\n+      String baseUrl = httpHostResolver.resolve(httpRequest);\n+      var shortenedUrl = baseUrl + \"/r/\"\n+        + urlService.createNewAlias(email, request.url(), request.alias());\n+      return HttpResponse.created(\n+        json.toJson(new UrlShortenResponse(shortenedUrl)));\n+    } catch (AliasAlreadyExist e) {\n+      return HttpResponse.serverError(\n+        json.toJson(new ErrorResponse(1, \"Alias is already taken\"))\n+      );\n+    }\n+  }\n+}\n+"
+  },
+  {
+    "sha": "f72565b3c7953c84229f2c94a5f0758c4f579ee5",
+    "filename": "src/main/java/edu/kpi/testcourse/logic/UrlService.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-last/blob/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/logic/UrlService.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-last/raw/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/logic/UrlService.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-last/contents/src/main/java/edu/kpi/testcourse/logic/UrlService.java?ref=ecec0b56433a6120d0fcb6bf73e460d476e3b953",
+    "patch": "@@ -0,0 +1,44 @@\n+package edu.kpi.testcourse.logic;\n+\n+import edu.kpi.testcourse.model.UrlAlias;\n+import edu.kpi.testcourse.repository.UrlRepository;\n+import edu.kpi.testcourse.repository.UrlRepository.AliasAlreadyExist;\n+\n+import javax.inject.Inject;\n+import javax.inject.Singleton;\n+\n+@Singleton\n+public class UrlService {\n+\n+  private final UrlRepository urlRepository;\n+  private final UrlRepository urls;\n+\n+  @Inject\n+  public UrlService(UrlRepository urlRepository,  UrlRepository urls) {\n+    this.urlRepository = urlRepository;\n+    this.urls = urls;\n+  }\n+\n+  /**\n+   * Create a new URL alias (shortened version).\n+   *\n+   * @param email an email of a user that creates the alias\n+   * @param url a full URL\n+   * @param alias a proposed alias\n+   *\n+   * @return a shortened URL\n+   */\n+  public String createNewAlias(String email, String url, String alias) throws AliasAlreadyExist {\n+    String finalAlias;\n+    if (alias == null || alias.isEmpty()) {\n+      // TODO: Generate short alias\n+      throw new UnsupportedOperationException(\"Is not implemented yet\");\n+    } else {\n+      finalAlias = alias;\n+    }\n+\n+    urls.createUrlAlias(new UrlAlias(finalAlias, url, email));\n+\n+    return finalAlias;\n+  }\n+}"
+  },
+  {
+    "sha": "8d9afb1a0feb6ad62928a212ce748b5a9665af9c",
+    "filename": "src/main/java/edu/kpi/testcourse/model/ErrorResponse.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-last/blob/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/model/ErrorResponse.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-last/raw/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/model/ErrorResponse.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-last/contents/src/main/java/edu/kpi/testcourse/model/ErrorResponse.java?ref=ecec0b56433a6120d0fcb6bf73e460d476e3b953",
+    "patch": "@@ -0,0 +1,11 @@\n+package edu.kpi.testcourse.model;\n+\n+import com.fasterxml.jackson.annotation.JsonProperty;\n+\n+/**\n+ * Error descriptor for API responses.\n+ */\n+public record ErrorResponse(\n+  @JsonProperty(\"reason_code\") int reasonCode,\n+  @JsonProperty(\"reason_text\") String reasonText) {\n+}"
+  },
+  {
+    "sha": "6fb50270ce7a7068f0bcd831d10cbab54fdcf895",
+    "filename": "src/main/java/edu/kpi/testcourse/model/UrlShortenRequest.java",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-last/blob/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/model/UrlShortenRequest.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-last/raw/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/model/UrlShortenRequest.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-last/contents/src/main/java/edu/kpi/testcourse/model/UrlShortenRequest.java?ref=ecec0b56433a6120d0fcb6bf73e460d476e3b953",
+    "patch": "@@ -0,0 +1,14 @@\n+package edu.kpi.testcourse.model;\n+\n+import com.fasterxml.jackson.annotation.JsonProperty;\n+\n+/**\n+ * URL shorten request with long and short URLs.\n+ *\n+ * @param url a full version of URL\n+ * @param alias an alias ({base URL shortener URL}/{alias})\n+ */\n+public record UrlShortenRequest(\n+  @JsonProperty(\"url\") String url,\n+  @JsonProperty(\"alias\") String alias) {\n+}"
+  },
+  {
+    "sha": "cb25408d0d818e77ed701dd4cf60fc9ba96b914b",
+    "filename": "src/main/java/edu/kpi/testcourse/model/UrlShortenResponse.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-last/blob/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/model/UrlShortenResponse.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-last/raw/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/model/UrlShortenResponse.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-last/contents/src/main/java/edu/kpi/testcourse/model/UrlShortenResponse.java?ref=ecec0b56433a6120d0fcb6bf73e460d476e3b953",
+    "patch": "@@ -0,0 +1,8 @@\n+package edu.kpi.testcourse.model;\n+\n+import com.fasterxml.jackson.annotation.JsonProperty;\n+\n+/**\n+ * Successful result of URL shortening.\n+ */\n+public record UrlShortenResponse(@JsonProperty(\"shortened_url\") String shortenedUrl) { }"
+  },
+  {
+    "sha": "20b73a7fc18515725f7c2e6335ca555d15ce3b1b",
+    "filename": "src/main/java/edu/kpi/testcourse/repository/UrlRepository.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-last/blob/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/repository/UrlRepository.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-last/raw/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/repository/UrlRepository.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-last/contents/src/main/java/edu/kpi/testcourse/repository/UrlRepository.java?ref=ecec0b56433a6120d0fcb6bf73e460d476e3b953",
+    "patch": "@@ -1,6 +1,8 @@\n package edu.kpi.testcourse.repository;\n \n import edu.kpi.testcourse.model.UrlAlias;\n+\n+import javax.annotation.Nullable;\n import java.util.List;\n \n /**\n@@ -36,4 +38,27 @@\n    * @return origin url for alias\n    */\n   String getOriginUrl(String alias);\n+\n+  /**\n+   * Stores the given URL alias in the repository if it does not already exist.\n+   *\n+   * @param urlAlias an pair of full and shortened URLs\n+   * @throws AliasAlreadyExist if the repository already contains a URL alias with this short name.\n+   */\n+  void createUrlAlias(UrlAlias urlAlias) throws AliasAlreadyExist;\n+\n+  /**\n+   * Returns complete information about the URL alias with the given short name.\n+   */\n+  @Nullable\n+  UrlAlias findUrlAlias(String alias);\n+\n+  /**\n+   * Error for a case when we try to create a shortened URL that is already exist.\n+   */\n+  class AliasAlreadyExist extends IllegalStateException {\n+    public AliasAlreadyExist() {\n+      super(\"Storage already contains an alias\");\n+    }\n+  }\n }"
+  },
+  {
+    "sha": "1fa35ae1fbf88f1a622492eb13087de95ea36a4c",
+    "filename": "src/main/java/edu/kpi/testcourse/repository/UrlRepositoryImpl.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-last/blob/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/repository/UrlRepositoryImpl.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-last/raw/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/repository/UrlRepositoryImpl.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-last/contents/src/main/java/edu/kpi/testcourse/repository/UrlRepositoryImpl.java?ref=ecec0b56433a6120d0fcb6bf73e460d476e3b953",
+    "patch": "@@ -14,6 +14,7 @@\n import java.util.Map;\n import java.util.concurrent.ConcurrentHashMap;\n import java.util.stream.Collectors;\n+import javax.annotation.Nullable;\n import javax.inject.Inject;\n import javax.inject.Singleton;\n import org.slf4j.Logger;\n@@ -24,6 +25,7 @@\n  */\n @Singleton\n public class UrlRepositoryImpl implements UrlRepository {\n+  private final HashMap<String, UrlAlias> aliases = new HashMap<>();\n \n   private static final Logger logger = LoggerFactory.getLogger(UserRepositoryImpl.class);\n   private final Map<String, UrlAlias> urls;\n@@ -110,4 +112,19 @@ private void writeUrlsToFile() {\n       throw new Error(\"Error while reading urls from file\");\n     }\n   }\n+\n+  @Override\n+  public void createUrlAlias(UrlAlias urlAlias) {\n+    if (aliases.containsKey(urlAlias.alias())) {\n+      throw new UrlRepository.AliasAlreadyExist();\n+    }\n+\n+    aliases.put(urlAlias.alias(), urlAlias);\n+  }\n+\n+  @Override\n+  public @Nullable\n+  UrlAlias findUrlAlias(String alias) {\n+    return aliases.get(alias);\n+  }\n }"
+  },
+  {
+    "sha": "ab6b0cd7e895c660cb8dfd84ef66ec5804c8d82c",
+    "filename": "src/main/java/edu/kpi/testcourse/serialization/JsonTool.java",
+    "status": "added",
+    "additions": 49,
+    "deletions": 0,
+    "changes": 49,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-last/blob/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/serialization/JsonTool.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-last/raw/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/serialization/JsonTool.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-last/contents/src/main/java/edu/kpi/testcourse/serialization/JsonTool.java?ref=ecec0b56433a6120d0fcb6bf73e460d476e3b953",
+    "patch": "@@ -0,0 +1,49 @@\n+package edu.kpi.testcourse.serialization;\n+\n+import java.lang.reflect.Type;\n+\n+/**\n+ * Wrapper for JSON serialization/deserialization tool.\n+ */\n+public interface JsonTool {\n+\n+  /**\n+   * Create an object (with generics in type) from JSON string.\n+   *\n+   * <p>Example:\n+   * <pre>\n+   * json.fromJson(s, new TypeReference&#60;HashMap&#60;String, String&#62;&#62;() {}.getType());\n+   * </pre>\n+   *\n+   * @param jsonString an object in JSON form\n+   * @param type an object type. To get type you could use Jackson TypeReference or GSON TypeToken.\n+   * @return a deserialized object\n+   */\n+  <T> T fromJson(String jsonString, Type type);\n+\n+  /**\n+   * Create an object from JSON string.\n+   *\n+   * @param jsonString an object in JSON form\n+   * @param clazz a class of deserialized object\n+   * @return a deserialized object\n+   */\n+  <T> T fromJson(String jsonString, Class<T> clazz);\n+\n+  /**\n+   * Serialize object into JSON form.\n+   *\n+   * @param obj an object for serialization\n+   * @return JSON string\n+   */\n+  String toJson(Object obj);\n+\n+  /**\n+   * JSON parsing error.\n+   */\n+  class JsonParsingError extends IllegalArgumentException {\n+    public JsonParsingError(Throwable e) {\n+      super(\"Error during JSON parsing\", e);\n+    }\n+  }\n+}"
+  },
+  {
+    "sha": "198476d30d8d9d196f52cee1efd243e094d70e30",
+    "filename": "src/main/java/edu/kpi/testcourse/serialization/JsonToolJacksonImpl.java",
+    "status": "added",
+    "additions": 49,
+    "deletions": 0,
+    "changes": 49,
+    "blob_url": "https://github.com/future-stardust/url-shrtnr-last/blob/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/serialization/JsonToolJacksonImpl.java",
+    "raw_url": "https://github.com/future-stardust/url-shrtnr-last/raw/ecec0b56433a6120d0fcb6bf73e460d476e3b953/src/main/java/edu/kpi/testcourse/serialization/JsonToolJacksonImpl.java",
+    "contents_url": "https://api.github.com/repos/future-stardust/url-shrtnr-last/contents/src/main/java/edu/kpi/testcourse/serialization/JsonToolJacksonImpl.java?ref=ecec0b56433a6120d0fcb6bf73e460d476e3b953",
+    "patch": "@@ -0,0 +1,49 @@\n+package edu.kpi.testcourse.serialization;\n+\n+import com.fasterxml.jackson.core.JsonProcessingException;\n+import com.fasterxml.jackson.core.type.TypeReference;\n+import com.fasterxml.jackson.databind.ObjectMapper;\n+\n+import javax.inject.Singleton;\n+import java.lang.reflect.Type;\n+\n+/**\n+ * JSON serialization tool that uses Jackson as engine.\n+ */\n+@Singleton\n+public class JsonToolJacksonImpl implements JsonTool {\n+\n+  private final ObjectMapper mapper = new ObjectMapper();\n+\n+  @Override\n+  public <T> T fromJson(String jsonString, Type type) throws JsonParsingError {\n+    try {\n+      return mapper.readValue(jsonString, new TypeReference<T>() {\n+        @Override\n+        public Type getType() {\n+          return type;\n+        }\n+      });\n+    } catch (JsonProcessingException e) {\n+      throw new JsonParsingError(e);\n+    }\n+  }\n+\n+  @Override\n+  public <T> T fromJson(String jsonString, Class<T> clazz) {\n+    try {\n+      return mapper.readValue(jsonString, clazz);\n+    } catch (JsonProcessingException e) {\n+      throw new JsonParsingError(e);\n+    }\n+  }\n+\n+  @Override\n+  public String toJson(Object obj) {\n+    try {\n+      return mapper.writeValueAsString(obj);\n+    } catch (JsonProcessingException e) {\n+      throw new RuntimeException(\"Error during object-JSON serialization\", e);\n+    }\n+  }\n+}"
+  }
+]

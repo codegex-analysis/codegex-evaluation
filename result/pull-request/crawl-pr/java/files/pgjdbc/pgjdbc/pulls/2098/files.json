@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "a2b3c6cf13fc4d4a75d07aafd5ccff929a97980c",
+    "filename": ".travis.yml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/pgjdbc/pgjdbc/blob/c7f078a77bf75ca0af4fb99d76ad4af74553bdf4/.travis.yml",
+    "raw_url": "https://github.com/pgjdbc/pgjdbc/raw/c7f078a77bf75ca0af4fb99d76ad4af74553bdf4/.travis.yml",
+    "contents_url": "https://api.github.com/repos/pgjdbc/pgjdbc/contents/.travis.yml?ref=c7f078a77bf75ca0af4fb99d76ad4af74553bdf4",
+    "patch": "@@ -34,6 +34,7 @@ before_script:\n   - test \"x$PG_VERSION\" = 'xHEAD' || psql -U postgres -c \"create user test with password 'test';\"\n   - test \"x$REPLICATION\" == 'x' || psql -U postgres -c \"alter user test with replication;\"\n   - psql -c 'create database test owner test;' -U postgres\n+  - psql -c 'select version()' -U postgres\n   - test \"x$SSLTEST\" == 'x' || ./.travis/travis_ssl_users.sh\n   - test \"x$REPLICATION\" == 'x' || ./.travis/travis_create_slaves.sh\n   - if [[ $TRAVIS_BRANCH == release/* ]]; then echo \"MAVEN_OPTS='-Xmx1g'\" > ~/.mavenrc; else echo \"MAVEN_OPTS='-Xmx1g -Dgpg.skip=true'\" > ~/.mavenrc; fi"
+  },
+  {
+    "sha": "a3ffa2879a47dc4a4e101a367f613e7fd9b46bd6",
+    "filename": "appveyor.yml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/pgjdbc/pgjdbc/blob/c7f078a77bf75ca0af4fb99d76ad4af74553bdf4/appveyor.yml",
+    "raw_url": "https://github.com/pgjdbc/pgjdbc/raw/c7f078a77bf75ca0af4fb99d76ad4af74553bdf4/appveyor.yml",
+    "contents_url": "https://api.github.com/repos/pgjdbc/pgjdbc/contents/appveyor.yml?ref=c7f078a77bf75ca0af4fb99d76ad4af74553bdf4",
+    "patch": "@@ -63,6 +63,7 @@ before_build:\n - psql -U postgres -c \"alter user test with replication\" postgres\n - createuser -U postgres testsspi\n - createdb -U postgres -O test test\n+- psql -U postgres -t -c \"select version()\" postgres\n \n build_script:\n   - gradlew assemble"
+  },
+  {
+    "sha": "9f8c5dba6369453b8d820372f4ede983c4d7f023",
+    "filename": "pgjdbc/src/test/java/org/postgresql/core/PrintDebugInfoTest.java",
+    "status": "added",
+    "additions": 83,
+    "deletions": 0,
+    "changes": 83,
+    "blob_url": "https://github.com/pgjdbc/pgjdbc/blob/c7f078a77bf75ca0af4fb99d76ad4af74553bdf4/pgjdbc/src/test/java/org/postgresql/core/PrintDebugInfoTest.java",
+    "raw_url": "https://github.com/pgjdbc/pgjdbc/raw/c7f078a77bf75ca0af4fb99d76ad4af74553bdf4/pgjdbc/src/test/java/org/postgresql/core/PrintDebugInfoTest.java",
+    "contents_url": "https://api.github.com/repos/pgjdbc/pgjdbc/contents/pgjdbc/src/test/java/org/postgresql/core/PrintDebugInfoTest.java?ref=c7f078a77bf75ca0af4fb99d76ad4af74553bdf4",
+    "patch": "@@ -0,0 +1,83 @@\n+/*\n+ * Copyright (c) 2021, PostgreSQL Global Development Group\n+ * See the LICENSE file in the project root for more information.\n+ */\n+\n+package org.postgresql.core;\n+\n+import org.postgresql.test.TestUtil;\n+import org.postgresql.util.DriverInfo;\n+\n+import org.junit.Test;\n+\n+import java.sql.Connection;\n+import java.sql.ResultSet;\n+import java.sql.SQLException;\n+import java.sql.Statement;\n+import java.time.OffsetDateTime;\n+\n+/**\n+ * Test cases to print debug information of both client and server.\n+ */\n+public class PrintDebugInfoTest {\n+  @Test\n+  public void testShowDriverInfo() {\n+    System.err.println(\"========================================================================\");\n+    System.err.println(\"                      PostgreSQL JDBC Driver Info                       \");\n+    System.err.println(\"                      ---------------------------                       \");\n+    System.err.println(\"                                                                        \");\n+    System.err.println(\"JAVA_VERSION = \" + System.getProperty(\"java.version\"));\n+    System.err.println(\"JAVA_VERSION = \" + System.getProperty(\"os.name\"));\n+    System.err.println(\"CLIENT_NOW = \" + OffsetDateTime.now().toString());\n+    System.err.println(\"DRIVER_NAME = \" + DriverInfo.DRIVER_NAME);\n+    System.err.println(\"DRIVER_SHORT_NAME = \" + DriverInfo.DRIVER_SHORT_NAME);\n+    System.err.println(\"DRIVER_VERSION = \" + DriverInfo.DRIVER_VERSION);\n+    System.err.println(\"DRIVER_MAJOR_VERSION = \" + DriverInfo.MAJOR_VERSION);\n+    System.err.println(\"MINOR_VERSION = \" + DriverInfo.MINOR_VERSION);\n+    System.err.println(\"PATCH_VERSION = \" + DriverInfo.PATCH_VERSION);\n+    System.err.println(\"JDBC_VERSION = \" + DriverInfo.JDBC_VERSION);\n+    System.err.println(\"========================================================================\");\n+  }\n+\n+  @Test\n+  public void testShowServerInfo() throws SQLException {\n+    System.err.println(\"========================================================================\");\n+    System.err.println(\"                      PostgreSQL Test Server Info                       \");\n+    System.err.println(\"                      ---------------------------                       \");\n+    System.err.println(\"                                                                        \");\n+    try (Connection conn = TestUtil.openDB()) {\n+      System.err.println(\"SELECT version()\");\n+      System.err.println(\"----------------\");\n+      System.err.println(TestUtil.queryForString(conn, \"SELECT version()\"));\n+      System.err.println(\"\");\n+\n+      System.err.println(\"SELECT now()\");\n+      System.err.println(\"------------\");\n+      System.err.println(TestUtil.queryForString(conn, \"SELECT now()\"));\n+      System.err.println(\"\");\n+\n+      System.err.println(\"SELECT USER\");\n+      System.err.println(\"----------------\");\n+      System.err.println(TestUtil.queryForString(conn, \"SELECT USER\"));\n+      System.err.println(\"\");\n+\n+      System.err.println(\"SELECT current_database()\");\n+      System.err.println(\"-------------------------\");\n+      System.err.println(TestUtil.queryForString(conn, \"SELECT current_database()\"));\n+      System.err.println(\"\");\n+\n+      System.err.println(\"SHOW ALL\");\n+      System.err.println(\"--------\");\n+      Statement stmt = conn.createStatement();\n+      ResultSet rs = stmt.executeQuery(\"SHOW ALL\");\n+      while (rs.next()) {\n+        String name = rs.getString(1);\n+        String value = rs.getString(2);\n+        System.err.println(name + \" = \" + value);\n+      }\n+      rs.close();\n+      stmt.close();\n+    }\n+    System.err.println(\"========================================================================\");\n+  }\n+}"
+  },
+  {
+    "sha": "c4c663f1da2cb84c8245904048a6da8119a5be09",
+    "filename": "pgjdbc/src/test/java/org/postgresql/test/jdbc2/Jdbc2TestSuite.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/pgjdbc/pgjdbc/blob/c7f078a77bf75ca0af4fb99d76ad4af74553bdf4/pgjdbc/src/test/java/org/postgresql/test/jdbc2/Jdbc2TestSuite.java",
+    "raw_url": "https://github.com/pgjdbc/pgjdbc/raw/c7f078a77bf75ca0af4fb99d76ad4af74553bdf4/pgjdbc/src/test/java/org/postgresql/test/jdbc2/Jdbc2TestSuite.java",
+    "contents_url": "https://api.github.com/repos/pgjdbc/pgjdbc/contents/pgjdbc/src/test/java/org/postgresql/test/jdbc2/Jdbc2TestSuite.java?ref=c7f078a77bf75ca0af4fb99d76ad4af74553bdf4",
+    "patch": "@@ -10,6 +10,7 @@\n import org.postgresql.core.OidToStringTest;\n import org.postgresql.core.OidValueOfTest;\n import org.postgresql.core.ParserTest;\n+import org.postgresql.core.PrintDebugInfoTest;\n import org.postgresql.core.ReturningParserTest;\n import org.postgresql.core.UTF8EncodingTest;\n import org.postgresql.core.v3.V3ParameterListTests;\n@@ -107,6 +108,7 @@\n     PGTimeTest.class,\n     PgSQLXMLTest.class,\n     PreparedStatementTest.class,\n+    PrintDebugInfoTest.class,\n     QuotationTest.class,\n     ReaderInputStreamTest.class,\n     RefCursorTest.class,"
+  }
+]

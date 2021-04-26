@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "4716e4b7faac2838e4c1072898193e10bdb2125d",
+    "filename": ".github/workflows/github-ci.yml",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/xiaodongqin/oneroof/blob/d50393ef079bc4a704c3a44796a627284fd87f25/.github/workflows/github-ci.yml",
+    "raw_url": "https://github.com/xiaodongqin/oneroof/raw/d50393ef079bc4a704c3a44796a627284fd87f25/.github/workflows/github-ci.yml",
+    "contents_url": "https://api.github.com/repos/xiaodongqin/oneroof/contents/.github/workflows/github-ci.yml?ref=d50393ef079bc4a704c3a44796a627284fd87f25",
+    "patch": "@@ -0,0 +1,40 @@\n+name: Application CI\n+on: [push, pull_request]\n+jobs:\n+    validation:\n+        name: \"Gradle Wrapper Validation\"\n+        runs-on: ubuntu-latest\n+        steps:\n+            - uses: actions/checkout@v2\n+            - uses: gradle/wrapper-validation-action@v1\n+    pipeline:\n+        name: oneroof pipeline\n+        runs-on: ubuntu-latest\n+        if: \"!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.pull_request.title, '[skip ci]') && !contains(github.event.pull_request.title, '[ci skip]')\"\n+        timeout-minutes: 40\n+        env:\n+            NODE_VERSION: 12.16.1\n+            SPRING_OUTPUT_ANSI_ENABLED: DETECT\n+            SPRING_JPA_SHOW_SQL: false\n+            JHI_DISABLE_WEBPACK_LOGS: true\n+            NG_CLI_ANALYTICS: false\n+        steps:\n+            - uses: actions/checkout@v2\n+            - uses: actions/setup-node@v1\n+              with:\n+                  node-version: 12.16.1\n+            - uses: actions/setup-java@v1\n+              with:\n+                  java-version: '11.x'\n+            - name: Stop MySQL server\n+              run: sudo /etc/init.d/mysql stop\n+            - name: Install node.js packages\n+              run: npm install\n+            - name: Run backend test\n+              run: |\n+                  chmod +x gradlew\n+                  ./gradlew clean test integrationTest -x webpack\n+            - name: Run frontend test\n+              run: npm run test\n+            - name: Package application\n+              run: ./gradlew bootJar -Pprod -x test -x integrationTest"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "b471c52b01da980c928a4173e650a0959ce581fa",
+    "filename": "NEWS.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/folio-org/mod-pubsub/blob/0a0c19df579882a457c9d706528dac7ae6105b45/NEWS.md",
+    "raw_url": "https://github.com/folio-org/mod-pubsub/raw/0a0c19df579882a457c9d706528dac7ae6105b45/NEWS.md",
+    "contents_url": "https://api.github.com/repos/folio-org/mod-pubsub/contents/NEWS.md?ref=0a0c19df579882a457c9d706528dac7ae6105b45",
+    "patch": "@@ -1,4 +1,5 @@\n ## xxxx-xx-xx v2.1.0-SNAPSHOT\n+* [MODINV-373](https://issues.folio.org/browse/MODINV-373) Ensure exactly once processing for interaction via Kafka.\n \n ## 2021-03-06 v2.0.1\n * [MODPUBSUB-152](https://issues.folio.org/browse/MODPUBSUB-152) Module registration in mod-pubsub fails when MessagingDescriptor contains no publications"
+  },
+  {
+    "sha": "8c5ce4c8e08094171ba2983818064e6c6d2ccd9e",
+    "filename": "folio-kafka-wrapper/pom.xml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/folio-org/mod-pubsub/blob/0a0c19df579882a457c9d706528dac7ae6105b45/folio-kafka-wrapper/pom.xml",
+    "raw_url": "https://github.com/folio-org/mod-pubsub/raw/0a0c19df579882a457c9d706528dac7ae6105b45/folio-kafka-wrapper/pom.xml",
+    "contents_url": "https://api.github.com/repos/folio-org/mod-pubsub/contents/folio-kafka-wrapper/pom.xml?ref=0a0c19df579882a457c9d706528dac7ae6105b45",
+    "patch": "@@ -52,6 +52,11 @@\n       <version>2.13.3</version>\n       <scope>compile</scope>\n     </dependency>\n+    <dependency>\n+      <groupId>io.kcache</groupId>\n+      <artifactId>kcache</artifactId>\n+      <version>3.4.3</version>\n+    </dependency>\n   </dependencies>\n \n   <build>"
+  },
+  {
+    "sha": "1f97141658138c5652d0fba82908e733f6e7c00d",
+    "filename": "folio-kafka-wrapper/src/main/java/org/folio/kafka/KafkaConfig.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/folio-org/mod-pubsub/blob/0a0c19df579882a457c9d706528dac7ae6105b45/folio-kafka-wrapper/src/main/java/org/folio/kafka/KafkaConfig.java",
+    "raw_url": "https://github.com/folio-org/mod-pubsub/raw/0a0c19df579882a457c9d706528dac7ae6105b45/folio-kafka-wrapper/src/main/java/org/folio/kafka/KafkaConfig.java",
+    "contents_url": "https://api.github.com/repos/folio-org/mod-pubsub/contents/folio-kafka-wrapper/src/main/java/org/folio/kafka/KafkaConfig.java?ref=0a0c19df579882a457c9d706528dac7ae6105b45",
+    "patch": "@@ -1,5 +1,6 @@\n package org.folio.kafka;\n \n+import io.kcache.KafkaCacheConfig;\n import lombok.Builder;\n import lombok.Getter;\n import lombok.ToString;\n@@ -8,6 +9,7 @@\n \n import java.util.HashMap;\n import java.util.Map;\n+import java.util.Properties;\n \n @Getter\n @Builder\n@@ -28,6 +30,8 @@\n   public static final String KAFKA_CONSUMER_MAX_POLL_INTERVAL_MS_CONFIG = \"kafka.consumer.max.poll.interval.ms\";\n   public static final String KAFKA_CONSUMER_MAX_POLL_INTERVAL_MS_CONFIG_DEFAULT = \"300000\";\n \n+  private static final String KAFKA_CACHE_TOPIC_PROPERTY = \"kafkacache.topic\";\n+\n   private final String kafkaHost;\n   private final String kafkaPort;\n   private final String okapiUrl;\n@@ -56,6 +60,13 @@\n     return consumerProps;\n   }\n \n+  public KafkaCacheConfig getCacheConfig() {\n+    Properties props = new Properties();\n+    props.put(KafkaCacheConfig.KAFKACACHE_BOOTSTRAP_SERVERS_CONFIG, getKafkaUrl());\n+    props.put(KAFKA_CACHE_TOPIC_PROPERTY, \"events_cache\");\n+    return new KafkaCacheConfig(props);\n+  }\n+\n   public String getKafkaUrl() {\n     return kafkaHost + \":\" + kafkaPort;\n   }"
+  },
+  {
+    "sha": "9765109bcc412b4a46c3393375bb60a89dc68cbc",
+    "filename": "folio-kafka-wrapper/src/main/java/org/folio/kafka/cache/KafkaInternalCache.java",
+    "status": "added",
+    "additions": 90,
+    "deletions": 0,
+    "changes": 90,
+    "blob_url": "https://github.com/folio-org/mod-pubsub/blob/0a0c19df579882a457c9d706528dac7ae6105b45/folio-kafka-wrapper/src/main/java/org/folio/kafka/cache/KafkaInternalCache.java",
+    "raw_url": "https://github.com/folio-org/mod-pubsub/raw/0a0c19df579882a457c9d706528dac7ae6105b45/folio-kafka-wrapper/src/main/java/org/folio/kafka/cache/KafkaInternalCache.java",
+    "contents_url": "https://api.github.com/repos/folio-org/mod-pubsub/contents/folio-kafka-wrapper/src/main/java/org/folio/kafka/cache/KafkaInternalCache.java?ref=0a0c19df579882a457c9d706528dac7ae6105b45",
+    "patch": "@@ -0,0 +1,90 @@\n+package org.folio.kafka.cache;\n+\n+import java.time.LocalDateTime;\n+import java.time.temporal.ChronoUnit;\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+import org.apache.kafka.common.serialization.Serdes;\n+import org.apache.logging.log4j.LogManager;\n+import org.apache.logging.log4j.Logger;\n+import org.folio.kafka.KafkaConfig;\n+\n+import io.kcache.Cache;\n+import io.kcache.KafkaCache;\n+import io.kcache.KeyValueIterator;\n+import lombok.Builder;\n+\n+/**\n+ * Cache in Kafka for processing events.\n+ */\n+public class KafkaInternalCache {\n+\n+  private static final Logger LOGGER = LogManager.getLogger(KafkaInternalCache.class);\n+\n+  private final KafkaConfig kafkaConfig;\n+  private Cache<String, String> kafkaCache;\n+\n+  @Builder\n+  private KafkaInternalCache(KafkaConfig kafkaConfig) {\n+    this.kafkaConfig = kafkaConfig;\n+  }\n+\n+  /**\n+   * Initialize cache for Kafka with specific properties in KafkaConfig.\n+   */\n+  public void initKafkaCache() {\n+    Cache<String, String> cache = new KafkaCache<>(\n+      kafkaConfig.getCacheConfig(),\n+      Serdes.String(),\n+      Serdes.String()\n+    );\n+    this.kafkaCache = cache;\n+    cache.init();\n+  }\n+\n+\n+  /**\n+   * Put to the cache an element with specific key. Tha value - current time. Example : 2021-03-17T14:58:05.725953.\n+   * Stored as Strings.\n+   * @param key - key for the event. Mostly - uuid.\n+   */\n+  public void putToCache(String key) {\n+    String currentTime = LocalDateTime.now().toString();\n+    kafkaCache.put(key, currentTime);\n+  }\n+\n+  /**\n+   * Check if element in cache exists by specified key.\n+   * @param key - element`s key.\n+   * @return true - if cache contains element by this key. false - if not.\n+   */\n+  public boolean containsByKey(String key) {\n+    String value = kafkaCache.get(key);\n+    return value != null;\n+  }\n+\n+  /**\n+   * Clean Kafka cache from outdated elements.\n+   * Outdated element - element difference between its value and current time is more or equal to the eventTimeoutHours.\n+   * @param eventTimeoutHours - timeout for event in hours.\n+   */\n+  public void cleanupEvents(int eventTimeoutHours) {\n+    List<String> outdatedEvents = new ArrayList<>();\n+\n+    LocalDateTime currentTime = LocalDateTime.now();\n+    KeyValueIterator<String, String> events = kafkaCache.all();\n+    events.forEachRemaining(currentEvent -> {\n+      LocalDateTime eventTime = LocalDateTime.parse(currentEvent.value);\n+      long hoursBetween = ChronoUnit.HOURS.between(eventTime, currentTime);\n+      if (hoursBetween >= eventTimeoutHours) {\n+        outdatedEvents.add(currentEvent.key);\n+      }\n+    });\n+    if(!outdatedEvents.isEmpty()) {\n+      LOGGER.info(\"Clearing cache from outdated events...\");\n+    }\n+\n+    outdatedEvents.forEach(outdatedEvent -> kafkaCache.remove(outdatedEvent));\n+  }\n+}"
+  },
+  {
+    "sha": "6ad468ad7d6f4db8759d6684b5d14518d132732d",
+    "filename": "folio-kafka-wrapper/src/main/java/org/folio/kafka/cache/util/CacheUtil.java",
+    "status": "added",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/folio-org/mod-pubsub/blob/0a0c19df579882a457c9d706528dac7ae6105b45/folio-kafka-wrapper/src/main/java/org/folio/kafka/cache/util/CacheUtil.java",
+    "raw_url": "https://github.com/folio-org/mod-pubsub/raw/0a0c19df579882a457c9d706528dac7ae6105b45/folio-kafka-wrapper/src/main/java/org/folio/kafka/cache/util/CacheUtil.java",
+    "contents_url": "https://api.github.com/repos/folio-org/mod-pubsub/contents/folio-kafka-wrapper/src/main/java/org/folio/kafka/cache/util/CacheUtil.java?ref=0a0c19df579882a457c9d706528dac7ae6105b45",
+    "patch": "@@ -0,0 +1,26 @@\n+package org.folio.kafka.cache.util;\n+\n+import org.folio.kafka.cache.KafkaInternalCache;\n+\n+import io.vertx.core.Vertx;\n+\n+/**\n+ * Util for Kafka cache.\n+ */\n+public class CacheUtil {\n+\n+  private CacheUtil() {\n+  }\n+\n+  /**\n+   * Set periodic task (cleanup cache from outdated events) to the vertx with specific params.\n+   * @param vertx - vertx for periodic.\n+   * @param kafkaInternalCache - kafka cache.\n+   * @param periodicTime - time between executing periodic task.\n+   * @param eventTimeoutHours - timeout for event in hours.\n+   */\n+  public static void initCacheCleanupPeriodicTask(Vertx vertx, KafkaInternalCache kafkaInternalCache, long periodicTime, int eventTimeoutHours) {\n+    vertx.setPeriodic(periodicTime,\n+      e -> vertx.<Void>executeBlocking(b -> kafkaInternalCache.cleanupEvents(eventTimeoutHours)));\n+  }\n+}"
+  }
+]

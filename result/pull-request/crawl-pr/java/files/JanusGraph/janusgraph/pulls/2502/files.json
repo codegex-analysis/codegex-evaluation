@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "6af395de04e4583f52d05f35e946b082d5aa3e87",
+    "filename": "docs/operations/cache.md",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/JanusGraph/janusgraph/blob/791d99ed037eb65267fed8e4ac3f27ecc05c3ae6/docs/operations/cache.md",
+    "raw_url": "https://github.com/JanusGraph/janusgraph/raw/791d99ed037eb65267fed8e4ac3f27ecc05c3ae6/docs/operations/cache.md",
+    "contents_url": "https://api.github.com/repos/JanusGraph/janusgraph/contents/docs/operations/cache.md?ref=791d99ed037eb65267fed8e4ac3f27ecc05c3ae6",
+    "patch": "@@ -47,6 +47,29 @@ which means they cannot be evicted since that would entail loosing their\n changes. Therefore, transaction which contain a lot of modifications may\n end up with a larger than configured vertex cache.\n \n+Assuming your vertex is not evicted from cache, or it is evicted from\n+cache but your program context still holds the reference to the vertex,\n+then its properties are cached together with the vertex. This means once\n+a property is queried, any subsequent reads will hit the cache. In case\n+you want to force JanusGraph to read from the data storage again, or you\n+simply want to save memory, you could clear the cache of that vertex manually.\n+Note this is not gremlin compliant, so you need to cast your vertex into\n+CacheVertex type to do the refresh:\n+\n+```groovy\n+// first read automatically caches the property together with v\n+v.property(\"prop\").value();\n+// force refresh to clear the cache\n+((CacheVertex) v).refresh();\n+// now a subsequent read will lead to a data storage read\n+v.property(\"prop\").value();\n+```\n+\n+Note that refresh operation cannot guarantee your current transaction reads\n+the latest data from an eventual consistent backend. You should not attempt\n+to achieve Compare-And-Set (CAS) via refresh operation, even though it might\n+be helpful to detect conflicts among transactions in some cases.\n+\n ### Index Cache\n \n The index cache contains the results of index queries executed in the"
+  },
+  {
+    "sha": "e8cfbb9ccbb608304f6043ce7b929506ee6c0362",
+    "filename": "janusgraph-backend-testutils/src/main/java/org/janusgraph/graphdb/JanusGraphTest.java",
+    "status": "modified",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/JanusGraph/janusgraph/blob/791d99ed037eb65267fed8e4ac3f27ecc05c3ae6/janusgraph-backend-testutils/src/main/java/org/janusgraph/graphdb/JanusGraphTest.java",
+    "raw_url": "https://github.com/JanusGraph/janusgraph/raw/791d99ed037eb65267fed8e4ac3f27ecc05c3ae6/janusgraph-backend-testutils/src/main/java/org/janusgraph/graphdb/JanusGraphTest.java",
+    "contents_url": "https://api.github.com/repos/JanusGraph/janusgraph/contents/janusgraph-backend-testutils/src/main/java/org/janusgraph/graphdb/JanusGraphTest.java?ref=791d99ed037eb65267fed8e4ac3f27ecc05c3ae6",
+    "patch": "@@ -171,6 +171,7 @@\n import org.janusgraph.graphdb.types.StandardPropertyKeyMaker;\n import org.janusgraph.graphdb.types.system.BaseVertexLabel;\n import org.janusgraph.graphdb.types.system.ImplicitKey;\n+import org.janusgraph.graphdb.vertices.CacheVertex;\n import org.janusgraph.testutil.FeatureFlag;\n import org.janusgraph.testutil.JanusGraphFeature;\n import org.janusgraph.testutil.TestGraphConfigs;\n@@ -2421,6 +2422,49 @@ public void testPropertyIdAccessInDifferentTransaction() {\n         assertEquals(expectedId, p.id());\n     }\n \n+    /**\n+     * By default, relations of a vertex is cached once queried within the lifecycle of that transaction.\n+     * This means a subsequent read would hit the cache. However, sometimes users do want to read from data storage in\n+     * the mid of a transaction. Note that even with force refresh, user might still see old value if the underlying\n+     * data storage is only eventually consistent.\n+     */\n+    @Test\n+    public void testCacheForceRefresh() {\n+        if (features.hasLocking()) return;\n+\n+        graph.addVertex().property(\"prop\", 0);\n+        graph.tx().commit();\n+\n+        JanusGraphTransaction tx1 = graph.newTransaction();\n+        Vertex v1 = tx1.traversal().V().next();\n+        assertEquals(0, v1.property(\"prop\").value());\n+\n+        JanusGraphTransaction tx2 = graph.newTransaction();\n+        Vertex v2 = tx2.traversal().V().next();\n+        assertEquals(0, v2.property(\"prop\").value());\n+        v2.property(\"prop\", 2);\n+        assertEquals(2, v2.property(\"prop\").value());\n+        tx2.commit();\n+\n+        // tx1 sees old (cached) value\n+        assertEquals(0, v1.property(\"prop\").value());\n+        assertEquals(0, tx1.traversal().V(v1).next().property(\"prop\").value());\n+        assertEquals(0, tx1.traversal().V(v1).properties(\"prop\").next().value());\n+        // force refreshing v1 in tx1, now it can see the new value\n+        ((CacheVertex) v1).refresh();\n+        assertEquals(2, v1.property(\"prop\").value());\n+        assertEquals(2, tx1.traversal().V(v1).next().property(\"prop\").value());\n+        assertEquals(2, tx1.traversal().V(v1).properties(\"prop\").next().value());\n+\n+        // verify that force refresh does not affect modified value within a transaction\n+        v1.property(\"prop\", 1);\n+        ((CacheVertex) v1).refresh();\n+        assertEquals(1, v1.property(\"prop\").value());\n+        assertEquals(1, tx1.traversal().V(v1).next().property(\"prop\").value());\n+        assertEquals(1, tx1.traversal().V(v1).properties(\"prop\").next().value());\n+        tx1.commit();\n+    }\n+\n     @Test\n     public void testTransactionScopeTransition() {\n         tx.rollback();"
+  },
+  {
+    "sha": "7a5b8896f0f43ba74e5c316d168322d63026fcf1",
+    "filename": "janusgraph-core/src/main/java/org/janusgraph/graphdb/vertices/CacheVertex.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/JanusGraph/janusgraph/blob/791d99ed037eb65267fed8e4ac3f27ecc05c3ae6/janusgraph-core/src/main/java/org/janusgraph/graphdb/vertices/CacheVertex.java",
+    "raw_url": "https://github.com/JanusGraph/janusgraph/raw/791d99ed037eb65267fed8e4ac3f27ecc05c3ae6/janusgraph-core/src/main/java/org/janusgraph/graphdb/vertices/CacheVertex.java",
+    "contents_url": "https://api.github.com/repos/JanusGraph/janusgraph/contents/janusgraph-core/src/main/java/org/janusgraph/graphdb/vertices/CacheVertex.java?ref=791d99ed037eb65267fed8e4ac3f27ecc05c3ae6",
+    "patch": "@@ -38,6 +38,12 @@ public CacheVertex(StandardJanusGraphTx tx, long id, byte lifecycle) {\n         queryCache = new HashMap<>(4);\n     }\n \n+    public void refresh() {\n+        synchronized (queryCache) {\n+            queryCache.clear();\n+        }\n+    }\n+\n     protected void addToQueryCache(final SliceQuery query, final EntryList entries) {\n         synchronized (queryCache) {\n             //TODO: become smarter about what to cache and when (e.g. memory pressure)"
+  }
+]

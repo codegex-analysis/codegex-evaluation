@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "4f4330be0854bda5badc12ce535afb71aa1af3aa",
+    "filename": "nexuse2e-core/src/main/java/org/nexuse2e/messaging/ConversationStateMachine.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/solutionsdirekt/NEXUSe2e/blob/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/ConversationStateMachine.java",
+    "raw_url": "https://github.com/solutionsdirekt/NEXUSe2e/raw/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/ConversationStateMachine.java",
+    "contents_url": "https://api.github.com/repos/solutionsdirekt/NEXUSe2e/contents/nexuse2e-core/src/main/java/org/nexuse2e/messaging/ConversationStateMachine.java?ref=8940298b4361569387e2ffc84f9934653944502e",
+    "patch": "@@ -130,6 +130,13 @@\n      */\n     public abstract void processingFailed() throws StateTransitionException, NexusException;\n \n+    /**\n+     * Updates the conversation and message state after processing backend has failed.\n+     * @throws StateTransitionException If the state transition is illegal.\n+     * @throws NexusException If the transition could not be performed due to a system-specific error.\n+     */\n+    public abstract void processingBackendFailed() throws StateTransitionException, NexusException;\n+\n     /**\n      * Sets the current conversation message to <code>QUEUED</code> without forcing\n      * a state transition."
+  },
+  {
+    "sha": "6552a3f6b07d65de4135f5d106c20e560f972765",
+    "filename": "nexuse2e-core/src/main/java/org/nexuse2e/messaging/FrontendInboundDispatcher.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/solutionsdirekt/NEXUSe2e/blob/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/FrontendInboundDispatcher.java",
+    "raw_url": "https://github.com/solutionsdirekt/NEXUSe2e/raw/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/FrontendInboundDispatcher.java",
+    "contents_url": "https://api.github.com/repos/solutionsdirekt/NEXUSe2e/contents/nexuse2e-core/src/main/java/org/nexuse2e/messaging/FrontendInboundDispatcher.java?ref=8940298b4361569387e2ffc84f9934653944502e",
+    "patch": "@@ -286,6 +286,16 @@ private MessageContext handleNormalMessage(MessageContext messageContext, Partic\n                     // Block for synchronous processing\n                     if (participant.getConnection().isSynchronous()) {\n                         responseMessageContext = waitForSynchronousResponse(messageContext);\n+                        if (responseMessageContext.getMessagePojo().getStatus() != MessageStatus.FAILED.getOrdinal()\n+                                && responseMessageContext.getMessagePojo().getBackendStatus() != MessageStatus.FAILED\n+                                        .getOrdinal())\n+                        {\n+                            try {\n+                                messageContext.getStateMachine().receivedNonReliableMessage();\n+                            } catch (StateTransitionException e) {\n+                                LOG.warn(e.getMessage());\n+                            }\n+                        }\n                     }\n                 } catch (NexusException e) {\n                     LOG.error(new LogMessage(\n@@ -347,6 +357,8 @@ private MessageContext waitForSynchronousResponse(MessageContext messageContext)\n                     LOG.warn(new LogMessage(\"Waiting for synchronous reply was interrupted\", messageContext), e);\n                 }\n             }\n+            //TODO we should check the replies first before we wait\n+            \n             // Since the processing process uses notifyAll(),\n             // we check whether there is a response for this thread.\n             // If response is not present, the loop continues."
+  },
+  {
+    "sha": "de1d62731d58f81432311577593a727fca980c8c",
+    "filename": "nexuse2e-core/src/main/java/org/nexuse2e/messaging/MessageContext.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/solutionsdirekt/NEXUSe2e/blob/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/MessageContext.java",
+    "raw_url": "https://github.com/solutionsdirekt/NEXUSe2e/raw/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/MessageContext.java",
+    "contents_url": "https://api.github.com/repos/solutionsdirekt/NEXUSe2e/contents/nexuse2e-core/src/main/java/org/nexuse2e/messaging/MessageContext.java?ref=8940298b4361569387e2ffc84f9934653944502e",
+    "patch": "@@ -57,6 +57,7 @@\n     private ConversationPojo    conversation        = null;\n \n     private ArrayList<ErrorDescriptor> errors       = null;\n+    private Object synchronusBackendResponse        = null;\n     \n     private transient ConversationStateMachine conversationStateMachine = null;\n     private transient boolean                  processThroughReturnPipeline = true;\n@@ -405,5 +406,12 @@ public boolean isFirstTimeInQueue() {\n     public void setFirstTimeInQueue(boolean firstTimeInQueue) {\n         this.firstTimeInQueue = firstTimeInQueue;\n     }\n-    \n+\n+    public Object getSynchronusBackendResponse() {\n+        return synchronusBackendResponse;\n+    }\n+\n+    public void setSynchronusBackendResponse(Object synchronusBackendResponse) {\n+        this.synchronusBackendResponse = synchronusBackendResponse;\n+    }\n } // MessageContext"
+  },
+  {
+    "sha": "6be4f7481480cbd38bb7533468b58495c98e0d2d",
+    "filename": "nexuse2e-core/src/main/java/org/nexuse2e/messaging/impl/ConversationStateMachineImpl.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/solutionsdirekt/NEXUSe2e/blob/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/impl/ConversationStateMachineImpl.java",
+    "raw_url": "https://github.com/solutionsdirekt/NEXUSe2e/raw/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/impl/ConversationStateMachineImpl.java",
+    "contents_url": "https://api.github.com/repos/solutionsdirekt/NEXUSe2e/contents/nexuse2e-core/src/main/java/org/nexuse2e/messaging/impl/ConversationStateMachineImpl.java?ref=8940298b4361569387e2ffc84f9934653944502e",
+    "patch": "@@ -503,6 +503,21 @@ public UpdateScope update(ConversationPojo conversation, MessagePojo message, Me\n         executeStateTransitionJobs( StateTransition.PROCESSING_FAILED );\n     }\n \n+    public void processingBackendFailed() throws StateTransitionException, NexusException {\n+\n+        UpdateTransactionOperation operation = new UpdateTransactionOperation() {\n+            public UpdateScope update(ConversationPojo conversation, MessagePojo message, MessagePojo referencedMessage) throws NexusException, StateTransitionException {\n+                message.setBackendStatus(MessageBackendStatus.FAILED.getOrdinal());\n+\n+                return UpdateScope.MESSAGE_ONLY;\n+            }\n+\n+        };\n+\n+        // Persist the message\n+        Engine.getInstance().getTransactionService().updateTransaction(message, operation);\n+    }\n+\n     public void queueMessage() throws StateTransitionException, NexusException {\n \n         queueMessage( false );"
+  },
+  {
+    "sha": "85cbcc2a0d001ba91ef99cc38c5b3b261faafc27",
+    "filename": "nexuse2e-core/src/main/java/org/nexuse2e/messaging/impl/MessageWorkerImpl.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/solutionsdirekt/NEXUSe2e/blob/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/impl/MessageWorkerImpl.java",
+    "raw_url": "https://github.com/solutionsdirekt/NEXUSe2e/raw/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/messaging/impl/MessageWorkerImpl.java",
+    "contents_url": "https://api.github.com/repos/solutionsdirekt/NEXUSe2e/contents/nexuse2e-core/src/main/java/org/nexuse2e/messaging/impl/MessageWorkerImpl.java?ref=8940298b4361569387e2ffc84f9934653944502e",
+    "patch": "@@ -169,6 +169,7 @@ protected void processInbound(MessageContext messageContext) {\n             } catch (NexusException nex) {\n                 LOG.error(new LogMessage(\"Error processing backend\", messageContext, nex), nex);\n                 try {\n+                    messageContext.getStateMachine().processingBackendFailed();\n                     messageContext.getStateMachine().processingFailed();\n                 } catch (StateTransitionException e) {\n                     LOG.warn(new LogMessage(e.getMessage(), messageContext));\n@@ -178,6 +179,13 @@ protected void processInbound(MessageContext messageContext) {\n             } catch (StateTransitionException stex) {\n                 LOG.warn(new LogMessage(stex.getMessage(), messageContext));\n             }\n+\n+            if (messageContext.getParticipant().getConnection().isSynchronous()) {\n+                Engine.getInstance().getCurrentConfiguration().getStaticBeanContainer().getFrontendInboundDispatcher()\n+                        .processSynchronousReplyMessage(messageContext);\n+                Engine.getInstance().getTransactionService()\n+                        .removeSynchronousRequest(messageContext.getMessagePojo().getMessageId());\n+            }\n         }\n     \n         protected void processOutbound(MessageContext messageContext) {"
+  },
+  {
+    "sha": "1d2955c042c559596fba58a2abe379ff0dc8c62f",
+    "filename": "nexuse2e-core/src/main/java/org/nexuse2e/service/http/HttpReceiverService.java",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 6,
+    "changes": 29,
+    "blob_url": "https://github.com/solutionsdirekt/NEXUSe2e/blob/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/service/http/HttpReceiverService.java",
+    "raw_url": "https://github.com/solutionsdirekt/NEXUSe2e/raw/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/service/http/HttpReceiverService.java",
+    "contents_url": "https://api.github.com/repos/solutionsdirekt/NEXUSe2e/contents/nexuse2e-core/src/main/java/org/nexuse2e/service/http/HttpReceiverService.java?ref=8940298b4361569387e2ffc84f9934653944502e",
+    "patch": "@@ -30,6 +30,7 @@\n import java.util.Enumeration;\n import java.util.HashMap;\n import java.util.Map;\n+import java.util.Map.Entry;\n \n import javax.servlet.ServletRequest;\n import javax.servlet.http.HttpServletRequest;\n@@ -131,12 +132,27 @@ public ModelAndView handleRequest( HttpServletRequest request, HttpServletRespon\n             } catch ( RuntimeException e ) {\n                 LOG.error(e);\n             }\n-            \n-            processMessage( messageContext );\n+\n+            MessageContext responseCtx = processMessage( messageContext );\n+            if ( responseCtx != null && responseCtx.getSynchronusBackendResponse() instanceof HttpResponse ) {\n+                HttpResponse synchronusBackendResponse = (HttpResponse) responseCtx.getSynchronusBackendResponse();\n+                response.setStatus( synchronusBackendResponse.getStatusCode() );\n+                response.getOutputStream().write(synchronusBackendResponse.getBody());\n+                for ( Entry<? extends String, ? extends String> e : synchronusBackendResponse.getHeaders().entrySet() ) {\n+                    response.addHeader( e.getKey(), e.getValue() );\n+                }\n+            } else {\n+                if ( responseCtx != null\n+                        && responseCtx.getConversation().getStatus() == Constants.CONVERSATION_STATUS_ERROR )\n+                {\n+                    response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );\n+                } else {\n+                    response.setStatus( HttpServletResponse.SC_OK );\n+                }\n+            }\n             LOG.trace( new LogMessage( \"Processing Done\",messageContext.getMessagePojo()) );\n \n             // PrintWriter out = new PrintWriter( response.getOutputStream() );\n-            response.setStatus( HttpServletResponse.SC_OK );\n             // out.println( \"\\n\" );\n             //out.flush();\n             //out.close();\n@@ -210,7 +226,7 @@ private void createErrorResponse( HttpServletRequest request, HttpServletRespons\n         } else {\n         \t// create simple output for none ebxml requests.\n         \tresponse.setContentType( \"text/plain\" );\n-        \tresponse.setStatus(400);\n+        \tresponse.setStatus(500);\n         \tPrintWriter pw = new PrintWriter(response.getOutputStream());\n         \tpw.write(\"NEXUSe2e - Processing error: \" + message);\n         \tpw.flush();\n@@ -250,16 +266,17 @@ public void setTransportReceiver( TransportReceiver transportReceiver ) {\n     public MessageContext processMessage( MessageContext messageContext ) throws IllegalArgumentException,\n             IllegalStateException, NexusException {\n \n+        MessageContext ctx = null;\n         if ( transportReceiver != null ) {\n-            transportReceiver.processMessage( messageContext );\n+            ctx = transportReceiver.processMessage( messageContext );\n             if ( transportReceiver.getStatus() != BeanStatus.ACTIVATED ) {\n                 savePayload( messageContext );\n             }\n         } else {\n             LOG.fatal( \"No TransportReceiver available for inbound message!\" );\n             savePayload( messageContext );\n         }\n-        return null;\n+        return ctx;\n     }\n \n     private void savePayload( MessageContext messageContext ) {"
+  },
+  {
+    "sha": "1c68637350bcf73e0a6548814465ca600d98eaa2",
+    "filename": "nexuse2e-core/src/main/java/org/nexuse2e/service/http/HttpResponse.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/solutionsdirekt/NEXUSe2e/blob/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/service/http/HttpResponse.java",
+    "raw_url": "https://github.com/solutionsdirekt/NEXUSe2e/raw/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/service/http/HttpResponse.java",
+    "contents_url": "https://api.github.com/repos/solutionsdirekt/NEXUSe2e/contents/nexuse2e-core/src/main/java/org/nexuse2e/service/http/HttpResponse.java?ref=8940298b4361569387e2ffc84f9934653944502e",
+    "patch": "@@ -0,0 +1,44 @@\n+package org.nexuse2e.service.http;\n+\n+import java.util.Collections;\n+import java.util.Map;\n+\n+public class HttpResponse {\n+    private byte[] body;\n+    private int statusCode;\n+    private Map<? extends String, ? extends String> headers;\n+\n+    public HttpResponse(byte[] body, int statusCode) {\n+        this(body, statusCode, Collections.<String,String>emptyMap());\n+    }\n+\n+    public HttpResponse(byte[] body, int statusCode, Map<? extends String, ? extends String> headers) {\n+        this.body = body;\n+        this.statusCode = statusCode;\n+        this.headers = headers;\n+    }\n+\n+    public byte[] getBody() {\n+        return body;\n+    }\n+\n+    public void setBody(byte[] body) {\n+        this.body = body;\n+    }\n+\n+    public int getStatusCode() {\n+        return statusCode;\n+    }\n+\n+    public void setStatusCode(int statusCode) {\n+        this.statusCode = statusCode;\n+    }\n+\n+    public Map<? extends String, ? extends String> getHeaders() {\n+        return headers;\n+    }\n+\n+    public void setHeaders(Map<? extends String, ? extends String> headers) {\n+        this.headers = headers;\n+    }\n+}"
+  },
+  {
+    "sha": "a7c06f5d83cede8cd2ac3e9b23294dfa2d79589a",
+    "filename": "nexuse2e-core/src/main/java/org/nexuse2e/ui/form/ReportMessageEntryForm.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/solutionsdirekt/NEXUSe2e/blob/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/ui/form/ReportMessageEntryForm.java",
+    "raw_url": "https://github.com/solutionsdirekt/NEXUSe2e/raw/8940298b4361569387e2ffc84f9934653944502e/nexuse2e-core/src/main/java/org/nexuse2e/ui/form/ReportMessageEntryForm.java",
+    "contents_url": "https://api.github.com/repos/solutionsdirekt/NEXUSe2e/contents/nexuse2e-core/src/main/java/org/nexuse2e/ui/form/ReportMessageEntryForm.java?ref=8940298b4361569387e2ffc84f9934653944502e",
+    "patch": "@@ -121,8 +121,13 @@ public void setMessageProperties(MessagePojo messagePojo) {\n         switch (MessageBackendStatus.getByOrdinal(messagePojo.getBackendStatus())) {\n             case FAILED:\n                 setBackendStatus(\"Failed\");\n+                break;\n             case SENT:\n                 setBackendStatus(\"Sent\");\n+                break;\n+            case OUTBOUND:\n+                setBackendStatus(\"Outbound\");\n+                break;\n             default:\n                 setBackendStatus(\"Unknown\");\n         }"
+  }
+]

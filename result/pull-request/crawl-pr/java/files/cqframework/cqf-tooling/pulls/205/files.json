@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "ce51a0621516d7a9688a5bcd4259d0527f9ac763",
+    "filename": "src/main/java/org/opencds/cqf/tooling/Operation.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/cqframework/cqf-tooling/blob/450eb051bd2fd9da026ae783d0a44ba2488b78f8/src/main/java/org/opencds/cqf/tooling/Operation.java",
+    "raw_url": "https://github.com/cqframework/cqf-tooling/raw/450eb051bd2fd9da026ae783d0a44ba2488b78f8/src/main/java/org/opencds/cqf/tooling/Operation.java",
+    "contents_url": "https://api.github.com/repos/cqframework/cqf-tooling/contents/src/main/java/org/opencds/cqf/tooling/Operation.java?ref=450eb051bd2fd9da026ae783d0a44ba2488b78f8",
+    "patch": "@@ -14,7 +14,7 @@ protected void setOutputPath(String outputPath) {\n         File outputFile = new File(this.outputPath);\n         outputFile.mkdirs();\n         if (!outputFile.isDirectory()) {\n-            throw new IllegalArgumentException(String.format(\"Specified output path is not a directory: %s\"));\n+            throw new IllegalArgumentException(String.format(\"Specified output path is not a directory: %s\", outputFile));\n         }\n     }\n "
+  },
+  {
+    "sha": "4124674097ad63aba0f0aeeda0824a2bbe28c510",
+    "filename": "src/main/java/org/opencds/cqf/tooling/measure/r4/RefreshR4MeasureOperation.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/cqframework/cqf-tooling/blob/450eb051bd2fd9da026ae783d0a44ba2488b78f8/src/main/java/org/opencds/cqf/tooling/measure/r4/RefreshR4MeasureOperation.java",
+    "raw_url": "https://github.com/cqframework/cqf-tooling/raw/450eb051bd2fd9da026ae783d0a44ba2488b78f8/src/main/java/org/opencds/cqf/tooling/measure/r4/RefreshR4MeasureOperation.java",
+    "contents_url": "https://api.github.com/repos/cqframework/cqf-tooling/contents/src/main/java/org/opencds/cqf/tooling/measure/r4/RefreshR4MeasureOperation.java?ref=450eb051bd2fd9da026ae783d0a44ba2488b78f8",
+    "patch": "@@ -3,6 +3,8 @@\n import ca.uhn.fhir.context.FhirContext;\n import ca.uhn.fhir.parser.JsonParser;\n import ca.uhn.fhir.parser.XmlParser;\n+\n+import org.apache.commons.io.FilenameUtils;\n import org.hl7.fhir.r4.model.Measure;\n import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;\n import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;\n@@ -27,7 +29,7 @@ public RefreshR4MeasureOperation() {\n     }\n \n     public RefreshR4MeasureOperation(String pathToMeasures) {\n-        super(pathToMeasures, \"-RefreshR4Measure\", FhirContext.forR4(), null, pathToMeasures);\n+        super(FilenameUtils.getPath(pathToMeasures), \"-RefreshR4Measure\", FhirContext.forR4(), null, pathToMeasures);\n         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();\n         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();\n     }"
+  },
+  {
+    "sha": "2d517b05d98ca6adc7cb42106501be10de5e0258",
+    "filename": "src/main/java/org/opencds/cqf/tooling/processor/MeasureProcessor.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/cqframework/cqf-tooling/blob/450eb051bd2fd9da026ae783d0a44ba2488b78f8/src/main/java/org/opencds/cqf/tooling/processor/MeasureProcessor.java",
+    "raw_url": "https://github.com/cqframework/cqf-tooling/raw/450eb051bd2fd9da026ae783d0a44ba2488b78f8/src/main/java/org/opencds/cqf/tooling/processor/MeasureProcessor.java",
+    "contents_url": "https://api.github.com/repos/cqframework/cqf-tooling/contents/src/main/java/org/opencds/cqf/tooling/processor/MeasureProcessor.java?ref=450eb051bd2fd9da026ae783d0a44ba2488b78f8",
+    "patch": "@@ -91,6 +91,10 @@ public static void bundleMeasures(ArrayList<String> refreshedLibraryNames, Strin\n                 else {\n                     primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);\n                 }\n+                \n+                if (primaryLibrary == null)\n+                \tthrow new IllegalArgumentException(String.format(\"Could not resolve library url %s\", primaryLibraryUrl));\n+                \n                 String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());\n                 String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);\n                 if (includeVersion) {"
+  }
+]

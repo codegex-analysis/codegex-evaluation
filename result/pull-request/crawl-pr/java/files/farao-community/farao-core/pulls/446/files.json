@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "70c47dd994ed2b7636ed88f0aa4f41bee29cdee4",
+    "filename": "data/crac-io/crac-io-api/pom.xml",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/farao-community/farao-core/blob/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-api/pom.xml",
+    "raw_url": "https://github.com/farao-community/farao-core/raw/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-api/pom.xml",
+    "contents_url": "https://api.github.com/repos/farao-community/farao-core/contents/data/crac-io/crac-io-api/pom.xml?ref=57999e0bbf0ae9025dcea3dfc13e15336d5c316c",
+    "patch": "@@ -25,6 +25,11 @@\n             <artifactId>farao-crac-api</artifactId>\n             <version>${project.version}</version>\n         </dependency>\n+        <dependency>\n+            <groupId>${project.groupId}</groupId>\n+            <artifactId>farao-crac-creator-api</artifactId>\n+            <version>${project.version}</version>\n+        </dependency>\n         <dependency>\n             <groupId>${project.groupId}</groupId>\n             <artifactId>farao-reference-program</artifactId>"
+  },
+  {
+    "sha": "45983853fcb10ce6977f0e20b12c9e62066b3e85",
+    "filename": "data/crac-io/crac-io-api/src/main/java/com/farao_community/farao/data/crac_io_api/CracExporter.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/farao-community/farao-core/blob/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-api/src/main/java/com/farao_community/farao/data/crac_io_api/CracExporter.java",
+    "raw_url": "https://github.com/farao-community/farao-core/raw/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-api/src/main/java/com/farao_community/farao/data/crac_io_api/CracExporter.java",
+    "contents_url": "https://api.github.com/repos/farao-community/farao-core/contents/data/crac-io/crac-io-api/src/main/java/com/farao_community/farao/data/crac_io_api/CracExporter.java?ref=57999e0bbf0ae9025dcea3dfc13e15336d5c316c",
+    "patch": "@@ -8,6 +8,7 @@\n package com.farao_community.farao.data.crac_io_api;\n \n import com.farao_community.farao.data.crac_api.Crac;\n+import com.farao_community.farao.data.crac_creator_api.CracCreationContext;\n import com.powsybl.iidm.network.Network;\n \n import java.io.OutputStream;\n@@ -18,11 +19,14 @@\n  * @author Joris Mancini {@literal <joris.mancini at rte-france.com>}\n  */\n \n-public interface CracExporter {\n+public interface CracExporter<T extends CracCreationContext> {\n \n     String getFormat();\n \n     void exportCrac(Crac crac, OutputStream outputStream);\n \n     void exportCrac(Crac crac, Network network, OutputStream outputStream);\n+\n+    void exportCrac(Crac crac, Network network, T cracCreationContext,\n+                    String initialVariantId, String postPraVariantId, String postCraVariantId, OutputStream outputStream);\n }"
+  },
+  {
+    "sha": "3dd20906cea0604b54f54fe866493c426c6bea28",
+    "filename": "data/crac-io/crac-io-api/src/main/java/com/farao_community/farao/data/crac_io_api/CracExporters.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/farao-community/farao-core/blob/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-api/src/main/java/com/farao_community/farao/data/crac_io_api/CracExporters.java",
+    "raw_url": "https://github.com/farao-community/farao-core/raw/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-api/src/main/java/com/farao_community/farao/data/crac_io_api/CracExporters.java",
+    "contents_url": "https://api.github.com/repos/farao-community/farao-core/contents/data/crac-io/crac-io-api/src/main/java/com/farao_community/farao/data/crac_io_api/CracExporters.java?ref=57999e0bbf0ae9025dcea3dfc13e15336d5c316c",
+    "patch": "@@ -13,6 +13,8 @@\n import java.io.*;\n import java.nio.file.Path;\n import java.util.function.Supplier;\n+\n+import com.farao_community.farao.data.crac_creator_api.CracCreationContext;\n import com.google.common.base.Suppliers;\n import com.powsybl.commons.util.ServiceLoaderCache;\n import com.powsybl.iidm.network.Network;\n@@ -52,6 +54,13 @@ public static void exportCrac(Crac crac, Network network, String format, OutputS\n         exporter.exportCrac(crac, network, outputStream);\n     }\n \n+    public static void exportCrac(Crac crac, Network network, CracCreationContext cracCreationContext,\n+                                  String initialVariantId, String postPraVariantId, String postCraVariantId,\n+                                  String format, OutputStream outputStream) {\n+        CracExporter exporter = findCracExporter(format, CRAC_EXPORTERS.get());\n+        exporter.exportCrac(crac, network, cracCreationContext, initialVariantId, postPraVariantId, postCraVariantId, outputStream);\n+    }\n+\n     static CracExporter findCracExporter(String name, List<CracExporter> cracExporters) {\n         Objects.requireNonNull(cracExporters);\n "
+  },
+  {
+    "sha": "cc6f724484d08829ae5f87de9036126448122525",
+    "filename": "data/crac-io/crac-io-api/src/test/java/com/farao_community/farao/data/crac_io_api/CracExporterMock.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/farao-community/farao-core/blob/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-api/src/test/java/com/farao_community/farao/data/crac_io_api/CracExporterMock.java",
+    "raw_url": "https://github.com/farao-community/farao-core/raw/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-api/src/test/java/com/farao_community/farao/data/crac_io_api/CracExporterMock.java",
+    "contents_url": "https://api.github.com/repos/farao-community/farao-core/contents/data/crac-io/crac-io-api/src/test/java/com/farao_community/farao/data/crac_io_api/CracExporterMock.java?ref=57999e0bbf0ae9025dcea3dfc13e15336d5c316c",
+    "patch": "@@ -1,6 +1,7 @@\n package com.farao_community.farao.data.crac_io_api;\n \n import com.farao_community.farao.data.crac_api.Crac;\n+import com.farao_community.farao.data.crac_creator_api.CracCreationContext;\n import com.google.auto.service.AutoService;\n import com.powsybl.iidm.network.Network;\n \n@@ -24,4 +25,9 @@ public void exportCrac(Crac crac, OutputStream outputStream) {\n     public void exportCrac(Crac crac, Network network, OutputStream outputStream) {\n \n     }\n+\n+    @Override\n+    public void exportCrac(Crac crac, Network network, CracCreationContext cracCreationContext, String initialVariantId, String postPraVariantId, String postCraVariantId, OutputStream outputStream) {\n+\n+    }\n }"
+  },
+  {
+    "sha": "9f2845d4b63764c7999c47396d2c275f4d651804",
+    "filename": "data/crac-io/crac-io-cne/src/main/java/com/farao_community/farao/data/crac_io_cne/CneExport.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/farao-community/farao-core/blob/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-cne/src/main/java/com/farao_community/farao/data/crac_io_cne/CneExport.java",
+    "raw_url": "https://github.com/farao-community/farao-core/raw/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-cne/src/main/java/com/farao_community/farao/data/crac_io_cne/CneExport.java",
+    "contents_url": "https://api.github.com/repos/farao-community/farao-core/contents/data/crac-io/crac-io-cne/src/main/java/com/farao_community/farao/data/crac_io_cne/CneExport.java?ref=57999e0bbf0ae9025dcea3dfc13e15336d5c316c",
+    "patch": "@@ -9,6 +9,7 @@\n \n import com.farao_community.farao.commons.FaraoException;\n import com.farao_community.farao.data.crac_api.Crac;\n+import com.farao_community.farao.data.crac_creator_api.CracCreationContext;\n import com.farao_community.farao.data.crac_io_api.CracExporter;\n import com.google.auto.service.AutoService;\n import com.powsybl.iidm.network.Network;\n@@ -81,6 +82,11 @@ public void exportCrac(Crac crac, Network network, OutputStream outputStream) {\n         }\n     }\n \n+    @Override\n+    public void exportCrac(Crac crac, Network network, CracCreationContext cracCreationContext, String initialVariantId, String postPraVariantId, String postCraVariantId, OutputStream outputStream) {\n+        // CNE export will be removed from farao-core, no need to implement this\n+    }\n+\n     private static String getSchemaFile(String schemaName) {\n         return Objects.requireNonNull(CneExport.class.getResource(\"/xsd/\" + schemaName)).toExternalForm();\n     }"
+  },
+  {
+    "sha": "80504a8a04fc62175c79fa88394a98b4fd408178",
+    "filename": "data/crac-io/crac-io-json/src/main/java/com/farao_community/farao/data/crac_io_json/JsonExport.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/farao-community/farao-core/blob/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-json/src/main/java/com/farao_community/farao/data/crac_io_json/JsonExport.java",
+    "raw_url": "https://github.com/farao-community/farao-core/raw/57999e0bbf0ae9025dcea3dfc13e15336d5c316c/data/crac-io/crac-io-json/src/main/java/com/farao_community/farao/data/crac_io_json/JsonExport.java",
+    "contents_url": "https://api.github.com/repos/farao-community/farao-core/contents/data/crac-io/crac-io-json/src/main/java/com/farao_community/farao/data/crac_io_json/JsonExport.java?ref=57999e0bbf0ae9025dcea3dfc13e15336d5c316c",
+    "patch": "@@ -8,6 +8,7 @@\n package com.farao_community.farao.data.crac_io_json;\n \n import com.farao_community.farao.data.crac_api.Crac;\n+import com.farao_community.farao.data.crac_creator_api.CracCreationContext;\n import com.farao_community.farao.data.crac_impl.json.CracImplJsonModule;\n import com.farao_community.farao.data.crac_io_api.CracExporter;\n import com.fasterxml.jackson.annotation.JsonInclude;\n@@ -55,4 +56,10 @@ public void exportCrac(Crac crac, OutputStream outputStream) {\n     public void exportCrac(Crac crac, Network network, OutputStream outputStream) {\n         exportCrac(crac, outputStream);\n     }\n+\n+    @Override\n+    public void exportCrac(Crac crac, Network network, CracCreationContext cracCreationContext, String initialVariantId, String postPraVariantId, String postCraVariantId, OutputStream outputStream) {\n+        exportCrac(crac, outputStream);\n+    }\n+\n }"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "51fc7ae00e8cc56394c64b3523dfa75d5f38db38",
+    "filename": "src/main/java/pages/BasePage.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/blob/5eab6b47933582ea22767589326ef11399c5eb98/src/main/java/pages/BasePage.java",
+    "raw_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/raw/5eab6b47933582ea22767589326ef11399c5eb98/src/main/java/pages/BasePage.java",
+    "contents_url": "https://api.github.com/repos/Katerina-Tsu/AutomationPracticeShop2/contents/src/main/java/pages/BasePage.java?ref=5eab6b47933582ea22767589326ef11399c5eb98",
+    "patch": "@@ -18,4 +18,5 @@\n     abstract void waitForPageOpened();\n \n     public void openPage(String url) { driver.get(url); }\n+\n }"
+  },
+  {
+    "sha": "85a8b469df81df94c0d2ba03697e18c8d738399f",
+    "filename": "src/main/java/pages/SignInPage.java",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/blob/5eab6b47933582ea22767589326ef11399c5eb98/src/main/java/pages/SignInPage.java",
+    "raw_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/raw/5eab6b47933582ea22767589326ef11399c5eb98/src/main/java/pages/SignInPage.java",
+    "contents_url": "https://api.github.com/repos/Katerina-Tsu/AutomationPracticeShop2/contents/src/main/java/pages/SignInPage.java?ref=5eab6b47933582ea22767589326ef11399c5eb98",
+    "patch": "@@ -21,6 +21,22 @@ public SignInPage(WebDriver driver) {\n     @FindBy(xpath = \"//*[@id='create_account_error']//ancestor::*[contains(text(),'Invalid email address.')]\")\n     WebElement errorWrongEmailAddressInField;\n \n+    @FindBy(xpath = \"//*[@id='email']\")\n+    WebElement emailAddressFieldInputSignIn;\n+\n+    @FindBy(xpath = \"//*[@id='passwd']\")\n+    WebElement passwordFieldInputSignIn;\n+\n+    @FindBy(xpath = \"//*[@id='SubmitLogin']\")\n+    WebElement signInButton;\n+\n+    @FindBy(xpath = \"//*[@id='center_column']//ancestor::*[contains(text(),'Authentication failed.')]\")\n+    WebElement signInErrorText;\n+\n+    @FindBy(xpath = \"//*[@id='header']//ancestor::*[contains(text(),'Anton Ivanov')]\")\n+    WebElement headerPageLabel;\n+\n+\n     @Override\n     void waitForPageOpened() {\n         //TODO: Implement this method\n@@ -31,6 +47,12 @@ public void fillInEmailAndClickCreateAccountBtn(String emailAddress) {\n         createAnAccountButton.click();\n     }\n \n+    public void fillInSignInAndBtn(String emailAddress, String password) {\n+        emailAddressFieldInputSignIn.sendKeys(emailAddress);\n+        passwordFieldInputSignIn.sendKeys(password);\n+        signInButton.click();\n+    }\n+\n     public boolean isPageOpened() {\n         return createAnAccountLabel.isDisplayed();\n     }\n@@ -39,7 +61,16 @@ public String getEmailAddressText() {\n         return errorWrongEmailAddressInField.getText();\n     }\n \n+    public String getErrorTextSignIn() {\n+        return signInErrorText.getText();\n+    }\n+\n     public void openPage(String url) {\n         super.openPage(SIGN_IN_URL);\n     }\n+\n+    public boolean isMainPageOpened() {\n+        return headerPageLabel.isDisplayed();\n+    }\n+\n }"
+  },
+  {
+    "sha": "5c90fb9d4b264accb9a86558d8df8a82d0347e60",
+    "filename": "src/main/java/pages/SignOutPage.java",
+    "status": "added",
+    "additions": 35,
+    "deletions": 0,
+    "changes": 35,
+    "blob_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/blob/5eab6b47933582ea22767589326ef11399c5eb98/src/main/java/pages/SignOutPage.java",
+    "raw_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/raw/5eab6b47933582ea22767589326ef11399c5eb98/src/main/java/pages/SignOutPage.java",
+    "contents_url": "https://api.github.com/repos/Katerina-Tsu/AutomationPracticeShop2/contents/src/main/java/pages/SignOutPage.java?ref=5eab6b47933582ea22767589326ef11399c5eb98",
+    "patch": "@@ -0,0 +1,35 @@\n+package pages;\n+\n+import org.openqa.selenium.WebDriver;\n+import org.openqa.selenium.WebElement;\n+import org.openqa.selenium.support.FindBy;\n+\n+public class SignOutPage extends BasePage{\n+    public SignOutPage(WebDriver driver) {\n+        super(driver);\n+    }\n+\n+    @FindBy(xpath = \"//*[@id='email']\")\n+    WebElement emailAddressFieldInputSignIn;\n+\n+    @FindBy(xpath = \"//*[@id='passwd']\")\n+    WebElement passwordFieldInputSignIn;\n+\n+    @FindBy(xpath = \"//*[@id='SubmitLogin']\")\n+    WebElement signInButton;\n+\n+    @FindBy(xpath = \"//*[@id='header']//ancestor::*[contains(text(), 'Sign out')]\")\n+    WebElement signOutButtom;\n+\n+    void waitForPageOpened() {\n+    }\n+\n+    public void fillInSignInAndBtn(String emailAddress, String password) {\n+        emailAddressFieldInputSignIn.sendKeys(emailAddress);\n+        passwordFieldInputSignIn.sendKeys(password);\n+        signInButton.click();\n+        signOutButtom.click();\n+    }\n+\n+    public boolean isMainPageClose() { return signInButton.isDisplayed(); }\n+}"
+  },
+  {
+    "sha": "c6b370c43762d1645c6c6ef29adccefe19a228fe",
+    "filename": "src/test/java/test_data/TestConstants.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/blob/5eab6b47933582ea22767589326ef11399c5eb98/src/test/java/test_data/TestConstants.java",
+    "raw_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/raw/5eab6b47933582ea22767589326ef11399c5eb98/src/test/java/test_data/TestConstants.java",
+    "contents_url": "https://api.github.com/repos/Katerina-Tsu/AutomationPracticeShop2/contents/src/test/java/test_data/TestConstants.java?ref=5eab6b47933582ea22767589326ef11399c5eb98",
+    "patch": "@@ -3,8 +3,11 @@\n \n public interface TestConstants {\n     String EMAIL_ADDRESS = \"a.ivanov.customer@mail.ru\";\n+    String EMAIL_ADDRESS_WRONG_S = \"ssssss.ivanov.customer@mail.ru\";\n+    String EMAIL_ADDRESS_RIGHT_SIGN_IN_S = \"sss.ivanov.customer@mail.ru\";\n     String EMPTY_EMAIL_ADDRESS = \"\";\n-    String PASSWORD = \"rfvtgb123yhn\";\n+    String PASSWORD = \"rfvtgb123\";\n     String WRONG_EMAIL_ADDRESS = \"ivanov\";\n     String WRONG_EMAIL_ADDRESS_MESSAGE = \"Invalid email address.\";\n+    String WRONG_EMAIL_ADDRESS_MESSAGE_SIGN_IN = \"Authentication failed.\";\n }"
+  },
+  {
+    "sha": "e1d37e1a68c733d97f3139d5f709fa300c33950b",
+    "filename": "src/test/java/tests/BaseTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/blob/5eab6b47933582ea22767589326ef11399c5eb98/src/test/java/tests/BaseTest.java",
+    "raw_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/raw/5eab6b47933582ea22767589326ef11399c5eb98/src/test/java/tests/BaseTest.java",
+    "contents_url": "https://api.github.com/repos/Katerina-Tsu/AutomationPracticeShop2/contents/src/test/java/tests/BaseTest.java?ref=5eab6b47933582ea22767589326ef11399c5eb98",
+    "patch": "@@ -8,13 +8,15 @@\n import org.testng.annotations.BeforeMethod;\n import pages.CreateAnAccountPage;\n import pages.SignInPage;\n+import pages.SignOutPage;\n import test_data.TestConstants;\n \n import java.util.concurrent.TimeUnit;\n \n public class BaseTest implements TestConstants {\n     WebDriver driver;\n     SignInPage signInPage;\n+    SignOutPage signOutPage;\n     CreateAnAccountPage createAnAccountPage;\n \n     @BeforeMethod\n@@ -34,6 +36,7 @@ public void endTest() {\n \n     public void initPage() {\n         signInPage = new SignInPage(driver);\n+        signOutPage = new SignOutPage(driver);\n         createAnAccountPage = new CreateAnAccountPage(driver);\n     }\n }"
+  },
+  {
+    "sha": "3eca9d52c72d644b770b88336de5fcc66b0a43c8",
+    "filename": "src/test/java/tests/SignInTests.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/blob/5eab6b47933582ea22767589326ef11399c5eb98/src/test/java/tests/SignInTests.java",
+    "raw_url": "https://github.com/Katerina-Tsu/AutomationPracticeShop2/raw/5eab6b47933582ea22767589326ef11399c5eb98/src/test/java/tests/SignInTests.java",
+    "contents_url": "https://api.github.com/repos/Katerina-Tsu/AutomationPracticeShop2/contents/src/test/java/tests/SignInTests.java?ref=5eab6b47933582ea22767589326ef11399c5eb98",
+    "patch": "@@ -27,4 +27,26 @@ public void wrongEmailFieldTest() {\n         signInPage.fillInEmailAndClickCreateAccountBtn(WRONG_EMAIL_ADDRESS);\n         Assert.assertEquals(signInPage.getEmailAddressText(), WRONG_EMAIL_ADDRESS_MESSAGE);\n     }\n+\n+    @Test(groups = \"Sasha. Checked error text when input wrong email address\")\n+    public void wrongEmailFieldSignInTest() {\n+        signInPage.openPage(SIGN_IN_URL);\n+        signInPage.fillInSignInAndBtn(EMAIL_ADDRESS_WRONG_S, PASSWORD);\n+        Assert.assertEquals(signInPage.getErrorTextSignIn(), WRONG_EMAIL_ADDRESS_MESSAGE_SIGN_IN);\n+    }\n+\n+    @Test(groups = \"Sasha. Checked when sign in is over\")\n+    public void rightDataSignInTest() {\n+        signInPage.openPage(SIGN_IN_URL);\n+        signInPage.fillInSignInAndBtn(EMAIL_ADDRESS_RIGHT_SIGN_IN_S, PASSWORD);\n+        Assert.assertTrue(signInPage.isMainPageOpened());\n+    }\n+\n+    @Test(groups = \"Sasha. Checked when sign out is over\")\n+    public void signImSignOutTest() {\n+        signOutPage.openPage(SIGN_IN_URL);\n+        signOutPage.fillInSignInAndBtn(EMAIL_ADDRESS_RIGHT_SIGN_IN_S, PASSWORD);\n+        Assert.assertTrue(signOutPage.isMainPageClose());\n+    }\n+\n }"
+  }
+]

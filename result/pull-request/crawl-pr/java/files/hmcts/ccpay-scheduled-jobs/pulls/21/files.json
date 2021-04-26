@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "290c70f0c5cca7e04db68a8ff47d0aff846bf5bc",
+    "filename": ".github/workflows/ci.yml",
+    "status": "added",
+    "additions": 46,
+    "deletions": 0,
+    "changes": 46,
+    "blob_url": "https://github.com/hmcts/ccpay-scheduled-jobs/blob/35c878d3050b96033539cb761358b75fbfe22a59/.github/workflows/ci.yml",
+    "raw_url": "https://github.com/hmcts/ccpay-scheduled-jobs/raw/35c878d3050b96033539cb761358b75fbfe22a59/.github/workflows/ci.yml",
+    "contents_url": "https://api.github.com/repos/hmcts/ccpay-scheduled-jobs/contents/.github/workflows/ci.yml?ref=35c878d3050b96033539cb761358b75fbfe22a59",
+    "patch": "@@ -0,0 +1,46 @@\n+# This workflow will have a CI flow for ccpay-scheduled-jobs Java(Gradle) project\n+name: ccpay-scheduled-jobs - CI\n+on:\n+  pull_request:\n+    branches:\n+      - master\n+  push:\n+    branches:\n+      - master\n+      - refs/tags/*\n+    tags:\n+      - '*'\n+\n+jobs:\n+  build:\n+    runs-on: ubuntu-latest\n+    steps:\n+      - uses: actions/checkout@v2\n+        with:\n+          fetch-depth: 0\n+      - name: Set up JDK 11\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: 11\n+      - name: Grant execute permission for gradlew\n+        run: chmod +x gradlew\n+      - name: Cache Gradle packages\n+        uses: actions/cache@v2\n+        with:\n+          path: |\n+            ~/.gradle/caches\n+            ~/.gradle/wrapper\n+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}\n+          restore-keys: |\n+            ${{ runner.os }}-gradle-\n+      - name: Release\n+        env:\n+          BINTRAY_USER: jenkins-reform-hmcts\n+          BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}\n+          RELEASE_VERSION: ${{ github.ref }}\n+        run: ./gradlew bintrayUpload --info\n+        if: startsWith(github.ref, 'refs/tags')\n+      - name: Cleanup Gradle Cache\n+        run: |\n+          rm -f ~/.gradle/caches/modules-2/modules-2.lock\n+          rm -fr ~/.gradle/caches/modules-2/*/plugin-resolution/"
+  },
+  {
+    "sha": "23d2f543ef7c0a984d5af38e62590b2b2a597c22",
+    "filename": ".travis.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 19,
+    "changes": 19,
+    "blob_url": "https://github.com/hmcts/ccpay-scheduled-jobs/blob/7870df3cee1dcf7adfab5b2cbc7239cd14bd2696/.travis.yml",
+    "raw_url": "https://github.com/hmcts/ccpay-scheduled-jobs/raw/7870df3cee1dcf7adfab5b2cbc7239cd14bd2696/.travis.yml",
+    "contents_url": "https://api.github.com/repos/hmcts/ccpay-scheduled-jobs/contents/.travis.yml?ref=7870df3cee1dcf7adfab5b2cbc7239cd14bd2696",
+    "patch": "@@ -1,19 +0,0 @@\n-language: java\n-before_cache:\n-- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock\n-- rm -fr $HOME/.gradle/caches/*/plugin-resolution/\n-cache:\n-  directories:\n-  - \"$HOME/.gradle/caches/\"\n-  - \"$HOME/.gradle/wrapper/\"\n-deploy:\n-- provider: script\n-  script: \"./gradlew bintrayUpload\"\n-  skip_cleanup: true\n-  on:\n-    repo: hmcts/ccpay-scheduled-jobs\n-    tags: true\n-env:\n-  global:\n-  - secure: fjGRgLfKim2ZQjgXPJSlVozVZkvpXVn3yPqRD2tHs1pICR2D7NGXQgwJXezhZrDuzvd5tmh3nNtFHxnLqrI9maj9faCQZzeFYE652M9LE23kMGw58HzK51qYt96Y0Q3cI1kScHA/5NoaVbe+G/8n2oYOhBeOkL28wFyJ6YQAm/572sTawix7Ln9sS/w/jyZob44xmIduUEvzMmZJCRzDOxRsGcKy5ZG50ZGgBvPP9kvgGav92I22/3QghHujUDn8/gSUTS24NFqB8Kg5iVVhVPpuj0iw3W66iAeLnidH3wsQ+AzznmqVAMcne37VO5NPR9PMOPatgDUygDGf01iiJ8wXMgUgDok5tYbs6Z9fWI854hY5J2yKkNEenAZhDJFtIIn9/5rc9I2ZJ+NSO5ol1tOxw16y0ITnNFXI0te/QTv5IupgZUr3osHLJ7HrLZKIuF5NDkpk2UE7onpifPM/n3z7kNsYfSgiyuuWUt5xRrhVoR0vJA3rfHOeeAoSvMimPQaRd6AGVYiSl+F/MTN2BKXHIAOvuf+E4SsK4+3dcufclw1m0XoVYrV1vcq0EIGmMbkoXTKx2lakQoa8uLp5DCPj+PbZI+SprBYBJsBZzKGbW5RoLXiqJyYmJlZztgtA4Mtc9uxzowgKtvpt6h+sD4kJBTRhIdR1IuW574wJeF4=\n-  - secure: fDfWzm4Lszkra5Wj0MGmxwo0JIJnStio6PaJm6Ue33WwUwtJsFri2fY6XFJ0Di8Lf5p6YX0yEgNF6ZOirT7ilZBBKSaS+iQYhOeVmWjYg6IRF+vcyg9ZtbdHsmi5UlzCW1opx4vAnNZiMTdLRxg+qnOwAIrPhV/1ICoFZGq9vvDh9fIwWAOuB0uyqp2H7cW8BWxcf6KC4+J3C/LcoN2+gMebAitr9SoxQa9WUYeTJUtbCXpWaILQsXK5rWADdfXtEOQPhuZ3l65K/zdhtvXxsfWsP21Ee1IBczgI6Kvy21PNck28rarKBPki4FQulMATPIPd+2IYj29lmC7SeyuKEPFrw87Q5s/j+BMH8PSTSqqZLZRtSzkiaXlgqpgASrm2cAOmnHwzqNX3FgZ9CYc6GA0RBIbUF44tgFurcsIxevTPlPRaaGRveWOS8CN13umJBjkLzUlYrMJ3qCHcU4MSkMfdTYNCk8iBV4Te0uXUjMcxPr9Jyd3zOjUr9c/Cyf5YkOPJtK2nBVsoMqlXbU7OXCYfaEmX6qTacGN8V/e+fAFVo0Xc58Fpt2Gm0vIh+NcoyjlJ1bDw4xiePaRDscSbBzhe7Bq4AcYLPRksOcO7HGGoleK5oom/Z4rsj78oceAA0jJfQ8vE9DBnsYe+cdIv2LopFtoAfVW2Zvj4hWHKjQ8="
+  },
+  {
+    "sha": "f31b252ca8003f47961509bbf81e1a3ef7e1de99",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 5,
+    "changes": 28,
+    "blob_url": "https://github.com/hmcts/ccpay-scheduled-jobs/blob/35c878d3050b96033539cb761358b75fbfe22a59/build.gradle",
+    "raw_url": "https://github.com/hmcts/ccpay-scheduled-jobs/raw/35c878d3050b96033539cb761358b75fbfe22a59/build.gradle",
+    "contents_url": "https://api.github.com/repos/hmcts/ccpay-scheduled-jobs/contents/build.gradle?ref=35c878d3050b96033539cb761358b75fbfe22a59",
+    "patch": "@@ -2,8 +2,8 @@ plugins {\n     id 'java'\n     id 'java-library'\n     id 'jacoco'\n-    id 'org.owasp.dependencycheck' version '5.2.4'\n-    id 'org.sonarqube' version '2.8'\n+    id 'org.owasp.dependencycheck' version '6.0.1'\n+    id 'org.sonarqube' version '3.0'\n }\n \n group 'uk.gov.hmcts.reform.payment'\n@@ -20,12 +20,30 @@ repositories {\n     jcenter()\n }\n \n+\n+configurations.all {\n+    resolutionStrategy {\n+        eachDependency { DependencyResolveDetails det ->\n+            /* JAR upgrades with latest versions for CVE fixes*/\n+\n+            /*   CVE-2020-17521 */\n+            if (det.requested.name == 'groovy-xml' || det.requested.name == 'groovy-json') {\n+                det.useVersion '3.0.7'\n+            }\n+            /* CVE-2020-13956 */\n+            if (det.requested.name == 'httpclient') {\n+                det.useVersion '4.5.13'\n+            }\n+        }\n+    }\n+}\n+\n dependencies {\n     implementation group: 'io.rest-assured', name: 'rest-assured', version: '4.3.0'\n \n     implementation(group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2') {\n-        exclude group: 'com.google.guava', module: 'guava' \n-        exclude group: 'org.springframework.security', module: 'spring-security-crypto' \n+        exclude group: 'com.google.guava', module: 'guava'\n+        exclude group: 'org.springframework.security', module: 'spring-security-crypto'\n     }\n     implementation group: 'org.json', name: 'json', version: '20140107'\n \n@@ -72,7 +90,7 @@ dependencyCheck {\n }\n \n jar {\n-    manifest { \n+    manifest {\n         attributes  'Main-Class': 'JobProcessorApplication', 'Implementation-Title': project.name, 'Implementation-Version': project.version\n     }\n "
+  },
+  {
+    "sha": "7ef647484fc0c0be766bc16e800d3fe2cd2765c1",
+    "filename": "charts/payment-jobs/Chart.yaml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 4,
+    "changes": 11,
+    "blob_url": "https://github.com/hmcts/ccpay-scheduled-jobs/blob/35c878d3050b96033539cb761358b75fbfe22a59/charts/payment-jobs/Chart.yaml",
+    "raw_url": "https://github.com/hmcts/ccpay-scheduled-jobs/raw/35c878d3050b96033539cb761358b75fbfe22a59/charts/payment-jobs/Chart.yaml",
+    "contents_url": "https://api.github.com/repos/hmcts/ccpay-scheduled-jobs/contents/charts/payment-jobs/Chart.yaml?ref=35c878d3050b96033539cb761358b75fbfe22a59",
+    "patch": "@@ -1,9 +1,12 @@\n-apiVersion: v1\n-appVersion: \"1.0\"\n+apiVersion: v2\n name: payment-jobs\n home: https://github.com/hmcts/ccpay-scheduled-jobs\n-version: 0.0.6\n+version: 0.0.8\n description: HMCTS CCPAY Scheduled Jobs\n maintainers:\n   - name: HMCTS Fees & Payments Dev Team\n-    email: ccpay@hmcts.net\n\\ No newline at end of file\n+    email: ccpay@hmcts.net\n+dependencies:\n+  - name: job\n+    version: ~v0.5.1\n+    repository: '@hmctspublic'\n\\ No newline at end of file"
+  },
+  {
+    "sha": "7231316c4f1b40fcd5daa66416a05ecd5704c325",
+    "filename": "charts/payment-jobs/requirements.yaml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 4,
+    "changes": 4,
+    "blob_url": "https://github.com/hmcts/ccpay-scheduled-jobs/blob/7870df3cee1dcf7adfab5b2cbc7239cd14bd2696/charts/payment-jobs/requirements.yaml",
+    "raw_url": "https://github.com/hmcts/ccpay-scheduled-jobs/raw/7870df3cee1dcf7adfab5b2cbc7239cd14bd2696/charts/payment-jobs/requirements.yaml",
+    "contents_url": "https://api.github.com/repos/hmcts/ccpay-scheduled-jobs/contents/charts/payment-jobs/requirements.yaml?ref=7870df3cee1dcf7adfab5b2cbc7239cd14bd2696",
+    "patch": "@@ -1,4 +0,0 @@\n-dependencies:\n-   - name: job\n-     version: ~v0.5.1\n-     repository: '@hmctspublic'\n\\ No newline at end of file"
+  },
+  {
+    "sha": "ee560ed25ce0165cfbbe72b2d6ed5531d9f376bf",
+    "filename": "config/owasp/suppressions.xml",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 13,
+    "changes": 30,
+    "blob_url": "https://github.com/hmcts/ccpay-scheduled-jobs/blob/35c878d3050b96033539cb761358b75fbfe22a59/config/owasp/suppressions.xml",
+    "raw_url": "https://github.com/hmcts/ccpay-scheduled-jobs/raw/35c878d3050b96033539cb761358b75fbfe22a59/config/owasp/suppressions.xml",
+    "contents_url": "https://api.github.com/repos/hmcts/ccpay-scheduled-jobs/contents/config/owasp/suppressions.xml?ref=35c878d3050b96033539cb761358b75fbfe22a59",
+    "patch": "@@ -2,22 +2,26 @@\n <suppressions xmlns=\"https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd\">\n     <suppress>\n         <notes><![CDATA[file name: groovy-xml-2.4.12.jar]]></notes>\n-   <packageUrl regex=\"true\">^pkg:maven/org\\.codehaus\\.groovy/groovy\\-xml@.*$</packageUrl>\n-   <cve>CVE-2016-6497</cve>\n+        <packageUrl regex=\"true\">^pkg:maven/org\\.codehaus\\.groovy/groovy\\-xml@.*$</packageUrl>\n+        <cve>CVE-2016-6497</cve>\n     </suppress>\n     <suppress>\n-   <notes><![CDATA[file name: groovy-json-2.4.12.jar]]></notes>\n-   <packageUrl regex=\"true\">^pkg:maven/org\\.codehaus\\.groovy/groovy\\-json@.*$</packageUrl>\n-   <cpe>cpe:/a:apache:groovy</cpe>\n-</suppress>\n+        <notes><![CDATA[file name: groovy-json-2.4.12.jar]]></notes>\n+        <packageUrl regex=\"true\">^pkg:maven/org\\.codehaus\\.groovy/groovy\\-json@.*$</packageUrl>\n+        <cpe>cpe:/a:apache:groovy</cpe>\n+    </suppress>\n     <suppress>\n         <notes><![CDATA[file name: org.apache.sling.javax.activation-0.1.0.jar]]></notes>\n-   <packageUrl regex=\"true\">^pkg:maven/org\\.apache\\.sling/org\\.apache\\.sling\\.javax\\.activation@.*$</packageUrl>\n-   <cve>CVE-2016-5394</cve>\n+        <packageUrl regex=\"true\">^pkg:maven/org\\.apache\\.sling/org\\.apache\\.sling\\.javax\\.activation@.*$</packageUrl>\n+        <cve>CVE-2016-5394</cve>\n+    </suppress>\n+    <suppress>\n+        <notes><![CDATA[file name: org.apache.sling.javax.activation-0.1.0.jar]]></notes>\n+        <packageUrl regex=\"true\">^pkg:maven/org\\.apache\\.sling/org\\.apache\\.sling\\.javax\\.activation@.*$</packageUrl>\n+        <cve>CVE-2016-6798</cve>\n+    </suppress>\n+    <suppress until=\"2021-03-14\">\n+        <notes>Transitive dependency of spring boot version</notes>\n+        <cve>CVE-2020-5421</cve>\n     </suppress>\n-<suppress>\n-   <notes><![CDATA[file name: org.apache.sling.javax.activation-0.1.0.jar]]></notes>\n-   <packageUrl regex=\"true\">^pkg:maven/org\\.apache\\.sling/org\\.apache\\.sling\\.javax\\.activation@.*$</packageUrl>\n-   <cve>CVE-2016-6798</cve>\n-</suppress>\n </suppressions>\n\\ No newline at end of file"
+  }
+]

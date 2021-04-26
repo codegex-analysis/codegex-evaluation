@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "c3d3641f420e341fd28efafaa5d6dd642fc61d4b",
+    "filename": "src/main/java/ru/netology/comparator/TicketByTimeAscComparator.java",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/EliseevG787/JAVAQA-4.2/blob/9cc658c130d2449585a9731bc2a8c6d148e9e015/src/main/java/ru/netology/comparator/TicketByTimeAscComparator.java",
+    "raw_url": "https://github.com/EliseevG787/JAVAQA-4.2/raw/9cc658c130d2449585a9731bc2a8c6d148e9e015/src/main/java/ru/netology/comparator/TicketByTimeAscComparator.java",
+    "contents_url": "https://api.github.com/repos/EliseevG787/JAVAQA-4.2/contents/src/main/java/ru/netology/comparator/TicketByTimeAscComparator.java?ref=9cc658c130d2449585a9731bc2a8c6d148e9e015",
+    "patch": "@@ -0,0 +1,13 @@\n+package ru.netology.comparator;\n+\n+import ru.netology.domain.Ticket;\n+\n+import java.util.Comparator;\n+\n+public class TicketByTimeAscComparator implements Comparator<Ticket> {\n+\n+    @Override\n+    public int compare(Ticket o1, Ticket o2) {\n+        return o1.getTravelTime() - o2.getTravelTime();\n+    }\n+}"
+  },
+  {
+    "sha": "c1ea665d542a2cbf32e6b6db1b94e764fbfbc80c",
+    "filename": "src/main/java/ru/netology/domain/Ticket.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 6,
+    "changes": 7,
+    "blob_url": "https://github.com/EliseevG787/JAVAQA-4.2/blob/9cc658c130d2449585a9731bc2a8c6d148e9e015/src/main/java/ru/netology/domain/Ticket.java",
+    "raw_url": "https://github.com/EliseevG787/JAVAQA-4.2/raw/9cc658c130d2449585a9731bc2a8c6d148e9e015/src/main/java/ru/netology/domain/Ticket.java",
+    "contents_url": "https://api.github.com/repos/EliseevG787/JAVAQA-4.2/contents/src/main/java/ru/netology/domain/Ticket.java?ref=9cc658c130d2449585a9731bc2a8c6d148e9e015",
+    "patch": "@@ -6,15 +6,10 @@\n @AllArgsConstructor\n @Data\n \n-public class Ticket implements Comparable<Ticket>{\n+public class Ticket{\n     private int id;\n     private int price;\n     private String departure;\n     private String arrival;\n     private int travelTime;\n-\n-    @Override\n-    public int compareTo(Ticket o) {\n-        return this.price - o.price;\n-    }\n }"
+  },
+  {
+    "sha": "b0738f619abdcb9293a7179d83e52a5cbd2b46be",
+    "filename": "src/main/java/ru/netology/manager/TicketManager.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/EliseevG787/JAVAQA-4.2/blob/9cc658c130d2449585a9731bc2a8c6d148e9e015/src/main/java/ru/netology/manager/TicketManager.java",
+    "raw_url": "https://github.com/EliseevG787/JAVAQA-4.2/raw/9cc658c130d2449585a9731bc2a8c6d148e9e015/src/main/java/ru/netology/manager/TicketManager.java",
+    "contents_url": "https://api.github.com/repos/EliseevG787/JAVAQA-4.2/contents/src/main/java/ru/netology/manager/TicketManager.java?ref=9cc658c130d2449585a9731bc2a8c6d148e9e015",
+    "patch": "@@ -4,6 +4,7 @@\n import ru.netology.repository.TicketRepository;\n \n import java.util.Arrays;\n+import java.util.Comparator;\n \n public class TicketManager {\n \n@@ -17,7 +18,7 @@ public void add(Ticket ticket) {\n         repository.save(ticket);\n     }\n \n-    public Ticket[] findAll(String from, String to) {\n+    public Ticket[] findAll(String from, String to, Comparator<Ticket> comparator) {\n         Ticket[] result = new Ticket[0];\n         for (Ticket ticket : repository.getAll()) {\n             if (ticket.getDeparture().equalsIgnoreCase(from) && ticket.getArrival().equalsIgnoreCase(to)) {\n@@ -27,7 +28,7 @@ public void add(Ticket ticket) {\n                 result = tmp;\n             }\n         }\n-        Arrays.sort(result);\n+        Arrays.sort(result, comparator);\n         return result;\n     }\n }"
+  },
+  {
+    "sha": "52d1822537e4538c6f33ff4994d7da85df789edf",
+    "filename": "src/test/java/ru/netology/manager/TicketManagerTest.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 10,
+    "changes": 24,
+    "blob_url": "https://github.com/EliseevG787/JAVAQA-4.2/blob/9cc658c130d2449585a9731bc2a8c6d148e9e015/src/test/java/ru/netology/manager/TicketManagerTest.java",
+    "raw_url": "https://github.com/EliseevG787/JAVAQA-4.2/raw/9cc658c130d2449585a9731bc2a8c6d148e9e015/src/test/java/ru/netology/manager/TicketManagerTest.java",
+    "contents_url": "https://api.github.com/repos/EliseevG787/JAVAQA-4.2/contents/src/test/java/ru/netology/manager/TicketManagerTest.java?ref=9cc658c130d2449585a9731bc2a8c6d148e9e015",
+    "patch": "@@ -1,26 +1,30 @@\n package ru.netology.manager;\n \n import org.junit.jupiter.api.Test;\n+import ru.netology.comparator.TicketByTimeAscComparator;\n import ru.netology.domain.Ticket;\n import ru.netology.repository.TicketRepository;\n \n import static org.junit.jupiter.api.Assertions.*;\n \n+import java.util.Comparator;\n+\n class TicketManagerTest {\n \n     private TicketRepository repository = new TicketRepository();\n     private TicketManager manager = new TicketManager(repository);\n-    private Ticket ticket1 = new Ticket(1, 2111, \"vko\", \"kzn\", 95);\n-    private Ticket ticket2 = new Ticket(2, 2222, \"vko\", \"kzn\", 96);\n-    private Ticket ticket3 = new Ticket(3, 2333, \"vko\", \"kzn\", 93);\n-    private Ticket ticket4 = new Ticket(4, 2444, \"vko\", \"kzn\", 92);\n-    private Ticket ticket5 = new Ticket(5, 2555, \"vko\", \"kzn\", 99);\n+    private Comparator<Ticket> comparator = new TicketByTimeAscComparator();\n+    private Ticket ticket1 = new Ticket(1, 2111, \"vko\", \"kzn\", 90);\n+    private Ticket ticket2 = new Ticket(2, 2222, \"vko\", \"kzn\", 91);\n+    private Ticket ticket3 = new Ticket(3, 2333, \"vko\", \"kzn\", 92);\n+    private Ticket ticket4 = new Ticket(4, 2444, \"vko\", \"kzn\", 93);\n+    private Ticket ticket5 = new Ticket(5, 2555, \"vko\", \"kzn\", 94);\n     private Ticket ticket6 = new Ticket(6, 2666, \"svo\", \"jfk\", 95);\n \n     @Test\n     void shouldFindAllIfEmpty() {\n         Ticket[] expected = new Ticket[]{};\n-        Ticket[] actual = manager.findAll(\"vko\", \"kzn\");\n+        Ticket[] actual = manager.findAll(\"vko\", \"kzn\", comparator);\n \n         assertArrayEquals(expected, actual);\n     }\n@@ -30,22 +34,22 @@ void shouldFindAllIfOne() {\n         manager.add(ticket3);\n \n         Ticket[] expected = new Ticket[]{ticket3};\n-        Ticket[] actual = manager.findAll(\"vko\", \"kzn\");\n+        Ticket[] actual = manager.findAll(\"vko\", \"kzn\", comparator);\n \n         assertArrayEquals(expected, actual);\n     }\n \n     @Test\n     void shouldFindAll() {\n-        manager.add(ticket1);\n         manager.add(ticket3);\n-        manager.add(ticket2);\n+        manager.add(ticket1);\n         manager.add(ticket5);\n+        manager.add(ticket2);\n         manager.add(ticket6);\n         manager.add(ticket4);\n \n         Ticket[] expected = new Ticket[]{ticket1, ticket2, ticket3, ticket4, ticket5};\n-        Ticket[] actual = manager.findAll(\"vko\", \"kzn\");\n+        Ticket[] actual = manager.findAll(\"vko\", \"kzn\", comparator);\n \n         assertArrayEquals(expected, actual);\n     }"
+  }
+]

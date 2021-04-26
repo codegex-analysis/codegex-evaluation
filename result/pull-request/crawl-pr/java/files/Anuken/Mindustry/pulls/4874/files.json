@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "11620b4d5fa3659c12063b5fcc8637cee3e07b73",
+    "filename": "core/src/mindustry/world/blocks/power/LightBlock.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/Anuken/Mindustry/blob/7247e897ac44f21d73d668df1a4c82075538d6d8/core/src/mindustry/world/blocks/power/LightBlock.java",
+    "raw_url": "https://github.com/Anuken/Mindustry/raw/7247e897ac44f21d73d668df1a4c82075538d6d8/core/src/mindustry/world/blocks/power/LightBlock.java",
+    "contents_url": "https://api.github.com/repos/Anuken/Mindustry/contents/core/src/mindustry/world/blocks/power/LightBlock.java?ref=7247e897ac44f21d73d668df1a4c82075538d6d8",
+    "patch": "@@ -3,12 +3,15 @@\n import arc.graphics.*;\n import arc.graphics.g2d.*;\n import arc.math.*;\n+import arc.math.geom.*;\n import arc.scene.ui.layout.*;\n+import arc.struct.*;\n import arc.util.*;\n import arc.util.io.*;\n import mindustry.annotations.Annotations.*;\n import mindustry.gen.*;\n import mindustry.graphics.*;\n+import mindustry.input.*;\n import mindustry.logic.*;\n import mindustry.world.*;\n \n@@ -25,10 +28,24 @@ public LightBlock(String name){\n         update = true;\n         configurable = true;\n         saveConfig = true;\n+        swapDiagonalPlacement = true;\n \n         config(Integer.class, (LightBuild tile, Integer value) -> tile.color = value);\n     }\n \n+    @Override\n+    public void drawPlace(int x, int y, int rotation, boolean valid){\n+        super.drawPlace(x, y, rotation, valid);\n+\n+        Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, radius * 0.8f, Pal.placing);\n+    }\n+\n+    @Override\n+    public void changePlacementPath(Seq<Point2> points, int rotation){\n+        var placeRadius2 = Mathf.pow(radius * 0.8f / tilesize, 2f) * 3;\n+        Placement.calculateNodes(points, this, rotation, (point, other) -> Mathf.dst2(point.x, point.y, other.x, other.y) <= placeRadius2);\n+    }\n+\n     public class LightBuild extends Building{\n         public int color = Pal.accent.rgba();\n         public float smoothTime = 1f;\n@@ -70,6 +87,11 @@ public void drawLight(){\n             Drawf.light(team, x, y, radius * Math.min(smoothTime, 2f), Tmp.c1.set(color), brightness * efficiency());\n         }\n \n+        @Override\n+        public void drawSelect(){\n+            Drawf.dashCircle(x, y, radius * 0.8f, team.color);\n+        }\n+\n         @Override\n         public Integer config(){\n             return color;"
+  }
+]

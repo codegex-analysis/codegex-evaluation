@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "1613904d70eed4b08a0a9838e29e389290c6509c",
+    "filename": ".github/workflows/gradle.yml",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/kieker-monitoring/kieker/blob/0bfae462a7a56a4d806d6bfc61af34c64a7d8da7/.github/workflows/gradle.yml",
+    "raw_url": "https://github.com/kieker-monitoring/kieker/raw/0bfae462a7a56a4d806d6bfc61af34c64a7d8da7/.github/workflows/gradle.yml",
+    "contents_url": "https://api.github.com/repos/kieker-monitoring/kieker/contents/.github/workflows/gradle.yml?ref=0bfae462a7a56a4d806d6bfc61af34c64a7d8da7",
+    "patch": "@@ -0,0 +1,40 @@\n+name: Java CI with Gradle (Regular)\n+\n+on: [push, workflow_dispatch]\n+\n+jobs:\n+  build:\n+    strategy: \n+        matrix:\n+          os: [ubuntu-latest, windows-latest, macos-latest]\n+          java: [ 1.8, 11, 15 ]\n+        fail-fast: false\n+    runs-on: ${{ matrix.os }}\n+    name: Java ${{ matrix.java }} OS ${{ matrix.os }} sample\n+    steps:\n+    - name: Set Git Property and output path\n+      run: |\n+        if [ \"$RUNNER_OS\" == \"Windows\" ]; then\n+          git config --system core.longpaths true\n+        fi\n+      shell: bash\n+    - uses: actions/checkout@v2\n+    - name: Set up JDK ${{ matrix.java }}\n+      uses: actions/setup-java@v1\n+      with:\n+        java-version: ${{ matrix.java }}\n+    - name: Run Unit Tests\n+      run: ./gradlew test\n+    - name: Publish Test Report ${{ matrix.java }} OS ${{ matrix.os }}\n+      if: ${{ always() }}\n+      uses: scacap/action-surefire-report@v1\n+      with:\n+         github_token: ${{ secrets.GITHUB_TOKEN }}\n+         report_paths: '**/build/test-results/test/TEST-*.xml'\n+         check_name: Test Report ${{ matrix.java }} OS ${{ matrix.os }}\n+    - name: Upload Unit Test Results\n+      if: ${{ always() }}\n+      uses: actions/upload-artifact@v2\n+      with:\n+        name: Unit Test Results (Java ${{ matrix.java }} OS ${{ matrix.os }})\n+        path: '**/build/test-results/test/TEST-*.xml'"
+  },
+  {
+    "sha": "323a0e472350d15928e2d3151f9dd8e761aa5c2f",
+    "filename": ".github/workflows/gradleForPR.yml",
+    "status": "added",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/kieker-monitoring/kieker/blob/0bfae462a7a56a4d806d6bfc61af34c64a7d8da7/.github/workflows/gradleForPR.yml",
+    "raw_url": "https://github.com/kieker-monitoring/kieker/raw/0bfae462a7a56a4d806d6bfc61af34c64a7d8da7/.github/workflows/gradleForPR.yml",
+    "contents_url": "https://api.github.com/repos/kieker-monitoring/kieker/contents/.github/workflows/gradleForPR.yml?ref=0bfae462a7a56a4d806d6bfc61af34c64a7d8da7",
+    "patch": "@@ -0,0 +1,33 @@\n+name: Java CI with Gradle (PR)\n+\n+on: pull_request\n+\n+jobs:\n+  build:\n+    strategy: \n+        matrix:\n+          os: [ubuntu-latest, windows-latest, macos-latest]\n+          java: [ 1.8, 11, 15 ]\n+        fail-fast: false\n+    runs-on: ${{ matrix.os }}\n+    name: Java ${{ matrix.java }} OS ${{ matrix.os }} sample\n+    steps:\n+    - name: Set Git Property and output path\n+      run: |\n+        if [ \"$RUNNER_OS\" == \"Windows\" ]; then\n+          git config --system core.longpaths true\n+        fi\n+      shell: bash\n+    - uses: actions/checkout@v2\n+    - name: Set up JDK ${{ matrix.java }}\n+      uses: actions/setup-java@v1\n+      with:\n+        java-version: ${{ matrix.java }}\n+    - name: Run Unit Tests\n+      run: ./gradlew test\n+    - name: Upload Unit Test Results\n+      if: ${{ always() }}\n+      uses: actions/upload-artifact@v2\n+      with:\n+        name: Unit Test Results (Java ${{ matrix.java }} OS ${{ matrix.os }})\n+        path: '**/build/test-results/test/TEST-*.xml'"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "097b85d166509a84e05b13f286402707110837ea",
+    "filename": "candyDist.py",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/super30admin/Greedy-1/blob/9b0fefee1ca8077c0c01d6aa7a519154b870d5fa/candyDist.py",
+    "raw_url": "https://github.com/super30admin/Greedy-1/raw/9b0fefee1ca8077c0c01d6aa7a519154b870d5fa/candyDist.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Greedy-1/contents/candyDist.py?ref=9b0fefee1ca8077c0c01d6aa7a519154b870d5fa",
+    "patch": "@@ -0,0 +1,31 @@\n+class Solution:\n+    \n+    \"\"\"\n+    Description: distribute candies based on a ratings array, each child must get one candy and children with higher rating then their neighbor should have more candies than them\n+    \n+    Time Complexity: O(n)\n+    Space Complexity: O(n)\n+    \n+    Approach: 2 pass solution\n+    - create an array with all 1s (1 candy for each child)\n+    - for left pass, add one more candy if rating is higher than child on the left\n+    - for right pass, add candy if the child on left don't have higher candies than the right neighbor + 1\n+    - return the sum of resulting array\n+    \"\"\"\n+    \n+    def candy(self, ratings: List[int]) -> int:\n+    \n+        if ratings == None or len(ratings) == 0: return\n+        \n+        candies = [1]*len(ratings)\n+        # left pass\n+        for i in range(1, len(ratings)):\n+            if ratings[i] > ratings[i - 1]:\n+                candies[i] = candies[i - 1] + 1\n+                \n+        # right pass\n+        for i in range(len(ratings) - 1, 0, -1):\n+            if ratings[i - 1] > ratings[i]:\n+                candies[i - 1] = max(candies[i - 1], candies[i] + 1)\n+                \n+        return sum(candies)"
+  },
+  {
+    "sha": "c8e453a36bcd3b0f3e97cc81d90ab06703db42d5",
+    "filename": "jumpgame.py",
+    "status": "added",
+    "additions": 63,
+    "deletions": 0,
+    "changes": 63,
+    "blob_url": "https://github.com/super30admin/Greedy-1/blob/9b0fefee1ca8077c0c01d6aa7a519154b870d5fa/jumpgame.py",
+    "raw_url": "https://github.com/super30admin/Greedy-1/raw/9b0fefee1ca8077c0c01d6aa7a519154b870d5fa/jumpgame.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Greedy-1/contents/jumpgame.py?ref=9b0fefee1ca8077c0c01d6aa7a519154b870d5fa",
+    "patch": "@@ -0,0 +1,63 @@\n+class Solution:\n+    \n+    \"\"\"\n+    Description: Determine ability to reach last index of an array when each element represent max jump length at that position\n+    \n+    Time Complexity: O(n)\n+    Space Complexity: O(1)\n+    \n+    Approach:\n+    1. initialize from first index and index equating to maximum reach (say max_i) based on the value \n+    2. loop through all items and stop when the current index i matches with the last index in given array to return True\n+    3. jump max_i to value of max_i or the i + value@i\n+    \"\"\"\n+    \n+    def canJump(self, nums: List[int]) -> bool:\n+        \n+        if nums == None or len(nums) < 2: return True\n+        \n+        i = 0; max_i = 0\n+        while i <= max_i:\n+            if i == len(nums) - 1: return True\n+            max_i = max(max_i, i + nums[i])\n+            i += 1\n+            \n+        return False\n+    \n+    \"\"\"\n+    # DFS Solution:\n+\n+    def canJump(self, nums: List[int]) -> bool:\n+        \n+        if nums == None or len(nums) < 2: return True\n+        \n+        return self.dfs(nums, 0)\n+    \n+    def dfs(self, nums, idx):\n+        \n+        # Base\n+        if idx >= len(nums) - 1: return True\n+        \n+        # Logic\n+        for j in range(1, nums[idx] + 1):\n+            if self.dfs(nums, j + idx): return True\n+        return False\n+   \n+    # BFS Solution:\n+\n+    def canJump(self, nums: List[int]) -> bool:\n+        \n+        if nums == None or len(nums) < 2: return True\n+        \n+        from collections import deque\n+        queue = deque()\n+        queue.append((0, nums[0]))\n+        \n+        while queue:\n+            idx, elem = queue.popleft()\n+            for j in range(1, elem + 1):\n+                if j + idx >= len(nums) - 1: return True\n+                queue.append((j + idx, nums[j + idx]))\n+                \n+        return False\n+    \"\"\""
+  },
+  {
+    "sha": "af775640b6a2c2a2a1edb2530bd1b9f778c96aa2",
+    "filename": "jumpgame2.py",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/super30admin/Greedy-1/blob/9b0fefee1ca8077c0c01d6aa7a519154b870d5fa/jumpgame2.py",
+    "raw_url": "https://github.com/super30admin/Greedy-1/raw/9b0fefee1ca8077c0c01d6aa7a519154b870d5fa/jumpgame2.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Greedy-1/contents/jumpgame2.py?ref=9b0fefee1ca8077c0c01d6aa7a519154b870d5fa",
+    "patch": "@@ -0,0 +1,30 @@\n+class Solution:\n+    \n+    \"\"\"\n+    Description: From jump game, find minimum jumps\n+    \n+    Time Complexity: O(n)\n+    Space Complexity: O(1)\n+    \n+    Approach: Using Greedy approach:\n+    - start with jump = 1 (for length of array > 1)\n+    - for each index, move two zones, current interval and next interval\n+      + update current interval to next when we reach to end of previous current interval and add a jump\n+      + next interval will always be maximum index of the jump could be taken from previous\n+    - ensure to limit updating the current interval only for indices less than the last index\n+    \"\"\"\n+    \n+    def jump(self, nums: List[int]) -> int:\n+        \n+        if nums == None or len(nums) < 2: return 0\n+        jump = 1 # min jump for length > 1\n+        next_interval = nums[0]; curr_interval = nums[0]\n+        \n+        for i, num in enumerate(nums):\n+            next_interval = max(i + num, next_interval)\n+            if i == curr_interval and i < len(nums) - 1: \n+                jump += 1\n+                curr_interval = next_interval\n+            \n+        return jump\n+            "
+  }
+]

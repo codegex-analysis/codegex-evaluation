@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "275d395399f61b75a70879691743d71d181e9de5",
+    "filename": "plugins/hypervisors/kvm/src/main/java/com/cloud/hypervisor/kvm/resource/LibvirtComputingResource.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/cloudstack/blob/ef0321d41ed183d5d9fcbc84b961ca1d73769d49/plugins/hypervisors/kvm/src/main/java/com/cloud/hypervisor/kvm/resource/LibvirtComputingResource.java",
+    "raw_url": "https://github.com/apache/cloudstack/raw/ef0321d41ed183d5d9fcbc84b961ca1d73769d49/plugins/hypervisors/kvm/src/main/java/com/cloud/hypervisor/kvm/resource/LibvirtComputingResource.java",
+    "contents_url": "https://api.github.com/repos/apache/cloudstack/contents/plugins/hypervisors/kvm/src/main/java/com/cloud/hypervisor/kvm/resource/LibvirtComputingResource.java?ref=ef0321d41ed183d5d9fcbc84b961ca1d73769d49",
+    "patch": "@@ -4266,7 +4266,11 @@ public void setBackingFileFormat(String volPath) {\n             Map<String, String> info = qemu.info(file);\n             String backingFilePath = info.get(new String(\"backing_file\"));\n             String backingFileFormat = info.get(new String(\"backing_file_format\"));\n-            if (org.apache.commons.lang.StringUtils.isEmpty(backingFileFormat)) {\n+            if (org.apache.commons.lang.StringUtils.isNotBlank(backingFilePath)\n+                    && org.apache.commons.lang.StringUtils.isBlank(backingFileFormat)) {\n+                // VMs which are created in CloudStack 4.14 and before cannot be started or migrated\n+                // in latest Linux distributions due to missing backing file format\n+                // Please refer to https://libvirt.org/kbase/backing_chains.html#vm-refuses-to-start-due-to-misconfigured-backing-store-format\n                 s_logger.info(\"Setting backing file format of \" + volPath);\n                 QemuImgFile backingFile = new QemuImgFile(backingFilePath);\n                 Map<String, String> backingFileinfo = qemu.info(backingFile);"
+  }
+]

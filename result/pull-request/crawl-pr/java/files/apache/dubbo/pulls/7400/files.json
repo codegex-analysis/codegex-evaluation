@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "5d935fa60549c38ccd9780642cd02d0e7c64be6a",
+    "filename": "dubbo-config/dubbo-config-api/src/main/java/org/apache/dubbo/config/utils/ConfigValidationUtils.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/apache/dubbo/blob/cd1f426fb2c40ea225e4008c2ac3fffa40c0937f/dubbo-config/dubbo-config-api/src/main/java/org/apache/dubbo/config/utils/ConfigValidationUtils.java",
+    "raw_url": "https://github.com/apache/dubbo/raw/cd1f426fb2c40ea225e4008c2ac3fffa40c0937f/dubbo-config/dubbo-config-api/src/main/java/org/apache/dubbo/config/utils/ConfigValidationUtils.java",
+    "contents_url": "https://api.github.com/repos/apache/dubbo/contents/dubbo-config/dubbo-config-api/src/main/java/org/apache/dubbo/config/utils/ConfigValidationUtils.java?ref=cd1f426fb2c40ea225e4008c2ac3fffa40c0937f",
+    "patch": "@@ -49,7 +49,7 @@\n import org.apache.dubbo.monitor.MonitorFactory;\n import org.apache.dubbo.monitor.MonitorService;\n import org.apache.dubbo.registry.RegistryService;\n-import org.apache.dubbo.remoting.Codec;\n+import org.apache.dubbo.remoting.Codec2;\n import org.apache.dubbo.remoting.Dispatcher;\n import org.apache.dubbo.remoting.Transporter;\n import org.apache.dubbo.remoting.exchange.Exchanger;\n@@ -475,7 +475,7 @@ public static void validateProtocolConfig(ProtocolConfig config) {\n \n \n             if (DUBBO_PROTOCOL.equals(name)) {\n-                checkMultiExtension(Codec.class, CODEC_KEY, config.getCodec());\n+                checkMultiExtension(Codec2.class, CODEC_KEY, config.getCodec());\n                 checkMultiExtension(Serialization.class, SERIALIZATION_KEY, config.getSerialization());\n                 checkMultiExtension(Transporter.class, SERVER_KEY, config.getServer());\n                 checkMultiExtension(Transporter.class, CLIENT_KEY, config.getClient());"
+  },
+  {
+    "sha": "8fdbffcaf8e62a7d3156b3e1cfae066b790ab112",
+    "filename": "dubbo-config/dubbo-config-api/src/test/java/org/apache/dubbo/config/AbstractConfigTest.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 2,
+    "changes": 15,
+    "blob_url": "https://github.com/apache/dubbo/blob/cd1f426fb2c40ea225e4008c2ac3fffa40c0937f/dubbo-config/dubbo-config-api/src/test/java/org/apache/dubbo/config/AbstractConfigTest.java",
+    "raw_url": "https://github.com/apache/dubbo/raw/cd1f426fb2c40ea225e4008c2ac3fffa40c0937f/dubbo-config/dubbo-config-api/src/test/java/org/apache/dubbo/config/AbstractConfigTest.java",
+    "contents_url": "https://api.github.com/repos/apache/dubbo/contents/dubbo-config/dubbo-config-api/src/test/java/org/apache/dubbo/config/AbstractConfigTest.java?ref=cd1f426fb2c40ea225e4008c2ac3fffa40c0937f",
+    "patch": "@@ -107,6 +107,15 @@ public void testAppendProperties3() throws Exception {\n         }\n     }*/\n \n+    @Test\n+    public void testValidateProtocolConfig() {\n+        ProtocolConfig protocolConfig = new ProtocolConfig();\n+        protocolConfig.setCodec(\"exchange\");\n+        protocolConfig.setName(\"test\");\n+        protocolConfig.setHost(\"host\");\n+        ConfigValidationUtils.validateProtocolConfig(protocolConfig);\n+    }\n+\n     @Test\n     public void testAppendParameters1() throws Exception {\n         Map<String, String> parameters = new HashMap<String, String>();\n@@ -173,12 +182,14 @@ public void checkExtension() throws Exception {\n \n     @Test\n     public void checkMultiExtension1() throws Exception {\n-        Assertions.assertThrows(IllegalStateException.class, () -> ConfigValidationUtils.checkMultiExtension(Greeting.class, \"hello\", \"default,world\"));\n+        Assertions.assertThrows(IllegalStateException.class,\n+                () -> ConfigValidationUtils.checkMultiExtension(Greeting.class, \"hello\", \"default,world\"));\n     }\n \n     @Test\n     public void checkMultiExtension2() throws Exception {\n-        Assertions.assertThrows(IllegalStateException.class, () -> ConfigValidationUtils.checkMultiExtension(Greeting.class, \"hello\", \"default,-world\"));\n+        Assertions.assertThrows(IllegalStateException.class,\n+                () -> ConfigValidationUtils.checkMultiExtension(Greeting.class, \"hello\", \"default,-world\"));\n     }\n \n     @Test"
+  }
+]

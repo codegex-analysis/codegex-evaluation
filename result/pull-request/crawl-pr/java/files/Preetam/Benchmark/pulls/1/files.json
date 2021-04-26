@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "a507e09874ed4335110e0989a8acc0c5c747f247",
+    "filename": ".github/workflows/shiftleft.yml",
+    "status": "added",
+    "additions": 94,
+    "deletions": 0,
+    "changes": 94,
+    "blob_url": "https://github.com/Preetam/Benchmark/blob/765daf02634bb54ed83b5d76b62393f4ba03a45c/.github/workflows/shiftleft.yml",
+    "raw_url": "https://github.com/Preetam/Benchmark/raw/765daf02634bb54ed83b5d76b62393f4ba03a45c/.github/workflows/shiftleft.yml",
+    "contents_url": "https://api.github.com/repos/Preetam/Benchmark/contents/.github/workflows/shiftleft.yml?ref=765daf02634bb54ed83b5d76b62393f4ba03a45c",
+    "patch": "@@ -0,0 +1,94 @@\n+---\n+# This workflow integrates ShiftLeft NG SAST with GitHub\n+# Visit https://docs.shiftleft.io for help\n+name: ShiftLeft\n+\n+on:\n+  pull_request:\n+  workflow_dispatch:\n+\n+jobs:\n+  NextGen-Static-Analysis:\n+    runs-on: ubuntu-latest\n+    steps:\n+    - uses: actions/checkout@v2\n+    # We are building this application with Java 11\n+    - name: Setup Java JDK\n+      uses: actions/setup-java@v1.4.3\n+      with:\n+        java-version: 11.0.x\n+    - name: Package with maven\n+      run: mvn compile package\n+    - name: Download ShiftLeft CLI\n+      run: |\n+        curl https://cdn.shiftleft.io/download/sl > ${GITHUB_WORKSPACE}/sl && chmod a+rx ${GITHUB_WORKSPACE}/sl\n+    # ShiftLeft requires Java 1.8. Post the package step override the version\n+    - name: Setup Java JDK\n+      uses: actions/setup-java@v1.4.3\n+      with:\n+        java-version: 1.8\n+    - name: Extract branch name\n+      shell: bash\n+      run: echo \"##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})\"\n+      id: extract_branch\n+    - name: NextGen Static Analysis\n+      run: ${GITHUB_WORKSPACE}/sl analyze --wait --app Benchmark --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --java --cpg target/benchmark.war\n+      env:\n+        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}\n+        \n+  Build-Rules: \n+    runs-on: ubuntu-latest\n+    needs: NextGen-Static-Analysis\n+    steps:\n+    - uses: actions/checkout@v2\n+    - name: Download ShiftLeft CLI\n+      run: |\n+        curl https://cdn.shiftleft.io/download/sl > ${GITHUB_WORKSPACE}/sl && chmod a+rx ${GITHUB_WORKSPACE}/sl\n+    - name: Validate Build Rules\n+      run: |\n+        ${GITHUB_WORKSPACE}/sl check-analysis --app Benchmark \\\n+            --branch \"${{ github.head_ref || steps.extract_branch.outputs.branch }}\" \\\n+            --report \\\n+            --github-pr-number=${{github.event.number}} \\\n+            --github-pr-user=${{ github.repository_owner }} \\\n+            --github-pr-repo=${{ github.event.repository.name }} \\\n+            --github-token=${{ secrets.GITHUB_TOKEN }} --timeout=360s\n+      env:\n+        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}\n+        \n+  OWASP-Benchmark-Score:\n+    runs-on: ubuntu-20.04\n+    needs: NextGen-Static-Analysis\n+    steps:\n+    - uses: actions/checkout@v2\n+    - name: Setup Java JDK\n+      uses: actions/setup-java@v1.4.3\n+      with:\n+        java-version: 11.0.x\n+    - name: Export NG SAST Findings\n+      run: |\n+        cd $HOME\n+        git clone --depth 1 --branch v0.0.1  https://github.com/ShiftLeftSecurity/field-integrations\n+        cd field-integrations/shiftleft-utils || exit 1\n+        mkdir -p ${GITHUB_WORKSPACE}/ngsast_results\n+        pip3 install -r requirements.txt\n+        python3 export.py --app Benchmark -f sl -o ${GITHUB_WORKSPACE}/ngsast_results/Benchmark.sl\n+      env:\n+        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}\n+        \n+    - name: Package with maven\n+      run: mvn compile package\n+    - name: Calculate OWASP Benchmark Score\n+      run: |\n+        cd ${GITHUB_WORKSPACE}\n+        mvn validate -Pbenchmarkscore -Dexec.args=\"expectedresults-1.2.csv ngsast_results ShiftLeft anonymous\"\n+        if [ -e \"scorecard/Benchmark_Scorecard_for_ShiftLeft.html\" ]; then\n+            echo \"*** Thank you for Benchmarking ShiftLeft NextGen Static Analysis ***\"\n+            echo \"You can find the results for ShiftLeft under workflow artifacts called scorecard\"\n+        else\n+            echo \"Benchmark results were not produced correctly. Check if you have Java 1.8 installed\"\n+        fi\n+    - uses: actions/upload-artifact@v2\n+      with:\n+        name: scorecard\n+        path: scorecard"
+  },
+  {
+    "sha": "220d4baf42f981e72b61c5c28a614d63404024dc",
+    "filename": "shiftleft.yml",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/Preetam/Benchmark/blob/765daf02634bb54ed83b5d76b62393f4ba03a45c/shiftleft.yml",
+    "raw_url": "https://github.com/Preetam/Benchmark/raw/765daf02634bb54ed83b5d76b62393f4ba03a45c/shiftleft.yml",
+    "contents_url": "https://api.github.com/repos/Preetam/Benchmark/contents/shiftleft.yml?ref=765daf02634bb54ed83b5d76b62393f4ba03a45c",
+    "patch": "@@ -0,0 +1,12 @@\n+build_rules:\n+  - id: allow-zero-findings\n+    finding_types:\n+      - vuln\n+      - secret\n+      - insight\n+      - \"*\"\n+    severity:\n+      - SEVERITY_MEDIUM_IMPACT\n+      - SEVERITY_HIGH_IMPACT\n+      - SEVERITY_LOW_IMPACT\n+    threshold: 0\n\\ No newline at end of file"
+  }
+]

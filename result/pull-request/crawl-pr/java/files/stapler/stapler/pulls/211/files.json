@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "f5d23e5a019802c7d84e9c5fab968c632cc20744",
+    "filename": "core/pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/stapler/stapler/blob/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/core/pom.xml",
+    "raw_url": "https://github.com/stapler/stapler/raw/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/core/pom.xml",
+    "contents_url": "https://api.github.com/repos/stapler/stapler/contents/core/pom.xml?ref=c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7",
+    "patch": "@@ -44,7 +44,7 @@\n     <dependency>\n       <groupId>commons-beanutils</groupId>\n       <artifactId>commons-beanutils</artifactId>\n-      <version>1.9.2</version>\n+      <version>1.9.4</version>\n     </dependency>\n     <dependency>\n       <groupId>commons-io</groupId>"
+  },
+  {
+    "sha": "a73f5a88d124e7619c3546a22f3e735a20b38691",
+    "filename": "jelly/src/main/java/org/kohsuke/stapler/jelly/AttributeNameRewritingTagScript.java",
+    "status": "added",
+    "additions": 54,
+    "deletions": 0,
+    "changes": 54,
+    "blob_url": "https://github.com/stapler/stapler/blob/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/jelly/src/main/java/org/kohsuke/stapler/jelly/AttributeNameRewritingTagScript.java",
+    "raw_url": "https://github.com/stapler/stapler/raw/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/jelly/src/main/java/org/kohsuke/stapler/jelly/AttributeNameRewritingTagScript.java",
+    "contents_url": "https://api.github.com/repos/stapler/stapler/contents/jelly/src/main/java/org/kohsuke/stapler/jelly/AttributeNameRewritingTagScript.java?ref=c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7",
+    "patch": "@@ -0,0 +1,54 @@\n+/*\n+ * Copyright (c) 2021 CloudBees, Inc.\n+ * All rights reserved.\n+ *\n+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided\n+ * that the following conditions are met:\n+ *\n+ *     * Redistributions of source code must retain the above copyright notice, this list of\n+ *       conditions and the following disclaimer.\n+ *     * Redistributions in binary form must reproduce the above copyright notice, this list of\n+ *       conditions and the following disclaimer in the documentation and/or other materials\n+ *       provided with the distribution.\n+ *\n+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS\n+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY\n+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS\n+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,\n+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER\n+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF\n+ * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n+ */\n+\n+package org.kohsuke.stapler.jelly;\n+\n+import org.apache.commons.jelly.expression.Expression;\n+import org.apache.commons.jelly.impl.TagScript;\n+\n+/**\n+ * This class implements a {@link TagScript} that allows rewriting attribute names.\n+ *\n+ */\n+/* package */ class AttributeNameRewritingTagScript extends TagScript {\n+    private final String original;\n+    private final String replacement;\n+\n+    public AttributeNameRewritingTagScript(String original, String replacement) {\n+        this.original = original;\n+        this.replacement = replacement;\n+    }\n+\n+    @Override\n+    public void addAttribute(String name, Expression expression) {\n+        if (replacement.equals(name)) {\n+            // cf. TagScript#run\n+            throw new IllegalArgumentException(\"This tag does not understand the '\" + replacement + \"' attribute\");\n+        }\n+        if (original.equals(name)) {\n+            super.addAttribute(replacement, expression);\n+        } else {\n+            super.addAttribute(name, expression);\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "fb467b54854cecf28011c62995a12b4185bbd041",
+    "filename": "jelly/src/main/java/org/kohsuke/stapler/jelly/CustomJellyContext.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/stapler/stapler/blob/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/jelly/src/main/java/org/kohsuke/stapler/jelly/CustomJellyContext.java",
+    "raw_url": "https://github.com/stapler/stapler/raw/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/jelly/src/main/java/org/kohsuke/stapler/jelly/CustomJellyContext.java",
+    "contents_url": "https://api.github.com/repos/stapler/stapler/contents/jelly/src/main/java/org/kohsuke/stapler/jelly/CustomJellyContext.java?ref=c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7",
+    "patch": "@@ -23,6 +23,9 @@\n \n package org.kohsuke.stapler.jelly;\n \n+import org.apache.commons.beanutils.BeanUtilsBean;\n+import org.apache.commons.beanutils.PropertyUtilsBean;\n+import org.apache.commons.beanutils.SuppressPropertiesBeanIntrospector;\n import org.apache.commons.jelly.parser.XMLParser;\n import org.apache.commons.jelly.expression.ExpressionFactory;\n import org.apache.commons.jelly.expression.Expression;\n@@ -81,6 +84,12 @@ private void init() {\n         // we achieve substantial performance improvement.\n         registerTagLibrary(\"\",ReallyStaticTagLibrary.INSTANCE);\n         registerTagLibrary(\"this\",ThisTagLibrary.INSTANCE);\n+\n+        if (DISABLE_BEANUTILS_CLASS_SUPPRESSION) {\n+            /* In case our existing workarounds in StaplerTagLibrary for IncludeTag aren't enough */\n+            PropertyUtilsBean propertyUtilsBean = BeanUtilsBean.getInstance().getPropertyUtils();\n+            propertyUtilsBean.removeBeanIntrospector(SuppressPropertiesBeanIntrospector.SUPPRESS_CLASS);\n+        }\n     }\n \n     @Override\n@@ -109,6 +118,8 @@ public TagLibrary getTagLibrary(String namespaceURI) {\n \n     public static /* final */ boolean ESCAPE_BY_DEFAULT = Boolean.valueOf(System.getProperty(CustomJellyContext.class.getName() + \".escapeByDefault\", \"true\"));\n \n+    private static final boolean DISABLE_BEANUTILS_CLASS_SUPPRESSION = Boolean.getBoolean(CustomJellyContext.class.getName() + \".disableBeanUtilsClassSuppression\");\n+\n     private static class CustomXMLParser extends XMLParser implements ExpressionFactory {\n         private ResourceBundle resourceBundle;\n         @Override"
+  },
+  {
+    "sha": "b92a1593e195c7afa1ad0350a2d7a5b77f71ac7e",
+    "filename": "jelly/src/main/java/org/kohsuke/stapler/jelly/IncludeTag.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/stapler/stapler/blob/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/jelly/src/main/java/org/kohsuke/stapler/jelly/IncludeTag.java",
+    "raw_url": "https://github.com/stapler/stapler/raw/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/jelly/src/main/java/org/kohsuke/stapler/jelly/IncludeTag.java",
+    "contents_url": "https://api.github.com/repos/stapler/stapler/contents/jelly/src/main/java/org/kohsuke/stapler/jelly/IncludeTag.java?ref=c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7",
+    "patch": "@@ -23,6 +23,7 @@\n \n package org.kohsuke.stapler.jelly;\n \n+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;\n import org.apache.commons.jelly.JellyContext;\n import org.apache.commons.jelly.JellyTagException;\n import org.apache.commons.jelly.Script;\n@@ -34,12 +35,20 @@\n import org.xml.sax.SAXException;\n import org.jvnet.maven.jellydoc.annotation.Required;\n \n+import java.util.logging.Level;\n+import java.util.logging.Logger;\n+\n /**\n  * Tag that includes views of the object.\n  *\n  * @author Kohsuke Kawaguchi\n  */\n public class IncludeTag extends TagSupport {\n+    public static final Logger LOGGER = Logger.getLogger(IncludeTag.class.getName());\n+\n+    @SuppressFBWarnings(\"MS_SHOULD_BE_FINAL\")\n+    public static /* non-final for script console */ boolean SKIP_LOGGING_CLASS_SETTER = Boolean.getBoolean(IncludeTag.class.getName() + \".skipLoggingClassSetter\");\n+\n     private Object it;\n \n     private String page;\n@@ -79,8 +88,23 @@ public void setFrom(Object from) {\n      *\n      * By default this is \"from.getClass()\". This takes\n      * precedence over the {@link #setFrom(Object)} method.\n+     *\n+     * This used to be called {@code setClass}, but that ended up causing\n+     * problems with new commons-beanutils restrictions via\n+     * {@code ConvertingWrapDynaBean} use in {@code JellyBuilder}.\n+     * {@link StaplerTagLibrary} uses {@link AttributeNameRewritingTagScript}\n+     * to ensure attempts to set {@code class} instead set {@code clazz}, and\n+     * that attempts to set {@code clazz} directly that way fail.\n      */\n+    public void setClazz(Class clazz) {\n+        this.clazz = clazz;\n+    }\n+\n+    @Deprecated // TODO Remove this method?\n     public void setClass(Class clazz) {\n+        if (!SKIP_LOGGING_CLASS_SETTER) {\n+            LOGGER.log(Level.WARNING, \"Unexpected call to #setClass\", new Exception());\n+        }\n         this.clazz = clazz;\n     }\n "
+  },
+  {
+    "sha": "4699aeeca636ce5ac7f181a50dc91600952e42e3",
+    "filename": "jelly/src/main/java/org/kohsuke/stapler/jelly/StaplerTagLibrary.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/stapler/stapler/blob/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/jelly/src/main/java/org/kohsuke/stapler/jelly/StaplerTagLibrary.java",
+    "raw_url": "https://github.com/stapler/stapler/raw/c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7/jelly/src/main/java/org/kohsuke/stapler/jelly/StaplerTagLibrary.java",
+    "contents_url": "https://api.github.com/repos/stapler/stapler/contents/jelly/src/main/java/org/kohsuke/stapler/jelly/StaplerTagLibrary.java?ref=c0b75c89ee9d71a9fe6b43fb9b9af70d703290a7",
+    "patch": "@@ -23,12 +23,14 @@\n \n package org.kohsuke.stapler.jelly;\n \n+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;\n import org.apache.commons.jelly.JellyContext;\n import org.apache.commons.jelly.JellyException;\n import org.apache.commons.jelly.JellyTagException;\n import org.apache.commons.jelly.Script;\n import org.apache.commons.jelly.TagLibrary;\n import org.apache.commons.jelly.XMLOutput;\n+import org.apache.commons.jelly.impl.DefaultTagFactory;\n import org.apache.commons.jelly.impl.TagScript;\n import org.xml.sax.Attributes;\n \n@@ -105,8 +107,20 @@ public void run(JellyContext context, XMLOutput output) throws JellyTagException\n                 }\n             };\n \n+        if (!DISABLE_INCLUDE_TAG_CLASS_ATTRIBUTE_REWRITING && name.equals(\"include\")) {\n+            // Retain backward compatibility with all views setting the obsolete 'class' attribute.\n+            // See IncludeTag#setClazz for details.\n+            final AttributeNameRewritingTagScript script = new AttributeNameRewritingTagScript(\"class\", \"clazz\");\n+            script.setTagFactory(new DefaultTagFactory(IncludeTag.class));\n+            return script;\n+        }\n+\n         return super.createTagScript(name, attributes);\n     }\n \n     private static final String ONCE_TAG_KEY = \"stapler.once\";\n+\n+    // Disable the st:include compatibility workaround to allow testing\n+    @SuppressFBWarnings(value = \"MS_SHOULD_BE_FINAL\", justification = \"Exposed for tests\")\n+    public static /* non-final */ boolean DISABLE_INCLUDE_TAG_CLASS_ATTRIBUTE_REWRITING = false;\n }"
+  }
+]

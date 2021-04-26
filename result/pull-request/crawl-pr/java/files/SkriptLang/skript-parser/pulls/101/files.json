@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "47b23e1f9422ada12c31c8fa2cb8cfb4d8632451",
+    "filename": "src/main/java/io/github/syst3ms/skriptparser/file/FileParser.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/SkriptLang/skript-parser/blob/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/main/java/io/github/syst3ms/skriptparser/file/FileParser.java",
+    "raw_url": "https://github.com/SkriptLang/skript-parser/raw/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/main/java/io/github/syst3ms/skriptparser/file/FileParser.java",
+    "contents_url": "https://api.github.com/repos/SkriptLang/skript-parser/contents/src/main/java/io/github/syst3ms/skriptparser/file/FileParser.java?ref=84e36f89d7ce7a17137e401056eac8ca3dbfb2f9",
+    "patch": "@@ -92,7 +92,7 @@ private static int count(List<FileElement> elements) {\n      */\n     @Nullable\n     private static String removeComments(String string) {\n-        if (string.matches(\"^[\\\\s\\\\t]*#[^#]+\") || string.equals(\"#\") || string.isBlank()) {\n+        if (string.matches(\"^[\\\\s\\\\t]*#[^#]+\") || string.startsWith(\"#\") || string.isBlank()) {\n             return \"\"; // Whole string is a comment\n         }\n "
+  },
+  {
+    "sha": "04f98c90a98f9c62ddf3da49e3f3ec4bce35a649",
+    "filename": "src/main/java/io/github/syst3ms/skriptparser/lang/VariableString.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 18,
+    "changes": 38,
+    "blob_url": "https://github.com/SkriptLang/skript-parser/blob/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/main/java/io/github/syst3ms/skriptparser/lang/VariableString.java",
+    "raw_url": "https://github.com/SkriptLang/skript-parser/raw/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/main/java/io/github/syst3ms/skriptparser/lang/VariableString.java",
+    "contents_url": "https://api.github.com/repos/SkriptLang/skript-parser/contents/src/main/java/io/github/syst3ms/skriptparser/lang/VariableString.java?ref=84e36f89d7ce7a17137e401056eac8ca3dbfb2f9",
+    "patch": "@@ -1,7 +1,6 @@\n package io.github.syst3ms.skriptparser.lang;\n \n import io.github.syst3ms.skriptparser.lang.base.TaggedExpression;\n-import io.github.syst3ms.skriptparser.log.ErrorType;\n import io.github.syst3ms.skriptparser.log.SkriptLogger;\n import io.github.syst3ms.skriptparser.parsing.ParseContext;\n import io.github.syst3ms.skriptparser.parsing.ParserState;\n@@ -19,14 +18,12 @@\n import java.util.Arrays;\n import java.util.List;\n import java.util.Optional;\n-import java.util.regex.Pattern;\n \n /**\n  * A string that possibly contains expressions inside it, meaning that its value may be unknown at parse time\n  */\n @SuppressWarnings(\"ConfusingArgumentToVarargsMethod\")\n public class VariableString extends TaggedExpression {\n-    public static final Pattern R_LITERAL_CONTENT_PATTERN = Pattern.compile(\"^(.+?)\\\\((.+)\\\\)\\\\1$\"); // It's actually rare to be able to use '.+' raw like this\n     /**\n      * An array containing raw data for this {@link VariableString}.\n      * Contains {@link String} and {@link Expression} elements\n@@ -55,18 +52,10 @@ private VariableString(Object[] data) {\n     public static Optional<VariableString> newInstanceWithQuotes(String s, ParserState parserState, SkriptLogger logger) {\n         if (s.startsWith(\"\\\"\") && s.endsWith(\"\\\"\") && StringUtils.nextSimpleCharacterIndex(s, 0) == s.length()) {\n             return newInstance(s.substring(1, s.length() - 1), parserState, logger);\n-        } else if (s.startsWith(\"'\") && s.endsWith(\"'\") && StringUtils.nextSimpleCharacterIndex(s, 0) == s.length()) {\n-            return Optional.of(new VariableString(new String[]{\n-                    s.substring(1, s.length() - 1).replace(\"\\\\'\", \"'\")\n+        } else if (s.startsWith(\"r\\\"\") && s.endsWith(\"\\\"\") && StringUtils.nextSimpleCharacterIndex(s, 1) == s.length()) {\n+            return Optional.of(new VariableString(new String[] {\n+                    s.substring(2, s.length() - 1).replace(\"\\\\\\\"\", \"\\\"\")\n             }));\n-        } else if (s.startsWith(\"R\\\"\") && s.endsWith(\"\\\"\")) {\n-            var content = s.substring(2, s.length() - 1);\n-            var m = R_LITERAL_CONTENT_PATTERN.matcher(content);\n-            if (m.matches()) {\n-                return Optional.of(new VariableString(new String[]{m.group(2)}));\n-            } else {\n-                logger.error(\"Invalid R literal string\", ErrorType.MALFORMED_INPUT);\n-            }\n         }\n         return Optional.empty();\n     }\n@@ -87,6 +76,9 @@ private VariableString(Object[] data) {\n             if (c == '%') {\n                 if (i == charArray.length - 1) {\n                     return Optional.empty();\n+                } else if (charArray[i + 1] == '%') {\n+                    sb.append(charArray[++i]);\n+                    continue;\n                 }\n                 var content = StringUtils.getPercentContent(s, i + 1);\n                 var toParse = content.map(co -> co.replaceAll(\"\\\\\\\\(.)\", \"$1\"));\n@@ -105,7 +97,8 @@ private VariableString(Object[] data) {\n                 i += content.get().length() + 1;\n             } else if (c == '<') {\n                 if (i == charArray.length - 1) {\n-                    return Optional.empty();\n+                    sb.append(c);\n+                    break;\n                 }\n                 var content = StringUtils.getBracketContent(s, i + 1, '>');\n                 if (content.isEmpty()) {\n@@ -125,7 +118,7 @@ private VariableString(Object[] data) {\n                 data.add(tag.get());\n                 i += content.get().length() + \">\".length();\n             } else if (c == '\\\\') {\n-                if (i + 1 == charArray.length) {\n+                if (i == charArray.length - 1) {\n                     return Optional.empty();\n                 }\n                 char next = charArray[++i];\n@@ -137,11 +130,20 @@ private VariableString(Object[] data) {\n                         sb.append('\\t');\n                         break;\n                     default:\n-                        sb.append(c);\n+                        sb.append(next);\n                 }\n             } else if (c == '&') {\n+                if (i == charArray.length - 1) {\n+                    sb.append(c);\n+                    break;\n+                }\n+                char next = charArray[++i];\n+                if (Character.isWhitespace(next)) {\n+                    sb.append(c).append(next);\n+                    continue;\n+                }\n                 logger.recurse();\n-                var tag = TagManager.parseTag(String.valueOf(charArray[++i]), logger);\n+                var tag = TagManager.parseTag(String.valueOf(next), logger);\n                 logger.callback();\n                 if (tag.isEmpty()) {\n                     return Optional.empty();"
+  },
+  {
+    "sha": "1bf819dfda2b3e07e11a5e7ea4d4c6179d50607e",
+    "filename": "src/main/java/io/github/syst3ms/skriptparser/util/StringUtils.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 10,
+    "changes": 10,
+    "blob_url": "https://github.com/SkriptLang/skript-parser/blob/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/main/java/io/github/syst3ms/skriptparser/util/StringUtils.java",
+    "raw_url": "https://github.com/SkriptLang/skript-parser/raw/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/main/java/io/github/syst3ms/skriptparser/util/StringUtils.java",
+    "contents_url": "https://api.github.com/repos/SkriptLang/skript-parser/contents/src/main/java/io/github/syst3ms/skriptparser/util/StringUtils.java?ref=84e36f89d7ce7a17137e401056eac8ca3dbfb2f9",
+    "patch": "@@ -103,16 +103,6 @@ public static int nextSimpleCharacterIndex(String s, int index) {\n                 if (closing == -1)\n                     return -1;\n                 i = closing;\n-            } else if (c == '\\'') {\n-                var closing = s.indexOf('\\'', i + 1);\n-                if (closing == -1)\n-                    return -1;\n-                i = closing;\n-            } else if (c == 'R' && i < s.length() - 2 && chars[i + 1] == '\"') {\n-                var m = R_LITERAL_CONTENT_PATTERN.matcher(s).region(i + 2, s.length());\n-                if (!m.lookingAt())\n-                    return -1;\n-                i = m.end() + 1;\n             } else {\n                 return i;\n             }"
+  },
+  {
+    "sha": "55079656a22c0b2ba5c4f709a7aa7af571debb59",
+    "filename": "src/test/java/io/github/syst3ms/skriptparser/log/SkriptLoggerTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/SkriptLang/skript-parser/blob/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/test/java/io/github/syst3ms/skriptparser/log/SkriptLoggerTest.java",
+    "raw_url": "https://github.com/SkriptLang/skript-parser/raw/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/test/java/io/github/syst3ms/skriptparser/log/SkriptLoggerTest.java",
+    "contents_url": "https://api.github.com/repos/SkriptLang/skript-parser/contents/src/test/java/io/github/syst3ms/skriptparser/log/SkriptLoggerTest.java?ref=84e36f89d7ce7a17137e401056eac8ca3dbfb2f9",
+    "patch": "@@ -27,7 +27,7 @@ public void skriptLoggerTest() {\n         logger.finalizeLogs();\n         assertTrue(wrongNumber.isEmpty() && logger.close().get(0).getMessage().startsWith(\"A single\"));\n         logger = new SkriptLogger();\n-        Optional<? extends Expression<Boolean>> wrongRange = SyntaxParser.parseBooleanExpression(\"1 is between 'a' and 'b'\", SyntaxParser.MAYBE_CONDITIONAL, parserState, logger);\n+        Optional<? extends Expression<Boolean>> wrongRange = SyntaxParser.parseBooleanExpression(\"1 is between \\\"a\\\" and \\\"b\\\"\", SyntaxParser.MAYBE_CONDITIONAL, parserState, logger);\n         logger.finalizeLogs();\n         assertTrue(wrongRange.isEmpty() && logger.close().get(0).getMessage().startsWith(\"'1' cannot\"));\n     }"
+  },
+  {
+    "sha": "5ea4e088098012e0f62704fa769854cbc072eecc",
+    "filename": "src/test/java/io/github/syst3ms/skriptparser/syntax/EffAssert.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 11,
+    "changes": 32,
+    "blob_url": "https://github.com/SkriptLang/skript-parser/blob/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/test/java/io/github/syst3ms/skriptparser/syntax/EffAssert.java",
+    "raw_url": "https://github.com/SkriptLang/skript-parser/raw/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/test/java/io/github/syst3ms/skriptparser/syntax/EffAssert.java",
+    "contents_url": "https://api.github.com/repos/SkriptLang/skript-parser/contents/src/test/java/io/github/syst3ms/skriptparser/syntax/EffAssert.java?ref=84e36f89d7ce7a17137e401056eac8ca3dbfb2f9",
+    "patch": "@@ -27,13 +27,13 @@\n \t\tParser.getMainRegistration().addEffect(\n \t\t\tEffAssert.class,\n \t\t\t\"assert [1:with debug] %=boolean% [with [message] %string%]\",\n-\t\t\t\t\"throws [(error|exception)] <.+> [with [message] %string%]\"\n+\t\t\t\t\"(0:throws [(error|exception)]|1:compiles) <.+> [with [message] %string%]\"\n \t\t);\n \t}\n \n \tprivate Expression<Boolean> condition;\n \tprivate Expression<String> message;\n-\tprivate boolean debug;\n+\tprivate int parseMark;\n \n \tprivate String matched;\n \t@Nullable\n@@ -47,11 +47,11 @@\n \tpublic boolean init(Expression<?>[] expressions, int matchedPattern, ParseContext parseContext) {\n \t\tlogger = parseContext.getLogger();\n \t\tpattern = matchedPattern;\n+\t\tparseMark = parseContext.getParseMark();\n \t\tif (pattern == 0) {\n \t\t\tcondition = (Expression<Boolean>) expressions[0];\n \t\t\tif (expressions.length == 2)\n \t\t\t\tmessage = (Expression<String>) expressions[1];\n-\t\t\tdebug = parseContext.getParseMark() == 1;\n \t\t} else {\n \t\t\tmatched = parseContext.getMatches().get(0).group();\n \t\t\tparseContext.getLogger().recurse();\n@@ -70,7 +70,8 @@ public void execute(TriggerContext ctx) {\n \t\t\t\t\t.filter(val -> !val.booleanValue())\n \t\t\t\t\t.ifPresent(__ -> SyntaxParserTest.addError(new AssertionError(errorString(ctx))));\n \t\t} else {\n-\t\t\tif (throwsError != null)\n+\t\t\tif (throwsError != null && parseMark == 0\n+\t\t\t\t|| throwsError == null && parseMark == 1)\n \t\t\t\tSyntaxParserTest.addError(new AssertionError(errorString(ctx)));\n \t\t}\n \t}\n@@ -90,20 +91,29 @@ private String errorString(TriggerContext ctx) {\n \t\t\t\t\t\t.append(logger.getFileName())\n \t\t\t\t\t\t.append(\")\");\n \t\t\t} else {\n-\t\t\t\tassert throwsError != null;\n-\t\t\t\terror.append(\"Expected a non-parsable expression (\")\n-\t\t\t\t\t\t.append(matched)\n-\t\t\t\t\t\t.append(\", \")\n-\t\t\t\t\t\t.append(logger.getFileName())\n-\t\t\t\t\t\t.append(\")\");\n+\t\t\t\tif (parseMark == 0) {\n+\t\t\t\t\tassert throwsError != null;\n+\t\t\t\t\terror.append(\"Expected a non-parsable expression (\")\n+\t\t\t\t\t\t\t.append(matched)\n+\t\t\t\t\t\t\t.append(\", \")\n+\t\t\t\t\t\t\t.append(logger.getFileName())\n+\t\t\t\t\t\t\t.append(\")\");\n+\t\t\t\t} else {\n+\t\t\t\t\tassert throwsError == null;\n+\t\t\t\t\terror.append(\"Expected a parsable expression (\")\n+\t\t\t\t\t\t\t.append(matched)\n+\t\t\t\t\t\t\t.append(\", \")\n+\t\t\t\t\t\t\t.append(logger.getFileName())\n+\t\t\t\t\t\t\t.append(\")\");\n+\t\t\t\t}\n \t\t\t}\n \t\t} else {\n \t\t\terror.append(this.message.getSingle(ctx).map(s -> (String) s).orElse(TypeManager.EMPTY_REPRESENTATION))\n \t\t\t\t\t.append(\" (\")\n \t\t\t\t\t.append(logger.getFileName())\n \t\t\t\t\t.append(\")\");\n \t\t}\n-\t\tif (debug) {\n+\t\tif (pattern == 0 && parseMark == 1) {\n \t\t\terror.append(\" [\")\n \t\t\t\t\t.append(condition.getClass().getSimpleName())\n \t\t\t\t\t.append(\"]\");"
+  },
+  {
+    "sha": "5d861831917588532446f217c9ede6824a5b0031",
+    "filename": "src/test/resources/general/tags.txt",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 2,
+    "changes": 13,
+    "blob_url": "https://github.com/SkriptLang/skript-parser/blob/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/test/resources/general/tags.txt",
+    "raw_url": "https://github.com/SkriptLang/skript-parser/raw/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/test/resources/general/tags.txt",
+    "contents_url": "https://api.github.com/repos/SkriptLang/skript-parser/contents/src/test/resources/general/tags.txt?ref=84e36f89d7ce7a17137e401056eac8ca3dbfb2f9",
+    "patch": "@@ -1,10 +1,19 @@\n # Author(s):\n # \t- Mwexim\n-# Date: 2020/12/05\n+# Date(s):\n+#\t- 2020/12/05\n+#\t- 2021/03/07 (issue #99 and #100)\n \n test:\n \t# These are some general tests on tags, to test if they combine correctly into a string.\n \t# For the specific tests, refer to the 'tags' directory.\n \tset {var} to \"He<case=upper>llo, <tab>my <reset>name i<case=lower><break>s MWEXIM A&rND I am the creator of this test.\"\n \tset {var2} to \"HeLLO, \tMY name i\\ns mwexim aND I am the creator of this test.\"\n-\tassert {var} = {var2} with \"Multiple tags didn't combine correctly: {var} (%{var}%) != %{var2}%\"\n\\ No newline at end of file\n+\tassert {var} = {var2} with \"Multiple tags didn't combine correctly: {var} (%{var}%) != %{var2}%\"\n+\n+\t# Issue #99 and #100\n+\tset {list::*} to \"Hello\", \"&\" and \"World!\"\n+\tset {var3} to join {list::*} with \" \"\n+\tassert \"Hello & World!\" = {var3} with \"{list::*} joined by space should be 'Hello & World!': %{var3}%\"\n+\tcompiles \"<\"\n+\tcompiles \"70%% of the human body is made out of water.\"\n\\ No newline at end of file"
+  },
+  {
+    "sha": "aef0483eb2b5e1dc7623e942dc8c94e9d6c3189b",
+    "filename": "src/test/resources/literals/String.txt",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 3,
+    "changes": 8,
+    "blob_url": "https://github.com/SkriptLang/skript-parser/blob/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/test/resources/literals/String.txt",
+    "raw_url": "https://github.com/SkriptLang/skript-parser/raw/84e36f89d7ce7a17137e401056eac8ca3dbfb2f9/src/test/resources/literals/String.txt",
+    "contents_url": "https://api.github.com/repos/SkriptLang/skript-parser/contents/src/test/resources/literals/String.txt?ref=84e36f89d7ce7a17137e401056eac8ca3dbfb2f9",
+    "patch": "@@ -1,12 +1,14 @@\n # Author(s):\n # \t- Mwexim\n-# Date: 2020/11/07\n+# Date(s):\n+#\t- 2020/11/07\n+#\t- 2021/03/07 (R-string removal)\n \n test:\n \tset {var} to \"Hello World\"\n \tassert length of {var} = 11 with \"length of {var} didn't work: %length of {var}% != 11\"\n \n-\tset {var2} to R\"something(Hello World)something\" # R-literal strings will probably be removed in 0.2\n-\tassert {var} = {var2}\n+\tset {var2} to r\"I can put &here <whatever> I like%!\"\n+\tassert {var2} = \"I can put \\&here \\<whatever> I like%%!\"\n \n \tassert \"Hello \\tWorld!\" = \"Hello \tWorld!\" with \"'\\t'-character did not work.\"\n\\ No newline at end of file"
+  }
+]

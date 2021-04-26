@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "6243a45fd25f590fa8ae280062168349ec0d3e0d",
+    "filename": "common/src/main/java/com/github/twitch4j/common/util/AlternativeInstantDeserializer.java",
+    "status": "added",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/twitch4j/twitch4j/blob/72bb1c3491f42ac52638d5279b7869b8c02e32f4/common/src/main/java/com/github/twitch4j/common/util/AlternativeInstantDeserializer.java",
+    "raw_url": "https://github.com/twitch4j/twitch4j/raw/72bb1c3491f42ac52638d5279b7869b8c02e32f4/common/src/main/java/com/github/twitch4j/common/util/AlternativeInstantDeserializer.java",
+    "contents_url": "https://api.github.com/repos/twitch4j/twitch4j/contents/common/src/main/java/com/github/twitch4j/common/util/AlternativeInstantDeserializer.java?ref=72bb1c3491f42ac52638d5279b7869b8c02e32f4",
+    "patch": "@@ -0,0 +1,27 @@\n+package com.github.twitch4j.common.util;\n+\n+import com.fasterxml.jackson.core.JsonParser;\n+import com.fasterxml.jackson.databind.DeserializationContext;\n+import com.fasterxml.jackson.databind.JsonDeserializer;\n+\n+import java.io.IOException;\n+import java.time.Instant;\n+\n+public class AlternativeInstantDeserializer extends JsonDeserializer<Instant> {\n+    @Override\n+    public Instant deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {\n+        String str = p.getValueAsString();\n+\n+        if (str == null)\n+            return null;\n+\n+        str = str.trim();\n+\n+        if (str.endsWith(\" +0000 UTC\"))\n+            str = str.substring(0, str.length() - \" +0000 UTC\".length()) + \"Z\";\n+\n+        str = str.replace(' ', 'T');\n+\n+        return Instant.parse(str);\n+    }\n+}"
+  },
+  {
+    "sha": "ec35675a0637ce5a9cf8843d70e658f773dd7fdf",
+    "filename": "rest-helix/src/main/java/com/github/twitch4j/helix/TwitchHelix.java",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/twitch4j/twitch4j/blob/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/TwitchHelix.java",
+    "raw_url": "https://github.com/twitch4j/twitch4j/raw/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/TwitchHelix.java",
+    "contents_url": "https://api.github.com/repos/twitch4j/twitch4j/contents/rest-helix/src/main/java/com/github/twitch4j/helix/TwitchHelix.java?ref=72bb1c3491f42ac52638d5279b7869b8c02e32f4",
+    "patch": "@@ -1043,6 +1043,38 @@\n         @Param(\"first\") Integer limit\n     );\n \n+    /**\n+     * Gets information for a specific Twitch Team.\n+     * <p>\n+     * One of the two optional query parameters must be specified to return Team information.\n+     *\n+     * @param authToken User OAuth Token or App Access Token.\n+     * @param name      Team name.\n+     * @param id        Team ID.\n+     * @return TeamList\n+     */\n+    @RequestLine(\"GET /teams?name={name}&id={id}\")\n+    @Headers(\"Authorization: Bearer {token}\")\n+    HystrixCommand<TeamList> getTeams(\n+        @Param(\"token\") String authToken,\n+        @Param(\"name\") String name,\n+        @Param(\"id\") String id\n+    );\n+\n+    /**\n+     * Retrieves a list of Twitch Teams of which the specified channel/broadcaster is a member.\n+     *\n+     * @param authToken     User OAuth Token or App Access Token\n+     * @param broadcasterId User ID for a Twitch user.\n+     * @return TeamMembershipList\n+     */\n+    @RequestLine(\"GET /teams/channel?broadcaster_id={broadcaster_id}\")\n+    @Headers(\"Authorization: Bearer {token}\")\n+    HystrixCommand<TeamMembershipList> getChannelTeams(\n+        @Param(\"token\") String authToken,\n+        @Param(\"broadcaster_id\") String broadcasterId\n+    );\n+\n     /**\n      * Get Users\n      * <p>"
+  },
+  {
+    "sha": "9a4537f221aef97c87a1242b534478f675541935",
+    "filename": "rest-helix/src/main/java/com/github/twitch4j/helix/domain/Team.java",
+    "status": "added",
+    "additions": 73,
+    "deletions": 0,
+    "changes": 73,
+    "blob_url": "https://github.com/twitch4j/twitch4j/blob/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/Team.java",
+    "raw_url": "https://github.com/twitch4j/twitch4j/raw/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/Team.java",
+    "contents_url": "https://api.github.com/repos/twitch4j/twitch4j/contents/rest-helix/src/main/java/com/github/twitch4j/helix/domain/Team.java?ref=72bb1c3491f42ac52638d5279b7869b8c02e32f4",
+    "patch": "@@ -0,0 +1,73 @@\n+package com.github.twitch4j.helix.domain;\n+\n+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;\n+import com.github.twitch4j.common.util.AlternativeInstantDeserializer;\n+import lombok.AccessLevel;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+import lombok.Setter;\n+import org.jetbrains.annotations.Nullable;\n+\n+import java.time.Instant;\n+import java.util.List;\n+\n+@Data\n+@Setter(AccessLevel.PRIVATE)\n+@NoArgsConstructor\n+public class Team {\n+\n+    /**\n+     * Users in the specified Team.\n+     */\n+    private List<TeamUser> users;\n+\n+    /**\n+     * URL of the Team background image.\n+     */\n+    @Nullable\n+    private String backgroundImageUrl;\n+\n+    /**\n+     * URL for the Team banner.\n+     */\n+    @Nullable\n+    private String banner;\n+\n+    /**\n+     * Date and time the Team was created.\n+     */\n+    @JsonDeserialize(using = AlternativeInstantDeserializer.class)\n+    private Instant createdAt;\n+\n+    /**\n+     * Date and time the Team was last updated.\n+     */\n+    @JsonDeserialize(using = AlternativeInstantDeserializer.class)\n+    private Instant updatedAt;\n+\n+    /**\n+     * Team description.\n+     */\n+    private String info;\n+\n+    /**\n+     * Image URL for the Team logo.\n+     */\n+    private String thumbnailUrl;\n+\n+    /**\n+     * Team name.\n+     */\n+    private String teamName;\n+\n+    /**\n+     * Team display name.\n+     */\n+    private String teamDisplayName;\n+\n+    /**\n+     * Team ID.\n+     */\n+    private String id;\n+\n+}"
+  },
+  {
+    "sha": "be18abf51717a6ed5d71c9fb72d6b138ff2a8a67",
+    "filename": "rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamList.java",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/twitch4j/twitch4j/blob/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamList.java",
+    "raw_url": "https://github.com/twitch4j/twitch4j/raw/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamList.java",
+    "contents_url": "https://api.github.com/repos/twitch4j/twitch4j/contents/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamList.java?ref=72bb1c3491f42ac52638d5279b7869b8c02e32f4",
+    "patch": "@@ -0,0 +1,19 @@\n+package com.github.twitch4j.helix.domain;\n+\n+import com.fasterxml.jackson.annotation.JsonProperty;\n+import lombok.AccessLevel;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+import lombok.Setter;\n+\n+import java.util.List;\n+\n+@Data\n+@Setter(AccessLevel.PRIVATE)\n+@NoArgsConstructor\n+public class TeamList {\n+\n+    @JsonProperty(\"data\")\n+    private List<Team> teams;\n+\n+}"
+  },
+  {
+    "sha": "1c93d95d41d7a51d9a29cdd957210a39ef513c74",
+    "filename": "rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamMember.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/twitch4j/twitch4j/blob/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamMember.java",
+    "raw_url": "https://github.com/twitch4j/twitch4j/raw/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamMember.java",
+    "contents_url": "https://api.github.com/repos/twitch4j/twitch4j/contents/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamMember.java?ref=72bb1c3491f42ac52638d5279b7869b8c02e32f4",
+    "patch": "@@ -0,0 +1,32 @@\n+package com.github.twitch4j.helix.domain;\n+\n+import lombok.AccessLevel;\n+import lombok.Data;\n+import lombok.EqualsAndHashCode;\n+import lombok.NoArgsConstructor;\n+import lombok.Setter;\n+import lombok.ToString;\n+\n+@Data\n+@Setter(AccessLevel.PRIVATE)\n+@ToString(callSuper = true)\n+@EqualsAndHashCode(callSuper = true)\n+@NoArgsConstructor\n+public class TeamMember extends Team {\n+\n+    /**\n+     * User ID of the broadcaster.\n+     */\n+    private String broadcasterId;\n+\n+    /**\n+     * Display name of the broadcaster.\n+     */\n+    private String broadcasterName;\n+\n+    /**\n+     * Login of the broadcaster.\n+     */\n+    private String broadcasterLogin;\n+\n+}"
+  },
+  {
+    "sha": "c7857dff2266388e14383df1440c544b400481a7",
+    "filename": "rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamMembershipList.java",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/twitch4j/twitch4j/blob/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamMembershipList.java",
+    "raw_url": "https://github.com/twitch4j/twitch4j/raw/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamMembershipList.java",
+    "contents_url": "https://api.github.com/repos/twitch4j/twitch4j/contents/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamMembershipList.java?ref=72bb1c3491f42ac52638d5279b7869b8c02e32f4",
+    "patch": "@@ -0,0 +1,19 @@\n+package com.github.twitch4j.helix.domain;\n+\n+import com.fasterxml.jackson.annotation.JsonProperty;\n+import lombok.AccessLevel;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+import lombok.Setter;\n+\n+import java.util.List;\n+\n+@Data\n+@Setter(AccessLevel.PRIVATE)\n+@NoArgsConstructor\n+public class TeamMembershipList {\n+\n+    @JsonProperty(\"data\")\n+    private List<TeamMember> teams;\n+\n+}"
+  },
+  {
+    "sha": "f7d3862d8ea89a23fa9a5181ecd036e1fbbd0019",
+    "filename": "rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamUser.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/twitch4j/twitch4j/blob/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamUser.java",
+    "raw_url": "https://github.com/twitch4j/twitch4j/raw/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamUser.java",
+    "contents_url": "https://api.github.com/repos/twitch4j/twitch4j/contents/rest-helix/src/main/java/com/github/twitch4j/helix/domain/TeamUser.java?ref=72bb1c3491f42ac52638d5279b7869b8c02e32f4",
+    "patch": "@@ -0,0 +1,28 @@\n+package com.github.twitch4j.helix.domain;\n+\n+import lombok.AccessLevel;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+import lombok.Setter;\n+\n+@Data\n+@Setter(AccessLevel.PRIVATE)\n+@NoArgsConstructor\n+public class TeamUser {\n+\n+    /**\n+     * User ID of a Team member.\n+     */\n+    private String userId;\n+\n+    /**\n+     * Display name of a Team member.\n+     */\n+    private String userName;\n+\n+    /**\n+     * Login of a Team member.\n+     */\n+    private String userLogin;\n+\n+}"
+  },
+  {
+    "sha": "33eae92e4080bd9b5c5216a28f68fa0d792c202b",
+    "filename": "rest-kraken/src/main/java/com/github/twitch4j/kraken/TwitchKraken.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/twitch4j/twitch4j/blob/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-kraken/src/main/java/com/github/twitch4j/kraken/TwitchKraken.java",
+    "raw_url": "https://github.com/twitch4j/twitch4j/raw/72bb1c3491f42ac52638d5279b7869b8c02e32f4/rest-kraken/src/main/java/com/github/twitch4j/kraken/TwitchKraken.java",
+    "contents_url": "https://api.github.com/repos/twitch4j/twitch4j/contents/rest-kraken/src/main/java/com/github/twitch4j/kraken/TwitchKraken.java?ref=72bb1c3491f42ac52638d5279b7869b8c02e32f4",
+    "patch": "@@ -489,7 +489,9 @@\n      *\n      * @param channelId Channel Id (Required)\n      * @return KrakenTeamList\n+     * @deprecated in favor of TwitchHelix#getChannelTeams\n      */\n+    @Deprecated\n     @RequestLine(\"GET /channels/{channel_id}/teams\")\n     HystrixCommand<KrakenTeamList> getChannelTeams(\n         @Param(\"channel_id\") String channelId\n@@ -517,7 +519,9 @@\n      *\n      * @param name team name\n      * @return KrakenTeam\n+     * @deprecated in favor of TwitchHelix#getTeams\n      */\n+    @Deprecated\n     @RequestLine(\"GET /teams/{name}\")\n     HystrixCommand<KrakenTeam> getTeamByName(\n         @Param(\"name\") String name"
+  }
+]

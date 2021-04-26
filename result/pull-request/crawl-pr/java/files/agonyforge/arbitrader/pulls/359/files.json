@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "2bae396e19b0d04b864ad46259af01fbdda88d85",
+    "filename": "src/main/java/com/r307/arbitrader/config/MailConfiguration.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/agonyforge/arbitrader/blob/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/config/MailConfiguration.java",
+    "raw_url": "https://github.com/agonyforge/arbitrader/raw/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/config/MailConfiguration.java",
+    "contents_url": "https://api.github.com/repos/agonyforge/arbitrader/contents/src/main/java/com/r307/arbitrader/config/MailConfiguration.java?ref=d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030",
+    "patch": "@@ -39,7 +39,7 @@ public void sendEntryTradeNotification(Spread spread, BigDecimal exitTarget, Big\n             }\n \n             @Override\n-            public void sendExitTradeNotification(Spread spread, BigDecimal longVolume, BigDecimal longLimitPrice, BigDecimal shortVolume, BigDecimal shortLimitPrice, BigDecimal entryBalance, BigDecimal updatedBalance, BigDecimal exitTarget, boolean isForceCloseCondition, boolean isActivePositionExpired) {\n+            public void sendExitTradeNotification(Spread spread, BigDecimal longVolume, BigDecimal longLimitPrice, BigDecimal shortVolume, BigDecimal shortLimitPrice, BigDecimal entryBalance, BigDecimal updatedBalance, BigDecimal combinedBalance, BigDecimal exitTarget, boolean isForceCloseCondition, boolean isActivePositionExpired) {\n             }\n         };\n     }"
+  },
+  {
+    "sha": "a644d1e471ef859d7e802301b44de9c69f5aac90",
+    "filename": "src/main/java/com/r307/arbitrader/service/ExchangeService.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 1,
+    "changes": 21,
+    "blob_url": "https://github.com/agonyforge/arbitrader/blob/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/service/ExchangeService.java",
+    "raw_url": "https://github.com/agonyforge/arbitrader/raw/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/service/ExchangeService.java",
+    "contents_url": "https://api.github.com/repos/agonyforge/arbitrader/contents/src/main/java/com/r307/arbitrader/service/ExchangeService.java?ref=d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030",
+    "patch": "@@ -24,6 +24,7 @@\n import java.math.RoundingMode;\n import java.util.Map;\n import java.util.Optional;\n+import java.util.concurrent.atomic.AtomicReference;\n \n import static com.r307.arbitrader.DecimalConstants.USD_SCALE;\n \n@@ -40,10 +41,14 @@\n     private final ExchangeFeeCache feeCache;\n     private final TickerStrategyProvider tickerStrategyProvider;\n \n+    /** The current bankroll. Holds the sum of all account's balance. Useful to have a broad idea how our bankroll is evolving */\n+    private final AtomicReference<BigDecimal> combinedBalance;\n+\n     @Inject\n     public ExchangeService(ExchangeFeeCache feeCache, TickerStrategyProvider tickerStrategyProvider) {\n         this.feeCache = feeCache;\n         this.tickerStrategyProvider = tickerStrategyProvider;\n+        this.combinedBalance = new AtomicReference<>(BigDecimal.ZERO);\n     }\n \n     /**\n@@ -107,10 +112,16 @@ public void setUpExchange(Exchange exchange) {\n             LOGGER.debug(\"{} home currency: {}\",\n                 exchange.getExchangeSpecification().getExchangeName(),\n                 getExchangeHomeCurrency(exchange));\n+\n+            // Get the account balance for this exchange\n+            final BigDecimal accountBalance = getAccountBalance(exchange);\n+            // Add the account balance to the current global account balance\n+            updateCombinedBalance(accountBalance);\n+\n             LOGGER.info(\"{} balance: {}{}\",\n                 exchange.getExchangeSpecification().getExchangeName(),\n                 getExchangeHomeCurrency(exchange).getSymbol(),\n-                getAccountBalance(exchange));\n+                accountBalance);\n         } catch (IOException e) {\n             LOGGER.error(\"Unable to fetch account balance: \", e);\n         }\n@@ -298,4 +309,12 @@ public BigDecimal getExchangeFee(Exchange exchange, CurrencyPair currencyPair, b\n         feeCache.setCachedFee(exchange, currencyPair, currencyPairMetaData.getTradingFee());\n         return currencyPairMetaData.getTradingFee();\n     }\n+\n+    public void updateCombinedBalance(BigDecimal amount) {\n+        combinedBalance.getAndUpdate(bigDecimal -> bigDecimal.add(amount));\n+    }\n+\n+    public BigDecimal getCombinedBalance() {\n+        return combinedBalance.get();\n+    }\n }"
+  },
+  {
+    "sha": "e9433839f5708cf85a330a1f7b8c25c5bb41ecdf",
+    "filename": "src/main/java/com/r307/arbitrader/service/NotificationService.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/agonyforge/arbitrader/blob/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/service/NotificationService.java",
+    "raw_url": "https://github.com/agonyforge/arbitrader/raw/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/service/NotificationService.java",
+    "contents_url": "https://api.github.com/repos/agonyforge/arbitrader/contents/src/main/java/com/r307/arbitrader/service/NotificationService.java?ref=d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030",
+    "patch": "@@ -13,6 +13,6 @@ void sendEntryTradeNotification(Spread spread, BigDecimal exitTarget, BigDecimal\n                                     BigDecimal longLimitPrice, BigDecimal shortVolume,\n                                     BigDecimal shortLimitPrice, boolean isForceEntryPosition);\n     void sendExitTradeNotification(Spread spread, BigDecimal longVolume, BigDecimal longLimitPrice, BigDecimal shortVolume,\n-                                   BigDecimal shortLimitPrice, BigDecimal entryBalance, BigDecimal updatedBalance, BigDecimal exitTarget,\n-                                   boolean isForceCloseCondition, boolean isActivePositionExpired);\n+                                   BigDecimal shortLimitPrice, BigDecimal entryBalance, BigDecimal updatedBalance, BigDecimal combinedBalance,\n+                                   BigDecimal exitTarget, boolean isForceCloseCondition, boolean isActivePositionExpired);\n }"
+  },
+  {
+    "sha": "95957d2a4ae60b9ca6adda780ff8343fec0208fc",
+    "filename": "src/main/java/com/r307/arbitrader/service/NotificationServiceImpl.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/agonyforge/arbitrader/blob/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/service/NotificationServiceImpl.java",
+    "raw_url": "https://github.com/agonyforge/arbitrader/raw/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/service/NotificationServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/agonyforge/arbitrader/contents/src/main/java/com/r307/arbitrader/service/NotificationServiceImpl.java?ref=d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030",
+    "patch": "@@ -98,7 +98,8 @@ public void sendEntryTradeNotification(Spread spread, BigDecimal exitTarget, Big\n      */\n     @Override\n     public void sendExitTradeNotification(Spread spread, BigDecimal longVolume, BigDecimal longLimitPrice, BigDecimal shortVolume,\n-                                          BigDecimal shortLimitPrice, BigDecimal entryBalance, BigDecimal updatedBalance, BigDecimal exitTarget,\n+                                          BigDecimal shortLimitPrice, BigDecimal entryBalance, BigDecimal updatedBalance,\n+                                          BigDecimal combinedBalance, BigDecimal exitTarget,\n                                           boolean isForceExitPosition, boolean isActivePositionExpired) {\n \n         final String exitSpreadString = String.format(\"Exit spread: %s\\nExit spread target %s\\n\", spread.getOut(), exitTarget);\n@@ -133,7 +134,8 @@ public void sendExitTradeNotification(Spread spread, BigDecimal longVolume, BigD\n             longCloseString +\n             shortCloseString +\n             String.format(\"Combined account balances on entry: $%s\\n\", entryBalance.toPlainString()) +\n-            String.format(\"Profit calculation: $%s - $%s = $%s\\n\", updatedBalance.toPlainString(), entryBalance.toPlainString(), profit.toPlainString());\n+            String.format(\"Profit calculation: $%s - $%s = $%s\\n and combined balance = $%s\",\n+                updatedBalance.toPlainString(), entryBalance.toPlainString(), profit.toPlainString(), combinedBalance.toPlainString());\n \n         sendNotification(EMAIL_SUBJECT_NEW_EXIT, message);\n     }"
+  },
+  {
+    "sha": "384211e0170da17cae5631169081b053da2ae109",
+    "filename": "src/main/java/com/r307/arbitrader/service/TradingService.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 3,
+    "changes": 11,
+    "blob_url": "https://github.com/agonyforge/arbitrader/blob/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/service/TradingService.java",
+    "raw_url": "https://github.com/agonyforge/arbitrader/raw/d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030/src/main/java/com/r307/arbitrader/service/TradingService.java",
+    "contents_url": "https://api.github.com/repos/agonyforge/arbitrader/contents/src/main/java/com/r307/arbitrader/service/TradingService.java?ref=d4cbcbe2b6654567fbb6bac8bbf8aa0cea78d030",
+    "patch": "@@ -409,10 +409,14 @@ private void exitPosition(Spread spread) {\n         final BigDecimal updatedBalance = logCurrentExchangeBalances(spread.getLongExchange(), spread.getShortExchange());\n         final BigDecimal profit = updatedBalance.subtract(activePosition.getEntryBalance());\n \n-        LOGGER.info(\"Profit calculation: ${} - ${} = ${}\",\n+        // Update the global account balance with the profit from this trade\n+        exchangeService.updateCombinedBalance(profit);\n+\n+        LOGGER.info(\"Profit calculation: ${} - ${} = ${} | Current bankroll: ${}\",\n             updatedBalance,\n             activePosition.getEntryBalance(),\n-            profit);\n+            profit,\n+            exchangeService.getCombinedBalance());\n \n         final ArbitrageLog arbitrageLog = ArbitrageLog.ArbitrageLogBuilder.builder()\n             .withShortExchange(shortExchangeName)\n@@ -433,7 +437,8 @@ private void exitPosition(Spread spread) {\n \n         // Email notification must be sent before we set activePosition = null\n         notificationService.sendExitTradeNotification(spread, longVolume, longLimitPrice, shortVolume,\n-            shortLimitPrice, activePosition.getEntryBalance(), updatedBalance, activePosition.getExitTarget(), isForceCloseCondition, isActivePositionExpired());\n+            shortLimitPrice, activePosition.getEntryBalance(), updatedBalance, exchangeService.getCombinedBalance(),\n+            activePosition.getExitTarget(), isForceCloseCondition, isActivePositionExpired());\n \n         activePosition = null;\n "
+  }
+]

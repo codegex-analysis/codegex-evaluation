@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "578e05653df94912ea1a911355cd3356bd71f649",
+    "filename": "vitals/BatteryManagementSystem.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-Naveenkumar36/blob/2b27491cec74a2d8c4f1d9d74ee88ade417596cc/vitals/BatteryManagementSystem.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-Naveenkumar36/raw/2b27491cec74a2d8c4f1d9d74ee88ade417596cc/vitals/BatteryManagementSystem.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-Naveenkumar36/contents/vitals/BatteryManagementSystem.java?ref=2b27491cec74a2d8c4f1d9d74ee88ade417596cc",
+    "patch": "@@ -0,0 +1,10 @@\n+package vitals;\n+\n+/**\n+ * @author {@literal Jayaram Naveenkumar (jayaram.naveenkumar@in.bosch.com)}\n+ */\n+enum BatteryManagementSystem {\n+    TEMPERATURE,\n+    SOC,\n+    CHARGINGRATE\n+}"
+  },
+  {
+    "sha": "cdbd3258be21ea79d770abf3689077c2d842f22c",
+    "filename": "vitals/LiIonBattery.java",
+    "status": "added",
+    "additions": 108,
+    "deletions": 0,
+    "changes": 108,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-Naveenkumar36/blob/2b27491cec74a2d8c4f1d9d74ee88ade417596cc/vitals/LiIonBattery.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-Naveenkumar36/raw/2b27491cec74a2d8c4f1d9d74ee88ade417596cc/vitals/LiIonBattery.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-Naveenkumar36/contents/vitals/LiIonBattery.java?ref=2b27491cec74a2d8c4f1d9d74ee88ade417596cc",
+    "patch": "@@ -0,0 +1,108 @@\n+package vitals;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+import java.util.Map;\n+import java.util.TreeMap;\n+import java.util.function.Predicate;\n+\n+import static vitals.BatteryManagementSystem.*;\n+\n+/**\n+ * @author {@literal Jayaram Naveenkumar (jayaram.naveenkumar@in.bosch.com)}\n+ */\n+public class LiIonBattery {\n+\n+    private Map<BatteryManagementSystem, Float> input;\n+\n+    public LiIonBattery(\n+          float temperature,\n+          float soc,\n+          float chargeRate\n+    )\n+    {\n+        saveInput(temperature, soc, chargeRate);\n+    }\n+\n+    private void saveInput(\n+          float temperature,\n+          float soc,\n+          float chargeRate\n+    )\n+    {\n+        input = new TreeMap<>();\n+        input.put(TEMPERATURE, temperature);\n+        input.put(SOC, soc);\n+        input.put(CHARGINGRATE, chargeRate);\n+    }\n+\n+    public static Predicate<Float> isAboveThreshold(float maxThreshold) {\n+        return value -> value > maxThreshold;\n+    }\n+\n+    public static Predicate<Float> isBelowThreshold(float minThreshold) {\n+        return value -> value < minThreshold;\n+    }\n+\n+    private List<ValidateBMSVariants> variants() {\n+        List<ValidateBMSVariants> validateBMSVariants = new ArrayList<>();\n+        validateBMSVariants.add(new ValidateBMSVariants(isBelowThreshold(Temperature.MIN_TEMPERATURE_THRESHOLD),\n+              input.get(TEMPERATURE), \"Temperature is below threshold value\"\n+        ));\n+        validateBMSVariants.add(new ValidateBMSVariants(isAboveThreshold(Temperature.MAX_TEMPERATURE_THRESHOLD),\n+              input.get(TEMPERATURE), \"Temperature is above threshold value\"\n+        ));\n+        validateBMSVariants.add(new ValidateBMSVariants(isBelowThreshold(StateOfCharge.MIN_SOC),\n+              input.get(SOC), \"StateOfCharge is below threshold value\"\n+        ));\n+        validateBMSVariants.add(new ValidateBMSVariants(isAboveThreshold(StateOfCharge.MAX_SOC),\n+              input.get(SOC), \"StateOfCharge is above threshold value\"\n+        ));\n+        validateBMSVariants.add(new ValidateBMSVariants(isAboveThreshold(ChargingRate.MAX_CHARGING_RATE),\n+              input.get(CHARGINGRATE), \"ChargingRate is above threshold value\"\n+        ));\n+        return validateBMSVariants;\n+    }\n+\n+    public static boolean isBatteryOk(\n+          float temperature,\n+          float soc,\n+          float chargeRate\n+    )\n+    {\n+        LiIonBattery lionBattery = new LiIonBattery(temperature, soc, chargeRate);\n+        ValidateBMSVariants validateBMSVariants = ValidateBMSVariants.check(lionBattery.variants());\n+        if (validateBMSVariants != null) {\n+            System.out.println(validateBMSVariants.getMessage());\n+            return false;\n+        }\n+        return true;\n+    }\n+\n+    public static final class Temperature {\n+\n+        private static final float MAX_TEMPERATURE_THRESHOLD = 45;\n+        private static final float MIN_TEMPERATURE_THRESHOLD = 0;\n+\n+        private Temperature() {\n+        }\n+    }\n+\n+    public static final class StateOfCharge {\n+\n+        private static final float MAX_SOC = 80;\n+        private static final float MIN_SOC = 20;\n+\n+        private StateOfCharge() {\n+        }\n+    }\n+\n+    public static final class ChargingRate {\n+\n+        private static final float MAX_CHARGING_RATE = 0.8f;\n+\n+        private ChargingRate() {\n+        }\n+    }\n+\n+}"
+  },
+  {
+    "sha": "3d1358ba75236c4dcf7d73e916989c0ca01ba3f6",
+    "filename": "vitals/Main.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 16,
+    "changes": 25,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-Naveenkumar36/blob/2b27491cec74a2d8c4f1d9d74ee88ade417596cc/vitals/Main.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-Naveenkumar36/raw/2b27491cec74a2d8c4f1d9d74ee88ade417596cc/vitals/Main.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-Naveenkumar36/contents/vitals/Main.java?ref=2b27491cec74a2d8c4f1d9d74ee88ade417596cc",
+    "patch": "@@ -1,23 +1,16 @@\n package vitals;\n \n-public class Main {\n-    static boolean batteryIsOk(float temperature, float soc, float chargeRate) {\n-        if(temperature < 0 || temperature > 45) {\n-            System.out.println(\"Temperature is out of range!\");\n-            return false;\n-        } else if(soc < 20 || soc > 80) {\n-            System.out.println(\"State of Charge is out of range!\");\n-            return false;\n-        } else if(chargeRate > 0.8) {\n-            System.out.println(\"Charge Rate is out of range!\");\n-            return false;\n-        }\n-        return true;\n+public final class Main {\n+    private Main(){\n+\n     }\n \n     public static void main(String[] args) {\n-        assert(batteryIsOk(25, 70, 0.7f) == true);\n-        assert(batteryIsOk(50, 85, 0.0f) == false);\n-        System.out.println(\"Some more tests needed\");\n+        assert(LiIonBattery.isBatteryOk(25, 70, 0.7f) == true);\n+        assert(LiIonBattery.isBatteryOk(50, 85, 0.0f) == false);\n+        assert(LiIonBattery.isBatteryOk(-1, 85, 0.0f) == false);\n+        assert(LiIonBattery.isBatteryOk(25, 85, 0.0f) == false);\n+        assert(LiIonBattery.isBatteryOk(25, 15, 0.0f) == false);\n+        assert(LiIonBattery.isBatteryOk(25, 25, 0.9f) == false);\n     }\n }"
+  },
+  {
+    "sha": "993239607332ec90f4d79f7f6b5a4907d9faed85",
+    "filename": "vitals/ValidateBMSVariants.java",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/functional-java-Naveenkumar36/blob/2b27491cec74a2d8c4f1d9d74ee88ade417596cc/vitals/ValidateBMSVariants.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/functional-java-Naveenkumar36/raw/2b27491cec74a2d8c4f1d9d74ee88ade417596cc/vitals/ValidateBMSVariants.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/functional-java-Naveenkumar36/contents/vitals/ValidateBMSVariants.java?ref=2b27491cec74a2d8c4f1d9d74ee88ade417596cc",
+    "patch": "@@ -0,0 +1,40 @@\n+package vitals;\n+\n+import java.util.List;\n+import java.util.function.Predicate;\n+\n+/**\n+ * @author {@literal Jayaram Naveenkumar (jayaram.naveenkumar@in.bosch.com)}\n+ */\n+public class ValidateBMSVariants {\n+\n+    private final Predicate<Float> variant;\n+    private final String message;\n+    private final Float value;\n+\n+    public ValidateBMSVariants(\n+        Predicate<Float> variant,\n+        Float value,\n+        String message\n+    )\n+    {\n+        this.value = value;\n+        this.variant = variant;\n+        this.message = message;\n+    }\n+\n+    public boolean isNotValid()\n+    {\n+        return variant.test(value);\n+    }\n+\n+    public String getMessage()\n+\n+    {\n+        return message;\n+    }\n+\n+    public static ValidateBMSVariants check(List<ValidateBMSVariants> validateBMSVariants) {\n+        return validateBMSVariants.stream().filter(ValidateBMSVariants::isNotValid).findFirst().orElse(null);\n+    }\n+}"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "23f1a03c77cfe8e93f189f59382ca3715f3cb434",
+    "filename": "core/src/definitions-internal.ts",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/ionic-team/capacitor/blob/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/definitions-internal.ts",
+    "raw_url": "https://github.com/ionic-team/capacitor/raw/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/definitions-internal.ts",
+    "contents_url": "https://api.github.com/repos/ionic-team/capacitor/contents/core/src/definitions-internal.ts?ref=0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348",
+    "patch": "@@ -4,6 +4,7 @@ import type {\n   PluginResultData,\n   PluginResultError,\n } from './definitions';\n+import { CapacitorPlatformsInstance } from './platforms';\n \n export interface PluginHeaderMethod {\n   readonly name: string;\n@@ -138,6 +139,7 @@ export interface StoredCallback {\n \n export interface WindowCapacitor {\n   Capacitor?: CapacitorInstance;\n+  CapacitorPlatforms: CapacitorPlatformsInstance;\n   Ionic?: {\n     WebView?: {\n       getServerBasePath?: any;"
+  },
+  {
+    "sha": "c250c64d15b62af948015e480047d4d55b1ad8f2",
+    "filename": "core/src/events.ts",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/ionic-team/capacitor/blob/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/events.ts",
+    "raw_url": "https://github.com/ionic-team/capacitor/raw/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/events.ts",
+    "contents_url": "https://api.github.com/repos/ionic-team/capacitor/contents/core/src/events.ts?ref=0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348",
+    "patch": "@@ -69,7 +69,7 @@ export const initEvents = (\n           return doc.dispatchEvent(ev);\n         }\n       } else if (target === 'window' && win.dispatchEvent) {\n-        return (win as Window).dispatchEvent(ev);\n+        return (win as unknown as Window).dispatchEvent(ev);\n       } else if (doc?.querySelector) {\n         const targetEl: Element = doc.querySelector(target);\n         if (targetEl) {"
+  },
+  {
+    "sha": "303012a5c71eef5adff39b1f0849e19fab927afe",
+    "filename": "core/src/index.ts",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/ionic-team/capacitor/blob/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/index.ts",
+    "raw_url": "https://github.com/ionic-team/capacitor/raw/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/index.ts",
+    "contents_url": "https://api.github.com/repos/ionic-team/capacitor/contents/core/src/index.ts?ref=0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348",
+    "patch": "@@ -10,6 +10,9 @@ export type {\n   PluginResultError,\n } from './definitions';\n \n+// Platforms Map\n+export { CapacitorPlatforms, addPlatform, setPlatform } from './platforms';\n+\n // Global APIs\n export { Capacitor, registerPlugin } from './global';\n "
+  },
+  {
+    "sha": "408fd10777cd770d7ea7454f514b8c5e1cfe126d",
+    "filename": "core/src/platforms.ts",
+    "status": "added",
+    "additions": 61,
+    "deletions": 0,
+    "changes": 61,
+    "blob_url": "https://github.com/ionic-team/capacitor/blob/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/platforms.ts",
+    "raw_url": "https://github.com/ionic-team/capacitor/raw/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/platforms.ts",
+    "contents_url": "https://api.github.com/repos/ionic-team/capacitor/contents/core/src/platforms.ts?ref=0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348",
+    "patch": "@@ -0,0 +1,61 @@\n+import { PluginImplementations } from \"./definitions\";\n+import { PluginHeader } from \"./definitions-internal\";\n+\n+export interface CapacitorPlatform {\n+  name: string;\n+  getPlatform?(): string;\n+  isPluginAvailable?(pluginName: string): boolean;\n+  getPluginHeader?(pluginName: string): PluginHeader | undefined;\n+  registerPlugin?(pluginName: string, jsImplementations: PluginImplementations): any;\n+  isNativePlatform?(): boolean;\n+}\n+\n+export interface CapacitorPlatformsInstance {\n+  currentPlatform: CapacitorPlatform;\n+  platforms: Map<string, CapacitorPlatform>,\n+  addPlatform(name: string, platform: CapacitorPlatform): void;\n+  setPlatform(name: string): void;\n+}\n+\n+\n+const createCapacitorPlatforms = (win: any): CapacitorPlatformsInstance => {\n+  const defaultPlatformMap = new Map<string, CapacitorPlatform>();\n+  defaultPlatformMap.set('web', {name: 'web'});\n+  \n+  const capPlatforms: CapacitorPlatformsInstance = win.CapacitorPlatforms || {\n+    currentPlatform: {name: 'web'},\n+    platforms: defaultPlatformMap,\n+  };\n+\n+  const addPlatform = (name: string, platform: CapacitorPlatform) => {\n+    capPlatforms.platforms.set(name, platform);\n+  }\n+\n+  const setPlatform = (name: string) => {\n+    if (capPlatforms.platforms.has(name)) {\n+      capPlatforms.currentPlatform = capPlatforms.platforms.get(name);\n+    }\n+  }\n+\n+  capPlatforms.addPlatform = addPlatform;\n+  capPlatforms.setPlatform = setPlatform;\n+\n+  return capPlatforms\n+}\n+\n+const initPlatforms = (win: any) => (win.CapacitorPlatforms = createCapacitorPlatforms(win))\n+\n+export const CapacitorPlatforms = /*#__PURE__*/ initPlatforms(\n+  (typeof globalThis !== 'undefined'\n+    ? globalThis\n+    : typeof self !== 'undefined'\n+    ? self\n+    : typeof window !== 'undefined'\n+    ? window\n+    : typeof global !== 'undefined'\n+    ? global\n+    : {}) as any,\n+);\n+\n+export const addPlatform = CapacitorPlatforms.addPlatform;\n+export const setPlatform = CapacitorPlatforms.setPlatform;"
+  },
+  {
+    "sha": "244ee6d36939ec91ec5a8dbcb18dda2f4329e82f",
+    "filename": "core/src/runtime.ts",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 9,
+    "changes": 24,
+    "blob_url": "https://github.com/ionic-team/capacitor/blob/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/runtime.ts",
+    "raw_url": "https://github.com/ionic-team/capacitor/raw/0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348/core/src/runtime.ts",
+    "contents_url": "https://api.github.com/repos/ionic-team/capacitor/contents/core/src/runtime.ts?ref=0aef29f8e11bd7d6d4fccdd98b8b673c4b1c3348",
+    "patch": "@@ -7,6 +7,7 @@ import type {\n } from './definitions-internal';\n import { initEvents } from './events';\n import { initLegacyHandlers } from './legacy/legacy-handlers';\n+import type { CapacitorPlatformsInstance } from './platforms';\n import {\n   CapacitorException,\n   convertFileSrcServerUrl,\n@@ -22,17 +23,20 @@ export interface RegisteredPlugin {\n \n export const createCapacitor = (win: WindowCapacitor): CapacitorInstance => {\n   const cap: CapacitorInstance = win.Capacitor || ({} as any);\n+  const capPlatforms: CapacitorPlatformsInstance = win.CapacitorPlatforms;\n \n   const Plugins = (cap.Plugins = cap.Plugins || ({} as any));\n \n   const webviewServerUrl =\n     typeof win.WEBVIEW_SERVER_URL === 'string' ? win.WEBVIEW_SERVER_URL : '';\n \n-  const getPlatform = () => getPlatformId(win);\n+  const defaultGetPlatform = () => getPlatformId(win);\n+  const getPlatform = capPlatforms.currentPlatform.getPlatform || defaultGetPlatform;\n \n-  const isNativePlatform = () => getPlatformId(win) !== 'web';\n+  const defaultIsNativePlatform = () => capPlatforms.currentPlatform.name !== 'web';\n+  const isNativePlatform = capPlatforms.currentPlatform.isNativePlatform || defaultIsNativePlatform;\n \n-  const isPluginAvailable = (pluginName: string): boolean => {\n+  const defaultIsPluginAvailable = (pluginName: string): boolean => {\n     const plugin = registeredPlugins.get(pluginName);\n \n     if (plugin?.platforms.has(getPlatform())) {\n@@ -47,9 +51,10 @@ export const createCapacitor = (win: WindowCapacitor): CapacitorInstance => {\n \n     return false;\n   };\n+  const isPluginAvailable = capPlatforms.currentPlatform.isPluginAvailable || defaultIsPluginAvailable;\n \n-  const getPluginHeader = (pluginName: string): PluginHeader | undefined =>\n-    cap.PluginHeaders?.find(h => h.name === pluginName);\n+  const defaultGetPluginHeader = (pluginName: string): PluginHeader | undefined => cap.PluginHeaders?.find(h => h.name === pluginName);\n+  const getPluginHeader = capPlatforms.currentPlatform.getPluginHeader || defaultGetPluginHeader;\n \n   const convertFileSrc = (filePath: string) =>\n     convertFileSrcServerUrl(webviewServerUrl, filePath);\n@@ -84,7 +89,7 @@ export const createCapacitor = (win: WindowCapacitor): CapacitorInstance => {\n \n   const registeredPlugins = new Map<string, RegisteredPlugin>();\n \n-  const registerPlugin = (\n+  const defaultRegisterPlugin = (\n     pluginName: string,\n     jsImplementations: PluginImplementations = {},\n   ): any => {\n@@ -239,14 +244,15 @@ export const createCapacitor = (win: WindowCapacitor): CapacitorInstance => {\n \n     return proxy;\n   };\n+  const registerPlugin = capPlatforms.currentPlatform.registerPlugin || defaultRegisterPlugin;\n \n-  cap.convertFileSrc = convertFileSrc;\n-  cap.getPlatform = getPlatform;\n   cap.getServerUrl = () => webviewServerUrl;\n-  cap.handleError = handleError;\n+  cap.getPlatform = getPlatform;\n   cap.isNativePlatform = isNativePlatform;\n   cap.isPluginAvailable = isPluginAvailable;\n+  cap.convertFileSrc = convertFileSrc;\n   cap.logJs = logJs;\n+  cap.handleError = handleError;\n   cap.pluginMethodNoop = pluginMethodNoop;\n   cap.registerPlugin = registerPlugin;\n   cap.Exception = CapacitorException;"
+  }
+]

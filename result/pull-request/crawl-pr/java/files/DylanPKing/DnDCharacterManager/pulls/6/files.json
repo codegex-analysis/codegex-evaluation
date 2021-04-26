@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "33339971a5c164c4750a8c43c47eaf94bc0c7e54",
+    "filename": "src/main/java/com/seventhtill/item/Armor.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 4,
+    "changes": 4,
+    "blob_url": "https://github.com/DylanPKing/DnDCharacterManager/blob/ae6267144ffde1bfcd311bfdbe0c62471abacdc7/src/main/java/com/seventhtill/item/Armor.java",
+    "raw_url": "https://github.com/DylanPKing/DnDCharacterManager/raw/ae6267144ffde1bfcd311bfdbe0c62471abacdc7/src/main/java/com/seventhtill/item/Armor.java",
+    "contents_url": "https://api.github.com/repos/DylanPKing/DnDCharacterManager/contents/src/main/java/com/seventhtill/item/Armor.java?ref=ae6267144ffde1bfcd311bfdbe0c62471abacdc7",
+    "patch": "@@ -1,4 +0,0 @@\n-package com.seventhtill.item;\n-\n-public class Armor implements Item {\n-}"
+  },
+  {
+    "sha": "2d474a490ffc4c6cddd5ee8f167fa03e1f91839f",
+    "filename": "src/main/java/com/seventhtill/item/armour/Armour.java",
+    "status": "added",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/DylanPKing/DnDCharacterManager/blob/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/Armour.java",
+    "raw_url": "https://github.com/DylanPKing/DnDCharacterManager/raw/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/Armour.java",
+    "contents_url": "https://api.github.com/repos/DylanPKing/DnDCharacterManager/contents/src/main/java/com/seventhtill/item/armour/Armour.java?ref=558bec31ce894e102753955db3c6e79c723c4eff",
+    "patch": "@@ -0,0 +1,13 @@\n+package com.seventhtill.item.armour;\n+\n+import com.seventhtill.item.Item;\n+\n+public interface Armour extends Item {\n+    int getBaseArmour();\n+    int getWeight();\n+    boolean isDisadvantage();\n+\n+    default int getArmourClassModifier(int dexModifier) {\n+        return getBaseArmour() + dexModifier;\n+    }\n+}"
+  },
+  {
+    "sha": "e09801c0d76d216a50227bc50abae5ca0cdce3b0",
+    "filename": "src/main/java/com/seventhtill/item/armour/ArmourComposite.java",
+    "status": "added",
+    "additions": 69,
+    "deletions": 0,
+    "changes": 69,
+    "blob_url": "https://github.com/DylanPKing/DnDCharacterManager/blob/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/ArmourComposite.java",
+    "raw_url": "https://github.com/DylanPKing/DnDCharacterManager/raw/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/ArmourComposite.java",
+    "contents_url": "https://api.github.com/repos/DylanPKing/DnDCharacterManager/contents/src/main/java/com/seventhtill/item/armour/ArmourComposite.java?ref=558bec31ce894e102753955db3c6e79c723c4eff",
+    "patch": "@@ -0,0 +1,69 @@\n+package com.seventhtill.item.armour;\n+\n+import java.util.ArrayList;\n+\n+public class ArmourComposite implements Armour {\n+\n+    private ArrayList<Armour> armourCollection;\n+\n+    public ArmourComposite() {\n+        armourCollection = new ArrayList<>();\n+    }\n+\n+    public ArmourComposite(ArrayList<Armour> armourCollection) {\n+        this.armourCollection = armourCollection;\n+    }\n+\n+\n+    @Override\n+    public int getBaseArmour() {\n+        int totalBaseArmour = 0;\n+\n+        for (Armour armour : armourCollection) {\n+            totalBaseArmour += armour.getBaseArmour();\n+        }\n+\n+        return totalBaseArmour;\n+    }\n+\n+    @Override\n+    public int getArmourClassModifier(int dexModifier) {\n+        int totalArmour = 0;\n+\n+        for (Armour armour : armourCollection) {\n+            totalArmour += armour.getArmourClassModifier(dexModifier);\n+        }\n+\n+        return totalArmour;\n+    }\n+\n+    @Override\n+    public boolean isDisadvantage() {\n+        boolean result = false;\n+\n+        for (Armour armour : armourCollection) {\n+            result |= armour.isDisadvantage();\n+        }\n+\n+        return result;\n+    }\n+\n+    @Override\n+    public int getWeight() {\n+        int totalWeight = 0;\n+\n+        for (Armour armour : armourCollection) {\n+            totalWeight += armour.getWeight();\n+        }\n+\n+        return totalWeight;\n+    }\n+\n+    public void add(Armour armour) {\n+        armourCollection.add(armour);\n+    }\n+\n+    public void remove(Armour armour) {\n+        armourCollection.remove(armour);\n+    }\n+}"
+  },
+  {
+    "sha": "2bc489297713950aba6a86ff5e7937f973c2f7eb",
+    "filename": "src/main/java/com/seventhtill/item/armour/HeavyArmour.java",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/DylanPKing/DnDCharacterManager/blob/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/HeavyArmour.java",
+    "raw_url": "https://github.com/DylanPKing/DnDCharacterManager/raw/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/HeavyArmour.java",
+    "contents_url": "https://api.github.com/repos/DylanPKing/DnDCharacterManager/contents/src/main/java/com/seventhtill/item/armour/HeavyArmour.java?ref=558bec31ce894e102753955db3c6e79c723c4eff",
+    "patch": "@@ -0,0 +1,40 @@\n+package com.seventhtill.item.armour;\n+\n+public class HeavyArmour implements Armour {\n+\n+    private int baseArmour;\n+    private String name;\n+    private boolean disadvantage;\n+    private int weight;\n+\n+    public HeavyArmour(int baseArmour, String name, boolean disadvantage, int weight) {\n+        this.baseArmour = baseArmour;\n+        this.name = name;\n+        this.disadvantage = disadvantage;\n+        this.weight = weight;\n+    }\n+\n+    @Override\n+    public int getBaseArmour() {\n+        return baseArmour;\n+    }\n+\n+    @Override\n+    public int getArmourClassModifier(int dexModifier) {\n+        return getBaseArmour();\n+    }\n+\n+    @Override\n+    public boolean isDisadvantage() {\n+        return disadvantage;\n+    }\n+\n+    @Override\n+    public int getWeight() {\n+        return weight;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+}"
+  },
+  {
+    "sha": "e8a186eb929ec362362dc94d41a2a53e7ca8d262",
+    "filename": "src/main/java/com/seventhtill/item/armour/LightArmour.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/DylanPKing/DnDCharacterManager/blob/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/LightArmour.java",
+    "raw_url": "https://github.com/DylanPKing/DnDCharacterManager/raw/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/LightArmour.java",
+    "contents_url": "https://api.github.com/repos/DylanPKing/DnDCharacterManager/contents/src/main/java/com/seventhtill/item/armour/LightArmour.java?ref=558bec31ce894e102753955db3c6e79c723c4eff",
+    "patch": "@@ -0,0 +1,34 @@\n+package com.seventhtill.item.armour;\n+\n+public class LightArmour implements Armour {\n+    private int baseArmour;\n+    private String name;\n+    private boolean disadvantage;\n+    private int weight;\n+\n+    public LightArmour(int baseArmour, String name, boolean disadvantage, int weight) {\n+        this.baseArmour = baseArmour;\n+        this.name = name;\n+        this.disadvantage = disadvantage;\n+        this.weight = weight;\n+    }\n+\n+    @Override\n+    public int getBaseArmour() {\n+        return baseArmour;\n+    }\n+\n+    @Override\n+    public boolean isDisadvantage() {\n+        return disadvantage;\n+    }\n+\n+    @Override\n+    public int getWeight() {\n+        return weight;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+}"
+  },
+  {
+    "sha": "71de956160e9adf119cf078b4ed4a9521e605b47",
+    "filename": "src/main/java/com/seventhtill/item/armour/MediumArmour.java",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/DylanPKing/DnDCharacterManager/blob/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/MediumArmour.java",
+    "raw_url": "https://github.com/DylanPKing/DnDCharacterManager/raw/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/MediumArmour.java",
+    "contents_url": "https://api.github.com/repos/DylanPKing/DnDCharacterManager/contents/src/main/java/com/seventhtill/item/armour/MediumArmour.java?ref=558bec31ce894e102753955db3c6e79c723c4eff",
+    "patch": "@@ -0,0 +1,40 @@\n+package com.seventhtill.item.armour;\n+\n+public class MediumArmour implements Armour {\n+    private int baseArmour;\n+    private String name;\n+    private boolean disadvantage;\n+    private int weight;\n+\n+    public MediumArmour(int baseArmour, String name, boolean disadvantage, int weight) {\n+        this.baseArmour = baseArmour;\n+        this.name = name;\n+        this.disadvantage = disadvantage;\n+        this.weight = weight;\n+    }\n+\n+    @Override\n+    public int getBaseArmour() {\n+        return baseArmour;\n+    }\n+\n+    @Override\n+    public boolean isDisadvantage() {\n+        return disadvantage;\n+    }\n+\n+    @Override\n+    public int getArmourClassModifier(int dexModifier) {\n+        dexModifier = Math.min(dexModifier, 2);\n+        return Armour.super.getArmourClassModifier(dexModifier);\n+    }\n+\n+    @Override\n+    public int getWeight() {\n+        return weight;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+}"
+  },
+  {
+    "sha": "754551fe305c64252919471dd07091c416ee2d87",
+    "filename": "src/main/java/com/seventhtill/item/armour/Shield.java",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/DylanPKing/DnDCharacterManager/blob/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/Shield.java",
+    "raw_url": "https://github.com/DylanPKing/DnDCharacterManager/raw/558bec31ce894e102753955db3c6e79c723c4eff/src/main/java/com/seventhtill/item/armour/Shield.java",
+    "contents_url": "https://api.github.com/repos/DylanPKing/DnDCharacterManager/contents/src/main/java/com/seventhtill/item/armour/Shield.java?ref=558bec31ce894e102753955db3c6e79c723c4eff",
+    "patch": "@@ -0,0 +1,37 @@\n+package com.seventhtill.item.armour;\n+\n+public class Shield implements Armour {\n+    private int baseArmour;\n+    private String name;\n+    private int weight;\n+\n+    public Shield() {\n+        this.baseArmour = 2;\n+        this.name = \"Shield\";\n+        this.weight = 6;\n+    }\n+\n+    @Override\n+    public int getBaseArmour() {\n+        return baseArmour;\n+    }\n+\n+    @Override\n+    public int getArmourClassModifier(int dexModifier) {\n+        return getBaseArmour();\n+    }\n+\n+    @Override\n+    public boolean isDisadvantage() {\n+        return false;\n+    }\n+\n+    @Override\n+    public int getWeight() {\n+        return weight;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+}"
+  }
+]

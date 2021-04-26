@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "9cef7a6761e55986ec2bffdb071ecef2528dc351",
+    "filename": "kernel/src/main/java/org/kframework/kbmc/KBMC.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 3,
+    "changes": 7,
+    "blob_url": "https://github.com/kframework/k/blob/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kbmc/KBMC.java",
+    "raw_url": "https://github.com/kframework/k/raw/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kbmc/KBMC.java",
+    "contents_url": "https://api.github.com/repos/kframework/k/contents/kernel/src/main/java/org/kframework/kbmc/KBMC.java?ref=fff6c0d42c302ac5f5d52ee8d9362134ae752842",
+    "patch": "@@ -4,6 +4,7 @@\n import org.kframework.RewriterResult;\n import org.kframework.definition.Definition;\n import org.kframework.definition.Module;\n+import org.kframework.kompile.CompiledDefinition;\n import org.kframework.kprove.ProofDefinitionBuilder;\n import org.kframework.rewriter.Rewriter;\n import org.kframework.unparser.KPrint;\n@@ -37,13 +38,13 @@ public int run() {\n                     options.specFile(files).getAbsolutePath());\n         }\n \n-        Tuple2<Definition, Module> compiled = proofDefinitionBuilder\n+        Tuple2<CompiledDefinition, Module> compiled = proofDefinitionBuilder\n                 .build(options.specFile(files), options.defModule, options.specModule);\n-        Rewriter rewriter = rewriterGenerator.apply(compiled._1());\n+        Rewriter rewriter = rewriterGenerator.apply(compiled._1().kompiledDefinition);\n         Module specModule = compiled._2();\n \n         RewriterResult results = rewriter.bmc(specModule);\n-        kprint.prettyPrint(compiled._1(), compiled._1().getModule(\"LANGUAGE-PARSING\").get(), kprint::outputFile,\n+        kprint.prettyPrint(compiled._1().kompiledDefinition, compiled._1().kompiledDefinition.getModule(\"LANGUAGE-PARSING\").get(), kprint::outputFile,\n                 results.k());\n         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);\n     }"
+  },
+  {
+    "sha": "d4cf43682e6c9724374a2fb27cc829103916f903",
+    "filename": "kernel/src/main/java/org/kframework/keq/KEq.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/kframework/k/blob/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/keq/KEq.java",
+    "raw_url": "https://github.com/kframework/k/raw/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/keq/KEq.java",
+    "contents_url": "https://api.github.com/repos/kframework/k/contents/kernel/src/main/java/org/kframework/keq/KEq.java?ref=fff6c0d42c302ac5f5d52ee8d9362134ae752842",
+    "patch": "@@ -28,14 +28,14 @@ public int run(CompiledDefinition commonDef, Function<Definition, Rewriter> comm\n                    FileUtil files) {\n         Rewriter commonRewriter = commonGen.apply(commonDef.kompiledDefinition);\n \n-        Tuple2<Definition, Module> compiled1 = pdb1.build(\n+        Tuple2<CompiledDefinition, Module> compiled1 = pdb1.build(\n                 files.resolveWorkingDirectory(keqOptions.spec1), keqOptions.defModule1, keqOptions.specModule1);\n-        Rewriter rewriter1 = gen1.apply(compiled1._1());\n+        Rewriter rewriter1 = gen1.apply(compiled1._1().kompiledDefinition);\n         Module spec1 = compiled1._2();\n \n-        Tuple2<Definition, Module> compiled2 = pdb2.build(\n+        Tuple2<CompiledDefinition, Module> compiled2 = pdb2.build(\n                 files.resolveWorkingDirectory(keqOptions.spec2), keqOptions.defModule2, keqOptions.specModule2);\n-        Rewriter rewriter2 = gen2.apply(compiled2._1());\n+        Rewriter rewriter2 = gen2.apply(compiled2._1().kompiledDefinition);\n         Module spec2 = compiled2._2();\n \n         boolean isEquivalent = commonRewriter.equivalence(rewriter1, rewriter2, spec1, spec2);"
+  },
+  {
+    "sha": "f29eea25164fcd766f9e7b3c9964605b2304dfb2",
+    "filename": "kernel/src/main/java/org/kframework/kompile/DefinitionParsing.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/kframework/k/blob/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kompile/DefinitionParsing.java",
+    "raw_url": "https://github.com/kframework/k/raw/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kompile/DefinitionParsing.java",
+    "contents_url": "https://api.github.com/repos/kframework/k/contents/kernel/src/main/java/org/kframework/kompile/DefinitionParsing.java?ref=fff6c0d42c302ac5f5d52ee8d9362134ae752842",
+    "patch": "@@ -269,7 +269,7 @@ protected Definition resolveConfigBubbles(Definition definition, Module defaultC\n         return result;\n     }\n \n-    Map<String, ParseCache> caches;\n+    public Map<String, ParseCache> caches;\n     private java.util.Set<KEMException> errors;\n     RuleGrammarGenerator gen;\n "
+  },
+  {
+    "sha": "7bc0b867bb3726fef0c03cefcfad091097a03101",
+    "filename": "kernel/src/main/java/org/kframework/kompile/Kompile.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/kframework/k/blob/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kompile/Kompile.java",
+    "raw_url": "https://github.com/kframework/k/raw/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kompile/Kompile.java",
+    "contents_url": "https://api.github.com/repos/kframework/k/contents/kernel/src/main/java/org/kframework/kompile/Kompile.java?ref=fff6c0d42c302ac5f5d52ee8d9362134ae752842",
+    "patch": "@@ -79,7 +79,7 @@\n     private final KExceptionManager kem;\n     private final ParserUtils parser;\n     private final Stopwatch sw;\n-    private final DefinitionParsing definitionParsing;\n+    public final DefinitionParsing definitionParsing;\n     java.util.Set<KEMException> errors;\n \n     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {"
+  },
+  {
+    "sha": "fa9db516b3003a59dab063fc92507313a6e3d90f",
+    "filename": "kernel/src/main/java/org/kframework/kprove/KProve.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 21,
+    "changes": 35,
+    "blob_url": "https://github.com/kframework/k/blob/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kprove/KProve.java",
+    "raw_url": "https://github.com/kframework/k/raw/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kprove/KProve.java",
+    "contents_url": "https://api.github.com/repos/kframework/k/contents/kernel/src/main/java/org/kframework/kprove/KProve.java?ref=fff6c0d42c302ac5f5d52ee8d9362134ae752842",
+    "patch": "@@ -63,47 +63,40 @@ public int run() {\n                     kproveOptions.specFile(files).getAbsolutePath());\n         }\n \n-        Tuple2<Definition, Module> compiled = proofDefinitionBuilder\n+        Tuple2<CompiledDefinition, Module> compiled = proofDefinitionBuilder\n                 .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule, compiledDefinition.kompileOptions.readOnlyKompiledDirectory);\n \n+        // Saving combined verification definition to disk to be usable by other tools or future kprove runs\n         if (kproveOptions.saveProofDefinitionTo != null) {\n-            saveFullDefinition(compiled._1());\n+            Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve(\"prove-spec-kompiled\");\n+            try {\n+                Files.createDirectories(proveKompiledDir);\n+                loader.saveOrDie(proveKompiledDir.resolve(\"compiled.bin\").toFile(), compiled._1());\n+                loader.saveOrDie(proveKompiledDir.resolve(\"cache.bin\").toFile(), proofDefinitionBuilder.kompile.definitionParsing.caches);\n+            } catch (IOException e) {\n+                throw KEMException.criticalError(\n+                        \"Could not create proof output directory \" + proveKompiledDir.toAbsolutePath(), e);\n+            }\n         }\n \n-        Rewriter rewriter = rewriterGenerator.apply(compiled._1());\n+        Rewriter rewriter = rewriterGenerator.apply(compiled._1().kompiledDefinition);\n         Module specModule = compiled._2();\n         Rule boundaryPattern = buildBoundaryPattern(compiledDefinition);\n \n         if (kproveOptions.emitJson) {\n             try {\n-                files.saveToKompiled(\"prove-definition.json\", new String(ToJson.apply(compiled._1()), \"UTF-8\"));\n+                files.saveToKompiled(\"prove-definition.json\", new String(ToJson.apply(compiled._1().kompiledDefinition), \"UTF-8\"));\n             } catch (UnsupportedEncodingException e) {\n                 throw KEMException.criticalError(\"Unsupported encoding `UTF-8` when saving JSON definition.\");\n             }\n         }\n \n         RewriterResult results = rewriter.prove(specModule, boundaryPattern);\n-        kprint.prettyPrint(compiled._1(), compiled._1().getModule(\"LANGUAGE-PARSING\").get(), kprint::outputFile,\n+        kprint.prettyPrint(compiled._1().kompiledDefinition, compiled._1().kompiledDefinition.getModule(\"LANGUAGE-PARSING\").get(), kprint::outputFile,\n                 results.k());\n         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);\n     }\n \n-    // Saving combined verification definition to disk to be usable by other tools (e.g., kast)\n-    private void saveFullDefinition(Definition fullDefinition) {\n-        CompiledDefinition fullCompiledDefinition = new CompiledDefinition(\n-                compiledDefinition.kompileOptions,\n-                fullDefinition, fullDefinition,\n-                files, kem, compiledDefinition.topCellInitializer);\n-        Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve(\"prove-spec-kompiled\");\n-        try {\n-            Files.createDirectories(proveKompiledDir);\n-            loader.saveOrDie(proveKompiledDir.resolve(\"compiled.bin\").toFile(), fullCompiledDefinition);\n-        } catch (IOException e) {\n-            throw KEMException.criticalError(\n-                    \"Could not create proof output directory \" + proveKompiledDir.toAbsolutePath(), e);\n-        }\n-    }\n-\n     /**\n      * A pattern that implements --boundary-cells functionality. When this pattern matches, in the resulting\n      * substitution, for each boundary cell there will be a variable starting with {@code \"BOUND_\"}. Other variables"
+  },
+  {
+    "sha": "6862d45777dc4f1b0c2473cfe2c431df86c77d4e",
+    "filename": "kernel/src/main/java/org/kframework/kprove/ProofDefinitionBuilder.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 5,
+    "changes": 11,
+    "blob_url": "https://github.com/kframework/k/blob/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kprove/ProofDefinitionBuilder.java",
+    "raw_url": "https://github.com/kframework/k/raw/fff6c0d42c302ac5f5d52ee8d9362134ae752842/kernel/src/main/java/org/kframework/kprove/ProofDefinitionBuilder.java",
+    "contents_url": "https://api.github.com/repos/kframework/k/contents/kernel/src/main/java/org/kframework/kprove/ProofDefinitionBuilder.java?ref=fff6c0d42c302ac5f5d52ee8d9362134ae752842",
+    "patch": "@@ -9,6 +9,7 @@\n import org.kframework.kompile.CompiledDefinition;\n import org.kframework.kompile.Kompile;\n import org.kframework.utils.errorsystem.KEMException;\n+import org.kframework.utils.errorsystem.KExceptionManager;\n import org.kframework.utils.file.FileUtil;\n import scala.Option;\n import scala.Tuple2;\n@@ -34,7 +35,7 @@ protected boolean removeEldestEntry(Map.Entry entry) {\n \n     private final CompiledDefinition compiledDefinition;\n     private final Backend backend;\n-    private final Kompile kompile;\n+    public final Kompile kompile;\n     private final FileUtil files;\n     @Inject(optional = true)\n     @Named(\"extraConcreteRuleLabels\")\n@@ -55,11 +56,11 @@ public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend bac\n      *                       modules required by proofs, usually abstractions for symbolic execution and lemmas.\n      * @param specModuleName Module containing specifications to prove\n      */\n-    public Tuple2<Definition, Module> build(File specFile, String defModuleName, String specModuleName) {\n+    public Tuple2<CompiledDefinition, Module> build(File specFile, String defModuleName, String specModuleName) {\n         return build(specFile, defModuleName, specModuleName, false);\n     }\n \n-    public Tuple2<Definition, Module> build(File specFile, String defModuleName, String specModuleName, boolean readOnlyCache) {\n+    public Tuple2<CompiledDefinition, Module> build(File specFile, String defModuleName, String specModuleName, boolean readOnlyCache) {\n         String defModuleNameUpdated =\n                 defModuleName == null ? compiledDefinition.kompiledDefinition.mainModule().name() : defModuleName;\n         String specModuleNameUpdated =\n@@ -81,8 +82,8 @@ public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend bac\n         compiledExtendedDef = backend.proofDefinitionNonCachedSteps(extraConcreteRuleLabels).apply(compiledExtendedDef);\n \n         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);\n-\n-        return Tuple2.apply(compiledExtendedDef, specModule);\n+        CompiledDefinition cd = new CompiledDefinition(compiledDefinition.kompileOptions, parsedDefinition, compiledExtendedDef, files, new KExceptionManager(compiledDefinition.kompileOptions.global), compiledDefinition.topCellInitializer);\n+        return Tuple2.apply(cd, specModule);\n     }\n \n     private static Module getModule(String defModule, Map<String, Module> modules, Definition parsedDefinition) {"
+  }
+]

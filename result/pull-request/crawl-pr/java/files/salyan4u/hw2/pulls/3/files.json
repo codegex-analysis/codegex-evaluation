@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "3492ef1b51ab3cc2f4de8f1cd0a672aafa2f8467",
+    "filename": ".gitignore",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/salyan4u/hw2/blob/c3c02c102e625e15143e1803b08e0a7b2c709331/.gitignore",
+    "raw_url": "https://github.com/salyan4u/hw2/raw/c3c02c102e625e15143e1803b08e0a7b2c709331/.gitignore",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw2/contents/.gitignore?ref=c3c02c102e625e15143e1803b08e0a7b2c709331",
+    "patch": "@@ -0,0 +1,4 @@\n+# Project exclude paths\n+/target/\n+*.iml\n+/.idea\n\\ No newline at end of file"
+  },
+  {
+    "sha": "4a7f07751bd78964db7d4608f82113a070af9dd9",
+    "filename": "pom.xml",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/salyan4u/hw2/blob/c3c02c102e625e15143e1803b08e0a7b2c709331/pom.xml",
+    "raw_url": "https://github.com/salyan4u/hw2/raw/c3c02c102e625e15143e1803b08e0a7b2c709331/pom.xml",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw2/contents/pom.xml?ref=c3c02c102e625e15143e1803b08e0a7b2c709331",
+    "patch": "@@ -0,0 +1,48 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n+         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n+         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n+    <modelVersion>4.0.0</modelVersion>\n+\n+    <groupId>ru.geekbrains</groupId>\n+    <artifactId>hw2</artifactId>\n+    <version>1.0-SNAPSHOT</version>\n+    <name>appBoot</name>\n+\n+    <properties>\n+        <maven.compiler.source>14</maven.compiler.source>\n+        <maven.compiler.target>14</maven.compiler.target>\n+    </properties>\n+\n+    <parent>\n+        <groupId>org.springframework.boot</groupId>\n+        <artifactId>spring-boot-starter-parent</artifactId>\n+        <version>2.4.3</version>\n+    </parent>\n+\n+    <dependencies>\n+        <dependency>\n+            <groupId>org.springframework.boot</groupId>\n+            <artifactId>spring-boot-starter-web</artifactId>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.springframework.boot</groupId>\n+            <artifactId>spring-boot-starter-thymeleaf</artifactId>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.springframework.boot</groupId>\n+            <artifactId>spring-boot-devtools</artifactId>\n+            <optional>true</optional>\n+        </dependency>\n+    </dependencies>\n+\n+    <build>\n+        <plugins>\n+            <plugin>\n+                <groupId>org.springframework.boot</groupId>\n+                <artifactId>spring-boot-maven-plugin</artifactId>\n+            </plugin>\n+        </plugins>\n+    </build>\n+\n+</project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "94fd3a940bdfe8bf8890ee55edcc0be7d394a9db",
+    "filename": "src/main/java/application/Application.java",
+    "status": "added",
+    "additions": 57,
+    "deletions": 0,
+    "changes": 57,
+    "blob_url": "https://github.com/salyan4u/hw2/blob/c3c02c102e625e15143e1803b08e0a7b2c709331/src/main/java/application/Application.java",
+    "raw_url": "https://github.com/salyan4u/hw2/raw/c3c02c102e625e15143e1803b08e0a7b2c709331/src/main/java/application/Application.java",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw2/contents/src/main/java/application/Application.java?ref=c3c02c102e625e15143e1803b08e0a7b2c709331",
+    "patch": "@@ -0,0 +1,57 @@\n+package application;\n+\n+import common.Cart;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.boot.CommandLineRunner;\n+import org.springframework.boot.SpringApplication;\n+import org.springframework.boot.autoconfigure.SpringBootApplication;\n+import org.springframework.context.ApplicationContext;\n+import production.Product;\n+import production.ProductRepository;\n+\n+import java.util.List;\n+import java.util.Scanner;\n+\n+@SpringBootApplication(scanBasePackages = {\"common\", \"production\"})\n+public class Application implements CommandLineRunner {\n+\n+    @Autowired\n+    private ProductRepository productRepository;\n+\n+    @Autowired\n+    private Cart cart;\n+\n+    @Override\n+    public void run(String... args) {\n+        List<Product> productList = List.of(new Product(1, \"Banana\", 50),\n+                new Product(2, \"Banana\", 50),\n+                new Product(3, \"Apple\", 20),\n+                new Product(4, \"Apple\", 20),\n+                new Product(5, \"Grape\", 120));\n+        productRepository.setProductList(productList);\n+        System.out.println(\"ProductList содержит: \");\n+        productRepository.getList();\n+        System.out.println(\"Добавить товар в корзину: add id, \" +\n+                \"удалить товар: del id, \" +\n+                \"показать список товаров: show, \" +\n+                \"выход: exit, введите команду!\");\n+        while (true) {\n+            Scanner scanner = new Scanner(System.in);\n+            String command = scanner.nextLine();\n+            String[] strings = command.split(\" \");\n+            if (command.startsWith(\"del \")) {\n+                cart.delProduct(Integer.parseInt(strings[1]));\n+            } else if (command.startsWith(\"add \")) {\n+                cart.addProduct(Integer.parseInt(strings[1]));\n+            } else if (command.equals(\"show\")) {\n+                cart.showCart();\n+            } else if (command.equals(\"exit\")) {\n+                break;\n+            }\n+        }\n+    }\n+\n+    public static void main(String[] args) {\n+        SpringApplication.run(Application.class, args);\n+    }\n+}"
+  },
+  {
+    "sha": "0b3be07d2d3b24c9b4cf2a29ec645a3165b1f98a",
+    "filename": "src/main/java/common/Cart.java",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/salyan4u/hw2/blob/c3c02c102e625e15143e1803b08e0a7b2c709331/src/main/java/common/Cart.java",
+    "raw_url": "https://github.com/salyan4u/hw2/raw/c3c02c102e625e15143e1803b08e0a7b2c709331/src/main/java/common/Cart.java",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw2/contents/src/main/java/common/Cart.java?ref=c3c02c102e625e15143e1803b08e0a7b2c709331",
+    "patch": "@@ -0,0 +1,40 @@\n+package common;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.context.annotation.Scope;\n+import org.springframework.stereotype.Component;\n+import production.Product;\n+import production.ProductRepository;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+@Component\n+@Scope(\"prototype\")\n+public class Cart {\n+    private final ProductRepository productRepository;\n+\n+    @Autowired\n+    public Cart(ProductRepository productRepository) {\n+        this.productRepository = productRepository;\n+    }\n+\n+    private final List<Product> cartList = new ArrayList<>();\n+\n+    public void showCart() {\n+        for (Product product : cartList) {\n+            System.out.println(product.toString());\n+        }\n+    }\n+\n+    public void addProduct(int id) {\n+        cartList.add(productRepository.getProduct(id));\n+        System.out.printf(\"Товар с id %d добавлен!\\n\", id);\n+    }\n+\n+    public void delProduct(int id) {\n+        cartList.remove(productRepository.getProduct(id));\n+        System.out.printf(\"Товар с id %d удален!\\n\", id);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "5ba2a5f66cadbea2b28884d39c869c9f2e52d1f3",
+    "filename": "src/main/java/production/Product.java",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/salyan4u/hw2/blob/c3c02c102e625e15143e1803b08e0a7b2c709331/src/main/java/production/Product.java",
+    "raw_url": "https://github.com/salyan4u/hw2/raw/c3c02c102e625e15143e1803b08e0a7b2c709331/src/main/java/production/Product.java",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw2/contents/src/main/java/production/Product.java?ref=c3c02c102e625e15143e1803b08e0a7b2c709331",
+    "patch": "@@ -0,0 +1,42 @@\n+package production;\n+\n+public class Product {\n+    private int id;\n+    private String name;\n+    private int cost;\n+\n+    public Product(int id, String name, int cost) {\n+        this.id = id;\n+        this.name = name;\n+        this.cost = cost;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return String.format(\"Name:%s, id:%d, cost:%d\", getName(), getId(), getCost());\n+    }\n+\n+    public int getId() {\n+        return id;\n+    }\n+\n+    public void setId(int id) {\n+        this.id = id;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public void setName(String name) {\n+        this.name = name;\n+    }\n+\n+    public int getCost() {\n+        return cost;\n+    }\n+\n+    public void setCost(int cost) {\n+        this.cost = cost;\n+    }\n+}"
+  },
+  {
+    "sha": "c1971106fd40def19d61e060ee53897832a3e0f5",
+    "filename": "src/main/java/production/ProductRepository.java",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/salyan4u/hw2/blob/c3c02c102e625e15143e1803b08e0a7b2c709331/src/main/java/production/ProductRepository.java",
+    "raw_url": "https://github.com/salyan4u/hw2/raw/c3c02c102e625e15143e1803b08e0a7b2c709331/src/main/java/production/ProductRepository.java",
+    "contents_url": "https://api.github.com/repos/salyan4u/hw2/contents/src/main/java/production/ProductRepository.java?ref=c3c02c102e625e15143e1803b08e0a7b2c709331",
+    "patch": "@@ -0,0 +1,37 @@\n+package production;\n+\n+import org.springframework.stereotype.Component;\n+\n+import java.util.List;\n+\n+@Component\n+public class ProductRepository {\n+\n+    private List<Product> productList;\n+\n+    public List<Product> getProductList() {\n+        return productList;\n+    }\n+\n+    public void setProductList(List<Product> productList) {\n+        this.productList = productList;\n+    }\n+\n+    public void getList() {\n+        for (Product product : productList) {\n+            System.out.println(product.toString());\n+        }\n+    }\n+\n+    public Product getProduct(int id) {\n+        Product returnable = null;\n+        for (Product product : productList) {\n+            if (product.getId() == id) {\n+                System.out.println(product.toString());\n+                returnable = product;\n+            }\n+        }\n+        return returnable;\n+    }\n+\n+}"
+  }
+]

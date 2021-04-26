@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "31e7928c285a42ba47df00a2971c42e6e1d155d7",
+    "filename": "build.bat",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/hcwong/cs3223/blob/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/build.bat",
+    "raw_url": "https://github.com/hcwong/cs3223/raw/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/build.bat",
+    "contents_url": "https://api.github.com/repos/hcwong/cs3223/contents/build.bat?ref=f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d",
+    "patch": "@@ -1,6 +1,7 @@\n javac -d classes -classpath lib -sourcepath src src/QueryMain.java\r\n-javac -d classes -classpath lib -sourcepath src src/ConvertTxtToTbl.java \r\n+javac -d classes -classpath lib -sourcepath src src/ConvertTxtToTbl.java\r\n javac -d classes -classpath lib -sourcepath src src/RandomDB.java\r\n javac -d classes -classpath lib -sourcepath src src/qp/algorithms/ExternalSort.java\r\n javac -d classes -classpath lib -sourcepath src src/utils/PrintTupleFile.java\r\n-javac -d classes -classpath lib -sourcepath src src/utils/BuildIndex.java\n\\ No newline at end of file\n+javac -d classes -classpath lib -sourcepath src src/utils/BuildIndex.java\r\n+javac -d classes -classpath lib -sourcepath src src/qp/optimizer/BufferManager.java\r"
+  },
+  {
+    "sha": "d21da28be0247438e3799c43a081d90d71612b61",
+    "filename": "src/qp/operators/HashDistinct.java",
+    "status": "added",
+    "additions": 124,
+    "deletions": 0,
+    "changes": 124,
+    "blob_url": "https://github.com/hcwong/cs3223/blob/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/operators/HashDistinct.java",
+    "raw_url": "https://github.com/hcwong/cs3223/raw/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/operators/HashDistinct.java",
+    "contents_url": "https://api.github.com/repos/hcwong/cs3223/contents/src/qp/operators/HashDistinct.java?ref=f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d",
+    "patch": "@@ -0,0 +1,124 @@\n+package qp.operators;\n+\n+import qp.optimizer.BufferManager;\n+import qp.utils.Batch;\n+import qp.utils.Tuple;\n+import qp.utils.TupleReader;\n+import qp.utils.TupleWriter;\n+\n+import java.io.File;\n+import java.util.ArrayList;\n+import java.util.Hashtable;\n+import java.util.stream.Collectors;\n+import java.util.stream.IntStream;\n+\n+public class HashDistinct extends Operator {\n+\n+    Operator base;\n+    String filename;\n+    int batchSize;\n+\n+    public HashDistinct(Operator base, int type) {\n+        super(type);\n+        this.base = base;\n+    }\n+\n+    private int hash(Tuple tuple, int numBuckets) {\n+        return tuple.hashCode() % numBuckets;\n+    }\n+\n+    public boolean open() {\n+        if (!base.open()) {\n+            return false;\n+        }\n+\n+        int numBuffer = BufferManager.getNumBuffer() - 1;\n+        ArrayList<Batch> buffers = new ArrayList<>(numBuffer);\n+        Batch batch = base.next();\n+        batchSize = batch.capacity();\n+        for (int i = 0; i < numBuffer; i++) {\n+            buffers.add(new Batch(batchSize));\n+        }\n+\n+        int j;\n+        Tuple t;\n+        Batch b;\n+        TupleWriter tw;\n+\n+        ArrayList<TupleWriter> tupleWriters = IntStream.range(0, numBuffer)\n+                .mapToObj(i -> new TupleWriter(String.format(\"temp-%d.tbl\", i), batchSize))\n+                .collect(Collectors.toCollection(ArrayList::new));\n+        tupleWriters.forEach(TupleWriter::open);\n+        while (batch != null) {\n+            for (int i = 0; i < batch.size(); i++) {\n+                t = batch.get(i);\n+                j = hash(t, numBuffer);\n+                b = buffers.get(j);\n+                if (!b.contains(t)) {\n+                    b.add(t);\n+                }\n+                if (b.isFull()) {\n+                    tw = tupleWriters.get(j);\n+                    tw.open();\n+                    b.getTuples().forEach(tw::next);\n+                    tw.close();\n+                    b.clear();\n+                }\n+            }\n+            batch = base.next();\n+        }\n+        for (int i = 0; i < batchSize; i++) {\n+            b = buffers.get(i);\n+            tw = tupleWriters.get(i);\n+            tw.open();\n+            b.getTuples().forEach(tw::next);\n+            tw.close();\n+        }\n+        tupleWriters.forEach(TupleWriter::close);\n+\n+        int numBuckets = (numBuffer / 2) | 1;\n+        Hashtable<Integer, Tuple> hashTable = new Hashtable<>();\n+        filename = \"temp-distinct.tbl\";\n+        tw = new TupleWriter(filename, batchSize);\n+        for (int i = 0; i < numBuffer; i++) {\n+            TupleReader tr = new TupleReader(String.format(\"temp-%d.tbl\", i), batchSize);\n+            tr.open();\n+            while (!tr.isEOF()) {\n+                t = tr.next();\n+                j = hash(t, numBuckets);\n+                hashTable.put(j, t);\n+            }\n+            tr.close();\n+            hashTable.values().forEach(tw::next);\n+            hashTable.clear();\n+        }\n+        tw.close();\n+        return true;\n+    }\n+\n+    public Batch next() {\n+        Batch outBatch = new Batch(batchSize);\n+        TupleReader tupleReader = new TupleReader(filename, batchSize);\n+        tupleReader.open();\n+        while (!tupleReader.isEOF()) {\n+            Tuple t = tupleReader.next();\n+            outBatch.add(t);\n+        }\n+        tupleReader.close();\n+        return outBatch;\n+    }\n+\n+    public boolean close() {\n+        File file = new File(filename);\n+        file.delete();\n+        return base.close();\n+    }\n+\n+    public Operator getBase() {\n+        return base;\n+    }\n+\n+    public void setBase(Operator base) {\n+        this.base = base;\n+    }\n+}"
+  },
+  {
+    "sha": "0d7f33a6babc4963a22ba16901d03048d5d6866c",
+    "filename": "src/qp/operators/OpType.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/hcwong/cs3223/blob/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/operators/OpType.java",
+    "raw_url": "https://github.com/hcwong/cs3223/raw/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/operators/OpType.java",
+    "contents_url": "https://api.github.com/repos/hcwong/cs3223/contents/src/qp/operators/OpType.java?ref=f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d",
+    "patch": "@@ -12,5 +12,6 @@\n     public static final int JOIN = 3;\n     public static final int ORDERBY = 4;\n     public static final int SORTDISTINCT = 5;\n+    public static final int HASHDISTINCT = 6;\n \n }"
+  },
+  {
+    "sha": "5e195d7a0018fd8a4b746826600986d3145969a4",
+    "filename": "src/qp/optimizer/PlanCost.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/hcwong/cs3223/blob/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/optimizer/PlanCost.java",
+    "raw_url": "https://github.com/hcwong/cs3223/raw/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/optimizer/PlanCost.java",
+    "contents_url": "https://api.github.com/repos/hcwong/cs3223/contents/src/qp/optimizer/PlanCost.java?ref=f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d",
+    "patch": "@@ -10,6 +10,8 @@\n import java.io.IOException;\n import java.util.HashMap;\n import java.util.StringTokenizer;\n+\n+import qp.operators.HashDistinct;\n import qp.operators.Join;\n import qp.operators.JoinType;\n import qp.operators.OpType;\n@@ -85,6 +87,8 @@ protected long calculateCost(Operator node) {\n             return getStatistics((Scan) node);\n         } else if (node.getOpType() == OpType.ORDERBY) {\n             return getStatistics((Orderby) node);\n+        } else if (node.getOpType() == OpType.HASHDISTINCT) {\n+            return getStatistics((HashDistinct) node);\n         } else if (node.getOpType() == OpType.SORTDISTINCT) {\n             return getStatistics((SortDistinct) node);\n         }\n@@ -101,6 +105,11 @@ protected long getStatistics(Project node) {\n         return calculateCost(node.getBase());\n     }\n \n+    protected long getStatistics(HashDistinct node) {\n+        //TODO\n+        return 0;\n+    }\n+\n     /**\n      * Calculates statistics of orderby operation\n      * @param node"
+  },
+  {
+    "sha": "16024885f868a14ecdd0805f902f8684a691555c",
+    "filename": "src/qp/optimizer/RandomInitialPlan.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/hcwong/cs3223/blob/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/optimizer/RandomInitialPlan.java",
+    "raw_url": "https://github.com/hcwong/cs3223/raw/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/optimizer/RandomInitialPlan.java",
+    "contents_url": "https://api.github.com/repos/hcwong/cs3223/contents/src/qp/optimizer/RandomInitialPlan.java?ref=f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d",
+    "patch": "@@ -61,6 +61,7 @@ public Operator prepareInitialPlan() {\n             createJoinOp();\n         }\n         createProjectOp();\n+        createDistinctOp();\n         createOrderByOp();\n         createSortDistinctOp();\n "
+  },
+  {
+    "sha": "6f81b3ddc28dae7d394c92dbf54f05f6ce6f2634",
+    "filename": "src/qp/optimizer/RandomOptimizer.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/hcwong/cs3223/blob/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/optimizer/RandomOptimizer.java",
+    "raw_url": "https://github.com/hcwong/cs3223/raw/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/optimizer/RandomOptimizer.java",
+    "contents_url": "https://api.github.com/repos/hcwong/cs3223/contents/src/qp/optimizer/RandomOptimizer.java?ref=f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d",
+    "patch": "@@ -90,6 +90,10 @@ public static Operator makeExecPlan(Operator node) {\n             ((SortDistinct) node).setBase(base);\n             ((SortDistinct) node).setNumBuff(totalBuff);\n             return node;\n+        } else if (node.getOpType() == OpType.HASHDISTINCT) {\n+            Operator base = makeExecPlan(((HashDistinct) node).getBase());\n+            ((HashDistinct) node).setBase(base);\n+            return node;\n         } else {\n             return node;\n         }\n@@ -382,12 +386,14 @@ protected Operator findNodeAt(Operator node, int joinNum) {\n         } else if (node.getOpType() == OpType.SCAN) {\n             return null;\n         } else if (node.getOpType() == OpType.SELECT) {\n-            // if sort/project/select/orderby operator\n+            // if sort/project/select/orderby/distinct operator\n             return findNodeAt(((Select) node).getBase(), joinNum);\n         } else if (node.getOpType() == OpType.PROJECT) {\n             return findNodeAt(((Project) node).getBase(), joinNum);\n         } else if (node.getOpType() == OpType.ORDERBY) {\n             return findNodeAt(((Orderby) node).getBase(), joinNum);\n+        } else if (node.getOpType() == OpType.HASHDISTINCT) {\n+            return findNodeAt(((HashDistinct) node).getBase(), joinNum);\n         } else if (node.getOpType() == OpType.SORTDISTINCT) {\n             return findNodeAt(((SortDistinct) node).getBase(), joinNum);\n         } else {\n@@ -417,6 +423,8 @@ private void modifySchema(Operator node) {\n         } else if (node.getOpType() == OpType.ORDERBY) {\n             Operator base = ((Orderby) node).getBase();\n             modifySchema(base);\n+        } else if (node.getOpType() == OpType.HASHDISTINCT) {\n+            Operator base = ((HashDistinct) node).getBase();\n         } else if (node.getOpType() == OpType.SORTDISTINCT) {\n             Operator base = ((SortDistinct) node).getBase();\n             modifySchema(base);"
+  },
+  {
+    "sha": "72cfdf102a0730389c7f1b710f72e31494ee6148",
+    "filename": "src/qp/utils/Tuple.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/hcwong/cs3223/blob/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/utils/Tuple.java",
+    "raw_url": "https://github.com/hcwong/cs3223/raw/f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d/src/qp/utils/Tuple.java",
+    "contents_url": "https://api.github.com/repos/hcwong/cs3223/contents/src/qp/utils/Tuple.java?ref=f8dbbce1399d0a44451a38cae3b68e7f7bf00e2d",
+    "patch": "@@ -214,4 +214,24 @@ public String toString() {\n         // Trim the last comma\n         return sb.substring(0, sb.length() - 1);\n     }\n+\n+    @Override\n+    public boolean equals(Object o) {\n+        if (o == this) {\n+            return true;\n+        }\n+        if (o instanceof Tuple) {\n+            Tuple t = (Tuple) o;\n+            if (t._data.size() != this._data.size()) {\n+                return false;\n+            }\n+            for (int i = 0; i < this._data.size(); i++) {\n+                if (!t._data.get(i).equals(this._data.get(i))) {\n+                    return false;\n+                }\n+            }\n+            return true;\n+        }\n+        return false;\n+    }\n }"
+  }
+]

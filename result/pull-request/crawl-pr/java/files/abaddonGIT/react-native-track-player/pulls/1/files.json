@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "30f6635277bf8d02e71b5902e148bb4582569109",
+    "filename": "android/build.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/abaddonGIT/react-native-track-player/blob/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/android/build.gradle",
+    "raw_url": "https://github.com/abaddonGIT/react-native-track-player/raw/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/android/build.gradle",
+    "contents_url": "https://api.github.com/repos/abaddonGIT/react-native-track-player/contents/android/build.gradle?ref=09a01abda6fef30eba1487cc93bc5576dc2a4e0d",
+    "patch": "@@ -90,5 +90,6 @@ dependencies {\n     // Make sure we're using androidx\n     implementation \"androidx.core:core:1.3.0-rc01\"\n     implementation \"androidx.media:media:1.1.0\"\n+    implementation \"androidx.localbroadcastmanager:localbroadcastmanager:1.1.0-alpha01\"\n     implementation \"com.github.bumptech.glide:glide:4.7.1\"\n }"
+  },
+  {
+    "sha": "46722ed9231c34cbaec5afdbb49cae19ba2ac561",
+    "filename": "android/src/main/java/com/guichaguri/trackplayer/module/MusicModule.java",
+    "status": "modified",
+    "additions": 47,
+    "deletions": 1,
+    "changes": 48,
+    "blob_url": "https://github.com/abaddonGIT/react-native-track-player/blob/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/android/src/main/java/com/guichaguri/trackplayer/module/MusicModule.java",
+    "raw_url": "https://github.com/abaddonGIT/react-native-track-player/raw/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/android/src/main/java/com/guichaguri/trackplayer/module/MusicModule.java",
+    "contents_url": "https://api.github.com/repos/abaddonGIT/react-native-track-player/contents/android/src/main/java/com/guichaguri/trackplayer/module/MusicModule.java?ref=09a01abda6fef30eba1487cc93bc5576dc2a4e0d",
+    "patch": "@@ -5,6 +5,7 @@\n import android.content.IntentFilter;\n import android.content.ServiceConnection;\n import android.os.Bundle;\n+import android.os.Build;\n import android.os.IBinder;\n import android.support.v4.media.RatingCompat;\n import android.support.v4.media.session.PlaybackStateCompat;\n@@ -22,6 +23,9 @@\n import javax.annotation.Nullable;\n import java.util.*;\n \n+import com.facebook.react.bridge.WritableMap;\n+import com.facebook.react.bridge.Arguments;\n+\n /**\n  * @author Guichaguri\n  */\n@@ -103,7 +107,11 @@ private void waitForConnection(Runnable r) {\n \n         // Binds the service to get a MediaWrapper instance\n         Intent intent = new Intent(context, MusicService.class);\n-        context.startService(intent);\n+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n+            context.startForegroundService(intent);\n+        } else {\n+            context.startService(intent);\n+        }\n         intent.setAction(Utils.CONNECT_INTENT);\n         context.bindService(intent, this, 0);\n \n@@ -462,4 +470,42 @@ public void getState(final Promise callback) {\n             waitForConnection(() -> callback.resolve(binder.getPlayback().getState()));\n         }\n     }\n+\n+    @ReactMethod\n+    public void getPlayerState(final Promise callback) {\n+        WritableMap resultMap = Arguments.createMap();\n+\n+        waitForConnection(() -> {\n+            long position = binder.getPlayback().getPosition();\n+            long bufferedPosition = binder.getPlayback().getBufferedPosition();\n+            long duration = binder.getPlayback().getDuration();\n+\n+\n+            if(position == C.POSITION_UNSET) {\n+                resultMap.putString(\"position\", \"Unknown position\");\n+            } else {\n+                resultMap.putDouble(\"position\", Utils.toSeconds(position));\n+            }\n+\n+            if(bufferedPosition == C.POSITION_UNSET) {\n+                resultMap.putDouble(\"bufferedPosition\", Utils.toSeconds(0));\n+            } else {\n+                resultMap.putDouble(\"bufferedPosition\", Utils.toSeconds(bufferedPosition));\n+            }\n+\n+            if(duration == C.TIME_UNSET) {\n+                resultMap.putDouble(\"duration\", Utils.toSeconds(0));\n+            } else {\n+                resultMap.putDouble(\"duration\", Utils.toSeconds(duration));\n+            }\n+\n+            if (binder == null) {\n+                resultMap.putInt(\"state\", PlaybackStateCompat.STATE_NONE);\n+            } else {\n+                resultMap.putInt(\"state\", binder.getPlayback().getState());\n+            }\n+\n+            callback.resolve(resultMap);\n+        });\n+    }\n }"
+  },
+  {
+    "sha": "0028761315042c50c1c5affcd42613cd49fb0b65",
+    "filename": "android/src/main/java/com/guichaguri/trackplayer/service/MusicService.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/abaddonGIT/react-native-track-player/blob/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/android/src/main/java/com/guichaguri/trackplayer/service/MusicService.java",
+    "raw_url": "https://github.com/abaddonGIT/react-native-track-player/raw/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/android/src/main/java/com/guichaguri/trackplayer/service/MusicService.java",
+    "contents_url": "https://api.github.com/repos/abaddonGIT/react-native-track-player/contents/android/src/main/java/com/guichaguri/trackplayer/service/MusicService.java?ref=09a01abda6fef30eba1487cc93bc5576dc2a4e0d",
+    "patch": "@@ -111,12 +111,18 @@ public int onStartCommand(Intent intent, int flags, int startId) {\n         super.onStartCommand(intent, flags, startId);\n         return START_NOT_STICKY;\n     }\n-\n+    @Override\n+    public void onCreate() {\n+        super.onCreate();\n+        String channel = Utils.getNotificationChannel((Context) this);\n+        startForeground(1, new NotificationCompat.Builder(this, channel).build());\n+    }\n     @Override\n     public void onDestroy() {\n         super.onDestroy();\n \n         destroy();\n+        stopForeground(true);\n     }\n \n     @Override"
+  },
+  {
+    "sha": "13f3cdfc9559b701a7628fce1e6c92bd7b95f70a",
+    "filename": "index.d.ts",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/abaddonGIT/react-native-track-player/blob/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/index.d.ts",
+    "raw_url": "https://github.com/abaddonGIT/react-native-track-player/raw/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/index.d.ts",
+    "contents_url": "https://api.github.com/repos/abaddonGIT/react-native-track-player/contents/index.d.ts?ref=09a01abda6fef30eba1487cc93bc5576dc2a4e0d",
+    "patch": "@@ -154,6 +154,12 @@ declare namespace RNTrackPlayer {\n   export function getBufferedPosition(): Promise<number>;\n   export function getState(): Promise<State>;\n   export function getRate(): Promise<number>;\n+  export function getPlayerState(): Promise<{\n+    \"position\": number;\n+    \"bufferedPosition\": number;\n+    \"duration\": number;\n+    \"state\": State;\n+  }>\n \n   // Components\n "
+  },
+  {
+    "sha": "abdab1849ed17444879cc6f54f3abb80f62ad538",
+    "filename": "ios/RNTrackPlayer/RNTrackPlayer.swift",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 3,
+    "changes": 16,
+    "blob_url": "https://github.com/abaddonGIT/react-native-track-player/blob/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/ios/RNTrackPlayer/RNTrackPlayer.swift",
+    "raw_url": "https://github.com/abaddonGIT/react-native-track-player/raw/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/ios/RNTrackPlayer/RNTrackPlayer.swift",
+    "contents_url": "https://api.github.com/repos/abaddonGIT/react-native-track-player/contents/ios/RNTrackPlayer/RNTrackPlayer.swift?ref=09a01abda6fef30eba1487cc93bc5576dc2a4e0d",
+    "patch": "@@ -389,12 +389,12 @@ public class RNTrackPlayer: RCTEventEmitter {\n     }\n     \n     @objc(reset:rejecter:)\n-    public func reset(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {\n+    public func reset(resolve: @escaping RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {\n         print(\"Resetting player.\")\n-        player.stop()\n-        resolve(NSNull())\n+        player.stop();\n         DispatchQueue.main.async {\n             UIApplication.shared.endReceivingRemoteControlEvents();\n+            resolve(NSNull())\n         }\n     }\n     \n@@ -495,6 +495,16 @@ public class RNTrackPlayer: RCTEventEmitter {\n         resolve(player.playerState.rawValue)\n     }\n     \n+    @objc(getPlayerState:rejecter:)\n+    public func getPlayerState(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {\n+        resolve([\n+            \"position\": player.currentTime,\n+            \"bufferedPosition\": player.bufferedPosition,\n+            \"duration\": player.duration,\n+            \"state\": player.playerState.rawValue\n+        ])\n+    }\n+    \n     @objc(updateMetadataForTrack:properties:resolver:rejecter:)\n     public func updateMetadata(for trackId: String, properties: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {\n         guard let track = player.items.first(where: { ($0 as! Track).id == trackId }) as? Track"
+  },
+  {
+    "sha": "6eb0d3195879a87b2c1250cef21a5acfd5ded373",
+    "filename": "ios/RNTrackPlayer/RNTrackPlayerBridge.m",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/abaddonGIT/react-native-track-player/blob/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/ios/RNTrackPlayer/RNTrackPlayerBridge.m",
+    "raw_url": "https://github.com/abaddonGIT/react-native-track-player/raw/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/ios/RNTrackPlayer/RNTrackPlayerBridge.m",
+    "contents_url": "https://api.github.com/repos/abaddonGIT/react-native-track-player/contents/ios/RNTrackPlayer/RNTrackPlayerBridge.m?ref=09a01abda6fef30eba1487cc93bc5576dc2a4e0d",
+    "patch": "@@ -95,6 +95,9 @@ @interface RCT_EXTERN_REMAP_MODULE(TrackPlayerModule, RNTrackPlayer, NSObject)\n RCT_EXTERN_METHOD(getState:(RCTPromiseResolveBlock)resolve\n                   rejecter:(RCTPromiseRejectBlock)reject);\n \n+RCT_EXTERN_METHOD(getPlayerState:(RCTPromiseResolveBlock)resolve\n+                  rejecter:(RCTPromiseRejectBlock)reject);\n+\n RCT_EXTERN_METHOD(updateMetadataForTrack:(NSString *)trackId\n                   properties:(NSDictionary *)properties\n                   resolver:(RCTPromiseResolveBlock)resolve"
+  },
+  {
+    "sha": "7f14b28aa1481988367258303b6c51e625928f29",
+    "filename": "lib/trackPlayer.js",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/abaddonGIT/react-native-track-player/blob/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/lib/trackPlayer.js",
+    "raw_url": "https://github.com/abaddonGIT/react-native-track-player/raw/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/lib/trackPlayer.js",
+    "contents_url": "https://api.github.com/repos/abaddonGIT/react-native-track-player/contents/lib/trackPlayer.js?ref=09a01abda6fef30eba1487cc93bc5576dc2a4e0d",
+    "patch": "@@ -210,4 +210,5 @@ module.exports.getDuration = TrackPlayer.getDuration;\n module.exports.getPosition = TrackPlayer.getPosition;\n module.exports.getBufferedPosition = TrackPlayer.getBufferedPosition;\n module.exports.getState = TrackPlayer.getState;\n-module.exports.getRate = TrackPlayer.getRate;\n\\ No newline at end of file\n+module.exports.getRate = TrackPlayer.getRate;\n+module.exports.getPlayerState = TrackPlayer.getPlayerState;\n\\ No newline at end of file"
+  },
+  {
+    "sha": "86b1c4c8119dea4448dea2ca98a40a0c19777d25",
+    "filename": "package.json",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/abaddonGIT/react-native-track-player/blob/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/package.json",
+    "raw_url": "https://github.com/abaddonGIT/react-native-track-player/raw/09a01abda6fef30eba1487cc93bc5576dc2a4e0d/package.json",
+    "contents_url": "https://api.github.com/repos/abaddonGIT/react-native-track-player/contents/package.json?ref=09a01abda6fef30eba1487cc93bc5576dc2a4e0d",
+    "patch": "@@ -1,6 +1,6 @@\n {\n   \"name\": \"react-native-track-player\",\n-  \"version\": \"1.2.4\",\n+  \"version\": \"1.2.5\",\n   \"description\": \"A fully fledged audio module created for music apps\",\n   \"contributors\": [\n     {"
+  }
+]

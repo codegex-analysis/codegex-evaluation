@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "b06731910c9e75a1e2b09102c9556fe60893958f",
+    "filename": "js-packages/admin-ui/package.json",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/smclab/openk9/blob/e75a859c7ce34baa4a0091937e489be45dc436b3/js-packages/admin-ui/package.json",
+    "raw_url": "https://github.com/smclab/openk9/raw/e75a859c7ce34baa4a0091937e489be45dc436b3/js-packages/admin-ui/package.json",
+    "contents_url": "https://api.github.com/repos/smclab/openk9/contents/js-packages/admin-ui/package.json?ref=e75a859c7ce34baa4a0091937e489be45dc436b3",
+    "patch": "@@ -15,6 +15,7 @@\n   \"dependencies\": {\n     \"@clayui/alert\": \"^3.5.1\",\n     \"@clayui/css\": \"^3.25.0\",\n+    \"@clayui/form\": \"^3.14.4\",\n     \"@clayui/icon\": \"^3.1.0\",\n     \"@clayui/navigation-bar\": \"^3.3.4\",\n     \"ansicolor\": \"^1.1.93\","
+  },
+  {
+    "sha": "a728a6f8832b2460fd622d7497a6ddf0e7580e27",
+    "filename": "js-packages/admin-ui/pages/tenants.tsx",
+    "status": "modified",
+    "additions": 83,
+    "deletions": 2,
+    "changes": 85,
+    "blob_url": "https://github.com/smclab/openk9/blob/e75a859c7ce34baa4a0091937e489be45dc436b3/js-packages/admin-ui/pages/tenants.tsx",
+    "raw_url": "https://github.com/smclab/openk9/raw/e75a859c7ce34baa4a0091937e489be45dc436b3/js-packages/admin-ui/pages/tenants.tsx",
+    "contents_url": "https://api.github.com/repos/smclab/openk9/contents/js-packages/admin-ui/pages/tenants.tsx?ref=e75a859c7ce34baa4a0091937e489be45dc436b3",
+    "patch": "@@ -19,15 +19,18 @@ import { useState } from \"react\";\n import { createUseStyles } from \"react-jss\";\n import ClayIcon from \"@clayui/icon\";\n import Link from \"next/link\";\n-import useSWR from \"swr\";\n+import useSWR, { mutate } from \"swr\";\n import {\n   DataSourceIcon,\n   SettingsIcon,\n   ThemeType,\n   UsersIcon,\n } from \"@openk9/search-ui-components\";\n-import { getTenants } from \"@openk9/http-api\";\n+import { getTenants, postTenant } from \"@openk9/http-api\";\n import { Layout } from \"../components/Layout\";\n+import ClayButton from \"@clayui/button\";\n+import ClayModal, { useModal } from \"@clayui/modal\";\n+import { ClayInput } from \"@clayui/form\";\n \n const useStyles = createUseStyles((theme: ThemeType) => ({\n   root: {\n@@ -113,6 +116,8 @@ function Controls({\n   searchValue: string;\n   setSearchValue(s: string): void;\n }) {\n+  const [visible, setVisible] = useState(false);\n+\n   return (\n     <ul className=\"navbar-nav\" style={{ marginRight: 16 }}>\n       <div className=\"navbar-form navbar-form-autofit navbar-overlay navbar-overlay-sm-down\">\n@@ -147,9 +152,11 @@ function Controls({\n         </div>\n       </div>\n       <li className=\"nav-item\">\n+        <AddModal visible={visible} handleClose={() => setVisible(false)} />\n         <button\n           className=\"nav-btn nav-btn-monospaced btn btn-monospaced btn-primary\"\n           type=\"button\"\n+          onClick={() => setVisible(true)}\n         >\n           <ClayIcon symbol=\"plus\" />\n         </button>\n@@ -188,4 +195,78 @@ function Tenants() {\n   );\n }\n \n+function AddModal({ visible, handleClose }) {\n+  const { observer, onClose } = useModal({\n+    onClose: handleClose,\n+  });\n+\n+  const [newTenant, setNewTenant] = useState({\n+    name: \"\",\n+    virtualHost: \"\",\n+  });\n+\n+  const handleChange = (e) => {\n+    const value = e.target.value;\n+    const id = e.target.id;\n+    setNewTenant((cs) => ({\n+      ...cs,\n+      [id]: value,\n+    }));\n+  };\n+\n+  const handleSave = async () => {\n+    await postTenant(newTenant);\n+    mutate(`/api/v2/tenant`);\n+\n+    setNewTenant((cs) => ({\n+      name: \"\",\n+      virtualHost: \"\",\n+    }));\n+\n+    onClose();\n+  };\n+\n+  return (\n+    <>\n+      {visible && (\n+        <ClayModal observer={observer} size=\"lg\" status=\"info\">\n+          <ClayModal.Header>{\"New Tenant\"}</ClayModal.Header>\n+          <ClayModal.Body>\n+            <ClayInput.Group>\n+              <ClayInput.GroupItem>\n+                <label htmlFor=\"basicInputText\">Name</label>\n+                <ClayInput\n+                  id=\"name\"\n+                  placeholder=\"Name\"\n+                  type=\"text\"\n+                  value={newTenant.name}\n+                  onChange={handleChange}\n+                />\n+              </ClayInput.GroupItem>\n+              <ClayInput.GroupItem>\n+                <label htmlFor=\"basicInputText\">VirtuaHost</label>\n+                <ClayInput\n+                  id=\"virtualHost\"\n+                  placeholder=\"VirtualHost\"\n+                  type=\"text\"\n+                  value={newTenant.virtualHost}\n+                  onChange={handleChange}\n+                />\n+              </ClayInput.GroupItem>\n+            </ClayInput.Group>\n+          </ClayModal.Body>\n+          <ClayModal.Footer\n+            first={\n+              <ClayButton.Group spaced>\n+                <ClayButton displayType=\"secondary\">{\"Cancel\"}</ClayButton>\n+              </ClayButton.Group>\n+            }\n+            last={<ClayButton onClick={handleSave}>{\"Save\"}</ClayButton>}\n+          />\n+        </ClayModal>\n+      )}\n+    </>\n+  );\n+}\n+\n export default Tenants;"
+  },
+  {
+    "sha": "4f47fd3cc749bda87fac03395174efa16eacd36d",
+    "filename": "js-packages/http-api/src/api/tenantsAPI.ts",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/smclab/openk9/blob/e75a859c7ce34baa4a0091937e489be45dc436b3/js-packages/http-api/src/api/tenantsAPI.ts",
+    "raw_url": "https://github.com/smclab/openk9/raw/e75a859c7ce34baa4a0091937e489be45dc436b3/js-packages/http-api/src/api/tenantsAPI.ts",
+    "contents_url": "https://api.github.com/repos/smclab/openk9/contents/js-packages/http-api/src/api/tenantsAPI.ts?ref=e75a859c7ce34baa4a0091937e489be45dc436b3",
+    "patch": "@@ -34,3 +34,18 @@ export async function getTenant(tenantId: number): Promise<Tenant> {\n   const response: Tenant = await request.json();\n   return response;\n }\n+\n+export async function postTenant(data: {\n+  name: string;\n+  virtualHost: string;\n+}): Promise<Tenant> {\n+  const request = await fetch(`${apiBaseUrlV2}/tenant`, {\n+    method: \"POST\",\n+    headers: {\n+      \"Content-Type\": \"application/json\",\n+    },\n+    body: JSON.stringify(data),\n+  });\n+  const response: Tenant = await request.json();\n+  return response;\n+}"
+  },
+  {
+    "sha": "8600357260c4799604a6163e9db78a0f424659e1",
+    "filename": "yarn.lock",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/smclab/openk9/blob/e75a859c7ce34baa4a0091937e489be45dc436b3/yarn.lock",
+    "raw_url": "https://github.com/smclab/openk9/raw/e75a859c7ce34baa4a0091937e489be45dc436b3/yarn.lock",
+    "contents_url": "https://api.github.com/repos/smclab/openk9/contents/yarn.lock?ref=e75a859c7ce34baa4a0091937e489be45dc436b3",
+    "patch": "@@ -1633,6 +1633,16 @@\n   resolved \"https://registry.yarnpkg.com/@clayui/css/-/css-3.25.0.tgz#533c6da279960e63ec0ef31003020c41875a9363\"\n   integrity sha512-H1xrbx+OS2qisrZCv1dxsz7KE2WpIVnee0uM2awib0IqZqxeCpGYFloIptwcQ6gDUqB+NbntxWfU+gRmazAFOA==\n \n+\"@clayui/form@^3.14.4\":\n+  version \"3.14.4\"\n+  resolved \"https://registry.yarnpkg.com/@clayui/form/-/form-3.14.4.tgz#50725d4647a3e1fba3fc5449429f8baec694b2df\"\n+  integrity sha512-R5pm55qw0ooH5ItepehAebUwLrJoebe1xnbA5Pkk/rbL+SzbJRtXv1igMNjvT1hUhjbSG7s2ZKKnXnVdhnmm3w==\n+  dependencies:\n+    \"@clayui/button\" \"^3.6.0\"\n+    \"@clayui/icon\" \"^3.1.0\"\n+    \"@clayui/shared\" \"^3.5.1\"\n+    classnames \"^2.2.6\"\n+\n \"@clayui/icon@^3.1.0\":\n   version \"3.1.0\"\n   resolved \"https://registry.yarnpkg.com/@clayui/icon/-/icon-3.1.0.tgz#9e600f87194f8dacfb49ace121fbab25a2e82f03\""
+  }
+]

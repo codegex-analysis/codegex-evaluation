@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "4563aff95eb467393b3d8ac380be27a927440b36",
+    "filename": "DBMS/Constraint/question3/question3.sql",
+    "status": "added",
+    "additions": 47,
+    "deletions": 0,
+    "changes": 47,
+    "blob_url": "https://github.com/meta-utkarsh-singh/GET2021/blob/c94fee2a87afad2644ac9c93128d02d9c2ad09c5/DBMS/Constraint/question3/question3.sql",
+    "raw_url": "https://github.com/meta-utkarsh-singh/GET2021/raw/c94fee2a87afad2644ac9c93128d02d9c2ad09c5/DBMS/Constraint/question3/question3.sql",
+    "contents_url": "https://api.github.com/repos/meta-utkarsh-singh/GET2021/contents/DBMS/Constraint/question3/question3.sql?ref=c94fee2a87afad2644ac9c93128d02d9c2ad09c5",
+    "patch": "@@ -0,0 +1,47 @@\n+SELECT s.id, s.name, COUNT(o.shopper_id) from shopper s\n+INNER JOIN orders o ON s.id = o.shopper_id \n+where o.placed_date > DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n+GROUP BY o.shopper_id;\n+\n+SELECT s.id, s.name, SUM(o.total) FROM shopper s INNER JOIN \n+orders o ON o.shopper_id = s.id WHERE o.placed_date > DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n+GROUP BY o.shopper_id\n+ORDER BY SUM(o.total) DESC LIMIT 10;\n+\n+SELECT p.id, p.name, COUNT(op.product_id) FROM product p INNER JOIN\n+orderproducts op ON p.id = op.product_id INNER JOIN orders o ON\n+o.id = op.order_id WHERE o.placed_date > DATE_SUB(CURDATE(), INTERVAL 60 DAY)\n+GROUP BY op.product_id\n+ORDER BY COUNT(op.product_id) DESC\n+LIMIT 20;\n+\n+SELECT MONTHNAME(o.placed_date), SUM(o.total) FROM orders o\n+where o.placed_date > DATE_SUB(CURDATE(), INTERVAL 6 MONTH) AND\n+o.placed_date <= CURDATE()\n+GROUP BY MONTH(o.placed_date);\n+\n+SET SQL_SAFE_UPDATES = 0;\n+\n+UPDATE product p SET product_state = \"Inactive\"\n+WHERE p.prod_id NOT IN \n+(SELECT op.product_id FROM orderproducts op WHERE\n+op.adddate > DATE_SUB(CURDATE(), INTERVAL 90 DAY));\n+\n+SELECT p.prod_id, p.name FROM product p INNER JOIN\n+productcategory pc ON p.prod_id = pc.prod_id \n+INNER JOIN category c ON pc.category_id = c.category_id\n+WHERE c.name = \"Mobiles\";\n+\n+UPDATE orderproducts SET status = \"Cancelled\"\n+WHERE order_id = 1 OR order_id = 3;\n+\n+SELECT p.prod_id, p.name, COUNT(op.product_id) FROM\n+product p INNER JOIN orderproducts op ON op.product_id = p.prod_id\n+WHERE op.status = \"Cancelled\"\n+GROUP BY op.product_id\n+ORDER BY COUNT(op.product_id) DESC;\n+\n+\n+\n+\n+"
+  }
+]

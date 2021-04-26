@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "3500a72d4459dd758863b3bddb0f452c3ff46a2e",
+    "filename": "api/src/main/java/org/openmrs/module/fhir2/FhirConstants.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/openmrs/openmrs-module-fhir2/blob/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/main/java/org/openmrs/module/fhir2/FhirConstants.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-fhir2/raw/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/main/java/org/openmrs/module/fhir2/FhirConstants.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-fhir2/contents/api/src/main/java/org/openmrs/module/fhir2/FhirConstants.java?ref=b8cc4fede6b2f93a2cbf9da292f59d612c8971d5",
+    "patch": "@@ -50,7 +50,7 @@\n \t        + \"/condition-ver-status\";\n \t\n \tpublic static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + \"/clinical-findings\";\n-\n+\t\n \tpublic static final String TASK_STATUS_VALUE_SET_URI = \"http://hl7.org/fhir/task-status\";\n \t\n \tpublic static final String OBSERVATION_REFERENCE_RANGE_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX\n@@ -102,6 +102,8 @@\n \tpublic static final String OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION = OPENMRS_FHIR_EXT_PREFIX\n \t        + \"/patient/identifier#location\";\n \t\n+\tpublic static final String OPENMRS_FHIR_EXT_ENCOUNTER_TAG = OPENMRS_FHIR_EXT_PREFIX + \"/encounter-tag\";\n+\t\n \tpublic static final String OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE = OPENMRS_FHIR_EXT_PREFIX\n \t        + \"/obs/reference-range\";\n \t"
+  },
+  {
+    "sha": "b795ee5c3f8bd322d6424928f415e2af8f439fea",
+    "filename": "api/src/main/java/org/openmrs/module/fhir2/api/translators/impl/EncounterTranslatorImpl.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/openmrs/openmrs-module-fhir2/blob/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/main/java/org/openmrs/module/fhir2/api/translators/impl/EncounterTranslatorImpl.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-fhir2/raw/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/main/java/org/openmrs/module/fhir2/api/translators/impl/EncounterTranslatorImpl.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-fhir2/contents/api/src/main/java/org/openmrs/module/fhir2/api/translators/impl/EncounterTranslatorImpl.java?ref=b8cc4fede6b2f93a2cbf9da292f59d612c8971d5",
+    "patch": "@@ -23,6 +23,7 @@\n import org.openmrs.EncounterProvider;\n import org.openmrs.EncounterType;\n import org.openmrs.Visit;\n+import org.openmrs.module.fhir2.FhirConstants;\n import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;\n import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;\n import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;\n@@ -76,6 +77,8 @@ public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openMrsEncounter)\n \t\t\t    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));\n \t\t}\n \t\t\n+\t\tencounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, \"Encounter\", \"encounter-type-display\");\n+\t\t\n \t\tencounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());\n \t\tencounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));\n \t\tencounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));"
+  },
+  {
+    "sha": "bc440148cbb11d273101e6e35576a5c8a89066dc",
+    "filename": "api/src/main/java/org/openmrs/module/fhir2/api/translators/impl/VisitTranslatorImpl.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/openmrs/openmrs-module-fhir2/blob/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/main/java/org/openmrs/module/fhir2/api/translators/impl/VisitTranslatorImpl.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-fhir2/raw/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/main/java/org/openmrs/module/fhir2/api/translators/impl/VisitTranslatorImpl.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-fhir2/contents/api/src/main/java/org/openmrs/module/fhir2/api/translators/impl/VisitTranslatorImpl.java?ref=b8cc4fede6b2f93a2cbf9da292f59d612c8971d5",
+    "patch": "@@ -19,6 +19,7 @@\n import org.openmrs.EncounterType;\n import org.openmrs.Visit;\n import org.openmrs.VisitType;\n+import org.openmrs.module.fhir2.FhirConstants;\n import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;\n import org.openmrs.module.fhir2.api.translators.EncounterTranslator;\n import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;\n@@ -59,6 +60,9 @@ public Encounter toFhirResource(@Nonnull Visit visit) {\n \t\tif (visit.getLocation() != null) {\n \t\t\tencounterLocationTranslator.toFhirResource(visit.getLocation());\n \t\t}\n+\t\t\n+\t\tencounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, \"Visit\", \"encounter-type-display\");\n+\t\t\n \t\tencounter.setClass_(mapLocationToClass(visit.getLocation()));\n \t\t\n \t\tencounter.getMeta().setLastUpdated(visit.getDateChanged());"
+  },
+  {
+    "sha": "d56132b5fd8617454501c18bff65ac678a484225",
+    "filename": "api/src/test/java/org/openmrs/module/fhir2/api/translators/impl/EncounterTranslatorImplTest.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/openmrs/openmrs-module-fhir2/blob/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/test/java/org/openmrs/module/fhir2/api/translators/impl/EncounterTranslatorImplTest.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-fhir2/raw/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/test/java/org/openmrs/module/fhir2/api/translators/impl/EncounterTranslatorImplTest.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-fhir2/contents/api/src/test/java/org/openmrs/module/fhir2/api/translators/impl/EncounterTranslatorImplTest.java?ref=b8cc4fede6b2f93a2cbf9da292f59d612c8971d5",
+    "patch": "@@ -85,6 +85,8 @@\n \t\n \tprivate static final String TYPE_DISPLAY = \"encounter-type-display\";\n \t\n+\tprivate static final String ENCOUNTER_TYPE_CODE = \"Encounter\";\n+\t\n \t@Mock\n \tprivate EncounterParticipantTranslator participantTranslator;\n \t\n@@ -463,4 +465,16 @@ public void toFhirResource_shouldTranslateEncounterTypeToEncounterTypeField() {\n \t\tassertThat(result.getType(), not(empty()));\n \t\tassertThat(result.getTypeFirstRep(), equalTo(fhirEncounterType));\n \t}\n+\t\n+\t@Test\n+\tpublic void toFhirResource_shouldHaveEncounterTag() {\n+\t\tEncounter result = encounterTranslator.toFhirResource(omrsEncounter);\n+\t\t\n+\t\tassertThat(result, notNullValue());\n+\t\tassertThat(result.getMeta().getTag(), notNullValue());\n+\t\tassertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));\n+\t\tassertThat(result.getMeta().getTag().get(0).getCode(), equalTo(ENCOUNTER_TYPE_CODE));\n+\t\tassertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));\n+\t\t\n+\t}\n }"
+  },
+  {
+    "sha": "7a810209f2c4015e581909f7ccd43e2d77239909",
+    "filename": "api/src/test/java/org/openmrs/module/fhir2/api/translators/impl/VisitTranslatorImplTest.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/openmrs/openmrs-module-fhir2/blob/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/test/java/org/openmrs/module/fhir2/api/translators/impl/VisitTranslatorImplTest.java",
+    "raw_url": "https://github.com/openmrs/openmrs-module-fhir2/raw/b8cc4fede6b2f93a2cbf9da292f59d612c8971d5/api/src/test/java/org/openmrs/module/fhir2/api/translators/impl/VisitTranslatorImplTest.java",
+    "contents_url": "https://api.github.com/repos/openmrs/openmrs-module-fhir2/contents/api/src/test/java/org/openmrs/module/fhir2/api/translators/impl/VisitTranslatorImplTest.java?ref=b8cc4fede6b2f93a2cbf9da292f59d612c8971d5",
+    "patch": "@@ -72,6 +72,8 @@\n \t\n \tprivate static final String TYPE_DISPLAY = \"encounter-type-display\";\n \t\n+\tprivate static final String VISIT_TYPE_CODE = \"Visit\";\n+\t\n \t@Mock\n \tprivate EncounterLocationTranslator encounterLocationTranslator;\n \t\n@@ -290,4 +292,19 @@ public void toFhirResource_shouldTranslateTypeToEncounterType() {\n \t\tassertThat(result.getType(), not(empty()));\n \t\tassertThat(result.getTypeFirstRep(), equalTo(codeableConcept));\n \t}\n+\t\n+\t@Test\n+\tpublic void toFhirResource_shouldHaveEncounterTag() {\n+\t\tVisit visit = new Visit();\n+\t\tvisit.setUuid(VISIT_UUID);\n+\t\t\n+\t\tEncounter result = visitTranslator.toFhirResource(visit);\n+\t\t\n+\t\tassertThat(result, notNullValue());\n+\t\tassertThat(result.getMeta().getTag(), notNullValue());\n+\t\tassertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));\n+\t\tassertThat(result.getMeta().getTag().get(0).getCode(), equalTo(VISIT_TYPE_CODE));\n+\t\tassertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));\n+\t\t\n+\t}\n }"
+  }
+]

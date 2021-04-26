@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "7cf47423cc100691f60eddc2f0f514f9c770a357",
+    "filename": "src/main/java/week15/Solution.java",
+    "status": "modified",
+    "additions": 34,
+    "deletions": 2,
+    "changes": 36,
+    "blob_url": "https://github.com/jiaekim123/algorithm-study/blob/c00ea1d7a7796b7d7b0198f4d028d69af94f8ead/src/main/java/week15/Solution.java",
+    "raw_url": "https://github.com/jiaekim123/algorithm-study/raw/c00ea1d7a7796b7d7b0198f4d028d69af94f8ead/src/main/java/week15/Solution.java",
+    "contents_url": "https://api.github.com/repos/jiaekim123/algorithm-study/contents/src/main/java/week15/Solution.java?ref=c00ea1d7a7796b7d7b0198f4d028d69af94f8ead",
+    "patch": "@@ -1,8 +1,40 @@\n+/*\n+    https://programmers.co.kr/learn/courses/30/lessons/72413\n+    [프로그래머스][카카오 2021 블라인드 테스트] 합승 택시 요금\n+    https://www.acmicpc.net/problem/11404\n+    [플로이드 와샬] 백준 문제\n+ */\n package week15;\n \n class Solution {\n     public int solution(int n, int s, int a, int b, int[][] fares) {\n-        int answer = 0;\n-        return answer;\n+        int[][] cost = new int[n + 1][n + 1];\n+        for(int i = 1; i < n + 1; i++) {\n+            for(int j = 1; j < n + 1; j++) {\n+                cost[i][j] = 20000000; //200(최대 n) * 100000(최대 요금)\n+            }\n+            cost[i][i] = 0;\n+        }\n+\n+        for(int i = 0; i < fares.length; i++) {\n+            cost[fares[i][0]][fares[i][1]] = fares[i][2];\n+            cost[fares[i][1]][fares[i][0]] = fares[i][2];\n+        }\n+\n+        for(int k = 1; k < n + 1; k++) {\n+            for(int i = 1; i < n + 1; i++) {\n+                for(int j = 1; j < n + 1; j++) {\n+                    // i에서 j로 바로 가는 비용보다 k를 경유해서 가는 비용이 더 저렴하면 갱신\n+                    cost[i][j] = Math.min(cost[i][j], cost[i][k] + cost[k][j]);\n+                }\n+            }\n+        }\n+\n+        int min = Integer.MAX_VALUE;\n+        for(int i = 1; i < n + 1; i++) {\n+            // 출발지점(s)에서 합승지점(i) + a혼자 가는 비용 + b혼자 가는 비용과 비교해서 더 저렴한 것으로 갱신\n+            min = Math.min(min, cost[s][i] + cost[i][a] + cost[i][b]);\n+        }\n+        return min;\n     }\n }"
+  }
+]

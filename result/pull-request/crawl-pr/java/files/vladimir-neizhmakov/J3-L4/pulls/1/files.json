@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "82343b0cb80a957214f6dd2de8e4471c9febefe7",
+    "filename": "src/main/java/ru/geekbrains/boot/Interfaces/ProductRepositoryInterface.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L4/blob/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/Interfaces/ProductRepositoryInterface.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L4/raw/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/Interfaces/ProductRepositoryInterface.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L4/contents/src/main/java/ru/geekbrains/boot/Interfaces/ProductRepositoryInterface.java?ref=1d13ea932fe3ca474537a0d0010e81bfea91bb17",
+    "patch": "@@ -0,0 +1,12 @@\n+package ru.geekbrains.boot.Interfaces;\n+\n+import ru.geekbrains.boot.model.Product;\n+\n+import java.util.List;\n+\n+public interface ProductRepositoryInterface {\n+    List<Product> getProducts();\n+    void addProduct(Product product);\n+    void updateProduct(int id, String newtitle, int newcost);\n+    void deleteProduct(int id);\n+}"
+  },
+  {
+    "sha": "381c2158d6da02a924edac3bffe000e30dd37ca9",
+    "filename": "src/main/java/ru/geekbrains/boot/controllers/ProductController.java",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L4/blob/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/controllers/ProductController.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L4/raw/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/controllers/ProductController.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L4/contents/src/main/java/ru/geekbrains/boot/controllers/ProductController.java?ref=1d13ea932fe3ca474537a0d0010e81bfea91bb17",
+    "patch": "@@ -0,0 +1,52 @@\n+package ru.geekbrains.boot.controllers;\n+\n+import ru.geekbrains.boot.model.Product;\n+import ru.geekbrains.boot.services.ProductService;\n+import lombok.RequiredArgsConstructor;\n+import org.springframework.stereotype.Controller;\n+import org.springframework.ui.Model;\n+import org.springframework.web.bind.annotation.*;\n+\n+import java.util.List;\n+\n+// root: http://localhost:8189/app/p\n+\n+@Controller\n+@RequestMapping(\"/products\")\n+@RequiredArgsConstructor\n+public class ProductController {\n+    private  final ProductService productService;\n+\n+    @GetMapping\n+    public String showAllProducts(Model model) {\n+        List<Product> products = productService.getProducts();\n+        model.addAttribute(\"products\", products);\n+        model.addAttribute(\"avgCost\", productService.productAverageCost());\n+        model.addAttribute(\"count\", productService.productCount());\n+        return \"products\";}\n+\n+    @PostMapping(\"/add\")\n+    public String addNewProduct(@ModelAttribute Product product) {\n+        productService.addProduct(product);\n+        return \"redirect:/products\";\n+    }\n+\n+    @GetMapping(\"/remove/{id}\")\n+    public String deleteProductById(@PathVariable int id) {\n+        productService.deleteProduct(productService.getListID(id));\n+        return \"redirect:/products\";\n+    }\n+\n+    @GetMapping(\"/update/{id}\")\n+    public String showEditForm(@PathVariable int id, Model model) {\n+        model.addAttribute(\"product\", productService.getProducts().get(productService.getListID(id)));\n+        return \"edit_product_form\";\n+    }\n+\n+    @PostMapping(\"/update\")\n+    public String updateProduct(@ModelAttribute(name = \"id\") int id, @ModelAttribute(name = \"title\") String title, @ModelAttribute(name = \"cost\") int cost) {\n+        productService.updateProduct(productService.getListID(id), title, cost);\n+        return \"redirect:/products/\";\n+    }\n+\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "3405cf61e54725db8aa2ee13db1ae73ef731bb32",
+    "filename": "src/main/java/ru/geekbrains/boot/model/Product.java",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L4/blob/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/model/Product.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L4/raw/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/model/Product.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L4/contents/src/main/java/ru/geekbrains/boot/model/Product.java?ref=1d13ea932fe3ca474537a0d0010e81bfea91bb17",
+    "patch": "@@ -0,0 +1,22 @@\n+package ru.geekbrains.boot.model;\n+\n+import lombok.AllArgsConstructor;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+\n+@Data\n+public class Product {\n+    private static int iid=0;\n+    private int id;\n+    private String title;\n+    private int cost;\n+\n+\n+    public Product(String title, int cost) {\n+        iid++;\n+        this.id = iid;\n+        this.title = title;\n+        this.cost = cost;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "ea811ebdc53a4ff3bffbea7cb5dc85d04b8caac6",
+    "filename": "src/main/java/ru/geekbrains/boot/repositories/ProductRepository.java",
+    "status": "added",
+    "additions": 61,
+    "deletions": 0,
+    "changes": 61,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L4/blob/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/repositories/ProductRepository.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L4/raw/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/repositories/ProductRepository.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L4/contents/src/main/java/ru/geekbrains/boot/repositories/ProductRepository.java?ref=1d13ea932fe3ca474537a0d0010e81bfea91bb17",
+    "patch": "@@ -0,0 +1,61 @@\n+package ru.geekbrains.boot.repositories;\n+\n+import ru.geekbrains.boot.Interfaces.ProductRepositoryInterface;\n+import ru.geekbrains.boot.model.Product;\n+import org.springframework.stereotype.Component;\n+\n+import javax.annotation.PostConstruct;\n+import java.util.*;\n+\n+\n+@Component\n+public class ProductRepository implements ProductRepositoryInterface {\n+   private List<Product> products;\n+\n+   @PostConstruct\n+   public void init() {\n+      products = new ArrayList<>();\n+      products.add(new Product(\"Milk\", 36));\n+      products.add(new Product(\"Bread\", 43));\n+      products.add(new Product(\"Carrot\", 17));\n+      products.add(new Product(\"Burger\", 112));\n+      products.add(new Product(\"Ketchup\", 72));\n+   }\n+\n+\n+   @Override\n+   public List<Product> getProducts() {\n+      return Collections.unmodifiableList(products);\n+   }\n+\n+   @Override\n+   public void addProduct(Product product) {\n+      if (product.getCost() < 0) {\n+         throw new IllegalArgumentException(\"Product's score must be > 0\");\n+      }\n+      products.add(product);\n+   }\n+\n+   @Override\n+   public void updateProduct(int id, String newtitle, int newcost) {\n+      if (newcost < 0) {\n+         throw new IllegalArgumentException(\"Product's score must be > 0\");\n+      }\n+      products.get(id).setTitle(newtitle);\n+      products.get(id).setCost(newcost);\n+   }\n+\n+   @Override\n+   public void deleteProduct(int id) {\n+      products.remove(id);\n+   }\n+\n+   public int getListID(int productID){\n+      for (Product p : products) {if(p.getId()==productID){return products.indexOf(p);}\n+      }\n+      return productID;\n+   }\n+\n+\n+}\n+"
+  },
+  {
+    "sha": "23e81de12d26db4811a4db179105614455cbd731",
+    "filename": "src/main/java/ru/geekbrains/boot/services/ProductService.java",
+    "status": "added",
+    "additions": 51,
+    "deletions": 0,
+    "changes": 51,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L4/blob/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/services/ProductService.java",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L4/raw/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/java/ru/geekbrains/boot/services/ProductService.java",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L4/contents/src/main/java/ru/geekbrains/boot/services/ProductService.java?ref=1d13ea932fe3ca474537a0d0010e81bfea91bb17",
+    "patch": "@@ -0,0 +1,51 @@\n+package ru.geekbrains.boot.services;\n+\n+import ru.geekbrains.boot.model.Product;\n+import ru.geekbrains.boot.repositories.ProductRepository;\n+import lombok.RequiredArgsConstructor;\n+import org.springframework.stereotype.Service;\n+\n+import java.util.List;\n+import java.util.Optional;\n+\n+@Service\n+@RequiredArgsConstructor\n+public class ProductService {\n+\n+    private final ProductRepository productRepository;\n+\n+ //   @Autowired\n+ //   public void SetProductRepository(ProductRepository productRepository){this.productRepository = productRepository;}\n+\n+    public List<Product> getProducts() {\n+        return productRepository.getProducts();\n+    }\n+\n+    public void addProduct(Product product) {productRepository.addProduct(product);}\n+\n+    public void updateProduct(int id, String newtitle, int newcost) {\n+        productRepository.updateProduct(id,newtitle,newcost);\n+    }\n+\n+    public void deleteProduct(int id) {\n+        productRepository.deleteProduct(id);\n+    }\n+\n+    public int getListID(int productID){\n+        return productRepository.getListID(productID);\n+    }\n+\n+    public int productCount(){\n+        return productRepository.getProducts().size();\n+    }\n+\n+    public double productAverageCost(){\n+        double avg=0;\n+        for (Product p : productRepository.getProducts()) {\n+            avg += p.getCost();\n+        }\n+        avg /= productRepository.getProducts().size();\n+        return avg;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "10291ea74cb9554e9a4cc0b40f78ceba61595dd1",
+    "filename": "src/main/resources/application.yaml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L4/blob/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/resources/application.yaml",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L4/raw/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/resources/application.yaml",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L4/contents/src/main/resources/application.yaml?ref=1d13ea932fe3ca474537a0d0010e81bfea91bb17",
+    "patch": "@@ -2,3 +2,4 @@ server:\n   port: 8189\n   servlet:\n     context-path: /app\n+"
+  },
+  {
+    "sha": "fbb2ec4231082fb30c77b3fd99c4ad640a99a1ef",
+    "filename": "src/main/resources/templates/all_products.html",
+    "status": "added",
+    "additions": 51,
+    "deletions": 0,
+    "changes": 51,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L4/blob/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/resources/templates/all_products.html",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L4/raw/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/resources/templates/all_products.html",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L4/contents/src/main/resources/templates/all_products.html?ref=1d13ea932fe3ca474537a0d0010e81bfea91bb17",
+    "patch": "@@ -0,0 +1,51 @@\n+<!DOCTYPE html>\n+\n+<html xmlns:th=\"http://www.thymeleaf.org\">\n+\n+<head>\n+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n+    <title>Spring MVC GeekApp HW3</title>\n+\n+    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\">\n+    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js\"></script>\n+    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js\"></script>\n+</head>\n+\n+<body>\n+<div class=\"container\">\n+    <h1>Список продуктов:</h1>\n+    <table th:if=\"${products.size() > 0}\" class=\"table\">\n+        <thead>\n+        <tr>\n+            <td>Id</td>\n+            <td>Наименование</td>\n+            <td>Цена</td>\n+            <td>Действия</td>\n+            <td> </td>\n+        </tr>\n+        </thead>\n+        <tbody>\n+\n+        <tr th:each=\"p : ${products}\">\n+            <td th:text=\"${p.id}\"></td>\n+            <td th:text=\"${p.title}\"></td>\n+            <td th:text=\"${p.cost}\"></td>\n+            <td><a class=\"btn btn-danger\" th:href=\"@{'/products/remove/' + ${p.id}}\">Удалить</a></td>\n+            <td><a class=\"btn btn-danger\" th:href=\"@{'/products/update/' + ${p.id}}\">Изменить</a></td>\n+        </tr>\n+        </tbody>\n+    </table>\n+    <span th:unless=\"${products.size() > 0}\">Товаров нет</span>\n+    <span th:text=\"'Количество продуктов: ' + ${count}\"/>\n+    <span th:text=\"'Средняя цена: ' + ${avgCost}\"/>\n+    <form th:action=\"@{'/products/add'}\" method=\"post\">\n+        <label>Наименование</label>\n+        <input type=\"text\" name=\"title\">\n+        <label>Цена</label>\n+        <input type=\"number\" name=\"cost\">\n+        <button class=\"btn btn-primary\" type=\"submit\">Добавить</button>\n+    </form>\n+\n+</div>\n+</body>\n+</html>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "5c275950f97b387f71b9048c17793c71032b30af",
+    "filename": "src/main/resources/templates/edit_product_form.html",
+    "status": "added",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L4/blob/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/resources/templates/edit_product_form.html",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L4/raw/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/resources/templates/edit_product_form.html",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L4/contents/src/main/resources/templates/edit_product_form.html?ref=1d13ea932fe3ca474537a0d0010e81bfea91bb17",
+    "patch": "@@ -0,0 +1,26 @@\n+<!DOCTYPE html>\n+\n+<html xmlns:th=\"http://www.thymeleaf.org\">\n+\n+<head>\n+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n+    <title>Spring MVC GeekApp HW3</title>\n+    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\">\n+    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js\"></script>\n+    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js\"></script>\n+</head>\n+\n+<body>\n+    <h1>Изменить продукт</h1>\n+    <form th:action=\"@{/products/update}\" th:object=\"${product}\" method=\"POST\">\n+        <input hidden th:field=\"*{id}\"/>\n+        <label>Наименование</label>\n+        <input type=\"text\" name=\"title\" th:field=\"*{title}\"/>\n+        <label>Стоимость</label>\n+        <input type=\"number\" name=\"cost\" th:field=\"*{cost}\"/>\n+        <button class=\"btn btn-primary\" type=\"submit\">Изменить</button>\n+    </form>\n+    <br>\n+    <a type=\"text\" th:href=\"@{/products}\">Вернуться</a>\n+</body>\n+</html>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "a9d245057033164ac3d053448d5f6dada51c5d08",
+    "filename": "src/main/resources/templates/products.html",
+    "status": "added",
+    "additions": 51,
+    "deletions": 0,
+    "changes": 51,
+    "blob_url": "https://github.com/vladimir-neizhmakov/J3-L4/blob/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/resources/templates/products.html",
+    "raw_url": "https://github.com/vladimir-neizhmakov/J3-L4/raw/1d13ea932fe3ca474537a0d0010e81bfea91bb17/src/main/resources/templates/products.html",
+    "contents_url": "https://api.github.com/repos/vladimir-neizhmakov/J3-L4/contents/src/main/resources/templates/products.html?ref=1d13ea932fe3ca474537a0d0010e81bfea91bb17",
+    "patch": "@@ -0,0 +1,51 @@\n+<!DOCTYPE html>\n+\n+<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:th=\"http://www.thymeleaf.org\">\n+\n+<head>\n+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n+    <title>Spring MVC GeekApp HW3</title>\n+\n+    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\">\n+    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js\"></script>\n+    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js\"></script>\n+</head>\n+\n+<body>\n+<div class=\"container\">\n+    <h1>Список продуктов:</h1>\n+    <table th:if=\"${products.size() > 0}\" class=\"table\">\n+        <thead>\n+        <tr>\n+            <td>Id</td>\n+            <td>Наименование</td>\n+            <td>Цена</td>\n+            <td>Действия</td>\n+            <td> </td>\n+        </tr>\n+        </thead>\n+        <tbody>\n+\n+        <tr th:each=\"p : ${products}\">\n+            <td th:text=\"${p.id}\"></td>\n+            <td th:text=\"${p.title}\"></td>\n+            <td th:text=\"${p.cost}\"></td>\n+            <td><a class=\"btn btn-danger\" th:href=\"@{'/products/remove/' + ${p.id}}\">Удалить</a></td>\n+            <td><a class=\"btn btn-danger\" th:href=\"@{'/products/update/' + ${p.id}}\">Изменить</a></td>\n+        </tr>\n+        </tbody>\n+    </table>\n+    <span th:unless=\"${products.size() > 0}\">Товаров нет</span>\n+    <span th:text=\"'Количество продуктов: ' + ${count}\"/>\n+    <span th:text=\"'Средняя цена: ' + ${avgCost}\"/>\n+    <form th:action=\"@{'/products/add'}\" method=\"post\">\n+        <label>Наименование</label>\n+        <input type=\"text\" name=\"title\">\n+        <label>Цена</label>\n+        <input type=\"number\" name=\"cost\">\n+        <button class=\"btn btn-primary\" type=\"submit\">Добавить</button>\n+    </form>\n+\n+</div>\n+</body>\n+</html>\n\\ No newline at end of file"
+  }
+]

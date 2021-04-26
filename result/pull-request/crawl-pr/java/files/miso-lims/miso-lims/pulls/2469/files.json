@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "6bfd22a76f96e32958dcf4af2b7f6277b8363e82",
+    "filename": "RELEASE_NOTES.md",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/miso-lims/miso-lims/blob/f531317fce652d72242b3a70c7640f45411e1344/RELEASE_NOTES.md",
+    "raw_url": "https://github.com/miso-lims/miso-lims/raw/f531317fce652d72242b3a70c7640f45411e1344/RELEASE_NOTES.md",
+    "contents_url": "https://api.github.com/repos/miso-lims/miso-lims/contents/RELEASE_NOTES.md?ref=f531317fce652d72242b3a70c7640f45411e1344",
+    "patch": "@@ -2,7 +2,8 @@\n \n Changes:\n \n-\n+* Improved error message when attempting to delete a library aliquot that\n+  is included in a pool order\n \n # 1.25.0\n "
+  },
+  {
+    "sha": "2d97919ee2698e2765c43401da3f46fe85caaf7a",
+    "filename": "miso-service/src/main/java/uk/ac/bbsrc/tgac/miso/service/impl/DefaultLibraryAliquotService.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/miso-lims/miso-lims/blob/f531317fce652d72242b3a70c7640f45411e1344/miso-service/src/main/java/uk/ac/bbsrc/tgac/miso/service/impl/DefaultLibraryAliquotService.java",
+    "raw_url": "https://github.com/miso-lims/miso-lims/raw/f531317fce652d72242b3a70c7640f45411e1344/miso-service/src/main/java/uk/ac/bbsrc/tgac/miso/service/impl/DefaultLibraryAliquotService.java",
+    "contents_url": "https://api.github.com/repos/miso-lims/miso-lims/contents/miso-service/src/main/java/uk/ac/bbsrc/tgac/miso/service/impl/DefaultLibraryAliquotService.java?ref=f531317fce652d72242b3a70c7640f45411e1344",
+    "patch": "@@ -413,8 +413,12 @@ public ValidationResult validateDeletion(LibraryAliquot object) throws IOExcepti\n \n     int poolCount = poolService.listByLibraryAliquotId(object.getId()).size();\n     if (poolCount > 0) {\n-      result.addError(\n-          new ValidationError(String.format(\"%s is included in %d %s\", object.getName(), poolCount, Pluralizer.pools(poolCount))));\n+      result.addError(ValidationError.forDeletionUsage(object, poolCount, Pluralizer.pools(poolCount)));\n+    }\n+\n+    long orderCount = libraryAliquotDao.getUsageByPoolOrders(object);\n+    if (orderCount > 0L) {\n+      result.addError(ValidationError.forDeletionUsage(object, orderCount, \"pool \" + Pluralizer.orders(orderCount)));\n     }\n \n     return result;"
+  },
+  {
+    "sha": "ef3b010174199f6494516cc7fc1547ac73de9f62",
+    "filename": "sqlstore/src/main/java/uk/ac/bbsrc/tgac/miso/persistence/LibraryAliquotStore.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/miso-lims/miso-lims/blob/f531317fce652d72242b3a70c7640f45411e1344/sqlstore/src/main/java/uk/ac/bbsrc/tgac/miso/persistence/LibraryAliquotStore.java",
+    "raw_url": "https://github.com/miso-lims/miso-lims/raw/f531317fce652d72242b3a70c7640f45411e1344/sqlstore/src/main/java/uk/ac/bbsrc/tgac/miso/persistence/LibraryAliquotStore.java",
+    "contents_url": "https://api.github.com/repos/miso-lims/miso-lims/contents/sqlstore/src/main/java/uk/ac/bbsrc/tgac/miso/persistence/LibraryAliquotStore.java?ref=f531317fce652d72242b3a70c7640f45411e1344",
+    "patch": "@@ -58,4 +58,6 @@\n    */\n   LibraryAliquot getByBarcode(String barcode) throws IOException;\n \n+  long getUsageByPoolOrders(LibraryAliquot aliquot) throws IOException;\n+\n }"
+  },
+  {
+    "sha": "f23a74c413e3bac36a0f2c449942a2695cadff84",
+    "filename": "sqlstore/src/main/java/uk/ac/bbsrc/tgac/miso/persistence/impl/HibernateLibraryAliquotDao.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/miso-lims/miso-lims/blob/f531317fce652d72242b3a70c7640f45411e1344/sqlstore/src/main/java/uk/ac/bbsrc/tgac/miso/persistence/impl/HibernateLibraryAliquotDao.java",
+    "raw_url": "https://github.com/miso-lims/miso-lims/raw/f531317fce652d72242b3a70c7640f45411e1344/sqlstore/src/main/java/uk/ac/bbsrc/tgac/miso/persistence/impl/HibernateLibraryAliquotDao.java",
+    "contents_url": "https://api.github.com/repos/miso-lims/miso-lims/contents/sqlstore/src/main/java/uk/ac/bbsrc/tgac/miso/persistence/impl/HibernateLibraryAliquotDao.java?ref=f531317fce652d72242b3a70c7640f45411e1344",
+    "patch": "@@ -21,6 +21,7 @@\n \n import uk.ac.bbsrc.tgac.miso.core.data.impl.LibraryAliquot;\n import uk.ac.bbsrc.tgac.miso.core.data.impl.PoolImpl;\n+import uk.ac.bbsrc.tgac.miso.core.data.impl.PoolOrder;\n import uk.ac.bbsrc.tgac.miso.core.data.type.PlatformType;\n import uk.ac.bbsrc.tgac.miso.core.util.DateType;\n import uk.ac.bbsrc.tgac.miso.core.util.TextQuery;\n@@ -213,4 +214,12 @@ public String getFriendlyName() {\n     return results;\n   }\n \n+  @Override\n+  public long getUsageByPoolOrders(LibraryAliquot aliquot) throws IOException {\n+    return (long) currentSession().createCriteria(PoolOrder.class)\n+        .createAlias(\"orderLibraryAliquots\", \"item\")\n+        .add(Restrictions.eq(\"item.aliquot\", aliquot))\n+        .setProjection(Projections.rowCount()).uniqueResult();\n+  }\n+\n }"
+  }
+]

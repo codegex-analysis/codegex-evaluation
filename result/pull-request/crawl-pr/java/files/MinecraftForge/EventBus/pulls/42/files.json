@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "9a800d3a1bfff98af74b6552e4b86d52faced000",
+    "filename": "src/main/java/net/minecraftforge/eventbus/EventSubclassTransformer.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 2,
+    "changes": 9,
+    "blob_url": "https://github.com/MinecraftForge/EventBus/blob/b403549f1a04b054b5c60112d2cc27ae05a8f788/src/main/java/net/minecraftforge/eventbus/EventSubclassTransformer.java",
+    "raw_url": "https://github.com/MinecraftForge/EventBus/raw/b403549f1a04b054b5c60112d2cc27ae05a8f788/src/main/java/net/minecraftforge/eventbus/EventSubclassTransformer.java",
+    "contents_url": "https://api.github.com/repos/MinecraftForge/EventBus/contents/src/main/java/net/minecraftforge/eventbus/EventSubclassTransformer.java?ref=b403549f1a04b054b5c60112d2cc27ae05a8f788",
+    "patch": "@@ -57,13 +57,18 @@ private boolean buildEvents(ClassNode classNode) throws Exception\n         // well, we should at least use the context classloader - this is forcing all the game classes in through\n         // the system classloader otherwise...\n         Class<?> parent = null;\n+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();\n+        if (classLoader == null)\n+        {\n+            classLoader = ClassLoader.getSystemClassLoader();\n+        }\n         try\n         {\n-            parent = Thread.currentThread().getContextClassLoader().loadClass(classNode.superName.replace('/', '.'));\n+            parent = classLoader.loadClass(classNode.superName.replace('/', '.'));\n         }\n         catch (ClassNotFoundException e)\n         {\n-            LOGGER.error(EVENTBUS, \"Could not find parent {} for class {} in classloader {} on thread {}\", classNode.superName, classNode.name, Thread.currentThread().getContextClassLoader(), Thread.currentThread());\n+            LOGGER.error(EVENTBUS, \"Could not find parent {} for class {} in classloader {} on thread {}\", classNode.superName, classNode.name, classLoader, Thread.currentThread());\n             throw e;\n         }\n "
+  }
+]

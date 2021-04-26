@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "6d69fcd1f5ecb6004ca7dd9ffd42a6e4025d2f6f",
+    "filename": "src/se/edu/inclass/Main.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 6,
+    "changes": 30,
+    "blob_url": "https://github.com/PingruiLi/TaskStream/blob/7fd199b825e7c17388045f815d40a76873951319/src/se/edu/inclass/Main.java",
+    "raw_url": "https://github.com/PingruiLi/TaskStream/raw/7fd199b825e7c17388045f815d40a76873951319/src/se/edu/inclass/Main.java",
+    "contents_url": "https://api.github.com/repos/PingruiLi/TaskStream/contents/src/se/edu/inclass/Main.java?ref=7fd199b825e7c17388045f815d40a76873951319",
+    "patch": "@@ -6,6 +6,7 @@\n import se.edu.inclass.task.TaskNameComparator;\n \n import java.util.ArrayList;\n+import java.util.Locale;\n import java.util.stream.Collectors;\n \n public class Main {\n@@ -21,10 +22,18 @@ public static void main(String[] args) {\n \n         System.out.println(\"Total number of deadlines: \" + countDeadlines(tasksData));\n \n+\n+        printDeadlineWithStream(tasksData);\n+        ArrayList<Task> filteredTasks = filterTaskByString(tasksData, \"11\");\n+        System.out.println(\"Filtered tasks\");\n+        printData(filteredTasks);\n+\n+\n         printData(tasksData);\n         printTaskWithStream(tasksData);\n         printDeadlineWithStream(tasksData);\n         System.out.println(\"Count of Deadlines with Stream: \" + countDeadlineWithStream(tasksData));\n+\n     }\n \n     private static int countDeadlines(ArrayList<Task> tasksData) {\n@@ -42,12 +51,6 @@ public static void printTaskWithStream(ArrayList<Task> tasks) {\n         tasks.stream().forEach(System.out::println);\n     }\n \n-    public static void printDeadlineWithStream(ArrayList<Task> tasks) {\n-        System.out.println(\"Print Deadlines with stream:\");\n-        tasks.stream()\n-                .filter((t) -> (t instanceof Deadline))\n-                .forEach(System.out::println);\n-    }\n \n     private static int countDeadlineWithStream(ArrayList<Task> tasks) {\n         int count = 0;\n@@ -69,4 +72,19 @@ public static void printDeadlines(ArrayList<Task> tasksData) {\n             }\n         }\n     }\n+\n+    public static void printDeadlineWithStream(ArrayList<Task> tasks) {\n+        System.out.println(\"Print with stream:\");\n+        tasks.stream().\n+                filter((t) -> (t instanceof Deadline)).\n+                sorted((t1, t2) -> t1.getDescription().toLowerCase(Locale.ROOT).compareTo(t2.getDescription().toLowerCase(Locale.ROOT))).\n+                forEach(System.out::println);\n+    }\n+\n+    public static ArrayList filterTaskByString(ArrayList<Task> tasks, String filterString) {\n+        ArrayList<Task> filteredTasks = (ArrayList<Task>) tasks.stream()\n+                .filter((t) -> t.getDescription().contains(filterString))\n+                .collect(Collectors.toList());\n+        return filteredTasks;\n+    }\n }"
+  }
+]

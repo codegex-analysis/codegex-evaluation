@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "649581d200a2d9976b241ab6923b7cfe62f14654",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/springframeworkguru/ssc-brewery/blob/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/README.md",
+    "raw_url": "https://github.com/springframeworkguru/ssc-brewery/raw/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/README.md",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/ssc-brewery/contents/README.md?ref=73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7",
+    "patch": "@@ -1,10 +1,9 @@\n-[![CircleCI](https://circleci.com/gh/sfg-beer-works/brewery-monolith.svg?style=svg)](https://circleci.com/gh/sfg-beer-works/brewery-monolith)\n # Brewery Spring MVC Monolith\n \n This repository contains source code examples used to support my on-line courses about the Spring Framework.\n \n You can learn more about the courses here:\n-* [Spring Security Core: Beginner to Guru](https://www.udemy.com/course/spring-boot-microservices-with-spring-cloud-beginner-to-guru/?referralCode=6142D427AE53031FEF38)\n+* [Spring Security Core: Beginner to Guru](https://www.udemy.com/course/spring-security-core-beginner-to-guru/?referralCode=306F288EB78688C0F3BC)\n * [Spring Boot Microservices with Spring Cloud](https://www.udemy.com/course/spring-boot-microservices-with-spring-cloud-beginner-to-guru/?referralCode=6142D427AE53031FEF38)\n * [Spring Framework 5: Beginner to Guru](https://www.udemy.com/course/spring-framework-5-beginner-to-guru/?referralCode=6D9ECD1F93988FEE5CE9)\n * [Testing Spring Boot: Beginner to Guru](https://www.udemy.com/course/testing-spring-boot-beginner-to-guru/?referralCode=EFFE87DDE96C8541B2EE)"
+  },
+  {
+    "sha": "5eb6742a0c557831468ecce0e878c2af626cf6d9",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/springframeworkguru/ssc-brewery/blob/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/pom.xml",
+    "raw_url": "https://github.com/springframeworkguru/ssc-brewery/raw/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/pom.xml",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/ssc-brewery/contents/pom.xml?ref=73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7",
+    "patch": "@@ -89,6 +89,10 @@\n             <groupId>org.springframework.boot</groupId>\n             <artifactId>spring-boot-starter-data-jpa</artifactId>\n         </dependency>\n+        <dependency>\n+            <groupId>org.springframework.boot</groupId>\n+            <artifactId>spring-boot-starter-security</artifactId>\n+        </dependency>\n         <dependency>\n             <groupId>com.h2database</groupId>\n             <artifactId>h2</artifactId>"
+  },
+  {
+    "sha": "7e2b4c44277191e1876bdb9e2d8f644f5ec28c1d",
+    "filename": "src/main/java/guru/sfg/brewery/config/SecurityConfig.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/springframeworkguru/ssc-brewery/blob/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/main/java/guru/sfg/brewery/config/SecurityConfig.java",
+    "raw_url": "https://github.com/springframeworkguru/ssc-brewery/raw/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/main/java/guru/sfg/brewery/config/SecurityConfig.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/ssc-brewery/contents/src/main/java/guru/sfg/brewery/config/SecurityConfig.java?ref=73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7",
+    "patch": "@@ -0,0 +1,28 @@\n+package guru.sfg.brewery.config;\n+\n+import org.springframework.context.annotation.Configuration;\n+import org.springframework.security.config.annotation.web.builders.HttpSecurity;\n+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;\n+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;\n+\n+/**\n+ * Created by jt on 6/13/20.\n+ */\n+@Configuration\n+@EnableWebSecurity\n+public class SecurityConfig extends WebSecurityConfigurerAdapter {\n+\n+    @Override\n+    protected void configure(HttpSecurity http) throws Exception {\n+                http\n+                .authorizeRequests(authorize -> {\n+                    authorize.antMatchers(\"/\", \"/webjars/**\", \"/login\", \"/resources/**\").permitAll()\n+                    .antMatchers(\"/beers/find\", \"/beers*\").permitAll();\n+                } )\n+                .authorizeRequests()\n+                .anyRequest().authenticated()\n+                .and()\n+                .formLogin().and()\n+                .httpBasic();\n+    }\n+}"
+  },
+  {
+    "sha": "f6b0661d1f798f630d0614bf428461fa1236e52d",
+    "filename": "src/main/resources/application.properties",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 17,
+    "changes": 21,
+    "blob_url": "https://github.com/springframeworkguru/ssc-brewery/blob/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/main/resources/application.properties",
+    "raw_url": "https://github.com/springframeworkguru/ssc-brewery/raw/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/main/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/ssc-brewery/contents/src/main/resources/application.properties?ref=73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7",
+    "patch": "@@ -1,19 +1,3 @@\n-#\n-#  Copyright 2019 the original author or authors.\n-#\n-# This program is free software: you can redistribute it and/or modify\n-#     it under the terms of the GNU General Public License as published by\n-#     the Free Software Foundation, either version 3 of the License, or\n-#     (at your option) any later version.\n-#\n-#     This program is distributed in the hope that it will be useful,\n-#     but WITHOUT ANY WARRANTY; without even the implied warranty of\n-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n-#     GNU General Public License for more details.\n-#\n-#     You should have received a copy of the GNU General Public License\n-#     along with this program.  If not, see <https://www.gnu.org/licenses/>.\n-#\n spring.application.name=brewery-monolith\n spring.jackson.serialization.write-dates-as-timestamps=false\n spring.jackson.serialization.write-date-timestamps-as-nanoseconds=true\n@@ -23,4 +7,7 @@ spring.messages.basename=messages/messages\n logging.level.guru=debug\n \n # Spring Data hangs when not set under Spring Boot 2.3.0\n-spring.data.jpa.repositories.bootstrap-mode=default\n\\ No newline at end of file\n+spring.data.jpa.repositories.bootstrap-mode=default\n+\n+spring.security.user.name=spring\n+spring.security.user.password=guru\n\\ No newline at end of file"
+  },
+  {
+    "sha": "8d5cc3a7e48436ca23dc92eeb518971c81407edc",
+    "filename": "src/main/resources/static/resources/application.properties",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 3,
+    "changes": 3,
+    "blob_url": "https://github.com/springframeworkguru/ssc-brewery/blob/7080be762b99ca072d7a162d10a32ec4514b5dce/src/main/resources/static/resources/application.properties",
+    "raw_url": "https://github.com/springframeworkguru/ssc-brewery/raw/7080be762b99ca072d7a162d10a32ec4514b5dce/src/main/resources/static/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/ssc-brewery/contents/src/main/resources/static/resources/application.properties?ref=7080be762b99ca072d7a162d10a32ec4514b5dce",
+    "patch": "@@ -1,3 +0,0 @@\n-# Internationalization\n-spring.messages.basename=messages/messages\n-"
+  },
+  {
+    "sha": "eed1ea0f2d9cad699c9cbea3f1de8a67831b37c6",
+    "filename": "src/test/java/guru/sfg/brewery/web/controllers/BaseIT.java",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/springframeworkguru/ssc-brewery/blob/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/test/java/guru/sfg/brewery/web/controllers/BaseIT.java",
+    "raw_url": "https://github.com/springframeworkguru/ssc-brewery/raw/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/test/java/guru/sfg/brewery/web/controllers/BaseIT.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/ssc-brewery/contents/src/test/java/guru/sfg/brewery/web/controllers/BaseIT.java?ref=73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7",
+    "patch": "@@ -0,0 +1,48 @@\n+package guru.sfg.brewery.web.controllers;\n+\n+import guru.sfg.brewery.repositories.BeerInventoryRepository;\n+import guru.sfg.brewery.repositories.BeerRepository;\n+import guru.sfg.brewery.repositories.CustomerRepository;\n+import guru.sfg.brewery.services.BeerService;\n+import guru.sfg.brewery.services.BreweryService;\n+import org.junit.jupiter.api.BeforeEach;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.boot.test.mock.mockito.MockBean;\n+import org.springframework.test.web.servlet.MockMvc;\n+import org.springframework.test.web.servlet.setup.MockMvcBuilders;\n+import org.springframework.web.context.WebApplicationContext;\n+\n+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;\n+\n+/**\n+ * Created by jt on 6/13/20.\n+ */\n+public abstract class BaseIT {\n+    @Autowired\n+    WebApplicationContext wac;\n+\n+    MockMvc mockMvc;\n+\n+    @MockBean\n+    BeerRepository beerRepository;\n+\n+    @MockBean\n+    BeerInventoryRepository beerInventoryRepository;\n+\n+    @MockBean\n+    BreweryService breweryService;\n+\n+    @MockBean\n+    CustomerRepository customerRepository;\n+\n+    @MockBean\n+    BeerService beerService;\n+\n+    @BeforeEach\n+    public void setup() {\n+        mockMvc = MockMvcBuilders\n+                .webAppContextSetup(wac)\n+                .apply(springSecurity())\n+                .build();\n+    }\n+}"
+  },
+  {
+    "sha": "c781e8f7440c3ccc72f3aa9ff0c165787f90eed6",
+    "filename": "src/test/java/guru/sfg/brewery/web/controllers/BeerControllerIT.java",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/springframeworkguru/ssc-brewery/blob/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/test/java/guru/sfg/brewery/web/controllers/BeerControllerIT.java",
+    "raw_url": "https://github.com/springframeworkguru/ssc-brewery/raw/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/test/java/guru/sfg/brewery/web/controllers/BeerControllerIT.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/ssc-brewery/contents/src/test/java/guru/sfg/brewery/web/controllers/BeerControllerIT.java?ref=73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7",
+    "patch": "@@ -0,0 +1,37 @@\n+package guru.sfg.brewery.web.controllers;\n+\n+import org.junit.jupiter.api.Test;\n+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;\n+import org.springframework.security.test.context.support.WithMockUser;\n+\n+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;\n+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;\n+\n+/**\n+ * Created by jt on 6/12/20.\n+ */\n+@WebMvcTest\n+public class BeerControllerIT extends BaseIT{\n+\n+    @WithMockUser(\"spring\")\n+    @Test\n+    void findBeers() throws Exception{\n+        mockMvc.perform(get(\"/beers/find\"))\n+                .andExpect(status().isOk())\n+                .andExpect(view().name(\"beers/findBeers\"))\n+                .andExpect(model().attributeExists(\"beer\"));\n+    }\n+\n+    @Test\n+    void findBeersWithHttpBasic() throws Exception{\n+        mockMvc.perform(get(\"/beers/find\").with(httpBasic(\"spring\", \"guru\")))\n+                .andExpect(status().isOk())\n+                .andExpect(view().name(\"beers/findBeers\"))\n+                .andExpect(model().attributeExists(\"beer\"));\n+    }\n+\n+\n+\n+\n+}"
+  },
+  {
+    "sha": "5140c3acb66f6e411bc1b573e96d6d18530076a1",
+    "filename": "src/test/java/guru/sfg/brewery/web/controllers/IndexControllerIT.java",
+    "status": "added",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/springframeworkguru/ssc-brewery/blob/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/test/java/guru/sfg/brewery/web/controllers/IndexControllerIT.java",
+    "raw_url": "https://github.com/springframeworkguru/ssc-brewery/raw/73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7/src/test/java/guru/sfg/brewery/web/controllers/IndexControllerIT.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/ssc-brewery/contents/src/test/java/guru/sfg/brewery/web/controllers/IndexControllerIT.java?ref=73d352fcb9d955d37c4c7d76bf1bdcdb4fd7a9f7",
+    "patch": "@@ -0,0 +1,20 @@\n+package guru.sfg.brewery.web.controllers;\n+\n+import org.junit.jupiter.api.Test;\n+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;\n+\n+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;\n+\n+/**\n+ * Created by jt on 6/13/20.\n+ */\n+@WebMvcTest\n+public class IndexControllerIT extends BaseIT {\n+\n+    @Test\n+    void testGetIndexSlash() throws Exception{\n+        mockMvc.perform(get(\"/\" ))\n+                .andExpect(status().isOk());\n+    }\n+}"
+  }
+]

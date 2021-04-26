@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "cce7081e1f1a7d5dffa668c05ead161afef0dccb",
+    "filename": ".github/workflows/gradle.yml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/opendistro-for-elasticsearch/performance-analyzer-rca/blob/557b2059f7e1682de1281a8a4842414a88f9a951/.github/workflows/gradle.yml",
+    "raw_url": "https://github.com/opendistro-for-elasticsearch/performance-analyzer-rca/raw/557b2059f7e1682de1281a8a4842414a88f9a951/.github/workflows/gradle.yml",
+    "contents_url": "https://api.github.com/repos/opendistro-for-elasticsearch/performance-analyzer-rca/contents/.github/workflows/gradle.yml?ref=557b2059f7e1682de1281a8a4842414a88f9a951",
+    "patch": "@@ -3,12 +3,12 @@ name: Java CI\n on: \n   push: \n     branches: \n-      - master\n+      - main\n       - dev\n \n   pull_request:\n     branches: \n-      - master\n+      - main\n       - dev\n \n jobs:"
+  },
+  {
+    "sha": "25a3a542d06379331e8946c7001ce5ce47daef88",
+    "filename": "src/main/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/PerformanceAnalyzerApp.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/opendistro-for-elasticsearch/performance-analyzer-rca/blob/557b2059f7e1682de1281a8a4842414a88f9a951/src/main/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/PerformanceAnalyzerApp.java",
+    "raw_url": "https://github.com/opendistro-for-elasticsearch/performance-analyzer-rca/raw/557b2059f7e1682de1281a8a4842414a88f9a951/src/main/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/PerformanceAnalyzerApp.java",
+    "contents_url": "https://api.github.com/repos/opendistro-for-elasticsearch/performance-analyzer-rca/contents/src/main/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/PerformanceAnalyzerApp.java?ref=557b2059f7e1682de1281a8a4842414a88f9a951",
+    "patch": "@@ -121,8 +121,6 @@ public static void main(String[] args) {\n               (MetricsConfiguration.CONFIG_MAP.get(StatsCollector.class).samplingInterval) / 2,\n               TimeUnit.MILLISECONDS);\n       METRIC_COLLECTOR_EXECUTOR.addScheduledMetricCollector(StatsCollector.instance());\n-      StatsCollector.instance()\n-          .addDefaultExceptionCode(StatExceptionCode.READER_RESTART_PROCESSING);\n       METRIC_COLLECTOR_EXECUTOR.setEnabled(true);\n       METRIC_COLLECTOR_EXECUTOR.start();\n "
+  },
+  {
+    "sha": "cb45e6ac97650d8249807fab4ed7277b4ea7fdea",
+    "filename": "src/main/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/collectors/StatsCollector.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 2,
+    "changes": 10,
+    "blob_url": "https://github.com/opendistro-for-elasticsearch/performance-analyzer-rca/blob/557b2059f7e1682de1281a8a4842414a88f9a951/src/main/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/collectors/StatsCollector.java",
+    "raw_url": "https://github.com/opendistro-for-elasticsearch/performance-analyzer-rca/raw/557b2059f7e1682de1281a8a4842414a88f9a951/src/main/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/collectors/StatsCollector.java",
+    "contents_url": "https://api.github.com/repos/opendistro-for-elasticsearch/performance-analyzer-rca/contents/src/main/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/collectors/StatsCollector.java?ref=557b2059f7e1682de1281a8a4842414a88f9a951",
+    "patch": "@@ -26,6 +26,7 @@\n import java.io.InputStream;\n import java.text.SimpleDateFormat;\n import java.util.Date;\n+import java.util.HashMap;\n import java.util.List;\n import java.util.Locale;\n import java.util.Map;\n@@ -52,6 +53,12 @@\n   private Map<String, AtomicInteger> counters = new ConcurrentHashMap<>();\n   private Date objectCreationTime = new Date();\n \n+  private static final Map<String, String> DEFAULT_STATS_DATA = new HashMap<>();\n+\n+  static {\n+    DEFAULT_STATS_DATA.put(\"MethodName\", \"CollectStatsMetric\");\n+  }\n+\n   private List<StatExceptionCode> defaultExceptionCodes = new Vector<>();\n \n   public static StatsCollector instance() {\n@@ -124,7 +131,6 @@ public StatsCollector(String name, int samplingIntervalMillis, Map<String, Strin\n     super(samplingIntervalMillis, name);\n     this.metadata = metadata;\n     addRcaVersionMetadata(this.metadata);\n-    defaultExceptionCodes.add(StatExceptionCode.TOTAL_ERROR);\n   }\n \n   private StatsCollector(Map<String, String> metadata) {\n@@ -150,7 +156,7 @@ public void collectMetrics(long startTime) {\n     }\n \n     writeStats(\n-        metadata, currentCounters, null, null, objectCreationTime.getTime(), new Date().getTime());\n+        metadata, currentCounters, DEFAULT_STATS_DATA, null, objectCreationTime.getTime(), new Date().getTime());\n     collectAndWriteRcaStats();\n     objectCreationTime = new Date();\n   }"
+  },
+  {
+    "sha": "163abda2bc514f022f38ccf331d97c68abd16c83",
+    "filename": "src/test/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/PerformanceAnalyzerAppTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/opendistro-for-elasticsearch/performance-analyzer-rca/blob/557b2059f7e1682de1281a8a4842414a88f9a951/src/test/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/PerformanceAnalyzerAppTest.java",
+    "raw_url": "https://github.com/opendistro-for-elasticsearch/performance-analyzer-rca/raw/557b2059f7e1682de1281a8a4842414a88f9a951/src/test/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/PerformanceAnalyzerAppTest.java",
+    "contents_url": "https://api.github.com/repos/opendistro-for-elasticsearch/performance-analyzer-rca/contents/src/test/java/com/amazon/opendistro/elasticsearch/performanceanalyzer/PerformanceAnalyzerAppTest.java?ref=557b2059f7e1682de1281a8a4842414a88f9a951",
+    "patch": "@@ -26,5 +26,7 @@ public void testMain() {\n     PerformanceAnalyzerApp.main(new String[0]);\n     Assert.assertFalse(ConfigStatus.INSTANCE.haveValidConfig());\n     Assert.assertEquals(StatsCollector.instance().getCounters().get(\"ReaderThreadStopped\").get(), 1);\n+    Assert.assertEquals(StatsCollector.instance().getCounters().get(\"TotalError\").get(), 1);\n+    Assert.assertFalse(StatsCollector.instance().getCounters().containsKey(\"ReaderRestartProcessing\"));\n   }\n-}\n\\ No newline at end of file\n+}"
+  }
+]

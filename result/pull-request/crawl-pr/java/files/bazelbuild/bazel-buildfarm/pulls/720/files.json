@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "92e4bc46b65753f0e2103c6965e9e5ec81fd8ac3",
+    "filename": "src/main/java/build/buildfarm/common/ExecutionProperties.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/common/ExecutionProperties.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/common/ExecutionProperties.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/common/ExecutionProperties.java?ref=073e7ed05a5169e9649e4c1f8e1277169d04a91b",
+    "patch": "@@ -51,6 +51,13 @@\n    */\n   public static final String MAX_MEM = \"max-mem\";\n \n+  /**\n+   * @field BLOCK_NETWORK\n+   * @brief The exec_property and platform property name for blocking network access.\n+   * @details This is decided between client and server. The key value is expected to be a boolean.\n+   */\n+  public static final String BLOCK_NETWORK = \"block-network\";\n+\n   /**\n    * @field ENV_VARS\n    * @brief The exec_property and platform property name for providing additional environment"
+  },
+  {
+    "sha": "bebfa9f028f9ff0daf749381030922a067ce43ba",
+    "filename": "src/main/java/build/buildfarm/worker/cgroup/Group.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/cgroup/Group.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/cgroup/Group.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/worker/cgroup/Group.java?ref=073e7ed05a5169e9649e4c1f8e1277169d04a91b",
+    "patch": "@@ -33,6 +33,7 @@\n   private @Nullable String name;\n   private @Nullable Group parent;\n   private Cpu cpu;\n+  private Mem mem;\n \n   public static Group getRoot() {\n     return root;\n@@ -42,6 +43,7 @@ private Group(String name, Group parent) {\n     this.name = name;\n     this.parent = parent;\n     cpu = new Cpu(this);\n+    mem = new Mem(this);\n   }\n \n   public Group getChild(String name) {\n@@ -56,6 +58,10 @@ public Cpu getCpu() {\n     return cpu;\n   }\n \n+  public Mem getMem() {\n+    return mem;\n+  }\n+\n   public String getHierarchy() {\n     /* is root */\n     if (parent == null) {"
+  },
+  {
+    "sha": "b843e9b757cf6f6a224b4972788377dcd3041bf9",
+    "filename": "src/main/java/build/buildfarm/worker/cgroup/Mem.java",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/cgroup/Mem.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/cgroup/Mem.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/worker/cgroup/Mem.java?ref=073e7ed05a5169e9649e4c1f8e1277169d04a91b",
+    "patch": "@@ -0,0 +1,48 @@\n+// Copyright 2021 The Bazel Authors. All rights reserved.\n+//\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+//    http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package build.buildfarm.worker.cgroup;\n+\n+import java.io.IOException;\n+\n+public class Mem extends Controller {\n+  Mem(Group group) {\n+    super(group);\n+  }\n+\n+  @Override\n+  public String getName() {\n+    return \"memory\";\n+  }\n+\n+  public int getMemoryLimit() throws IOException {\n+    open();\n+    return readInt(\"memory.limit_in_bytes\");\n+  }\n+\n+  public void setMemoryLimit(int limitBytes) throws IOException {\n+    open();\n+    writeInt(\"memory.limit_in_bytes\", limitBytes);\n+  }\n+\n+  public int getMemorySwapLimit() throws IOException {\n+    open();\n+    return readInt(\"memory.memsw.limit_in_bytes\");\n+  }\n+\n+  public void setMemorySwapLimit(int limitBytes) throws IOException {\n+    open();\n+    writeInt(\"memory.memsw.limit_in_bytes\", limitBytes);\n+  }\n+}"
+  },
+  {
+    "sha": "24a88a57bcb5f86b2be30e03abeacaefc16f732c",
+    "filename": "src/main/java/build/buildfarm/worker/resources/CpuLimits.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/CpuLimits.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/CpuLimits.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/worker/resources/CpuLimits.java?ref=073e7ed05a5169e9649e4c1f8e1277169d04a91b",
+    "patch": "@@ -35,26 +35,26 @@\n    * @details Depending on the server implementation, we may skip applying any restrictions to core\n    *     usage.\n    */\n-  public boolean limit = true;\n+  public boolean limit = false;\n \n   /**\n    * @field min\n    * @brief The minimum CPU cores required.\n    * @details Client can suggest this though exec_properties.\n    */\n-  public int min = 1;\n+  public int min = 0;\n \n   /**\n    * @field max\n    * @brief The maximum CPU cores required.\n    * @details Client can suggest this though exec_properties.\n    */\n-  public int max = 1;\n+  public int max = 0;\n \n   /**\n    * @field claimed\n    * @brief The amount of cores actually claimed for the action.\n    * @details This will be in the range of (min,max) when limited.\n    */\n-  public int claimed = 1;\n+  public int claimed = 0;\n }"
+  },
+  {
+    "sha": "c75a93d3a639145fd8b9c5e0716712e15a30f6bd",
+    "filename": "src/main/java/build/buildfarm/worker/resources/MemLimits.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/MemLimits.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/MemLimits.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/worker/resources/MemLimits.java?ref=073e7ed05a5169e9649e4c1f8e1277169d04a91b",
+    "patch": "@@ -35,7 +35,7 @@\n    * @details Depending on the server implementation, we may skip applying any restrictions to\n    *     memory usage.\n    */\n-  public boolean limit = true;\n+  public boolean limit = false;\n \n   /**\n    * @field min"
+  },
+  {
+    "sha": "8affa8d0ec61fc290f0ef639d2f313b5d19212fe",
+    "filename": "src/main/java/build/buildfarm/worker/resources/NetworkLimits.java",
+    "status": "added",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/NetworkLimits.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/NetworkLimits.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/worker/resources/NetworkLimits.java?ref=073e7ed05a5169e9649e4c1f8e1277169d04a91b",
+    "patch": "@@ -0,0 +1,33 @@\n+// Copyright 2021 The Bazel Authors. All rights reserved.\n+//\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+//    http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package build.buildfarm.worker;\n+\n+/**\n+ * @class NetworkLimits\n+ * @brief Network resource limitations imposed on specific actions.\n+ * @details These resource limitations are often specified by the client (via: exec_properties), but\n+ *     ultimately validated and decided by the server. Restricting network access can make actions\n+ *     more reliable. Even unit tests that access localhost can conflict when similar tests are\n+ *     doing the same.\n+ */\n+public class NetworkLimits {\n+\n+  /**\n+   * @field blockNetwork\n+   * @brief Whether or not to block network access.\n+   * @details Depending on the server implementation, we may skip applying network restrictions.\n+   */\n+  public boolean blockNetwork = false;\n+}"
+  },
+  {
+    "sha": "889c69a5d8c9f1721dcee495b2d34fa77cf94d03",
+    "filename": "src/main/java/build/buildfarm/worker/resources/ResourceDecider.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 1,
+    "changes": 26,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/ResourceDecider.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/ResourceDecider.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/worker/resources/ResourceDecider.java?ref=073e7ed05a5169e9649e4c1f8e1277169d04a91b",
+    "patch": "@@ -64,9 +64,18 @@ public static ResourceLimits decideResourceLimitations(\n       limits.cpu.max = 1;\n     }\n \n-    // claim core amount according to execute stage width\n+    // Should we limit the cores of the action during execution? by default, no.\n+    // If the action has suggested core restrictions on itself, then yes.\n+    // Claim minimal core amount with regards to execute stage width.\n+    limits.cpu.limit = (limits.cpu.min > 0 || limits.cpu.max > 0);\n     limits.cpu.claimed = Math.min(limits.cpu.min, executeStageWidth);\n \n+    // Should we limit the memory of the action during execution? by default, no.\n+    // If the action has suggested memory restrictions on itself, then yes.\n+    // Claim minimal memory amount based on action's suggestion.\n+    limits.mem.limit = (limits.mem.min > 0 || limits.mem.max > 0);\n+    limits.mem.claimed = limits.mem.min;\n+\n     // we choose to resolve variables after the other variable values have been decided\n     resolveEnvironmentVariables(limits);\n \n@@ -94,6 +103,11 @@ private static void evaluateProperty(ResourceLimits limits, Property property) {\n       storeMaxMem(limits, property);\n     }\n \n+    // handle network properties\n+    if (property.getName().equals(ExecutionProperties.BLOCK_NETWORK)) {\n+      storeBlockNetwork(limits, property);\n+    }\n+\n     // handle env properties\n     else if (property.getName().equals(ExecutionProperties.ENV_VARS)) {\n       storeEnvVars(limits, property);\n@@ -149,6 +163,16 @@ private static void storeMaxMem(ResourceLimits limits, Property property) {\n     limits.mem.max = Integer.parseInt(property.getValue());\n   }\n \n+  /**\n+   * @brief Store the property for blocking network.\n+   * @details Parses and stores a boolean.\n+   * @param limits Current limits to apply changes to.\n+   * @param property The property to store.\n+   */\n+  private static void storeBlockNetwork(ResourceLimits limits, Property property) {\n+    limits.network.blockNetwork = Boolean.parseBoolean(property.getValue());\n+  }\n+\n   /**\n    * @brief Store the property for env vars.\n    * @details Parses the property as json."
+  },
+  {
+    "sha": "c9351db11ba896567ddbf8d9124a81c022f576ad",
+    "filename": "src/main/java/build/buildfarm/worker/resources/ResourceLimits.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/ResourceLimits.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/resources/ResourceLimits.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/worker/resources/ResourceLimits.java?ref=073e7ed05a5169e9649e4c1f8e1277169d04a91b",
+    "patch": "@@ -43,6 +43,13 @@\n    */\n   public MemLimits mem = new MemLimits();\n \n+  /**\n+   * @field network\n+   * @brief Resource limitations on network usage.\n+   * @details Decides specific network limitations and whether to apply them for a given action.\n+   */\n+  public NetworkLimits network = new NetworkLimits();\n+\n   /**\n    * @field extraEnvironmentVariables\n    * @brief Decides whether we should add extra environment variables when executing an operation."
+  },
+  {
+    "sha": "14582ebe8c5758bd5eb6921c0a8c4b2279707020",
+    "filename": "src/main/java/build/buildfarm/worker/shard/ShardWorkerContext.java",
+    "status": "modified",
+    "additions": 97,
+    "deletions": 43,
+    "changes": 140,
+    "blob_url": "https://github.com/bazelbuild/bazel-buildfarm/blob/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/shard/ShardWorkerContext.java",
+    "raw_url": "https://github.com/bazelbuild/bazel-buildfarm/raw/073e7ed05a5169e9649e4c1f8e1277169d04a91b/src/main/java/build/buildfarm/worker/shard/ShardWorkerContext.java",
+    "contents_url": "https://api.github.com/repos/bazelbuild/bazel-buildfarm/contents/src/main/java/build/buildfarm/worker/shard/ShardWorkerContext.java?ref=073e7ed05a5169e9649e4c1f8e1277169d04a91b",
+    "patch": "@@ -59,6 +59,7 @@\n import build.buildfarm.worker.WorkerContext;\n import build.buildfarm.worker.cgroup.Cpu;\n import build.buildfarm.worker.cgroup.Group;\n+import build.buildfarm.worker.cgroup.Mem;\n import com.google.common.annotations.VisibleForTesting;\n import com.google.common.base.Preconditions;\n import com.google.common.base.Throwables;\n@@ -901,53 +902,106 @@ public boolean isReferenced() {\n \n   IOResource limitSpecifiedExecution(\n       ResourceLimits limits, String operationName, ImmutableList.Builder<String> arguments) {\n-    final IOResource resource;\n-    final Group group;\n-    if (limits.cpu.min > 0 || limits.cpu.max > 0) {\n-      String operationId = getOperationId(operationName);\n-      group = operationsGroup.getChild(operationId);\n-      Cpu cpu = group.getCpu();\n+\n+    // The decision to apply resource restrictions has already been decided within the\n+    // ResourceLimits object. We apply the cgroup settings to file resources\n+    // and collect group names to use on the CLI.\n+    String operationId = getOperationId(operationName);\n+    final Group group = operationsGroup.getChild(operationId);\n+    ArrayList<IOResource> resources = new ArrayList<IOResource>();\n+    ArrayList<String> usedGroups = new ArrayList<String>();\n+\n+    // Possibly set core restrictions.\n+    if (limits.cpu.limit) {\n+      applyCpuLimits(group, limits, resources);\n+      usedGroups.add(group.getCpu().getName());\n+    }\n+\n+    // Possibly set memory restrictions.\n+    if (limits.mem.limit) {\n+      applyMemLimits(group, limits, resources);\n+      usedGroups.add(group.getMem().getName());\n+    }\n+\n+    // Possibly set network restrictions.\n+    if (limits.network.blockNetwork) {\n+      arguments.add(\"/usr/bin/unshare\", \"-n\", \"-r\");\n+    }\n+\n+    // Decide the CLI for running under cgroups\n+    if (limitGlobalExecution || !usedGroups.isEmpty()) {\n+      arguments.add(\n+          \"/usr/bin/cgexec\", \"-g\", String.join(\",\", usedGroups) + \":\" + group.getHierarchy());\n+    }\n+\n+    // The executor expects a single IOResource.\n+    // However, we may have multiple IOResources due to using multiple cgroup groups.\n+    // We construct a single IOResource to account for this.\n+    return combineResources(resources);\n+  }\n+\n+  private void applyCpuLimits(Group group, ResourceLimits limits, ArrayList<IOResource> resources) {\n+\n+    Cpu cpu = group.getCpu();\n+    try {\n+      cpu.close();\n+      if (limits.cpu.max > 0) {\n+        /* period of 100ms */\n+        cpu.setCFSPeriod(100000);\n+        cpu.setCFSQuota(limits.cpu.max * 100000);\n+      }\n+      if (limits.cpu.min > 0) {\n+        cpu.setShares(limits.cpu.min * 1024);\n+      }\n+    } catch (IOException e) {\n+      // clear interrupt flag if set due to ClosedByInterruptException\n+      boolean wasInterrupted = Thread.interrupted();\n       try {\n         cpu.close();\n-        if (limits.cpu.max > 0) {\n-          /* period of 100ms */\n-          cpu.setCFSPeriod(100000);\n-          cpu.setCFSQuota(limits.cpu.max * 100000);\n-        }\n-        if (limits.cpu.min > 0) {\n-          cpu.setShares(limits.cpu.min * 1024);\n-        }\n-      } catch (IOException e) {\n-        // clear interrupt flag if set due to ClosedByInterruptException\n-        boolean wasInterrupted = Thread.interrupted();\n-        try {\n-          cpu.close();\n-        } catch (IOException closeEx) {\n-          e.addSuppressed(closeEx);\n-        }\n-        if (wasInterrupted) {\n-          Thread.currentThread().interrupt();\n-        }\n-        throw new RuntimeException(e);\n+      } catch (IOException closeEx) {\n+        e.addSuppressed(closeEx);\n       }\n-      resource = cpu;\n-    } else {\n-      group = operationsGroup;\n-      resource =\n-          new IOResource() {\n-            @Override\n-            public void close() {}\n-\n-            @Override\n-            public boolean isReferenced() {\n-              // no way to isolate references to this shared group\n-              return false;\n-            }\n-          };\n+      if (wasInterrupted) {\n+        Thread.currentThread().interrupt();\n+      }\n+      throw new RuntimeException(e);\n     }\n-    if (limitGlobalExecution || group != operationsGroup) {\n-      arguments.add(\"/usr/bin/cgexec\", \"-g\", group.getCpu().getName() + \":\" + group.getHierarchy());\n+    resources.add(cpu);\n+  }\n+\n+  private void applyMemLimits(Group group, ResourceLimits limits, ArrayList<IOResource> resources) {\n+\n+    try {\n+      Mem mem = group.getMem();\n+      mem.setMemoryLimit(limits.mem.claimed);\n+      resources.add(mem);\n+    } catch (IOException e) {\n+      throw new RuntimeException(e);\n     }\n-    return resource;\n+  }\n+\n+  private IOResource combineResources(ArrayList<IOResource> resources) {\n+    return new IOResource() {\n+      @Override\n+      public void close() {\n+        for (IOResource resource : resources) {\n+          try {\n+            resource.close();\n+          } catch (IOException e) {\n+            throw new RuntimeException(e);\n+          }\n+        }\n+      }\n+\n+      @Override\n+      public boolean isReferenced() {\n+        for (IOResource resource : resources) {\n+          if (resource.isReferenced()) {\n+            return true;\n+          }\n+        }\n+        return false;\n+      }\n+    };\n   }\n }"
+  }
+]

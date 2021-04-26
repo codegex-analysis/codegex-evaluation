@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "f90185ead9aa19d86e4b31286b7fadf2a9bcdbb7",
+    "filename": "src/icomoon/Downlord's FAF Client.json",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/FAForever/downlords-faf-client/blob/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/icomoon/Downlord's%20FAF%20Client.json",
+    "raw_url": "https://github.com/FAForever/downlords-faf-client/raw/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/icomoon/Downlord's%20FAF%20Client.json",
+    "contents_url": "https://api.github.com/repos/FAForever/downlords-faf-client/contents/src/icomoon/Downlord's%20FAF%20Client.json?ref=2e67328f9fb4e9f2493c0c29184fbfa805239744",
+    "patch": "@@ -2,7 +2,7 @@\n   \"metadata\": {\n     \"name\": \"Downlord's FAF Client\",\n     \"lastOpened\": 0,\n-    \"created\": 1593976286920\n+    \"created\": 1615155020190\n   },\n   \"iconSets\": [\n     {\n@@ -16882,7 +16882,7 @@\n           \"ligatures\": \"user-plus, user2\",\n           \"name\": \"user-plus\",\n           \"id\": 115,\n-          \"order\": 0\n+          \"order\": 115\n         },\n         {\n           \"ligatures\": \"user-minus, user3\",\n@@ -16996,7 +16996,7 @@\n           \"ligatures\": \"search, magnifier\",\n           \"name\": \"search\",\n           \"id\": 134,\n-          \"order\": 0\n+          \"order\": 116\n         },\n         {\n           \"ligatures\": \"zoom-in, magnifier2\","
+  },
+  {
+    "sha": "be2394b79f89faaa06811fef42372122fe82993f",
+    "filename": "src/main/java/com/faforever/client/fx/IconButtonListCell.java",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/FAForever/downlords-faf-client/blob/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/java/com/faforever/client/fx/IconButtonListCell.java",
+    "raw_url": "https://github.com/FAForever/downlords-faf-client/raw/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/java/com/faforever/client/fx/IconButtonListCell.java",
+    "contents_url": "https://api.github.com/repos/FAForever/downlords-faf-client/contents/src/main/java/com/faforever/client/fx/IconButtonListCell.java?ref=2e67328f9fb4e9f2493c0c29184fbfa805239744",
+    "patch": "@@ -0,0 +1,41 @@\n+package com.faforever.client.fx;\n+\n+import com.faforever.client.theme.UiService;\n+import javafx.scene.control.ListCell;\n+import lombok.RequiredArgsConstructor;\n+import lombok.Value;\n+\n+import java.util.function.Consumer;\n+\n+/**\n+ * Alternative to {@link StringListCell} that allows to display to differently styled strings in each cell.\n+ */\n+@RequiredArgsConstructor\n+public class IconButtonListCell<T> extends ListCell<T> {\n+  private final Consumer<IconButtonListCellControllerAndItem<T>> configureControllerCallback;\n+  private final UiService uiService;\n+  private IconButtonListCellController iconButtonListCellController;\n+\n+  @Override\n+  protected void updateItem(T item, boolean empty) {\n+    super.updateItem(item, empty);\n+    JavaFxUtil.runLater(() -> {\n+      if (empty || item == null) {\n+        setText(null);\n+        setGraphic(null);\n+      } else {\n+        if (iconButtonListCellController == null) {\n+          iconButtonListCellController = uiService.loadFxml(\"theme/iconButtonListCell.fxml\");\n+        }\n+        configureControllerCallback.accept(new IconButtonListCellControllerAndItem<>(iconButtonListCellController, item));\n+        setGraphic(iconButtonListCellController.getRoot());\n+      }\n+    });\n+  }\n+\n+  @Value\n+  public static class IconButtonListCellControllerAndItem<E> {\n+    IconButtonListCellController iconButtonListCellController;\n+    E item;\n+  }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "25bee81b42e1a21ebd98f4b5f1f6ec8bed60f756",
+    "filename": "src/main/java/com/faforever/client/fx/IconButtonListCellController.java",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/FAForever/downlords-faf-client/blob/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/java/com/faforever/client/fx/IconButtonListCellController.java",
+    "raw_url": "https://github.com/FAForever/downlords-faf-client/raw/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/java/com/faforever/client/fx/IconButtonListCellController.java",
+    "contents_url": "https://api.github.com/repos/FAForever/downlords-faf-client/contents/src/main/java/com/faforever/client/fx/IconButtonListCellController.java?ref=2e67328f9fb4e9f2493c0c29184fbfa805239744",
+    "patch": "@@ -0,0 +1,37 @@\n+package com.faforever.client.fx;\n+\n+import javafx.scene.Node;\n+import javafx.scene.control.Button;\n+import javafx.scene.control.Label;\n+import javafx.scene.layout.HBox;\n+import javafx.scene.layout.Region;\n+import lombok.RequiredArgsConstructor;\n+import org.springframework.beans.factory.config.ConfigurableBeanFactory;\n+import org.springframework.context.annotation.Scope;\n+import org.springframework.stereotype.Component;\n+\n+@Component\n+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)\n+@RequiredArgsConstructor\n+public class IconButtonListCellController implements Controller<Node> {\n+  public HBox root;\n+  public Label label;\n+  public Button iconButton;\n+  public Region iconRegion;\n+\n+  public Label getLabel() {\n+    return label;\n+  }\n+\n+  public Button getIconButton() {\n+    return iconButton;\n+  }\n+\n+  public Region getIconRegion() {\n+    return iconRegion;\n+  }\n+\n+  public Node getRoot() {\n+    return root;\n+  }\n+}"
+  },
+  {
+    "sha": "bd8f1939e8cd66b5d97849466c18cd30c7f22c39",
+    "filename": "src/main/java/com/faforever/client/teammatchmaking/InvitePlayerController.java",
+    "status": "modified",
+    "additions": 35,
+    "deletions": 26,
+    "changes": 61,
+    "blob_url": "https://github.com/FAForever/downlords-faf-client/blob/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/java/com/faforever/client/teammatchmaking/InvitePlayerController.java",
+    "raw_url": "https://github.com/FAForever/downlords-faf-client/raw/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/java/com/faforever/client/teammatchmaking/InvitePlayerController.java",
+    "contents_url": "https://api.github.com/repos/FAForever/downlords-faf-client/contents/src/main/java/com/faforever/client/teammatchmaking/InvitePlayerController.java?ref=2e67328f9fb4e9f2493c0c29184fbfa805239744",
+    "patch": "@@ -1,20 +1,24 @@\n package com.faforever.client.teammatchmaking;\n \n import com.faforever.client.fx.Controller;\n+import com.faforever.client.fx.IconButtonListCell;\n+import com.faforever.client.fx.IconButtonListCell.IconButtonListCellControllerAndItem;\n+import com.faforever.client.fx.IconButtonListCellController;\n import com.faforever.client.fx.JavaFxUtil;\n+import com.faforever.client.i18n.I18n;\n import com.faforever.client.player.Player;\n import com.faforever.client.player.PlayerService;\n import com.faforever.client.player.SocialStatus;\n+import com.faforever.client.theme.UiService;\n+import com.faforever.client.ui.list.NoSelectionModel;\n import javafx.beans.binding.Bindings;\n import javafx.collections.FXCollections;\n import javafx.collections.ObservableList;\n import javafx.collections.transformation.FilteredList;\n import javafx.collections.transformation.SortedList;\n-import javafx.event.ActionEvent;\n+import javafx.scene.control.Button;\n import javafx.scene.control.ListView;\n import javafx.scene.control.TextField;\n-import javafx.scene.input.KeyCode;\n-import javafx.scene.input.KeyEvent;\n import javafx.scene.layout.Pane;\n import lombok.RequiredArgsConstructor;\n import org.springframework.beans.factory.config.ConfigurableBeanFactory;\n@@ -30,6 +34,8 @@\n public class InvitePlayerController implements Controller<Pane> {\n \n   private final PlayerService playerService;\n+  private final UiService uiService;\n+  private final I18n i18n;\n   private final TeamMatchmakingService teamMatchmakingService;\n   private final ObservableList<String> playerList = FXCollections.observableArrayList();\n   private final FilteredList<String> filteredPlayerList = new FilteredList<>(playerList, p -> true);\n@@ -65,11 +71,34 @@ public void initialize() {\n         }, playerTextField.textProperty()\n     ));\n \n+    invitedPlayersListView.setSelectionModel(new NoSelectionModel<>());\n+    invitedPlayersListView.setCellFactory(param -> new IconButtonListCell<>(this::invitedPlayerListCellConfiguration, uiService));\n+\n+    playersListView.setSelectionModel(new NoSelectionModel<>());\n+    playersListView.setCellFactory(param -> new IconButtonListCell<>(this::playerListCellConfiguration, uiService));\n     playersListView.setItems(sortedPlayerList);\n     playersListView.getSelectionModel().selectFirst();\n     requestFocus();\n   }\n \n+  private void invitedPlayerListCellConfiguration(IconButtonListCellControllerAndItem<String> iconButtonListCellControllerAndItem) {\n+    IconButtonListCellController iconButtonListCellController = iconButtonListCellControllerAndItem.getIconButtonListCellController();\n+    String playerName = iconButtonListCellControllerAndItem.getItem();\n+    Button iconButton = iconButtonListCellController.getIconButton();\n+    iconButton.setDisable(true);\n+    iconButtonListCellController.getIconRegion().getStyleClass().add(\"added-person\");\n+    iconButtonListCellController.getLabel().setText(playerName);\n+  }\n+\n+  private void playerListCellConfiguration(IconButtonListCellControllerAndItem<String> iconButtonListCellControllerAndItem) {\n+    IconButtonListCellController iconButtonListCellController = iconButtonListCellControllerAndItem.getIconButtonListCellController();\n+    String playerName = iconButtonListCellControllerAndItem.getItem();\n+    Button iconButton = iconButtonListCellController.getIconButton();\n+    iconButton.setOnMouseClicked(event -> invite(playerName));\n+    iconButtonListCellController.getIconRegion().getStyleClass().add(\"add-person\");\n+    iconButtonListCellController.getLabel().setText(playerName);\n+  }\n+\n   public void requestFocus() {\n     JavaFxUtil.runLater(() -> playerTextField.requestFocus());\n   }\n@@ -83,28 +112,8 @@ public Pane getRoot() {\n     return root;\n   }\n \n-  public void onInviteButtonClicked(ActionEvent event) {\n-    invite();\n-  }\n-\n-  private void invite() {\n-    playersListView.getSelectionModel().getSelectedItems().forEach(player -> {\n-      teamMatchmakingService.invitePlayer(player);\n-      invitedPlayersListView.getItems().add(player);\n-    });\n-    playerTextField.setText(\"\");\n-    JavaFxUtil.runLater(() -> playersListView.getSelectionModel().selectFirst());\n-  }\n-\n-  public void onKeyPressed(KeyEvent keyEvent) {\n-    if (keyEvent.getCode() == KeyCode.ENTER) {\n-      invite();\n-    }\n-    if (keyEvent.getCode() == KeyCode.UP) {\n-      playersListView.getSelectionModel().selectPrevious();\n-    }\n-    if (keyEvent.getCode() == KeyCode.DOWN) {\n-      playersListView.getSelectionModel().selectNext();\n-    }\n+  private void invite(String playerName) {\n+    teamMatchmakingService.invitePlayer(playerName);\n+    invitedPlayersListView.getItems().add(playerName);\n   }\n }"
+  },
+  {
+    "sha": "5dfafde006aeabaae2fb20db591b0ce889d61637",
+    "filename": "src/main/resources/i18n/messages.properties",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/FAForever/downlords-faf-client/blob/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/i18n/messages.properties",
+    "raw_url": "https://github.com/FAForever/downlords-faf-client/raw/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/i18n/messages.properties",
+    "contents_url": "https://api.github.com/repos/FAForever/downlords-faf-client/contents/src/main/resources/i18n/messages.properties?ref=2e67328f9fb4e9f2493c0c29184fbfa805239744",
+    "patch": "@@ -82,7 +82,8 @@ coop.watchReplay=Watch\n teammatchmaking.leaveParty=Leave party\n teammatchmaking.invitePlayer=Invite players\n teammatchmaking.invite=Invite\n-teammatchmaking.invitedPlayers=Invited players:\n+teammatchmaking.invitedPlayers=Already invited players:\n+teammatchmaking.searchAndInvite=Search and invite players:\n teammatchmaking.mapPool=Maplist\n teammatchmaking.playersInQueue=In Queue: {0,number,#}\n teammatchmaking.queuePopTimer=Matching in: {0,number,0}:{1,number,00}\n@@ -113,6 +114,8 @@ teammatchmaking.queueTitle.inQueue=Your party is now in queue\n teammatchmaking.chat.topic=Find teammates and get gameplay advice on our official discord:\n teammatchmaking.queue.ladder1v1=1v1 Queue\n teammatchmaking.queue.tmm2v2=2v2 Queue\n+teammatchmaking.search.prompt=Search by playername\n+teammatchmaking.search.noOneInvited=You invited nobody\n statusBar.chatConnected=Chat connected\n statusBar.chatConnecting=Connecting to chat…\n statusBar.chatDisconnected=Chat disconnected"
+  },
+  {
+    "sha": "e4ce64520e9ce68f1f38677301592f772a10ed18",
+    "filename": "src/main/resources/theme/iconButtonListCell.fxml",
+    "status": "added",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/FAForever/downlords-faf-client/blob/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/theme/iconButtonListCell.fxml",
+    "raw_url": "https://github.com/FAForever/downlords-faf-client/raw/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/theme/iconButtonListCell.fxml",
+    "contents_url": "https://api.github.com/repos/FAForever/downlords-faf-client/contents/src/main/resources/theme/iconButtonListCell.fxml?ref=2e67328f9fb4e9f2493c0c29184fbfa805239744",
+    "patch": "@@ -0,0 +1,17 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+\n+<?import javafx.scene.control.Button?>\n+<?import javafx.scene.control.Label?>\n+<?import javafx.scene.layout.HBox?>\n+<?import javafx.scene.layout.Region?>\n+<HBox xmlns:fx=\"http://javafx.com/fxml/1\" fx:id=\"root\" xmlns=\"http://javafx.com/javafx/11.0.1\"\n+      fx:controller=\"com.faforever.client.fx.IconButtonListCellController\">\n+    <Label fx:id=\"label\" maxHeight=\"1.7976931348623157E308\" maxWidth=\"1.7976931348623157E308\" HBox.hgrow=\"ALWAYS\"/>\n+    <Button fx:id=\"iconButton\">\n+        <graphic>\n+            <Region fx:id=\"iconRegion\" styleClass=\"icon\">\n+\n+            </Region>\n+        </graphic>\n+    </Button>\n+</HBox>"
+  },
+  {
+    "sha": "3c7a1aebd55290a8995bec36c20a49ff1c94e6c5",
+    "filename": "src/main/resources/theme/icons.css",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/FAForever/downlords-faf-client/blob/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/theme/icons.css",
+    "raw_url": "https://github.com/FAForever/downlords-faf-client/raw/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/theme/icons.css",
+    "contents_url": "https://api.github.com/repos/FAForever/downlords-faf-client/contents/src/main/resources/theme/icons.css?ref=2e67328f9fb4e9f2493c0c29184fbfa805239744",
+    "patch": "@@ -91,6 +91,16 @@\n   -fx-padding: 0.666667em 0.5em;\n }\n \n+.add-person {\n+  -fx-shape: \"M12 23c0-4.726 2.996-8.765 7.189-10.319 0.509-1.142 0.811-2.411 0.811-3.681 0-4.971 0-9-6-9s-6 4.029-6 9c0 3.096 1.797 6.191 4 7.432v1.649c-6.784 0.555-12 3.888-12 7.918h12.416c-0.271-0.954-0.416-1.96-0.416-3z M23 14c-4.971 0-9 4.029-9 9s4.029 9 9 9c4.971 0 9-4.029 9-9s-4.029-9-9-9zM28 24h-4v4h-2v-4h-4v-2h4v-4h2v4h4v2z\";\n+  -fx-padding: 0.666667em 0.5em;\n+}\n+\n+.added-person {\n+  -fx-shape: \"M30 19l-9 9-3-3-2 2 5 5 11-11z M14 24h10v-3.598c-2.101-1.225-4.885-2.066-8-2.321v-1.649c2.203-1.242 4-4.337 4-7.432 0-4.971 0-9-6-9s-6 4.029-6 9c0 3.096 1.797 6.191 4 7.432v1.649c-6.784 0.555-12 3.888-12 7.918h14v-2z\";\n+  -fx-padding: 0.666667em 0.5em;\n+}\n+\n .fast-rewind-icon {\n   -fx-shape: \"M11.484 12l8.531-6v12zM11.016 18l-8.531-6 8.531-6v12z\";\n   -fx-padding: 0.666667em 0.5em;"
+  },
+  {
+    "sha": "bb6eb5c6a1469b066c91110a3ff209ad5ffb1b4d",
+    "filename": "src/main/resources/theme/play/teammatchmaking/matchmaking_invite_player.fxml",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 23,
+    "changes": 52,
+    "blob_url": "https://github.com/FAForever/downlords-faf-client/blob/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/theme/play/teammatchmaking/matchmaking_invite_player.fxml",
+    "raw_url": "https://github.com/FAForever/downlords-faf-client/raw/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/theme/play/teammatchmaking/matchmaking_invite_player.fxml",
+    "contents_url": "https://api.github.com/repos/FAForever/downlords-faf-client/contents/src/main/resources/theme/play/teammatchmaking/matchmaking_invite_player.fxml?ref=2e67328f9fb4e9f2493c0c29184fbfa805239744",
+    "patch": "@@ -1,37 +1,43 @@\n <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n \n <?import javafx.geometry.Insets?>\n-<?import javafx.scene.layout.HBox?>\n-<?import javafx.scene.layout.VBox?>\n <?import javafx.scene.control.Label?>\n <?import javafx.scene.control.ListView?>\n-<?import javafx.scene.layout.StackPane?>\n-<?import javafx.scene.control.Button?>\n <?import javafx.scene.control.TextField?>\n-<VBox xmlns:fx=\"http://javafx.com/fxml\"\n-      xmlns=\"http://javafx.com/javafx\"\n-      fx:controller=\"com.faforever.client.teammatchmaking.InvitePlayerController\"\n-      prefHeight=\"400.0\" prefWidth=\"400.0\" fx:id=\"root\" >\n+<?import javafx.scene.layout.HBox?>\n+<?import javafx.scene.layout.Region?>\n+<?import javafx.scene.layout.VBox?>\n+<VBox xmlns:fx=\"http://javafx.com/fxml/1\" fx:id=\"root\" maxHeight=\"400.0\" spacing=\"20.0\"\n+      xmlns=\"http://javafx.com/javafx/11.0.1\"\n+      fx:controller=\"com.faforever.client.teammatchmaking.InvitePlayerController\">\n \n     <children>\n-        <HBox spacing=\"20\">\n-            <TextField fx:id=\"playerTextField\" prefWidth=\"190.0\" onAction=\"#onInviteButtonClicked\"\n-                       onKeyPressed=\"#onKeyPressed\"/>\n-            <Button text=\"%teammatchmaking.invite\" onAction=\"#onInviteButtonClicked\"/>\n-        </HBox>\n-        <StackPane alignment=\"TOP_LEFT\">\n-            <VBox spacing=\"20\">\n-                <Label text=\"%teammatchmaking.invitedPlayers\" />\n-                <ListView fx:id=\"invitedPlayersListView\" styleClass=\"empty-cells-transparent\" prefWidth=\"190.0\"/>\n-                <padding>\n-                    <Insets top=\"20.0\" left=\"200.0\"/>\n-                </padding>\n+        <HBox spacing=\"20.0\">\n+            <VBox prefWidth=\"190.0\" spacing=\"20\">\n+                <Label text=\"%teammatchmaking.searchAndInvite\"/>\n+                <HBox alignment=\"CENTER_LEFT\" spacing=\"20\">\n+                    <Label contentDisplay=\"RIGHT\" graphicTextGap=\"10.0\" maxWidth=\"1.7976931348623157E308\">\n+                        <graphic>\n+                            <Region styleClass=\"icon,search-icon\"/>\n+                        </graphic>\n+                    </Label>\n+                    <TextField fx:id=\"playerTextField\" promptText=\"%teammatchmaking.search.prompt\" HBox.hgrow=\"ALWAYS\">\n+                    </TextField>\n+                </HBox>\n+                <ListView fx:id=\"playersListView\" styleClass=\"empty-cells-transparent\" VBox.vgrow=\"ALWAYS\"/>\n+            </VBox>\n+            <VBox prefWidth=\"190.0\" spacing=\"20\">\n+                <Label text=\"%teammatchmaking.invitedPlayers\"/>\n+                <ListView fx:id=\"invitedPlayersListView\" styleClass=\"empty-cells-transparent\" VBox.vgrow=\"ALWAYS\">\n+                    <placeholder>\n+                        <Label text=\"%teammatchmaking.search.noOneInvited\"/>\n+                    </placeholder>\n+                </ListView>\n             </VBox>\n-            <ListView fx:id=\"playersListView\" styleClass=\"empty-cells-transparent\" maxWidth=\"190.0\"/>\n-        </StackPane>\n+        </HBox>\n     </children>\n \n     <padding>\n-        <Insets left=\"2.0\" right=\"2.0\" top=\"2.0\" bottom=\"2.0\"/>\n+        <Insets bottom=\"2.0\" left=\"2.0\" right=\"2.0\" top=\"2.0\"/>\n     </padding>\n </VBox>"
+  },
+  {
+    "sha": "fc5c28b6f71b89537fbb955f72244fe41673f075",
+    "filename": "src/main/resources/theme/style.css",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/FAForever/downlords-faf-client/blob/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/theme/style.css",
+    "raw_url": "https://github.com/FAForever/downlords-faf-client/raw/2e67328f9fb4e9f2493c0c29184fbfa805239744/src/main/resources/theme/style.css",
+    "contents_url": "https://api.github.com/repos/FAForever/downlords-faf-client/contents/src/main/resources/theme/style.css?ref=2e67328f9fb4e9f2493c0c29184fbfa805239744",
+    "patch": "@@ -627,7 +627,7 @@\n }\n \n .create-game-dual-list-cell > .right-label {\n-  -fx-text-fill: -fx-mid-text-color;\n+  -fx-text-fill: -fx-accent;\n }\n \n /***************** Settings window *****************/"
+  }
+]

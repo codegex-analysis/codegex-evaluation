@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "ba9e1cdb9ac19e3d7c34c31ff4a3e7ee38789540",
+    "filename": ".env",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/devyaniB/cwa-server/blob/a6dcc00bf11c12735e3a2996484a53b829d799f5/.env",
+    "raw_url": "https://github.com/devyaniB/cwa-server/raw/a6dcc00bf11c12735e3a2996484a53b829d799f5/.env",
+    "contents_url": "https://api.github.com/repos/devyaniB/cwa-server/contents/.env?ref=a6dcc00bf11c12735e3a2996484a53b829d799f5",
+    "patch": "@@ -25,3 +25,7 @@ OBJECTSTORE_SECRETKEY=verySecretKey1\n \n # Docker Compose Secrets settings\n SECRET_PRIVATE=file:/secrets/private.pem\n+\n+# Docker Compose Actuator Credentials\n+ACTUATOR_USER_NAME=local_actuator_username\n+ACTUATOR_USER_PASSWORD=local_actuator_password"
+  },
+  {
+    "sha": "9e09440b6d9cf0d5cce1edc5446c71c6abf315a2",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/devyaniB/cwa-server/blob/a6dcc00bf11c12735e3a2996484a53b829d799f5/README.md",
+    "raw_url": "https://github.com/devyaniB/cwa-server/raw/a6dcc00bf11c12735e3a2996484a53b829d799f5/README.md",
+    "contents_url": "https://api.github.com/repos/devyaniB/cwa-server/contents/README.md?ref=a6dcc00bf11c12735e3a2996484a53b829d799f5",
+    "patch": "@@ -123,6 +123,12 @@ POSTGRESQL_SERVICE_PORT=8001\n SPRING_PROFILES_ACTIVE=disable-ssl-server,disable-ssl-client-postgres,disable-ssl-client-verification,disable-ssl-client-verification-verify-hostname\n ```\n \n+For the submission actuator Basic Auth\n+```bash\n+ACTUATOR_USER_NAME=local_actuator_username\n+ACTUATOR_USER_PASSWORD=local_actuator_password\n+```\n+\n #### Configure\n \n After you made sure that the specified dependencies are running, configure them in the respective configuration files."
+  },
+  {
+    "sha": "a28947ea36ac82db602c80fe8c91f1ff2b78fb68",
+    "filename": "docker-compose.yml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/devyaniB/cwa-server/blob/a6dcc00bf11c12735e3a2996484a53b829d799f5/docker-compose.yml",
+    "raw_url": "https://github.com/devyaniB/cwa-server/raw/a6dcc00bf11c12735e3a2996484a53b829d799f5/docker-compose.yml",
+    "contents_url": "https://api.github.com/repos/devyaniB/cwa-server/contents/docker-compose.yml?ref=a6dcc00bf11c12735e3a2996484a53b829d799f5",
+    "patch": "@@ -20,6 +20,8 @@ services:\n       POSTGRESQL_PASSWORD_FLYWAY: ${POSTGRES_FLYWAY_PASSWORD}\n       POSTGRESQL_USER_FLYWAY: ${POSTGRES_FLYWAY_USER}\n       VERIFICATION_BASE_URL: http://verification-fake:8004\n+      ACTUATOR_USER_NAME: ${ACTUATOR_USER_NAME}\n+      ACTUATOR_USER_PASSWORD: ${ACTUATOR_USER_PASSWORD}\n   distribution:\n     build:\n       context: ./"
+  },
+  {
+    "sha": "6d48beb54238631025965da43b8b1879ba67bdf9",
+    "filename": "services/submission/src/main/java/app/coronawarn/server/services/submission/ServerApplication.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 2,
+    "changes": 3,
+    "blob_url": "https://github.com/devyaniB/cwa-server/blob/a6dcc00bf11c12735e3a2996484a53b829d799f5/services/submission/src/main/java/app/coronawarn/server/services/submission/ServerApplication.java",
+    "raw_url": "https://github.com/devyaniB/cwa-server/raw/a6dcc00bf11c12735e3a2996484a53b829d799f5/services/submission/src/main/java/app/coronawarn/server/services/submission/ServerApplication.java",
+    "contents_url": "https://api.github.com/repos/devyaniB/cwa-server/contents/services/submission/src/main/java/app/coronawarn/server/services/submission/ServerApplication.java?ref=a6dcc00bf11c12735e3a2996484a53b829d799f5",
+    "patch": "@@ -31,7 +31,6 @@\n import org.springframework.boot.SpringApplication;\n import org.springframework.boot.autoconfigure.SpringBootApplication;\n import org.springframework.boot.autoconfigure.domain.EntityScan;\n-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;\n import org.springframework.boot.context.properties.EnableConfigurationProperties;\n import org.springframework.cloud.openfeign.EnableFeignClients;\n import org.springframework.context.EnvironmentAware;\n@@ -41,7 +40,7 @@\n import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;\n import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;\n \n-@SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})\n+@SpringBootApplication\n @EnableJdbcRepositories(basePackages = \"app.coronawarn.server.common.persistence\")\n @EntityScan(basePackages = \"app.coronawarn.server.common.persistence\")\n @ComponentScan({\"app.coronawarn.server.common.persistence\","
+  },
+  {
+    "sha": "3edd681e4b604fd524848b9968c0b442ddde0562",
+    "filename": "services/submission/src/main/java/app/coronawarn/server/services/submission/config/SecurityConfig.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 5,
+    "changes": 13,
+    "blob_url": "https://github.com/devyaniB/cwa-server/blob/a6dcc00bf11c12735e3a2996484a53b829d799f5/services/submission/src/main/java/app/coronawarn/server/services/submission/config/SecurityConfig.java",
+    "raw_url": "https://github.com/devyaniB/cwa-server/raw/a6dcc00bf11c12735e3a2996484a53b829d799f5/services/submission/src/main/java/app/coronawarn/server/services/submission/config/SecurityConfig.java",
+    "contents_url": "https://api.github.com/repos/devyaniB/cwa-server/contents/services/submission/src/main/java/app/coronawarn/server/services/submission/config/SecurityConfig.java?ref=a6dcc00bf11c12735e3a2996484a53b829d799f5",
+    "patch": "@@ -28,6 +28,7 @@\n import org.springframework.security.config.annotation.web.builders.HttpSecurity;\n import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;\n import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;\n+import org.springframework.security.config.http.SessionCreationPolicy;\n import org.springframework.security.web.firewall.HttpFirewall;\n import org.springframework.security.web.firewall.StrictHttpFirewall;\n \n@@ -38,8 +39,8 @@\n   private static final String ACTUATOR_ROUTE = \"/actuator/\";\n   private static final String HEALTH_ROUTE = ACTUATOR_ROUTE + \"health\";\n   private static final String PROMETHEUS_ROUTE = ACTUATOR_ROUTE + \"prometheus\";\n-  private static final String READINESS_ROUTE = ACTUATOR_ROUTE + \"readiness\";\n-  private static final String LIVENESS_ROUTE = ACTUATOR_ROUTE + \"liveness\";\n+  private static final String READINESS_ROUTE = HEALTH_ROUTE + \"/readiness\";\n+  private static final String LIVENESS_ROUTE = HEALTH_ROUTE + \"/liveness\";\n   private static final String SUBMISSION_ROUTE =\n       \"/version/v1\" + SubmissionController.SUBMISSION_ROUTE;\n \n@@ -52,12 +53,14 @@ protected HttpFirewall strictFirewall() {\n     return firewall;\n   }\n \n+\n   @Override\n   protected void configure(HttpSecurity http) throws Exception {\n-    http.authorizeRequests()\n-        .mvcMatchers(HttpMethod.GET, HEALTH_ROUTE, PROMETHEUS_ROUTE, READINESS_ROUTE, LIVENESS_ROUTE).permitAll()\n+    http.sessionManagement()\n+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()\n         .mvcMatchers(HttpMethod.POST, SUBMISSION_ROUTE).permitAll()\n-        .anyRequest().denyAll()\n+        .mvcMatchers(HttpMethod.GET, HEALTH_ROUTE, PROMETHEUS_ROUTE, READINESS_ROUTE, LIVENESS_ROUTE)\n+        .hasRole(\"ACTUATOR\").anyRequest().denyAll().and().httpBasic()\n         .and().csrf().disable();\n     http.headers().contentSecurityPolicy(\"default-src 'self'\");\n   }"
+  },
+  {
+    "sha": "d902643e93452575e7996017dcf61251de2bc555",
+    "filename": "services/submission/src/main/resources/application.yaml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/devyaniB/cwa-server/blob/a6dcc00bf11c12735e3a2996484a53b829d799f5/services/submission/src/main/resources/application.yaml",
+    "raw_url": "https://github.com/devyaniB/cwa-server/raw/a6dcc00bf11c12735e3a2996484a53b829d799f5/services/submission/src/main/resources/application.yaml",
+    "contents_url": "https://api.github.com/repos/devyaniB/cwa-server/contents/services/submission/src/main/resources/application.yaml?ref=a6dcc00bf11c12735e3a2996484a53b829d799f5",
+    "patch": "@@ -41,6 +41,12 @@ services:\n         trust-store-password: ${SSL_VERIFICATION_TRUSTSTORE_PASSWORD}\n \n spring:\n+  security:\n+    user:\n+      name: ${ACTUATOR_USER_NAME}\n+      password: ${ACTUATOR_USER_PASSWORD}\n+      roles:\n+        - ACTUATOR\n   lifecycle:\n     # keep in sync or lower than the kubernetes setting 'terminationGracePeriodSeconds'\n     # 5s +5s Feign client + 20s DB timeout\n@@ -114,4 +120,4 @@ feign:\n     config:\n       default:\n         connect-timeout: 5000\n-        read-timeout: 5000\n\\ No newline at end of file\n+        read-timeout: 5000"
+  }
+]

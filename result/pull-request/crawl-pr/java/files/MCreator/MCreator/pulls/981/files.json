@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "45cccfb268785b04c44774e2a3ba9d4153a46277",
+    "filename": "plugins/generator-1.15.2/forge-1.15.2/procedures/block_is_valid_position.java.ftl",
+    "status": "added",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/generator-1.15.2/forge-1.15.2/procedures/block_is_valid_position.java.ftl",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/generator-1.15.2/forge-1.15.2/procedures/block_is_valid_position.java.ftl",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/plugins/generator-1.15.2/forge-1.15.2/procedures/block_is_valid_position.java.ftl?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -0,0 +1,2 @@\n+<#include \"mcitems.ftl\">\r\n+(${mappedBlockToBlockStateCode(input$block)}.isValidPosition(world, new BlockPos((int) ${input$x}, (int) ${input$y}, (int) ${input$z})))\n\\ No newline at end of file"
+  },
+  {
+    "sha": "5ffe42652fa37f9ed556a059e930a9fdae1f88c3",
+    "filename": "plugins/generator-1.15.2/forge-1.15.2/templates/block.java.ftl",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 7,
+    "changes": 30,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/generator-1.15.2/forge-1.15.2/templates/block.java.ftl",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/generator-1.15.2/forge-1.15.2/templates/block.java.ftl",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/plugins/generator-1.15.2/forge-1.15.2/templates/block.java.ftl?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -365,6 +365,16 @@ public class ${name}Block extends ${JavaModName}Elements.ModElement {\n \t\t}\r\n         </#if>\r\n \r\n+\t\t<#if hasCondition(data.placingCondition)>\r\n+\t\t@Override public boolean isValidPosition(BlockState state, IWorldReader worldIn, BlockPos pos) {\r\n+\t\t\tWorld world = worldIn.getDimension().getWorld();\r\n+\t\t\tint x = pos.getX();\r\n+\t\t\tint y = pos.getY();\r\n+\t\t\tint z = pos.getZ();\r\n+\t\t\treturn <@procedureOBJToConditionCode data.placingCondition/>;\r\n+\t\t}\r\n+\t\t</#if>\r\n+\r\n         <#if data.isWaterloggable>\r\n             <#if data.rotationMode == 0>\r\n             @Override\r\n@@ -380,14 +390,20 @@ public class ${name}Block extends ${JavaModName}Elements.ModElement {\n         @Override public IFluidState getFluidState(BlockState state) {\r\n             return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);\r\n         }\r\n-\t\r\n+\t\t</#if>\r\n+\r\n+\t\t<#if data.isWaterloggable || hasCondition(data.placingCondition)>\r\n \t\t@Override public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState, IWorld world, BlockPos currentPos, BlockPos facingPos) {\r\n-\t        if (state.get(WATERLOGGED)) {\r\n-\t\t        world.getPendingFluidTicks().scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(world));\r\n-\t        }\r\n-\t        return super.updatePostPlacement(state, facing, facingState, world, currentPos, facingPos);\r\n-        }\r\n-        </#if>\r\n+\t\t\t<#if data.isWaterloggable>\r\n+\t\t\tif (state.get(WATERLOGGED)) {\r\n+\t\t\t\tworld.getPendingFluidTicks().scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(world));\r\n+\t\t\t}\r\n+\t\t\t</#if>\r\n+\t\t\treturn <#if hasCondition(data.placingCondition)>\r\n+\t\t\t!state.isValidPosition(world, currentPos) ? Blocks.AIR.getDefaultState() :\r\n+\t\t\t</#if> super.updatePostPlacement(state, facing, facingState, world, currentPos, facingPos);\r\n+\t\t}\r\n+\t\t</#if>\r\n \r\n \t\t<#if data.enchantPowerBonus != 0>\r\n \t\t@Override public float getEnchantPowerBonus(BlockState state, IWorldReader world, BlockPos pos) {\r"
+  },
+  {
+    "sha": "45cccfb268785b04c44774e2a3ba9d4153a46277",
+    "filename": "plugins/generator-1.16.4/forge-1.16.4/procedures/block_is_valid_position.java.ftl",
+    "status": "added",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/generator-1.16.4/forge-1.16.4/procedures/block_is_valid_position.java.ftl",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/generator-1.16.4/forge-1.16.4/procedures/block_is_valid_position.java.ftl",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/plugins/generator-1.16.4/forge-1.16.4/procedures/block_is_valid_position.java.ftl?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -0,0 +1,2 @@\n+<#include \"mcitems.ftl\">\r\n+(${mappedBlockToBlockStateCode(input$block)}.isValidPosition(world, new BlockPos((int) ${input$x}, (int) ${input$y}, (int) ${input$z})))\n\\ No newline at end of file"
+  },
+  {
+    "sha": "ee1550e4ee83924798e8130cc47a9bd0034a6113",
+    "filename": "plugins/generator-1.16.4/forge-1.16.4/templates/block.java.ftl",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 7,
+    "changes": 33,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/generator-1.16.4/forge-1.16.4/templates/block.java.ftl",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/generator-1.16.4/forge-1.16.4/templates/block.java.ftl",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/plugins/generator-1.16.4/forge-1.16.4/templates/block.java.ftl?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -393,6 +393,19 @@ public class ${name}Block extends ${JavaModName}Elements.ModElement {\n \t\t}\r\n         </#if>\r\n \r\n+\t\t<#if hasCondition(data.placingCondition)>\r\n+\t\t@Override public boolean isValidPosition(BlockState state, IWorldReader worldIn, BlockPos pos) {\r\n+\t\t\tif (worldIn instanceof IWorld) {\r\n+\t\t\t\tIWorld world = (IWorld) worldIn;\r\n+\t\t\t\tint x = pos.getX();\r\n+\t\t\t\tint y = pos.getY();\r\n+\t\t\t\tint z = pos.getZ();\r\n+\t\t\t\treturn <@procedureOBJToConditionCode data.placingCondition/>;\r\n+\t\t\t}\r\n+\t\t\treturn super.isValidPosition(state, worldIn, pos);\r\n+\t\t}\r\n+\t\t</#if>\r\n+\r\n         <#if data.isWaterloggable>\r\n             <#if data.rotationMode == 0>\r\n             @Override\r\n@@ -408,14 +421,20 @@ public class ${name}Block extends ${JavaModName}Elements.ModElement {\n         @Override public FluidState getFluidState(BlockState state) {\r\n             return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);\r\n         }\r\n-\t\r\n+\t\t</#if>\r\n+\r\n+\t\t<#if data.isWaterloggable || hasCondition(data.placingCondition)>\r\n \t\t@Override public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState, IWorld world, BlockPos currentPos, BlockPos facingPos) {\r\n-\t        if (state.get(WATERLOGGED)) {\r\n-\t\t        world.getPendingFluidTicks().scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(world));\r\n-\t        }\r\n-\t        return super.updatePostPlacement(state, facing, facingState, world, currentPos, facingPos);\r\n-        }\r\n-        </#if>\r\n+\t        <#if data.isWaterloggable>\r\n+\t\t\tif (state.get(WATERLOGGED)) {\r\n+\t\t\t\tworld.getPendingFluidTicks().scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(world));\r\n+\t\t\t}\r\n+\t\t\t</#if>\r\n+\t\t\treturn <#if hasCondition(data.placingCondition)>\r\n+\t\t\t!state.isValidPosition(world, currentPos) ? Blocks.AIR.getDefaultState() :\r\n+\t\t\t</#if> super.updatePostPlacement(state, facing, facingState, world, currentPos, facingPos);\r\n+\t\t}\r\n+\t\t</#if>\r\n \r\n \t\t<#if data.enchantPowerBonus != 0>\r\n \t\t@Override public float getEnchantPowerBonus(BlockState state, IWorldReader world, BlockPos pos) {\r"
+  },
+  {
+    "sha": "47543082f37ec51f1e798e7e0b5283221bbf650a",
+    "filename": "plugins/mcreator-core/procedures/block_is_valid_position.json",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/mcreator-core/procedures/block_is_valid_position.json",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/mcreator-core/procedures/block_is_valid_position.json",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/plugins/mcreator-core/procedures/block_is_valid_position.json?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -0,0 +1,48 @@\n+{\r\n+  \"args0\": [\r\n+    {\r\n+      \"type\": \"input_value\",\r\n+      \"name\": \"block\",\r\n+      \"check\": \"MCItemBlock\"\r\n+    },\r\n+    {\r\n+      \"type\": \"input_value\",\r\n+      \"name\": \"x\",\r\n+      \"check\": \"Number\"\r\n+    },\r\n+    {\r\n+      \"type\": \"input_value\",\r\n+      \"name\": \"y\",\r\n+      \"check\": \"Number\"\r\n+    },\r\n+    {\r\n+      \"type\": \"input_value\",\r\n+      \"name\": \"z\",\r\n+      \"check\": \"Number\"\r\n+    }\r\n+  ],\r\n+  \"inputsInline\": true,\r\n+  \"output\": \"Boolean\",\r\n+  \"colour\": \"%{BKY_LOGIC_HUE}\",\r\n+  \"mcreator\": {\r\n+    \"toolbox_id\": \"blockactions\",\r\n+    \"toolbox_init\": [\r\n+      \"<value name=\\\"block\\\"><block type=\\\"mcitem_allblocks\\\"><field name=\\\"value\\\"></field></block></value>\",\r\n+      \"<value name=\\\"x\\\"><block type=\\\"coord_x\\\"></block></value>\",\r\n+      \"<value name=\\\"y\\\"><block type=\\\"coord_y\\\"></block></value>\",\r\n+      \"<value name=\\\"z\\\"><block type=\\\"coord_z\\\"></block></value>\"\r\n+    ],\r\n+    \"inputs\": [\r\n+      \"x\",\r\n+      \"y\",\r\n+      \"z\",\r\n+      \"block\"\r\n+    ],\r\n+    \"dependencies\": [\r\n+      {\r\n+        \"name\": \"world\",\r\n+        \"type\": \"world\"\r\n+      }\r\n+    ]\r\n+  }\r\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "b280db795e4652e21c85d955157fe3a12e833280",
+    "filename": "plugins/mcreator-localization/help/default/block/placing_condition.md",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/mcreator-localization/help/default/block/placing_condition.md",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/mcreator-localization/help/default/block/placing_condition.md",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/plugins/mcreator-localization/help/default/block/placing_condition.md?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -0,0 +1,4 @@\n+This condition determines whether this block can be placed in a specific location. If the position is\r\n+no longer valid, the block will be broken.\r\n+\r\n+NOTE: this condition isn't checked during world generation.\n\\ No newline at end of file"
+  },
+  {
+    "sha": "054e402f9f1c01ed4547b9c31ba935edc42bda90",
+    "filename": "plugins/mcreator-localization/lang/texts.properties",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/mcreator-localization/lang/texts.properties",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/plugins/mcreator-localization/lang/texts.properties",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/plugins/mcreator-localization/lang/texts.properties?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -639,6 +639,7 @@ blockly.block.block_is_fluid=Is %1 a fluid\n blockly.block.block_is_fluid_source=Is %1 a fluid source\n blockly.block.block_is_tagged_in=Is %1 tagged in block tags as %2\n blockly.block.block_is_fertilizable=Can %1 be fertilized with bonemeal\n+blockly.block.block_is_valid_position=Is x: %2 y: %3 z: %4 a valid position for %1\n blockly.block.block_is_waterloggable=Is %1 waterloggable\n blockly.block.block_nbt_logic_get=Get NBT logic tag %4 of block at x: %1 y: %2 z: %3 if it has tile entity\n blockly.block.block_nbt_logic_set=Set NBT logic tag %4 of block at x: %1 y: %2 z: %3 to %5 if it has tile entity\n@@ -1513,6 +1514,7 @@ elementgui.block.event_on_right_clicked=On block right clicked\n elementgui.block.event_on_redstone_on=Redstone on\n elementgui.block.event_on_redstone_off=Redstone off\n elementgui.block.event_particle_condition=Particle spawning condition\n+elementgui.block.event_placing_condition=Block placing condition\n elementgui.block.event_generate_condition=Additional generation condition\n elementgui.block.texture_place_top=Top\n elementgui.block.texture_place_left_overlay=Left / overlay"
+  },
+  {
+    "sha": "dc31ce32e531deed1c4808c918b040459172af9c",
+    "filename": "src/main/java/net/mcreator/element/types/Block.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/src/main/java/net/mcreator/element/types/Block.java",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/src/main/java/net/mcreator/element/types/Block.java",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/src/main/java/net/mcreator/element/types/Block.java?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -121,6 +121,8 @@\n \tpublic int particleAmount;\r\n \tpublic Procedure particleCondition;\r\n \r\n+\tpublic Procedure placingCondition;\r\n+\r\n \tpublic boolean hasInventory;\r\n \tpublic String guiBoundTo;\r\n \tpublic boolean openGUIOnRightClick;\r"
+  },
+  {
+    "sha": "c363c60dab1a2a32087f46a55e5425201698b0f5",
+    "filename": "src/main/java/net/mcreator/ui/modgui/BlockGUI.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 2,
+    "changes": 16,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/src/main/java/net/mcreator/ui/modgui/BlockGUI.java",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/src/main/java/net/mcreator/ui/modgui/BlockGUI.java",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/src/main/java/net/mcreator/ui/modgui/BlockGUI.java?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -104,6 +104,7 @@\n \tprivate ProcedureSelector onRedstoneOff;\r\n \r\n \tprivate ProcedureSelector particleCondition;\r\n+\tprivate ProcedureSelector placingCondition;\r\n \tprivate ProcedureSelector generateCondition;\r\n \r\n \tprivate final JSpinner hardness = new JSpinner(new SpinnerNumberModel(1, -1, 64000, 0.05));\r\n@@ -297,6 +298,11 @@ public BlockGUI(MCreator mcreator, ModElement modElement, boolean editingMode) {\n \t\t\t\tL10N.t(\"elementgui.block.event_particle_condition\"), ProcedureSelector.Side.CLIENT, true,\r\n \t\t\t\tVariableElementType.LOGIC, Dependency.fromString(\"x:number/y:number/z:number/world:world\"));\r\n \r\n+\t\tplacingCondition = new ProcedureSelector(this.withEntry(\"block/placing_condition\"), mcreator,\r\n+\t\t\t\tL10N.t(\"elementgui.block.event_placing_condition\"), VariableElementType.LOGIC,\r\n+\t\t\t\tDependency.fromString(\"x:number/y:number/z:number/world:world\"))\r\n+\t\t\t\t.setDefaultName(\"(no additional condition)\");\r\n+\r\n \t\tgenerateCondition = new ProcedureSelector(this.withEntry(\"block/generation_condition\"), mcreator,\r\n \t\t\t\tL10N.t(\"elementgui.block.event_generate_condition\"), VariableElementType.LOGIC,\r\n \t\t\t\tDependency.fromString(\"x:number/y:number/z:number/world:world\"))\r\n@@ -770,6 +776,9 @@ public BlockGUI(MCreator mcreator, ModElement modElement, boolean editingMode) {\n \t\t\t\t.wrapWithHelpButton(this.withEntry(\"block/offset_type\"), L10N.label(\"elementgui.common.offset_type\")));\r\n \t\tadvancedProperties.add(offsetType);\r\n \r\n+\t\tJComponent advancedWithCondition = PanelUtils\r\n+\t\t\t\t.northAndCenterElement(advancedProperties, PanelUtils.join(FlowLayout.LEFT, placingCondition));\r\n+\r\n \t\tisWaterloggable.setOpaque(false);\r\n \t\tcanProvidePower.setOpaque(false);\r\n \t\tisLadder.setOpaque(false);\r\n@@ -795,7 +804,7 @@ public BlockGUI(MCreator mcreator, ModElement modElement, boolean editingMode) {\n \t\t\t\tL10N.t(\"elementgui.common.properties_dropping\"), TitledBorder.LEADING, TitledBorder.DEFAULT_POSITION,\r\n \t\t\t\tgetFont(), (Color) UIManager.get(\"MCreatorLAF.BRIGHT_COLOR\")));\r\n \r\n-\t\tadvancedProperties.setBorder(BorderFactory.createTitledBorder(\r\n+\t\tadvancedWithCondition.setBorder(BorderFactory.createTitledBorder(\r\n \t\t\t\tBorderFactory.createLineBorder((Color) UIManager.get(\"MCreatorLAF.BRIGHT_COLOR\"), 1),\r\n \t\t\t\tL10N.t(\"elementgui.block.properties_advanced_block\"), TitledBorder.LEADING,\r\n \t\t\t\tTitledBorder.DEFAULT_POSITION, getFont(), (Color) UIManager.get(\"MCreatorLAF.BRIGHT_COLOR\")));\r\n@@ -1070,7 +1079,7 @@ else if (slot instanceof OutputSlot)\n \t\t});\r\n \r\n \t\tpane7.add(PanelUtils.totalCenterInPanel(\r\n-\t\t\t\tPanelUtils.westAndEastElement(advancedProperties, PanelUtils.pullElementUp(parpar))));\r\n+\t\t\t\tPanelUtils.westAndEastElement(advancedWithCondition, PanelUtils.pullElementUp(parpar))));\r\n \r\n \t\tpane7.setOpaque(false);\r\n \t\tpane9.setOpaque(false);\r\n@@ -1177,6 +1186,7 @@ public void updateParametersBasedOnBoundingBoxSize() {\n \t\tonRedstoneOff.refreshListKeepSelected();\r\n \r\n \t\tparticleCondition.refreshListKeepSelected();\r\n+\t\tplacingCondition.refreshListKeepSelected();\r\n \t\tgenerateCondition.refreshListKeepSelected();\r\n \r\n \t\tComboBoxUtil.updateComboBoxContents(renderType, ListUtils\r\n@@ -1309,6 +1319,7 @@ else if (page == 6) {\n \t\toffsetType.setSelectedItem(block.offsetType);\r\n \t\taiPathNodeType.setSelectedItem(block.aiPathNodeType);\r\n \t\tcreativePickItem.setBlock(block.creativePickItem);\r\n+\t\tplacingCondition.setSelectedProcedure(block.placingCondition);\r\n \r\n \t\tbeaconColorModifier.setColor(block.beaconColorModifier);\r\n \r\n@@ -1445,6 +1456,7 @@ else if (page == 6) {\n \t\tblock.offsetType = (String) offsetType.getSelectedItem();\r\n \t\tblock.aiPathNodeType = (String) aiPathNodeType.getSelectedItem();\r\n \t\tblock.creativePickItem = creativePickItem.getBlock();\r\n+\t\tblock.placingCondition = placingCondition.getSelectedProcedure();\r\n \r\n \t\tblock.flammability = (int) flammability.getValue();\r\n \t\tblock.fireSpreadSpeed = (int) fireSpreadSpeed.getValue();\r"
+  },
+  {
+    "sha": "d768e267e6dbea9f3f0aa6ecf8d23110d8c7eee1",
+    "filename": "src/test/java/net/mcreator/integration/TestWorkspaceDataProvider.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/MCreator/MCreator/blob/3c20d9c53e2d158dc5eca4a61d745b31dba01682/src/test/java/net/mcreator/integration/TestWorkspaceDataProvider.java",
+    "raw_url": "https://github.com/MCreator/MCreator/raw/3c20d9c53e2d158dc5eca4a61d745b31dba01682/src/test/java/net/mcreator/integration/TestWorkspaceDataProvider.java",
+    "contents_url": "https://api.github.com/repos/MCreator/MCreator/contents/src/test/java/net/mcreator/integration/TestWorkspaceDataProvider.java?ref=3c20d9c53e2d158dc5eca4a61d745b31dba01682",
+    "patch": "@@ -1150,6 +1150,7 @@ private static GeneratableElement getExampleFor(ModElement modElement, Random ra\n \t\t\t\tblock.onRedstoneOff = new Procedure(\"procedure12\");\r\n \t\t\t\tblock.onEntityWalksOn = new Procedure(\"procedure13\");\r\n \t\t\t\tblock.generateCondition = new Procedure(\"condition1\");\r\n+\t\t\t\tblock.placingCondition = new Procedure(\"condition2\");\r\n \t\t\t\tblock.particleCondition = new Procedure(\"condition4\");\r\n \t\t\t}\r\n \t\t\tblock.itemTexture = emptyLists ? \"\" : \"itest\";\r"
+  }
+]

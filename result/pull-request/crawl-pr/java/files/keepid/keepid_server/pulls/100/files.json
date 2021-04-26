@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "c7879aef9c23cde7fb4884ce52d9f641035030af",
+    "filename": "src/main/Database/PDF/PdfDao.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/Database/PDF/PdfDao.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/Database/PDF/PdfDao.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/Database/PDF/PdfDao.java?ref=9d866c056596a394ae86643c7fd02a5e5a75d916",
+    "patch": "@@ -0,0 +1,29 @@\n+package Database.PDF;\n+\n+import Database.Dao;\n+import PDF.PDF;\n+import com.google.api.client.util.DateTime;\n+import org.bson.types.ObjectId;\n+\n+import java.io.InputStream;\n+import java.util.Optional;\n+\n+public interface PdfDao extends Dao<PDF> {\n+  Optional<PDF> get(ObjectId id);\n+\n+  Optional<PDF> getByFileId(ObjectId fileId);\n+\n+  Optional<PDF> get(String username);\n+\n+  Optional<InputStream> getStream(String username);\n+\n+  Optional<InputStream> getStream(ObjectId id);\n+\n+  void save(String uploaderUsername, InputStream fileInputStream);\n+\n+  void save(String uploaderUsername, InputStream fileInputStream, DateTime uploadedAt);\n+\n+  void delete(String username);\n+\n+  void delete(ObjectId id);\n+}"
+  },
+  {
+    "sha": "eb7e01e917b6f61ce3eec0934074dc7c435fc0e6",
+    "filename": "src/main/Database/PDF/PdfDaoFactory.java",
+    "status": "added",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/Database/PDF/PdfDaoFactory.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/Database/PDF/PdfDaoFactory.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/Database/PDF/PdfDaoFactory.java?ref=9d866c056596a394ae86643c7fd02a5e5a75d916",
+    "patch": "@@ -0,0 +1,12 @@\n+package Database.PDF;\n+\n+import Config.DeploymentLevel;\n+\n+public class PdfDaoFactory {\n+  public static PdfDao create(DeploymentLevel deploymentLevel) {\n+    if (deploymentLevel == DeploymentLevel.IN_MEMORY) {\n+      return new PdfDaoTestImpl(deploymentLevel);\n+    }\n+    return new PdfDaoImpl(deploymentLevel);\n+  }\n+}"
+  },
+  {
+    "sha": "28aecf553fcf4cc665d552e06f15d2fb505cd81c",
+    "filename": "src/main/Database/PDF/PdfDaoImpl.java",
+    "status": "added",
+    "additions": 84,
+    "deletions": 0,
+    "changes": 84,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/Database/PDF/PdfDaoImpl.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/Database/PDF/PdfDaoImpl.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/Database/PDF/PdfDaoImpl.java?ref=9d866c056596a394ae86643c7fd02a5e5a75d916",
+    "patch": "@@ -0,0 +1,84 @@\n+package Database.PDF;\n+\n+import Config.DeploymentLevel;\n+import Config.MongoConfig;\n+import PDF.PDF;\n+import com.google.api.client.util.DateTime;\n+import com.mongodb.client.MongoCollection;\n+import com.mongodb.client.MongoDatabase;\n+import org.bson.types.ObjectId;\n+\n+import java.io.InputStream;\n+import java.util.List;\n+import java.util.Optional;\n+\n+public class PdfDaoImpl implements PdfDao {\n+  private MongoCollection<PDF> pdfCollection;\n+\n+  public PdfDaoImpl(DeploymentLevel deploymentLevel) {\n+    MongoDatabase db = MongoConfig.getDatabase(deploymentLevel);\n+    if (db == null) {\n+      throw new IllegalStateException(\"DB cannot be null\");\n+    }\n+    pdfCollection = db.getCollection(\"pdf\", PDF.class);\n+  }\n+\n+  @Override\n+  public List<PDF> getAll() {\n+    return null;\n+  }\n+\n+  @Override\n+  public int size() {\n+    return 0;\n+  }\n+\n+  @Override\n+  public void clear() {}\n+\n+  @Override\n+  public void delete(PDF pdf) {}\n+\n+  @Override\n+  public void update(PDF pdf) {}\n+\n+  @Override\n+  public void save(PDF pdf) {}\n+\n+  @Override\n+  public Optional<PDF> get(ObjectId id) {\n+    return Optional.empty();\n+  }\n+\n+  @Override\n+  public Optional<PDF> getByFileId(ObjectId fileId) {\n+    return Optional.empty();\n+  }\n+\n+  @Override\n+  public Optional<PDF> get(String username) {\n+    return Optional.empty();\n+  }\n+\n+  @Override\n+  public Optional<InputStream> getStream(String username) {\n+    return Optional.empty();\n+  }\n+\n+  @Override\n+  public Optional<InputStream> getStream(ObjectId id) {\n+    return Optional.empty();\n+  }\n+\n+  @Override\n+  public void save(String uploaderUsername, InputStream fileInputStream) {}\n+\n+  @Override\n+  public void save(String uploaderUsername, InputStream fileInputStream, DateTime uploadedAt) {}\n+\n+  @Override\n+  public void delete(String username) {}\n+\n+  @Override\n+  public void delete(ObjectId id) {}\n+}"
+  },
+  {
+    "sha": "7164bd78ae917899908d2f0539f33d09253f16d5",
+    "filename": "src/main/Database/PDF/PdfDaoTestImpl.java",
+    "status": "added",
+    "additions": 123,
+    "deletions": 0,
+    "changes": 123,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/Database/PDF/PdfDaoTestImpl.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/Database/PDF/PdfDaoTestImpl.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/Database/PDF/PdfDaoTestImpl.java?ref=9d866c056596a394ae86643c7fd02a5e5a75d916",
+    "patch": "@@ -0,0 +1,123 @@\n+package Database.PDF;\n+\n+import Config.DeploymentLevel;\n+import PDF.PDF;\n+import com.google.api.client.util.DateTime;\n+import org.bson.types.ObjectId;\n+\n+import java.io.InputStream;\n+import java.util.*;\n+\n+import static PDF.PDFType.FORM;\n+\n+public class PdfDaoTestImpl implements PdfDao {\n+  Map<String, PDF> pdfMap;\n+  Map<ObjectId, PDF> objectIdPDFMap;\n+\n+  public PdfDaoTestImpl(DeploymentLevel deploymentLevel) {\n+    if (deploymentLevel != DeploymentLevel.IN_MEMORY) {\n+      throw new IllegalStateException(\n+          \"Should not run in memory test database in production or staging\");\n+    }\n+    pdfMap = new LinkedHashMap<>();\n+  }\n+\n+  @Override\n+  public Optional<PDF> get(String username) {\n+    return Optional.ofNullable(pdfMap.get(username));\n+  }\n+\n+  @Override\n+  public Optional<InputStream> getStream(String username) {\n+    return Optional.ofNullable(pdfMap.get(username).getFileStream());\n+  }\n+\n+  @Override\n+  public Optional<InputStream> getStream(ObjectId id) {\n+    return Optional.ofNullable(objectIdPDFMap.get(id).getFileStream());\n+  }\n+\n+  @Override\n+  public void save(String uploaderUsername, InputStream fileInputStream) {\n+    PDF pdf =\n+        new PDF(\n+            uploaderUsername,\n+            Optional.empty(),\n+            new DateTime(new Date()),\n+            Optional.empty(),\n+            fileInputStream,\n+            FORM);\n+    pdfMap.put(uploaderUsername, pdf);\n+    objectIdPDFMap.put(pdf.getId(), pdf);\n+  }\n+\n+  @Override\n+  public void save(String uploaderUsername, InputStream fileInputStream, DateTime uploadedAt) {\n+    PDF pdf =\n+        new PDF(\n+            uploaderUsername,\n+            Optional.empty(),\n+            uploadedAt,\n+            Optional.empty(),\n+            fileInputStream,\n+            FORM);\n+    pdfMap.put(uploaderUsername, pdf);\n+    objectIdPDFMap.put(pdf.getId(), pdf);\n+  }\n+\n+  @Override\n+  public void delete(String username) {\n+    PDF pdf = pdfMap.remove(username);\n+    objectIdPDFMap.remove(pdf.getId());\n+  }\n+\n+  @Override\n+  public void delete(ObjectId id) {\n+    PDF pdf = objectIdPDFMap.remove(id);\n+    pdfMap.remove(pdf.getUsername());\n+  }\n+\n+  @Override\n+  public Optional<PDF> get(ObjectId id) {\n+    return Optional.ofNullable(objectIdPDFMap.get(id));\n+  }\n+\n+  @Override\n+  public Optional<PDF> getByFileId(ObjectId fileId) {\n+    return pdfMap.values().stream().filter(x -> x.getFileId() == fileId).findFirst();\n+  }\n+\n+  @Override\n+  public List<PDF> getAll() {\n+    return new ArrayList<>(pdfMap.values());\n+  }\n+\n+  @Override\n+  public int size() {\n+    return pdfMap.size();\n+  }\n+\n+  @Override\n+  public void save(PDF pdf) {\n+    pdfMap.put(pdf.getUsername(), pdf);\n+    objectIdPDFMap.put(pdf.getId(), pdf);\n+  }\n+\n+  @Override\n+  public void delete(PDF pdf) {\n+    pdfMap.remove(pdf.getUsername());\n+    objectIdPDFMap.remove(pdf.getId());\n+  }\n+\n+  @Override\n+  public void update(PDF newPdf) {\n+    pdfMap.put(newPdf.getUsername(), newPdf);\n+    objectIdPDFMap.put(newPdf.getId(), newPdf);\n+  }\n+\n+  @Override\n+  public void clear() {\n+    pdfMap.clear();\n+    objectIdPDFMap.clear();\n+  }\n+}"
+  },
+  {
+    "sha": "399ac63a2267943769f3a3ac5a0cdc77f1977896",
+    "filename": "src/main/PDF/PDF.java",
+    "status": "added",
+    "additions": 117,
+    "deletions": 0,
+    "changes": 117,
+    "blob_url": "https://github.com/keepid/keepid_server/blob/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/PDF/PDF.java",
+    "raw_url": "https://github.com/keepid/keepid_server/raw/9d866c056596a394ae86643c7fd02a5e5a75d916/src/main/PDF/PDF.java",
+    "contents_url": "https://api.github.com/repos/keepid/keepid_server/contents/src/main/PDF/PDF.java?ref=9d866c056596a394ae86643c7fd02a5e5a75d916",
+    "patch": "@@ -0,0 +1,117 @@\n+package PDF;\n+\n+import com.google.api.client.util.DateTime;\n+import lombok.extern.slf4j.Slf4j;\n+import org.bson.codecs.pojo.annotations.BsonProperty;\n+import org.bson.types.ObjectId;\n+\n+import java.io.InputStream;\n+import java.util.Optional;\n+\n+@Slf4j\n+public class PDF {\n+  private ObjectId id;\n+  private ObjectId fileId;\n+\n+  @BsonProperty(value = \"uploadedAt\")\n+  private DateTime uploadedAt;\n+\n+  @BsonProperty(value = \"lastModifiedAt\")\n+  private DateTime lastModifiedAt;\n+\n+  @BsonProperty(value = \"firstName\")\n+  private String username;\n+\n+  @BsonProperty(value = \"lastName\")\n+  private String uploaderUsername;\n+\n+  private InputStream fileStream;\n+\n+  @BsonProperty(value = \"pdfType\")\n+  private PDFType pdfType;\n+\n+  public PDF() {}\n+\n+  public PDF(\n+      String username,\n+      Optional<String> uploaderUsername,\n+      DateTime uploadedAt,\n+      Optional<DateTime> lastModifiedAt,\n+      InputStream fileStream,\n+      PDFType pdfType) {\n+    this.id = new ObjectId();\n+    this.fileId = new ObjectId();\n+    this.username = username;\n+    this.uploaderUsername = uploaderUsername.orElse(username);\n+    this.uploadedAt = uploadedAt;\n+    this.lastModifiedAt = lastModifiedAt.orElse(uploadedAt);\n+    this.fileStream = fileStream;\n+    this.pdfType = pdfType;\n+  }\n+\n+  /** **************** GETTERS ********************* */\n+  public ObjectId getId() {\n+    return this.id;\n+  }\n+\n+  public ObjectId getFileId() {\n+    return this.fileId;\n+  }\n+\n+  public DateTime getLastModifiedAt() {\n+    return lastModifiedAt;\n+  }\n+\n+  public DateTime getUploadedAt() {\n+    return uploadedAt;\n+  }\n+\n+  public InputStream getFileStream() {\n+    return fileStream;\n+  }\n+\n+  public PDFType getPdfType() {\n+    return pdfType;\n+  }\n+\n+  public String getUsername() {\n+    return username;\n+  }\n+\n+  public String getUploaderUsername() {\n+    return uploaderUsername;\n+  }\n+\n+  /** **************** SETTERS ********************* */\n+  public void setFileId(ObjectId fileId) {\n+    this.fileId = fileId;\n+  }\n+\n+  public void setFileStream(InputStream fileStream) {\n+    this.fileStream = fileStream;\n+  }\n+\n+  public void setId(ObjectId id) {\n+    this.id = id;\n+  }\n+\n+  public void setLastModifiedAt(DateTime lastModifiedAt) {\n+    this.lastModifiedAt = lastModifiedAt;\n+  }\n+\n+  public void setPdfType(PDFType pdfType) {\n+    this.pdfType = pdfType;\n+  }\n+\n+  public void setUploaderUsername(String uploaderUsername) {\n+    this.uploaderUsername = uploaderUsername;\n+  }\n+\n+  public void setUploadedAt(DateTime uploadedAt) {\n+    this.uploadedAt = uploadedAt;\n+  }\n+\n+  public void setUsername(String username) {\n+    this.username = username;\n+  }\n+}"
+  }
+]

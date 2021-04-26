@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "0a669b9e9f0229fcdf0014248657c402fc6d9f5e",
+    "filename": "hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/CertificateStore.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/apache/ozone/blob/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/CertificateStore.java",
+    "raw_url": "https://github.com/apache/ozone/raw/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/CertificateStore.java",
+    "contents_url": "https://api.github.com/repos/apache/ozone/contents/hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/CertificateStore.java?ref=64628809f8c39ac9b492cb7722377af20dfdb77e",
+    "patch": "@@ -54,6 +54,14 @@\n   void storeValidCertificate(BigInteger serialID,\n       X509Certificate certificate, NodeType role) throws IOException;\n \n+  /**\n+   * Check certificate serialID exists or not. If exists throws an exception.\n+   * @param serialID\n+   * @throws IOException\n+   */\n+  void checkValidCertID(BigInteger serialID) throws IOException;\n+\n+\n   /**\n    * Adds the certificates to be revoked to a new CRL and moves all the\n    * certificates in a transactional manner from valid certificate to"
+  },
+  {
+    "sha": "39f610c0e4b425ecc4565056a96564336c3b660a",
+    "filename": "hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/DefaultApprover.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 2,
+    "changes": 11,
+    "blob_url": "https://github.com/apache/ozone/blob/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/DefaultApprover.java",
+    "raw_url": "https://github.com/apache/ozone/raw/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/DefaultApprover.java",
+    "contents_url": "https://api.github.com/repos/apache/ozone/contents/hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/DefaultApprover.java?ref=64628809f8c39ac9b492cb7722377af20dfdb77e",
+    "patch": "@@ -89,7 +89,8 @@ public  X509CertificateHolder sign(\n       Date validTill,\n       PKCS10CertificationRequest certificationRequest,\n       String scmId,\n-      String clusterId) throws IOException, OperatorCreationException {\n+      String clusterId) throws IOException,\n+      OperatorCreationException {\n \n     AlgorithmIdentifier sigAlgId = new\n         DefaultSignatureAlgorithmIdentifierFinder().find(\n@@ -135,7 +136,7 @@ public  X509CertificateHolder sign(\n         new X509v3CertificateBuilder(\n             caCertificate.getSubject(),\n             // Serial is not sequential but it is monotonically increasing.\n-            BigInteger.valueOf(Time.monotonicNowNanos()),\n+            BigInteger.valueOf(generateSerialId()),\n             validFrom,\n             validTill,\n             x500Name, keyInfo);\n@@ -155,6 +156,12 @@ public  X509CertificateHolder sign(\n \n   }\n \n+  public long generateSerialId() {\n+    // TODO: to make generation of serialId distributed.\n+    // This issue will be fixed in HDDS-4999.\n+    return Time.monotonicNowNanos();\n+  }\n+\n   @Override\n   public CompletableFuture<X509CertificateHolder> inspectCSR(String csr)\n       throws IOException {"
+  },
+  {
+    "sha": "dc70e4f4c14d7bee4c6096b03dc95e7ee2c6699a",
+    "filename": "hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/DefaultCAServer.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 6,
+    "changes": 23,
+    "blob_url": "https://github.com/apache/ozone/blob/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/DefaultCAServer.java",
+    "raw_url": "https://github.com/apache/ozone/raw/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/DefaultCAServer.java",
+    "contents_url": "https://api.github.com/repos/apache/ozone/contents/hadoop-hdds/framework/src/main/java/org/apache/hadoop/hdds/security/x509/certificate/authority/DefaultCAServer.java?ref=64628809f8c39ac9b492cb7722377af20dfdb77e",
+    "patch": "@@ -60,6 +60,8 @@\n import java.util.Optional;\n import java.util.concurrent.CompletableFuture;\n import java.util.concurrent.Future;\n+import java.util.concurrent.locks.Lock;\n+import java.util.concurrent.locks.ReentrantLock;\n import java.util.function.Consumer;\n \n import static org.apache.hadoop.hdds.security.x509.certificates.utils.CertificateSignRequest.getCertificationRequest;\n@@ -129,6 +131,7 @@\n   private CertificateApprover approver;\n   private CRLApprover crlApprover;\n   private CertificateStore store;\n+  private Lock lock;\n \n   /**\n    * Create an Instance of DefaultCAServer.\n@@ -143,6 +146,7 @@ public DefaultCAServer(String subject, String clusterID, String scmID,\n     this.clusterID = clusterID;\n     this.scmID = scmID;\n     this.store = certificateStore;\n+    lock = new ReentrantLock();\n   }\n \n   @Override\n@@ -265,12 +269,19 @@ private X509CertificateHolder signAndStoreCertificate(LocalDate beginDate,\n       LocalDate endDate, PKCS10CertificationRequest csr, NodeType role)\n       throws IOException,\n       OperatorCreationException, CertificateException {\n-    X509CertificateHolder xcert = approver.sign(config,\n-        getCAKeys().getPrivate(),\n-        getCACertificate(), java.sql.Date.valueOf(beginDate),\n-        java.sql.Date.valueOf(endDate), csr, scmID, clusterID);\n-    store.storeValidCertificate(xcert.getSerialNumber(),\n-        CertificateCodec.getX509Certificate(xcert), role);\n+    lock.lock();\n+    X509CertificateHolder xcert;\n+    try {\n+      xcert = approver.sign(config,\n+          getCAKeys().getPrivate(),\n+          getCACertificate(), java.sql.Date.valueOf(beginDate),\n+          java.sql.Date.valueOf(endDate), csr, scmID, clusterID);\n+      store.checkValidCertID(xcert.getSerialNumber());\n+      store.storeValidCertificate(xcert.getSerialNumber(),\n+          CertificateCodec.getX509Certificate(xcert), role);\n+    } finally {\n+      lock.unlock();\n+    }\n     return xcert;\n   }\n "
+  },
+  {
+    "sha": "c60c9753555e8ca977712d7c2c34668d1bcbc94b",
+    "filename": "hadoop-hdds/framework/src/test/java/org/apache/hadoop/hdds/security/x509/certificate/authority/MockCAStore.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/ozone/blob/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/framework/src/test/java/org/apache/hadoop/hdds/security/x509/certificate/authority/MockCAStore.java",
+    "raw_url": "https://github.com/apache/ozone/raw/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/framework/src/test/java/org/apache/hadoop/hdds/security/x509/certificate/authority/MockCAStore.java",
+    "contents_url": "https://api.github.com/repos/apache/ozone/contents/hadoop-hdds/framework/src/test/java/org/apache/hadoop/hdds/security/x509/certificate/authority/MockCAStore.java?ref=64628809f8c39ac9b492cb7722377af20dfdb77e",
+    "patch": "@@ -42,6 +42,11 @@ public void storeValidCertificate(BigInteger serialID,\n \n   }\n \n+  @Override\n+  public void checkValidCertID(BigInteger serialID) throws IOException {\n+\n+  }\n+\n   @Override\n   public Optional<Long> revokeCertificates(\n       List<BigInteger> serialIDs,"
+  },
+  {
+    "sha": "ee4bc20387e0eb2d0b7ec03a2bcf430136d1d4bd",
+    "filename": "hadoop-hdds/server-scm/src/main/java/org/apache/hadoop/hdds/scm/server/SCMCertStore.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 6,
+    "changes": 15,
+    "blob_url": "https://github.com/apache/ozone/blob/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/server-scm/src/main/java/org/apache/hadoop/hdds/scm/server/SCMCertStore.java",
+    "raw_url": "https://github.com/apache/ozone/raw/64628809f8c39ac9b492cb7722377af20dfdb77e/hadoop-hdds/server-scm/src/main/java/org/apache/hadoop/hdds/scm/server/SCMCertStore.java",
+    "contents_url": "https://api.github.com/repos/apache/ozone/contents/hadoop-hdds/server-scm/src/main/java/org/apache/hadoop/hdds/scm/server/SCMCertStore.java?ref=64628809f8c39ac9b492cb7722377af20dfdb77e",
+    "patch": "@@ -80,7 +80,6 @@ public void storeValidCertificate(BigInteger serialID,\n     lock.lock();\n     try {\n       // This makes sure that no certificate IDs are reusable.\n-      checkValidCertID(serialID);\n       if (role == SCM) {\n         // If the role is SCM, store certificate in scm cert table\n         // and valid cert table. This is to help to return scm certs during\n@@ -106,7 +105,6 @@ private void storeValidScmCertificate(BigInteger serialID,\n       X509Certificate certificate) throws IOException {\n     lock.lock();\n     try {\n-      checkValidCertID(serialID);\n       BatchOperation batchOperation =\n           scmMetadataStore.getBatchHandler().initBatchOperation();\n       scmMetadataStore.getValidSCMCertsTable().putWithBatch(batchOperation,\n@@ -119,10 +117,15 @@ private void storeValidScmCertificate(BigInteger serialID,\n     }\n   }\n \n-  private void checkValidCertID(BigInteger serialID) throws IOException {\n-    if ((getCertificateByID(serialID, VALID_CERTS) != null) ||\n-        (getCertificateByID(serialID, CertType.REVOKED_CERTS) != null)) {\n-      throw new SCMSecurityException(\"Conflicting certificate ID\");\n+  public void checkValidCertID(BigInteger serialID) throws IOException {\n+    lock.lock();\n+    try {\n+      if ((getCertificateByID(serialID, VALID_CERTS) != null) ||\n+          (getCertificateByID(serialID, CertType.REVOKED_CERTS) != null)) {\n+        throw new SCMSecurityException(\"Conflicting certificate ID\" + serialID);\n+      }\n+    } finally {\n+      lock.unlock();\n     }\n   }\n "
+  }
+]

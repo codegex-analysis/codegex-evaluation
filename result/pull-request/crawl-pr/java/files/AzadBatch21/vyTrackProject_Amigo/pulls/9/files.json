@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "e384c287b6d47d49aaf17234506314ae5ed1a791",
+    "filename": "src/test/java/com/azsdet/vytrack/Runner/CukesRunner.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/blob/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Runner/CukesRunner.java",
+    "raw_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/raw/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Runner/CukesRunner.java",
+    "contents_url": "https://api.github.com/repos/AzadBatch21/vyTrackProject_Amigo/contents/src/test/java/com/azsdet/vytrack/Runner/CukesRunner.java?ref=480b35663b94a0e59084809f556e756c8e9071b0",
+    "patch": "@@ -14,7 +14,7 @@\n      //   plugin = {\"html:target/cucumber-report.html\"\n     //    },\n         dryRun= false,\n-        tags = \"@test\"\n+        tags = \"\"\n         \n        \n "
+  },
+  {
+    "sha": "04e4c14dfb260ae67aa1d90455df2e105334973c",
+    "filename": "src/test/java/com/azsdet/vytrack/Step_Definitions/Hooks.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/blob/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Step_Definitions/Hooks.java",
+    "raw_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/raw/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Step_Definitions/Hooks.java",
+    "contents_url": "https://api.github.com/repos/AzadBatch21/vyTrackProject_Amigo/contents/src/test/java/com/azsdet/vytrack/Step_Definitions/Hooks.java?ref=480b35663b94a0e59084809f556e756c8e9071b0",
+    "patch": "@@ -25,7 +25,7 @@ public void tearDownScenario(Scenario scenario){\n             byte[] screenShot = ((TakesScreenshot) Driver.getDriver()).getScreenshotAs(OutputType.BYTES);\n             scenario.attach(screenShot, \"image/png\", scenario.getName());\n         }\n-        Driver.closeDriver();\n+        //Driver.closeDriver();\n     }\n     \n    "
+  },
+  {
+    "sha": "5547ad2f6af8b43d20889ae4566d003ac4f9b23b",
+    "filename": "src/test/java/com/azsdet/vytrack/Step_Definitions/US_10_StepDefinitions.java",
+    "status": "modified",
+    "additions": 118,
+    "deletions": 1,
+    "changes": 119,
+    "blob_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/blob/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Step_Definitions/US_10_StepDefinitions.java",
+    "raw_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/raw/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Step_Definitions/US_10_StepDefinitions.java",
+    "contents_url": "https://api.github.com/repos/AzadBatch21/vyTrackProject_Amigo/contents/src/test/java/com/azsdet/vytrack/Step_Definitions/US_10_StepDefinitions.java?ref=480b35663b94a0e59084809f556e756c8e9071b0",
+    "patch": "@@ -1,4 +1,121 @@\n package com.azsdet.vytrack.Step_Definitions;\n \n+import com.azsdet.vytrack.Pages.LoginPage;\n+import com.azsdet.vytrack.Pages.US_10_Page;\n+import com.azsdet.vytrack.Utilities.BrowserUtils;\n+import com.azsdet.vytrack.Utilities.ConfigurationReader;\n+import com.azsdet.vytrack.Utilities.Driver;\n+import io.cucumber.java.en.Given;\n+import io.cucumber.java.en.Then;\n+import io.cucumber.java.en.When;\n+import org.junit.Assert;\n+import org.openqa.selenium.Alert;\n+import org.openqa.selenium.JavascriptExecutor;\n+import org.openqa.selenium.WebElement;\n+\n public class US_10_StepDefinitions {\n-}\n+    US_10_Page us10Page = new US_10_Page();\n+    LoginPage loginPage = new LoginPage();\n+\n+    @Given(\"Truck driver is already on the login page\")\n+    public void truck_driver_is_already_on_the_login_page() {\n+        Driver.getDriver().get(\"https://app.vytrack.com/user/login\");\n+\n+    }\n+\n+\n+    @When(\"Truck driver login as {string} and {string}\")\n+    public void truck_driver_login_as_and(String string, String string2) {\n+        loginPage.UserNameInput.sendKeys(ConfigurationReader.getProperty(\"truckDriver1\"));\n+        loginPage.passwordInputBox.sendKeys(ConfigurationReader.getProperty(\"password\"));\n+        loginPage.logInButton.click();\n+    }\n+\n+    @Then(\"Truck driver can see all Vehicle Fuel information on the grid\")\n+    public void truck_driver_can_see_all_vehicle_fuel_information_on_the_grid() {\n+        us10Page.fleet.click();\n+        BrowserUtils.wait(4);\n+        us10Page.fuelLogs.click();\n+        BrowserUtils.wait(4);\n+        String actual = us10Page.headerVFLogs.getText();\n+        BrowserUtils.wait(4);\n+        String expected = \"Vehicle Fuel Logs\";\n+        Assert.assertEquals(actual, expected);\n+        System.out.println(actual);\n+\n+    }\n+\n+    @Then(\"Truck driver can create Vehicle Fuel logs\")\n+    public void truck_driver_can_create_vehicle_fuel_logs() throws InterruptedException {\n+        JavascriptExecutor executor = (JavascriptExecutor) Driver.getDriver();\n+        executor.executeScript(\"arguments[0].click();\", us10Page.creatVehFuelLogs);\n+        String expected = us10Page.headerVehFuelLogs.getText();\n+        String actual = \"Create Vehicle Fuel Logs\";\n+        Assert.assertEquals(expected, actual);\n+        System.out.println(expected);\n+\n+    }\n+\n+    @Then(\"Truck driver can cancel Vehicle Fuel logs\")\n+    public void truck_driver_can_can_cle_vehicle_fuel_logs() {\n+        BrowserUtils.wait(4);\n+        us10Page.cancelButton.click();\n+\n+    }\n+\n+    @Then(\"Truck driver can Edit Vehicle Fuel Logs\")\n+    public void truck_driver_can_edit_vehicle_fuel_logs() {\n+        us10Page.chekBox.click();\n+        BrowserUtils.wait(4);\n+        us10Page.vendorClick.click();\n+    }\n+\n+    @Then(\"Truck driver can delete Vehicle Fuel Logs\")\n+    public void truck_driver_can_delete_vehicle_fuel_logs() {\n+        BrowserUtils.wait(4);\n+        us10Page.deleteButton.click();\n+        BrowserUtils.wait(4);\n+        us10Page.yesDeleteButton.click();\n+\n+    }\n+\n+    @Then(\"Truck driver can add attachment on Fuel Logs\")\n+    public void truck_driver_can_add_attachment_on_fuel_logs() {\n+        // Driver.getDriver().navigate().back();\n+        JavascriptExecutor executor = (JavascriptExecutor) Driver.getDriver();\n+        executor.executeScript(\"arguments[0].click();\", us10Page.creatVehFuelLogs);\n+        BrowserUtils.wait(4);\n+        us10Page.saveAndCloseButton.click();\n+        String path = \"C:\\\\Users\\\\Owner\\\\Desktop\\\\Capture.PNG\";\n+        us10Page.attachButton.click();\n+\n+        WebElement chooseFile = us10Page.fileUpload;\n+        WebElement saveFile = us10Page.saveButton;\n+        BrowserUtils.wait(4);\n+        chooseFile.sendKeys(path);\n+        BrowserUtils.wait(4);\n+        saveFile.click();\n+\n+\n+    }\n+\n+    @Then(\"Truck driver can add event on Fuel Logs\")\n+    public void truck_driver_can_add_event_on_fuel_logs() {\n+        BrowserUtils.wait(4);\n+        us10Page.addEventButton.click();\n+        BrowserUtils.wait(4);\n+        us10Page.inputText.sendKeys(\"6Amigos\");\n+        us10Page.saveEventButton.click();\n+    }\n+\n+    @Then(\"Verify that truck driver can reset the grid by clicking on Grid setting\")\n+    public void verify_that_truck_driver_can_reset_the_grid_by_clicking_on_grid_setting() {\n+        us10Page.gridSettingButton.click();\n+        BrowserUtils.wait(4);\n+        if (us10Page.selected.isSelected()) {\n+            System.out.println(\"Driver reset the grid\");\n+        } else {\n+            System.out.println(\"TEST FAILED\");\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "dc11242ab124420bcb38b204b0c80492fd900fd0",
+    "filename": "src/test/java/com/azsdet/vytrack/Step_Definitions/US_9_StepDefinitions.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/blob/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Step_Definitions/US_9_StepDefinitions.java",
+    "raw_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/raw/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Step_Definitions/US_9_StepDefinitions.java",
+    "contents_url": "https://api.github.com/repos/AzadBatch21/vyTrackProject_Amigo/contents/src/test/java/com/azsdet/vytrack/Step_Definitions/US_9_StepDefinitions.java?ref=480b35663b94a0e59084809f556e756c8e9071b0",
+    "patch": "@@ -1,4 +1,9 @@\n package com.azsdet.vytrack.Step_Definitions;\n \n+import com.azsdet.vytrack.Pages.HomePage;\n+import com.azsdet.vytrack.Pages.LoginPage;\n+\n public class US_9_StepDefinitions {\n+\n+\n }"
+  },
+  {
+    "sha": "5e99c1170d3ba1f2ceb9fc24d9424182f94d7a58",
+    "filename": "src/test/java/com/azsdet/vytrack/Utilities/Driver.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/blob/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Utilities/Driver.java",
+    "raw_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/raw/480b35663b94a0e59084809f556e756c8e9071b0/src/test/java/com/azsdet/vytrack/Utilities/Driver.java",
+    "contents_url": "https://api.github.com/repos/AzadBatch21/vyTrackProject_Amigo/contents/src/test/java/com/azsdet/vytrack/Utilities/Driver.java?ref=480b35663b94a0e59084809f556e756c8e9071b0",
+    "patch": "@@ -44,14 +44,14 @@ public static WebDriver getDriver() {\n         }\n         \n         return driver;\n-    }\n+\n     \n-    public static void closeDriver() {\n+   /* public static void closeDriver() {\n         if (driver != null) {\n             driver.quit();\n-            driver = null;\n+            driver = null;*/\n         }\n     }\n     \n     \n-}\n+"
+  },
+  {
+    "sha": "81bbcdaf0751280899a467074ec8dc861624f6e7",
+    "filename": "src/test/resources/features/US_10.feature",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 0,
+    "changes": 13,
+    "blob_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/blob/480b35663b94a0e59084809f556e756c8e9071b0/src/test/resources/features/US_10.feature",
+    "raw_url": "https://github.com/AzadBatch21/vyTrackProject_Amigo/raw/480b35663b94a0e59084809f556e756c8e9071b0/src/test/resources/features/US_10.feature",
+    "contents_url": "https://api.github.com/repos/AzadBatch21/vyTrackProject_Amigo/contents/src/test/resources/features/US_10.feature?ref=480b35663b94a0e59084809f556e756c8e9071b0",
+    "patch": "@@ -0,0 +1,13 @@\n+Feature: Driver accessibility on Vehicle Fuel Logs\n+@grid\n+  Scenario:Truck driver should be able to access Vehicle Fuel Logs\n+    Given Truck driver is already on the login page\n+    When  Truck driver login as \"<username>\" and \"<password>\"\n+    Then Truck driver can see all Vehicle Fuel information on the grid\n+    And Truck driver can create Vehicle Fuel logs\n+    And Truck driver can cancel Vehicle Fuel logs\n+    And Truck driver can Edit Vehicle Fuel Logs\n+    And Truck driver can delete Vehicle Fuel Logs\n+    And Truck driver can add attachment on Fuel Logs\n+    And Truck driver can add event on Fuel Logs\n+    And Verify that truck driver can reset the grid by clicking on Grid setting\n\\ No newline at end of file"
+  }
+]

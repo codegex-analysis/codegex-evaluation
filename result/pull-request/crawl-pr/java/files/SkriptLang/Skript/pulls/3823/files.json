@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "bad2d3836d174fefaed5c2bdbcee533cfd471117",
+    "filename": "src/main/java/ch/njol/skript/lang/ExpressionList.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 17,
+    "changes": 28,
+    "blob_url": "https://github.com/SkriptLang/Skript/blob/e42c2f63e4d625eab39fe0b706a7198323c19d5b/src/main/java/ch/njol/skript/lang/ExpressionList.java",
+    "raw_url": "https://github.com/SkriptLang/Skript/raw/e42c2f63e4d625eab39fe0b706a7198323c19d5b/src/main/java/ch/njol/skript/lang/ExpressionList.java",
+    "contents_url": "https://api.github.com/repos/SkriptLang/Skript/contents/src/main/java/ch/njol/skript/lang/ExpressionList.java?ref=e42c2f63e4d625eab39fe0b706a7198323c19d5b",
+    "patch": "@@ -223,32 +223,26 @@ public void invertAnd() {\n \t@Override\n \t@Nullable\n \tpublic Class<?>[] acceptChange(final ChangeMode mode) {\n-\t\tClass<?>[] l = expressions[0].acceptChange(mode);\n-\t\tif (l == null)\n+\t\tClass<?>[] exprClasses = expressions[0].acceptChange(mode);\n+\t\tif (exprClasses == null)\n \t\t\treturn null;\n-\t\tfinal ArrayList<Class<?>> r = new ArrayList<>(Arrays.asList(l));\n+\t\tfinal ArrayList<Class<?>> acceptedClasses = new ArrayList<>(Arrays.asList(exprClasses));\n \t\tfor (int i = 1; i < expressions.length; i++) {\n-\t\t\tl = expressions[i].acceptChange(mode);\n-\t\t\tif (l == null)\n+\t\t\texprClasses = expressions[i].acceptChange(mode);\n+\t\t\tif (exprClasses == null)\n \t\t\t\treturn null;\n-\t\t\tr.retainAll(Arrays.asList(l));\n-\t\t\tif (r.isEmpty())\n+\t\t\t\n+\t\t\tacceptedClasses.retainAll(Arrays.asList(exprClasses));\n+\t\t\tif (acceptedClasses.isEmpty())\n \t\t\t\treturn null;\n \t\t}\n-\t\treturn r.toArray(new Class[r.size()]);\n+\t\treturn acceptedClasses.toArray(new Class[0]);\n \t}\n \t\n \t@Override\n \tpublic void change(final Event e, final @Nullable Object[] delta, final ChangeMode mode) throws UnsupportedOperationException {\n-\t\tif (delta == null || delta.length < expressions.length) {\n-\t\t\tfor (Expression<?> expr : expressions) {\n-\t\t\t\texpr.change(e, delta, mode);\n-\t\t\t}\n-\t\t} else {\n-\t\t\tfor (int i = 0; i < expressions.length; i++) {\n-\t\t\t\tExpression<?> expr = expressions[i];\n-\t\t\t\texpr.change(e, new Object[] {delta[i]}, mode);\n-\t\t\t}\n+\t\tfor (Expression<?> expr : expressions) {\n+\t\t\texpr.change(e, delta, mode);\n \t\t}\n \t}\n \t"
+  }
+]

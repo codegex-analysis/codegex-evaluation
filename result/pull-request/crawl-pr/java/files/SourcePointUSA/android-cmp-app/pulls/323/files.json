@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "faaee49e9cb1eae01879b1493779b0302d723efa",
+    "filename": "cmplibrary/src/main/java/com/sourcepoint/gdpr_cmplibrary/ConsentLibBuilder.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 6,
+    "changes": 13,
+    "blob_url": "https://github.com/SourcePointUSA/android-cmp-app/blob/7bdb1d68ee41b4af65d0485c005ee4399c8d2e98/cmplibrary/src/main/java/com/sourcepoint/gdpr_cmplibrary/ConsentLibBuilder.java",
+    "raw_url": "https://github.com/SourcePointUSA/android-cmp-app/raw/7bdb1d68ee41b4af65d0485c005ee4399c8d2e98/cmplibrary/src/main/java/com/sourcepoint/gdpr_cmplibrary/ConsentLibBuilder.java",
+    "contents_url": "https://api.github.com/repos/SourcePointUSA/android-cmp-app/contents/cmplibrary/src/main/java/com/sourcepoint/gdpr_cmplibrary/ConsentLibBuilder.java?ref=7bdb1d68ee41b4af65d0485c005ee4399c8d2e98",
+    "patch": "@@ -1,7 +1,6 @@\n package com.sourcepoint.gdpr_cmplibrary;\n \n import android.content.Context;\n-import android.content.pm.PackageInfo;\n import android.net.ConnectivityManager;\n import android.os.Build;\n import android.os.CountDownTimer;\n@@ -50,18 +49,20 @@\n     PropertyConfig propertyConfig;\n     private Context context;\n     private Logger logger = null;\n+    private OkHttpClient okHttpClient;\n \n-    ConsentLibBuilder(Integer accountId, String property, Integer propertyId , String pmId , Context context) {\n-        init(accountId, property, propertyId , pmId , context);\n+    ConsentLibBuilder(Integer accountId, String property, Integer propertyId , String pmId , Context context, OkHttpClient okHttpClient) {\n+        init(accountId, property, propertyId , pmId , context, okHttpClient);\n     }\n \n-    private void init(Integer accountId, String propertyName, Integer propertyId , String pmId , Context context){\n+    private void init(Integer accountId, String propertyName, Integer propertyId , String pmId , Context context, OkHttpClient okHttpClient){\n         //TODO: add a constructor method that takes PropertyConfig class as parameter\n         propertyConfig = new PropertyConfig(accountId, propertyId, propertyName, pmId);\n         stagingCampaign = false;\n         shouldCleanConsentOnError = true;\n         messageTimeOut = DEFAULT_MESSAGE_TIMEOUT;\n         this.context = context.getApplicationContext();\n+        this.okHttpClient = okHttpClient;\n         logger = initLogger(accountId, propertyId);\n     }\n \n@@ -80,7 +81,7 @@ private Logger initLogger(int accountId, int propertyId){\n         String osVersion = String.valueOf(Build.VERSION.SDK_INT);\n         ClientInfo ci = new ClientInfo(BuildConfig.VERSION_NAME, osVersion, Build.MODEL);\n         return LoggerFactory.createLogger(\n-                new OkHttpClient(),\n+                okHttpClient,\n                 ErrorMessageManagerKt.createErrorManager(\n                         accountId,\n                         propertyId,\n@@ -254,7 +255,7 @@ String getTargetingParamsString() {\n     }\n \n     protected SourcePointClient getSourcePointClient(){\n-        return new SourcePointClient(new OkHttpClient(), spClientConfig() , getConnectivityManager(), logger);\n+        return new SourcePointClient(okHttpClient, spClientConfig() , getConnectivityManager(), logger);\n     }\n \n     private SourcePointClientConfig spClientConfig(){"
+  },
+  {
+    "sha": "f5d6920a110ea33a351ced19206e85f07e31fb36",
+    "filename": "cmplibrary/src/main/java/com/sourcepoint/gdpr_cmplibrary/GDPRConsentLib.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/SourcePointUSA/android-cmp-app/blob/7bdb1d68ee41b4af65d0485c005ee4399c8d2e98/cmplibrary/src/main/java/com/sourcepoint/gdpr_cmplibrary/GDPRConsentLib.java",
+    "raw_url": "https://github.com/SourcePointUSA/android-cmp-app/raw/7bdb1d68ee41b4af65d0485c005ee4399c8d2e98/cmplibrary/src/main/java/com/sourcepoint/gdpr_cmplibrary/GDPRConsentLib.java",
+    "contents_url": "https://api.github.com/repos/SourcePointUSA/android-cmp-app/contents/cmplibrary/src/main/java/com/sourcepoint/gdpr_cmplibrary/GDPRConsentLib.java?ref=7bdb1d68ee41b4af65d0485c005ee4399c8d2e98",
+    "patch": "@@ -153,7 +153,14 @@ default void onFailure(ConsentLibException exception) {\n      * @return a new instance of GDPRConsentLib.Builder\n      */\n     public static ConsentLibBuilder newBuilder(Integer accountId, String property, Integer propertyId, String pmId, Context context) {\n-        return new ConsentLibBuilder(accountId, property, propertyId, pmId, context);\n+        return newBuilder(accountId, property, propertyId, pmId, context, new OkHttpClient());\n+    }\n+\n+    /**\n+     * @return a new instance of GDPRConsentLib.Builder, with the ability to use a shared instance of OkHttpClient() from the app.\n+     */\n+    public static ConsentLibBuilder newBuilder(Integer accountId, String property, Integer propertyId, String pmId, Context context, OkHttpClient okHttpClient) {\n+        return new ConsentLibBuilder(accountId, property, propertyId, pmId, context, okHttpClient);\n     }\n \n     GDPRConsentLib(ConsentLibBuilder b) {"
+  },
+  {
+    "sha": "78f29b8ff3cfd400ac1cb45ec519604568b8a131",
+    "filename": "cmplibrary/src/test/java/com/sourcepoint/gdpr_cmplibrary/ConsentLibBuilderTest.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/SourcePointUSA/android-cmp-app/blob/7bdb1d68ee41b4af65d0485c005ee4399c8d2e98/cmplibrary/src/test/java/com/sourcepoint/gdpr_cmplibrary/ConsentLibBuilderTest.java",
+    "raw_url": "https://github.com/SourcePointUSA/android-cmp-app/raw/7bdb1d68ee41b4af65d0485c005ee4399c8d2e98/cmplibrary/src/test/java/com/sourcepoint/gdpr_cmplibrary/ConsentLibBuilderTest.java",
+    "contents_url": "https://api.github.com/repos/SourcePointUSA/android-cmp-app/contents/cmplibrary/src/test/java/com/sourcepoint/gdpr_cmplibrary/ConsentLibBuilderTest.java?ref=7bdb1d68ee41b4af65d0485c005ee4399c8d2e98",
+    "patch": "@@ -13,6 +13,8 @@\n \n import java.lang.reflect.Field;\n \n+import okhttp3.OkHttpClient;\n+\n import static junit.framework.TestCase.assertTrue;\n import static org.junit.Assert.assertEquals;\n import static org.junit.Assert.assertFalse;\n@@ -32,7 +34,7 @@\n     private PropertyConfig defaultConfig = new PropertyConfig(22, 1234,\"mobile.demo\", \"1234\");\n \n     private ConsentLibBuilder spyBuilder(PropertyConfig config){\n-        ConsentLibBuilder spy =  spy(new ConsentLibBuilder(config.accountId, config.propertyName, config.propertyId, config.pmId, activityMock));\n+        ConsentLibBuilder spy =  spy(new ConsentLibBuilder(config.accountId, config.propertyName, config.propertyId, config.pmId, activityMock, new OkHttpClient()));\n         // mocking dependencies...\n         doReturn(storeClientMock).when(spy).getStoreClient();\n         doReturn(sourcePointClientMock).when(spy).getSourcePointClient();\n@@ -83,7 +85,7 @@ private Field getDeclaredFieldAccess(String fieldName) throws Exception {\n \n     @Test\n     public void ConsentLibBuilder(){\n-        ConsentLibBuilder builder = new ConsentLibBuilder(defaultConfig.accountId, defaultConfig.propertyName, defaultConfig.propertyId, defaultConfig.pmId, activityMock);\n+        ConsentLibBuilder builder = new ConsentLibBuilder(defaultConfig.accountId, defaultConfig.propertyName, defaultConfig.propertyId, defaultConfig.pmId, activityMock, new OkHttpClient());\n         assertEquals(builder.propertyConfig.accountId, defaultConfig.accountId);\n         assertEquals(builder.propertyConfig.propertyId, defaultConfig.propertyId);\n         assertEquals(builder.propertyConfig.propertyName, defaultConfig.propertyName);"
+  },
+  {
+    "sha": "0053d5262d02b6e313d0a8d5f354e81509e05d5a",
+    "filename": "cmplibrary/src/test/java/com/sourcepoint/gdpr_cmplibrary/GDPRConsentLibTest.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/SourcePointUSA/android-cmp-app/blob/7bdb1d68ee41b4af65d0485c005ee4399c8d2e98/cmplibrary/src/test/java/com/sourcepoint/gdpr_cmplibrary/GDPRConsentLibTest.java",
+    "raw_url": "https://github.com/SourcePointUSA/android-cmp-app/raw/7bdb1d68ee41b4af65d0485c005ee4399c8d2e98/cmplibrary/src/test/java/com/sourcepoint/gdpr_cmplibrary/GDPRConsentLibTest.java",
+    "contents_url": "https://api.github.com/repos/SourcePointUSA/android-cmp-app/contents/cmplibrary/src/test/java/com/sourcepoint/gdpr_cmplibrary/GDPRConsentLibTest.java?ref=7bdb1d68ee41b4af65d0485c005ee4399c8d2e98",
+    "patch": "@@ -18,6 +18,8 @@\n import java.util.Arrays;\n import java.util.concurrent.atomic.AtomicBoolean;\n \n+import okhttp3.OkHttpClient;\n+\n import static org.junit.Assert.assertEquals;\n import static org.junit.Assert.assertFalse;\n import static org.junit.Assert.assertTrue;\n@@ -73,7 +75,7 @@\n     ArgumentCaptor<Runnable> lambdaCaptor;\n \n     private ConsentLibBuilder builderMock(int accountId, String propertyName, int propertyId, String pmId, Activity activity){\n-        ConsentLibBuilder b = new ConsentLibBuilder(accountId, propertyName, propertyId, pmId, activity){\n+        ConsentLibBuilder b = new ConsentLibBuilder(accountId, propertyName, propertyId, pmId, activity, new OkHttpClient()){\n             @Override\n             public SourcePointClient getSourcePointClient(){\n                 return sourcePointClientMock;"
+  }
+]

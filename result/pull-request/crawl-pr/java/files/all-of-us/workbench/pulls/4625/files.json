@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "b260f2b416b525026659146160a3b8a8a1572945",
+    "filename": "ui/src/app/app-routing.tsx",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b5678442a2a31298819db58f8e44bcbb81c3b5bb/ui/src/app/app-routing.tsx",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b5678442a2a31298819db58f8e44bcbb81c3b5bb/ui/src/app/app-routing.tsx",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/ui/src/app/app-routing.tsx?ref=b5678442a2a31298819db58f8e44bcbb81c3b5bb",
+    "patch": "@@ -21,6 +21,7 @@ import {NotebookRedirect} from './pages/analysis/notebook-redirect';\n import {Homepage} from './pages/homepage/homepage';\n import {SignIn} from './pages/login/sign-in';\n import {WorkspaceLibrary} from './pages/workspace/workspace-library';\n+import {ProfileProvider} from './services/profile-context';\n import {AnalyticsTracker} from './utils/analytics';\n import {BreadcrumbType} from './utils/navigation';\n \n@@ -82,7 +83,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi\n     <ProtectedRoutes guards={[signInGuard]}>\n       <AppRoute\n         path='/'\n-          component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}\n+        component={() => <ProfileProvider><HomepagePage routeData={{title: 'Homepage'}}/></ProfileProvider>}\n       />\n       <AppRoute\n           path='/admin/user-audit'"
+  },
+  {
+    "sha": "60bf8d747fbfac0ece1bc035e2dc30cd20b9dd7b",
+    "filename": "ui/src/app/pages/homepage/homepage.tsx",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 8,
+    "changes": 17,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b5678442a2a31298819db58f8e44bcbb81c3b5bb/ui/src/app/pages/homepage/homepage.tsx",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b5678442a2a31298819db58f8e44bcbb81c3b5bb/ui/src/app/pages/homepage/homepage.tsx",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/ui/src/app/pages/homepage/homepage.tsx?ref=b5678442a2a31298819db58f8e44bcbb81c3b5bb",
+    "patch": "@@ -19,9 +19,10 @@ import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';\n import {RecentResources} from 'app/pages/homepage/recent-resources';\n import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';\n import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';\n+import {withProfileContext} from 'app/services/profile-context';\n import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';\n import colors, {addOpacity} from 'app/styles/colors';\n-import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils';\n+import {hasRegisteredAccessFetch, reactStyles} from 'app/utils';\n import {AnalyticsTracker} from 'app/utils/analytics';\n import {fetchWithGlobalErrorHandler} from 'app/utils/retry';\n import {supportUrls} from 'app/utils/zendesk';\n@@ -68,9 +69,9 @@ export const styles = reactStyles({\n });\n \n interface Props {\n-  profileState: {\n-    profile: Profile,\n-    reload: Function\n+  profileContext: {\n+    profile: Profile\n+    reload: () => {},\n   };\n }\n \n@@ -93,7 +94,7 @@ interface State {\n   videoId: string;\n }\n \n-export const Homepage = withUserProfile()(class extends React.Component<Props, State> {\n+export const Homepage = withProfileContext(class extends React.Component<Props, State> {\n   private pageId = 'homepage';\n   private timer: NodeJS.Timer;\n   private quickTourResourcesDiv: HTMLDivElement;\n@@ -127,8 +128,8 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S\n   }\n \n   componentDidUpdate(prevProps) {\n-    const {profileState: {profile}} = this.props;\n-    if (!fp.isEqual(prevProps.profileState.profile, profile)) {\n+    const {profile} = this.props.profileContext;\n+    if (!fp.isEqual(prevProps.profileContext.profile, profile)) {\n       this.callProfile();\n     }\n   }\n@@ -183,7 +184,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S\n   }\n \n   async callProfile() {\n-    const {profileState: {profile, reload}} = this.props;\n+    const {profile, reload} = this.props.profileContext;\n \n     if (fp.isEmpty(profile)) {\n       setTimeout(() => {"
+  },
+  {
+    "sha": "20ea084d1bb79e403889fb3ca07a7b7b97cac291",
+    "filename": "ui/src/app/services/profile-context.tsx",
+    "status": "added",
+    "additions": 61,
+    "deletions": 0,
+    "changes": 61,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b5678442a2a31298819db58f8e44bcbb81c3b5bb/ui/src/app/services/profile-context.tsx",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b5678442a2a31298819db58f8e44bcbb81c3b5bb/ui/src/app/services/profile-context.tsx",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/ui/src/app/services/profile-context.tsx?ref=b5678442a2a31298819db58f8e44bcbb81c3b5bb",
+    "patch": "@@ -0,0 +1,61 @@\n+import * as React from 'react';\n+import {useEffect} from 'react';\n+\n+import {Profile} from 'generated/fetch';\n+\n+import {profileApi} from 'app/services/swagger-fetch-clients';\n+import {apiCallWithConflictRetries} from 'app/utils/retry';\n+import {useStore} from 'app/utils/stores';\n+import {atom} from 'app/utils/subscribable';\n+\n+interface ProfileStore {\n+  profile?: Profile;\n+}\n+\n+const reactProfileStore = atom<ProfileStore>({});\n+\n+const ProfileContext = React.createContext({\n+  profile: {},\n+  reload: () => {}\n+});\n+\n+export const ProfileProvider = ({children}) => {\n+  useStore(reactProfileStore);\n+\n+  const getProfile = async() => {\n+    const profile = await apiCallWithConflictRetries(() => profileApi().getMe());\n+    reactProfileStore.set({...reactProfileStore.get(), profile: profile});\n+    return profile;\n+  };\n+\n+  // For this particular store, we want to fetch whenever the first ProfileProvider first renders,\n+  // and then only when reload is explicitly called.\n+  // When converting Angular services, pay attention to how they are used and copy that behavior in\n+  // the store. For instance, the cdr version store and the server config store should only be\n+  // populated once per session.\n+  useEffect(() => {\n+    async function getProfileWrapper() {\n+      await getProfile();\n+    }\n+\n+    if (reactProfileStore.get() !== undefined) {\n+      getProfileWrapper();\n+    }\n+  }, []);\n+\n+  return <ProfileContext.Provider value={{\n+    profile: reactProfileStore.get().profile,\n+    reload: async() => await getProfile()\n+  }}>\n+    {children}\n+  </ProfileContext.Provider>;\n+};\n+\n+// This HOC can be used to wrap class components that need ProfileContext injected.\n+// For function components, using useContext(ProfileContext) is preferred.\n+export const withProfileContext = Component =>\n+    props => (\n+        <ProfileContext.Consumer>\n+          {context => <Component profileContext={context} {...props}/>}\n+        </ProfileContext.Consumer>\n+    );"
+  },
+  {
+    "sha": "3e839e9f0d949444f735650bb1778e4edef2a195",
+    "filename": "ui/src/app/utils/retry.tsx",
+    "status": "modified",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/all-of-us/workbench/blob/b5678442a2a31298819db58f8e44bcbb81c3b5bb/ui/src/app/utils/retry.tsx",
+    "raw_url": "https://github.com/all-of-us/workbench/raw/b5678442a2a31298819db58f8e44bcbb81c3b5bb/ui/src/app/utils/retry.tsx",
+    "contents_url": "https://api.github.com/repos/all-of-us/workbench/contents/ui/src/app/utils/retry.tsx?ref=b5678442a2a31298819db58f8e44bcbb81c3b5bb",
+    "patch": "@@ -93,3 +93,39 @@ async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(\n       apiCall, maxRetries, retryCount + 1, initialWaitTime);\n   }\n }\n+\n+/*\n+ * A method to run an API call and retry up to three times on 409 errors. These have a likelihood\n+ * to occur on initial user login because we lazily initialize several things via the /me profile\n+ * endpoint.\n+ */\n+export async function apiCallWithConflictRetries<T>(\n+  apiCall: () => Promise<T>,\n+  maxRetries: number  = 3,\n+  retryDelayMs: number = 500\n+): Promise<T> {\n+  return apiCallWithConflictRetriesAndRetryCount(apiCall, maxRetries, 1, retryDelayMs);\n+}\n+\n+\n+async function apiCallWithConflictRetriesAndRetryCount<T>(\n+  apiCall: () => Promise<T>,\n+  maxRetries: number  = 3,\n+  retryCount = 1,\n+  retryDelayMs: number = 500\n+): Promise<T> {\n+  try {\n+    return await apiCall();\n+  } catch (ex) {\n+    if (ex.status !== 409 || retryCount > maxRetries) {\n+      throw ex;\n+    }\n+    await new Promise(resolve => setTimeout(resolve, retryDelayMs));\n+    return await apiCallWithConflictRetriesAndRetryCount(\n+      apiCall,\n+      maxRetries,\n+      retryCount + 1,\n+      retryDelayMs\n+    );\n+  }\n+}"
+  }
+]

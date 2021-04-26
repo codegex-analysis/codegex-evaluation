@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c92bd5bbcc54670a4458a79d4c0991795bc3105e",
+    "filename": "changelog.txt",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/AzureAD/microsoft-authentication-library-common-for-android/blob/32e64edb7ccbd1449e1680d9235280c86b6eed52/changelog.txt",
+    "raw_url": "https://github.com/AzureAD/microsoft-authentication-library-common-for-android/raw/32e64edb7ccbd1449e1680d9235280c86b6eed52/changelog.txt",
+    "contents_url": "https://api.github.com/repos/AzureAD/microsoft-authentication-library-common-for-android/contents/changelog.txt?ref=32e64edb7ccbd1449e1680d9235280c86b6eed52",
+    "patch": "@@ -1,5 +1,8 @@\n V.Next\n ----------\n+\n+Version 3.2.0\n+----------\n - [PATCH] Fix interrupt flow when no login hint is provided (#1490)\n - [MINOR] Added logging functionality to track the request status.(#1237)\n - [MINOR] Expand functionality for key store access."
+  },
+  {
+    "sha": "831b2c84de680969587c19c43b8c8f87a0309b5a",
+    "filename": "common/src/main/java/com/microsoft/identity/common/adal/internal/net/DefaultConnectionService.java",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 19,
+    "changes": 48,
+    "blob_url": "https://github.com/AzureAD/microsoft-authentication-library-common-for-android/blob/32e64edb7ccbd1449e1680d9235280c86b6eed52/common/src/main/java/com/microsoft/identity/common/adal/internal/net/DefaultConnectionService.java",
+    "raw_url": "https://github.com/AzureAD/microsoft-authentication-library-common-for-android/raw/32e64edb7ccbd1449e1680d9235280c86b6eed52/common/src/main/java/com/microsoft/identity/common/adal/internal/net/DefaultConnectionService.java",
+    "contents_url": "https://api.github.com/repos/AzureAD/microsoft-authentication-library-common-for-android/contents/common/src/main/java/com/microsoft/identity/common/adal/internal/net/DefaultConnectionService.java?ref=32e64edb7ccbd1449e1680d9235280c86b6eed52",
+    "patch": "@@ -71,25 +71,35 @@ public DefaultConnectionService(Context ctx) {\n     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)\n     public void registerNetworkCallback() {\n         if (null == networkCallback) {\n-            final ConnectivityManager connectivityManager = (ConnectivityManager) mConnectionContext\n-                    .getSystemService(Context.CONNECTIVITY_SERVICE);\n-            final NetworkRequest.Builder builder = new NetworkRequest.Builder()\n-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);\n-\n-\n-            connectivityManager.registerNetworkCallback(\n-                    builder.build(),\n-                    networkCallback = new ConnectivityManager.NetworkCallback() {\n-                        @Override\n-                        public void onAvailable(@NonNull Network network) {\n-                            DefaultConnectionService.connectionAvailable = true;\n-                        }\n-\n-                        @Override\n-                        public void onLost(@NonNull Network network) {\n-                            DefaultConnectionService.connectionAvailable = false;\n-                        }\n-                    });\n+            try {\n+                final ConnectivityManager connectivityManager = (ConnectivityManager) mConnectionContext\n+                        .getSystemService(Context.CONNECTIVITY_SERVICE);\n+                final NetworkRequest.Builder builder = new NetworkRequest.Builder()\n+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);\n+\n+                NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();\n+                // Initialize the connectionAvailable to the active network info, before the callback is registered.\n+                DefaultConnectionService.connectionAvailable =\n+                        null != activeNetwork &&\n+                                activeNetwork.isConnectedOrConnecting();\n+\n+                connectivityManager.registerNetworkCallback(\n+                        builder.build(),\n+                        networkCallback = new ConnectivityManager.NetworkCallback() {\n+                            @Override\n+                            public void onAvailable(@NonNull Network network) {\n+                                DefaultConnectionService.connectionAvailable = true;\n+                            }\n+\n+                            @Override\n+                            public void onLost(@NonNull Network network) {\n+                                DefaultConnectionService.connectionAvailable = false;\n+                            }\n+                        });\n+            } catch (Exception e) {\n+                // The connection callback registration failed\n+                DefaultConnectionService.connectionAvailable = false;\n+            }\n         }\n     }\n "
+  },
+  {
+    "sha": "95770db06cbf329506f7a4a71aca7e730f54edce",
+    "filename": "common/versioning/version.properties",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/AzureAD/microsoft-authentication-library-common-for-android/blob/32e64edb7ccbd1449e1680d9235280c86b6eed52/common/versioning/version.properties",
+    "raw_url": "https://github.com/AzureAD/microsoft-authentication-library-common-for-android/raw/32e64edb7ccbd1449e1680d9235280c86b6eed52/common/versioning/version.properties",
+    "contents_url": "https://api.github.com/repos/AzureAD/microsoft-authentication-library-common-for-android/contents/common/versioning/version.properties?ref=32e64edb7ccbd1449e1680d9235280c86b6eed52",
+    "patch": "@@ -1,4 +1,4 @@\n-#Fri Mar 05 20:06:07 UTC 2021\n-versionName=3.1.2\n+#Fri Feb 19 20:58:44 UTC 2021\n+versionName=3.2.0\n versionCode=1\n latestPatchVersion=151"
+  }
+]

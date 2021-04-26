@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "89abd31279c72a74f9990251b56f249838b6afe6",
+    "filename": ".circleci/config.yml",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/micrometer-metrics/micrometer/blob/1ee6ace6eb1eaa7bda8ee543e2149ca3c5a54e38/.circleci/config.yml",
+    "raw_url": "https://github.com/micrometer-metrics/micrometer/raw/1ee6ace6eb1eaa7bda8ee543e2149ca3c5a54e38/.circleci/config.yml",
+    "contents_url": "https://api.github.com/repos/micrometer-metrics/micrometer/contents/.circleci/config.yml?ref=1ee6ace6eb1eaa7bda8ee543e2149ca3c5a54e38",
+    "patch": "@@ -7,6 +7,12 @@ executors:\n       GRADLE_OPTS: '-Dorg.gradle.jvmargs=\"-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError\"'\n     docker:\n       - image: cimg/openjdk:15.0\n+  circle-jdk8-executor:\n+    working_directory: ~/micrometer\n+    environment:\n+      GRADLE_OPTS: '-Dorg.gradle.jvmargs=\"-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError\"'\n+    docker:\n+      - image: cimg/openjdk:8.0.275\n   machine-executor:\n     working_directory: ~/micrometer\n     machine:\n@@ -52,6 +58,11 @@ jobs:\n       - run: ./gradlew shenandoahTest\n       - run: ./gradlew zgcTest\n \n+  build-jdk8:\n+    executor: circle-jdk8-executor\n+    steps:\n+      - gradlew-build\n+\n   docker-tests:\n     executor: machine-executor\n     steps:\n@@ -87,10 +98,12 @@ workflows:\n   build_prs_deploy_snapshots:\n     jobs:\n       - build\n+      - build-jdk8\n       - docker-tests\n       - deploy:\n           requires:\n             - build\n+            - build-jdk8\n             - docker-tests\n           filters:\n             branches:\n@@ -105,6 +118,12 @@ workflows:\n               ignore: /.*/\n             tags:\n               only: /^v\\d+\\.\\d+\\.\\d+(-rc\\.\\d+)?$/\n+      - build-jdk8:\n+          filters:\n+            branches:\n+              ignore: /.*/\n+            tags:\n+              only: /^v\\d+\\.\\d+\\.\\d+(-rc\\.\\d+)?$/\n       - docker-tests:\n           filters:\n             branches:\n@@ -114,6 +133,7 @@ workflows:\n       - deploy:\n           requires:\n             - build\n+            - build-jdk8\n             - docker-tests\n           filters:\n             tags:"
+  }
+]

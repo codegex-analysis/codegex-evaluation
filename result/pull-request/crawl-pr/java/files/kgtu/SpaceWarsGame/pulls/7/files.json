@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "8987fb4c7470fdc5c6624e0d607ae8de484ef489",
+    "filename": "core/src/com/kgtu/spacewars/base/SpritesPool.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/kgtu/SpaceWarsGame/blob/1c92eac4f42cae7f95c5320b192b0a00c99edeaf/core/src/com/kgtu/spacewars/base/SpritesPool.java",
+    "raw_url": "https://github.com/kgtu/SpaceWarsGame/raw/1c92eac4f42cae7f95c5320b192b0a00c99edeaf/core/src/com/kgtu/spacewars/base/SpritesPool.java",
+    "contents_url": "https://api.github.com/repos/kgtu/SpaceWarsGame/contents/core/src/com/kgtu/spacewars/base/SpritesPool.java?ref=1c92eac4f42cae7f95c5320b192b0a00c99edeaf",
+    "patch": "@@ -67,4 +67,12 @@ public void dispose() {\n         activeObjects.clear();\n         freeObjects.clear();\n     }\n+\n+    public void destroyAll() {\n+        for (T item : activeObjects) {\n+            if (!item.isDestroyed()) {\n+                item.destroy();\n+            }\n+        }\n+    }\n }"
+  },
+  {
+    "sha": "b2ef73af37a907f88dfb2887db50ca4052b9ea76",
+    "filename": "core/src/com/kgtu/spacewars/screen/GameScreen.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 7,
+    "changes": 29,
+    "blob_url": "https://github.com/kgtu/SpaceWarsGame/blob/1c92eac4f42cae7f95c5320b192b0a00c99edeaf/core/src/com/kgtu/spacewars/screen/GameScreen.java",
+    "raw_url": "https://github.com/kgtu/SpaceWarsGame/raw/1c92eac4f42cae7f95c5320b192b0a00c99edeaf/core/src/com/kgtu/spacewars/screen/GameScreen.java",
+    "contents_url": "https://api.github.com/repos/kgtu/SpaceWarsGame/contents/core/src/com/kgtu/spacewars/screen/GameScreen.java?ref=1c92eac4f42cae7f95c5320b192b0a00c99edeaf",
+    "patch": "@@ -6,6 +6,7 @@\n import com.badlogic.gdx.graphics.GL20;\n import com.badlogic.gdx.graphics.Texture;\n import com.badlogic.gdx.graphics.g2d.TextureAtlas;\n+import com.badlogic.gdx.graphics.g2d.TextureRegion;\n import com.badlogic.gdx.math.Vector2;\n \n import java.util.List;\n@@ -17,7 +18,9 @@\n import com.kgtu.spacewars.pool.ExplosionPool;\n import com.kgtu.spacewars.sprite.Background;\n import com.kgtu.spacewars.sprite.Bullet;\n+import com.kgtu.spacewars.sprite.ButtonExit;\n import com.kgtu.spacewars.sprite.EnemyShip;\n+import com.kgtu.spacewars.sprite.GameOver;\n import com.kgtu.spacewars.sprite.MainShip;\n import com.kgtu.spacewars.sprite.Star;\n import com.kgtu.spacewars.utils.EnemyEmitter;\n@@ -31,6 +34,7 @@\n \n     private Background background;\n     private Star[] stars;\n+    private GameOver gameOver;\n \n     private BulletPool bulletPool;\n     private ExplosionPool explosionPool;\n@@ -50,6 +54,7 @@ public void show() {\n         bg = new Texture(\"textures/bg.png\");\n         atlas = new TextureAtlas(Gdx.files.internal(\"textures/mainAtlas.tpack\"));\n         background = new Background(bg);\n+        gameOver = new GameOver(atlas);\n         stars = new Star[STAR_COUNT];\n         for (int i = 0; i < STAR_COUNT; i++) {\n             stars[i] = new Star(atlas);\n@@ -83,6 +88,7 @@ public void resize(Rect worldBounds) {\n             star.resize(worldBounds);\n         }\n         mainShip.resize(worldBounds);\n+        gameOver.resize(worldBounds);\n     }\n \n     @Override\n@@ -127,11 +133,13 @@ private void update(float delta) {\n         for (Star star : stars) {\n             star.update(delta);\n         }\n-        mainShip.update(delta);\n         bulletPool.updateActiveSprites(delta);\n         explosionPool.updateActiveSprites(delta);\n         enemyPool.updateActiveSprites(delta);\n-        enemyEmitter.generate(delta);\n+        mainShip.update(delta);\n+        if(!mainShip.isDestroyed()) {\n+            enemyEmitter.generate(delta);\n+        }\n     }\n \n     private void checkCollisions() {\n@@ -152,7 +160,7 @@ private void checkCollisions() {\n                 continue;\n             }\n             if (bullet.getOwner() != mainShip) {\n-                if (mainShip.isBulletCollision(bullet)) {\n+                if (mainShip.isBulletCollision(bullet) && !mainShip.isDestroyed()) {\n                     mainShip.damage(bullet.getDamage());\n                     bullet.destroy();\n                 }\n@@ -184,10 +192,17 @@ private void draw() {\n         for (Star star : stars) {\n             star.draw(batch);\n         }\n-        mainShip.draw(batch);\n-        bulletPool.drawActiveSprites(batch);\n-        explosionPool.drawActiveSprites(batch);\n-        enemyPool.drawActiveSprites(batch);\n+        if(!mainShip.isDestroyed()) {\n+            mainShip.draw(batch);\n+            bulletPool.drawActiveSprites(batch);\n+            explosionPool.drawActiveSprites(batch);\n+            enemyPool.drawActiveSprites(batch);\n+        } else {\n+            explosionPool.drawActiveSprites(batch);\n+            enemyPool.destroyAll();\n+            bulletPool.destroyAll();\n+            gameOver.draw(batch);\n+        }\n         batch.end();\n     }\n }"
+  },
+  {
+    "sha": "fd1da5dc14e676a6276715dea9cff93f7f254140",
+    "filename": "core/src/com/kgtu/spacewars/sprite/GameOver.java",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/kgtu/SpaceWarsGame/blob/1c92eac4f42cae7f95c5320b192b0a00c99edeaf/core/src/com/kgtu/spacewars/sprite/GameOver.java",
+    "raw_url": "https://github.com/kgtu/SpaceWarsGame/raw/1c92eac4f42cae7f95c5320b192b0a00c99edeaf/core/src/com/kgtu/spacewars/sprite/GameOver.java",
+    "contents_url": "https://api.github.com/repos/kgtu/SpaceWarsGame/contents/core/src/com/kgtu/spacewars/sprite/GameOver.java?ref=1c92eac4f42cae7f95c5320b192b0a00c99edeaf",
+    "patch": "@@ -0,0 +1,22 @@\n+package com.kgtu.spacewars.sprite;\n+\n+import com.badlogic.gdx.Gdx;\n+import com.badlogic.gdx.graphics.g2d.TextureAtlas;\n+import com.kgtu.spacewars.base.BaseButton;\n+import com.kgtu.spacewars.base.Sprite;\n+import com.kgtu.spacewars.math.Rect;\n+\n+public class GameOver extends Sprite {\n+\n+    private static final float HEIGHT = 0.1f;\n+\n+    public GameOver(TextureAtlas atlas) {\n+        super(atlas.findRegion(\"message_game_over\"));\n+    }\n+\n+    @Override\n+    public void resize(Rect worldBounds) {\n+        setHeightProportion(HEIGHT);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "1443d14fa21c21e1c55f4225b072a2aaab49c8ef",
+    "filename": "core/src/com/kgtu/spacewars/sprite/MainShip.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/kgtu/SpaceWarsGame/blob/1c92eac4f42cae7f95c5320b192b0a00c99edeaf/core/src/com/kgtu/spacewars/sprite/MainShip.java",
+    "raw_url": "https://github.com/kgtu/SpaceWarsGame/raw/1c92eac4f42cae7f95c5320b192b0a00c99edeaf/core/src/com/kgtu/spacewars/sprite/MainShip.java",
+    "contents_url": "https://api.github.com/repos/kgtu/SpaceWarsGame/contents/core/src/com/kgtu/spacewars/sprite/MainShip.java?ref=1c92eac4f42cae7f95c5320b192b0a00c99edeaf",
+    "patch": "@@ -35,7 +35,7 @@ public MainShip(TextureAtlas atlas, BulletPool bulletPool, ExplosionPool explosi\n         damage = 1;\n         reloadInterval = 0.2f;\n         sound = Gdx.audio.newSound(Gdx.files.internal(\"sounds/laser.wav\"));\n-        hp = 100;\n+        hp = 10;\n     }\n \n     @Override"
+  }
+]

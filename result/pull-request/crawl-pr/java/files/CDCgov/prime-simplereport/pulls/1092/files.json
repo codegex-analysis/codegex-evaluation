@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "fa5066e36428e76c5de9730dd082225ed5693334",
+    "filename": "backend/src/main/java/gov/cdc/usds/simplereport/api/validation/LengthDirective.java",
+    "status": "added",
+    "additions": 60,
+    "deletions": 0,
+    "changes": 60,
+    "blob_url": "https://github.com/CDCgov/prime-simplereport/blob/1fb75e6cd1e0bfbea358a4e246a96c28c01475cf/backend/src/main/java/gov/cdc/usds/simplereport/api/validation/LengthDirective.java",
+    "raw_url": "https://github.com/CDCgov/prime-simplereport/raw/1fb75e6cd1e0bfbea358a4e246a96c28c01475cf/backend/src/main/java/gov/cdc/usds/simplereport/api/validation/LengthDirective.java",
+    "contents_url": "https://api.github.com/repos/CDCgov/prime-simplereport/contents/backend/src/main/java/gov/cdc/usds/simplereport/api/validation/LengthDirective.java?ref=1fb75e6cd1e0bfbea358a4e246a96c28c01475cf",
+    "patch": "@@ -0,0 +1,60 @@\n+package gov.cdc.usds.simplereport.api.validation;\n+\n+import gov.cdc.usds.simplereport.api.validation.errors.LengthError;\n+import graphql.execution.DataFetcherResult;\n+import graphql.schema.DataFetcher;\n+import graphql.schema.FieldCoordinates;\n+import graphql.schema.GraphQLArgument;\n+import graphql.schema.GraphQLDirective;\n+import graphql.schema.idl.SchemaDirectiveWiring;\n+import graphql.schema.idl.SchemaDirectiveWiringEnvironment;\n+\n+public class LengthDirective implements SchemaDirectiveWiring {\n+\n+  private static final int DEFAULT_MIN = 0;\n+  private static final int DEFAULT_MAX = 256;\n+\n+  @Override\n+  public GraphQLArgument onArgument(SchemaDirectiveWiringEnvironment<GraphQLArgument> env) {\n+    GraphQLDirective lengthDirective = env.getDirective();\n+\n+    GraphQLArgument minLenArg = lengthDirective.getArgument(\"min\");\n+    int minLen = minLenArg == null ? DEFAULT_MIN : (int) minLenArg.getValue();\n+\n+    GraphQLArgument maxLenArg = lengthDirective.getArgument(\"max\");\n+    int maxLen = maxLenArg == null ? DEFAULT_MAX : (int) maxLenArg.getValue();\n+\n+    GraphQLArgument argument = env.getElement();\n+    final String argumentName = argument.getName();\n+\n+    DataFetcher<?> originalDataFetcher =\n+        env.getCodeRegistry().getDataFetcher(env.getFieldsContainer(), env.getFieldDefinition());\n+\n+    DataFetcher<?> newFetcher =\n+        dfe -> {\n+          String runtimeValue = dfe.getArgument(argumentName);\n+          if (runtimeValue != null) {\n+            int runtimeLength = runtimeValue.length();\n+\n+            DataFetcherResult.Builder<Object> resultBuilder = DataFetcherResult.newResult();\n+            if (runtimeLength < minLen || runtimeLength > maxLen) {\n+              resultBuilder.error(new LengthError(argumentName, minLen, maxLen));\n+            }\n+\n+            DataFetcherResult<Object> result = resultBuilder.build();\n+            if (!result.getErrors().isEmpty()) {\n+              return result;\n+            }\n+          }\n+\n+          return originalDataFetcher.get(dfe);\n+        };\n+\n+    FieldCoordinates coordinates =\n+        FieldCoordinates.coordinates(env.getFieldsContainer(), env.getFieldDefinition());\n+\n+    env.getCodeRegistry().dataFetcher(coordinates, newFetcher);\n+\n+    return argument;\n+  }\n+}"
+  },
+  {
+    "sha": "e6fbfdb291c8630229a8f3865ce6f345fea15284",
+    "filename": "backend/src/main/java/gov/cdc/usds/simplereport/api/validation/ValidationConfiguration.java",
+    "status": "added",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/CDCgov/prime-simplereport/blob/1fb75e6cd1e0bfbea358a4e246a96c28c01475cf/backend/src/main/java/gov/cdc/usds/simplereport/api/validation/ValidationConfiguration.java",
+    "raw_url": "https://github.com/CDCgov/prime-simplereport/raw/1fb75e6cd1e0bfbea358a4e246a96c28c01475cf/backend/src/main/java/gov/cdc/usds/simplereport/api/validation/ValidationConfiguration.java",
+    "contents_url": "https://api.github.com/repos/CDCgov/prime-simplereport/contents/backend/src/main/java/gov/cdc/usds/simplereport/api/validation/ValidationConfiguration.java?ref=1fb75e6cd1e0bfbea358a4e246a96c28c01475cf",
+    "patch": "@@ -0,0 +1,14 @@\n+package gov.cdc.usds.simplereport.api.validation;\n+\n+import graphql.kickstart.tools.boot.SchemaDirective;\n+import org.springframework.context.annotation.Bean;\n+import org.springframework.context.annotation.Configuration;\n+\n+@Configuration\n+public class ValidationConfiguration {\n+\n+  @Bean\n+  public SchemaDirective lengthDirective() {\n+    return new SchemaDirective(\"length\", new LengthDirective());\n+  }\n+}"
+  },
+  {
+    "sha": "4dda3cdb42674dc79025caf16e1894b4d372e50a",
+    "filename": "backend/src/main/java/gov/cdc/usds/simplereport/api/validation/errors/LengthError.java",
+    "status": "added",
+    "additions": 37,
+    "deletions": 0,
+    "changes": 37,
+    "blob_url": "https://github.com/CDCgov/prime-simplereport/blob/1fb75e6cd1e0bfbea358a4e246a96c28c01475cf/backend/src/main/java/gov/cdc/usds/simplereport/api/validation/errors/LengthError.java",
+    "raw_url": "https://github.com/CDCgov/prime-simplereport/raw/1fb75e6cd1e0bfbea358a4e246a96c28c01475cf/backend/src/main/java/gov/cdc/usds/simplereport/api/validation/errors/LengthError.java",
+    "contents_url": "https://api.github.com/repos/CDCgov/prime-simplereport/contents/backend/src/main/java/gov/cdc/usds/simplereport/api/validation/errors/LengthError.java?ref=1fb75e6cd1e0bfbea358a4e246a96c28c01475cf",
+    "patch": "@@ -0,0 +1,37 @@\n+package gov.cdc.usds.simplereport.api.validation.errors;\n+\n+import graphql.ErrorType;\n+import graphql.GraphQLError;\n+import graphql.language.SourceLocation;\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+public class LengthError implements GraphQLError {\n+\n+  private final String fieldName;\n+  private final int minimumLength;\n+  private final int maximumLength;\n+\n+  public LengthError(String fieldName, int minimumLength, int maximumLength) {\n+    this.fieldName = fieldName;\n+    this.minimumLength = minimumLength;\n+    this.maximumLength = maximumLength;\n+  }\n+\n+  @Override\n+  public String getMessage() {\n+    return String.format(\n+        \"%s: length is invalid (expected %d <= len <= %d)\",\n+        fieldName, minimumLength, maximumLength);\n+  }\n+\n+  @Override\n+  public List<SourceLocation> getLocations() {\n+    return new ArrayList<>();\n+  }\n+\n+  @Override\n+  public ErrorType getErrorType() {\n+    return ErrorType.ValidationError;\n+  }\n+}"
+  },
+  {
+    "sha": "ec8285b0dea2afc0f592aac8ea144e9885a322e6",
+    "filename": "backend/src/main/resources/schema.graphqls",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/CDCgov/prime-simplereport/blob/1fb75e6cd1e0bfbea358a4e246a96c28c01475cf/backend/src/main/resources/schema.graphqls",
+    "raw_url": "https://github.com/CDCgov/prime-simplereport/raw/1fb75e6cd1e0bfbea358a4e246a96c28c01475cf/backend/src/main/resources/schema.graphqls",
+    "contents_url": "https://api.github.com/repos/CDCgov/prime-simplereport/contents/backend/src/main/resources/schema.graphqls?ref=1fb75e6cd1e0bfbea358a4e246a96c28c01475cf",
+    "patch": "@@ -1,3 +1,6 @@\n+# this not not used, but provided so schema validates and for clarity\n+directive @length(min: Int = 0, max: Int = 256) on ARGUMENT_DEFINITION\n+\n # java.util.Date implementation\n scalar DateTime\n # java.time.LocalDate\n@@ -357,8 +360,8 @@ type Mutation {\n     street: String!\n     streetTwo: String\n     city: String\n-    state: String!\n-    zipCode: String!\n+    state: String! @length(min: 2, max: 2)\n+    zipCode: String! @length(min: 5, max: 10)\n     telephone: String!\n     role: String\n     email: String"
+  }
+]

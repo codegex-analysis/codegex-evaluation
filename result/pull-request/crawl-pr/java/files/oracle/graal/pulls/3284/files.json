@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "970bf42de5d3f8e1bb0be0d9cc832f3d16de9efc",
+    "filename": "substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/jdk/SunMiscSubstitutions.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 6,
+    "changes": 12,
+    "blob_url": "https://github.com/oracle/graal/blob/318b011a66eb60522a2e86b892551d5f025adcd5/substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/jdk/SunMiscSubstitutions.java",
+    "raw_url": "https://github.com/oracle/graal/raw/318b011a66eb60522a2e86b892551d5f025adcd5/substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/jdk/SunMiscSubstitutions.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.core/src/com/oracle/svm/core/jdk/SunMiscSubstitutions.java?ref=318b011a66eb60522a2e86b892551d5f025adcd5",
+    "patch": "@@ -32,6 +32,7 @@\n import java.security.ProtectionDomain;\n import java.util.function.Function;\n \n+import com.oracle.svm.core.StaticFieldsSupport;\n import org.graalvm.compiler.nodes.extended.MembarNode;\n import org.graalvm.compiler.serviceprovider.JavaVersionUtil;\n import org.graalvm.nativeimage.Platform;\n@@ -206,14 +207,13 @@ public void ensureClassInitialized(Class<?> c) {\n         DynamicHub.fromClass(c).ensureInitialized();\n     }\n \n-    @Substitute\n-    private long staticFieldOffset(Field f) {\n-        throw VMError.unsupportedFeature(\"Unsupported method of Unsafe\");\n-    }\n-\n     @Substitute\n     private Object staticFieldBase(Field f) {\n-        throw VMError.unsupportedFeature(\"Unsupported method of Unsafe\");\n+        if (f.getType().isPrimitive()) {\n+            return StaticFieldsSupport.getStaticPrimitiveFields();\n+        } else {\n+            return StaticFieldsSupport.getStaticObjectFields();\n+        }\n     }\n \n     @Substitute"
+  },
+  {
+    "sha": "4ad8c15820b36018560e1ba92bb4b4d3163b3743",
+    "filename": "substratevm/src/com.oracle.svm.reflect/src/com/oracle/svm/reflect/target/Target_jdk_internal_misc_Unsafe_Reflection.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/oracle/graal/blob/318b011a66eb60522a2e86b892551d5f025adcd5/substratevm/src/com.oracle.svm.reflect/src/com/oracle/svm/reflect/target/Target_jdk_internal_misc_Unsafe_Reflection.java",
+    "raw_url": "https://github.com/oracle/graal/raw/318b011a66eb60522a2e86b892551d5f025adcd5/substratevm/src/com.oracle.svm.reflect/src/com/oracle/svm/reflect/target/Target_jdk_internal_misc_Unsafe_Reflection.java",
+    "contents_url": "https://api.github.com/repos/oracle/graal/contents/substratevm/src/com.oracle.svm.reflect/src/com/oracle/svm/reflect/target/Target_jdk_internal_misc_Unsafe_Reflection.java?ref=318b011a66eb60522a2e86b892551d5f025adcd5",
+    "patch": "@@ -47,6 +47,7 @@ public long objectFieldOffset(Target_java_lang_reflect_Field field) {\n         if (offset > 0) {\n             return offset;\n         }\n+\n         throw VMError.unsupportedFeature(\"The offset of \" + field + \" is accessed without the field being first registered as unsafe accessed. \" +\n                         \"Please register the field as unsafe accessed. You can do so with a reflection configuration that \" +\n                         \"contains an entry for the field with the attribute \\\"allowUnsafeAccess\\\": true. Such a configuration \" +\n@@ -67,4 +68,9 @@ public long objectFieldOffset(Class<?> c, String name) {\n             throw new InternalError();\n         }\n     }\n+\n+    @Substitute\n+    private long staticFieldOffset(Target_java_lang_reflect_Field f) {\n+        return f.offset;\n+    }\n }"
+  }
+]

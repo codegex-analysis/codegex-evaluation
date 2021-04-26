@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "e5500e8c0b4567474d493b791b1a0f7ed573cea8",
+    "filename": ".github/workflows/build-docker-push-master.yml",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/snowblossomcoin/snowblossom/blob/c02647424ffe8ab4fe28469a032ab093f0f565ea/.github/workflows/build-docker-push-master.yml",
+    "raw_url": "https://github.com/snowblossomcoin/snowblossom/raw/c02647424ffe8ab4fe28469a032ab093f0f565ea/.github/workflows/build-docker-push-master.yml",
+    "contents_url": "https://api.github.com/repos/snowblossomcoin/snowblossom/contents/.github/workflows/build-docker-push-master.yml?ref=c02647424ffe8ab4fe28469a032ab093f0f565ea",
+    "patch": "@@ -0,0 +1,28 @@\n+name: Build Docker Image - Latest master\n+on:\n+  push:\n+    branches:\n+      - master\n+\n+jobs:\n+  docker:\n+    runs-on: ubuntu-20.04\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v2\n+\n+      - name: Login to DockerHub\n+        uses: docker/login-action@v1\n+        with:\n+            username: ${{ secrets.DOCKERHUB_USERNAME }}\n+            password: ${{ secrets.DOCKERHUB_PASSWORD }}\n+\n+      - name: Build and Push\n+        uses: docker/build-push-action@v2\n+        with:\n+            push: true\n+            build-args:\n+              GIT_REF: ${{ GITHUB_SHA }}\n+            tags:\n+              - snowblossom/snowblossom:${{ GITHUB_SHA }}"
+  },
+  {
+    "sha": "3124337a2722bde21a7c8804edc4d019974df51c",
+    "filename": ".github/workflows/build-docker-push-tag.yml",
+    "status": "added",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/snowblossomcoin/snowblossom/blob/c02647424ffe8ab4fe28469a032ab093f0f565ea/.github/workflows/build-docker-push-tag.yml",
+    "raw_url": "https://github.com/snowblossomcoin/snowblossom/raw/c02647424ffe8ab4fe28469a032ab093f0f565ea/.github/workflows/build-docker-push-tag.yml",
+    "contents_url": "https://api.github.com/repos/snowblossomcoin/snowblossom/contents/.github/workflows/build-docker-push-tag.yml?ref=c02647424ffe8ab4fe28469a032ab093f0f565ea",
+    "patch": "@@ -0,0 +1,33 @@\n+name: Build Docker Image - Release\n+on:\n+  push:\n+    tags:\n+      - '*'\n+\n+jobs:\n+  docker:\n+    runs-on: ubuntu-20.04\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v2\n+\n+      - name: Parse git tag\n+        run: echo ::set-output name=GITHUB_TAG::${GITHUB_REF#refs/tags/}\n+\n+      - name: Login to DockerHub\n+        uses: docker/login-action@v1\n+        with:\n+            username: ${{ secrets.DOCKERHUB_USERNAME }}\n+            password: ${{ secrets.DOCKERHUB_PASSWORD }}\n+\n+      - name: Build and Push\n+        uses: docker/build-push-action@v2\n+        with:\n+          push: true\n+          build-args:\n+            GIT_REF: ${{ GITHUB_TAG }}\n+          tags:\n+            - snowblossom/snowblossom:latest\n+            - snowblossom/snowblossom:${{ GITHUB_SHA }}\n+            - snowblossom/snowblossom:${{ GITHUB_TAG }}"
+  },
+  {
+    "sha": "cfa73a4358593d531465b17bc0f26a30a6dd20bf",
+    "filename": ".github/workflows/build-docker.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 37,
+    "changes": 37,
+    "blob_url": "https://github.com/snowblossomcoin/snowblossom/blob/690ab48db933fcae1a00961d0e2deb1700738f9d/.github/workflows/build-docker.yml",
+    "raw_url": "https://github.com/snowblossomcoin/snowblossom/raw/690ab48db933fcae1a00961d0e2deb1700738f9d/.github/workflows/build-docker.yml",
+    "contents_url": "https://api.github.com/repos/snowblossomcoin/snowblossom/contents/.github/workflows/build-docker.yml?ref=690ab48db933fcae1a00961d0e2deb1700738f9d",
+    "patch": "@@ -1,37 +0,0 @@\n-name: Build Docker Image\n-on: push\n-\n-env:\n-    DOCKER_REPOSITORY: snowblossom/snowblossom\n-\n-jobs:\n-    docker:\n-        name: Build Docker Image\n-        runs-on: ubuntu-20.04\n-        steps:\n-            - name: Checkout Repo\n-              uses: actions/checkout@v2\n-\n-            - name: Determine Meta\n-              run: |\n-                  REF=\"${GITHUB_REF##*/}\" >> $GITHUB_ENV\n-                  TAGS=\\\n-                  $DOCKER_REPOSITORY:$REF\n-                  if [[ \"$GITHUB_REF\" == *\"tags\"* ]]; then\n-                      TAGS=$TAGS,$DOCKER_REPOSITORY:latest\n-                  fi\n-                  echo \"TAGS=$TAGS\" >> $GITHUB_ENV\n-\n-            - name: Login to DockerHub\n-              uses: docker/login-action@v1\n-              with:\n-                  username: ${{ secrets.DOCKERHUB_USERNAME }}\n-                  password: ${{ secrets.DOCKERHUB_PASSWORD }}\n-\n-            - name: Build and Push\n-              uses: docker/build-push-action@v2\n-              with:\n-                  push: true\n-                  cache-from: type=registry,ref=${{ env.DOCKER_REPOSITORY }}:${{ env.REF }}\n-                  cache-to: type=inline\n-                  tags: ${{ env.TAGS }}"
+  },
+  {
+    "sha": "c1824089fdb0ce5018b3146a968aef20cb892df8",
+    "filename": "Dockerfile",
+    "status": "modified",
+    "additions": 49,
+    "deletions": 36,
+    "changes": 85,
+    "blob_url": "https://github.com/snowblossomcoin/snowblossom/blob/c02647424ffe8ab4fe28469a032ab093f0f565ea/Dockerfile",
+    "raw_url": "https://github.com/snowblossomcoin/snowblossom/raw/c02647424ffe8ab4fe28469a032ab093f0f565ea/Dockerfile",
+    "contents_url": "https://api.github.com/repos/snowblossomcoin/snowblossom/contents/Dockerfile?ref=c02647424ffe8ab4fe28469a032ab093f0f565ea",
+    "patch": "@@ -1,41 +1,54 @@\n-FROM debian:bullseye-slim as prepared-build-image\n+ARG DISTRO=debian\n+ARG DISTRO_VERSION=bullseye-slim\n+\n+\n+FROM $DISTRO:$DISTRO_VERSION as base\n+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199#23\n+RUN mkdir -p /usr/share/man/man1\n+\n+\n+FROM base as build-dependencies\n ARG DEBIAN_FRONTEND=noninteractive\n-# mkdir line debian/openjdk bug https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199#23\n-RUN \\\n-mkdir -p /usr/share/man/man1 && \\\n-apt-get update -q && \\\n-apt-get install -yqq apt-utils 2>&1 && \\\n-apt-get install -qq --no-install-suggests --no-install-recommends git bazel-bootstrap && \\\n-apt-get clean\n-RUN \\\n-git clone --depth 1 --branch master https://github.com/snowblossomcoin/snowblossom.git /snowblossom && \\\n-cd /snowblossom && \\\n-bazel build :Everything_deploy.jar\n-\n-\n-FROM debian:bullseye-slim as prepared-run-image\n+RUN apt-get -qq update \\\n+  && apt-get -qq install --no-install-suggests --no-install-recommends \\\n+    git \\\n+    bazel-bootstrap \\\n+  && apt-get clean \\\n+  && rm -rf /var/lib/apt/lists/*\n+\n+\n+FROM build-dependencies as build\n+WORKDIR /snowblossom/\n+ARG GIT_REF=master\n+RUN git init . \\\n+  && git remote add origin https://github.com/snowblossomcoin/snowblossom.git \\\n+  && git fetch origin $GIT_REF \\\n+  && git checkout FETCH_HEAD \\\n+  && rm -rf .git/\n+RUN bazel build :Everything_deploy.jar\n+\n+\n+FROM base as runtime-dependencies\n ARG DEBIAN_FRONTEND=noninteractive\n-RUN \\\n-mkdir -p /usr/share/man/man1 && \\\n-apt-get update -q && \\\n-apt-get install -yqq apt-utils 2>&1 && \\\n-apt-get install -qq --no-install-suggests --no-install-recommends openjdk-11-jre-headless && \\\n-apt-get -yqq install sudo libxext6 libxrender1 libxtst6 libfreetype6 fontconfig && \\\n-apt-get clean\n-\n-\n-FROM prepared-build-image as build\n-COPY .git /snowblossom/.git\n-RUN \\\n-cd /snowblossom && \\\n-git checkout . && \\\n-bazel build :Everything_deploy.jar\n-\n-\n-FROM prepared-run-image as run\n-COPY --from=build /snowblossom/bazel-bin/Everything_deploy.jar /snowblossom/\n-COPY example/deployment/docker/scripts/run /snowblossom/scripts\n-COPY example/configs/logging.properties /snowblossom/log.conf\n+RUN apt-get -qq update \\\n+  && apt-get -qq install --no-install-suggests --no-install-recommends \\\n+    default-jre-headless \\\n+    fontconfig \\\n+    libfreetype6 \\\n+    libxext6 \\\n+    libxrender1 \\\n+    libxtst6 \\\n+    sudo \\\n+  && apt-get clean \\\n+  && rm -rf /var/lib/apt/lists/*\n+\n+\n+FROM runtime-dependencies as runtime\n+WORKDIR /snowblossom/\n+COPY --from=build /snowblossom/bazel-bin/Everything_deploy.jar .\n+COPY --from=build /snowblossom/example/deployment/docker/scripts/* ./scripts/\n+COPY --from=build /snowblossom/example/configs/logging.properties log.conf\n+\n \n VOLUME [\"/data\"]\n ENTRYPOINT [\"/bin/sh\", \"/snowblossom/scripts/entrypoint\"]"
+  }
+]

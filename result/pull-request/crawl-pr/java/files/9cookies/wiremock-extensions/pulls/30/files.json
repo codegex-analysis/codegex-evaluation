@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "ebcc827b49d19cac3bf2e35faa76e65056099bf9",
+    "filename": "CHANGELOG.md",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/9cookies/wiremock-extensions/blob/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/CHANGELOG.md",
+    "raw_url": "https://github.com/9cookies/wiremock-extensions/raw/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/CHANGELOG.md",
+    "contents_url": "https://api.github.com/repos/9cookies/wiremock-extensions/contents/CHANGELOG.md?ref=f1aa5845fc12a308a7e5f1d4e1b30eacbd534413",
+    "patch": "@@ -16,6 +16,7 @@ Author: M.Scheepers\n - Support for string embedded keyword usage.\n - Introduced new keyword `ENV` to provide access to environment variables.\n     - Callback authentication properties may contain keywords.\n+- Support `max` and optional `min` parameters for `Random` keyword.\n \n ### Fixes\n - Bug during callback handling where exceptions where swallowed without logging."
+  },
+  {
+    "sha": "951ae186f060396117d4f9117d669b8099fbad30",
+    "filename": "keywords.md",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/9cookies/wiremock-extensions/blob/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/keywords.md",
+    "raw_url": "https://github.com/9cookies/wiremock-extensions/raw/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/keywords.md",
+    "contents_url": "https://api.github.com/repos/9cookies/wiremock-extensions/contents/keywords.md?ref=f1aa5845fc12a308a7e5f1d4e1b30eacbd534413",
+    "patch": "@@ -35,6 +35,17 @@ However, same suffixes result in same values for different properties. The follo\n }\n ```\n \n+For the random integer it is also possible to specify a maximum or minimum and maximum value by providing integers. Spaces will be ignored. If only maximum is provided the value must be positive.\n+```JSON\n+{\n+  \"number_between_zero_and_10\": \"$(!Random[10])\",\n+  \"number_between_10_and_100\": \"$(!Random[10,100])\",\n+  \"number_between_15_and_30\": \"$(!Random[15, 30])\",\n+  \"number_between_20_and_50\": \"$(!Random[20 , 50])\",\n+  \"number_between_2_and_5\": \"$(!Random[2 ,5])\"\n+}\n+```\n+\n ### Instant, date time and time stamp calculation\n \n Generating current time stamp in [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) UTC format for a response property"
+  },
+  {
+    "sha": "1c1400d97dbb3ba3ac1e34a9e7d77d9d0d1f7998",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 3,
+    "changes": 4,
+    "blob_url": "https://github.com/9cookies/wiremock-extensions/blob/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/pom.xml",
+    "raw_url": "https://github.com/9cookies/wiremock-extensions/raw/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/pom.xml",
+    "contents_url": "https://api.github.com/repos/9cookies/wiremock-extensions/contents/pom.xml?ref=f1aa5845fc12a308a7e5f1d4e1b30eacbd534413",
+    "patch": "@@ -332,9 +332,7 @@\n                                 </assembly>\n                                 <from>940776968316.dkr.ecr.eu-west-1.amazonaws.com/deliveryhero/rps-base-java:jdk-8.181</from>\n                                 <runCmds>\n-                                    <runCmd>apk add --update --no-cache\n-                                        openssl 'su-exec>=0.2' bash curl\n-                                        jq</runCmd>\n+                                    <runCmd>apk add --update --no-cache openssl 'su-exec>=0.2' bash curl jq</runCmd>\n                                     <runCmd>mkdir -p /var/wiremock/lib/</runCmd>\n                                 </runCmds>\n                                 <workdir>/home/wiremock</workdir>"
+  },
+  {
+    "sha": "8155de706aa565aee856d9faddc24495ef4d531f",
+    "filename": "src/main/java/com/ninecookies/wiremock/extensions/util/Placeholders.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 1,
+    "changes": 28,
+    "blob_url": "https://github.com/9cookies/wiremock-extensions/blob/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/src/main/java/com/ninecookies/wiremock/extensions/util/Placeholders.java",
+    "raw_url": "https://github.com/9cookies/wiremock-extensions/raw/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/src/main/java/com/ninecookies/wiremock/extensions/util/Placeholders.java",
+    "contents_url": "https://api.github.com/repos/9cookies/wiremock-extensions/contents/src/main/java/com/ninecookies/wiremock/extensions/util/Placeholders.java?ref=f1aa5845fc12a308a7e5f1d4e1b30eacbd534413",
+    "patch": "@@ -254,6 +254,8 @@ private static String encodeValue(String value) {\n         public abstract Object value(String arguments);\n \n         private static final Random RANDOM_GENERATOR = new Random();\n+        static final Pattern HAS_BOUNDS = Pattern\n+                .compile(\"\\\\[([\\\\+0-9 ]+)\\\\]|\\\\[([\\\\-\\\\+0-9 ]+),([\\\\-\\\\+0-9 ]+)\\\\]\");\n         private static final Pattern IS_CALCULATED = Pattern.compile(\"\\\\.plus\\\\[([HhMmSs]{1})([0-9\\\\-\\\\+]+)\\\\]\");\n         private static final Pattern HAS_ARGUMENT = Pattern.compile(\"\\\\[([A-Z_]+)\\\\]\");\n \n@@ -301,9 +303,33 @@ private static ChronoUnit stringToChronoUnit(String unit) {\n             return System.getenv(envKey);\n         };\n \n+        private static final Function<String, Integer> RANDOM_PROVIDER = s -> {\n+            Matcher argument = HAS_BOUNDS.matcher(s);\n+            if (argument.find()) {\n+                if (argument.group(1) != null) {\n+                    // only max provided\n+                    // Note: nextInt(bound) : the upper bound (exclusive). Must be positive.\n+                    int max = Integer.parseInt(argument.group(1).trim()) + 1;\n+                    return RANDOM_GENERATOR.nextInt(max);\n+                }\n+                // must be min and max provided otherwise\n+                int min = Integer.parseInt(argument.group(2).trim());\n+                int max = Integer.parseInt(argument.group(3).trim());\n+                if (min > max) {\n+                    throw new IllegalArgumentException(\"invalid bounds: min '\" + min + \"' >= max '\" + max + \"'\");\n+                }\n+                return RANDOM_GENERATOR.nextInt((max + 1) - min) + min;\n+            }\n+            // something invalid provided\n+            if (s.contains(\"[\")) {\n+                throw new IllegalArgumentException(\"invalid arguments for $(!Random): \" + s);\n+            }\n+            return RANDOM_GENERATOR.nextInt();\n+        };\n+\n         private static final Keyword ENV = new SimpleKeyword(\"ENV\", s -> ENVIRONMENT_PROVIDER.apply(s));\n         private static final Keyword UUID = new SimpleKeyword(\"UUID\", s -> java.util.UUID.randomUUID().toString());\n-        private static final Keyword RANDOM = new SimpleKeyword(\"Random\", s -> RANDOM_GENERATOR.nextInt());\n+        private static final Keyword RANDOM = new SimpleKeyword(\"Random\", s -> RANDOM_PROVIDER.apply(s));\n         private static final Keyword INSTANT = new SimpleKeyword(\"Instant\", s -> INSTANT_PROVIDER.apply(s).toString());\n         private static final Keyword TIMESTAMP = new SimpleKeyword(\"Timestamp\",\n                 s -> INSTANT_PROVIDER.apply(s).toEpochMilli());"
+  },
+  {
+    "sha": "2c0b6aae477e4ba6f886864b98df27184f08276a",
+    "filename": "src/test/java/com/ninecookies/wiremock/extensions/util/PlaceholdersKeywordTest.java",
+    "status": "modified",
+    "additions": 51,
+    "deletions": 4,
+    "changes": 55,
+    "blob_url": "https://github.com/9cookies/wiremock-extensions/blob/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/src/test/java/com/ninecookies/wiremock/extensions/util/PlaceholdersKeywordTest.java",
+    "raw_url": "https://github.com/9cookies/wiremock-extensions/raw/f1aa5845fc12a308a7e5f1d4e1b30eacbd534413/src/test/java/com/ninecookies/wiremock/extensions/util/PlaceholdersKeywordTest.java",
+    "contents_url": "https://api.github.com/repos/9cookies/wiremock-extensions/contents/src/test/java/com/ninecookies/wiremock/extensions/util/PlaceholdersKeywordTest.java?ref=f1aa5845fc12a308a7e5f1d4e1b30eacbd534413",
+    "patch": "@@ -86,9 +86,9 @@ public void testUUIDPatternInString() {\n         assertNotNull(uuid);\n     }\n \n-    @Test\n-    public void testRandomPattern() {\n-        Matcher isKey = Placeholders.KEYWORD_PATTERN.matcher(\"$(!Random)\");\n+    @Test(dataProvider = \"randomPatternsAndFixtures\")\n+    public void testRandomPattern(String pattern, Integer min, Integer max) {\n+        Matcher isKey = Placeholders.KEYWORD_PATTERN.matcher(pattern);\n         assertTrue(isKey.find());\n \n         Keyword keyword = Keyword.of(isKey.group(1));\n@@ -98,7 +98,54 @@ public void testRandomPattern() {\n         assertNotNull(value);\n \n         Integer integer = Integer.valueOf(value.toString());\n-        assertNotNull(integer);\n+        if (min == null && max == null) {\n+            assertNotNull(integer);\n+        } else {\n+            assertThat(integer).isBetween(min, max);\n+        }\n+    }\n+\n+    @DataProvider\n+    private Object[][] randomPatternsAndFixtures() {\n+        return new Object[][] {\n+                { \"$(!Random)\", null, null },\n+                { \"$(!Random[5])\", 0, 5 },\n+                { \"$(!Random[ 5])\", 0, 5 },\n+                { \"$(!Random[5 ])\", 0, 5 },\n+                { \"$(!Random[ 5 ])\", 0, 5 },\n+                { \"$(!Random[10,15])\", 10, 15 },\n+                { \"$(!Random[10 ,15])\", 10, 15 },\n+                { \"$(!Random[10 , 15])\", 10, 15 },\n+                { \"$(!Random.user)\", null, null },\n+                { \"$(!Random[5].user)\", 0, 5 },\n+                { \"$(!Random[-10,+15].user)\", -10, +15 },\n+                { \"$(!Random[-10,-5])\", -10, -5 },\n+                { \"$(!Random[-5,-5])\", -5, -5 }\n+        };\n+    }\n+\n+    @Test(dataProvider = \"invalidRandomPatterns\")\n+    public void testInvalidRandomPattern(String pattern) {\n+        Matcher isKey = Placeholders.KEYWORD_PATTERN.matcher(pattern);\n+        assertTrue(isKey.find());\n+\n+        Keyword keyword = Keyword.of(isKey.group(1));\n+        assertNotNull(keyword);\n+\n+        assertThrows(IllegalArgumentException.class, () -> keyword.value(isKey.group(2)));\n+    }\n+\n+    @DataProvider\n+    private Object[][] invalidRandomPatterns() {\n+        return new Object[][] {\n+                { \"$(!Random[])\" },\n+                { \"$(!Random[-1])\" },\n+                { \"$(!Random[a,b])\" },\n+                { \"$(!Random[1,c])\" },\n+                { \"$(!Random[d,2])\" },\n+                { \"$(!Random[3,4,5])\" },\n+                { \"$(!Random[7,6])\" }\n+        };\n     }\n \n     @Test(dataProvider = \"offsetDateTimePatternsAndFixtures\")"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "cc1670ecfed68ded3e225f1a0892ebcf63451b47",
+    "filename": "src/main/java/com/example/demo/EleveRepository.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/antbaron/mock/blob/93ed302662a554583deab454b640ca6032a93130/src/main/java/com/example/demo/EleveRepository.java",
+    "raw_url": "https://github.com/antbaron/mock/raw/93ed302662a554583deab454b640ca6032a93130/src/main/java/com/example/demo/EleveRepository.java",
+    "contents_url": "https://api.github.com/repos/antbaron/mock/contents/src/main/java/com/example/demo/EleveRepository.java?ref=93ed302662a554583deab454b640ca6032a93130",
+    "patch": "@@ -8,4 +8,5 @@\n \tpublic void addEleve(Eleve eleve);\n \t\n \tpublic int findMean(String name);\n+\t\n }"
+  },
+  {
+    "sha": "57bfb1b07746a876b299dafd0a5017d6fde299af",
+    "filename": "src/main/java/com/example/demo/EleveService.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/antbaron/mock/blob/93ed302662a554583deab454b640ca6032a93130/src/main/java/com/example/demo/EleveService.java",
+    "raw_url": "https://github.com/antbaron/mock/raw/93ed302662a554583deab454b640ca6032a93130/src/main/java/com/example/demo/EleveService.java",
+    "contents_url": "https://api.github.com/repos/antbaron/mock/contents/src/main/java/com/example/demo/EleveService.java?ref=93ed302662a554583deab454b640ca6032a93130",
+    "patch": "@@ -14,5 +14,16 @@ public boolean isPositiveNote(int note) {\n \t\treturn 0 <= note;\n \t}\n \t\n+\tpublic int anthony(int note) {\n+\t\tboolean isNote = this.isPositiveNote(note) && note <= 20;\n+\t\tint mean = -1;\n+\t\tif(isNote) {\n+\t\t\tEleve a = new Eleve(\"anthony\", note);\n+\t\t\televeRepository.addEleve(a);\n+\t\t\tmean = eleveRepository.findMean(\"anthony\");\n+\t\t} \n+\t\t\n+\t\treturn mean;\n+\t}\n \t\n }"
+  },
+  {
+    "sha": "a0e79b8cfb34b3ed73c800a437196fbbc0e920f8",
+    "filename": "src/test/java/com/example/demo/EleveServiceTest.java",
+    "status": "modified",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/antbaron/mock/blob/93ed302662a554583deab454b640ca6032a93130/src/test/java/com/example/demo/EleveServiceTest.java",
+    "raw_url": "https://github.com/antbaron/mock/raw/93ed302662a554583deab454b640ca6032a93130/src/test/java/com/example/demo/EleveServiceTest.java",
+    "contents_url": "https://api.github.com/repos/antbaron/mock/contents/src/test/java/com/example/demo/EleveServiceTest.java?ref=93ed302662a554583deab454b640ca6032a93130",
+    "patch": "@@ -1,6 +1,54 @@\n package com.example.demo;\n \n+import org.assertj.core.api.Assertions;\n+import org.junit.jupiter.api.Test;\n+import org.junit.jupiter.api.extension.ExtendWith;\n+import org.mockito.ArgumentCaptor;\n+import org.mockito.InjectMocks;\n+import org.mockito.Mock;\n+import org.mockito.Mockito;\n+import org.mockito.Spy;\n+import org.mockito.junit.jupiter.MockitoExtension;\n+\n+@ExtendWith(MockitoExtension.class)\n public class EleveServiceTest {\n \n+\t@Mock\n+\tprivate EleveRepository eleveRepository;\n+\t\n+\t@Spy\n+\t@InjectMocks\n+\tprivate EleveService sut;\n+\t\n+\t@Test\n+\tpublic void testisPositiveNote() {\n+\t\tboolean response = sut.isPositiveNote(0);\n+\t\t\n+\t\tAssertions.assertThat(response).isTrue();\n+\t}\n \t\n+\t@Test\n+\tpublic void test1() {\n+\t\t// Arrange\n+\t\tint note = 0;\n+\t\t\n+\t\tMockito.doReturn(true).when(sut).isPositiveNote(note);\n+\t\t\n+\t\tArgumentCaptor<Eleve> acEleve = ArgumentCaptor.forClass(Eleve.class);\n+\t\tMockito.lenient().doNothing().when(eleveRepository).addEleve(acEleve.capture());\n+\t\t\n+\t\tMockito.doReturn(10).when(eleveRepository).findMean(\"anthony\");\n+\t\t// Act\n+\t\tint response = sut.anthony(note);\n+\t\t// Assert\n+\t\tAssertions.assertThat(response).isEqualTo(10);\n+\t\t\n+\t\tEleve photo = acEleve.getValue();\n+\t\tAssertions.assertThat(photo.getName()).isEqualTo(\"anthony\");\n+\t\tAssertions.assertThat(photo.getNote()).isEqualTo(note);\n+\t\t\n+\t\tMockito.verify(eleveRepository, Mockito.times(1)).addEleve(Mockito.any());\n+\t}\n+\t\n+\n }"
+  }
+]

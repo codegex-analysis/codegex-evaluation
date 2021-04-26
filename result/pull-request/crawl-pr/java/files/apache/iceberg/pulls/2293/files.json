@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "e8bf36aca10fe620070c0ebdec5a63eb3ede2ad3",
+    "filename": "api/src/main/java/org/apache/iceberg/RewriteFiles.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/apache/iceberg/blob/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/api/src/main/java/org/apache/iceberg/RewriteFiles.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/api/src/main/java/org/apache/iceberg/RewriteFiles.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/api/src/main/java/org/apache/iceberg/RewriteFiles.java?ref=7d460c7d97ff7b94e28edf9784ac79efb5fbd373",
+    "patch": "@@ -42,4 +42,14 @@\n    * @return this for method chaining\n    */\n   RewriteFiles rewriteFiles(Set<DataFile> filesToDelete, Set<DataFile> filesToAdd);\n+\n+  /**\n+   * Create a new {@link RewriteFiles} setting the {@link PartitionSpec} for the new files to add\n+   * during the rewrite.\n+   *\n+   * @param spec partition spec to use during the rewrite on files to add\n+   * @return a new rewrite files instance with capability to write new files to add with the\n+   * specified spec.\n+   */\n+  RewriteFiles rewriteSpec(PartitionSpec spec);\n }"
+  },
+  {
+    "sha": "934b1ef1d085ffbb7bee0db1c93ce25a257b5378",
+    "filename": "core/src/main/java/org/apache/iceberg/BaseRewriteFiles.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 1,
+    "changes": 16,
+    "blob_url": "https://github.com/apache/iceberg/blob/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/core/src/main/java/org/apache/iceberg/BaseRewriteFiles.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/core/src/main/java/org/apache/iceberg/BaseRewriteFiles.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/core/src/main/java/org/apache/iceberg/BaseRewriteFiles.java?ref=7d460c7d97ff7b94e28edf9784ac79efb5fbd373",
+    "patch": "@@ -23,8 +23,13 @@\n import org.apache.iceberg.relocated.com.google.common.base.Preconditions;\n \n class BaseRewriteFiles extends MergingSnapshotProducer<RewriteFiles> implements RewriteFiles {\n+\n   BaseRewriteFiles(String tableName, TableOperations ops) {\n-    super(tableName, ops);\n+    this(tableName, ops, ops.current().spec());\n+  }\n+\n+  BaseRewriteFiles(String tableName, TableOperations ops, PartitionSpec spec) {\n+    super(tableName, ops, spec);\n \n     // replace files must fail if any of the deleted paths is missing and cannot be deleted\n     failMissingDeletePaths();\n@@ -46,6 +51,8 @@ public RewriteFiles rewriteFiles(Set<DataFile> filesToDelete, Set<DataFile> file\n         \"Files to delete cannot be null or empty\");\n     Preconditions.checkArgument(filesToAdd != null && !filesToAdd.isEmpty(),\n         \"Files to add can not be null or empty\");\n+    Preconditions.checkArgument(filesToAdd.stream().allMatch(df -> df.specId() == writeSpec().specId()),\n+        \"Files to add can not have a different spec than the rewrite files spec\");\n \n     for (DataFile toDelete : filesToDelete) {\n       delete(toDelete);\n@@ -57,4 +64,11 @@ public RewriteFiles rewriteFiles(Set<DataFile> filesToDelete, Set<DataFile> file\n \n     return this;\n   }\n+\n+  @Override\n+  public RewriteFiles rewriteSpec(PartitionSpec newSpec) {\n+    Preconditions.checkArgument(current().specsById().containsKey(newSpec.specId()),\n+        \"Invalid spec with id %d\", newSpec.specId());\n+    return new BaseRewriteFiles(tableName(), ops(), newSpec);\n+  }\n }"
+  },
+  {
+    "sha": "075f67240ae37882b7d47cb5df8d701e9cfdd84b",
+    "filename": "core/src/main/java/org/apache/iceberg/MergingSnapshotProducer.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 5,
+    "changes": 22,
+    "blob_url": "https://github.com/apache/iceberg/blob/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/core/src/main/java/org/apache/iceberg/MergingSnapshotProducer.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/core/src/main/java/org/apache/iceberg/MergingSnapshotProducer.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/core/src/main/java/org/apache/iceberg/MergingSnapshotProducer.java?ref=7d460c7d97ff7b94e28edf9784ac79efb5fbd373",
+    "patch": "@@ -84,10 +84,14 @@\n   private boolean hasNewDeleteFiles = false;\n \n   MergingSnapshotProducer(String tableName, TableOperations ops) {\n+    this(tableName, ops, ops.current().spec());\n+  }\n+\n+  MergingSnapshotProducer(String tableName, TableOperations ops, PartitionSpec spec) {\n     super(ops);\n     this.tableName = tableName;\n     this.ops = ops;\n-    this.spec = ops.current().spec();\n+    this.spec = spec;\n     long targetSizeBytes = ops.current()\n         .propertyAsLong(MANIFEST_TARGET_SIZE_BYTES, MANIFEST_TARGET_SIZE_BYTES_DEFAULT);\n     int minCountToMerge = ops.current()\n@@ -108,6 +112,14 @@ public ThisT set(String property, String value) {\n     return self();\n   }\n \n+  protected String tableName() {\n+    return tableName;\n+  }\n+\n+  protected TableOperations ops() {\n+    return ops;\n+  }\n+\n   protected PartitionSpec writeSpec() {\n     // the spec is set when the write is started\n     return spec;\n@@ -179,7 +191,7 @@ protected void delete(CharSequence path) {\n    * Add a data file to the new snapshot.\n    */\n   protected void add(DataFile file) {\n-    addedFilesSummary.addedFile(spec, file);\n+    addedFilesSummary.addedFile(writeSpec(), file);\n     hasNewFiles = true;\n     newFiles.add(file);\n   }\n@@ -188,7 +200,7 @@ protected void add(DataFile file) {\n    * Add a delete file to the new snapshot.\n    */\n   protected void add(DeleteFile file) {\n-    addedFilesSummary.addedFile(spec, file);\n+    addedFilesSummary.addedFile(writeSpec(), file);\n     hasNewDeleteFiles = true;\n     newDeleteFiles.add(file);\n   }\n@@ -444,7 +456,7 @@ private ManifestFile newFilesAsManifest() {\n \n     if (cachedNewManifest == null) {\n       try {\n-        ManifestWriter<DataFile> writer = newManifestWriter(spec);\n+        ManifestWriter<DataFile> writer = newManifestWriter(writeSpec());\n         try {\n           writer.addAll(newFiles);\n         } finally {\n@@ -477,7 +489,7 @@ private ManifestFile newDeleteFilesAsManifest() {\n \n     if (cachedNewDeleteManifest == null) {\n       try {\n-        ManifestWriter<DeleteFile> writer = newDeleteManifestWriter(spec);\n+        ManifestWriter<DeleteFile> writer = newDeleteManifestWriter(writeSpec());\n         try {\n           writer.addAll(newDeleteFiles);\n         } finally {"
+  },
+  {
+    "sha": "b070cd3fcdde7bf0f18a9c69d7884924debf75cc",
+    "filename": "core/src/main/java/org/apache/iceberg/actions/BaseRewriteDataFilesAction.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 1,
+    "changes": 6,
+    "blob_url": "https://github.com/apache/iceberg/blob/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/core/src/main/java/org/apache/iceberg/actions/BaseRewriteDataFilesAction.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/core/src/main/java/org/apache/iceberg/actions/BaseRewriteDataFilesAction.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/core/src/main/java/org/apache/iceberg/actions/BaseRewriteDataFilesAction.java?ref=7d460c7d97ff7b94e28edf9784ac79efb5fbd373",
+    "patch": "@@ -101,6 +101,10 @@ protected Table table() {\n     return table;\n   }\n \n+  protected PartitionSpec spec() {\n+    return spec;\n+  }\n+\n   protected EncryptionManager encryptionManager() {\n     return encryptionManager;\n   }\n@@ -260,7 +264,7 @@ public RewriteDataFilesActionResult execute() {\n \n   private void replaceDataFiles(Iterable<DataFile> deletedDataFiles, Iterable<DataFile> addedDataFiles) {\n     try {\n-      RewriteFiles rewriteFiles = table.newRewrite();\n+      RewriteFiles rewriteFiles = table.newRewrite().rewriteSpec(spec());\n       rewriteFiles.rewriteFiles(Sets.newHashSet(deletedDataFiles), Sets.newHashSet(addedDataFiles));\n       commit(rewriteFiles);\n     } catch (Exception e) {"
+  },
+  {
+    "sha": "7e6a81795a1f8472ba4103de8cfc4e0d6aefc166",
+    "filename": "spark/src/main/java/org/apache/iceberg/actions/RewriteDataFilesAction.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/iceberg/blob/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/spark/src/main/java/org/apache/iceberg/actions/RewriteDataFilesAction.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/spark/src/main/java/org/apache/iceberg/actions/RewriteDataFilesAction.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/spark/src/main/java/org/apache/iceberg/actions/RewriteDataFilesAction.java?ref=7d460c7d97ff7b94e28edf9784ac79efb5fbd373",
+    "patch": "@@ -62,7 +62,7 @@ protected FileIO fileIO() {\n     Broadcast<FileIO> io = sparkContext.broadcast(fileIO());\n     Broadcast<EncryptionManager> encryption = sparkContext.broadcast(encryptionManager());\n     RowDataRewriter rowDataRewriter =\n-        new RowDataRewriter(table(), table().spec(), caseSensitive(), io, encryption);\n+        new RowDataRewriter(table(), spec(), caseSensitive(), io, encryption);\n     return rowDataRewriter.rewriteDataForTasks(taskRDD);\n   }\n }"
+  },
+  {
+    "sha": "7b541de81ca35680112d4c479e1f1a56948e4232",
+    "filename": "spark/src/test/java/org/apache/iceberg/actions/TestRewriteDataFilesAction.java",
+    "status": "modified",
+    "additions": 99,
+    "deletions": 0,
+    "changes": 99,
+    "blob_url": "https://github.com/apache/iceberg/blob/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/spark/src/test/java/org/apache/iceberg/actions/TestRewriteDataFilesAction.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/7d460c7d97ff7b94e28edf9784ac79efb5fbd373/spark/src/test/java/org/apache/iceberg/actions/TestRewriteDataFilesAction.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/spark/src/test/java/org/apache/iceberg/actions/TestRewriteDataFilesAction.java?ref=7d460c7d97ff7b94e28edf9784ac79efb5fbd373",
+    "patch": "@@ -377,4 +377,103 @@ private void writeDF(Dataset<Row> df) {\n         .mode(\"append\")\n         .save(tableLocation);\n   }\n+\n+  @Test\n+  public void testRewriteToOutputPartitionSpec() {\n+    PartitionSpec spec = PartitionSpec.builderFor(SCHEMA)\n+        .identity(\"c1\")\n+        .build();\n+    Map<String, String> options = Maps.newHashMap();\n+    Table table = TABLES.create(SCHEMA, spec, options, tableLocation);\n+\n+    table.updateSpec().addField(Expressions.truncate(\"c2\", 2)).commit();\n+\n+    Assert.assertEquals(\"Should have 2 partitions specs\", 2, table.specs().size());\n+\n+    List<ThreeColumnRecord> records1 = Lists.newArrayList(\n+        new ThreeColumnRecord(1, \"AAAAAAAAAA\", \"AAAA\"),\n+        new ThreeColumnRecord(1, \"AAAAAAAAAA\", \"CCCC\")\n+    );\n+    writeRecords(records1);\n+\n+    List<ThreeColumnRecord> records2 = Lists.newArrayList(\n+        new ThreeColumnRecord(1, \"BBBBBBBBBB\", \"BBBB\"),\n+        new ThreeColumnRecord(1, \"BBBBBBBBBB\", \"DDDD\")\n+    );\n+    writeRecords(records2);\n+\n+    List<ThreeColumnRecord> records3 = Lists.newArrayList(\n+        new ThreeColumnRecord(2, \"AAAAAAAAAA\", \"EEEE\"),\n+        new ThreeColumnRecord(2, \"AAAAAAAAAA\", \"GGGG\")\n+    );\n+    writeRecords(records3);\n+\n+    List<ThreeColumnRecord> records4 = Lists.newArrayList(\n+        new ThreeColumnRecord(2, \"BBBBBBBBBB\", \"FFFF\"),\n+        new ThreeColumnRecord(2, \"BBBBBBBBBB\", \"HHHH\")\n+    );\n+    writeRecords(records4);\n+\n+    table.refresh();\n+\n+    CloseableIterable<FileScanTask> tasks = table.newScan().planFiles();\n+    List<DataFile> dataFiles = Lists.newArrayList(CloseableIterable.transform(tasks, FileScanTask::file));\n+    Assert.assertEquals(\"Should have 8 data files before rewrite\", 8, dataFiles.size());\n+\n+    Dataset<Row> beforeResultDF = spark.read().format(\"iceberg\").load(tableLocation);\n+    List<ThreeColumnRecord> beforeActualFilteredRecords = beforeResultDF.sort(\"c1\", \"c2\", \"c3\")\n+        .filter(\"c1 = 1 AND c2 = 'BBBBBBBBBB'\")\n+        .as(Encoders.bean(ThreeColumnRecord.class))\n+        .collectAsList();\n+    Assert.assertEquals(\"Rows must match\", records2, beforeActualFilteredRecords);\n+\n+    Actions actions = Actions.forTable(table);\n+    RewriteDataFilesActionResult result = actions\n+        .rewriteDataFiles()\n+        .outputSpecId(0)\n+        .execute();\n+    Assert.assertEquals(\"Action should rewrite 8 data files\", 8, result.deletedDataFiles().size());\n+    Assert.assertEquals(\"Action should add 2 data file\", 2, result.addedDataFiles().size());\n+\n+    Assert.assertTrue(result.deletedDataFiles().stream().allMatch(df -> df.specId() == 1));\n+    Assert.assertTrue(result.addedDataFiles().stream().allMatch(df -> df.specId() == 0));\n+\n+    table.refresh();\n+\n+    CloseableIterable<FileScanTask> tasks2 = table.newScan().planFiles();\n+    List<DataFile> dataFiles2 = Lists.newArrayList(CloseableIterable.transform(tasks2, FileScanTask::file));\n+    Assert.assertEquals(\"Should have 2 data files after rewrite\", 2, dataFiles2.size());\n+\n+    // Should still have all the same data\n+    List<ThreeColumnRecord> expectedRecords = Lists.newArrayList();\n+    expectedRecords.addAll(records1);\n+    expectedRecords.addAll(records2);\n+    expectedRecords.addAll(records3);\n+    expectedRecords.addAll(records4);\n+\n+    Dataset<Row> resultDF = spark.read().format(\"iceberg\").load(tableLocation);\n+    List<ThreeColumnRecord> actualRecords = resultDF.sort(\"c1\", \"c2\", \"c3\")\n+        .as(Encoders.bean(ThreeColumnRecord.class))\n+        .collectAsList();\n+\n+    Assert.assertEquals(\"Rows must match\", expectedRecords, actualRecords);\n+\n+    List<ThreeColumnRecord> actualFilteredRecords = resultDF.sort(\"c1\", \"c2\", \"c3\")\n+        .filter(\"c1 = 1 AND c2 = 'BBBBBBBBBB'\")\n+        .as(Encoders.bean(ThreeColumnRecord.class))\n+        .collectAsList();\n+    Assert.assertEquals(\"Rows must match\", records2, actualFilteredRecords);\n+\n+    List<ThreeColumnRecord> records5 = Lists.newArrayList(\n+        new ThreeColumnRecord(3, \"CCCCCCCCCC\", \"FFFF\"),\n+        new ThreeColumnRecord(3, \"CCCCCCCCCC\", \"HHHH\")\n+    );\n+    writeRecords(records5);\n+    expectedRecords.addAll(records5);\n+    actualRecords = resultDF.sort(\"c1\", \"c2\", \"c3\")\n+        .as(Encoders.bean(ThreeColumnRecord.class))\n+        .collectAsList();\n+\n+    Assert.assertEquals(\"Rows must match\", expectedRecords, actualRecords);\n+  }\n }"
+  }
+]

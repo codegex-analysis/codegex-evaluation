@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c8015cc00fb8124670833e3b2feac23c8906d2e1",
+    "filename": "HW2/task1/Tread_task.java",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/mojnonenada/interview/blob/9347c0212ed8da510f5c1123f7854b6a375aa51b/HW2/task1/Tread_task.java",
+    "raw_url": "https://github.com/mojnonenada/interview/raw/9347c0212ed8da510f5c1123f7854b6a375aa51b/HW2/task1/Tread_task.java",
+    "contents_url": "https://api.github.com/repos/mojnonenada/interview/contents/HW2/task1/Tread_task.java?ref=9347c0212ed8da510f5c1123f7854b6a375aa51b",
+    "patch": "@@ -0,0 +1,48 @@\n+package HW2.task1;\r\n+\r\n+public class Tread_task {\r\n+    private final Object mon = new Object();\r\n+    private volatile String val = \"Ping\";\r\n+\r\n+    public static void main(String[] args) {\r\n+        Tread_task tt = new Tread_task();\r\n+        Thread t1 = new Thread(tt::printPing);\r\n+        Thread t2 = new Thread(tt::printPong);\r\n+        t1.start();\r\n+        t2.start();\r\n+    }\r\n+\r\n+    private void printPong() {\r\n+        synchronized (mon) {\r\n+            try {\r\n+                for (int i = 0; i < 100; i++) {\r\n+                    while (!val.equals(\"Ping\")) {\r\n+                        mon.wait();\r\n+                    }\r\n+                    System.out.println(\"Ping\");\r\n+                    val = \"Pong\";\r\n+                    mon.notify();\r\n+                }\r\n+            } catch (InterruptedException e) {\r\n+                e.printStackTrace();\r\n+            }\r\n+        }\r\n+    }\r\n+\r\n+    private void printPing() {\r\n+        synchronized (mon) {\r\n+            try {\r\n+                for (int i = 0; i < 100; i++) {\r\n+                    while(!val.equals(\"Pong\")) {\r\n+                        mon.wait();\r\n+                    }\r\n+                    System.out.println(\"Pong\");\r\n+                    val = \"Ping\";\r\n+                    mon.notify();\r\n+                }\r\n+            } catch (InterruptedException e) {\r\n+                e.printStackTrace();\r\n+            }\r\n+        }\r\n+    }\r\n+}\r"
+  },
+  {
+    "sha": "301700d54bf06a73dba3b25f3f6e7051ba94de4e",
+    "filename": "HW2/task2/Counter.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/mojnonenada/interview/blob/9347c0212ed8da510f5c1123f7854b6a375aa51b/HW2/task2/Counter.java",
+    "raw_url": "https://github.com/mojnonenada/interview/raw/9347c0212ed8da510f5c1123f7854b6a375aa51b/HW2/task2/Counter.java",
+    "contents_url": "https://api.github.com/repos/mojnonenada/interview/contents/HW2/task2/Counter.java?ref=9347c0212ed8da510f5c1123f7854b6a375aa51b",
+    "patch": "@@ -0,0 +1,7 @@\n+package HW2.task2;\r\n+\r\n+public class Counter {\r\n+    private int sum = 0;\r\n+    public int getSum() { return sum;}\r\n+    public void increaseSum() {sum++;}\r\n+}\r"
+  },
+  {
+    "sha": "d85beba5d69cb32ea0e926a26f734c7d24c5830e",
+    "filename": "Main.java",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 16,
+    "changes": 47,
+    "blob_url": "https://github.com/mojnonenada/interview/blob/9347c0212ed8da510f5c1123f7854b6a375aa51b/Main.java",
+    "raw_url": "https://github.com/mojnonenada/interview/raw/9347c0212ed8da510f5c1123f7854b6a375aa51b/Main.java",
+    "contents_url": "https://api.github.com/repos/mojnonenada/interview/contents/Main.java?ref=9347c0212ed8da510f5c1123f7854b6a375aa51b",
+    "patch": "@@ -1,22 +1,37 @@\n-import Task1.Person;\r\n-import Task3.Circle;\r\n-import Task3.Square;\r\n-import Task3.Triangle;\r\n+import HW2.task1.Tread_task;\r\n+import HW2.task2.Counter;\r\n+\r\n+import java.util.concurrent.locks.Lock;\r\n+import java.util.concurrent.locks.ReentrantLock;\r\n \r\n public class Main {\r\n+static Lock lock = new ReentrantLock();\r\n \r\n-    public static void main(String[] args) {\r\n-\t    Person person = new Person.PersonBuilder(\"f1name\", \"f2name\",\"f3name\").\r\n-                address(\"Malaya Bronnaya 1\").\r\n-                age(31).\r\n-                country(\"Russia\").\r\n-                build();\r\n+static class CounterTread extends Thread {\r\n+    private Counter counter;\r\n+    public CounterTread(Counter counter) {\r\n+        this.counter = counter;\r\n+    }\r\n+    @Override\r\n+    public void run() {\r\n+        for (int i = 0; i < 100; i++) {\r\n+            try {\r\n+                lock.lock();\r\n+                counter.increaseSum();\r\n+            } finally {\r\n+                lock.unlock();\r\n+            }\r\n+        }\r\n+    }\r\n+}\r\n \r\n-        Circle circle = new Circle(5.0);\r\n-        Square square = new Square(5.0);\r\n-        Triangle triangle = new Triangle(5.0,5.0,5.0);\r\n-        System.out.println(\"S circle = \" + circle.getSquare());\r\n-        System.out.println(\"S square = \" + square.getSquare());\r\n-        System.out.println(\"S triangle = \" + triangle.getSquare());\r\n+public static void main(String[] args) throws InterruptedException {\r\n+        Counter counter = new Counter();\r\n+        for (int i = 0; i < 100; i++) {\r\n+            CounterTread counterTread = new CounterTread(counter);\r\n+            counterTread.start();\r\n+        }\r\n+        Thread.sleep(1000);\r\n+        System.out.println(\"Counter:\" + counter.getSum());\r\n     }\r\n }\r"
+  }
+]

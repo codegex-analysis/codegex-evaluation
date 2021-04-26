@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "e626af8d6f90169220068e8502424c52bbde518e",
+    "filename": "components/org.wso2.carbon.identity.local.auth.api.core/pom.xml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/wso2-extensions/identity-local-auth-api/blob/8af56e8095dff516fa773a9938a9ec2f52c718d8/components/org.wso2.carbon.identity.local.auth.api.core/pom.xml",
+    "raw_url": "https://github.com/wso2-extensions/identity-local-auth-api/raw/8af56e8095dff516fa773a9938a9ec2f52c718d8/components/org.wso2.carbon.identity.local.auth.api.core/pom.xml",
+    "contents_url": "https://api.github.com/repos/wso2-extensions/identity-local-auth-api/contents/components/org.wso2.carbon.identity.local.auth.api.core/pom.xml?ref=8af56e8095dff516fa773a9938a9ec2f52c718d8",
+    "patch": "@@ -73,6 +73,10 @@\n             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>\n             <artifactId>org.wso2.carbon.identity.oauth</artifactId>\n         </dependency>\n+        <dependency>\n+            <groupId>org.wso2.carbon.identity.framework</groupId>\n+            <artifactId>org.wso2.carbon.identity.multi.attribute.login.mgt</artifactId>\n+        </dependency>\n     </dependencies>\n \n     <build>\n@@ -113,7 +117,10 @@\n                             org.wso2.carbon.identity.application.authentication.framework.context; version=\"${carbon.identity.framework.imp.pkg.version}\",\n                             org.wso2.carbon.identity.application.authentication.framework.util; version=\"${carbon.identity.framework.imp.pkg.version}\",\n                             org.wso2.carbon.identity.oauth.cache; version=\"${identity.inbound.auth.oauth.imp.pkg.version}\",\n-                            org.wso2.carbon.identity.oauth.common; version=\"${identity.inbound.auth.oauth.imp.pkg.version}\"\n+                            org.wso2.carbon.identity.oauth.common;\n+                            version=\"${identity.inbound.auth.oauth.imp.pkg.version}\",\n+                            org.wso2.carbon.identity.multi.attribute.login.mgt.*;\n+                            version=\"${carbon.identity.framework.imp.pkg.version}\",\n                         </Import-Package>\n                         <Export-Package>\n                             !org.wso2.carbon.identity.local.auth.api.core.internal,"
+  },
+  {
+    "sha": "3af53a193a9cb6e4ead4cf0a8eecf70cb00b617e",
+    "filename": "components/org.wso2.carbon.identity.local.auth.api.core/src/main/java/org/wso2/carbon/identity/local/auth/api/core/AuthManagerImpl.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/wso2-extensions/identity-local-auth-api/blob/8af56e8095dff516fa773a9938a9ec2f52c718d8/components/org.wso2.carbon.identity.local.auth.api.core/src/main/java/org/wso2/carbon/identity/local/auth/api/core/AuthManagerImpl.java",
+    "raw_url": "https://github.com/wso2-extensions/identity-local-auth-api/raw/8af56e8095dff516fa773a9938a9ec2f52c718d8/components/org.wso2.carbon.identity.local.auth.api.core/src/main/java/org/wso2/carbon/identity/local/auth/api/core/AuthManagerImpl.java",
+    "contents_url": "https://api.github.com/repos/wso2-extensions/identity-local-auth-api/contents/components/org.wso2.carbon.identity.local.auth.api.core/src/main/java/org/wso2/carbon/identity/local/auth/api/core/AuthManagerImpl.java?ref=8af56e8095dff516fa773a9938a9ec2f52c718d8",
+    "patch": "@@ -22,6 +22,7 @@\n import org.apache.commons.lang.StringUtils;\n import org.apache.commons.logging.Log;\n import org.apache.commons.logging.LogFactory;\n+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;\n import org.wso2.carbon.identity.application.common.model.User;\n import org.wso2.carbon.identity.core.model.IdentityErrorMsgContext;\n import org.wso2.carbon.identity.core.util.IdentityCoreConstants;\n@@ -35,6 +36,7 @@\n import org.wso2.carbon.identity.local.auth.api.core.model.AuthnRequest;\n import org.wso2.carbon.identity.local.auth.api.core.model.AuthnResponse;\n import org.wso2.carbon.identity.local.auth.api.core.model.AuthnStatus;\n+import org.wso2.carbon.identity.multi.attribute.login.mgt.ResolvedUserResult;\n import org.wso2.carbon.user.api.UserRealm;\n import org.wso2.carbon.user.api.UserStoreException;\n import org.wso2.carbon.user.api.UserStoreManager;\n@@ -135,7 +137,13 @@ protected void authenticate(String username, Object credential, AuthnMessageCont\n         String userTenantDomain = MultitenantUtils.getTenantDomain(username);\n         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);\n         UserStoreManager userStoreManager = getUserStoreManager(userTenantDomain);\n-\n+        ResolvedUserResult resolvedUserResult = FrameworkUtils.\n+                processMultiAttributeLoginIdentification(tenantAwareUsername, userTenantDomain);\n+        if (resolvedUserResult != null &&  ResolvedUserResult.UserResolvedStatus.SUCCESS.\n+                equals(resolvedUserResult.getResolvedStatus())) {\n+            tenantAwareUsername = resolvedUserResult.getUser().getUsername();\n+            username = UserCoreUtil.addTenantDomainToEntry(tenantAwareUsername, userTenantDomain);\n+        }\n         if (authenticate(tenantAwareUsername, credential, userStoreManager)) {\n             User user = new User();\n             user.setUserName(tenantAwareUsername);"
+  },
+  {
+    "sha": "f7d2e4ec1f87c8f3ade679c3e399f9a8aa218b6b",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/wso2-extensions/identity-local-auth-api/blob/8af56e8095dff516fa773a9938a9ec2f52c718d8/pom.xml",
+    "raw_url": "https://github.com/wso2-extensions/identity-local-auth-api/raw/8af56e8095dff516fa773a9938a9ec2f52c718d8/pom.xml",
+    "contents_url": "https://api.github.com/repos/wso2-extensions/identity-local-auth-api/contents/pom.xml?ref=8af56e8095dff516fa773a9938a9ec2f52c718d8",
+    "patch": "@@ -239,6 +239,11 @@\n                 <artifactId>pax-logging-api</artifactId>\n                 <version>${pax.logging.api.version}</version>\n             </dependency>\n+            <dependency>\n+                <groupId>org.wso2.carbon.identity.framework</groupId>\n+                <artifactId>org.wso2.carbon.identity.multi.attribute.login.mgt</artifactId>\n+                <version>${carbon.identity.framework.version}</version>\n+            </dependency>\n         </dependencies>\n     </dependencyManagement>\n \n@@ -346,7 +351,7 @@\n \n         <carbon.kernel.version>4.6.0</carbon.kernel.version>\n         <carbon.kernel.imp.pkg.version>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version>\n-        <carbon.identity.framework.version>5.14.67</carbon.identity.framework.version>\n+        <carbon.identity.framework.version>5.19.45</carbon.identity.framework.version>\n         <carbon.identity.framework.imp.pkg.version>[5.14.67, 6.0.0)</carbon.identity.framework.imp.pkg.version>\n         <carbon.user.api.imp.pkg.version>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version>\n         <carbon.base.imp.pkg.version>[1.0.0, 2.0.0)</carbon.base.imp.pkg.version>"
+  }
+]

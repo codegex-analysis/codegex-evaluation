@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "459f933502352811bd177853d01ca4b635e5adda",
+    "filename": ".github/workflows/main-workflow.yml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 4,
+    "changes": 7,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/blob/e5a9f31cf4a76af5858166936108770a79af2fed/.github/workflows/main-workflow.yml",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/raw/e5a9f31cf4a76af5858166936108770a79af2fed/.github/workflows/main-workflow.yml",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/contents/.github/workflows/main-workflow.yml?ref=e5a9f31cf4a76af5858166936108770a79af2fed",
+    "patch": "@@ -7,16 +7,15 @@ on: [push, pull_request]\n \n jobs:\n   build:\n-\n+  \n     runs-on: ubuntu-latest\n-\n     steps:\n     - uses: actions/checkout@v2\n     - name: Set up JDK 1.8\n       uses: actions/setup-java@v1\n       with:\n         java-version: 1.8\n     - name: Build\n-      run: javac vitals/Main.java\n+      run: javac vitals/BatteryCheckSystem.java\n     - name: Verify\n-      run: java -ea -classpath . vitals.Main\n+      run: java -ea -classpath . vitals.BatteryCheckSystem"
+  },
+  {
+    "sha": "b1a34318f3cc1e256e638e6c97ae0d61f02fbd79",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 28,
+    "changes": 38,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/blob/e5a9f31cf4a76af5858166936108770a79af2fed/README.md",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/raw/e5a9f31cf4a76af5858166936108770a79af2fed/README.md",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/contents/README.md?ref=e5a9f31cf4a76af5858166936108770a79af2fed",
+    "patch": "@@ -1,4 +1,3 @@\n-# Programming Paradigms\n \n Electric Vehicles have BMS - Battery Management Systems\n \n@@ -14,40 +13,23 @@ Electric Vehicles have BMS - Battery Management Systems\n \n ## Possible purpose\n \n-- Protect batteries while charging:\n-at home, in public place, within vehicle / regenerative braking\n-- Estimate life, inventory and supply chains\n+Extension 1: Early Warning for Check in Temperature, SOC, Charge Breach\n+Extension 2: Support a language in addition to English i.e. ENG, DE\n \n-## The Starting Point\n \n-We will explore the charging phase of Li-ion batteries to start with.\n-\n-## Issues\n-\n-- The code here has high complexity in a single function.\n-- The tests are not complete - they do not cover all the needs of a consumer\n \n ## Tasks\n \n-1. Reduce the cyclomatic complexity.\n-1. Separate pure functions from I/O\n-1. Avoid duplication - functions that do nearly the same thing\n-1. Complete the tests - cover all conditions.\n-1. To take effective action, we need to know\n-the abnormal measure and the breach -\n-whether high or low. Add this capability.\n-\n-## The Exploration\n-\n-How well does our code hold-out in the rapidly evolving EV space?\n-Can we add new functionality without disturbing the old?\n+Changes done\n \n-## The Landscape\n+    Added language feature\n+    Reduced cyclomatic complexity\n+    Added warning feature\n+    Added temperature scale\n+    Separate pure functions from I/O\n+    Avoided duplication\n+    Completed the test condition.\n \n-- Limits may change based on new research\n-- Technology changes due to obsolescence\n-- Sensors may be from different vendors with different accuracy\n-- Predicting the future requires Astrology!\n \n ## Keep it Simple\n "
+  },
+  {
+    "sha": "39b64d010cd852d7b1c3e652f6bb7516f624f6e2",
+    "filename": "vitals/BatteryCheck.java",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/blob/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/BatteryCheck.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/raw/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/BatteryCheck.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/contents/vitals/BatteryCheck.java?ref=e5a9f31cf4a76af5858166936108770a79af2fed",
+    "patch": "@@ -0,0 +1,39 @@\n+package vitals;\r\n+\r\n+public class BatteryCheck {\r\n+\tpublic float Temperature, StateOfCharge, ChargeRate;\t \r\n+    public BatteryCheck(float temperature, float soc, float chargeRate)\r\n+    {\r\n+        this.Temperature = temperature;\r\n+        this.StateOfCharge = soc;\r\n+        this.ChargeRate = chargeRate;\r\n+    }\r\n+    \r\n+    \r\n+    public static void CheckLowBreach(BatteryConstants battery)\r\n+    {\r\n+        if ((battery.value > (battery.minimumLimit + battery.lowBreach)) && (battery.value<(battery.minimumLimit + battery.highBreach))){\r\n+        SwitchLanguage.lowBreach(battery.parameter);\r\n+        }\r\n+    }    \r\n+    \r\n+    public static void CheckHighBreach(BatteryConstants battery)\r\n+    {\r\n+         if (((battery.value > battery.maxLimit - battery.highBreach)) && (battery.value<battery.maxLimit)){\r\n+         SwitchLanguage.highBreach(battery.parameter);\r\n+         }\r\n+    }\r\n+\r\n+\r\n+\tpublic static boolean EvaluateBatteryMeasure(BatteryConstants battery) {\r\n+\t\tif(battery.value > battery.maxLimit){\r\n+\t\t\tSwitchLanguage.maxLimit(battery.parameter, battery.maxLimit);\r\n+            return false;\r\n+\t\t}\r\n+        if (battery.value < battery.minimumLimit){\r\n+        \tSwitchLanguage.minLimit(battery.parameter, battery.minimumLimit);\r\n+        \treturn false;\r\n+        }\r\n+        return true;\r\n+\t}\r\n+}\r"
+  },
+  {
+    "sha": "47c69bb323f9a6df84a68e5ddadbca846e6627e4",
+    "filename": "vitals/BatteryCheckSystem.java",
+    "status": "added",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/blob/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/BatteryCheckSystem.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/raw/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/BatteryCheckSystem.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/contents/vitals/BatteryCheckSystem.java?ref=e5a9f31cf4a76af5858166936108770a79af2fed",
+    "patch": "@@ -0,0 +1,26 @@\n+package vitals;\n+\n+public class BatteryCheckSystem {\n+\tstatic boolean batteryTest(float temperature, float soc, float chargeRate) {       \n+        BatteryLimit limit = new BatteryLimit(new BatteryCheck(temperature, soc, chargeRate));\n+\t\tif(limit.checkBatteryOk()){\n+\t\t\tSwitchLanguage.setMessage(BatteryConstants.BATTERY_OK);\n+\t\t\treturn true;\n+\t\t}\n+\t\t\treturn false;\n+    }\n+\t\n+    public static void main(String[] args) {\n+    \tSwitchLanguage.setLanguageInSystem(\"EN\");\n+    \tassert(SwitchLanguage.setLanguageInSystem(\"EN\")==true);\n+    \tassert(batteryTest(-3, -15, 0.7f)==false);\n+      \tassert(batteryTest(44, 79, 0.7f)==true);\n+\tBatteryLimit limit = new BatteryLimit();\n+    \tassert(limit.setTemperatureUnit(\"Fahrenheit\")==true);\n+       \tassert(batteryTest(142, 60, 0.6f) == false);\n+    \tassert(SwitchLanguage.setLanguageInSystem(\"DE\")==true);\n+    \tassert(batteryTest(-3, -15, 0.7f)==false);\n+      \tassert(batteryTest(44, 79, 0.7f)==true);\n+    \t\n+    }\n+}"
+  },
+  {
+    "sha": "d2a169280fcc9f4cf61f08d6d645820a68138c95",
+    "filename": "vitals/BatteryConstants.java",
+    "status": "added",
+    "additions": 38,
+    "deletions": 0,
+    "changes": 38,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/blob/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/BatteryConstants.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/raw/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/BatteryConstants.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/contents/vitals/BatteryConstants.java?ref=e5a9f31cf4a76af5858166936108770a79af2fed",
+    "patch": "@@ -0,0 +1,38 @@\n+package vitals;\r\n+\r\n+public class BatteryConstants {\r\n+\r\n+\tpublic float value, maxLimit, minimumLimit, lowBreach, highBreach;\r\n+    \tpublic String parameter;\r\n+    \r\n+\tstatic final float MAX_CHARGE_RATE= 0.8f;\r\n+\tstatic final float MIN_CHARGE_RATE= 0.0f;\r\n+\tstatic final float MAX_TEMPERATURE = 45;\r\n+\tstatic final float MIN_TEMPERATURE = 0;\r\n+\tstatic final float MAX_SOC= 80;\r\n+\tstatic final float MIN_SOC= 20;\r\n+\t\r\n+\tstatic final String LOW_THRESHOLD_ENG= \"is below threshold value\";\r\n+\tstatic final String HIGH_THRESHOLD_ENG=\"is above threshold value\";\r\n+\tstatic final String HIGH_BREACH_WARNING_ENG=\"is about to approach high breach\";\r\n+\tstatic final String LOW_BREACH_WARNING_ENG=\"is about to approach low breach\";\r\n+\r\n+\tstatic final String\tLOW_THRESHOLD_DE=\"liegt unter dem Schwellenwert\";\r\n+\tstatic final String HIGH_THRESHOLD_DE=\"liegt uber dem Schwellenwert\";\r\n+\tstatic final String\tHIGH_BREACH_WARNING_DE=\"ist kurz davor, sich einer hohen Verletzung zu nahern\";\r\n+\tstatic final String LOW_BREACH_WARNING_DE=\"ist im Begriff, sich einer geringen Verletzung zu nahern\";\r\n+\tstatic final String BATTERY_OK=\"Battery Status OK\";\r\n+    \r\n+    public BatteryConstants(String battery_parameter, float value, float maxLimit, float minimumLimit)\r\n+    {\r\n+        this.parameter = battery_parameter;\r\n+        this.value = value;\r\n+        this.maxLimit = maxLimit;\r\n+        this.minimumLimit = minimumLimit;\r\n+        this.lowBreach = (minimumLimit * 0.05f);\r\n+        this.highBreach = (maxLimit * 0.05f);\r\n+    }\r\n+\t\r\n+\t\r\n+\r\n+}\r"
+  },
+  {
+    "sha": "a22fed5672172bc57e510f9dca6e287f16f64bcc",
+    "filename": "vitals/BatteryLimit.java",
+    "status": "added",
+    "additions": 74,
+    "deletions": 0,
+    "changes": 74,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/blob/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/BatteryLimit.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/raw/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/BatteryLimit.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/contents/vitals/BatteryLimit.java?ref=e5a9f31cf4a76af5858166936108770a79af2fed",
+    "patch": "@@ -0,0 +1,74 @@\n+package vitals;\r\n+\r\n+import java.util.Arrays;\r\n+import java.util.List;\r\n+\r\n+public class BatteryLimit {\r\n+\r\n+\tpublic static String measureUnitDefault = \"Celsius\";\r\n+\tstatic List<String> unitsTemperature = Arrays.asList(\"Celsius\", \"Fahrenheit\");\r\n+\r\n+\tBatteryCheck bmsCheck;\r\n+\r\n+\tpublic BatteryLimit(BatteryCheck batteryMeasures) {\r\n+\t\tthis.bmsCheck = batteryMeasures;\r\n+\t}\r\n+\r\n+\tpublic BatteryLimit() {\r\n+\t\t// constructor stub\r\n+\t}\r\n+\r\n+\tpublic boolean checkBatteryOk() {\r\n+\t\tboolean check_of_charge = isChargeWithinLimit(bmsCheck.ChargeRate);\r\n+\t\tboolean check_of_temp = isTemperatureWithinLimit(bmsCheck.Temperature);\r\n+\t\tboolean check_of_soc = isSocWithinLimit(bmsCheck.StateOfCharge);\r\n+\t\treturn ((check_of_temp && check_of_soc) && check_of_charge);\r\n+\t}\r\n+\r\n+\tpublic boolean isTemperatureWithinLimit(float temperature) {\r\n+\r\n+\t\tif ((measureUnitDefault).equals(unitsTemperature.get(1))) {\r\n+\t\t\ttemperature = convertFtoC(temperature);\r\n+\t\t}\r\n+\t\tBatteryConstants btemp = new BatteryConstants(\"Temperature\", temperature, BatteryConstants.MAX_TEMPERATURE,\r\n+\t\t\t\tBatteryConstants.MIN_TEMPERATURE);\r\n+\t\tBatteryCheck.CheckLowBreach(btemp);\r\n+\t\tBatteryCheck.CheckHighBreach(btemp);\r\n+\r\n+\t\treturn BatteryCheck.EvaluateBatteryMeasure(btemp);\r\n+\r\n+\t}\r\n+\r\n+\tprivate float convertFtoC(float temperature) {\r\n+\t\tfloat tempInCelsius = ((temperature - 32) * 5) / 9;\r\n+\t\tSystem.out.println(tempInCelsius);\r\n+\t\treturn tempInCelsius;\r\n+\t}\r\n+\r\n+\tpublic boolean isChargeWithinLimit(float chargeRate) {\r\n+\t\tBatteryConstants limitCharge = new BatteryConstants(\"ChargeRate\", chargeRate, BatteryConstants.MAX_CHARGE_RATE,\r\n+\t\t\t\tBatteryConstants.MIN_CHARGE_RATE);\r\n+\t\tBatteryCheck.CheckLowBreach(limitCharge);\r\n+\t\tBatteryCheck.CheckHighBreach(limitCharge);\r\n+\t\treturn BatteryCheck.EvaluateBatteryMeasure(limitCharge);\r\n+\t}\r\n+\r\n+\tpublic boolean isSocWithinLimit(float stateofcharge) {\r\n+\t\tBatteryConstants limitSoc = new BatteryConstants(\"StateofCharge\", stateofcharge, BatteryConstants.MAX_SOC,\r\n+\t\t\t\tBatteryConstants.MIN_SOC);\r\n+\t\tBatteryCheck.CheckLowBreach(limitSoc);\r\n+\t\tBatteryCheck.CheckHighBreach(limitSoc);\r\n+\t\treturn BatteryCheck.EvaluateBatteryMeasure(limitSoc);\r\n+\t}\r\n+\r\n+\tpublic boolean setTemperatureUnit(String temp_unit) {\r\n+\t\tif (unitsTemperature.contains(temp_unit)) {\r\n+\t\t\tmeasureUnitDefault = temp_unit;\r\n+\t\t\treturn true;\r\n+\t\t} else\r\n+\t\t\t// Temperature Unit Not supported\r\n+\t\t\treturn false;\r\n+\r\n+\t}\r\n+\r\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "7833f94d0a1d6cbaa29822e4add4f5317834c3a8",
+    "filename": "vitals/Main.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 23,
+    "changes": 23,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/blob/31ca148acd1ccfeae71f2c21f26a69bcedd44474/vitals/Main.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/raw/31ca148acd1ccfeae71f2c21f26a69bcedd44474/vitals/Main.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/contents/vitals/Main.java?ref=31ca148acd1ccfeae71f2c21f26a69bcedd44474",
+    "patch": "@@ -1,23 +0,0 @@\n-package vitals;\n-\n-public class Main {\n-    static boolean batteryIsOk(float temperature, float soc, float chargeRate) {\n-        if(temperature < 0 || temperature > 45) {\n-            System.out.println(\"Temperature is out of range!\");\n-            return false;\n-        } else if(soc < 20 || soc > 80) {\n-            System.out.println(\"State of Charge is out of range!\");\n-            return false;\n-        } else if(chargeRate > 0.8) {\n-            System.out.println(\"Charge Rate is out of range!\");\n-            return false;\n-        }\n-        return true;\n-    }\n-\n-    public static void main(String[] args) {\n-        assert(batteryIsOk(25, 70, 0.7f) == true);\n-        assert(batteryIsOk(50, 85, 0.0f) == false);\n-        System.out.println(\"Some more tests needed\");\n-    }\n-}"
+  },
+  {
+    "sha": "1cb2af295f5ae6629e075c03fcc3f72f79e75df6",
+    "filename": "vitals/SwitchLanguage.java",
+    "status": "added",
+    "additions": 78,
+    "deletions": 0,
+    "changes": 78,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/blob/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/SwitchLanguage.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/raw/e5a9f31cf4a76af5858166936108770a79af2fed/vitals/SwitchLanguage.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-ARULPRIYAM30/contents/vitals/SwitchLanguage.java?ref=e5a9f31cf4a76af5858166936108770a79af2fed",
+    "patch": "@@ -0,0 +1,78 @@\n+package vitals;\r\n+\r\n+import java.util.Arrays;\r\n+import java.util.List;\r\n+\r\n+public class SwitchLanguage {\r\n+\t\r\n+\tpublic static String language;\r\n+\tstatic List<String> availableLanguage = Arrays.asList(\"EN\", \"DE\");\r\n+\t\r\n+\tpublic static boolean setLanguageInSystem(String lan) {\r\n+\t\tif(availableLanguage.contains(lan)){\r\n+\t    \tlanguage=lan;\r\n+\t        return true;\r\n+\t    }\r\n+\t\telse {\r\n+\t\t\t//language is not supported!!!\r\n+\t\treturn false;\r\n+\t\t}\r\n+\t}\r\n+\t\r\n+\t\r\n+\tpublic static void setMessage(String messagePrint)\r\n+    {\r\n+      System.out.println(messagePrint);\r\n+    }\r\n+    \r\n+    public static void maxLimit(String parameter, float MaximumLimit)\r\n+    {\r\n+    \t\r\n+    \tif (language.equals(\"DE\") ) {\r\n+    \t\tString displayMessage =parameter + \" \" + BatteryConstants.HIGH_THRESHOLD_DE + \" \" + MaximumLimit;\r\n+        \tsetMessage(displayMessage);\r\n+    \t}\r\n+    \telse {\r\n+    \t\tString displayMessage =parameter + \" \" + BatteryConstants.HIGH_THRESHOLD_ENG + \" \" + MaximumLimit;\r\n+        \tsetMessage(displayMessage);\r\n+    \t}\r\n+    }\r\n+\r\n+    public static void minLimit(String parameter, float MinimumLimit)\r\n+    {\r\n+    \tif (language.equals(\"DE\")) {\r\n+    \t\tString displayMessage =parameter + \" \" + BatteryConstants.LOW_THRESHOLD_DE + \" \" + MinimumLimit;\r\n+        \tsetMessage(displayMessage);\r\n+    \t}\r\n+    \telse {\r\n+    \t\tString displayMessage =parameter + \" \" + BatteryConstants.LOW_THRESHOLD_ENG + \" \" + MinimumLimit;\r\n+        \tsetMessage(displayMessage);\r\n+    \t}\r\n+    }\r\n+    public static void lowBreach(String parameter)\r\n+    {\r\n+    \tif (language.equals(\"DE\")) {\r\n+    \t\tString displayMessage =parameter + \" \" + BatteryConstants.LOW_BREACH_WARNING_DE ;\r\n+        \tsetMessage(displayMessage);\r\n+    \t}\r\n+    \telse {\r\n+    \t\tString displayMessage =parameter + \" \" + BatteryConstants.LOW_BREACH_WARNING_ENG ;\r\n+        \tsetMessage(displayMessage);\r\n+    \t}\r\n+    }\r\n+    \r\n+    public static void highBreach(String parameter)\r\n+    {\r\n+    \tif (language.equals(\"DE\")) {\r\n+    \t\tString displayMessage =parameter + \" \" + BatteryConstants.HIGH_BREACH_WARNING_DE ;\r\n+        \tsetMessage(displayMessage);\r\n+    \t}\r\n+    \telse {\r\n+    \t\tString displayMessage =parameter + \" \" + BatteryConstants.HIGH_BREACH_WARNING_ENG ;\r\n+        \tsetMessage(displayMessage);\r\n+    \t}\r\n+    }\r\n+\r\n+    \r\n+\r\n+}\r"
+  }
+]

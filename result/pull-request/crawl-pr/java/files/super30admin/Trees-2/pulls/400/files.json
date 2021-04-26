@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "97ae5eb152bfeb2c7ddc586c2857fc6443aad2ac",
+    "filename": "constructBinaryTree.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/super30admin/Trees-2/blob/d1bdb672787014297c48e07bff9baabb10d9abb2/constructBinaryTree.java",
+    "raw_url": "https://github.com/super30admin/Trees-2/raw/d1bdb672787014297c48e07bff9baabb10d9abb2/constructBinaryTree.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Trees-2/contents/constructBinaryTree.java?ref=d1bdb672787014297c48e07bff9baabb10d9abb2",
+    "patch": "@@ -0,0 +1,44 @@\n+// Problem1 (https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/)\n+// Time Complexity : O(N)\n+// Space Complexity : O(N)\n+public class constructBinaryTree {\n+        int post_idx;\n+        int[] postorder;\n+        int[] inorder;\n+        HashMap<Integer, Integer> idx_map = new HashMap<Integer, Integer>();\n+      \n+        public TreeNode helper(int in_left, int in_right) {\n+          // if there is no elements to construct subtrees\n+          if (in_left > in_right)\n+            return null;\n+      \n+          // pick up post_idx element as a root\n+          int root_val = postorder[post_idx];\n+          TreeNode root = new TreeNode(root_val);\n+      \n+          // root splits inorder list\n+          // into left and right subtrees\n+          int index = idx_map.get(root_val);\n+      \n+          // recursion \n+          post_idx--;\n+          // build right subtree\n+          root.right = helper(index + 1, in_right);\n+          // build left subtree\n+          root.left = helper(in_left, index - 1);\n+          return root;\n+        }\n+      \n+        public TreeNode buildTree(int[] inorder, int[] postorder) {\n+          this.postorder = postorder;\n+          this.inorder = inorder;\n+          // start from the last postorder element\n+          post_idx = postorder.length - 1;\n+      \n+          // build a hashmap value -> its index\n+          int idx = 0;\n+          for (Integer val : inorder)\n+            idx_map.put(val, idx++);\n+          return helper(0, inorder.length - 1);\n+        }  \n+}"
+  },
+  {
+    "sha": "4b71e4c41af79d495637b5a58407949e9915964c",
+    "filename": "sumRootToLeafNumbers.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/super30admin/Trees-2/blob/d1bdb672787014297c48e07bff9baabb10d9abb2/sumRootToLeafNumbers.java",
+    "raw_url": "https://github.com/super30admin/Trees-2/raw/d1bdb672787014297c48e07bff9baabb10d9abb2/sumRootToLeafNumbers.java",
+    "contents_url": "https://api.github.com/repos/super30admin/Trees-2/contents/sumRootToLeafNumbers.java?ref=d1bdb672787014297c48e07bff9baabb10d9abb2",
+    "patch": "@@ -0,0 +1,28 @@\n+// Problem2 (https://leetcode.com/problems/sum-root-to-leaf-numbers/)\n+// Time Complexity : O(N) N- No of Nodes\n+// Space Complexity : O(H) H- Height\n+public class sumRootToLeafNumbers {\n+    public int sumNumbers(TreeNode root) {\n+        int rootToLeaf = 0, currNumber = 0;\n+        Deque<Pair<TreeNode, Integer>> stack = new ArrayDeque();\n+        stack.push(new Pair(root, 0));\n+    \n+        while (!stack.isEmpty()) {\n+          Pair<TreeNode, Integer> p = stack.pop();\n+          root = p.getKey();\n+          currNumber = p.getValue();\n+    \n+          if (root != null) {\n+            currNumber = currNumber * 10 + root.val;\n+            // if it's a leaf, update root-to-leaf sum\n+            if (root.left == null && root.right == null) {\n+              rootToLeaf += currNumber;\n+            } else {\n+              stack.push(new Pair(root.right, currNumber));\n+              stack.push(new Pair(root.left, currNumber));\n+            }\n+          }\n+        }\n+        return rootToLeaf;\n+      }\n+}"
+  }
+]

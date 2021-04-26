@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "78d82d05643a6676b98f463c6f91988efe6e5929",
+    "filename": "src/gwt/acesupport/acemode/r_highlight_rules.js",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 11,
+    "changes": 28,
+    "blob_url": "https://github.com/rstudio/rstudio/blob/68273855d5b4281c566b4905fccac9bef891b7b4/src/gwt/acesupport/acemode/r_highlight_rules.js",
+    "raw_url": "https://github.com/rstudio/rstudio/raw/68273855d5b4281c566b4905fccac9bef891b7b4/src/gwt/acesupport/acemode/r_highlight_rules.js",
+    "contents_url": "https://api.github.com/repos/rstudio/rstudio/contents/src/gwt/acesupport/acemode/r_highlight_rules.js?ref=68273855d5b4281c566b4905fccac9bef891b7b4",
+    "patch": "@@ -184,14 +184,8 @@ define(\"mode/r_highlight_rules\", [\"require\", \"exports\", \"module\"], function(requ\n \n   var RHighlightRules = function()\n   {\n-    // NOTE: The backslash character is an experimental alias\n-    // for the 'function' symbol, and can be used for defining\n-    // short-hand functions, e.g.\n-    //\n-    //     \\(x) x + 1\n-    //\n     var keywords = lang.arrayToMap([\n-      \"\\\\\", \"function\", \"if\", \"else\", \"in\",\n+      \"function\", \"if\", \"else\", \"in\",\n       \"break\", \"next\", \"repeat\", \"for\", \"while\"\n     ]);\n \n@@ -208,9 +202,7 @@ define(\"mode/r_highlight_rules\", [\"require\", \"exports\", \"module\"], function(requ\n       \"NA_complex_\"\n     ]);\n \n-    // NOTE: We accept '\\' as a standalone identifier here\n-    // so that it can be parsed as the 'function' alias symbol\n-    var reIdentifier = \"(?:\\\\\\\\|[a-zA-Z.][a-zA-Z0-9._]*)\";\n+    var reIdentifier = \"[a-zA-Z.][a-zA-Z0-9._]*\";\n \n     var $complements = {\n       \"{\" : \"}\",\n@@ -323,6 +315,20 @@ define(\"mode/r_highlight_rules\", [\"require\", \"exports\", \"module\"], function(requ\n       }\n     ];\n \n+    rules[\"#lambda\"] = [\n+      {\n+        token : \"keyword\",\n+        regex : \"\\\\\\\\\",\n+        next  : \"start\",\n+        onMatch : function(value, state, stack, line) {\n+          return [{\n+            type: this.token,\n+            value: \"λ\"\n+          }];\n+        }\n+      }\n+    ];\n+\n     rules[\"#identifier\"] = [\n       {\n         token : function(value)\n@@ -449,7 +455,7 @@ define(\"mode/r_highlight_rules\", [\"require\", \"exports\", \"module\"], function(requ\n \n     // Construct rules from previously defined blocks.\n     rules[\"start\"] = include([\n-      \"#comment\", \"#string\", \"#number\",\n+      \"#comment\", \"#string\", \"#number\", \"#lambda\",\n       \"#package-access\", \"#quoted-identifier\",\n       \"#function-call-or-keyword\", \"#keyword-or-identifier\",\n       \"#operator\", \"#text\""
+  }
+]

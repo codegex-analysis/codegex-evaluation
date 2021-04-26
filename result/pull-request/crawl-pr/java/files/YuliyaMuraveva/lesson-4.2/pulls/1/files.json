@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "4f1ac437b4cccd7de170c3082c615c15958df1df",
+    "filename": ".github/workflows/maven.yml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/YuliyaMuraveva/lesson-4.2/blob/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/.github/workflows/maven.yml",
+    "raw_url": "https://github.com/YuliyaMuraveva/lesson-4.2/raw/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/.github/workflows/maven.yml",
+    "contents_url": "https://api.github.com/repos/YuliyaMuraveva/lesson-4.2/contents/.github/workflows/maven.yml?ref=c294b7b133d45b5f79156f30bb0f57acc3d6d05f",
+    "patch": "@@ -5,9 +5,9 @@ name: Java CI with Maven\n \n on:\n   push:\n-    branches: [ master ]\n+    branches: [ master, comparator ]\n   pull_request:\n-    branches: [ master ]\n+    branches: [ master, comparator ]\n \n jobs:\n   build:"
+  },
+  {
+    "sha": "ac9acf8d80ebac0c863df25027fa2a271dc55dd2",
+    "filename": "src/main/java/ru/netology/domain/Flight.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 3,
+    "changes": 5,
+    "blob_url": "https://github.com/YuliyaMuraveva/lesson-4.2/blob/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/src/main/java/ru/netology/domain/Flight.java",
+    "raw_url": "https://github.com/YuliyaMuraveva/lesson-4.2/raw/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/src/main/java/ru/netology/domain/Flight.java",
+    "contents_url": "https://api.github.com/repos/YuliyaMuraveva/lesson-4.2/contents/src/main/java/ru/netology/domain/Flight.java?ref=c294b7b133d45b5f79156f30bb0f57acc3d6d05f",
+    "patch": "@@ -5,7 +5,7 @@\n \n @AllArgsConstructor\n @Data\n-public class Flight implements Comparable<Flight>{\n+public class Flight implements Comparable<Flight> {\n     private int id;\n     private int price;\n     private String departureAirport;\n@@ -21,7 +21,6 @@ public boolean matches(String searchDeparture, String searchArrival) {\n         if (this.getDepartureAirport().equalsIgnoreCase(searchDeparture) &&\n                 this.getArrivalAirport().equalsIgnoreCase(searchArrival)) {\n             return true;\n-        }\n-        else { return false; }\n+        } else return false;\n     }\n }"
+  },
+  {
+    "sha": "5ba3b354738b788625712a5bdd9e55219698b9d2",
+    "filename": "src/main/java/ru/netology/domain/FlightByFlightTimeAscComparator.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/YuliyaMuraveva/lesson-4.2/blob/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/src/main/java/ru/netology/domain/FlightByFlightTimeAscComparator.java",
+    "raw_url": "https://github.com/YuliyaMuraveva/lesson-4.2/raw/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/src/main/java/ru/netology/domain/FlightByFlightTimeAscComparator.java",
+    "contents_url": "https://api.github.com/repos/YuliyaMuraveva/lesson-4.2/contents/src/main/java/ru/netology/domain/FlightByFlightTimeAscComparator.java?ref=c294b7b133d45b5f79156f30bb0f57acc3d6d05f",
+    "patch": "@@ -0,0 +1,9 @@\n+package ru.netology.domain;\n+\n+import java.util.Comparator;\n+\n+public class FlightByFlightTimeAscComparator implements Comparator<Flight> {\n+    public int compare(Flight o1, Flight o2) {\n+        return o1.getFlightTime() - o2.getFlightTime();\n+    }\n+}"
+  },
+  {
+    "sha": "45f00c83e85e78719e7adcc16287e66fb57bebfc",
+    "filename": "src/main/java/ru/netology/manager/FlightManager.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/YuliyaMuraveva/lesson-4.2/blob/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/src/main/java/ru/netology/manager/FlightManager.java",
+    "raw_url": "https://github.com/YuliyaMuraveva/lesson-4.2/raw/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/src/main/java/ru/netology/manager/FlightManager.java",
+    "contents_url": "https://api.github.com/repos/YuliyaMuraveva/lesson-4.2/contents/src/main/java/ru/netology/manager/FlightManager.java?ref=c294b7b133d45b5f79156f30bb0f57acc3d6d05f",
+    "patch": "@@ -4,6 +4,7 @@\n import ru.netology.repository.FlightRepository;\n \n import java.util.Arrays;\n+import java.util.Comparator;\n \n public class FlightManager {\n     private FlightRepository repository;\n@@ -22,7 +23,7 @@\n         return repository.findAll();\n     }\n \n-    public Flight[] search(String departureAirport, String arrivalAirport) {\n+    public Flight[] findAll(String departureAirport, String arrivalAirport, Comparator<Flight> comparator) {\n         Flight[] offers = new Flight[0];\n         for (Flight flight : repository.findAll()) {\n             if (flight.matches(departureAirport, arrivalAirport)) {\n@@ -32,7 +33,7 @@\n                 offers = tmp;\n             }\n         }\n-        Arrays.sort(offers);\n+        Arrays.sort(offers, comparator);\n         return offers;\n     }\n }"
+  },
+  {
+    "sha": "c10c0830b7edc8bb2a67f07f2bdcb2ee4ae55759",
+    "filename": "src/test/java/ru/netology/manager/FlightManagerTest.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 12,
+    "changes": 19,
+    "blob_url": "https://github.com/YuliyaMuraveva/lesson-4.2/blob/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/src/test/java/ru/netology/manager/FlightManagerTest.java",
+    "raw_url": "https://github.com/YuliyaMuraveva/lesson-4.2/raw/c294b7b133d45b5f79156f30bb0f57acc3d6d05f/src/test/java/ru/netology/manager/FlightManagerTest.java",
+    "contents_url": "https://api.github.com/repos/YuliyaMuraveva/lesson-4.2/contents/src/test/java/ru/netology/manager/FlightManagerTest.java?ref=c294b7b133d45b5f79156f30bb0f57acc3d6d05f",
+    "patch": "@@ -3,6 +3,7 @@\n import org.junit.jupiter.api.BeforeEach;\n import org.junit.jupiter.api.Test;\n import ru.netology.domain.Flight;\n+import ru.netology.domain.FlightByFlightTimeAscComparator;\n import ru.netology.domain.NotFoundException;\n import ru.netology.repository.FlightRepository;\n \n@@ -11,6 +12,7 @@\n class FlightManagerTest {\n     private FlightRepository repository = new FlightRepository();\n     private FlightManager manager = new FlightManager(repository);\n+    private FlightByFlightTimeAscComparator comparator = new FlightByFlightTimeAscComparator();\n     private Flight spbMoscow = new Flight(1, 2000, \"LED\", \"DME\", 100);\n     private Flight moscowSpb1 = new Flight(2, 2500, \"DME\", \"LED\", 90);\n     private Flight moscowRostov = new Flight(3, 5000, \"DME\", \"ROV\", 120);\n@@ -31,29 +33,22 @@ public void setUp() {\n     }\n \n     @Test\n-    void shouldSearchAndSort() {\n-        Flight[] actual = manager.search(\"DME\", \"LED\");\n-        Flight[] expected = new Flight[]{moscowSpb2, moscowSpb1, moscowSpb3};\n-        assertArrayEquals(expected, actual);\n-    }\n-\n-    @Test\n-    void shouldSearchAndSortInEqualsPrice() {\n-        Flight[] actual = manager.search(\"lEd\", \"dmE\");\n-        Flight[] expected = new Flight[]{spbMoscow, spbMoscow2};\n+    void shouldSearchAndSortByTime() {\n+        Flight[] actual = manager.findAll(\"DME\", \"LED\", comparator);\n+        Flight[] expected = new Flight[]{moscowSpb2, moscowSpb3, moscowSpb1};\n         assertArrayEquals(expected, actual);\n     }\n \n     @Test\n     void shouldSearchInOne() {\n-        Flight[] actual = manager.search(\"dme\", \"rov\");\n+        Flight[] actual = manager.findAll(\"dme\", \"rov\", comparator);\n         Flight[] expected = new Flight[]{moscowRostov};\n         assertArrayEquals(expected, actual);\n     }\n \n     @Test\n     void shouldSearchNotInList() {\n-        Flight[] actual = manager.search(\"Dme\", \"Kzn\");\n+        Flight[] actual = manager.findAll(\"Dme\", \"Kzn\", comparator);\n         Flight[] expected = new Flight[0];\n         assertArrayEquals(expected, actual);\n     }"
+  }
+]

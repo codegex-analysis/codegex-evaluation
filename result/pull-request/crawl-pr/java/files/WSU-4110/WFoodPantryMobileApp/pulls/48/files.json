@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "745c6f179a4ba15f4a13928e9f362cf276992887",
+    "filename": "CSC4111-FoodPantryApp-master/app/src/main/AndroidManifest.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/WSU-4110/WFoodPantryMobileApp/blob/e78a977a2f1ee8dc577a53083ca1f5d1a6d76842/CSC4111-FoodPantryApp-master/app/src/main/AndroidManifest.xml",
+    "raw_url": "https://github.com/WSU-4110/WFoodPantryMobileApp/raw/e78a977a2f1ee8dc577a53083ca1f5d1a6d76842/CSC4111-FoodPantryApp-master/app/src/main/AndroidManifest.xml",
+    "contents_url": "https://api.github.com/repos/WSU-4110/WFoodPantryMobileApp/contents/CSC4111-FoodPantryApp-master/app/src/main/AndroidManifest.xml?ref=e78a977a2f1ee8dc577a53083ca1f5d1a6d76842",
+    "patch": "@@ -20,6 +20,7 @@\n         <activity android:name=\".MainActivity\" />\n         <activity android:name=\".MenuPage\" />\n         <activity android:name=\".StaffMenuPage\" />\n+        <activity android:name=\".StaffMessageUser\" />\n         <activity android:name=\".StaffLoginPage\" />\n         <activity android:name=\".FormPIProcessing\" />\n         <activity android:name=\".FormOIProcessing\" />"
+  },
+  {
+    "sha": "dab93effb8c10cbdaf4c2ba4baf61f0bab7500c3",
+    "filename": "CSC4111-FoodPantryApp-master/app/src/main/java/com/example/csc4111project3/StaffMenuPage.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/WSU-4110/WFoodPantryMobileApp/blob/e78a977a2f1ee8dc577a53083ca1f5d1a6d76842/CSC4111-FoodPantryApp-master/app/src/main/java/com/example/csc4111project3/StaffMenuPage.java",
+    "raw_url": "https://github.com/WSU-4110/WFoodPantryMobileApp/raw/e78a977a2f1ee8dc577a53083ca1f5d1a6d76842/CSC4111-FoodPantryApp-master/app/src/main/java/com/example/csc4111project3/StaffMenuPage.java",
+    "contents_url": "https://api.github.com/repos/WSU-4110/WFoodPantryMobileApp/contents/CSC4111-FoodPantryApp-master/app/src/main/java/com/example/csc4111project3/StaffMenuPage.java?ref=e78a977a2f1ee8dc577a53083ca1f5d1a6d76842",
+    "patch": "@@ -64,8 +64,8 @@ public boolean onNavigationItemSelected(@NonNull MenuItem item) {\n                         new StaffCheckOrders()).commit();\n                 break;\n             case R.id.nav_message_user: // if \"message user\" is clicked\n-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container_staff,\n-                        new StaffMessageUser()).commit();\n+                Intent i = new Intent(this,StaffMessageUser.class);\n+                this.startActivity(i); //starts the activity using the intent\n                 break;\n             case R.id.nav_push_update: // if \"push update\" is clicked\n                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container_staff,"
+  },
+  {
+    "sha": "45c367255b88461051dde2bddf990644d98a8904",
+    "filename": "CSC4111-FoodPantryApp-master/app/src/main/java/com/example/csc4111project3/StaffMessageUser.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 10,
+    "changes": 37,
+    "blob_url": "https://github.com/WSU-4110/WFoodPantryMobileApp/blob/e78a977a2f1ee8dc577a53083ca1f5d1a6d76842/CSC4111-FoodPantryApp-master/app/src/main/java/com/example/csc4111project3/StaffMessageUser.java",
+    "raw_url": "https://github.com/WSU-4110/WFoodPantryMobileApp/raw/e78a977a2f1ee8dc577a53083ca1f5d1a6d76842/CSC4111-FoodPantryApp-master/app/src/main/java/com/example/csc4111project3/StaffMessageUser.java",
+    "contents_url": "https://api.github.com/repos/WSU-4110/WFoodPantryMobileApp/contents/CSC4111-FoodPantryApp-master/app/src/main/java/com/example/csc4111project3/StaffMessageUser.java?ref=e78a977a2f1ee8dc577a53083ca1f5d1a6d76842",
+    "patch": "@@ -1,21 +1,38 @@\n package com.example.csc4111project3;\n \n+import androidx.appcompat.app.AppCompatActivity;\n+\n+import android.content.Intent;\n import android.os.Bundle;\n-import android.view.LayoutInflater;\n import android.view.View;\n-import android.view.ViewGroup;\n+import android.widget.Button;\n+import android.widget.EditText;\n \n-import androidx.annotation.NonNull;\n-import androidx.annotation.Nullable;\n-import androidx.fragment.app.Fragment;\n+import java.lang.*;\n \n+public class StaffMessageUser extends AppCompatActivity{\n+    //variables\n+    private EditText Recipient;\n+    private EditText MessageSubject;\n+    private EditText MessageSend;\n+    private Button SendButton;\n \n+    @Override\n+    protected void onCreate(Bundle savedInstanceState) {\n+        super.onCreate(savedInstanceState);\n+        setContentView(R.layout.activity_staffmessage_user);\n \n+        //declare variables\n+        Recipient = (EditText) findViewById(R.id.Recipient);\n+        MessageSubject = (EditText) findViewById(R.id.MessageSubject);\n+        MessageSend = (EditText) findViewById(R.id.MessageSend);\n+        SendButton = (Button) findViewById(R.id.SendButton);\n \n-public class StaffMessageUser extends Fragment {\n-    @Nullable\n-    @Override\n-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {\n-        return inflater.inflate(R.layout.activity_staffmessage_user, container, false);\n+        SendButton.setOnClickListener(new View.OnClickListener() {\n+            @Override\n+            public void onClick(View v) {\n+                finish(); //fill later\n+            }\n+        });\n     }\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "a2fadf9bd803f37e92dd7845895093accb304211",
+    "filename": "CSC4111-FoodPantryApp-master/app/src/main/res/layout/activity_staffmessage_user.xml",
+    "status": "modified",
+    "additions": 55,
+    "deletions": 1,
+    "changes": 56,
+    "blob_url": "https://github.com/WSU-4110/WFoodPantryMobileApp/blob/e78a977a2f1ee8dc577a53083ca1f5d1a6d76842/CSC4111-FoodPantryApp-master/app/src/main/res/layout/activity_staffmessage_user.xml",
+    "raw_url": "https://github.com/WSU-4110/WFoodPantryMobileApp/raw/e78a977a2f1ee8dc577a53083ca1f5d1a6d76842/CSC4111-FoodPantryApp-master/app/src/main/res/layout/activity_staffmessage_user.xml",
+    "contents_url": "https://api.github.com/repos/WSU-4110/WFoodPantryMobileApp/contents/CSC4111-FoodPantryApp-master/app/src/main/res/layout/activity_staffmessage_user.xml?ref=e78a977a2f1ee8dc577a53083ca1f5d1a6d76842",
+    "patch": "@@ -5,7 +5,61 @@\n     android:id=\"@+id/staffMessageUser\"\n     android:layout_width=\"match_parent\"\n     android:layout_height=\"match_parent\"\n-    android:background=\"#FBC663\"\n     tools:context=\".StaffMessageUser\">\n \n+    <EditText\n+        android:id=\"@+id/Recipient\"\n+        android:layout_width=\"wrap_content\"\n+        android:layout_height=\"wrap_content\"\n+        android:ems=\"10\"\n+        android:hint=\"Recipient\"\n+        android:inputType=\"textPersonName\"\n+        app:layout_constraintBottom_toBottomOf=\"parent\"\n+        app:layout_constraintEnd_toEndOf=\"parent\"\n+        app:layout_constraintHorizontal_bias=\"0.497\"\n+        app:layout_constraintStart_toStartOf=\"parent\"\n+        app:layout_constraintTop_toTopOf=\"parent\"\n+        app:layout_constraintVertical_bias=\"0.298\" />\n+\n+    <EditText\n+        android:id=\"@+id/MessageSubject\"\n+        android:layout_width=\"wrap_content\"\n+        android:layout_height=\"wrap_content\"\n+        android:ems=\"10\"\n+        android:hint=\"Subject\"\n+        android:inputType=\"textEmailSubject\"\n+        app:layout_constraintBottom_toBottomOf=\"parent\"\n+        app:layout_constraintEnd_toEndOf=\"parent\"\n+        app:layout_constraintHorizontal_bias=\"0.497\"\n+        app:layout_constraintStart_toStartOf=\"parent\"\n+        app:layout_constraintTop_toBottomOf=\"@+id/Recipient\"\n+        app:layout_constraintVertical_bias=\"0.055\" />\n+\n+    <EditText\n+        android:id=\"@+id/MessageSend\"\n+        android:layout_width=\"258dp\"\n+        android:layout_height=\"210dp\"\n+        android:ems=\"10\"\n+        android:hint=\"Message to User\"\n+        android:inputType=\"textLongMessage\"\n+        app:layout_constraintBottom_toBottomOf=\"parent\"\n+        app:layout_constraintEnd_toEndOf=\"parent\"\n+        app:layout_constraintHorizontal_bias=\"0.497\"\n+        app:layout_constraintStart_toStartOf=\"parent\"\n+        app:layout_constraintTop_toBottomOf=\"@+id/MessageSubject\"\n+        app:layout_constraintVertical_bias=\"0.055\" />\n+\n+    <Button\n+        android:id=\"@+id/SendButton\"\n+        android:layout_width=\"wrap_content\"\n+        android:layout_height=\"wrap_content\"\n+        android:text=\"Send Message\"\n+        android:textColor=\"#000000\"\n+        app:backgroundTint=\"#FBC663\"\n+        app:layout_constraintBottom_toBottomOf=\"parent\"\n+        app:layout_constraintEnd_toEndOf=\"parent\"\n+        app:layout_constraintStart_toStartOf=\"parent\"\n+        app:layout_constraintTop_toBottomOf=\"@+id/MessageSend\"\n+        app:layout_constraintVertical_bias=\"0.176\" />\n+\n </androidx.constraintlayout.widget.ConstraintLayout>\n\\ No newline at end of file"
+  }
+]

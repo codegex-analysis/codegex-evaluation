@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "e8270b46a49d6874f0472d9717d005b59ec1d2f4",
+    "filename": "reports-ui/src/main/java/io/jmix/reportsui/screen/report/edit/ReportEditor.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 3,
+    "changes": 20,
+    "blob_url": "https://github.com/Haulmont/jmix-reports/blob/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports-ui/src/main/java/io/jmix/reportsui/screen/report/edit/ReportEditor.java",
+    "raw_url": "https://github.com/Haulmont/jmix-reports/raw/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports-ui/src/main/java/io/jmix/reportsui/screen/report/edit/ReportEditor.java",
+    "contents_url": "https://api.github.com/repos/Haulmont/jmix-reports/contents/reports-ui/src/main/java/io/jmix/reportsui/screen/report/edit/ReportEditor.java?ref=b2fc27ff87433984e1ac3f8b4f0f6a3076f37624",
+    "patch": "@@ -34,18 +34,17 @@\n import io.jmix.ui.component.*;\n import io.jmix.ui.model.CollectionContainer;\n import io.jmix.ui.model.CollectionLoader;\n-import io.jmix.ui.model.DataContext;\n import io.jmix.ui.model.InstanceContainer;\n import io.jmix.ui.screen.*;\n import org.apache.commons.collections4.CollectionUtils;\n import org.apache.commons.lang3.BooleanUtils;\n import org.apache.commons.lang3.StringUtils;\n import org.springframework.beans.factory.annotation.Autowired;\n-\n import javax.inject.Named;\n import java.util.Collection;\n import java.util.HashSet;\n import java.util.Map;\n+import java.util.stream.Collectors;\n \n @UiController(\"report_Report.edit\")\n @UiDescriptor(\"report-edit.xml\")\n@@ -181,7 +180,7 @@ public void onAfterShow(AfterShowEvent event) {\n     }\n \n     @Override\n-    protected String getSaveNotificationCaption(){\n+    protected String getSaveNotificationCaption() {\n         return messages.formatMessage(getClass(), \"notification.completeSuccessfully\", getEditedEntity().getName());\n     }\n \n@@ -218,6 +217,21 @@ protected void onRunClick(Button.ClickEvent event) {\n         }\n     }\n \n+    @Subscribe\n+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {\n+        getEditedEntity().getReportRoles().forEach(role -> {\n+            if(role.getReport() == null){\n+                role.setReport(getEditedEntity());\n+            }\n+        });\n+\n+        getEditedEntity().getReportScreens().forEach(screen -> {\n+            if(screen.getReport() == null){\n+                screen.setReport(getEditedEntity());\n+            }\n+        });\n+    }\n+\n     @Subscribe\n     protected void onValidation(ValidationEvent event) {\n         ValidationErrors validationErrors = new ValidationErrors();"
+  },
+  {
+    "sha": "21c07f021f8cdea0d77470889a79538f35434d1b",
+    "filename": "reports-ui/src/main/java/io/jmix/reportsui/screen/report/edit/tabs/SecurityFragment.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/Haulmont/jmix-reports/blob/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports-ui/src/main/java/io/jmix/reportsui/screen/report/edit/tabs/SecurityFragment.java",
+    "raw_url": "https://github.com/Haulmont/jmix-reports/raw/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports-ui/src/main/java/io/jmix/reportsui/screen/report/edit/tabs/SecurityFragment.java",
+    "contents_url": "https://api.github.com/repos/Haulmont/jmix-reports/contents/reports-ui/src/main/java/io/jmix/reportsui/screen/report/edit/tabs/SecurityFragment.java?ref=b2fc27ff87433984e1ac3f8b4f0f6a3076f37624",
+    "patch": "@@ -126,7 +126,6 @@ protected void onRolesTableAdd(Action.ActionPerformedEvent event) {\n \n             if (!exists) {\n                 ReportRole reportRole = metadata.create(ReportRole.class);\n-                reportRole.setReport(reportDc.getItem());\n                 reportRole.setRoleName(role.getName());\n                 reportRole.setRoleCode(role.getCode());\n                 reportRolesDc.getMutableItems().add(reportRole);\n@@ -149,7 +148,6 @@ public void onScreenTableAdd(Action.ActionPerformedEvent event) {\n \n             if (!exists) {\n                 ReportScreen reportScreen = metadata.create(ReportScreen.class);\n-                reportScreen.setReport(reportDc.getItem());\n                 reportScreen.setScreenId(screenId);\n                 reportScreensDc.getMutableItems().add(reportScreen);\n             }"
+  },
+  {
+    "sha": "a1402b9c2104aa696179d5855ce47a1a1a83d1f7",
+    "filename": "reports-ui/src/main/java/io/jmix/reportsui/screen/report/run/ReportRun.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Haulmont/jmix-reports/blob/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports-ui/src/main/java/io/jmix/reportsui/screen/report/run/ReportRun.java",
+    "raw_url": "https://github.com/Haulmont/jmix-reports/raw/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports-ui/src/main/java/io/jmix/reportsui/screen/report/run/ReportRun.java",
+    "contents_url": "https://api.github.com/repos/Haulmont/jmix-reports/contents/reports-ui/src/main/java/io/jmix/reportsui/screen/report/run/ReportRun.java?ref=b2fc27ff87433984e1ac3f8b4f0f6a3076f37624",
+    "patch": "@@ -96,7 +96,7 @@ public void setScreenParameter(String screenParameter) {\n     }\n \n     @Subscribe\n-    protected void onInit(InitEvent event) {\n+    protected void onBeforeShow(BeforeShowEvent event) {\n         List<Report> reports = reportsParameter;\n         if (reports == null) {\n             reports = reportGuiManager.getAvailableReports(screenParameter, currentAuthentication.getUser(),"
+  },
+  {
+    "sha": "a344acd0022e5959f95b24b5a470c99d6ca25720",
+    "filename": "reports/src/main/java/io/jmix/reports/ReportSecurityManager.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/Haulmont/jmix-reports/blob/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports/src/main/java/io/jmix/reports/ReportSecurityManager.java",
+    "raw_url": "https://github.com/Haulmont/jmix-reports/raw/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports/src/main/java/io/jmix/reports/ReportSecurityManager.java",
+    "contents_url": "https://api.github.com/repos/Haulmont/jmix-reports/contents/reports/src/main/java/io/jmix/reports/ReportSecurityManager.java?ref=b2fc27ff87433984e1ac3f8b4f0f6a3076f37624",
+    "patch": "@@ -65,8 +65,8 @@ public void applySecurityPolicies(LoadContext lc, @Nullable String screen, @Null\n                 lc.getQuery().setParameter(paramName, wrapCodeParameterForSearch(role.getCode()));\n                 transformer.addWhereAsIs(roleCondition.toString());\n             }\n-            lc.getQuery().setQueryString(transformer.getResult());\n         }\n+        lc.getQuery().setQueryString(transformer.getResult());\n     }\n \n     /**\n@@ -90,6 +90,6 @@ public void applyPoliciesByEntityParameters(LoadContext lc, @Nullable MetaClass\n     }\n \n     protected String wrapCodeParameterForSearch(String value) {\n-        return \"%,\" + QueryUtils.escapeForLike(value) + \",%\";\n+        return \"%\" + QueryUtils.escapeForLike(value) + \"%\";\n     }\n }"
+  },
+  {
+    "sha": "c5c853c93dbada15f70af1e801876d94139fc61b",
+    "filename": "reports/src/main/java/io/jmix/reports/entity/Report.java",
+    "status": "modified",
+    "additions": 49,
+    "deletions": 0,
+    "changes": 49,
+    "blob_url": "https://github.com/Haulmont/jmix-reports/blob/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports/src/main/java/io/jmix/reports/entity/Report.java",
+    "raw_url": "https://github.com/Haulmont/jmix-reports/raw/b2fc27ff87433984e1ac3f8b4f0f6a3076f37624/reports/src/main/java/io/jmix/reports/entity/Report.java",
+    "contents_url": "https://api.github.com/repos/Haulmont/jmix-reports/contents/reports/src/main/java/io/jmix/reports/entity/Report.java?ref=b2fc27ff87433984e1ac3f8b4f0f6a3076f37624",
+    "patch": "@@ -32,6 +32,7 @@\n \n import javax.persistence.*;\n import java.util.*;\n+import java.util.stream.Collectors;\n \n /**\n  * Attention! This entity should be detached for correct work. If you do not detach it please use logic as in\n@@ -44,6 +45,7 @@\n @SuppressWarnings(\"unused\")\n public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.Entity {\n     private static final long serialVersionUID = -2817764915661205093L;\n+    protected static final String IDX_SEPARATOR = \",\";\n \n     @JmixGeneratedValue\n     @Id\n@@ -148,10 +150,12 @@\n \n     @Transient\n     @JmixProperty\n+    @Composition\n     protected List<ReportScreen> reportScreens = new ArrayList<>();\n \n     @Transient\n     @JmixProperty\n+    @Composition\n     protected Set<ReportRole> reportRoles = new HashSet<>();\n \n     @Transient\n@@ -168,6 +172,51 @@\n     @JmixProperty\n     protected Boolean validationOn = false;\n \n+    @PreUpdate\n+    @PrePersist\n+    protected void updateIdxFields(){\n+        updateInputParamIdx();\n+        updateRoleIdx();\n+        updateScreenIdx();\n+    }\n+\n+    private void updateInputParamIdx() {\n+        if (CollectionUtils.isNotEmpty(inputParameters)) {\n+            setInputEntityTypesIdx(inputParameters\n+                    .stream()\n+                    .map(ReportInputParameter::getEntityMetaClass)\n+                    .filter(StringUtils::isNotBlank)\n+                    .collect(Collectors.joining(IDX_SEPARATOR)));\n+        } else {\n+            setInputEntityTypesIdx(null);\n+        }\n+    }\n+\n+    private void updateRoleIdx() {\n+        if (CollectionUtils.isNotEmpty(reportRoles)) {\n+            setRolesIdx(reportRoles\n+                    .stream()\n+                    .map(ReportRole::getRoleName)\n+                    .collect(Collectors.joining(IDX_SEPARATOR)));\n+        } else {\n+           setRolesIdx(null);\n+        }\n+    }\n+\n+    private void updateScreenIdx() {\n+        if (CollectionUtils.isNotEmpty(reportScreens)) {\n+            setScreensIdx(reportScreens\n+                    .stream()\n+                    .map(ReportScreen::getScreenId)\n+                    .collect(Collectors.joining(IDX_SEPARATOR)));\n+        } else {\n+            setScreensIdx(null);\n+        }\n+    }\n+\n+\n+\n+\n     public Boolean getIsTmp() {\n         return isTmp;\n     }"
+  }
+]

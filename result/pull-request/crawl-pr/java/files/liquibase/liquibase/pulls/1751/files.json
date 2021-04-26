@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "02905f843415e3c484bb87b43257c81b62505091",
+    "filename": "liquibase-core/src/main/java/liquibase/statement/InsertExecutablePreparedStatement.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 2,
+    "changes": 15,
+    "blob_url": "https://github.com/liquibase/liquibase/blob/656897e280e15e2845520cdedbe5d545035df459/liquibase-core/src/main/java/liquibase/statement/InsertExecutablePreparedStatement.java",
+    "raw_url": "https://github.com/liquibase/liquibase/raw/656897e280e15e2845520cdedbe5d545035df459/liquibase-core/src/main/java/liquibase/statement/InsertExecutablePreparedStatement.java",
+    "contents_url": "https://api.github.com/repos/liquibase/liquibase/contents/liquibase-core/src/main/java/liquibase/statement/InsertExecutablePreparedStatement.java?ref=656897e280e15e2845520cdedbe5d545035df459",
+    "patch": "@@ -4,6 +4,7 @@\n import liquibase.change.ColumnConfig;\n import liquibase.changelog.ChangeSet;\n import liquibase.database.Database;\n+import liquibase.database.core.MSSQLDatabase;\n import liquibase.resource.ResourceAccessor;\n \n import java.util.List;\n@@ -26,9 +27,15 @@ public boolean continueOnError() {\n \n     @Override\n     protected String generateSql(List<ColumnConfig> cols) {\n-        StringBuilder sql = new StringBuilder(\"INSERT INTO \");\n+        StringBuilder sql = new StringBuilder();\n+        String tableName = database.escapeTableName(getCatalogName(), getSchemaName(), getTableName());\n+        if (database instanceof MSSQLDatabase) {\n+            String enableIdentityInsert = \"SET IDENTITY_INSERT \" + tableName + \" ON; \";\n+            sql.append(enableIdentityInsert);\n+        }\n+        sql.append(\"INSERT INTO \");\n         StringBuilder params = new StringBuilder(\"VALUES(\");\n-        sql.append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));\n+        sql.append(tableName);\n         sql.append(\"(\");\n         for(ColumnConfig column : getColumns()) {\n             if(database.supportsAutoIncrement()\n@@ -47,6 +54,10 @@ protected String generateSql(List<ColumnConfig> cols) {\n         params.append(\")\");\n         sql.append(\") \");\n         sql.append(params);\n+        if (database instanceof MSSQLDatabase) {\n+            String disableIdentityInsert = \"; SET IDENTITY_INSERT \" + tableName + \" OFF\";\n+            sql.append(disableIdentityInsert);\n+        }\n         return sql.toString();\n     }\n }"
+  },
+  {
+    "sha": "ebcb97294d500a015c9d07cceec53ab756a73398",
+    "filename": "liquibase-core/src/test/groovy/liquibase/change/core/LoadDataChangeTest.groovy",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 1,
+    "changes": 25,
+    "blob_url": "https://github.com/liquibase/liquibase/blob/656897e280e15e2845520cdedbe5d545035df459/liquibase-core/src/test/groovy/liquibase/change/core/LoadDataChangeTest.groovy",
+    "raw_url": "https://github.com/liquibase/liquibase/raw/656897e280e15e2845520cdedbe5d545035df459/liquibase-core/src/test/groovy/liquibase/change/core/LoadDataChangeTest.groovy",
+    "contents_url": "https://api.github.com/repos/liquibase/liquibase/contents/liquibase-core/src/test/groovy/liquibase/change/core/LoadDataChangeTest.groovy?ref=656897e280e15e2845520cdedbe5d545035df459",
+    "patch": "@@ -5,20 +5,27 @@ import liquibase.change.StandardChangeTest\n import liquibase.changelog.ChangeSet\n import liquibase.database.DatabaseConnection\n import liquibase.database.DatabaseFactory\n+import liquibase.database.PreparedStatementFactory\n import liquibase.database.core.MSSQLDatabase\n import liquibase.database.core.MockDatabase\n+import liquibase.database.jvm.JdbcConnection\n+import liquibase.exception.DatabaseException\n import liquibase.parser.core.ParsedNodeException\n import liquibase.resource.ResourceAccessor\n import liquibase.snapshot.MockSnapshotGeneratorFactory\n import liquibase.snapshot.SnapshotGeneratorFactory\n import liquibase.statement.ExecutablePreparedStatement\n import liquibase.statement.ExecutablePreparedStatementBase\n+import liquibase.statement.ExecutablePreparedStatementBaseTest\n import liquibase.statement.SqlStatement\n import liquibase.statement.core.InsertSetStatement\n import liquibase.statement.core.InsertStatement\n import liquibase.test.TestContext\n import spock.lang.Unroll\n \n+import java.sql.PreparedStatement\n+import java.sql.SQLException\n+\n public class LoadDataChangeTest extends StandardChangeTest {\n \n     MSSQLDatabase mssqlDb;\n@@ -465,6 +472,23 @@ public class LoadDataChangeTest extends StandardChangeTest {\n \n         when:\n         SqlStatement[] sqlStatements = ((ExecutablePreparedStatement) sqlStatement[0]).getIndividualStatements();\n+        def conn = new JdbcConnection() {\n+            def passedInput = \"localhost\"\n+\n+            @Override\n+            protected String getConnectionUrl() throws SQLException {\n+                return passedInput\n+            }\n+\n+            @Override\n+            PreparedStatement prepareStatement(String sql) throws DatabaseException {\n+                ExecutablePreparedStatementBaseTest.DummyPreparedStatement stmt = new ExecutablePreparedStatementBaseTest.DummyPreparedStatement()\n+                return stmt\n+            }\n+        }\n+\n+        def factory = new PreparedStatementFactory(conn)\n+        ((ExecutablePreparedStatementBase)sqlStatements[0]).execute(factory)\n \n         then:\n         sqlStatements.length == 2\n@@ -543,5 +567,4 @@ public class LoadDataChangeTest extends StandardChangeTest {\n         \"John Doe\" == ((InsertStatement) sqlStatements[1]).getColumnValue(\"name\")\n         \"jdoe\" == ((InsertStatement) sqlStatements[1]).getColumnValue(\"username\")\n     }\n-\n }"
+  },
+  {
+    "sha": "0956fa723def24bd652de256c1b937c201ad0e6b",
+    "filename": "liquibase-core/src/test/java/liquibase/statement/ExecutablePreparedStatementBaseTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/liquibase/liquibase/blob/656897e280e15e2845520cdedbe5d545035df459/liquibase-core/src/test/java/liquibase/statement/ExecutablePreparedStatementBaseTest.java",
+    "raw_url": "https://github.com/liquibase/liquibase/raw/656897e280e15e2845520cdedbe5d545035df459/liquibase-core/src/test/java/liquibase/statement/ExecutablePreparedStatementBaseTest.java",
+    "contents_url": "https://api.github.com/repos/liquibase/liquibase/contents/liquibase-core/src/test/java/liquibase/statement/ExecutablePreparedStatementBaseTest.java?ref=656897e280e15e2845520cdedbe5d545035df459",
+    "patch": "@@ -81,7 +81,7 @@ protected String generateSql(List<ColumnConfig> cols) {\n         assertEquals(java.sql.Types.NULL, stmt.getParamTypes().get(1).intValue());\n     }\n \n-    private static class DummyPreparedStatement implements PreparedStatement {\n+    public static class DummyPreparedStatement implements PreparedStatement {\n         private Map<Integer, Integer> paramTypes = new HashMap<>();\n \n         public Map<Integer, Integer> getParamTypes() {"
+  }
+]

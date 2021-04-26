@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "883e861c02df1349c723d790dbf0118429937e36",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/MC-Machinations/VanillaTweaks/blob/29388ef9a70c2e1711187f0829d98114af3ba30e/pom.xml",
+    "raw_url": "https://github.com/MC-Machinations/VanillaTweaks/raw/29388ef9a70c2e1711187f0829d98114af3ba30e/pom.xml",
+    "contents_url": "https://api.github.com/repos/MC-Machinations/VanillaTweaks/contents/pom.xml?ref=29388ef9a70c2e1711187f0829d98114af3ba30e",
+    "patch": "@@ -108,7 +108,7 @@\n         <dependency>\n             <groupId>org.spigotmc</groupId>\n             <artifactId>spigot-api</artifactId>\n-            <version>1.16.4-R0.1-SNAPSHOT</version>\n+            <version>1.16.5-R0.1-SNAPSHOT</version>\n             <scope>provided</scope>\n         </dependency>\n         <dependency>"
+  },
+  {
+    "sha": "9f36e68ac39dc57e68e9ba70e11e0d1a2846ec70",
+    "filename": "src/main/java/me/machinemaker/vanillatweaks/VanillaTweaksModules.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/MC-Machinations/VanillaTweaks/blob/29388ef9a70c2e1711187f0829d98114af3ba30e/src/main/java/me/machinemaker/vanillatweaks/VanillaTweaksModules.java",
+    "raw_url": "https://github.com/MC-Machinations/VanillaTweaks/raw/29388ef9a70c2e1711187f0829d98114af3ba30e/src/main/java/me/machinemaker/vanillatweaks/VanillaTweaksModules.java",
+    "contents_url": "https://api.github.com/repos/MC-Machinations/VanillaTweaks/contents/src/main/java/me/machinemaker/vanillatweaks/VanillaTweaksModules.java?ref=29388ef9a70c2e1711187f0829d98114af3ba30e",
+    "patch": "@@ -119,4 +119,7 @@\n \n     @Path(\"villagers.wanderingtrades\")\n     public Boolean wanderingTrades = false;\n+\n+    @Path(\"survival.unlock-all-recipes\")\n+    public Boolean unlockAllRecipes = false;\n }"
+  },
+  {
+    "sha": "dc65194025b9d1964ca0c531eafaa5242ecb783a",
+    "filename": "src/main/java/me/machinemaker/vanillatweaks/_managers/ModuleManager.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/MC-Machinations/VanillaTweaks/blob/29388ef9a70c2e1711187f0829d98114af3ba30e/src/main/java/me/machinemaker/vanillatweaks/_managers/ModuleManager.java",
+    "raw_url": "https://github.com/MC-Machinations/VanillaTweaks/raw/29388ef9a70c2e1711187f0829d98114af3ba30e/src/main/java/me/machinemaker/vanillatweaks/_managers/ModuleManager.java",
+    "contents_url": "https://api.github.com/repos/MC-Machinations/VanillaTweaks/contents/src/main/java/me/machinemaker/vanillatweaks/_managers/ModuleManager.java?ref=29388ef9a70c2e1711187f0829d98114af3ba30e",
+    "patch": "@@ -26,6 +26,7 @@\n import me.machinemaker.vanillatweaks.tag.Tag;\n import me.machinemaker.vanillatweaks.thundershrine.ThunderShrine;\n import me.machinemaker.vanillatweaks.trackrawstats.TrackRawStats;\n+import me.machinemaker.vanillatweaks.unlockallrecipes.UnlockAllRecipes;\n import me.machinemaker.vanillatweaks.villagerdeathmessages.VillagerDeathMessages;\n import me.machinemaker.vanillatweaks.wanderingtrades.WanderingTrades;\n import me.machinemaker.vanillatweaks.workstationhighlights.WorkstationHighlights;\n@@ -99,7 +100,9 @@ private void reload(boolean unregister) {\n                     new VillagerDeathMessages(plugin),\n                     new PillagerTools(plugin),\n                     new WorkstationHighlights(plugin),\n-                    new WanderingTrades(plugin)\n+                    new WanderingTrades(plugin),\n+\n+                    new UnlockAllRecipes(plugin)\n             );\n         }\n         return this.allModules;"
+  },
+  {
+    "sha": "f6eb1e19f32dadb442e0959f0f2df88d8e5e41d6",
+    "filename": "src/main/java/me/machinemaker/vanillatweaks/unlockallrecipes/UnlockAllRecipes.java",
+    "status": "added",
+    "additions": 51,
+    "deletions": 0,
+    "changes": 51,
+    "blob_url": "https://github.com/MC-Machinations/VanillaTweaks/blob/29388ef9a70c2e1711187f0829d98114af3ba30e/src/main/java/me/machinemaker/vanillatweaks/unlockallrecipes/UnlockAllRecipes.java",
+    "raw_url": "https://github.com/MC-Machinations/VanillaTweaks/raw/29388ef9a70c2e1711187f0829d98114af3ba30e/src/main/java/me/machinemaker/vanillatweaks/unlockallrecipes/UnlockAllRecipes.java",
+    "contents_url": "https://api.github.com/repos/MC-Machinations/VanillaTweaks/contents/src/main/java/me/machinemaker/vanillatweaks/unlockallrecipes/UnlockAllRecipes.java?ref=29388ef9a70c2e1711187f0829d98114af3ba30e",
+    "patch": "@@ -0,0 +1,51 @@\n+package me.machinemaker.vanillatweaks.unlockallrecipes;\n+\n+import me.machinemaker.vanillatweaks.BaseModule;\n+import me.machinemaker.vanillatweaks.VanillaTweaks;\n+import me.machinemaker.vanillatweaks.utils.Cacheable;\n+import org.bukkit.Bukkit;\n+import org.bukkit.Keyed;\n+import org.bukkit.NamespacedKey;\n+import org.bukkit.entity.HumanEntity;\n+import org.bukkit.event.EventHandler;\n+import org.bukkit.event.Listener;\n+import org.bukkit.event.player.PlayerJoinEvent;\n+import org.bukkit.inventory.Recipe;\n+\n+import java.util.Collection;\n+import java.util.stream.Collectors;\n+import java.util.stream.StreamSupport;\n+\n+public class UnlockAllRecipes extends BaseModule implements Listener {\n+\n+    private final Cacheable<Collection<NamespacedKey>> recipes;\n+\n+    public UnlockAllRecipes(VanillaTweaks plugin) {\n+        super(plugin, config -> config.unlockAllRecipes);\n+        this.recipes = new Cacheable<>(() -> {\n+            Iterable<Recipe> iterable = Bukkit::recipeIterator;\n+            return StreamSupport.stream(iterable.spliterator(), false).filter(Keyed.class::isInstance).map(Keyed.class::cast).map(Keyed::getKey).collect(Collectors.toSet());\n+        }, 1000 * 60 * 5); // 5 minutes\n+\n+    }\n+\n+    @EventHandler\n+    public void onPlayerJoin(PlayerJoinEvent event) {\n+        discoverAllRecipes(event.getPlayer());\n+    }\n+\n+    public void discoverAllRecipes(HumanEntity humanEntity) {\n+        humanEntity.discoverRecipes(recipes.get());\n+    }\n+\n+    @Override\n+    public void register() {\n+        registerEvents(this);\n+        Bukkit.getOnlinePlayers().forEach(this::discoverAllRecipes);\n+    }\n+\n+    @Override\n+    public void unregister() {\n+        unregisterEvents(this);\n+    }\n+}"
+  },
+  {
+    "sha": "472117fa140389cafb740d5fd43dd981256f1c95",
+    "filename": "src/main/java/me/machinemaker/vanillatweaks/utils/Cacheable.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/MC-Machinations/VanillaTweaks/blob/29388ef9a70c2e1711187f0829d98114af3ba30e/src/main/java/me/machinemaker/vanillatweaks/utils/Cacheable.java",
+    "raw_url": "https://github.com/MC-Machinations/VanillaTweaks/raw/29388ef9a70c2e1711187f0829d98114af3ba30e/src/main/java/me/machinemaker/vanillatweaks/utils/Cacheable.java",
+    "contents_url": "https://api.github.com/repos/MC-Machinations/VanillaTweaks/contents/src/main/java/me/machinemaker/vanillatweaks/utils/Cacheable.java?ref=29388ef9a70c2e1711187f0829d98114af3ba30e",
+    "patch": "@@ -0,0 +1,32 @@\n+package me.machinemaker.vanillatweaks.utils;\n+\n+import org.jetbrains.annotations.NotNull;\n+\n+import java.util.function.Supplier;\n+\n+public class Cacheable<T> {\n+\n+    private T object;\n+    private long time;\n+    private final Supplier<T> objectSupplier;\n+    private final long cacheLength;\n+\n+    public Cacheable(Supplier<T> objectSupplier, long cacheLength) {\n+        this.objectSupplier = objectSupplier;\n+        this.cacheLength = cacheLength;\n+    }\n+\n+    @NotNull\n+    public T get() {\n+        if (this.object == null || this.time + this.cacheLength < System.currentTimeMillis()) {\n+            this.object = objectSupplier.get();\n+            this.time = System.currentTimeMillis();\n+        }\n+        return this.object;\n+    }\n+\n+    public void invalidate() {\n+        this.object = null;\n+        this.time = 0;\n+    }\n+}"
+  }
+]

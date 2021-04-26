@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "6a7558ab8d67fb3bfbfc36fdd46244e814f12220",
+    "filename": "core/pom.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/ibissource/iaf/blob/17162fb64adf6da1c0e20037dcaeb27170f28ebd/core/pom.xml",
+    "raw_url": "https://github.com/ibissource/iaf/raw/17162fb64adf6da1c0e20037dcaeb27170f28ebd/core/pom.xml",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/pom.xml?ref=17162fb64adf6da1c0e20037dcaeb27170f28ebd",
+    "patch": "@@ -613,6 +613,12 @@\n \t\t\t<version>1.0.31</version>\n \t\t\t<scope>test</scope>\n \t\t</dependency>\n+\t\t<dependency>\n+\t\t\t<groupId>com.github.therapi</groupId>\n+\t\t\t<artifactId>therapi-runtime-javadoc-scribe</artifactId>\n+\t\t\t<version>${therapi.version}</version>\n+\t\t\t<scope>provided</scope>\n+\t\t</dependency>\n \t</dependencies>\n \n \t<build>"
+  },
+  {
+    "sha": "d701e9a885169739e1da0847bc363f864c5052ed",
+    "filename": "core/src/main/java/nl/nn/adapterframework/doc/model/FrankElement.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/ibissource/iaf/blob/17162fb64adf6da1c0e20037dcaeb27170f28ebd/core/src/main/java/nl/nn/adapterframework/doc/model/FrankElement.java",
+    "raw_url": "https://github.com/ibissource/iaf/raw/17162fb64adf6da1c0e20037dcaeb27170f28ebd/core/src/main/java/nl/nn/adapterframework/doc/model/FrankElement.java",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/java/nl/nn/adapterframework/doc/model/FrankElement.java?ref=17162fb64adf6da1c0e20037dcaeb27170f28ebd",
+    "patch": "@@ -32,6 +32,9 @@\n \n import org.apache.logging.log4j.Logger;\n \n+import com.github.therapi.runtimejavadoc.CommentFormatter;\n+import com.github.therapi.runtimejavadoc.RuntimeJavadoc;\n+\n import lombok.Getter;\n import nl.nn.adapterframework.doc.Utils;\n import nl.nn.adapterframework.doc.model.ElementChild.AbstractKey;\n@@ -40,6 +43,7 @@\n \n public class FrankElement implements Comparable<FrankElement> {\n \tprivate static Logger log = LogUtil.getLogger(FrankElement.class);\n+\tprivate static final CommentFormatter THERAPI_JAVADOC_FORMATTER = new CommentFormatter();\n \n \tprivate static final Comparator<FrankElement> COMPARATOR =\n \t\t\tComparator.comparing(FrankElement::getSimpleName).thenComparing(FrankElement::getFullName);\n@@ -56,10 +60,12 @@\n \tprivate @Getter List<String> xmlElementNames;\n \tprivate @Getter FrankElementStatistics statistics;\n \tprivate LinkedHashMap<String, ConfigChildSet> configChildSets;\n+\tprivate @Getter String classLevelDoc;\n \n \tFrankElement(Class<?> clazz) {\n \t\tthis(clazz.getName(), clazz.getSimpleName(), Modifier.isAbstract(clazz.getModifiers()));\n \t\tisDeprecated = clazz.getAnnotation(Deprecated.class) != null;\n+\t\tclassLevelDoc = THERAPI_JAVADOC_FORMATTER.format(RuntimeJavadoc.getJavadoc(clazz.getName()).getComment());\n \t\tconfigChildSets = new LinkedHashMap<>();\n \t}\n "
+  },
+  {
+    "sha": "b9ccb32268efee26dc6a67e3dca7ce95f037bd6c",
+    "filename": "core/src/test/java/nl/nn/adapterframework/doc/model/FrankDocModelPopulateTest.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 24,
+    "changes": 37,
+    "blob_url": "https://github.com/ibissource/iaf/blob/17162fb64adf6da1c0e20037dcaeb27170f28ebd/core/src/test/java/nl/nn/adapterframework/doc/model/FrankDocModelPopulateTest.java",
+    "raw_url": "https://github.com/ibissource/iaf/raw/17162fb64adf6da1c0e20037dcaeb27170f28ebd/core/src/test/java/nl/nn/adapterframework/doc/model/FrankDocModelPopulateTest.java",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/test/java/nl/nn/adapterframework/doc/model/FrankDocModelPopulateTest.java?ref=17162fb64adf6da1c0e20037dcaeb27170f28ebd",
+    "patch": "@@ -16,36 +16,25 @@\n package nl.nn.adapterframework.doc.model;\n \n import static org.junit.Assert.assertTrue;\n+import static org.junit.Assume.assumeTrue;\n \n-import java.util.Set;\n-import java.util.stream.Collectors;\n-\n-import org.junit.Before;\n-import org.junit.Ignore;\n import org.junit.Test;\n \n-@Ignore(\"Test takes a long time to run, and gives little information\")\n+import nl.nn.adapterframework.testutil.TestAssertions;\n+\n public class FrankDocModelPopulateTest {\n \tprivate FrankDocModel instance;\n-\tprivate Set<String> actualTypeSimpleNames;\n-\tprivate Set<String> actualElementSimpleNames;\n-\n-\t@Before\n-\tpublic void setUp() {\n-\t\tinstance = FrankDocModel.populate();\n-\t\tactualTypeSimpleNames = instance.getAllTypes().values().stream()\n-\t\t\t\t.map(ElementType::getSimpleName).collect(Collectors.toSet());\n-\t\tactualElementSimpleNames = instance.getAllElements().values().stream()\n-\t\t\t\t.map(FrankElement::getSimpleName).collect(Collectors.toSet());\t\t\n-\t}\n \n+\t/**\n+\t * Test that the model gets class-level Javadoc comments. This is achieved using project Therapi. That\n+\t * project uses an annotation processor. The test will only succeed after a successful Maven build, not\n+\t * when this test is executed for the first time in Eclipse.\n+\t */\n \t@Test\n-\tpublic void testTypeIAdapterCreated() {\n-\t\tassertTrue(actualTypeSimpleNames.contains(\"IAdapter\"));\n-\t}\n-\n-\t@Test\n-\tpublic void testElementReceiverCreated() {\n-\t\tassertTrue(actualElementSimpleNames.contains(\"Receiver\"));\n+\tpublic void testJavadocsCaptured() {\n+\t\tassumeTrue(TestAssertions.isTestRunningOnCI());\n+\t\tinstance = FrankDocModel.populate();\n+\t\tFrankElement configuration = instance.findFrankElement(\"nl.nn.adapterframework.configuration.Configuration\");\n+\t\tassertTrue(configuration.getClassLevelDoc().startsWith(\"The Configuration is placeholder of all configuration objects.\"));\n \t}\n }"
+  },
+  {
+    "sha": "cef47ef55d7da422b834989ff76ada5c4057aebd",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/ibissource/iaf/blob/17162fb64adf6da1c0e20037dcaeb27170f28ebd/pom.xml",
+    "raw_url": "https://github.com/ibissource/iaf/raw/17162fb64adf6da1c0e20037dcaeb27170f28ebd/pom.xml",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/pom.xml?ref=17162fb64adf6da1c0e20037dcaeb27170f28ebd",
+    "patch": "@@ -9,6 +9,7 @@\n \t<properties>\n \t\t<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n \t\t<log4j2.version>2.13.1</log4j2.version>\n+\t\t<therapi.version>0.12.0</therapi.version>\n \t</properties>\n \n \t<name>Ibis AdapterFramework parent</name>\n@@ -248,6 +249,17 @@\n \t\t</dependencies>\n \t</dependencyManagement>\n \n+\t<!-- Library that makes Javadoc comments available at run-time.\n+\tEvery subproject should use this dependency, because we the Javadocs of every Java class inside the Frank!Doc -->\n+\t<dependencies>\n+\t\t<dependency>\n+\t\t\t<groupId>com.github.therapi</groupId>\n+\t\t\t<artifactId>therapi-runtime-javadoc-scribe</artifactId>\n+\t\t\t<version>${therapi.version}</version>\n+\t\t\t<scope>provided</scope>\n+\t\t</dependency>\n+\t</dependencies>\n+\n \t<build>\n \t\t<defaultGoal>install</defaultGoal>\n \t\t<plugins>"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "597b3f71d966bf22f2e173c86832be7338cb6bdc",
+    "filename": ".github/workflows/prepare-release.yml",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/DataDog/datadog-api-client-java/blob/c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32/.github/workflows/prepare-release.yml",
+    "raw_url": "https://github.com/DataDog/datadog-api-client-java/raw/c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32/.github/workflows/prepare-release.yml",
+    "contents_url": "https://api.github.com/repos/DataDog/datadog-api-client-java/contents/.github/workflows/prepare-release.yml?ref=c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32",
+    "patch": "@@ -0,0 +1,24 @@\n+name: Prepare Release\n+\n+on:\n+  push:\n+    branches:\n+      - master\n+\n+jobs:\n+  prep-release:\n+   # Use ubuntu-18.04 image so we have Java 8 + Maven 3 - https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu1804-README.md\n+   # We only need to use the `mvn release:prepare` command here to perform the SCM actions, the full build and release happens in .gitlab-ci.yml\n+   runs-on: ubuntu-18.04\n+   if: contains(github.event.head_commit.message, \"[trigger release]\")\n+   steps:\n+   - name: Checkout code\n+     uses: actions/checkout@v2\n+   - name: Configure Git user\n+     run: |\n+       git config user.email \"package@datadoghq.com\"\n+       git config user.name \"Datadog\"\n+  - name: Prepare repo for release\n+    run: mvn -B -DskipTests -Darguments=-DskipTests release:prepare\n+    env:\n+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
+  },
+  {
+    "sha": "68a0d2df88424cf12411898e252adcaa2150d7d2",
+    "filename": ".gitlab-ci.yml",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/DataDog/datadog-api-client-java/blob/c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32/.gitlab-ci.yml",
+    "raw_url": "https://github.com/DataDog/datadog-api-client-java/raw/c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32/.gitlab-ci.yml",
+    "contents_url": "https://api.github.com/repos/DataDog/datadog-api-client-java/contents/.gitlab-ci.yml?ref=c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32",
+    "patch": "@@ -0,0 +1,34 @@\n+stages:\n+  - deploy\n+  - create_key\n+\n+# From the tagged repo, stage the final artifact\n+# We've already run tests through the CI when creating the changelog and tag, skip them here\n+deploy:\n+  stage: deploy\n+  tags: [ \"runner:docker\", \"size:large\" ]\n+  image: maven:3.6.3-jdk-8-slim\n+  when: manual\n+  # TODO Remove \"when: manual\" and make this trigger on tags once its been tested\n+  #rules:\n+  #  - if: $CI_COMMIT_TAG\n+  script:\n+    - export SONATYPE_PASS=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-api-client-java.sonatype_password --with-decryption --query \"Parameter.Value\" --out text)\n+    # TODO Set SONATYPE_USER\n+    # - export SONATYPE_USER=\n+    - export GPG_PASSPHRASE=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-api-client-java.gpg_passphrase --with-decryption --query \"Parameter.Value\" --out text)\n+    # Import GPG Key\n+    - GPG_KEY=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-api-client-java.gpg_private_key --with-decryption --query \"Parameter.Value\" --out text)\n+    - printf -- \"$GPG_KEY\" | gpg --import --batch\n+    # Perform the release\n+    - mvn -DskipTests -Darguments=-DskipTests -DdryRun=true --settings settings.xml clean deploy\n+\n+# This job creates the GPG key used to sign the above release\n+create_key:\n+  when: manual\n+  tags: [ \"runner:docker\", \"size:large\" ]\n+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/agent-key-management-tools/create-gpg-key:1\n+  variables:\n+    PROJECT_NAME: \"datadog-api-client-java\"\n+  script:\n+    - ash create_gpg_key.sh\n\\ No newline at end of file"
+  },
+  {
+    "sha": "458114716960f6fe17dffc132ddff4d117221a34",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 44,
+    "deletions": 28,
+    "changes": 72,
+    "blob_url": "https://github.com/DataDog/datadog-api-client-java/blob/c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32/pom.xml",
+    "raw_url": "https://github.com/DataDog/datadog-api-client-java/raw/c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32/pom.xml",
+    "contents_url": "https://api.github.com/repos/DataDog/datadog-api-client-java/contents/pom.xml?ref=c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32",
+    "patch": "@@ -24,8 +24,9 @@\n \n     <distributionManagement>\n         <repository>\n-            <id>bintray-datadog-api-client</id>\n-            <url>https://api.bintray.com/maven/${bintray.repo}/${bintray.package}/</url>\n+            <id>nexus</id>\n+            <!-- TODO Replace with real snapshot repository-->\n+            <url>http://localhost:8081/nexus/content/repositories/snapshots</url>\n         </repository>\n     </distributionManagement>\n \n@@ -80,6 +81,14 @@\n                     <tagNameFormat>@{project.version}</tagNameFormat>\n                 </configuration>\n             </plugin>\n+            <!-- Skip the maven release default deploy, we use the nexus staging plugin for this-->\n+            <plugin>\n+                <groupId>org.apache.maven.plugins</groupId>\n+                <artifactId>maven-deploy-plugin</artifactId>\n+                <configuration>\n+                    <skip>true</skip>\n+                </configuration>\n+            </plugin>\n             <plugin>\n                 <groupId>org.apache.maven.plugins</groupId>\n                 <artifactId>maven-surefire-plugin</artifactId>\n@@ -233,33 +242,41 @@\n                     </execution>\n                 </executions>\n             </plugin>\n+            <plugin>\n+                <groupId>org.sonatype.plugins</groupId>\n+                <artifactId>nexus-staging-maven-plugin</artifactId>\n+                <version>1.6.6</version>\n+                <extensions>true</extensions>\n+                <configuration>\n+                    <serverId>nexus</serverId>\n+                    <!-- TODO Replace with real sonatype URL-->\n+                    <nexusUrl>http://localhost:8081/nexus/</nexusUrl>\n+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>\n+                </configuration>\n+            </plugin>\n+            <plugin>\n+                <groupId>org.apache.maven.plugins</groupId>\n+                <artifactId>maven-gpg-plugin</artifactId>\n+                <version>1.6</version>\n+                <executions>\n+                    <execution>\n+                        <id>sign-artifacts</id>\n+                        <phase>verify</phase>\n+                        <goals>\n+                            <goal>sign</goal>\n+                        </goals>\n+                        <configuration>\n+                            <gpgArguments>\n+                                <arg>--pinentry-mode</arg>\n+                                <arg>loopback</arg>\n+                            </gpgArguments>\n+                        </configuration>\n+                    </execution>\n+                </executions>\n+            </plugin>\n         </plugins>\n     </build>\n \n-    <profiles>\n-        <profile>\n-            <id>sign-artifacts</id>\n-            <build>\n-                <plugins>\n-                    <plugin>\n-                        <groupId>org.apache.maven.plugins</groupId>\n-                        <artifactId>maven-gpg-plugin</artifactId>\n-                        <version>1.5</version>\n-                        <executions>\n-                            <execution>\n-                                <id>sign-artifacts</id>\n-                                <phase>verify</phase>\n-                                <goals>\n-                                    <goal>sign</goal>\n-                                </goals>\n-                            </execution>\n-                        </executions>\n-                    </plugin>\n-                </plugins>\n-            </build>\n-        </profile>\n-    </profiles>\n-\n     <dependencies>\n         <dependency>\n             <groupId>io.swagger</groupId>\n@@ -414,7 +431,6 @@\n         <maven-plugin-version>1.0.0</maven-plugin-version>\n         <junit-version>4.13.1</junit-version>\n         <dd-java-agent-version>0.72.0</dd-java-agent-version>\n-        <bintray.repo>datadog/datadog-maven</bintray.repo>\n-        <bintray.package>datadog-api-client</bintray.package>\n+        <project.scm.id>github</project.scm.id>\n     </properties>\n </project>"
+  },
+  {
+    "sha": "5da4e8edd35a39389620c71a754eed41321294ce",
+    "filename": "settings.xml",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 3,
+    "changes": 15,
+    "blob_url": "https://github.com/DataDog/datadog-api-client-java/blob/c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32/settings.xml",
+    "raw_url": "https://github.com/DataDog/datadog-api-client-java/raw/c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32/settings.xml",
+    "contents_url": "https://api.github.com/repos/DataDog/datadog-api-client-java/contents/settings.xml?ref=c97a19a2eedaa4bbf4fb0c7e1cd24df46ba5df32",
+    "patch": "@@ -3,9 +3,18 @@\n           xmlns='http://maven.apache.org/SETTINGS/1.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>\n     <servers>\n         <server>\n-            <id>bintray-datadog-api-client</id>\n-            <username>${env.BINTRAY_USER}</username>\n-            <password>${env.BINTRAY_API_KEY}</password>\n+            <id>nexus</id>\n+            <username>${env.SONATYPE_USER}</username>\n+            <password>${env.SONATYPE_PASS}</password>\n+        </server>\n+        <server>\n+            <id>github</id>\n+            <username>datadog</username>\n+            <password>${env.GITHUB_TOKEN}</password>\n+        </server>\n+        <server>\n+            <id>gpg.passphrase</id>\n+            <passphrase>${env.GPG_PASSPHRASE}</passphrase>\n         </server>\n     </servers>\n </settings>"
+  }
+]

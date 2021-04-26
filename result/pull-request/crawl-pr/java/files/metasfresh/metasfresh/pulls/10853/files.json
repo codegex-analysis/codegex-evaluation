@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "b524cca6c73f386651db28907647780615ef4923",
+    "filename": "frontend/src/components/header/MenuOverlayContainer.js",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/metasfresh/metasfresh/blob/815b7730a7d5154101038304284c36b49bda3e68/frontend/src/components/header/MenuOverlayContainer.js",
+    "raw_url": "https://github.com/metasfresh/metasfresh/raw/815b7730a7d5154101038304284c36b49bda3e68/frontend/src/components/header/MenuOverlayContainer.js",
+    "contents_url": "https://api.github.com/repos/metasfresh/metasfresh/contents/frontend/src/components/header/MenuOverlayContainer.js?ref=815b7730a7d5154101038304284c36b49bda3e68",
+    "patch": "@@ -34,13 +34,19 @@ class MenuOverlayContainer extends Component {\n       onUpdateData,\n       transparentBookmarks,\n       onKeyDown,\n+      indexOrder,\n     } = this.props;\n+\n+    let menuOverlayClasses = 'menu-overlay-node-container js-menu-container ';\n+    menuOverlayClasses =\n+      indexOrder === 1 ? `${menuOverlayClasses} mt-0 ` : menuOverlayClasses;\n+\n     return (\n       <div\n         tabIndex={0}\n         onKeyDown={onKeyDown}\n         className={\n-          'menu-overlay-node-container js-menu-container ' +\n+          `${menuOverlayClasses}` +\n           (deep\n             ? 'menu-overlay-node-spaced '\n             : 'menu-overlay-expanded-link-spaced js-menu-main-container')\n@@ -143,6 +149,7 @@ MenuOverlayContainer.propTypes = {\n   onUpdateData: PropTypes.bool,\n   transparentBookmarks: PropTypes.bool,\n   onKeyDown: PropTypes.func,\n+  indexOrder: PropTypes.number,\n };\n \n export default connect()(MenuOverlayContainer);"
+  },
+  {
+    "sha": "90e3ee946beecb97016b8aec30374d7a934d67c1",
+    "filename": "frontend/src/containers/NavigationTree.js",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 16,
+    "changes": 37,
+    "blob_url": "https://github.com/metasfresh/metasfresh/blob/815b7730a7d5154101038304284c36b49bda3e68/frontend/src/containers/NavigationTree.js",
+    "raw_url": "https://github.com/metasfresh/metasfresh/raw/815b7730a7d5154101038304284c36b49bda3e68/frontend/src/containers/NavigationTree.js",
+    "contents_url": "https://api.github.com/repos/metasfresh/metasfresh/contents/frontend/src/containers/NavigationTree.js?ref=815b7730a7d5154101038304284c36b49bda3e68",
+    "patch": "@@ -298,7 +298,8 @@ class NavigationTree extends Component {\n   };\n \n   renderTree = () => {\n-    const { rootResults, queriedResults, query } = this.state;\n+    const { queriedResults, query } = this.state;\n+    let indexOrder = 0;\n \n     return (\n       <div className=\"sitemap\">\n@@ -326,25 +327,29 @@ class NavigationTree extends Component {\n         </div>\n \n         <p className=\"menu-overlay-header menu-overlay-header-main menu-overlay-header-spaced\">\n-          {rootResults.caption}\n+          {/* {rootResults.caption} */}\n         </p>\n \n         <div className=\"column-wrapper\">\n           {queriedResults &&\n-            queriedResults.map((subitem, subindex) => (\n-              <MenuOverlayContainer\n-                key={subindex}\n-                printChildren={true}\n-                showBookmarks={true}\n-                openModal={this.openModal}\n-                onUpdateData={this.updateData}\n-                onKeyDown={this.handleKeyDown}\n-                handleClickOnFolder={this.handleDeeper}\n-                handleRedirect={this.handleRedirect}\n-                handleNewRedirect={this.handleNewRedirect}\n-                {...subitem}\n-              />\n-            ))}\n+            queriedResults.map((subitem, subindex) => {\n+              indexOrder = indexOrder + 1;\n+              return (\n+                <MenuOverlayContainer\n+                  key={subindex}\n+                  printChildren={true}\n+                  showBookmarks={true}\n+                  indexOrder={indexOrder}\n+                  openModal={this.openModal}\n+                  onUpdateData={this.updateData}\n+                  onKeyDown={this.handleKeyDown}\n+                  handleClickOnFolder={this.handleDeeper}\n+                  handleRedirect={this.handleRedirect}\n+                  handleNewRedirect={this.handleNewRedirect}\n+                  {...subitem}\n+                />\n+              );\n+            })}\n \n           {queriedResults.length === 0 && query !== '' && (\n             <span>There are no results</span>"
+  }
+]

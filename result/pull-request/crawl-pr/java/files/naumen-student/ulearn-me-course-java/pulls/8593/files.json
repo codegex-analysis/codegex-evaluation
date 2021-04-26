@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "57ff7d257546d13844fe6caa8fc0ba7e3d0869cc",
+    "filename": "09-java-generics-collections/task03/src/com/example/task03/Task03Main.java",
+    "status": "modified",
+    "additions": 25,
+    "deletions": 3,
+    "changes": 28,
+    "blob_url": "https://github.com/naumen-student/ulearn-me-course-java/blob/965dbada227618be4390c37c51b97fb1ef6cf8b2/09-java-generics-collections/task03/src/com/example/task03/Task03Main.java",
+    "raw_url": "https://github.com/naumen-student/ulearn-me-course-java/raw/965dbada227618be4390c37c51b97fb1ef6cf8b2/09-java-generics-collections/task03/src/com/example/task03/Task03Main.java",
+    "contents_url": "https://api.github.com/repos/naumen-student/ulearn-me-course-java/contents/09-java-generics-collections/task03/src/com/example/task03/Task03Main.java?ref=965dbada227618be4390c37c51b97fb1ef6cf8b2",
+    "patch": "@@ -3,22 +3,44 @@\n import java.io.FileInputStream;\r\n import java.io.IOException;\r\n import java.io.InputStream;\r\n+import java.io.InputStreamReader;\r\n import java.nio.charset.Charset;\r\n import java.util.List;\r\n import java.util.Set;\r\n+import java.util.*;\r\n+import java.util.stream.Collectors;\r\n \r\n public class Task03Main {\r\n \r\n     public static void main(String[] args) throws IOException {\r\n-\r\n-        List<Set<String>> anagrams = findAnagrams(new FileInputStream(\"task03/resources/singular.txt\"), Charset.forName(\"windows-1251\"));\r\n+        List<Set<String>> anagrams = findAnagrams(new FileInputStream(\"09-java-generics-collections/task03/resources/singular.txt\"), Charset.forName(\"windows-1251\"));\r\n         for (Set<String> anagram : anagrams) {\r\n             System.out.println(anagram);\r\n         }\r\n \r\n     }\r\n \r\n     public static List<Set<String>> findAnagrams(InputStream inputStream, Charset charset) {\r\n-        return null;\r\n+        Scanner scanner = new Scanner(new InputStreamReader(inputStream, charset));\r\n+        Map<String, TreeSet<String>> words = new TreeMap<>();\r\n+\r\n+        while (scanner.hasNextLine()) {\r\n+            String currentWord = scanner.nextLine().toLowerCase();\r\n+            if (currentWord.matches(\"[а-я]+\") && currentWord.length() > 2) {\r\n+                char[] arrWord = currentWord.toCharArray();\r\n+                Arrays.sort(arrWord);\r\n+                String currentKey = new String(arrWord);\r\n+                if (!words.containsKey(currentKey)) {\r\n+                    words.put(currentKey, new TreeSet<String>() {{\r\n+                        add(currentWord);\r\n+                    }});\r\n+                } else {\r\n+                    words.get(currentKey).add(currentWord);\r\n+                }\r\n+            }\r\n+        }\r\n+        return words.values().stream().filter((it) -> it.size() >= 2).collect(Collectors.toList());\r\n     }\r\n }\r\n+\r\n+\r"
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "sha": "ac73e60f9faba886164e69686f7ca398a8f71f2f",
+    "filename": "src/main/java/com/felixgrund/codeshovel/changes/Yformatchange.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/changes/Yformatchange.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/changes/Yformatchange.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/changes/Yformatchange.java?ref=2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71",
+    "patch": "@@ -0,0 +1,10 @@\n+package com.felixgrund.codeshovel.changes;\n+\n+import com.felixgrund.codeshovel.parser.Yfunction;\n+import com.felixgrund.codeshovel.wrappers.StartEnvironment;\n+\n+public class Yformatchange extends Ycomparefunctionchange {\n+    public Yformatchange(StartEnvironment startEnv, Yfunction newFunction, Yfunction oldFunction) {\n+        super(startEnv, newFunction, oldFunction);\n+    }\n+}"
+  },
+  {
+    "sha": "6d159a75dee53d94a9a781f361c865f89a5c4212",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/AbstractFunction.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 1,
+    "changes": 10,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/AbstractFunction.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/AbstractFunction.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/AbstractFunction.java?ref=2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71",
+    "patch": "@@ -50,6 +50,8 @@\n \tprivate String sourceFragment;\n \tprivate String functionDoc;\n \tprotected abstract String getInitialDoc(E rawMethod);\n+\tprivate String unformattedBody;\n+\tprotected abstract String getInitialUnformattedBody(E rawMethod);\n \n \tpublic AbstractFunction(E rawMethod, Commit commit, String sourceFilePath, String sourceFileContent) {\n \t\tthis.commit = commit;\n@@ -71,8 +73,9 @@ public AbstractFunction(E rawMethod, Commit commit, String sourceFilePath, Strin\n \t\tthis.functionPath = getInitialFunctionPath(rawMethod);\n \t\tthis.returnStmt = getInitialReturnStmt(rawMethod); // Must be called after getInitialType\n \t\tthis.annotation = getInitialAnnotation(rawMethod);\n-\t\tthis.sourceFragment = getInitialSourceFragment(rawMethod); // Must be called after begin/endLine\n \t\tthis.functionDoc = getInitialDoc(rawMethod);\n+\t\tthis.unformattedBody = getInitialUnformattedBody(rawMethod);\n+\t\tthis.sourceFragment = getInitialSourceFragment(rawMethod); // Must be called after begin/endLine\n \t}\n \n \tprotected String getIdParameterString() {\n@@ -208,4 +211,9 @@ public String getAnnotation() {\n \tpublic String getFunctionDoc() {\n \t\treturn this.functionDoc;\n \t}\n+\n+\t@Override\n+\tpublic String getUnformattedBody() {\n+\t\treturn this.unformattedBody;\n+\t}\n }"
+  },
+  {
+    "sha": "4b3fb97c567e5fca9bfe397dde3e9b1c38294ca1",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/AbstractParser.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/AbstractParser.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/AbstractParser.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/AbstractParser.java?ref=2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71",
+    "patch": "@@ -64,6 +64,15 @@ protected Yannotationchange getAnnotationChange(Ycommit commit, Yfunction compar\n         return ret;\n     }\n \n+    protected Yformatchange getFormatChange(Ycommit commit, Yfunction compareFunction) {\n+        Yformatchange ret = null;\n+        Yfunction function = commit.getMatchedFunction();\n+        if (Utl.isFormatChange(function, compareFunction)) {\n+            ret = new Yformatchange(this.startEnv, commit.getMatchedFunction(), compareFunction);\n+        }\n+        return ret;\n+    }\n+\n     protected Yreturntypechange getReturnTypeChange(Ycommit commit, Yfunction compareFunction) {\n         Yreturntypechange ret = null;\n         Yreturn returnA = compareFunction.getReturnStmt();"
+  },
+  {
+    "sha": "b0552d1163a704fcf53d518ac16ac86a71a208ef",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/Yfunction.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/Yfunction.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/Yfunction.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/Yfunction.java?ref=2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71",
+    "patch": "@@ -109,4 +109,9 @@\n \t * */\n \tString getFunctionDoc();\n \n+\t/***\n+\t * @return the unformatted method's body preserving whitespace, indentation and other formatting\n+\t */\n+\tString getUnformattedBody();\n+\n }"
+  },
+  {
+    "sha": "8f036f613061cde0126343d159177a330574fe22",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/impl/JavaFunction.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/impl/JavaFunction.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/impl/JavaFunction.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/impl/JavaFunction.java?ref=2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71",
+    "patch": "@@ -15,7 +15,9 @@\n import com.github.javaparser.ast.nodeTypes.NodeWithName;\n import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;\n import com.github.javaparser.ast.type.ReferenceType;\n+import com.github.javaparser.printer.PrettyPrinter;\n import com.github.javaparser.printer.PrettyPrinterConfiguration;\n+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;\n import org.apache.commons.lang3.StringUtils;\n \n import java.util.ArrayList;\n@@ -203,4 +205,10 @@ private boolean isNestedMethod(MethodDeclaration method) {\n \tprotected String getInitialDoc(MethodDeclaration method) {\n \t\treturn method.hasJavaDocComment() ? method.getJavadoc().get().toText() : \"\" ;\n \t}\n+\n+\t@Override\n+\tprotected String getInitialUnformattedBody(MethodDeclaration method) {\n+\t\tLexicalPreservingPrinter.setup(method);\n+\t\treturn LexicalPreservingPrinter.print(method.getBody().get());\n+\t}\n }"
+  },
+  {
+    "sha": "0f90040831a80c31444941922c39e7108457c25e",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/impl/JavaParser.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/impl/JavaParser.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/impl/JavaParser.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/impl/JavaParser.java?ref=2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71",
+    "patch": "@@ -71,6 +71,7 @@ public String getAcceptedFileExtension() {\n         Ymodifierchange ymodifierchange = getModifiersChange(commit, compareFunction);\n         Yexceptionschange yexceptionschange = getExceptionsChange(commit, compareFunction);\n         Ybodychange ybodychange = getBodyChange(commit, compareFunction);\n+        Yformatchange yformatchange = getFormatChange(commit, compareFunction);\n         Yparametermetachange yparametermetachange = getParametersMetaChange(commit, compareFunction);\n         Yannotationchange yannotationchange = getAnnotationChange(commit, compareFunction);\n         Ydocchange ydocchange = getDocChange(commit, compareFunction);\n@@ -96,6 +97,9 @@ public String getAcceptedFileExtension() {\n         if (ydocchange != null) {\n             changes.add(ydocchange);\n         }\n+        if (yformatchange != null) {\n+            changes.add(yformatchange);\n+        }\n         return changes;\n     }\n "
+  },
+  {
+    "sha": "eb5b973f7616b65e812ca5db842abcb10d5e548e",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/impl/PythonFunction.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/impl/PythonFunction.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/impl/PythonFunction.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/impl/PythonFunction.java?ref=2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71",
+    "patch": "@@ -161,6 +161,12 @@ protected String getInitialDoc(PythonParser.FuncdefContext rawMethod) {\n         return null;\n     }\n \n+    @Override\n+    protected String getInitialUnformattedBody(PythonParser.FuncdefContext rawMethod) {\n+        // TODO: implement function for python\n+        return null;\n+    }\n+\n     @Override\n     protected String getInitialSourceFragment(PythonParseTree.PythonParser.FuncdefContext function) {\n         // Note: This will not work on lambdas"
+  },
+  {
+    "sha": "7fcfb9abd07910ff504539b35a60c7e2d434605b",
+    "filename": "src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptFunction.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptFunction.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptFunction.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/parser/impl/TypeScriptFunction.java?ref=2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71",
+    "patch": "@@ -166,6 +166,12 @@ protected String getInitialDoc(V8Object rawMethod) {\n         return null;\n     }\n \n+    @Override\n+    protected String getInitialUnformattedBody(V8Object rawMethod) {\n+        // TODO: implement function for typescript\n+        return null;\n+    }\n+\n     @Override\n     protected String getInitialSourceFragment(V8Object rawMethod) {\n         int startLine = rawMethod.getInteger(\"startLine\");"
+  },
+  {
+    "sha": "3d8f2b7984d53417f865b541ecec4f7848f774bb",
+    "filename": "src/main/java/com/felixgrund/codeshovel/util/Utl.java",
+    "status": "modified",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/ataraxie/codeshovel/blob/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/util/Utl.java",
+    "raw_url": "https://github.com/ataraxie/codeshovel/raw/2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71/src/main/java/com/felixgrund/codeshovel/util/Utl.java",
+    "contents_url": "https://api.github.com/repos/ataraxie/codeshovel/contents/src/main/java/com/felixgrund/codeshovel/util/Utl.java?ref=2e2762e0aa4681ed9c6a21b71bb3aa2f1ca12a71",
+    "patch": "@@ -348,4 +348,27 @@ public static boolean parentNamesMatch(Yfunction function, Yfunction compareFunc\n \n \t\treturn false;\n \t}\n+\n+\t/***\n+\t * Check for formatting changes\n+\t * <p>\n+\t *     If indentation, whitespace or any sort of formatting\n+\t *     was performed on a method the function will return true.\n+\t *     Otherwise it will return false.\n+\t * </p>\n+\t * @param function current matched function\n+\t * @param compareFunction previous function to compare with\n+\t * @return boolean True/False\n+\t */\n+\tpublic static boolean isFormatChange(Yfunction function, Yfunction compareFunction) {\n+\t\t// if lexically preserved method's body (unformatted body) are not equal\n+\t\t// but pretty printed method's body (ignoring whitespace, indentation etc.,) are equal\n+\t\t// then the change was of Yformatchange type\n+\t\tif (function != null && compareFunction != null &&\n+\t\t\t\tfunction.getBody().equals(compareFunction.getBody()) &&\n+\t\t\t\t!function.getUnformattedBody().equals(compareFunction.getUnformattedBody())) {\n+\t\t\treturn true;\n+\t\t}\n+\t\treturn false;\n+\t}\n }"
+  }
+]

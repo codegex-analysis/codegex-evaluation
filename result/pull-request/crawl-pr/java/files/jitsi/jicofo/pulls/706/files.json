@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "06b412b870af64d663f6ec3d3f1aa34dfd0ba2f3",
+    "filename": ".github/workflows/maven.yml",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 17,
+    "changes": 38,
+    "blob_url": "https://github.com/jitsi/jicofo/blob/13bd2244ac7bd08183c76ca3b02839eef7435edd/.github/workflows/maven.yml",
+    "raw_url": "https://github.com/jitsi/jicofo/raw/13bd2244ac7bd08183c76ca3b02839eef7435edd/.github/workflows/maven.yml",
+    "contents_url": "https://api.github.com/repos/jitsi/jicofo/contents/.github/workflows/maven.yml?ref=13bd2244ac7bd08183c76ca3b02839eef7435edd",
+    "patch": "@@ -3,27 +3,31 @@\n \n name: Java CI with Maven\n \n-on:\n-  pull_request:\n-    branches: [ master ]\n+on: [push, pull_request]\n \n jobs:\n   build:\n \n     runs-on: ubuntu-latest\n \n     steps:\n-    - uses: actions/checkout@v2\n-    - name: Set up JDK 1.8\n-      uses: actions/setup-java@v1\n-      with:\n-        java-version: 1.8\n-    - name: Cache local Maven repository\n-      uses: actions/cache@v2\n-      with:\n-        path: ~/.m2/repository\n-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}\n-        restore-keys: |\n-          ${{ runner.os }}-maven-\n-    - name: Build with Maven\n-      run: mvn clean verify\n+      - name: Checkout\n+        uses: actions/checkout@v2\n+\n+      - name: Set up JDK 1.8\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: 1.8\n+      - name: Cache local Maven repository\n+        uses: actions/cache@v2\n+        with:\n+          path: ~/.m2/repository\n+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}\n+          restore-keys: |\n+            ${{ runner.os }}-maven-\n+\n+      - name: Build and test with Maven\n+        run:  mvn clean verify -Pcoverage\n+\n+      - name: Upload coverage report\n+        uses: codecov/codecov-action@v1"
+  },
+  {
+    "sha": "337dfb95ee44a07beb61a8c4bdf5d9ab05090071",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/jitsi/jicofo/blob/13bd2244ac7bd08183c76ca3b02839eef7435edd/pom.xml",
+    "raw_url": "https://github.com/jitsi/jicofo/raw/13bd2244ac7bd08183c76ca3b02839eef7435edd/pom.xml",
+    "contents_url": "https://api.github.com/repos/jitsi/jicofo/contents/pom.xml?ref=13bd2244ac7bd08183c76ca3b02839eef7435edd",
+    "patch": "@@ -460,4 +460,36 @@\n       <url>https://jitpack.io</url>\n     </repository>\n   </repositories>\n+  <profiles>\n+    <profile>\n+      <id>coverage</id>\n+      <properties>\n+        <jacoco.version>0.8.6</jacoco.version>\n+      </properties>\n+      <build>\n+        <plugins>\n+          <plugin>\n+            <groupId>org.jacoco</groupId>\n+            <artifactId>jacoco-maven-plugin</artifactId>\n+            <version>${jacoco.version}</version>\n+            <executions>\n+              <execution>\n+                <goals>\n+                  <goal>prepare-agent</goal>\n+                </goals>\n+              </execution>\n+              <!-- attached to Maven test phase -->\n+              <execution>\n+                <id>report</id>\n+                <phase>test</phase>\n+                <goals>\n+                  <goal>report</goal>\n+                </goals>\n+              </execution>\n+            </executions>\n+          </plugin>\n+        </plugins>\n+      </build>\n+    </profile>\n+  </profiles>\n </project>"
+  }
+]

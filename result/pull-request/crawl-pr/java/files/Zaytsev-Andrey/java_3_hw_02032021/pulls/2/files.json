@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "ada1a27170d58eec3838c646da609b31ebb8265f",
+    "filename": "src/hw4/Main.java",
+    "status": "modified",
+    "additions": 66,
+    "deletions": 0,
+    "changes": 66,
+    "blob_url": "https://github.com/Zaytsev-Andrey/java_3_hw_02032021/blob/7ede158e3d8a4899dd1fb9ff9c7e0e00293c97a0/src/hw4/Main.java",
+    "raw_url": "https://github.com/Zaytsev-Andrey/java_3_hw_02032021/raw/7ede158e3d8a4899dd1fb9ff9c7e0e00293c97a0/src/hw4/Main.java",
+    "contents_url": "https://api.github.com/repos/Zaytsev-Andrey/java_3_hw_02032021/contents/src/hw4/Main.java?ref=7ede158e3d8a4899dd1fb9ff9c7e0e00293c97a0",
+    "patch": "@@ -1,7 +1,73 @@\n package hw4;\n \n public class Main {\n+    private static final int COUNTER = 5;\n+    private static final Object LOCK = new Object();\n+    private static volatile char ch = 'A';\n+\n     public static void main(String[] args) {\n+        printA();\n+        printB();\n+        printC();\n+    }\n+\n+    private static void printA() {\n+        new Thread((() -> {\n+            try {\n+                for (int i = 0; i < COUNTER; i++) {\n+                    synchronized (LOCK) {\n+                        while (ch != 'A') {\n+                            LOCK.wait();\n+                        }\n+\n+                        System.out.print(ch);\n+                        ch = 'B';\n+                        LOCK.notifyAll();\n+                    }\n+                }\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            }\n+        })).start();\n+    }\n+\n+    private static void printB() {\n+        new Thread((() -> {\n+            try {\n+                for (int i = 0; i < COUNTER; i++) {\n+                    synchronized (LOCK) {\n+                        while (ch != 'B') {\n+                            LOCK.wait();\n+                        }\n+\n+                        System.out.print(ch);\n+                        ch = 'C';\n+                        LOCK.notifyAll();\n+                    }\n+                }\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            }\n+        })).start();\n+    }\n+\n+    private static void printC() {\n+        new Thread((() -> {\n+            try {\n+                for (int i = 0; i < COUNTER; i++) {\n+                    synchronized (LOCK) {\n+                        while (ch != 'C') {\n+                            LOCK.wait();\n+                        }\n \n+                        System.out.print(ch);\n+                        ch = 'A';\n+                        LOCK.notifyAll();\n+                    }\n+                }\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            }\n+        })).start();\n     }\n }"
+  }
+]

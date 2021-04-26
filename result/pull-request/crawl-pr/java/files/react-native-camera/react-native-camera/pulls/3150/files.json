@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "598af265b1e6e1a0735b6ffc7efc5c10c7097434",
+    "filename": "ios/RN/RNCamera.m",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 1,
+    "changes": 11,
+    "blob_url": "https://github.com/react-native-camera/react-native-camera/blob/dd399b8cc89e07052d53616a1ff788161ff83eed/ios/RN/RNCamera.m",
+    "raw_url": "https://github.com/react-native-camera/react-native-camera/raw/dd399b8cc89e07052d53616a1ff788161ff83eed/ios/RN/RNCamera.m",
+    "contents_url": "https://api.github.com/repos/react-native-camera/react-native-camera/contents/ios/RN/RNCamera.m?ref=dd399b8cc89e07052d53616a1ff788161ff83eed",
+    "patch": "@@ -1166,9 +1166,18 @@ - (void)record:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve r\n         if (options[@\"codec\"]) {\n             if (@available(iOS 10, *)) {\n                 AVVideoCodecType videoCodecType = options[@\"codec\"];\n+                \n                 if ([self.movieFileOutput.availableVideoCodecTypes containsObject:videoCodecType]) {\n                     self.videoCodecType = videoCodecType;\n-                    if(options[@\"videoBitrate\"]) {\n+                    \n+                    BOOL supportsBitRate = NO;\n+                    \n+                    // prevent crashing due to unsupported keys\n+                    if (@available(iOS 12.0, *)) {\n+                        supportsBitRate = [[self.movieFileOutput supportedOutputSettingsKeysForConnection:connection] containsObject:AVVideoCompressionPropertiesKey];\n+                    }\n+                    \n+                    if(options[@\"videoBitrate\"] && supportsBitRate) {\n                         NSString *videoBitrate = options[@\"videoBitrate\"];\n                         [self.movieFileOutput setOutputSettings:@{\n                           AVVideoCodecKey:videoCodecType,"
+  }
+]

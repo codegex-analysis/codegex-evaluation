@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "d5246e0dd19d52abe46b0918fe7babc8f8754ce2",
+    "filename": "portfolio/pom.xml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/adriabellak/Software-Product-Sprint/blob/3a3f2fb8054d61e754417914badc20a8d8894ef2/portfolio/pom.xml",
+    "raw_url": "https://github.com/adriabellak/Software-Product-Sprint/raw/3a3f2fb8054d61e754417914badc20a8d8894ef2/portfolio/pom.xml",
+    "contents_url": "https://api.github.com/repos/adriabellak/Software-Product-Sprint/contents/portfolio/pom.xml?ref=3a3f2fb8054d61e754417914badc20a8d8894ef2",
+    "patch": "@@ -45,8 +45,16 @@\n       <artifactId>gson</artifactId>\n       <version>2.8.6</version>\n     </dependency>\n+\n+    <dependency>\n+      <groupId>com.google.cloud</groupId>\n+      <artifactId>google-cloud-datastore</artifactId>\n+      <version>1.104.0</version>\n+    </dependency>\n+    \n   </dependencies>\n \n+\n   <build>\n     <plugins>\n       <!-- Copy static resources like html files into the output jar file. -->"
+  },
+  {
+    "sha": "14e23537d3243f2a5e2b9b4222e1a29811d8d1f8",
+    "filename": "portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/adriabellak/Software-Product-Sprint/blob/3a3f2fb8054d61e754417914badc20a8d8894ef2/portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java",
+    "raw_url": "https://github.com/adriabellak/Software-Product-Sprint/raw/3a3f2fb8054d61e754417914badc20a8d8894ef2/portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java",
+    "contents_url": "https://api.github.com/repos/adriabellak/Software-Product-Sprint/contents/portfolio/src/main/java/com/google/sps/servlets/FormHandlerServlet.java?ref=3a3f2fb8054d61e754417914badc20a8d8894ef2",
+    "patch": "@@ -1,5 +1,11 @@\n package com.google.sps.servlets;\n \n+import com.google.cloud.datastore.Datastore;\n+import com.google.cloud.datastore.DatastoreOptions;\n+import com.google.cloud.datastore.Entity;\n+import com.google.cloud.datastore.FullEntity;\n+import com.google.cloud.datastore.KeyFactory;\n+\n import java.io.IOException;\n import javax.servlet.annotation.WebServlet;\n import javax.servlet.http.HttpServlet;\n@@ -27,5 +33,15 @@ public void doPost(HttpServletRequest request, HttpServletResponse response) thr\n       System.out.println(\"Somebody (anonymously) submitted: \" + textValue);\n       response.getWriter().println(\"You submitted: \" + textValue);\n     }\n+\n+    // Datastore\n+    Datastore datastore = DatastoreOptions.getDefaultInstance().getService();\n+    KeyFactory keyFactory = datastore.newKeyFactory().setKind(\"Message\");\n+    FullEntity messageEntity =\n+        Entity.newBuilder(keyFactory.newKey())\n+            .set(\"name\", nameValue)\n+            .set(\"text\", textValue)\n+            .build();\n+    datastore.put(messageEntity);\n   }\n }\n\\ No newline at end of file"
+  }
+]

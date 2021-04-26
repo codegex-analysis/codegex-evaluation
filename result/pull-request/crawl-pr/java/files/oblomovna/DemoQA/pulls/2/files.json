@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "904df3c43917dd7eb0ea1ca9ddc6f60137af58f3",
+    "filename": "src/test/java/com/telran/bookstoretests/JSExecutorTest.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/oblomovna/DemoQA/blob/1e3b86ae6a185839d4da577c529c8ff2acbcdb4d/src/test/java/com/telran/bookstoretests/JSExecutorTest.java",
+    "raw_url": "https://github.com/oblomovna/DemoQA/raw/1e3b86ae6a185839d4da577c529c8ff2acbcdb4d/src/test/java/com/telran/bookstoretests/JSExecutorTest.java",
+    "contents_url": "https://api.github.com/repos/oblomovna/DemoQA/contents/src/test/java/com/telran/bookstoretests/JSExecutorTest.java?ref=1e3b86ae6a185839d4da577c529c8ff2acbcdb4d",
+    "patch": "@@ -0,0 +1,28 @@\n+package com.telran.bookstoretests;\n+\n+import com.telran.helpers.JSExecutor;\n+import com.telran.pages.AlertsPage;\n+import com.telran.pages.MainPage;\n+\n+import com.telran.pages.SidePanelPage;\n+import org.testng.annotations.Test;\n+\n+public class JSExecutorTest extends TestBase{\n+\n+\n+    @Test\n+    public void executorTest(){\n+        new MainPage(driver).goToElementsPage();\n+        new SidePanelPage(driver).selectTextBox();\n+        new JSExecutor(driver).typeNameEmailWithExecutor(\"Salvador Dali\", \"dali@gmail.com\")\n+                .refreshBrowserJSE().clickOnSubmit().getTitlePageJSE().getURLPageJSE();\n+    }\n+    @Test\n+    public void checkBoxJSETest(){\n+        new MainPage(driver).goToFormsPage();\n+        new SidePanelPage(driver).selectPracticeForm();\n+        new JSExecutor(driver).checkBoxJSE().alertWithJSE();\n+        new AlertsPage(driver).acceptAlert();\n+\n+    }\n+}"
+  },
+  {
+    "sha": "7cf7e11872b0b493ce7d1d8d11f24bac73074416",
+    "filename": "src/test/java/com/telran/bookstoretests/WebTablesPageTests.java",
+    "status": "added",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/oblomovna/DemoQA/blob/1e3b86ae6a185839d4da577c529c8ff2acbcdb4d/src/test/java/com/telran/bookstoretests/WebTablesPageTests.java",
+    "raw_url": "https://github.com/oblomovna/DemoQA/raw/1e3b86ae6a185839d4da577c529c8ff2acbcdb4d/src/test/java/com/telran/bookstoretests/WebTablesPageTests.java",
+    "contents_url": "https://api.github.com/repos/oblomovna/DemoQA/contents/src/test/java/com/telran/bookstoretests/WebTablesPageTests.java?ref=1e3b86ae6a185839d4da577c529c8ff2acbcdb4d",
+    "patch": "@@ -0,0 +1,16 @@\n+package com.telran.bookstoretests;\n+\n+import com.telran.helpers.JSExecutor;\n+import com.telran.pages.MainPage;\n+import com.telran.pages.SidePanelPage;\n+import org.testng.annotations.Test;\n+\n+public class WebTablesPageTests extends TestBase{\n+\n+    @Test\n+    public void checkNameByAge(){\n+        new MainPage(driver).goToElementsPage();\n+        new SidePanelPage(driver).selectWebTables();\n+        new JSExecutor(driver).typeAgeToSearchPanel(29).showNameByAge(29);\n+    }\n+}"
+  },
+  {
+    "sha": "01521e0991d9b6de740ab40589fa00b95c14aedf",
+    "filename": "src/test/java/com/telran/helpers/JSExecutor.java",
+    "status": "added",
+    "additions": 86,
+    "deletions": 0,
+    "changes": 86,
+    "blob_url": "https://github.com/oblomovna/DemoQA/blob/1e3b86ae6a185839d4da577c529c8ff2acbcdb4d/src/test/java/com/telran/helpers/JSExecutor.java",
+    "raw_url": "https://github.com/oblomovna/DemoQA/raw/1e3b86ae6a185839d4da577c529c8ff2acbcdb4d/src/test/java/com/telran/helpers/JSExecutor.java",
+    "contents_url": "https://api.github.com/repos/oblomovna/DemoQA/contents/src/test/java/com/telran/helpers/JSExecutor.java?ref=1e3b86ae6a185839d4da577c529c8ff2acbcdb4d",
+    "patch": "@@ -0,0 +1,86 @@\n+package com.telran.helpers;\n+\n+import com.telran.pages.PageBase;\n+import org.openqa.selenium.JavascriptExecutor;\n+import org.openqa.selenium.WebDriver;\n+import org.openqa.selenium.WebElement;\n+import org.openqa.selenium.support.FindBy;\n+\n+public class JSExecutor extends PageBase {\n+\n+    JavascriptExecutor js;\n+\n+    public JSExecutor(WebDriver driver) {\n+        super(driver);\n+        js = (JavascriptExecutor) driver;\n+    }\n+    @FindBy(id = \"userName\")\n+    WebElement uName;\n+\n+    @FindBy(id = \"userEmail\")\n+    WebElement uEmail;\n+\n+    @FindBy(id = \"submit\")\n+    WebElement submitBtn;\n+\n+    public JSExecutor typeNameEmailWithExecutor(String name,String email){\n+        if(name!=null && email!=null){\n+            js.executeScript(\"document.getElementById('userName').value='\"+ name +\"';\");\n+            js.executeScript(\"document.getElementById('userName').style.border='1px solid red';\");\n+            js.executeScript(\"document.getElementById('userEmail').value='\"+ email +\"';\");\n+            System.out.println(uName.getAttribute((\"value\") + \"By value\"));\n+        }\n+        return this;\n+    }\n+    public JSExecutor clickOnSubmit(){\n+        js.executeScript(\"document.querySelector('#submit').style.backgroundColor = 'Red';\");\n+        js.executeScript(\"document.querySelector('footer').style.display='none';\");\n+        js.executeScript(\"document.getElementById('submit').click();\");\n+        return this;\n+    }\n+    public JSExecutor refreshBrowserJSE(){\n+        js.executeScript(\"history.go(0)\");\n+        return this;\n+    }\n+    public JSExecutor checkBoxJSE(){\n+        js.executeScript(\"document.getElementById('hobbies-checkbox-1').checked=true;\");\n+        return this;\n+    }\n+    public JSExecutor alertWithJSE() {\n+        js.executeScript(\"alert('hello world!')\");\n+        return this;\n+    }\n+    public JSExecutor scrollWithJSE(){\n+        js.executeScript(\"window.scrollBy()0,100\");\n+        return this;\n+    }\n+    public JSExecutor getTitlePageJSE(){\n+        String text = js.executeScript(\"return document.title;\").toString();\n+        System.out.println(\"********************\" + \"\\n\" + text);\n+        return this;\n+    }\n+    public JSExecutor getURLPageJSE() {\n+        String text = js.executeScript(\"return document.URL;\").toString();\n+        System.out.println(\"URL --> \" + text);\n+        return this;\n+    }\n+    public JSExecutor typeAgeToSearchPanel(int age){\n+        js.executeScript(\"document.getElementById('searchBox').value='\"+ age +\"';\");\n+        return this;\n+    }\n+    public JSExecutor showNameByAge(int age){\n+        String name;\n+        if(age==39){\n+            name = \"Vega\";\n+        }else if(age==45){\n+            name = \"Cantrell\";\n+        }else\n+            name = \"Gentry\";\n+        js.executeScript(\"alert('we found \" + name + \"')\");\n+        driver.switchTo().alert().accept();\n+        return this;\n+    }\n+\n+\n+\n+}"
+  }
+]

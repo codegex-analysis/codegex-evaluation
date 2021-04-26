@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "a685bc0447e48812c7ff94bccd9fae994339fa38",
+    "filename": "mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectClassTypeHandler.java",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/mulesoft/mule-extensions-api/blob/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectClassTypeHandler.java",
+    "raw_url": "https://github.com/mulesoft/mule-extensions-api/raw/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectClassTypeHandler.java",
+    "contents_url": "https://api.github.com/repos/mulesoft/mule-extensions-api/contents/mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectClassTypeHandler.java?ref=b99a0ad015caa28814e24253b77fbe11dcb72f46",
+    "patch": "@@ -0,0 +1,30 @@\n+/*\n+ * Copyright (c) MuleSoft, Inc.  All rights reserved.  http://www.mulesoft.com\n+ * The software in this package is published under the terms of the CPAL v1.0\n+ * license, a copy of which has been included with this distribution in the\n+ * LICENSE.txt file.\n+ */\n+package org.mule.runtime.extension.api.declaration.type;\n+\n+import org.mule.metadata.api.builder.BaseTypeBuilder;\n+import org.mule.metadata.api.builder.TypeBuilder;\n+import org.mule.metadata.java.api.handler.ClassHandler;\n+import org.mule.metadata.java.api.handler.TypeHandlerManager;\n+import org.mule.metadata.java.api.utils.ParsingContext;\n+\n+import java.lang.reflect.Type;\n+import java.util.List;\n+\n+public class ExtensionObjectClassTypeHandler implements ClassHandler {\n+\n+  @Override\n+  public boolean handles(Class<?> clazz) {\n+    return clazz.equals(Object.class);\n+  }\n+\n+  @Override\n+  public TypeBuilder<?> handleClass(Class<?> clazz, List<Type> genericTypes, TypeHandlerManager typeHandlerManager,\n+                                    ParsingContext context, BaseTypeBuilder typeBuilder) {\n+    return typeBuilder.anyType().id(clazz.getName());\n+  }\n+}"
+  },
+  {
+    "sha": "0e9a75d6ee5ddb9e6d66df4f37250e07ed7b2dcd",
+    "filename": "mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectTypeHandler.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/mulesoft/mule-extensions-api/blob/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectTypeHandler.java",
+    "raw_url": "https://github.com/mulesoft/mule-extensions-api/raw/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectTypeHandler.java",
+    "contents_url": "https://api.github.com/repos/mulesoft/mule-extensions-api/contents/mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectTypeHandler.java?ref=b99a0ad015caa28814e24253b77fbe11dcb72f46",
+    "patch": "@@ -14,9 +14,11 @@\n \n import org.mule.metadata.api.annotation.TypeAliasAnnotation;\n import org.mule.metadata.api.annotation.TypeAnnotation;\n+import org.mule.metadata.api.builder.AnyTypeBuilder;\n import org.mule.metadata.api.builder.BaseTypeBuilder;\n import org.mule.metadata.api.builder.TypeBuilder;\n import org.mule.metadata.api.builder.WithAnnotation;\n+import org.mule.metadata.java.api.annotation.ClassInformationAnnotation;\n import org.mule.metadata.java.api.handler.ObjectFieldHandler;\n import org.mule.metadata.java.api.handler.ObjectHandler;\n import org.mule.metadata.java.api.handler.TypeHandlerManager;\n@@ -85,6 +87,10 @@ public ExtensionObjectTypeHandler(ObjectFieldHandler fieldHandler) {\n       handleGenericType(clazz, genericTypes, typeHandlerManager, wrappedTypesContexts.get(Literal.class),\n                         baseTypeBuilder, literalTypeAnnotation);\n       currentClass = getGenericClass(genericTypes, 0);\n+    } else if (Object.class.equals(clazz)) {\n+      typeBuilder = baseTypeBuilder.anyType()\n+          .id(clazz.getCanonicalName())\n+          .with(new ClassInformationAnnotation(clazz, genericTypes));\n     } else {\n       typeBuilder = super.handleClass(currentClass, genericTypes, typeHandlerManager, context, baseTypeBuilder);\n     }"
+  },
+  {
+    "sha": "e9a247549c2e5600c3478097cc0841a9b83220d4",
+    "filename": "mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionsTypeHandlerManagerFactory.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/mulesoft/mule-extensions-api/blob/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionsTypeHandlerManagerFactory.java",
+    "raw_url": "https://github.com/mulesoft/mule-extensions-api/raw/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionsTypeHandlerManagerFactory.java",
+    "contents_url": "https://api.github.com/repos/mulesoft/mule-extensions-api/contents/mule-extensions-api/src/main/java/org/mule/runtime/extension/api/declaration/type/ExtensionsTypeHandlerManagerFactory.java?ref=b99a0ad015caa28814e24253b77fbe11dcb72f46",
+    "patch": "@@ -6,7 +6,6 @@\n  */\n package org.mule.runtime.extension.api.declaration.type;\n \n-\n import org.mule.metadata.java.api.handler.TypeHandlerManager;\n import org.mule.metadata.java.api.handler.TypeHandlerManagerFactory;\n "
+  },
+  {
+    "sha": "a3037aaac97783361b5042a32bcafed636261e52",
+    "filename": "mule-extensions-api/src/test/java/org/mule/runtime/extension/api/declaration/fluent/ExtensionDeclarerTestCase.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/mulesoft/mule-extensions-api/blob/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/test/java/org/mule/runtime/extension/api/declaration/fluent/ExtensionDeclarerTestCase.java",
+    "raw_url": "https://github.com/mulesoft/mule-extensions-api/raw/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/test/java/org/mule/runtime/extension/api/declaration/fluent/ExtensionDeclarerTestCase.java",
+    "contents_url": "https://api.github.com/repos/mulesoft/mule-extensions-api/contents/mule-extensions-api/src/test/java/org/mule/runtime/extension/api/declaration/fluent/ExtensionDeclarerTestCase.java?ref=b99a0ad015caa28814e24253b77fbe11dcb72f46",
+    "patch": "@@ -39,7 +39,7 @@ public void withTypes() {\n \n   @Test\n   public void doNotDeclareObject() {\n-    assertNotDeclared(Object.class);\n+    assertNotDeclared(ClassForTesting.class);\n   }\n \n   @Test\n@@ -57,4 +57,7 @@ private void assertNotDeclared(Class<?> type) {\n     assertThat(declarer.getDeclaration().getTypes(), hasSize(0));\n   }\n \n+  private class ClassForTesting {\n+  }\n+\n }"
+  },
+  {
+    "sha": "5972d208646982fb33faafa1e50e9af6c54535a7",
+    "filename": "mule-extensions-api/src/test/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectClassTypeHandlerTestCase.java",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/mulesoft/mule-extensions-api/blob/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/test/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectClassTypeHandlerTestCase.java",
+    "raw_url": "https://github.com/mulesoft/mule-extensions-api/raw/b99a0ad015caa28814e24253b77fbe11dcb72f46/mule-extensions-api/src/test/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectClassTypeHandlerTestCase.java",
+    "contents_url": "https://api.github.com/repos/mulesoft/mule-extensions-api/contents/mule-extensions-api/src/test/java/org/mule/runtime/extension/api/declaration/type/ExtensionObjectClassTypeHandlerTestCase.java?ref=b99a0ad015caa28814e24253b77fbe11dcb72f46",
+    "patch": "@@ -0,0 +1,36 @@\n+/*\n+ * Copyright (c) MuleSoft, Inc.  All rights reserved.  http://www.mulesoft.com\n+ * The software in this package is published under the terms of the CPAL v1.0\n+ * license, a copy of which has been included with this distribution in the\n+ * LICENSE.txt file.\n+ */\n+package org.mule.runtime.extension.api.declaration.type;\n+\n+import static org.hamcrest.MatcherAssert.assertThat;\n+import static org.hamcrest.Matchers.instanceOf;\n+import static org.hamcrest.Matchers.is;\n+\n+import org.mule.metadata.api.ClassTypeLoader;\n+import org.mule.metadata.api.model.MetadataType;\n+import org.mule.metadata.api.model.impl.DefaultAnyType;\n+import org.mule.metadata.api.model.impl.DefaultArrayType;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+import org.junit.Test;\n+\n+public class ExtensionObjectClassTypeHandlerTestCase {\n+\n+  private final ClassTypeLoader typeLoader = ExtensionsTypeLoaderFactory.getDefault().createTypeLoader();\n+\n+  @Test\n+  public void listOfObjectsMetadataType() {\n+    List<Object> list = new ArrayList<>();\n+    MetadataType type = typeLoader.load(list.getClass());\n+\n+    assertThat(type, is(instanceOf(DefaultArrayType.class)));\n+    assertThat(((DefaultArrayType) type).getType(), is(instanceOf(DefaultAnyType.class)));\n+  }\n+\n+}"
+  }
+]

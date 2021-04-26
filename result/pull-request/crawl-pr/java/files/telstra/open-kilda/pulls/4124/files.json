@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "3163453c73f40ab2bdeea8abdfa8c36be090413f",
+    "filename": "src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/service/ActionService.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 3,
+    "changes": 8,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/287211bd4712a1344cfae1b76cf1f7dd74fade57/src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/service/ActionService.java",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/287211bd4712a1344cfae1b76cf1f7dd74fade57/src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/service/ActionService.java",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/src-java/flowmonitoring-topology/flowmonitoring-storm-topology/src/main/java/org/openkilda/wfm/topology/flowmonitoring/service/ActionService.java?ref=287211bd4712a1344cfae1b76cf1f7dd74fade57",
+    "patch": "@@ -19,6 +19,8 @@\n \n import lombok.extern.slf4j.Slf4j;\n \n+import java.util.concurrent.TimeUnit;\n+\n @Slf4j\n public class ActionService {\n \n@@ -27,9 +29,9 @@\n      */\n     public void checkFlowSla(String flowId, FlowDirection direction, long latency,\n                              Long maxLatency, Long maxLatencyTier2) {\n-        if (maxLatency != null && latency > maxLatency) {\n-            long latencyMs = latency / 1000;\n-            long maxLatencyMs = maxLatency / 1000;\n+        if (maxLatency != null && maxLatency > 0 && latency > maxLatency) {\n+            long latencyMs = TimeUnit.NANOSECONDS.toMillis(latency);\n+            long maxLatencyMs = TimeUnit.NANOSECONDS.toMillis(maxLatency);\n             log.warn(\"{} path for flow '{}' violates latency SLA {}/{} ms\",\n                     direction.name(), flowId, latencyMs, maxLatencyMs);\n         }"
+  }
+]

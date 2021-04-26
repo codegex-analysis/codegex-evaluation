@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "542801674dd63ff7e0524a3089ffce8b7866fa6f",
+    "filename": "partitionLabels.py",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/super30admin/Greedy-2/blob/a53da0147c08e12e9b5c9490e12c16f8bb343fb8/partitionLabels.py",
+    "raw_url": "https://github.com/super30admin/Greedy-2/raw/a53da0147c08e12e9b5c9490e12c16f8bb343fb8/partitionLabels.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Greedy-2/contents/partitionLabels.py?ref=a53da0147c08e12e9b5c9490e12c16f8bb343fb8",
+    "patch": "@@ -0,0 +1,31 @@\n+class Solution:\n+    \n+    def partitionLabels(self, S: str) -> List[int]:\n+        \n+        \"\"\"\n+        Description: find lengths of largest possible strings with unique characters\n+        \n+        Time Complexity: O(n)\n+        Space Complexity: O(n)\n+\n+        Approach: \n+        - Use a dictionary to identify frequency of each item\n+        - for each largest possible string, we can utilize the dictionary to see if the character's maximum index is going beyond a certain point\n+        - if the index remains under a limit defined by another character at start index, we can identify that as a longest string \n+        - update start index to next character in the string and search to find end again and keep appending the resulting list until every character is looked at\n+        \"\"\"\n+        \n+        from collections import defaultdict\n+        char_map = defaultdict(int); result = []\n+        \n+        for i, char in enumerate(S):\n+            char_map[char] = i\n+           \n+        start = 0; end = 0\n+        for i, char in enumerate(S):\n+            end = max(end, char_map[char])\n+            if i == end:\n+                result.append(end - start + 1)\n+                start = i + 1\n+                \n+        return result"
+  },
+  {
+    "sha": "0514ede8226649de6ca4043fb4aa122f03de3a91",
+    "filename": "qReconstruct.py",
+    "status": "added",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/super30admin/Greedy-2/blob/a53da0147c08e12e9b5c9490e12c16f8bb343fb8/qReconstruct.py",
+    "raw_url": "https://github.com/super30admin/Greedy-2/raw/a53da0147c08e12e9b5c9490e12c16f8bb343fb8/qReconstruct.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Greedy-2/contents/qReconstruct.py?ref=a53da0147c08e12e9b5c9490e12c16f8bb343fb8",
+    "patch": "@@ -0,0 +1,23 @@\n+class Solution:\n+    \n+    \"\"\"\n+    Description: reconstruct a queue from a list of lists where 2nd element present number of people equal or greather than 1st element\n+    \n+    Time Complexity: O(n^2)\n+    Space Complexity: O(n)\\\n+    \n+    Approach:\n+    1. sort the queue by using reverse height and number of people in front \n+    2. in an empty resulting array insert each person one by one on the index identified by 2nd element \n+    \"\"\"\n+    \n+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:\n+        \n+        if people == None: return \n+        \n+        people = sorted(people, key = lambda x: (-x[0], x[1]))\n+        result = []\n+        for person in people:\n+            result.insert(person[1], person)\n+            \n+        return result"
+  },
+  {
+    "sha": "534e78f82f16fe537b60be54547162afa43b3328",
+    "filename": "taskSchedule.py",
+    "status": "added",
+    "additions": 43,
+    "deletions": 0,
+    "changes": 43,
+    "blob_url": "https://github.com/super30admin/Greedy-2/blob/a53da0147c08e12e9b5c9490e12c16f8bb343fb8/taskSchedule.py",
+    "raw_url": "https://github.com/super30admin/Greedy-2/raw/a53da0147c08e12e9b5c9490e12c16f8bb343fb8/taskSchedule.py",
+    "contents_url": "https://api.github.com/repos/super30admin/Greedy-2/contents/taskSchedule.py?ref=a53da0147c08e12e9b5c9490e12c16f8bb343fb8",
+    "patch": "@@ -0,0 +1,43 @@\n+class Solution:\n+    \n+    \"\"\"\n+    Description: for a list of CPU tasks, with a given cooldown period between same tasks, find the time to complete all the tasks\n+    \n+    Time Complexity: O(n)\n+    Space Complexity: O(n)\n+    \n+    Approach:\n+    - space task with maximum frequency with n distance apart by imagining an empty array, see below\n+      for [\"A\",\"A\",\"A\",\"B\",\"B\",\"C\"]: space like: A--A--A for n = 2\n+    - there is an opportunity to fill other tasks in empty spaces (-), find available places to fill (4 in above example)\n+    - find idle spaces by differencing between empty and available\n+    - return size of task + idle as the resulting time to complete all the task\n+    \n+    + Modifications:\n+      - for multiple tasks with same frequency:\n+        use groups (derive another paramter, maximum count with same maximum frequency)\n+        + one can modify the empty spaces by reducing it by multiplying with maximum count (e.g. AB-AB-AB for [\"A\",\"A\",\"A\",\"B\",\"B\",\"B\",\"C\"])\n+        + winsorize the idle space with 0 (cannot be negative)\n+    \"\"\"\n+    \n+    def leastInterval(self, tasks: List[str], n: int) -> int:\n+        \n+        from collections import defaultdict\n+        freq_map = defaultdict(int)\n+        max_freq = 0; max_count = 0\n+        \n+        for task in tasks:\n+            freq_map[task] += 1\n+            max_freq = max(freq_map[task], max_freq)\n+            \n+        for val in freq_map.values():\n+            if val == max_freq: \n+                max_count += 1\n+            \n+        partitions = max_freq - 1\n+        empty = (n - (max_count - 1))*partitions\n+        available = len(tasks) - max_freq*max_count\n+        idle = max(0, empty - available)\n+        \n+        return len(tasks) + idle\n+        "
+  }
+]

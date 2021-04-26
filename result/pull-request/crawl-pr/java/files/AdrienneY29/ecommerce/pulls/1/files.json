@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "7fd8eff623e251530427f7ed1c447c649359587f",
+    "filename": "src/main/java/com/tts/ecommerce/model/Product.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 5,
+    "changes": 13,
+    "blob_url": "https://github.com/AdrienneY29/ecommerce/blob/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/java/com/tts/ecommerce/model/Product.java",
+    "raw_url": "https://github.com/AdrienneY29/ecommerce/raw/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/java/com/tts/ecommerce/model/Product.java",
+    "contents_url": "https://api.github.com/repos/AdrienneY29/ecommerce/contents/src/main/java/com/tts/ecommerce/model/Product.java?ref=9c60115da6fde67eecd0db84647aefc9c12a8631",
+    "patch": "@@ -1,12 +1,15 @@\n package com.tts.ecommerce.model;\n \n-import lombok.Getter;\n-import org.springframework.data.annotation.Id;\n+import lombok.*;\n+//import org.springframework.data.annotation.Id;\n \n-import javax.persistence.Column;\n-import javax.persistence.GeneratedValue;\n-import javax.persistence.GenerationType;\n+import javax.persistence.*;\n \n+@Data\n+@Builder\n+@AllArgsConstructor\n+@NoArgsConstructor\n+@Entity\n public class Product {\n \n     @Getter"
+  },
+  {
+    "sha": "12fea6cd89c8c51bab8364d0be604cf59b0a5f39",
+    "filename": "src/main/java/com/tts/ecommerce/model/User.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 22,
+    "changes": 44,
+    "blob_url": "https://github.com/AdrienneY29/ecommerce/blob/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/java/com/tts/ecommerce/model/User.java",
+    "raw_url": "https://github.com/AdrienneY29/ecommerce/raw/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/java/com/tts/ecommerce/model/User.java",
+    "contents_url": "https://api.github.com/repos/AdrienneY29/ecommerce/contents/src/main/java/com/tts/ecommerce/model/User.java?ref=9c60115da6fde67eecd0db84647aefc9c12a8631",
+    "patch": "@@ -4,8 +4,8 @@\n import com.fasterxml.jackson.annotation.JsonProperty;\n import com.fasterxml.jackson.annotation.JsonProperty.Access;\n \n-\n-import org.springframework.data.annotation.Id;\n+// this import conflicts with the one from javax.persistence\n+//import org.springframework.data.annotation.Id;\n import org.springframework.security.core.GrantedAuthority;\n import org.springframework.security.core.userdetails.UserDetails;\n \n@@ -48,11 +48,10 @@\n     private String password;\n \n     //from twitter this is to show whether user is enabled value of 1= active\n-    private int active;\n+//    private int active;\n \n \n     //Map\n-\n     @ElementCollection\n     private Map<Product, Integer> cart;\n \n@@ -78,53 +77,54 @@\n //    @Transient\n //    private Collection<GrantedAuthority> authorities = null;\n \n-    @Override\n+\n+        @Override\n     public Collection<? extends GrantedAuthority> getAuthorities() {\n         return null;\n     }\n-\n+//\n     @Override\n     public String getPassword() {\n-        return null;\n+        return this.password;\n     }\n \n     @Override\n     public String getUsername() {\n-        return null;\n+        return this.username;\n     }\n \n     @Override\n     public boolean isAccountNonExpired() {\n-        return false;\n+        return true;\n     }\n \n     @Override\n     public boolean isAccountNonLocked() {\n-        return false;\n+        return true;\n     }\n \n     @Override\n     public boolean isCredentialsNonExpired() {\n-        return false;\n+        return true;\n     }\n \n     @Override\n     public boolean isEnabled() {\n-        return false;\n+        return true;\n     }\n \n     //this is new created from userService\n-    public void setCart(Map<Product, Integer> cart) {\n-        this.cart = cart;\n-    }\n-\n-    public Map<Product, Integer> getCart() {\n-        return cart;\n-    }\n+//    public void setCart(Map<Product, Integer> cart) {\n+//        this.cart = cart;\n+//    }\n+//\n+//    public Map<Product, Integer> getCart() {\n+//        return cart;\n+//    }\n \n-    public void setPassword(String password) {\n-        this.password = password;\n-    }\n+//    public void setPassword(String password) {\n+//        this.password = password;\n+//    }\n \n \n     //"
+  },
+  {
+    "sha": "ac7f24addc9d02cdb99dd5215c92ec514754f312",
+    "filename": "src/main/java/com/tts/ecommerce/service/UserService.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AdrienneY29/ecommerce/blob/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/java/com/tts/ecommerce/service/UserService.java",
+    "raw_url": "https://github.com/AdrienneY29/ecommerce/raw/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/java/com/tts/ecommerce/service/UserService.java",
+    "contents_url": "https://api.github.com/repos/AdrienneY29/ecommerce/contents/src/main/java/com/tts/ecommerce/service/UserService.java?ref=9c60115da6fde67eecd0db84647aefc9c12a8631",
+    "patch": "@@ -34,7 +34,7 @@ public User findByUsername(String username) {\n     //added setActive fr twitter so that the user is active or enabled\n     public void saveNew(User user) {\n         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));\n-        user.setActive(1);\n+//        user.setActive(1);\n         userRepository.save(user);\n     }\n "
+  },
+  {
+    "sha": "e2d8c3e51748c8e7de3aafcb2ec92723f9b7295e",
+    "filename": "src/main/resources/application.properties",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/AdrienneY29/ecommerce/blob/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/resources/application.properties",
+    "raw_url": "https://github.com/AdrienneY29/ecommerce/raw/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/resources/application.properties",
+    "contents_url": "https://api.github.com/repos/AdrienneY29/ecommerce/contents/src/main/resources/application.properties?ref=9c60115da6fde67eecd0db84647aefc9c12a8631",
+    "patch": "@@ -7,7 +7,7 @@ spring.datasource.url = jdbc:h2:file:~/ecommerce\n spring.datasource.username = sa\n spring.datasource.password =\n spring.datasource.driver-class-name = org.h2.Driver\n-spring.datasource.initialization-mode = always\n+#spring.datasource.initialization-mode = always\n \n # show sql queries in console\n spring.jpa.show-sql = true\n@@ -17,4 +17,5 @@ spring.jpa.hibernate.ddl-auto = update\n \n # set up queries for loading users\n spring.queries.users-query = select username, password from user where username=?\n-\n+STRIPE_SECRET_KEY=xxxxxxxxxxxxx\n+STRIPE_PUBLIC_KEY=xxxxxxxxxxxxx\n\\ No newline at end of file"
+  },
+  {
+    "sha": "d2120ffc89bb245e6ac230aa52ebbc7ea02bc92d",
+    "filename": "src/main/resources/data.sql",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/AdrienneY29/ecommerce/blob/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/resources/data.sql",
+    "raw_url": "https://github.com/AdrienneY29/ecommerce/raw/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/resources/data.sql",
+    "contents_url": "https://api.github.com/repos/AdrienneY29/ecommerce/contents/src/main/resources/data.sql?ref=9c60115da6fde67eecd0db84647aefc9c12a8631",
+    "patch": "@@ -1 +1,3 @@\n-INSERT INTO `user` VALUES (1,'USER');\n\\ No newline at end of file\n+--inserting a user will be more than a little complicated, best to avoid it via a script\n+--insert into USER values (1, 'user', 'password1')\n+insert into PRODUCT values (1, 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 1, 1.0)\n\\ No newline at end of file"
+  },
+  {
+    "sha": "246c1d2e9b35070678c32414539b892fe23ede61",
+    "filename": "src/main/resources/templates/fragments/fragments.html",
+    "status": "renamed",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/AdrienneY29/ecommerce/blob/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/resources/templates/fragments/fragments.html",
+    "raw_url": "https://github.com/AdrienneY29/ecommerce/raw/9c60115da6fde67eecd0db84647aefc9c12a8631/src/main/resources/templates/fragments/fragments.html",
+    "contents_url": "https://api.github.com/repos/AdrienneY29/ecommerce/contents/src/main/resources/templates/fragments/fragments.html?ref=9c60115da6fde67eecd0db84647aefc9c12a8631",
+    "previous_filename": "src/main/resources/templates/fragments/head.html"
+  }
+]

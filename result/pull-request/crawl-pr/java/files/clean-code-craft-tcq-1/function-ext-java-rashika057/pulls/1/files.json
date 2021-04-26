@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "d8262f5ed866288aece5693dbd701047c0b12d0d",
+    "filename": "vitals/BatteryManagementSystem.java",
+    "status": "added",
+    "additions": 57,
+    "deletions": 0,
+    "changes": 57,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/blob/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/BatteryManagementSystem.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/raw/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/BatteryManagementSystem.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-rashika057/contents/vitals/BatteryManagementSystem.java?ref=0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101",
+    "patch": "@@ -0,0 +1,57 @@\n+package vitals;\r\n+public class BatteryManagementSystem {\r\n+\t\r\n+InternationalizedText localeText;\r\n+\t\r\n+\tpublic BatteryManagementSystem(InternationalizedText localeText) {\r\n+\t\tthis.localeText = localeText;\r\n+\t}\r\n+\t\t\t\r\n+    boolean batteryIsOk(float temperature, float soc, float chargeRate) {\r\n+    \tboolean isTempOk = chargeTemparatureInRange(temperature);\r\n+    \tboolean issocOk = socInRange(soc);\r\n+    \tboolean ischargeRateOk = chargeRateInRange(chargeRate);\r\n+    \treturn (isTempOk && issocOk && ischargeRateOk);        \r\n+    }\r\n+    \r\n+    boolean chargeTemparatureInRange(float tempVal) {  \r\n+    \tCondition temperature = new Condition(\"temp\",0,45);\r\n+    \treturn valueInRange(tempVal,temperature);\r\n+    }\r\n+    \r\n+    boolean dischargeTemparatureInRange(float tempVal) {  \r\n+    \tCondition temperature = new Condition(\"dTemp\",-20,60);\r\n+    \treturn valueInRange(tempVal,temperature);\r\n+    }\r\n+    \r\n+    boolean socInRange(float socVal) {\r\n+    \tCondition soc = new Condition(\"soc\",20,80);\r\n+    \treturn valueInRange(socVal,soc);\r\n+    }\r\n+    \r\n+    boolean chargeRateInRange(float chargeRateVal) {\r\n+    \tCondition chargeRate = new Condition(\"chargeRate\",0,0.8f);\r\n+    \treturn valueInRange(chargeRateVal,chargeRate);\r\n+    }\r\n+       \r\n+    boolean valueInRange(float value,Condition cond) {\r\n+    \tfloat warningLevel = (5*cond.getMax())/100;\r\n+    \tfloat warningLowLevel = cond.getMin()+warningLevel;\r\n+    \tfloat warningHighLevel = cond.getMax()- warningLevel;\r\n+    \tif(value < cond.getMin()) {\r\n+    \t\tlocaleText.generateMsg(cond.getName(),false,false);\r\n+            return false;\r\n+        }\r\n+    \telse if(value > cond.getMax()) {\r\n+    \t\tlocaleText.generateMsg(cond.getName(),true,false);\t\r\n+            return false;\r\n+        }\r\n+    \telse if(value >= cond.getMin() && value <= warningLowLevel) {\r\n+    \t\tlocaleText.generateMsg(cond.getName(),false,true);\r\n+    \t}\r\n+    \telse if(value >= warningHighLevel && value <= cond.getMax()) {\r\n+    \t\tlocaleText.generateMsg(cond.getName(),true,true);\r\n+    \t}\r\n+    \treturn true;\r\n+    }\r\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "69dc962f41c0d3bda97cabd7f73b803240763587",
+    "filename": "vitals/Condition.java",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/blob/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/Condition.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/raw/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/Condition.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-rashika057/contents/vitals/Condition.java?ref=0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101",
+    "patch": "@@ -0,0 +1,32 @@\n+package vitals;\r\n+\r\n+public class Condition {\r\n+\t\tprivate String name;\r\n+\t    private float min;\r\n+\t    private float max;\r\n+\t\tpublic Condition(String name, float min,float max) {\r\n+\t\t\tthis.name = name;\r\n+\t\t\tthis.min = min;\r\n+\t\t\tthis.max = max;\r\n+\t\t}\r\n+\t\tpublic String getName() {\r\n+\t\t\treturn name;\r\n+\t\t}\r\n+\t\tpublic void setName(String name) {\r\n+\t\t\tthis.name = name;\r\n+\t\t}\r\n+\t\tpublic float getMin() {\r\n+\t\t\treturn min;\r\n+\t\t}\r\n+\t\tpublic void setMin(float min) {\r\n+\t\t\tthis.min = min;\r\n+\t\t}\r\n+\t\tpublic float getMax() {\r\n+\t\t\treturn max;\r\n+\t\t}\r\n+\t\tpublic void setMax(float max) {\r\n+\t\t\tthis.max = max;\r\n+\t\t}\t    \r\n+\t    \r\n+}\r\n+\r"
+  },
+  {
+    "sha": "fd251fd0446297d6ee0c99b1e96725ebb44cc1c8",
+    "filename": "vitals/InternationalizedText.java",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/blob/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/InternationalizedText.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/raw/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/InternationalizedText.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-rashika057/contents/vitals/InternationalizedText.java?ref=0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101",
+    "patch": "@@ -0,0 +1,42 @@\n+package vitals;\r\n+\r\n+import java.util.*;\r\n+\r\n+public class InternationalizedText {\r\n+\t\r\n+String language;\r\n+String country;\r\n+\r\n+public InternationalizedText(String language,String country) {\r\n+this.language = language;\r\n+this.country = country;\r\n+}\r\n+\r\n+public String translate(String text) {\r\n+if (language.isEmpty() && country.isEmpty()) {\r\n+\tlanguage = new String(\"en\");\r\n+\tcountry = new String(\"US\");\r\n+} \r\n+Locale currentLocale;\r\n+ResourceBundle messages;\r\n+currentLocale = new Locale(language, country);\r\n+messages = ResourceBundle.getBundle(\"MessagesBundle\", currentLocale);\r\n+return messages.getString(text);\r\n+}\r\n+\r\n+public void generateMsg(String condName,boolean isHigh,boolean isWarning) {\r\n+String result = \"\";\r\n+if(isWarning)\r\n+result = result.concat(translate(\"warning\") +\": \"+translate(\"approaching\")+\" \");\r\n+else\r\n+result = result.concat(translate(\"crossed\") +\" \"); \r\n+result = result.concat(translate(\"condName\") +\" \");\r\n+if(isHigh)\r\n+result = result.concat(translate(\"peak\") +\"!\");\r\n+else\r\n+result = result.concat(translate(\"bottom\") +\"!\");\r\n+System.out.println(result);\r\n+}\r\n+\r\n+}\r\n+\r"
+  },
+  {
+    "sha": "55914a35ee4b2f8dc62c3608749b5a8b1465356a",
+    "filename": "vitals/Main.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 17,
+    "changes": 26,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/blob/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/Main.java",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/raw/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/Main.java",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-rashika057/contents/vitals/Main.java?ref=0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101",
+    "patch": "@@ -1,23 +1,15 @@\n package vitals;\n \n public class Main {\n-    static boolean batteryIsOk(float temperature, float soc, float chargeRate) {\n-        if(temperature < 0 || temperature > 45) {\n-            System.out.println(\"Temperature is out of range!\");\n-            return false;\n-        } else if(soc < 20 || soc > 80) {\n-            System.out.println(\"State of Charge is out of range!\");\n-            return false;\n-        } else if(chargeRate > 0.8) {\n-            System.out.println(\"Charge Rate is out of range!\");\n-            return false;\n-        }\n-        return true;\n-    }\n-\n     public static void main(String[] args) {\n-        assert(batteryIsOk(25, 70, 0.7f) == true);\n-        assert(batteryIsOk(50, 85, 0.0f) == false);\n-        System.out.println(\"Some more tests needed\");\n+    \tInternationalizedText localeText=new InternationalizedText(\"de\",\"DE\");    \t\n+    \tBatteryManagementSystem bms =new BatteryManagementSystem(localeText);\n+        assert(bms.batteryIsOk(25, 70, 0.7f) == true);\n+        assert(bms.batteryIsOk(50, 85, 0.0f) == false);\n+        assert(bms.batteryIsOk(40, 60, 0.9f) == false);\n+        assert(bms.chargeTemparatureInRange(60) == false);\n+        assert(bms.dischargeTemparatureInRange(60) == true);\n+        assert(bms.socInRange(10) == false);\n+        assert(bms.chargeRateInRange(1.2f) == false);\n     }\n }"
+  },
+  {
+    "sha": "2f56279f1a437cb67e7ec10033add4027e39765a",
+    "filename": "vitals/MessagesBundle.properties",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/blob/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/MessagesBundle.properties",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/raw/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/MessagesBundle.properties",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-rashika057/contents/vitals/MessagesBundle.properties?ref=0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101",
+    "patch": "@@ -0,0 +1,9 @@\n+temp = Charge Temperature\r\n+dTemp = Discharge Temperature\r\n+soc = State of Charge\r\n+chargeRate = Charge Rate\r\n+bottom = trough\r\n+warning = Warning\r\n+approaching =  Approaching\r\n+crossed = Crossed\r\n+peak = peak\n\\ No newline at end of file"
+  },
+  {
+    "sha": "23c9fc0f916baaa06b4b7c94750a60c5d2f66cf4",
+    "filename": "vitals/MessagesBundle_de_DE.properties",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/blob/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/MessagesBundle_de_DE.properties",
+    "raw_url": "https://github.com/clean-code-craft-tcq-1/function-ext-java-rashika057/raw/0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101/vitals/MessagesBundle_de_DE.properties",
+    "contents_url": "https://api.github.com/repos/clean-code-craft-tcq-1/function-ext-java-rashika057/contents/vitals/MessagesBundle_de_DE.properties?ref=0f4f26e182c4e2d7bbafbe626e6204dbe9d4d101",
+    "patch": "@@ -0,0 +1,9 @@\n+temp = Ladetemperatur\r\n+dTemp = Entladungstemperatur\r\n+soc = Ladezustand\r\n+chargeRate = Ladestrom\r\n+bottom = Boden\r\n+warning = Warnung\r\n+approaching =  Ann�herung\r\n+crossed = gekreuzt\r\n+peak = Gipfel\n\\ No newline at end of file"
+  }
+]

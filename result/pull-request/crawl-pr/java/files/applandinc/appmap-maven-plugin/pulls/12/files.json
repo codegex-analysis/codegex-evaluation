@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "6ac96ff7bf83414a0d3f986f10b735bd31672782",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/applandinc/appmap-maven-plugin/blob/eeec12576c46450ca84b7210b54be33302f36347/README.md",
+    "raw_url": "https://github.com/applandinc/appmap-maven-plugin/raw/eeec12576c46450ca84b7210b54be33302f36347/README.md",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-maven-plugin/contents/README.md?ref=eeec12576c46450ca84b7210b54be33302f36347",
+    "patch": "@@ -84,7 +84,7 @@ for details.\n - `outputDirectory` Output directory for `.appmap.json` files. Default:\n   _./target/appmap_\n - `skip` Agent won't record tests when set to true. Default: _false_\n-- `debug` Enable debug logging. Default: _false_\n+- `debug` Enable debug flags as a comma separated list. Accepts: `info`, `hooks`, `http`, `locals` Default: _null_ (disabled)\n - `debugFile` Specify where to output debug logs. Default: _target/appmap/agent.log_\n - `eventValueSize` Specifies the length of a value string before truncation\n   occurs. If set to 0, truncation is disabled. Default: _1024_\n@@ -100,7 +100,7 @@ for details.\n         <configFile>appmap.yml</configFile>\n         <outputDirectory>target/appmap</outputDirectory>\n         <skip>false</skip>\n-        <debug>false</debug>\n+        <debug></debug>\n         <debugFile>target/appmap/agent.log</debugFile>\n         <eventValueSize>1024</eventValueSize>\n     </configuration>"
+  },
+  {
+    "sha": "e0a0f82f534227c515f60fa7beb22111e77649b3",
+    "filename": "src/main/java/com/appland/appmap/AppMapAgentMojo.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 3,
+    "changes": 14,
+    "blob_url": "https://github.com/applandinc/appmap-maven-plugin/blob/eeec12576c46450ca84b7210b54be33302f36347/src/main/java/com/appland/appmap/AppMapAgentMojo.java",
+    "raw_url": "https://github.com/applandinc/appmap-maven-plugin/raw/eeec12576c46450ca84b7210b54be33302f36347/src/main/java/com/appland/appmap/AppMapAgentMojo.java",
+    "contents_url": "https://api.github.com/repos/applandinc/appmap-maven-plugin/contents/src/main/java/com/appland/appmap/AppMapAgentMojo.java?ref=eeec12576c46450ca84b7210b54be33302f36347",
+    "patch": "@@ -16,6 +16,7 @@\n \n     static final String APPMAP_AGENT_ARTIFACT_NAME = \"com.appland:appmap-agent\";\n     static final String SUREFIRE_ARG_LINE = \"argLine\";\n+    static final List<String> DEBUG_FLAGS = Arrays.asList(\"hooks\", \"locals\", \"http\");\n \n     @Parameter(property = \"skip\")\n     protected boolean skip = false;\n@@ -27,7 +28,7 @@\n     protected File configFile = new File(\"appmap.yml\");\n \n     @Parameter(property = \"project.debug\")\n-    protected Boolean debug = false;\n+    protected String debug = null;\n \n     @Parameter(property = \"project.debugFile\")\n     protected File debugFile = new File(\"target/appmap/agent.log\");\n@@ -64,7 +65,7 @@ private String buildArguments() {\n         List<String> args = new ArrayList<String>();\n         final String oldConfig = getCurrentArgLinePropertyValue();\n         if (oldConfig != null) {\n-            final List<String> oldArgs = Arrays.asList(oldConfig.split(\" \"));\n+            final List<String> oldArgs = new ArrayList<>(Arrays.asList(oldConfig.split(\" \")));\n             removeOldAppMapAgentFromCommandLine(oldArgs);\n             args.addAll(oldArgs);\n         }\n@@ -97,7 +98,14 @@ private void addMvnAppMapCommandLineArgsFirst(List<String> args) {\n                 format(\"-javaagent:%s=%s\", getAppMapAgentJar(), this)\n         ));\n \n-        if (this.debug) {\n+        if (this.debug != null && !this.debug.isEmpty()) {\n+            final List<String> debugTokens = new ArrayList<>(Arrays.asList(this.debug.split(\"[,|\\\\s]\")));\n+            for (String token : debugTokens) {\n+                if (DEBUG_FLAGS.contains(token)) {\n+                    args.add(\"-Dappmap.debug.\" + token);\n+                }\n+            }\n+\n             args.add(0, \"-Dappmap.debug\");\n             args.add(0, \"-Dappmap.debug.file=\" + StringEscapeUtils.escapeJava(format(\"%s\", debugFile)));\n         }"
+  }
+]

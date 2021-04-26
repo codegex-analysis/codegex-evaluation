@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "82dc4bd3d4782e5b7f75f08334a87288de79eeee",
+    "filename": "src/main/java/net/blay09/mods/waystones/client/gui/GuiWaystoneList.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 3,
+    "changes": 25,
+    "blob_url": "https://github.com/blay09/Waystones/blob/f149ed2390d70a1287906812f87345c3cf442d38/src/main/java/net/blay09/mods/waystones/client/gui/GuiWaystoneList.java",
+    "raw_url": "https://github.com/blay09/Waystones/raw/f149ed2390d70a1287906812f87345c3cf442d38/src/main/java/net/blay09/mods/waystones/client/gui/GuiWaystoneList.java",
+    "contents_url": "https://api.github.com/repos/blay09/Waystones/contents/src/main/java/net/blay09/mods/waystones/client/gui/GuiWaystoneList.java?ref=f149ed2390d70a1287906812f87345c3cf442d38",
+    "patch": "@@ -130,9 +130,28 @@ protected void actionPerformed(GuiButton button) {\n                 return;\n             }\n \n-            WaystoneEntry swap = entries[index];\n-            entries[index] = entries[otherIndex];\n-            entries[otherIndex] = swap;\n+            if (otherIndex == 0 && index != 1) {\n+                WaystoneEntry[] result = new WaystoneEntry[entries.length];\n+\n+                System.arraycopy(entries, 0, result, 1, index);\n+                System.arraycopy(entries, index + 1, result, index + 1, entries.length - index - 1);\n+                result[0] = entries[index];\n+\n+                System.arraycopy(result, 0, entries, 0, entries.length);\n+            } else if (otherIndex == entries.length - 1 && index != entries.length - 2) {\n+                WaystoneEntry[] result = new WaystoneEntry[entries.length];\n+\n+                System.arraycopy(entries, 0, result, 0, index);\n+                System.arraycopy(entries, index+1, result, index, entries.length - index - 1);\n+                result[entries.length - 1] = entries[index];\n+\n+                System.arraycopy(result, 0, entries, 0, entries.length);\n+            } else {\n+                WaystoneEntry swap = entries[index];\n+                entries[index] = entries[otherIndex];\n+                entries[otherIndex] = swap;\n+            }\n+\n             NetworkHandler.channel.sendToServer(new MessageSortWaystone(index, otherIndex));\n             updateList();\n         } else if (button instanceof GuiButtonRemoveWaystone) {"
+  },
+  {
+    "sha": "71762b657c24d459a62f8524d6bf87f5e41769c9",
+    "filename": "src/main/java/net/blay09/mods/waystones/network/handler/HandlerSortWaystone.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 3,
+    "changes": 20,
+    "blob_url": "https://github.com/blay09/Waystones/blob/f149ed2390d70a1287906812f87345c3cf442d38/src/main/java/net/blay09/mods/waystones/network/handler/HandlerSortWaystone.java",
+    "raw_url": "https://github.com/blay09/Waystones/raw/f149ed2390d70a1287906812f87345c3cf442d38/src/main/java/net/blay09/mods/waystones/network/handler/HandlerSortWaystone.java",
+    "contents_url": "https://api.github.com/repos/blay09/Waystones/contents/src/main/java/net/blay09/mods/waystones/network/handler/HandlerSortWaystone.java?ref=f149ed2390d70a1287906812f87345c3cf442d38",
+    "patch": "@@ -23,9 +23,23 @@ public IMessage onMessage(final MessageSortWaystone message, final MessageContex\n \t\t\tif(index < 0 || index >= entries.length || otherIndex < 0 || otherIndex >= entries.length) {\n \t\t\t\treturn;\n \t\t\t}\n-\t\t\tWaystoneEntry swap = entries[index];\n-\t\t\tentries[index] = entries[otherIndex];\n-\t\t\tentries[otherIndex] = swap;\n+\t\t\tif (otherIndex == 0 && index != 1) {\n+\t\t\t\tWaystoneEntry[] result = new WaystoneEntry[entries.length];\n+\t\t\t\tSystem.arraycopy(entries, 0, result, 1, index);\n+\t\t\t\tSystem.arraycopy(entries, index + 1, result, index + 1, entries.length - index - 1);\n+\t\t\t\tresult[0] = entries[index];\n+\t\t\t\tSystem.arraycopy(result, 0, entries, 0, entries.length);\n+\t\t\t} else if (otherIndex == entries.length - 1 && index != entries.length - 2) {\n+\t\t\t\tWaystoneEntry[] result = new WaystoneEntry[entries.length];\n+\t\t\t\tSystem.arraycopy(entries, 0, result, 0, index);\n+\t\t\t\tSystem.arraycopy(entries, index+1, result, index, entries.length - index - 1);\n+\t\t\t\tresult[entries.length - 1] = entries[index];\n+\t\t\t\tSystem.arraycopy(result, 0, entries, 0, entries.length);\n+\t\t\t} else {\n+\t\t\t\tWaystoneEntry swap = entries[index];\n+\t\t\t\tentries[index] = entries[otherIndex];\n+\t\t\t\tentries[otherIndex] = swap;\n+\t\t\t}\n \t\t\twaystoneData.store(ctx.getServerHandler().player);\n \t\t\tWaystoneManager.sendPlayerWaystones(ctx.getServerHandler().player);\n \t\t});"
+  }
+]

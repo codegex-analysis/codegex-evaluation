@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "79b2cac9e723882db709656772fea8bb3fe98ca7",
+    "filename": "src/main/java/Lesson4/Lesson4.java",
+    "status": "added",
+    "additions": 78,
+    "deletions": 0,
+    "changes": 78,
+    "blob_url": "https://github.com/nik61088/JAVA_3/blob/92477da8f211aa89dc2c0e26c5ca19379569dc46/src/main/java/Lesson4/Lesson4.java",
+    "raw_url": "https://github.com/nik61088/JAVA_3/raw/92477da8f211aa89dc2c0e26c5ca19379569dc46/src/main/java/Lesson4/Lesson4.java",
+    "contents_url": "https://api.github.com/repos/nik61088/JAVA_3/contents/src/main/java/Lesson4/Lesson4.java?ref=92477da8f211aa89dc2c0e26c5ca19379569dc46",
+    "patch": "@@ -0,0 +1,78 @@\n+package Lesson4;\n+\n+public class Lesson4 {\n+    private final Object mon = new Object();\n+    private volatile char currentLetter = 'A';\n+    private int x = 5;\n+\n+    public static void main(String[] args) {\n+        Lesson4 w = new Lesson4();\n+        Thread t1 = new Thread(() -> {\n+            w.printA();\n+        });\n+        Thread t2 = new Thread(() -> {\n+            w.printB();\n+        });\n+        Thread t3 = new Thread(() -> {\n+            w.printC();\n+        });\n+        t1.start();\n+        t2.start();\n+        t3.start();\n+    }\n+\n+    public void printA() {\n+        synchronized (mon) {\n+            try {\n+                for (int i = 0; i < x; i++) {\n+                    while (currentLetter != 'A') {\n+                        mon.wait();\n+                    }\n+                    System.out.print(\"A\");\n+                    currentLetter = 'B';\n+                    mon.notifyAll();\n+                }\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            }\n+        }\n+    }\n+\n+    public void printB() {\n+        synchronized (mon) {\n+            try {\n+                for (int i = 0; i < x; i++) {\n+                    while (currentLetter != 'B') {\n+                        mon.wait();\n+                    }\n+                    System.out.print(\"B\");\n+                    currentLetter = 'C';\n+                    mon.notifyAll();\n+                }\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            }\n+        }\n+    }\n+    public void printC() {\n+        synchronized (mon) {\n+            try {\n+                for (int i = 0; i < x; i++) {\n+                    while (currentLetter != 'C') {\n+                        mon.wait();\n+                    }\n+                    System.out.print(\"C\");\n+                    System.out.println();\n+                    currentLetter = 'A';\n+                    mon.notifyAll();\n+                }\n+            } catch (InterruptedException e) {\n+                e.printStackTrace();\n+            }\n+        }\n+    }\n+}\n+\n+\n+\n+"
+  }
+]

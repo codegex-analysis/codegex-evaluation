@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "c857486ff230f3bcd0b0ea7daf41aabfb8e22730",
+    "filename": ".github/workflows/ci.yml",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/hmcts/bar-api/blob/d8974c66e892628b6126d5053b21926f93a40c51/.github/workflows/ci.yml",
+    "raw_url": "https://github.com/hmcts/bar-api/raw/d8974c66e892628b6126d5053b21926f93a40c51/.github/workflows/ci.yml",
+    "contents_url": "https://api.github.com/repos/hmcts/bar-api/contents/.github/workflows/ci.yml?ref=d8974c66e892628b6126d5053b21926f93a40c51",
+    "patch": "@@ -0,0 +1,40 @@\n+# This workflow will have a CI flow for Bar Java(Gradle) project\n+name: Bar - CI\n+on:\n+  push:\n+    branches: [ master ]\n+  pull_request:\n+    branches: [ master ]\n+\n+jobs:\n+  build:\n+    runs-on: ubuntu-latest\n+    steps:\n+      - uses: actions/checkout@v2\n+        with:\n+          fetch-depth: 0\n+      - name: Set up JDK 11\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: 11\n+      - name: Grant execute permission for gradlew\n+        run: chmod +x gradlew\n+      - name: Cache Gradle packages\n+        uses: actions/cache@v2\n+        with:\n+          path: |\n+            ~/.gradle/caches\n+            ~/.gradle/wrapper\n+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}\n+          restore-keys: |\n+            ${{ runner.os }}-gradle-\n+      - name: Build gradle application\n+        run: ./gradlew build\n+      - name: Generate code coverage report\n+        run: ./gradlew codeCoverageReport\n+      - name: Publish report to Codecov\n+        run: bash <(curl -s https://codecov.io/bash)\n+      - name: Cleanup Gradle Cache\n+        run: |\n+          rm -f ~/.gradle/caches/modules-2/modules-2.lock\n+          rm -fr ~/.gradle/caches/modules-2/*/plugin-resolution/"
+  },
+  {
+    "sha": "a342351b6a19cc9481e71ea1aca974147c5e4c76",
+    "filename": ".travis.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 21,
+    "changes": 21,
+    "blob_url": "https://github.com/hmcts/bar-api/blob/b8b41644d7faf56957daf144cc895b9ba9242ccc/.travis.yml",
+    "raw_url": "https://github.com/hmcts/bar-api/raw/b8b41644d7faf56957daf144cc895b9ba9242ccc/.travis.yml",
+    "contents_url": "https://api.github.com/repos/hmcts/bar-api/contents/.travis.yml?ref=b8b41644d7faf56957daf144cc895b9ba9242ccc",
+    "patch": "@@ -1,21 +0,0 @@\n-sudo: required\n-\n-language: java\n-jdk:\n-  - openjdk11\n-\n-services:\n-  - docker\n-before_cache:\n-- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock\n-- rm -fr $HOME/.gradle/caches/*/plugin-resolution/\n-before_install:\n-cache:\n-  directories:\n-  - $HOME/.gradle/caches/\n-  - $HOME/.gradle/wrapper/\n-script:\n-  - ./gradlew build\n-  - ./gradlew codeCoverageReport\n-after_success:\n-  - bash <(curl -s https://codecov.io/bash)"
+  },
+  {
+    "sha": "9e23d490ca12564f7facdd849970d6e596632e95",
+    "filename": "charts/bar-api/Chart.yaml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/hmcts/bar-api/blob/d8974c66e892628b6126d5053b21926f93a40c51/charts/bar-api/Chart.yaml",
+    "raw_url": "https://github.com/hmcts/bar-api/raw/d8974c66e892628b6126d5053b21926f93a40c51/charts/bar-api/Chart.yaml",
+    "contents_url": "https://api.github.com/repos/hmcts/bar-api/contents/charts/bar-api/Chart.yaml?ref=d8974c66e892628b6126d5053b21926f93a40c51",
+    "patch": "@@ -1,9 +1,9 @@\n apiVersion: v2\n-appVersion: \"1.0\"\n+appVersion: \"2.0\"\n description: Helm chart for the HMCTS bar api\n name: bar-api\n home: https://github.com/hmcts/bar-app\n-version: 0.2.8\n+version: 0.2.9\n maintainers:\n   - name: HMCTS Bar Dev Team\n     email: bar@hmcts.net"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "245714c9dba97e759b6266f94d62ea4a5b0845ad",
+    "filename": "src/main/java/org/sonar/plugins/clojure/sensors/kondo/KondoSensor.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/fsantiag/sonar-clojure/blob/1c56dd4f0040c14cf87a64146f72116967b2396e/src/main/java/org/sonar/plugins/clojure/sensors/kondo/KondoSensor.java",
+    "raw_url": "https://github.com/fsantiag/sonar-clojure/raw/1c56dd4f0040c14cf87a64146f72116967b2396e/src/main/java/org/sonar/plugins/clojure/sensors/kondo/KondoSensor.java",
+    "contents_url": "https://api.github.com/repos/fsantiag/sonar-clojure/contents/src/main/java/org/sonar/plugins/clojure/sensors/kondo/KondoSensor.java?ref=1c56dd4f0040c14cf87a64146f72116967b2396e",
+    "patch": "@@ -60,8 +60,8 @@ private void saveIssue(Finding finding, SensorContext context) {\n                         .on(file)\n                         .message(finding.getMessage());\n \n-                TextRange range = file.newRange(finding.getRow(), finding.getCol(),\n-                        finding.getEndRow(), finding.getEndCol());\n+                TextRange range = file.newRange(finding.getRow(), finding.getCol() - 1,\n+                        finding.getEndRow(), finding.getEndCol() - 1);\n                 primaryLocation.at(range);\n \n                 newIssue.at(primaryLocation);"
+  },
+  {
+    "sha": "866c9f0212644ec0da82c892625473745330da29",
+    "filename": "src/test/java/org/sonar/plugins/clojure/sensors/kondo/KondoSensorTest.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/fsantiag/sonar-clojure/blob/1c56dd4f0040c14cf87a64146f72116967b2396e/src/test/java/org/sonar/plugins/clojure/sensors/kondo/KondoSensorTest.java",
+    "raw_url": "https://github.com/fsantiag/sonar-clojure/raw/1c56dd4f0040c14cf87a64146f72116967b2396e/src/test/java/org/sonar/plugins/clojure/sensors/kondo/KondoSensorTest.java",
+    "contents_url": "https://api.github.com/repos/fsantiag/sonar-clojure/contents/src/test/java/org/sonar/plugins/clojure/sensors/kondo/KondoSensorTest.java?ref=1c56dd4f0040c14cf87a64146f72116967b2396e",
+    "patch": "@@ -5,7 +5,10 @@\n import org.junit.runner.RunWith;\n import org.mockito.Mock;\n import org.mockito.junit.MockitoJUnitRunner;\n+import org.sonar.api.batch.fs.TextRange;\n import org.sonar.api.batch.fs.internal.DefaultInputFile;\n+import org.sonar.api.batch.fs.internal.DefaultTextPointer;\n+import org.sonar.api.batch.fs.internal.DefaultTextRange;\n import org.sonar.api.batch.fs.internal.TestInputFileBuilder;\n import org.sonar.api.batch.sensor.internal.DefaultSensorDescriptor;\n import org.sonar.api.batch.sensor.internal.SensorContextTester;\n@@ -61,10 +64,13 @@ public void shouldExecuteKondo() throws IOException {\n \n         kondoSensor.execute(context);\n \n+        TextRange expectedRange = new DefaultTextRange(new DefaultTextPointer(1, 15), new DefaultTextPointer(1, 19));\n+\n         List<Issue> issuesList = new ArrayList<>(context.allIssues());\n         assertThat(issuesList.size(), is(1));\n         assertThat(issuesList.get(0).ruleKey().rule(), is(\"kondo\"));\n         assertThat(issuesList.get(0).primaryLocation().message(), is(\"unused binding args\"));\n+        assertThat(issuesList.get(0).primaryLocation().textRange(), is(expectedRange));\n     }\n \n     private SensorContextTester prepareContext() throws IOException {"
+  }
+]

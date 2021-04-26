@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "9174f52660e92e967cd7bf3536ed19b5a0f3bf84",
+    "filename": "src/main/java/com/houarizegai/calculator/Calculator.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 3,
+    "changes": 23,
+    "blob_url": "https://github.com/HouariZegai/Calculator/blob/d0152efcc1b8171001cea7d3822fb4f7bcf0e2a0/src/main/java/com/houarizegai/calculator/Calculator.java",
+    "raw_url": "https://github.com/HouariZegai/Calculator/raw/d0152efcc1b8171001cea7d3822fb4f7bcf0e2a0/src/main/java/com/houarizegai/calculator/Calculator.java",
+    "contents_url": "https://api.github.com/repos/HouariZegai/Calculator/contents/src/main/java/com/houarizegai/calculator/Calculator.java?ref=d0152efcc1b8171001cea7d3822fb4f7bcf0e2a0",
+    "patch": "@@ -24,7 +24,7 @@\n     private JTextField inText; // Input\n     private JButton btnC, btnBack, btnMod, btnDiv, btnMul, btnSub, btnAdd,\n             btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9,\n-            btnPoint, btnEqual, btnRoot, btnPower, btnLog;\n+            btnPoint, btnEqual, btnRoot, btnPower, btnLog, btnSin;\n \n     private char opt = ' '; // Save the operator\n     private boolean go = true; // For calculate with Opt != (=)\n@@ -383,7 +383,7 @@ public Calculator() {\n                     } else {\n                         inText.setText(String.valueOf(val));\n                     }\n-                    opt = '√';\n+                    opt = '\"';\n                     addWrite = false;\n                 }\n         });\n@@ -423,7 +423,22 @@ public Calculator() {\n                 }\n         });\n         btnLog.setVisible(false);\n-\n+//Trigonometric Sin\n+        btnSin = initBtn(\"Sin\", x[4], y[4], event -> {\n+            if (Pattern.matches(\"([-]?\\\\d+[.]\\\\d*)|(\\\\d+)\", inText.getText()))\n+                if (go) {\n+                    val = Math.sin(Double.parseDouble(inText.getText()));\n+                    if (Pattern.matches(\"[-]?[\\\\d]+[.][0]*\", String.valueOf(val))) {\n+                        inText.setText(String.valueOf((int) val));\n+                    } else {\n+                        inText.setText(String.valueOf(val));\n+                    }\n+                    opt = 'S';\n+                    addWrite = false;\n+                }\n+        });\n+      //  btnSin.setVisible(false);\n+// end Sin        \n         window.setLayout(null);\n         window.setResizable(false);\n         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Close button clicked? = End The process\n@@ -469,6 +484,8 @@ public double calc(double x, String input, char opt) {\n                 return x % y;\n             case '^':\n                 return Math.pow(x, y);\n+            case 'S':\n+                return Math.sin(x);\n             default:\n                 inText.setFont(inText.getFont().deriveFont(Font.PLAIN));\n                 return y;"
+  },
+  {
+    "sha": "24b7d09612c47e09f1a41214565cec1f6c8d8718",
+    "filename": "src/test/java/com/houarizegai/calculator/CalculatorTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/HouariZegai/Calculator/blob/d0152efcc1b8171001cea7d3822fb4f7bcf0e2a0/src/test/java/com/houarizegai/calculator/CalculatorTest.java",
+    "raw_url": "https://github.com/HouariZegai/Calculator/raw/d0152efcc1b8171001cea7d3822fb4f7bcf0e2a0/src/test/java/com/houarizegai/calculator/CalculatorTest.java",
+    "contents_url": "https://api.github.com/repos/HouariZegai/Calculator/contents/src/test/java/com/houarizegai/calculator/CalculatorTest.java?ref=d0152efcc1b8171001cea7d3822fb4f7bcf0e2a0",
+    "patch": "@@ -19,6 +19,7 @@ void setUp() { // Create object before compilation\n     @Test\n     void testCalc() {\n         double first = 3;\n+        String non = \"\";\n         String second = \"5\";\n \n         try {\n@@ -28,6 +29,7 @@ void testCalc() {\n             Assertions.assertEquals(0.6, calculator.calc(first, second, '/'));\n             Assertions.assertEquals(3d, calculator.calc(first, second, '%'));\n             Assertions.assertEquals(243, calculator.calc(first, second, '^'));\n+            Assertions.assertEquals(0.05233595624294383272211862960908, calculator.calc(first,non,'S'));\n         } catch (Exception e) {\n             e.printStackTrace();\n         }"
+  }
+]

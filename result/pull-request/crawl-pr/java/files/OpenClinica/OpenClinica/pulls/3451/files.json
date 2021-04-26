@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "39ec01d90ebbf54381f4729833b524a199cb754a",
+    "filename": "web/src/main/java/org/akaza/openclinica/control/submit/CreateDiscrepancyNoteServlet.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 1,
+    "changes": 23,
+    "blob_url": "https://github.com/OpenClinica/OpenClinica/blob/9939df50eede99eaf64d5781a8569a7e6bfffd95/web/src/main/java/org/akaza/openclinica/control/submit/CreateDiscrepancyNoteServlet.java",
+    "raw_url": "https://github.com/OpenClinica/OpenClinica/raw/9939df50eede99eaf64d5781a8569a7e6bfffd95/web/src/main/java/org/akaza/openclinica/control/submit/CreateDiscrepancyNoteServlet.java",
+    "contents_url": "https://api.github.com/repos/OpenClinica/OpenClinica/contents/web/src/main/java/org/akaza/openclinica/control/submit/CreateDiscrepancyNoteServlet.java?ref=9939df50eede99eaf64d5781a8569a7e6bfffd95",
+    "patch": "@@ -179,6 +179,8 @@ protected void processRequest() throws Exception {\n         // as entity_type 'subject'\n         int subjectId = fp.getInt(SUBJECT_ID);\n         int itemId = fp.getInt(ITEM_ID);\n+        request.setAttribute(\"itemId\", itemId);\n+        \n         String entityType = fp.getString(ENTITY_TYPE);\n         \n         String field = fp.getString(ENTITY_FIELD);\n@@ -244,7 +246,25 @@ protected void processRequest() throws Exception {\n         if (!StringUtils.isBlank(entityType)) {\n             if (\"itemData\".equalsIgnoreCase(entityType)||\"itemdata\".equalsIgnoreCase(entityType)) {\n                 ItemBean item = (ItemBean) new ItemDAO(sm.getDataSource()).findByPK(itemId);\n-                ItemDataBean itemData = (ItemDataBean) new ItemDataDAO(sm.getDataSource()).findByPK(entityId);\n+                \n+                ItemDataDAO iddao = new ItemDataDAO(sm.getDataSource());\n+                ItemDataBean itemData = null;\n+              \n+                if(entityId == 0 && fp.isSubmitted()) {\n+                \titemData = new ItemDataBean();\n+                \titemData.setItemId(itemId);                \t\n+                \titemData.setEventCRFId(eventCRFId);\n+                \titemData.setCreatedDate(new Date());\n+                    itemData.setOrdinal(1);\n+                    itemData.setOwner(ub);\n+                    itemData.setStatus(Status.AVAILABLE);\n+                    itemData = (ItemDataBean) iddao.create(itemData);\n+                    entityId = itemData.getId();\n+                \t\n+                }else {\n+                \titemData = (ItemDataBean) iddao.findByPK(entityId);\t\n+                }\n+                \n                 request.setAttribute(\"entityValue\", itemData.getValue());\n                 request.setAttribute(\"entityName\", item.getName());\n                 EventCRFDAO ecdao = new EventCRFDAO(sm.getDataSource());\n@@ -737,6 +757,7 @@ else if (parent.getDiscrepancyNoteTypeId() > 0) {\n                         }\n \n                     }\n+                    \n                     note = (DiscrepancyNoteBean) dndao.create(note);\n                     note.setEntityId(entityId);\n                     dndao.createMapping(note);"
+  },
+  {
+    "sha": "5c5c1d843a24d92d584fbce9bb277bd7dde64a6e",
+    "filename": "web/src/main/webapp/WEB-INF/jsp/submit/addDiscrepancyNote.jsp",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/OpenClinica/OpenClinica/blob/9939df50eede99eaf64d5781a8569a7e6bfffd95/web/src/main/webapp/WEB-INF/jsp/submit/addDiscrepancyNote.jsp",
+    "raw_url": "https://github.com/OpenClinica/OpenClinica/raw/9939df50eede99eaf64d5781a8569a7e6bfffd95/web/src/main/webapp/WEB-INF/jsp/submit/addDiscrepancyNote.jsp",
+    "contents_url": "https://api.github.com/repos/OpenClinica/OpenClinica/contents/web/src/main/webapp/WEB-INF/jsp/submit/addDiscrepancyNote.jsp?ref=9939df50eede99eaf64d5781a8569a7e6bfffd95",
+    "patch": "@@ -141,6 +141,7 @@ function setElements(typeId, user1, user2,filter1,nw,ud,rs,cl,na) {\n \n <input type=\"hidden\" name=\"enterData\" value=\"<c:out value=\"${enterData}\" />\">\n <input type=\"hidden\" name=\"eventCRFId\" value=\"<c:out value=\"${eventCRFId}\"/>\">\n+<input type=\"hidden\" name=\"itemId\" value=\"<c:out value=\"${itemId}\" />\">\n \n           \n <c:set var=\"name\" value=\"${discrepancyNote.entityType}\"/>"
+  },
+  {
+    "sha": "d72fc7a74c36b9a3c58eb68947bd76ce0f8f7340",
+    "filename": "web/src/main/webapp/WEB-INF/jsp/submit/showGroupItemInputMonitor.jsp",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/OpenClinica/OpenClinica/blob/9939df50eede99eaf64d5781a8569a7e6bfffd95/web/src/main/webapp/WEB-INF/jsp/submit/showGroupItemInputMonitor.jsp",
+    "raw_url": "https://github.com/OpenClinica/OpenClinica/raw/9939df50eede99eaf64d5781a8569a7e6bfffd95/web/src/main/webapp/WEB-INF/jsp/submit/showGroupItemInputMonitor.jsp",
+    "contents_url": "https://api.github.com/repos/OpenClinica/OpenClinica/contents/web/src/main/webapp/WEB-INF/jsp/submit/showGroupItemInputMonitor.jsp?ref=9939df50eede99eaf64d5781a8569a7e6bfffd95",
+    "patch": "@@ -517,7 +517,7 @@\n  \r\n      <a tabindex=\"<c:out value=\"${tabNum + 1000}\"/>\" href=\"#\"  onmouseover=\"callTip(genToolTips(${itemId}));\"\r\n            onmouseout=\"UnTip()\" onClick=\r\n-    \"openDNWindow('CreateDiscrepancyNote?subjectId=<c:out value=\"${studySubject.id}\" />&itemId=<c:out value=\"${itemId}\" />&groupLabel=<c:out value=\"${displayItem.metadata.groupLabel}\"/>&sectionId=<c:out value=\"${displayItem.metadata.sectionId}\"/>&id=<c:out value=\"${displayItem.data.id}\"/>&name=itemData&field=<c:out value=\"${parsedInputName}\"/>&column=value&monitor=1&writeToDB=1&errorFlag=<c:out value=\"${errorFlag}\"/>&isLocked=<c:out value=\"${isLocked}\"/>','spanAlert-<c:out value=\"${parsedInputName}\"/>','<c:out value=\"${errorTxtMessage}\"/>'); return false;\"\r\n+    \"openDNWindow('CreateDiscrepancyNote?subjectId=<c:out value=\"${studySubject.id}\" />&eventCRFId=<c:out value=\"${section.eventCRF.id}\"/>&itemId=<c:out value=\"${itemId}\" />&groupLabel=<c:out value=\"${displayItem.metadata.groupLabel}\"/>&sectionId=<c:out value=\"${displayItem.metadata.sectionId}\"/>&id=<c:out value=\"${displayItem.data.id}\"/>&name=itemData&field=<c:out value=\"${parsedInputName}\"/>&column=value&monitor=1&writeToDB=1&errorFlag=<c:out value=\"${errorFlag}\"/>&isLocked=<c:out value=\"${isLocked}\"/>','spanAlert-<c:out value=\"${parsedInputName}\"/>','<c:out value=\"${errorTxtMessage}\"/>'); return false;\"\r\n     ><img id=\"flag_<c:out value=\"${inputName}\"/>\" name=\"flag_<c:out value=\"${inputName}\"/>\" src=\r\n     \"<c:out value=\"${contextPath}\" />/images/<c:out value=\"${imageFileName}\"/>.gif\" border=\"0\" alt=\"<fmt:message key=\"discrepancy_note\" bundle=\"${resword}\"/>\" title=\"<fmt:message key=\"discrepancy_note\" bundle=\"${resword}\"/>\"\r\n     ></a>\r"
+  },
+  {
+    "sha": "9ad1179a2be8d32b07174e17d2ecd8ca485d22ae",
+    "filename": "web/src/main/webapp/WEB-INF/jsp/submit/showItemInputMonitor.jsp",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/OpenClinica/OpenClinica/blob/9939df50eede99eaf64d5781a8569a7e6bfffd95/web/src/main/webapp/WEB-INF/jsp/submit/showItemInputMonitor.jsp",
+    "raw_url": "https://github.com/OpenClinica/OpenClinica/raw/9939df50eede99eaf64d5781a8569a7e6bfffd95/web/src/main/webapp/WEB-INF/jsp/submit/showItemInputMonitor.jsp",
+    "contents_url": "https://api.github.com/repos/OpenClinica/OpenClinica/contents/web/src/main/webapp/WEB-INF/jsp/submit/showItemInputMonitor.jsp?ref=9939df50eede99eaf64d5781a8569a7e6bfffd95",
+    "patch": "@@ -435,7 +435,7 @@ form element in red --%>\n \r\n        <td valign=\"top\"><a tabindex=\"<c:out value=\"${tabNum + 1000}\"/>\" href=\"#\"  onmouseover=\"callTip(genToolTips(${itemId}));\"\r\n            onmouseout=\"UnTip()\" onClick=\r\n-    \"openDNWindow('CreateDiscrepancyNote?subjectId=<c:out value=\"${studySubject.id}\" />&itemId=<c:out value=\"${itemId}\" />&id=<c:out value=\"${displayItem.data.id}\"/>&name=itemData&field=input<c:out value=\"${itemId}\"/>&column=value&monitor=1&blank=<c:out value=\"${isBlank}\"/>&writeToDB=1&errorFlag=<c:out value=\"${errorFlag}\"/>&isLocked=<c:out value=\"${isLocked}\"/>','spanAlert-input<c:out value=\"${itemId}\"/>','<c:out value=\"${errorTxtMessage}\"/>'); return false;\"\r\n+    \"openDNWindow('CreateDiscrepancyNote?subjectId=<c:out value=\"${studySubject.id}\" />&eventCRFId=<c:out value=\"${section.eventCRF.id}\"/>&itemId=<c:out value=\"${itemId}\" />&id=<c:out value=\"${displayItem.data.id}\"/>&name=itemData&field=input<c:out value=\"${itemId}\"/>&column=value&monitor=1&blank=<c:out value=\"${isBlank}\"/>&writeToDB=1&errorFlag=<c:out value=\"${errorFlag}\"/>&isLocked=<c:out value=\"${isLocked}\"/>','spanAlert-input<c:out value=\"${itemId}\"/>','<c:out value=\"${errorTxtMessage}\"/>'); return false;\"\r\n     ><img id=\"flag_input<c:out value=\"${itemId}\" />\" name=\"flag_input<c:out value=\"${itemId}\" />\" src=\r\n     \"<c:out value=\"${contextPath}\" />/images/<c:out value=\"${imageFileName}\"/>.gif\" border=\"0\" alt=\r\n     \"<fmt:message key=\"discrepancy_note\" bundle=\"${resword}\"/>\" title=\"<fmt:message key=\"discrepancy_note\" bundle=\"${resword}\"/>\"\r"
+  }
+]

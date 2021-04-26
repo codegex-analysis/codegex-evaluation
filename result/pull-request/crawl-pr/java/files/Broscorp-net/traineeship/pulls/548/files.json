@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "ccd435408e8c7ef65cc849900796fc91fc676ae3",
+    "filename": "module1/src/main/java/net/broscorp/h_generics/MyCoolList.java",
+    "status": "modified",
+    "additions": 31,
+    "deletions": 10,
+    "changes": 41,
+    "blob_url": "https://github.com/Broscorp-net/traineeship/blob/c6e4cf3bc68d534cca17938e29d95d5b65bc32b1/module1/src/main/java/net/broscorp/h_generics/MyCoolList.java",
+    "raw_url": "https://github.com/Broscorp-net/traineeship/raw/c6e4cf3bc68d534cca17938e29d95d5b65bc32b1/module1/src/main/java/net/broscorp/h_generics/MyCoolList.java",
+    "contents_url": "https://api.github.com/repos/Broscorp-net/traineeship/contents/module1/src/main/java/net/broscorp/h_generics/MyCoolList.java?ref=c6e4cf3bc68d534cca17938e29d95d5b65bc32b1",
+    "patch": "@@ -1,24 +1,45 @@\n package net.broscorp.h_generics;\n \n import java.util.function.Function;\n-import sun.reflect.generics.reflectiveObjects.NotImplementedException;\n \n-public class MyCoolList {\n \n-  public void add(Object o){\n-    throw new NotImplementedException();\n+public class MyCoolList<N extends Number> {\n+\n+  private MyCoolList next;\n+  private int index = 0;\n+  private Object[] arr = new Object[32];\n+\n+\n+  public void add(N o) {\n+    if (index == arr.length - 1) {\n+      Object[] newArray = new Object[arr.length * 2];\n+      System.arraycopy(arr, 0, newArray, 0, index);\n+      arr = newArray;\n+    }\n+    arr[index++] = o;\n   }\n \n-  public Object get(int index){\n-    throw new NotImplementedException();\n+  public N get(int index) {\n+    return (N) arr[index];\n   }\n \n-  public Object remove(int index){\n-    throw new NotImplementedException();\n+  public void remove(int index) {\n+    for (int i = index; i < this.index; i++) {\n+      arr[i] = arr[i + 1];\n+    }\n+    arr[this.index] = null;\n+    this.index--;\n   }\n \n-  public MyCoolList map(Function f){\n-    throw new NotImplementedException();\n+  public <E extends Number> MyCoolList<E> map(Function<N,E> f) {\n+    MyCoolList<E> mcl = new MyCoolList<>();\n+    for (int i = 0; i < index; i++) {\n+      mcl.add((E) f.apply((N) arr[i]));\n+    }\n+    return mcl;\n   }\n \n+  public int size() {\n+    return index;\n+  }\n }"
+  },
+  {
+    "sha": "fd81e5a3ba7d8d3ecfabd4a77dc2b05079fc17c3",
+    "filename": "module1/src/main/src/test/java/MyCoolListTest.java",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/Broscorp-net/traineeship/blob/c6e4cf3bc68d534cca17938e29d95d5b65bc32b1/module1/src/main/src/test/java/MyCoolListTest.java",
+    "raw_url": "https://github.com/Broscorp-net/traineeship/raw/c6e4cf3bc68d534cca17938e29d95d5b65bc32b1/module1/src/main/src/test/java/MyCoolListTest.java",
+    "contents_url": "https://api.github.com/repos/Broscorp-net/traineeship/contents/module1/src/main/src/test/java/MyCoolListTest.java?ref=c6e4cf3bc68d534cca17938e29d95d5b65bc32b1",
+    "patch": "@@ -0,0 +1,42 @@\n+import static org.junit.jupiter.api.Assertions.*;\n+\n+import net.broscorp.h_generics.MyCoolList;\n+import org.junit.jupiter.api.Test;\n+\n+class MyCoolListTest {\n+\n+  @Test\n+  void getAdd() {\n+    MyCoolList<Integer> mcl = new MyCoolList();\n+    mcl.add(15);\n+    assertEquals(15, mcl.get(0));\n+  }\n+\n+  @Test\n+  void removeAdd() {\n+    MyCoolList<Integer> mcl = new MyCoolList();\n+    mcl.add(15);\n+    mcl.add(10);\n+    mcl.remove(0);\n+    assertEquals(10, mcl.get(0));\n+  }\n+\n+  @Test\n+  void map() {\n+    MyCoolList<Integer> mcl = new MyCoolList();\n+    mcl.add(15);\n+    mcl.add(10);\n+    MyCoolList<Integer> mcl1 = mcl.map(x -> x * 2);\n+    assertEquals(30, mcl1.get(0));\n+    assertEquals(20, mcl1.get(1));\n+  }\n+\n+  @Test\n+  void size() {\n+    MyCoolList<Integer> mcl = new MyCoolList();\n+    mcl.add(15);\n+    mcl.add(10);\n+    mcl.add(10);\n+    assertEquals(3, mcl.size());\n+  }\n+}\n\\ No newline at end of file"
+  }
+]

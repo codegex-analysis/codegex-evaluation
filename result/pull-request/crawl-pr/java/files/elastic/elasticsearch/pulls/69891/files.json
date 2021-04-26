@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "eb577ddc54dbcb7677ffebe6159f3ec4c5a7533a",
+    "filename": "docs/reference/monitoring/index.asciidoc",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/d5992dbf352556b02bfb2cd1d23e6e109b260804/docs/reference/monitoring/index.asciidoc",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/d5992dbf352556b02bfb2cd1d23e6e109b260804/docs/reference/monitoring/index.asciidoc",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/docs/reference/monitoring/index.asciidoc?ref=d5992dbf352556b02bfb2cd1d23e6e109b260804",
+    "patch": "@@ -16,6 +16,7 @@ performance of your {es} cluster.\n * <<config-monitoring-indices>>\n * <<collecting-monitoring-data>>\n * <<monitoring-troubleshooting>>\n+* <<investigating-cpu-spikes>>\n \n --\n \n@@ -41,3 +42,5 @@ include::http-export.asciidoc[]\n include::pause-export.asciidoc[]\n \n include::troubleshooting.asciidoc[]\n+\n+include::investigating-cpu-spikes.asciidoc[]"
+  },
+  {
+    "sha": "dc1b6c48d4d0bc441daea2f40d4817c4798a2a83",
+    "filename": "docs/reference/monitoring/investigating-cpu-spikes.asciidoc",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/elastic/elasticsearch/blob/d5992dbf352556b02bfb2cd1d23e6e109b260804/docs/reference/monitoring/investigating-cpu-spikes.asciidoc",
+    "raw_url": "https://github.com/elastic/elasticsearch/raw/d5992dbf352556b02bfb2cd1d23e6e109b260804/docs/reference/monitoring/investigating-cpu-spikes.asciidoc",
+    "contents_url": "https://api.github.com/repos/elastic/elasticsearch/contents/docs/reference/monitoring/investigating-cpu-spikes.asciidoc?ref=d5992dbf352556b02bfb2cd1d23e6e109b260804",
+    "patch": "@@ -0,0 +1,48 @@\n+[[investigating-cpu-spikes]]\n+== Investigating CPU spikes\n+\n+[discrete]\n+=== Monitoring\n+\n+Elastic stack monitoring collects metrics from the Elasticsearch nodes, Logstash, Kibana instances, and Beats in your deployment.  You can also configure Filebeat to collect the logs from the same components of your deployment.  See the <<monitoring-production,monitoring a production environment>> docs and configure monitoring.\n+\n+[discrete]\n+=== Alerting\n+When you set up monitoring, several stack monitoring alerts become available in Stack Management > Alerts and actions.  You should read {kibana-ref}/managing-alerts-and-actions.html[alerts and actions] docs and configure your alert destinations, the default is to write the alerts to the Kibana log file.\n+\n+[discrete]\n+=== Detecting high CPU utilization\n+These are indicators of high CPU utilization:\n+\n+- monitoring reports high utilization\n+- high load averages\n+- frequent or long Java garbage collection (GC) cycles\n+- every GC cycle takes CPU time\n+- having 20 or more <<shard-count-recommendation,shards per GB of heap>>. \n+\n+[discrete]\n+=== Look for high CPU consuming threads\n+\n+Occasional CPU intensive jobs are expected, but constant high CPU usage on \n+long running jobs should be investigated.  If CPU utilization on a system\n+with an Elasticsearch node is high then find out which Elasticsearch\n+threads are contributing to this by using the <<cluster-nodes-hot-threads,nodes hot threads API>>:\n+\n+[source,console]\n+--------------------------------------------------\n+GET _nodes/hot_threads\n+--------------------------------------------------\n+\n+[discrete]\n+=== Look for long running tasks\n+\n+Common high CPU causes are heavy read/write. Certain elasticsearch operations\n+can also be CPU intensive, like lookup, analyzer, nested aggregation, force\n+merge, percolate query, machine learning jobs. Some watcher jobs can also be\n+expensive (depending on the script).  Find long running tasks using the <<tasks,task management API>>: \n+\n+[source,console]\n+--------------------------------------------------\n+GET _tasks?detailed\n+--------------------------------------------------\n+"
+  }
+]

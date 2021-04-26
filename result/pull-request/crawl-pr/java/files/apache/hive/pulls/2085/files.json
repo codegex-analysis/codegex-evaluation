@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "652ad90ca01a453221ea149966fc6f2403dd0577",
+    "filename": "itests/hive-unit/src/test/java/org/apache/hadoop/hive/ql/TestWarehouseDnsPath.java",
+    "status": "added",
+    "additions": 56,
+    "deletions": 0,
+    "changes": 56,
+    "blob_url": "https://github.com/apache/hive/blob/7ac6f587cc44d7edddc4a9fea21d2cec79c72335/itests/hive-unit/src/test/java/org/apache/hadoop/hive/ql/TestWarehouseDnsPath.java",
+    "raw_url": "https://github.com/apache/hive/raw/7ac6f587cc44d7edddc4a9fea21d2cec79c72335/itests/hive-unit/src/test/java/org/apache/hadoop/hive/ql/TestWarehouseDnsPath.java",
+    "contents_url": "https://api.github.com/repos/apache/hive/contents/itests/hive-unit/src/test/java/org/apache/hadoop/hive/ql/TestWarehouseDnsPath.java?ref=7ac6f587cc44d7edddc4a9fea21d2cec79c72335",
+    "patch": "@@ -0,0 +1,56 @@\n+/*\n+ *  Licensed to the Apache Software Foundation (ASF) under one\n+ *  or more contributor license agreements.  See the NOTICE file\n+ *  distributed with this work for additional information\n+ *  regarding copyright ownership.  The ASF licenses this file\n+ *  to you under the Apache License, Version 2.0 (the\n+ *  \"License\"); you may not use this file except in compliance\n+ *  with the License.  You may obtain a copy of the License at\n+ *\n+ *      http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ *  Unless required by applicable law or agreed to in writing, software\n+ *  distributed under the License is distributed on an \"AS IS\" BASIS,\n+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+ *  See the License for the specific language governing permissions and\n+ *  limitations under the License.\n+ */\n+\n+package org.apache.hadoop.hive.ql;\n+\n+import static org.junit.Assert.assertEquals;\n+\n+import org.apache.hadoop.conf.Configuration;\n+import org.apache.hadoop.fs.Path;\n+import org.apache.hadoop.hive.metastore.Warehouse;\n+import org.apache.hadoop.hive.metastore.api.MetaException;\n+import org.junit.Before;\n+import org.junit.Test;\n+\n+public class TestWarehouseDnsPath {\n+  Configuration conf = new Configuration();\n+\n+  @Before\n+  public void setUp() throws Exception {\n+    conf.set(\"fs.defaultFS\", \"hdfs://localhost\");\n+  }\n+\n+  @Test\n+  public void testDnsPathNullAuthority() throws Exception {\n+    assertEquals(\"hdfs://localhost/path/1\", transformPath(\"hdfs:///path/1\"));\n+  }\n+\n+  @Test\n+  public void testDnsPathWithAuthority() throws Exception {\n+    assertEquals(\"hdfs://127.0.0.1/path/1\", transformPath(\"hdfs://127.0.0.1/path/1\"));\n+  }\n+\n+  @Test\n+  public void testDnsPathWithNoScheme() throws Exception {\n+    assertEquals(\"hdfs://localhost/path/1\", transformPath(\"/path/1\"));\n+  }\n+\n+  private String transformPath(String path) throws MetaException {\n+    return Warehouse.getDnsPath(new Path(path), conf).toString();\n+  }\n+}"
+  },
+  {
+    "sha": "56e7d106687c8b4f781b7ff669b8c65222cb62d7",
+    "filename": "ql/src/java/org/apache/hadoop/hive/ql/parse/AcidExportSemanticAnalyzer.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 9,
+    "changes": 14,
+    "blob_url": "https://github.com/apache/hive/blob/7ac6f587cc44d7edddc4a9fea21d2cec79c72335/ql/src/java/org/apache/hadoop/hive/ql/parse/AcidExportSemanticAnalyzer.java",
+    "raw_url": "https://github.com/apache/hive/raw/7ac6f587cc44d7edddc4a9fea21d2cec79c72335/ql/src/java/org/apache/hadoop/hive/ql/parse/AcidExportSemanticAnalyzer.java",
+    "contents_url": "https://api.github.com/repos/apache/hive/contents/ql/src/java/org/apache/hadoop/hive/ql/parse/AcidExportSemanticAnalyzer.java?ref=7ac6f587cc44d7edddc4a9fea21d2cec79c72335",
+    "patch": "@@ -137,15 +137,11 @@ private void analyzeAcidExport(ASTNode ast) throws SemanticException {\n \n     // for temporary tables we set the location to something in the session's scratch dir\n     // it has the same life cycle as the tmp table\n-    try {\n-      // Generate a unique ID for temp table path.\n-      // This path will be fixed for the life of the temp table.\n-      Path path = new Path(SessionState.getTempTableSpace(conf), UUID.randomUUID().toString());\n-      path = Warehouse.getDnsPath(path, conf);\n-      location = path.toString();\n-    } catch (MetaException err) {\n-      throw new SemanticException(\"Error while generating temp table path:\", err);\n-    }\n+    // Generate a unique ID for temp table path.\n+    // This path will be fixed for the life of the temp table.\n+    Path path = new Path(SessionState.getTempTableSpace(conf), UUID.randomUUID().toString());\n+    path = Warehouse.getDnsPath(path, conf);\n+    location = path.toString();\n \n     CreateTableLikeDesc ctlt = new CreateTableLikeDesc(newTableName,\n         false, true, null,"
+  },
+  {
+    "sha": "8a79a73e9605383d42fc7b98af08b03824c1d18d",
+    "filename": "ql/src/java/org/apache/hadoop/hive/ql/parse/MergeSemanticAnalyzer.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/hive/blob/7ac6f587cc44d7edddc4a9fea21d2cec79c72335/ql/src/java/org/apache/hadoop/hive/ql/parse/MergeSemanticAnalyzer.java",
+    "raw_url": "https://github.com/apache/hive/raw/7ac6f587cc44d7edddc4a9fea21d2cec79c72335/ql/src/java/org/apache/hadoop/hive/ql/parse/MergeSemanticAnalyzer.java",
+    "contents_url": "https://api.github.com/repos/apache/hive/contents/ql/src/java/org/apache/hadoop/hive/ql/parse/MergeSemanticAnalyzer.java?ref=7ac6f587cc44d7edddc4a9fea21d2cec79c72335",
+    "patch": "@@ -387,7 +387,7 @@ private boolean handleCardinalityViolation(StringBuilder rewrittenQueryStr, ASTN\n         table.setOutputFormatClass(format.getOutputFormat());\n         db.createTable(table, true);\n       }\n-    } catch(HiveException|MetaException e) {\n+    } catch(HiveException e) {\n       throw new SemanticException(e.getMessage(), e);\n     }\n     return true;"
+  },
+  {
+    "sha": "8bedc4688388f1b3abb25c5d5622339c2b5e595b",
+    "filename": "standalone-metastore/metastore-common/src/main/java/org/apache/hadoop/hive/metastore/Warehouse.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 6,
+    "changes": 18,
+    "blob_url": "https://github.com/apache/hive/blob/7ac6f587cc44d7edddc4a9fea21d2cec79c72335/standalone-metastore/metastore-common/src/main/java/org/apache/hadoop/hive/metastore/Warehouse.java",
+    "raw_url": "https://github.com/apache/hive/raw/7ac6f587cc44d7edddc4a9fea21d2cec79c72335/standalone-metastore/metastore-common/src/main/java/org/apache/hadoop/hive/metastore/Warehouse.java",
+    "contents_url": "https://api.github.com/repos/apache/hive/contents/standalone-metastore/metastore-common/src/main/java/org/apache/hadoop/hive/metastore/Warehouse.java?ref=7ac6f587cc44d7edddc4a9fea21d2cec79c72335",
+    "patch": "@@ -20,6 +20,7 @@\n \n import java.io.FileNotFoundException;\n import java.io.IOException;\n+import java.net.URI;\n import java.util.AbstractList;\n import java.util.ArrayList;\n import java.util.LinkedHashMap;\n@@ -139,13 +140,18 @@ public FileSystem getFs(Path f) throws MetaException {\n    *          Path to be canonicalized\n    * @return Path with canonical scheme and authority\n    */\n-  public static Path getDnsPath(Path path, Configuration conf) throws MetaException {\n-    FileSystem fs = getFs(path, conf);\n-    String uriPath = path.toUri().getPath();\n-    if (StringUtils.isEmpty(uriPath)) {\n-      uriPath = \"/\";\n+  public static Path getDnsPath(Path path, Configuration conf) {\n+    if (path.toUri().getAuthority() == null) {\n+      URI defaultUri = FileSystem.getDefaultUri(conf);\n+      if (defaultUri.getAuthority() != null) {\n+        String uriPath = path.toUri().getPath();\n+        if (StringUtils.isEmpty(uriPath)) {\n+          uriPath = \"/\";\n+        }\n+        return new Path(defaultUri.getScheme(), defaultUri.getAuthority(), uriPath);\n+      }\n     }\n-    return (new Path(fs.getUri().getScheme(), fs.getUri().getAuthority(), uriPath));\n+    return path;\n   }\n \n   public Path getDnsPath(Path path) throws MetaException {"
+  }
+]

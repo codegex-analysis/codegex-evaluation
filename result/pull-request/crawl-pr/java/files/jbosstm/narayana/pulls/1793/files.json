@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "be2f0274058f7fea60c6ea1a0341ca8c911d23be",
+    "filename": "ArjunaJTA/jms/pom.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/jbosstm/narayana/blob/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/jms/pom.xml",
+    "raw_url": "https://github.com/jbosstm/narayana/raw/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/jms/pom.xml",
+    "contents_url": "https://api.github.com/repos/jbosstm/narayana/contents/ArjunaJTA/jms/pom.xml?ref=be75a2c073ffe90b90cc434dc957dedeb8bbcdd9",
+    "patch": "@@ -40,8 +40,8 @@\n         </dependency>\n         <dependency>\n             <groupId>org.jboss.spec.javax.jms</groupId>\n-            <artifactId>jboss-jms-api_1.1_spec</artifactId>\n-            <version>${version.org.jboss.spec.javax.jms.jboss-jms-api_1.1_spec}</version>\n+            <artifactId>jboss-jms-api_2.0_spec</artifactId>\n+            <version>${version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec}</version>\n             <scope>provided</scope>\n         </dependency>\n         <dependency>"
+  },
+  {
+    "sha": "55e3e31db4a1e07b5489ad8f58947b547eee29fa",
+    "filename": "ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/ConnectionFactoryProxy.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/jbosstm/narayana/blob/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/ConnectionFactoryProxy.java",
+    "raw_url": "https://github.com/jbosstm/narayana/raw/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/ConnectionFactoryProxy.java",
+    "contents_url": "https://api.github.com/repos/jbosstm/narayana/contents/ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/ConnectionFactoryProxy.java?ref=be75a2c073ffe90b90cc434dc957dedeb8bbcdd9",
+    "patch": "@@ -25,6 +25,7 @@\n \n import javax.jms.Connection;\n import javax.jms.ConnectionFactory;\n+import javax.jms.JMSContext;\n import javax.jms.JMSException;\n import javax.jms.XAConnectionFactory;\n \n@@ -85,4 +86,24 @@ public Connection createConnection(String userName, String password) throws JMSE\n         return connection;\n     }\n \n+    @Override\n+    public JMSContext createContext() {\n+        return xaConnectionFactory.createXAContext();\n+    }\n+\n+    @Override\n+    public JMSContext createContext(String userName, String password) {\n+        return xaConnectionFactory.createXAContext(userName, password);\n+    }\n+\n+    @Override\n+    public JMSContext createContext(String userName, String password, int sessionMode) {\n+        return xaConnectionFactory.createXAContext(userName, password).createContext(sessionMode);\n+    }\n+\n+    @Override\n+    public JMSContext createContext(int sessionMode) {\n+        return xaConnectionFactory.createXAContext().createContext(sessionMode);\n+    }\n+\n }"
+  },
+  {
+    "sha": "04c95bae0db389d1cad6f29d6e2da11aa41f2d4a",
+    "filename": "ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/ConnectionProxy.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/jbosstm/narayana/blob/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/ConnectionProxy.java",
+    "raw_url": "https://github.com/jbosstm/narayana/raw/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/ConnectionProxy.java",
+    "contents_url": "https://api.github.com/repos/jbosstm/narayana/contents/ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/ConnectionProxy.java?ref=be75a2c073ffe90b90cc434dc957dedeb8bbcdd9",
+    "patch": "@@ -72,6 +72,16 @@ public Session createSession(boolean transacted, int acknowledgeMode) throws JMS\n         return xaConnection.createSession(transacted, acknowledgeMode);\n     }\n \n+    @Override\n+    public Session createSession(int sessionMode) throws JMSException {\n+        return xaConnection.createSession(sessionMode);\n+    }\n+\n+    @Override\n+    public Session createSession() throws JMSException {\n+        return xaConnection.createSession();\n+    }\n+\n     /**\n      * Simply close the proxied connection if there is no active transaction. Or register a\n      * {@link ConnectionClosingSynchronization} if active transaction exists.\n@@ -172,6 +182,11 @@ public ConnectionConsumer createConnectionConsumer(Destination destination, Stri\n         return xaConnection.createConnectionConsumer(destination, messageSelector, sessionPool, maxMessages);\n     }\n \n+    @Override\n+    public ConnectionConsumer createSharedConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) throws JMSException {\n+        return xaConnection.createSharedConnectionConsumer(topic, subscriptionName, messageSelector, sessionPool, maxMessages);\n+    }\n+\n     /**\n      * Delegate to {@link #xaConnection}.\n      *\n@@ -183,6 +198,11 @@ public ConnectionConsumer createDurableConnectionConsumer(Topic topic, String su\n         return xaConnection.createDurableConnectionConsumer(topic, subscriptionName, messageSelector, sessionPool, maxMessages);\n     }\n \n+    @Override\n+    public ConnectionConsumer createSharedDurableConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) throws JMSException {\n+        return xaConnection.createSharedDurableConnectionConsumer(topic, subscriptionName, messageSelector, sessionPool, maxMessages);\n+    }\n+\n     /**\n      * Create a proxied XA session and enlist its XA resource to the transaction.\n      * <p>"
+  },
+  {
+    "sha": "080693fcc092b3ad8382631c49216143926ef8da",
+    "filename": "ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/SessionProxy.java",
+    "status": "modified",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/jbosstm/narayana/blob/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/SessionProxy.java",
+    "raw_url": "https://github.com/jbosstm/narayana/raw/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/SessionProxy.java",
+    "contents_url": "https://api.github.com/repos/jbosstm/narayana/contents/ArjunaJTA/jms/src/main/java/org/jboss/narayana/jta/jms/SessionProxy.java?ref=be75a2c073ffe90b90cc434dc957dedeb8bbcdd9",
+    "patch": "@@ -192,6 +192,16 @@ public MessageConsumer createConsumer(Destination destination, String s, boolean\n         return xaSession.createConsumer(destination, s, b);\n     }\n \n+    @Override\n+    public MessageConsumer createSharedConsumer(Topic topic, String sharedSubscriptionName) throws JMSException {\n+        return xaSession.createSharedConsumer(topic, sharedSubscriptionName);\n+    }\n+\n+    @Override\n+    public MessageConsumer createSharedConsumer(Topic topic, String sharedSubscriptionName, String messageSelector) throws JMSException {\n+        return xaSession.createSharedConsumer(topic, sharedSubscriptionName, messageSelector);\n+    }\n+\n     @Override\n     public Queue createQueue(String s) throws JMSException {\n         return xaSession.createQueue(s);\n@@ -212,6 +222,26 @@ public TopicSubscriber createDurableSubscriber(Topic topic, String s, String s1,\n         return xaSession.createDurableSubscriber(topic, s, s1, b);\n     }\n \n+    @Override\n+    public MessageConsumer createDurableConsumer(Topic topic, String name) throws JMSException {\n+        return xaSession.createDurableConsumer(topic, name);\n+    }\n+\n+    @Override\n+    public MessageConsumer createDurableConsumer(Topic topic, String name, String messageSelector, boolean noLocal) throws JMSException {\n+        return xaSession.createDurableConsumer(topic, name, messageSelector, noLocal);\n+    }\n+\n+    @Override\n+    public MessageConsumer createSharedDurableConsumer(Topic topic, String name) throws JMSException {\n+        return createSharedDurableConsumer(topic, name);\n+    }\n+\n+    @Override\n+    public MessageConsumer createSharedDurableConsumer(Topic topic, String name, String messageSelector) throws JMSException {\n+        return createSharedDurableConsumer(topic, name, messageSelector);\n+    }\n+\n     @Override\n     public QueueBrowser createBrowser(Queue queue) throws JMSException {\n         return xaSession.createBrowser(queue);"
+  },
+  {
+    "sha": "951ce2aca1e87daf5334f54eea95b9bd0e210213",
+    "filename": "ArjunaJTA/narayana-jta/pom.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/jbosstm/narayana/blob/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/narayana-jta/pom.xml",
+    "raw_url": "https://github.com/jbosstm/narayana/raw/be75a2c073ffe90b90cc434dc957dedeb8bbcdd9/ArjunaJTA/narayana-jta/pom.xml",
+    "contents_url": "https://api.github.com/repos/jbosstm/narayana/contents/ArjunaJTA/narayana-jta/pom.xml?ref=be75a2c073ffe90b90cc434dc957dedeb8bbcdd9",
+    "patch": "@@ -216,8 +216,8 @@\n     </dependency>\n     <dependency>\n       <groupId>org.jboss.spec.javax.jms</groupId>\n-      <artifactId>jboss-jms-api_1.1_spec</artifactId>\n-      <version>${version.org.jboss.spec.javax.jms.jboss-jms-api_1.1_spec}</version>\n+      <artifactId>jboss-jms-api_2.0_spec</artifactId>\n+      <version>${version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec}</version>\n       <scope>provided</scope>\n     </dependency>\n     <dependency>"
+  }
+]

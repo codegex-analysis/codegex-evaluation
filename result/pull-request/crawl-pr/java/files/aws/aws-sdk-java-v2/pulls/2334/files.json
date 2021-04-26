@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "0bed6050bf343234d302e9ca24f05f35db46ef0b",
+    "filename": ".changes/next-release/bugfix-AmazonDynamoDBEnhanced-dbd1477.json",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/5c2834ff9ae9f05974762a949e25f6084762d52a/.changes/next-release/bugfix-AmazonDynamoDBEnhanced-dbd1477.json",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/5c2834ff9ae9f05974762a949e25f6084762d52a/.changes/next-release/bugfix-AmazonDynamoDBEnhanced-dbd1477.json",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/.changes/next-release/bugfix-AmazonDynamoDBEnhanced-dbd1477.json?ref=5c2834ff9ae9f05974762a949e25f6084762d52a",
+    "patch": "@@ -0,0 +1,6 @@\n+{\n+    \"category\": \"Amazon DynamoDB Enhanced\", \n+    \"contributor\": \"reed53\", \n+    \"type\": \"bugfix\", \n+    \"description\": \"Empty beans are now preserved through serialization and deserialization\"\n+}"
+  },
+  {
+    "sha": "cd4ebe1b8d824620989b440332dbc28433b379f8",
+    "filename": "services-custom/dynamodb-enhanced/src/main/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticImmutableTableSchema.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 6,
+    "changes": 8,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/5c2834ff9ae9f05974762a949e25f6084762d52a/services-custom/dynamodb-enhanced/src/main/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticImmutableTableSchema.java",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/5c2834ff9ae9f05974762a949e25f6084762d52a/services-custom/dynamodb-enhanced/src/main/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticImmutableTableSchema.java",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/services-custom/dynamodb-enhanced/src/main/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticImmutableTableSchema.java?ref=5c2834ff9ae9f05974762a949e25f6084762d52a",
+    "patch": "@@ -439,8 +439,7 @@ public StaticTableMetadata tableMetadata() {\n \n     @Override\n     public T mapToItem(Map<String, AttributeValue> attributeMap) {\n-        // Lazily instantiate the builder once we have an attribute to write\n-        B builder = null;\n+        B builder = constructNewBuilder();\n         Map<FlattenedMapper<T, B, ?>, Map<String, AttributeValue>> flattenedAttributeValuesMap = new LinkedHashMap<>();\n         \n         for (Map.Entry<String, AttributeValue> entry : attributeMap.entrySet()) {\n@@ -451,9 +450,6 @@ public T mapToItem(Map<String, AttributeValue> attributeMap) {\n                 ResolvedImmutableAttribute<T, B> attributeMapper = indexedMappers.get(key);\n \n                 if (attributeMapper != null) {\n-                    if (builder == null) {\n-                        builder = constructNewBuilder();\n-                    }\n \n                     attributeMapper.updateItemMethod().accept(builder, value);\n                 } else {\n@@ -479,7 +475,7 @@ public T mapToItem(Map<String, AttributeValue> attributeMap) {\n             builder = entry.getKey().mapToItem(builder, this::constructNewBuilder, entry.getValue());\n         }\n         \n-        return builder == null ? null : buildItemFunction.apply(builder);\n+        return buildItemFunction.apply(builder);\n     }\n \n     @Override"
+  },
+  {
+    "sha": "511964dce3bbbae1435c6227da7385184b6c009e",
+    "filename": "services-custom/dynamodb-enhanced/src/test/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticImmutableTableSchemaTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/5c2834ff9ae9f05974762a949e25f6084762d52a/services-custom/dynamodb-enhanced/src/test/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticImmutableTableSchemaTest.java",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/5c2834ff9ae9f05974762a949e25f6084762d52a/services-custom/dynamodb-enhanced/src/test/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticImmutableTableSchemaTest.java",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/services-custom/dynamodb-enhanced/src/test/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticImmutableTableSchemaTest.java?ref=5c2834ff9ae9f05974762a949e25f6084762d52a",
+    "patch": "@@ -1499,7 +1499,7 @@ public void noConverterProvider_handlesCorrectly_whenAttributeConvertersAreSuppl\n         assertThat(resultMap, is(expectedMap));\n \n         FakeMappedItem resultItem = tableSchema.mapToItem(expectedMap);\n-        assertThat(resultItem, is(nullValue()));\n+        assertThat(resultItem, is(FakeMappedItem.builder().build()));\n     }\n \n     private <R> void verifyNullableAttribute(EnhancedType<R> attributeType,"
+  },
+  {
+    "sha": "d366b759203be34a2ddcb93dd3ad4a9f8625b645",
+    "filename": "services-custom/dynamodb-enhanced/src/test/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticTableSchemaTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/5c2834ff9ae9f05974762a949e25f6084762d52a/services-custom/dynamodb-enhanced/src/test/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticTableSchemaTest.java",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/5c2834ff9ae9f05974762a949e25f6084762d52a/services-custom/dynamodb-enhanced/src/test/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticTableSchemaTest.java",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/services-custom/dynamodb-enhanced/src/test/java/software/amazon/awssdk/enhanced/dynamodb/mapper/StaticTableSchemaTest.java?ref=5c2834ff9ae9f05974762a949e25f6084762d52a",
+    "patch": "@@ -1517,7 +1517,7 @@ public void noConverterProvider_handlesCorrectly_whenAttributeConvertersAreSuppl\n         assertThat(resultMap, is(expectedMap));\n \n         FakeMappedItem resultItem = tableSchema.mapToItem(expectedMap);\n-        assertThat(resultItem, is(nullValue()));\n+        assertThat(resultItem, is(FakeMappedItem.builder().build()));\n     }\n \n     private <R> void verifyNullableAttribute(EnhancedType<R> attributeType,"
+  }
+]

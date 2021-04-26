@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "03f617be49c51cce1c951b75c5e5f865458072de",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 5,
+    "changes": 12,
+    "blob_url": "https://github.com/seahen/maven-s3-wagon/blob/be3c84c0005b4973474b19756907be5b9a964845/README.md",
+    "raw_url": "https://github.com/seahen/maven-s3-wagon/raw/be3c84c0005b4973474b19756907be5b9a964845/README.md",
+    "contents_url": "https://api.github.com/repos/seahen/maven-s3-wagon/contents/README.md?ref=be3c84c0005b4973474b19756907be5b9a964845",
+    "patch": "@@ -75,13 +75,15 @@ If things are setup correctly, `$ mvn deploy` will produce output similar to thi\n \n \n ## Authentication\n-The wagon supports 4 methods for authenticating with Amazon S3.\n+The wagon supports multiple methods for authenticating with Amazon S3.\n \n 1 - System Properties: `aws.accessKeyId` + `aws.secretKey`\n \n 2 - Environment Variables: `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`\n \n-3 - Entries in `~/.m2/settings.xml`\n+3 - IAM roles for service accounts (IRSA): see [AWS EKS User Guide - IAM roles for service accounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) for more information\n+\n+4 - Entries in `~/.m2/settings.xml`\n \n     <servers>\n       <server>\n@@ -91,11 +93,11 @@ The wagon supports 4 methods for authenticating with Amazon S3.\n       </server>\n     </servers>\n \n-4 - The default AWS credential profiles file: typically located at `~/.aws/credentials` (location can vary per platform), and shared by many of the AWS SDKs and by the AWS CLI.\n+5 - The default AWS credential profiles file: typically located at `~/.aws/credentials` (location can vary per platform), and shared by many of the AWS SDKs and by the AWS CLI.\n \n-5 - Amazon ECS container credentials: loaded from the Amazon ECS if the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI is set.\n+6 - Amazon ECS container credentials: loaded from the Amazon ECS if the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI is set.\n \n-6 - Instance profile credentials: used on EC2 instances, and delivered through the Amazon EC2 metadata service.\n+7 - Instance profile credentials: used on EC2 instances, and delivered through the Amazon EC2 metadata service.\n \n The priority used when searching for credentials is the same as the order listed on this page.  For example, if a set of credentials is found in the system properties, the next three areas are never checked.  If no credentials can be found, an exception is thrown.l\n "
+  },
+  {
+    "sha": "6ce797907133b20385fd32431573ba35eafe3341",
+    "filename": "src/main/java/org/kuali/maven/wagon/auth/MavenAwsCredentialsProviderChain.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/seahen/maven-s3-wagon/blob/be3c84c0005b4973474b19756907be5b9a964845/src/main/java/org/kuali/maven/wagon/auth/MavenAwsCredentialsProviderChain.java",
+    "raw_url": "https://github.com/seahen/maven-s3-wagon/raw/be3c84c0005b4973474b19756907be5b9a964845/src/main/java/org/kuali/maven/wagon/auth/MavenAwsCredentialsProviderChain.java",
+    "contents_url": "https://api.github.com/repos/seahen/maven-s3-wagon/contents/src/main/java/org/kuali/maven/wagon/auth/MavenAwsCredentialsProviderChain.java?ref=be3c84c0005b4973474b19756907be5b9a964845",
+    "patch": "@@ -26,6 +26,7 @@\n import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;\n import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;\n import com.amazonaws.auth.SystemPropertiesCredentialsProvider;\n+import com.amazonaws.auth.WebIdentityTokenCredentialsProvider;\n import com.amazonaws.auth.profile.ProfileCredentialsProvider;\n import com.google.common.base.Optional;\n \n@@ -48,6 +49,9 @@ public MavenAwsCredentialsProviderChain(Optional<AuthenticationInfo> auth) {\n \t\t// Then fall through to environment variables\n \t\tproviders.add(new EnvironmentVariableCredentialsProvider());\n \n+\t\t// Then fall through to IAM roles for service accounts (IRSA)\n+\t\tproviders.add(WebIdentityTokenCredentialsProvider.create());\n+\n \t\t// Then fall through to settings.xml\n \t\tproviders.add(new AuthenticationInfoCredentialsProvider(auth));\n "
+  }
+]

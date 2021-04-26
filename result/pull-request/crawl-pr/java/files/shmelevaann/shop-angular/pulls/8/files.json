@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "629dbefba158962e5e5ad1cadcd58d64c1106f50",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/pom.xml",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/pom.xml",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/pom.xml?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -56,6 +56,36 @@\n \t\t\t<artifactId>spring-boot-starter-test</artifactId>\n \t\t\t<scope>test</scope>\n \t\t</dependency>\n+\n+\t\t<dependency>\n+\t\t\t<groupId>javax.xml.bind</groupId>\n+\t\t\t<artifactId>jaxb-api</artifactId>\n+\t\t\t<version>2.3.1</version>\n+\t\t</dependency>\n+\t\t<dependency>\n+\t\t\t<groupId>org.glassfish.jaxb</groupId>\n+\t\t\t<artifactId>jaxb-runtime</artifactId>\n+\t\t\t<version>2.3.1</version>\n+\t\t</dependency>\n+\t\t<dependency>\n+\t\t\t<groupId>wsdl4j</groupId>\n+\t\t\t<artifactId>wsdl4j</artifactId>\n+\t\t\t<version>1.6.3</version>\n+\t\t</dependency>\n+\t\t<dependency>\n+\t\t\t<groupId>javax.xml.soap</groupId>\n+\t\t\t<artifactId>javax.xml.soap-api</artifactId>\n+\t\t\t<version>1.4.0</version>\n+\t\t</dependency>\n+\t\t<dependency>\n+\t\t\t<groupId>com.sun.xml.messaging.saaj</groupId>\n+\t\t\t<artifactId>saaj-impl</artifactId>\n+\t\t\t<version>1.5.1</version>\n+\t\t</dependency>\n+\t\t<dependency>\n+\t\t\t<groupId>org.springframework.boot</groupId>\n+\t\t\t<artifactId>spring-boot-starter-web-services</artifactId>\n+\t\t</dependency>\n \t</dependencies>\n \n \t<build>\n@@ -72,6 +102,24 @@\n \t\t\t\t\t</excludes>\n \t\t\t\t</configuration>\n \t\t\t</plugin>\n+\t\t\t<plugin>\n+\t\t\t\t<groupId>org.codehaus.mojo</groupId>\n+\t\t\t\t<artifactId>jaxb2-maven-plugin</artifactId>\n+\t\t\t\t<version>2.5.0</version>\n+\t\t\t\t<executions>\n+\t\t\t\t\t<execution>\n+\t\t\t\t\t\t<id>xjc</id>\n+\t\t\t\t\t\t<goals>\n+\t\t\t\t\t\t\t<goal>xjc</goal>\n+\t\t\t\t\t\t</goals>\n+\t\t\t\t\t</execution>\n+\t\t\t\t</executions>\n+\t\t\t\t<configuration>\n+\t\t\t\t\t<sources>\n+\t\t\t\t\t\t<source>${project.basedir}/src/main/resources/products.xsd</source>\n+\t\t\t\t\t</sources>\n+\t\t\t\t</configuration>\n+\t\t\t</plugin>\n \t\t</plugins>\n \t</build>\n "
+  },
+  {
+    "sha": "118e6822b8d1ebf3aeb69bea2f1a4c06564f8925",
+    "filename": "src/main/java/ru/chiffa/soap/ProductEndpoint.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/ProductEndpoint.java",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/ProductEndpoint.java",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/src/main/java/ru/chiffa/soap/ProductEndpoint.java?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -0,0 +1,24 @@\n+package ru.chiffa.soap;\n+\n+import lombok.RequiredArgsConstructor;\n+import org.springframework.ws.server.endpoint.annotation.Endpoint;\n+import org.springframework.ws.server.endpoint.annotation.PayloadRoot;\n+import org.springframework.ws.server.endpoint.annotation.RequestPayload;\n+import org.springframework.ws.server.endpoint.annotation.ResponsePayload;\n+import ru.chiffa.soap.products.GetAllProductsRequest;\n+import ru.chiffa.soap.products.GetAllProductsResponse;\n+\n+@Endpoint\n+@RequiredArgsConstructor\n+public class ProductEndpoint {\n+    private static final String NAMESPACE_URI = \"http://www.chiffa.ru/soap/products\";\n+    private final ProductViewService productViewService;\n+\n+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = \"getAllProductsRequest\")\n+    @ResponsePayload\n+    public GetAllProductsResponse getAllProducts(@RequestPayload GetAllProductsRequest request) {\n+        GetAllProductsResponse response = new GetAllProductsResponse();\n+        productViewService.getAllProductViews().forEach(response.getProducts()::add);\n+        return response;\n+    }\n+}"
+  },
+  {
+    "sha": "8fb10323b54ed6c8a46fe78a52f5d6bd9a03245d",
+    "filename": "src/main/java/ru/chiffa/soap/ProductViewService.java",
+    "status": "added",
+    "additions": 29,
+    "deletions": 0,
+    "changes": 29,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/ProductViewService.java",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/ProductViewService.java",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/src/main/java/ru/chiffa/soap/ProductViewService.java?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -0,0 +1,29 @@\n+package ru.chiffa.soap;\n+\n+import lombok.RequiredArgsConstructor;\n+import org.springframework.stereotype.Service;\n+import ru.chiffa.model.Product;\n+import ru.chiffa.reposirories.ProductRepository;\n+import ru.chiffa.soap.products.ProductView;\n+\n+import java.util.List;\n+import java.util.stream.Collectors;\n+\n+@Service\n+@RequiredArgsConstructor\n+public class ProductViewService {\n+    private final ProductRepository productRepository;\n+\n+    public List<ProductView> getAllProductViews() {\n+        List<Product> products = productRepository.findAll();\n+        return products.stream().map(this::productToProductView).collect(Collectors.toList());\n+    }\n+\n+    private ProductView productToProductView(Product product) {\n+        ProductView productView = new ProductView();\n+        productView.setId(product.getId());\n+        productView.setTitle(product.getTitle());\n+        productView.setPrice(product.getPrice());\n+        return productView;\n+    }\n+}"
+  },
+  {
+    "sha": "136d1f76b4efdbdf9f1318587eba56461a094b05",
+    "filename": "src/main/java/ru/chiffa/soap/WebServiceConfig.java",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/WebServiceConfig.java",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/WebServiceConfig.java",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/src/main/java/ru/chiffa/soap/WebServiceConfig.java?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -0,0 +1,41 @@\n+package ru.chiffa.soap;\n+\n+import org.springframework.boot.web.servlet.ServletRegistrationBean;\n+import org.springframework.context.ApplicationContext;\n+import org.springframework.context.annotation.Bean;\n+import org.springframework.context.annotation.Configuration;\n+import org.springframework.core.io.ClassPathResource;\n+import org.springframework.ws.config.annotation.EnableWs;\n+import org.springframework.ws.config.annotation.WsConfigurerAdapter;\n+import org.springframework.ws.transport.http.MessageDispatcherServlet;\n+import org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition;\n+import org.springframework.xml.xsd.SimpleXsdSchema;\n+import org.springframework.xml.xsd.XsdSchema;\n+\n+@EnableWs\n+@Configuration\n+public class WebServiceConfig extends WsConfigurerAdapter {\n+    @Bean\n+    public ServletRegistrationBean messageDispatcherServlet(ApplicationContext applicationContext) {\n+        MessageDispatcherServlet servlet = new MessageDispatcherServlet();\n+        servlet.setApplicationContext(applicationContext);\n+        servlet.setTransformWsdlLocations(true);\n+        return new ServletRegistrationBean(servlet, \"/ws/*\");\n+    }\n+\n+    // http://localhost:8080/ws/students.wsdl\n+    @Bean(name = \"products\")\n+    public DefaultWsdl11Definition productsWsdl11Definition(XsdSchema productsSchema) {\n+        DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();\n+        wsdl11Definition.setPortTypeName(\"ProductsPort\");\n+        wsdl11Definition.setLocationUri(\"/ws\");\n+        wsdl11Definition.setTargetNamespace(\"http://www.chiffa.ru/soap/products\");\n+        wsdl11Definition.setSchema(productsSchema);\n+        return wsdl11Definition;\n+    }\n+\n+    @Bean\n+    public XsdSchema productsSchema() {\n+        return new SimpleXsdSchema(new ClassPathResource(\"products.xsd\"));\n+    }\n+}"
+  },
+  {
+    "sha": "b85d42b95f54bd98d0a46f727405126b7cfe1d6b",
+    "filename": "src/main/java/ru/chiffa/soap/products/GetAllProductsRequest.java",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/GetAllProductsRequest.java",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/GetAllProductsRequest.java",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/src/main/java/ru/chiffa/soap/products/GetAllProductsRequest.java?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -0,0 +1,39 @@\n+//\n+// This file was generated by the JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.2 \n+// See <a href=\"https://javaee.github.io/jaxb-v2/\">https://javaee.github.io/jaxb-v2/</a> \n+// Any modifications to this file will be lost upon recompilation of the source schema. \n+// Generated on: 2021.03.06 at 04:14:06 PM MSK \n+//\n+\n+\n+package ru.chiffa.soap.products;\n+\n+import javax.xml.bind.annotation.XmlAccessType;\n+import javax.xml.bind.annotation.XmlAccessorType;\n+import javax.xml.bind.annotation.XmlRootElement;\n+import javax.xml.bind.annotation.XmlType;\n+\n+\n+/**\n+ * <p>Java class for anonymous complex type.\n+ * \n+ * <p>The following schema fragment specifies the expected content contained within this class.\n+ * \n+ * <pre>\n+ * &lt;complexType&gt;\n+ *   &lt;complexContent&gt;\n+ *     &lt;restriction base=\"{http://www.w3.org/2001/XMLSchema}anyType\"&gt;\n+ *     &lt;/restriction&gt;\n+ *   &lt;/complexContent&gt;\n+ * &lt;/complexType&gt;\n+ * </pre>\n+ * \n+ * \n+ */\n+@XmlAccessorType(XmlAccessType.FIELD)\n+@XmlType(name = \"\")\n+@XmlRootElement(name = \"getAllProductsRequest\")\n+public class GetAllProductsRequest {\n+\n+\n+}"
+  },
+  {
+    "sha": "1e719d765e89094d07f511cfced4c5cd3cfa4f1c",
+    "filename": "src/main/java/ru/chiffa/soap/products/GetAllProductsResponse.java",
+    "status": "added",
+    "additions": 78,
+    "deletions": 0,
+    "changes": 78,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/GetAllProductsResponse.java",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/GetAllProductsResponse.java",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/src/main/java/ru/chiffa/soap/products/GetAllProductsResponse.java?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -0,0 +1,78 @@\n+//\n+// This file was generated by the JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.2 \n+// See <a href=\"https://javaee.github.io/jaxb-v2/\">https://javaee.github.io/jaxb-v2/</a> \n+// Any modifications to this file will be lost upon recompilation of the source schema. \n+// Generated on: 2021.03.06 at 04:14:06 PM MSK \n+//\n+\n+\n+package ru.chiffa.soap.products;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+import javax.xml.bind.annotation.XmlAccessType;\n+import javax.xml.bind.annotation.XmlAccessorType;\n+import javax.xml.bind.annotation.XmlElement;\n+import javax.xml.bind.annotation.XmlRootElement;\n+import javax.xml.bind.annotation.XmlType;\n+\n+\n+/**\n+ * <p>Java class for anonymous complex type.\n+ * \n+ * <p>The following schema fragment specifies the expected content contained within this class.\n+ * \n+ * <pre>\n+ * &lt;complexType&gt;\n+ *   &lt;complexContent&gt;\n+ *     &lt;restriction base=\"{http://www.w3.org/2001/XMLSchema}anyType\"&gt;\n+ *       &lt;sequence&gt;\n+ *         &lt;element name=\"products\" type=\"{http://www.chiffa.ru/ws/products}productView\" maxOccurs=\"unbounded\"/&gt;\n+ *       &lt;/sequence&gt;\n+ *     &lt;/restriction&gt;\n+ *   &lt;/complexContent&gt;\n+ * &lt;/complexType&gt;\n+ * </pre>\n+ * \n+ * \n+ */\n+@XmlAccessorType(XmlAccessType.FIELD)\n+@XmlType(name = \"\", propOrder = {\n+    \"products\"\n+})\n+@XmlRootElement(name = \"getAllProductsResponse\")\n+public class GetAllProductsResponse {\n+\n+    @XmlElement(required = true)\n+    protected List<ProductView> products;\n+\n+    /**\n+     * Gets the value of the products property.\n+     * \n+     * <p>\n+     * This accessor method returns a reference to the live list,\n+     * not a snapshot. Therefore any modification you make to the\n+     * returned list will be present inside the JAXB object.\n+     * This is why there is not a <CODE>set</CODE> method for the products property.\n+     * \n+     * <p>\n+     * For example, to add a new item, do as follows:\n+     * <pre>\n+     *    getProducts().add(newItem);\n+     * </pre>\n+     * \n+     * \n+     * <p>\n+     * Objects of the following type(s) are allowed in the list\n+     * {@link ProductView }\n+     * \n+     * \n+     */\n+    public List<ProductView> getProducts() {\n+        if (products == null) {\n+            products = new ArrayList<ProductView>();\n+        }\n+        return this.products;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "c08bccf979f34be676614276eed7af4132960c2b",
+    "filename": "src/main/java/ru/chiffa/soap/products/ObjectFactory.java",
+    "status": "added",
+    "additions": 63,
+    "deletions": 0,
+    "changes": 63,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/ObjectFactory.java",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/ObjectFactory.java",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/src/main/java/ru/chiffa/soap/products/ObjectFactory.java?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -0,0 +1,63 @@\n+//\n+// This file was generated by the JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.2 \n+// See <a href=\"https://javaee.github.io/jaxb-v2/\">https://javaee.github.io/jaxb-v2/</a> \n+// Any modifications to this file will be lost upon recompilation of the source schema. \n+// Generated on: 2021.03.06 at 04:14:06 PM MSK \n+//\n+\n+\n+package ru.chiffa.soap.products;\n+\n+import javax.xml.bind.annotation.XmlRegistry;\n+\n+\n+/**\n+ * This object contains factory methods for each \n+ * Java content interface and Java element interface \n+ * generated in the ru.chiffa.ws.products package. \n+ * <p>An ObjectFactory allows you to programatically \n+ * construct new instances of the Java representation \n+ * for XML content. The Java representation of XML \n+ * content can consist of schema derived interfaces \n+ * and classes representing the binding of schema \n+ * type definitions, element declarations and model \n+ * groups.  Factory methods for each of these are \n+ * provided in this class.\n+ * \n+ */\n+@XmlRegistry\n+public class ObjectFactory {\n+\n+\n+    /**\n+     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: ru.chiffa.ws.products\n+     * \n+     */\n+    public ObjectFactory() {\n+    }\n+\n+    /**\n+     * Create an instance of {@link GetAllProductsRequest }\n+     * \n+     */\n+    public GetAllProductsRequest createGetAllProductsRequest() {\n+        return new GetAllProductsRequest();\n+    }\n+\n+    /**\n+     * Create an instance of {@link GetAllProductsResponse }\n+     * \n+     */\n+    public GetAllProductsResponse createGetAllProductsResponse() {\n+        return new GetAllProductsResponse();\n+    }\n+\n+    /**\n+     * Create an instance of {@link ProductView }\n+     * \n+     */\n+    public ProductView createProductView() {\n+        return new ProductView();\n+    }\n+\n+}"
+  },
+  {
+    "sha": "b826636e7479d857ae6a133883707053e96372ac",
+    "filename": "src/main/java/ru/chiffa/soap/products/ProductView.java",
+    "status": "added",
+    "additions": 107,
+    "deletions": 0,
+    "changes": 107,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/ProductView.java",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/ProductView.java",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/src/main/java/ru/chiffa/soap/products/ProductView.java?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -0,0 +1,107 @@\n+//\n+// This file was generated by the JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.2 \n+// See <a href=\"https://javaee.github.io/jaxb-v2/\">https://javaee.github.io/jaxb-v2/</a> \n+// Any modifications to this file will be lost upon recompilation of the source schema. \n+// Generated on: 2021.03.06 at 04:14:06 PM MSK \n+//\n+\n+\n+package ru.chiffa.soap.products;\n+\n+import javax.xml.bind.annotation.XmlAccessType;\n+import javax.xml.bind.annotation.XmlAccessorType;\n+import javax.xml.bind.annotation.XmlElement;\n+import javax.xml.bind.annotation.XmlType;\n+\n+\n+/**\n+ * <p>Java class for productView complex type.\n+ * \n+ * <p>The following schema fragment specifies the expected content contained within this class.\n+ * \n+ * <pre>\n+ * &lt;complexType name=\"productView\"&gt;\n+ *   &lt;complexContent&gt;\n+ *     &lt;restriction base=\"{http://www.w3.org/2001/XMLSchema}anyType\"&gt;\n+ *       &lt;sequence&gt;\n+ *         &lt;element name=\"id\" type=\"{http://www.w3.org/2001/XMLSchema}long\"/&gt;\n+ *         &lt;element name=\"title\" type=\"{http://www.w3.org/2001/XMLSchema}string\"/&gt;\n+ *         &lt;element name=\"price\" type=\"{http://www.w3.org/2001/XMLSchema}int\"/&gt;\n+ *       &lt;/sequence&gt;\n+ *     &lt;/restriction&gt;\n+ *   &lt;/complexContent&gt;\n+ * &lt;/complexType&gt;\n+ * </pre>\n+ * \n+ * \n+ */\n+@XmlAccessorType(XmlAccessType.FIELD)\n+@XmlType(name = \"productView\", propOrder = {\n+    \"id\",\n+    \"title\",\n+    \"price\"\n+})\n+public class ProductView {\n+\n+    protected long id;\n+    @XmlElement(required = true)\n+    protected String title;\n+    protected int price;\n+\n+    /**\n+     * Gets the value of the id property.\n+     * \n+     */\n+    public long getId() {\n+        return id;\n+    }\n+\n+    /**\n+     * Sets the value of the id property.\n+     * \n+     */\n+    public void setId(long value) {\n+        this.id = value;\n+    }\n+\n+    /**\n+     * Gets the value of the title property.\n+     * \n+     * @return\n+     *     possible object is\n+     *     {@link String }\n+     *     \n+     */\n+    public String getTitle() {\n+        return title;\n+    }\n+\n+    /**\n+     * Sets the value of the title property.\n+     * \n+     * @param value\n+     *     allowed object is\n+     *     {@link String }\n+     *     \n+     */\n+    public void setTitle(String value) {\n+        this.title = value;\n+    }\n+\n+    /**\n+     * Gets the value of the price property.\n+     * \n+     */\n+    public int getPrice() {\n+        return price;\n+    }\n+\n+    /**\n+     * Sets the value of the price property.\n+     * \n+     */\n+    public void setPrice(int value) {\n+        this.price = value;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "eca85b189fd4e3c280f605d340502c3e186836ae",
+    "filename": "src/main/java/ru/chiffa/soap/products/package-info.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/package-info.java",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/java/ru/chiffa/soap/products/package-info.java",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/src/main/java/ru/chiffa/soap/products/package-info.java?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -0,0 +1,9 @@\n+//\n+// This file was generated by the JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.2 \n+// See <a href=\"https://javaee.github.io/jaxb-v2/\">https://javaee.github.io/jaxb-v2/</a> \n+// Any modifications to this file will be lost upon recompilation of the source schema. \n+// Generated on: 2021.03.06 at 04:14:06 PM MSK \n+//\n+\n+@javax.xml.bind.annotation.XmlSchema(namespace = \"http://www.chiffa.ru/soap/products\", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)\n+package ru.chiffa.soap.products;"
+  },
+  {
+    "sha": "0d45de68f86920bf801365d5d5053ab831f93428",
+    "filename": "src/main/resources/products.xsd",
+    "status": "added",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/shmelevaann/shop-angular/blob/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/resources/products.xsd",
+    "raw_url": "https://github.com/shmelevaann/shop-angular/raw/ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc/src/main/resources/products.xsd",
+    "contents_url": "https://api.github.com/repos/shmelevaann/shop-angular/contents/src/main/resources/products.xsd?ref=ca8d6b442901fc6a5dcd38de6c6da4622e1b85cc",
+    "patch": "@@ -0,0 +1,26 @@\n+<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n+<xs:schema\n+        xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n+        xmlns:tns=\"http://www.chiffa.ru/soap/products\"\n+        targetNamespace=\"http://www.chiffa.ru/soap/products\" elementFormDefault=\"qualified\">\n+\n+    <xs:element name=\"getAllProductsRequest\">\n+        <xs:complexType/>\n+    </xs:element>\n+\n+    <xs:element name=\"getAllProductsResponse\">\n+        <xs:complexType>\n+            <xs:sequence>\n+                <xs:element name=\"products\" maxOccurs=\"unbounded\" type=\"tns:productView\"/>\n+            </xs:sequence>\n+        </xs:complexType>\n+    </xs:element>\n+\n+    <xs:complexType name=\"productView\">\n+        <xs:sequence>\n+            <xs:element name=\"id\" type=\"xs:long\"/>\n+            <xs:element name=\"title\" type=\"xs:string\"/>\n+            <xs:element name=\"price\" type=\"xs:int\"/>\n+        </xs:sequence>\n+    </xs:complexType>\n+</xs:schema>\n\\ No newline at end of file"
+  }
+]

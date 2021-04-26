@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "638ee7c0e74c7025db15ac91caaf8032c4955711",
+    "filename": "CHANGES",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/libgdx/libgdx/blob/b735078a5c30c21a6efe7352ce1983b569997ebb/CHANGES",
+    "raw_url": "https://github.com/libgdx/libgdx/raw/b735078a5c30c21a6efe7352ce1983b569997ebb/CHANGES",
+    "contents_url": "https://api.github.com/repos/libgdx/libgdx/contents/CHANGES?ref=b735078a5c30c21a6efe7352ce1983b569997ebb",
+    "patch": "@@ -11,7 +11,7 @@\n - Fix for #6377 Gdx.net.openURI not working with targetSdk 30\n - Api Addition: Added a Pool#discard(T) method.\n - Architecture support: Linux ARM and AARCH64 support has been added. The gdx-xxx-natives.jar files now contain native libraries of these architectures as well.\n-\n+- Desktop/LWJGL3: Music thread now runs outside the render-loop. That should reduce crackle noises when the render loop is slow, e.g. when files are loaded.\n \n [1.9.14]\n - [BREAKING CHANGE] iOS: IOSUIViewController has been moved to its own separate class "
+  },
+  {
+    "sha": "c48a869e3363e6355dffd714c51b16eae0627de3",
+    "filename": "backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/Lwjgl3Application.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 3,
+    "changes": 3,
+    "blob_url": "https://github.com/libgdx/libgdx/blob/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/Lwjgl3Application.java",
+    "raw_url": "https://github.com/libgdx/libgdx/raw/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/Lwjgl3Application.java",
+    "contents_url": "https://api.github.com/repos/libgdx/libgdx/contents/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/Lwjgl3Application.java?ref=b735078a5c30c21a6efe7352ce1983b569997ebb",
+    "patch": "@@ -128,9 +128,6 @@ public Lwjgl3Application(ApplicationListener listener, Lwjgl3ApplicationConfigur\n \tprotected void loop() {\n \t\tArray<Lwjgl3Window> closedWindows = new Array<Lwjgl3Window>();\n \t\twhile (running && windows.size > 0) {\n-\t\t\t// FIXME put it on a separate thread\n-\t\t\taudio.update();\n-\n \t\t\tboolean haveWindowsRendered = false;\n \t\t\tclosedWindows.clear();\n \t\t\tint targetFramerate = -2;"
+  },
+  {
+    "sha": "c7f2fc8849d79dcf71ac3c7fa653e083ef4f1bdc",
+    "filename": "backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/Lwjgl3Audio.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/libgdx/libgdx/blob/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/Lwjgl3Audio.java",
+    "raw_url": "https://github.com/libgdx/libgdx/raw/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/Lwjgl3Audio.java",
+    "contents_url": "https://api.github.com/repos/libgdx/libgdx/contents/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/Lwjgl3Audio.java?ref=b735078a5c30c21a6efe7352ce1983b569997ebb",
+    "patch": "@@ -5,5 +5,4 @@\n \n public interface Lwjgl3Audio extends Audio, Disposable {\n \n-\tvoid update ();\n }"
+  },
+  {
+    "sha": "5770175c1a7a5c2178ed20f41f901437bfff83d4",
+    "filename": "backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/OpenALLwjgl3Audio.java",
+    "status": "modified",
+    "additions": 59,
+    "deletions": 4,
+    "changes": 63,
+    "blob_url": "https://github.com/libgdx/libgdx/blob/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/OpenALLwjgl3Audio.java",
+    "raw_url": "https://github.com/libgdx/libgdx/raw/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/OpenALLwjgl3Audio.java",
+    "contents_url": "https://api.github.com/repos/libgdx/libgdx/contents/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/OpenALLwjgl3Audio.java?ref=b735078a5c30c21a6efe7352ce1983b569997ebb",
+    "patch": "@@ -72,6 +72,9 @@\n \tprivate int mostRecetSound = -1;\n \n \tArray<OpenALMusic> music = new Array(false, 1, OpenALMusic.class);\n+\tprivate final Object musicThreadSync = new Object();\n+\tprivate Thread musicThread;\n+\tprivate boolean musicThreadActive;\n \tlong device;\n \tlong context;\n \tboolean noDevice = false;\n@@ -131,6 +134,21 @@ public OpenALLwjgl3Audio (int simultaneousSources, int deviceBufferCount, int de\n \t\talListenerfv(AL_POSITION, position);\n \n \t\trecentSounds = new OpenALSound[simultaneousSources];\n+\n+\t\t// audio thread: separate from rendering-loop to reduce crackles when render loop is\n+\t\t// slow, e.g. when assets are loaded. Also possibly improves performance of render-loop.\n+\t\tmusicThread = new Thread(new Runnable() {\n+\t\t\t@Override\n+\t\t\tpublic void run() {\n+\t\t\t\t// audio thread will become 'null' once the app is closed\n+\t\t\t\twhile (musicThreadActive) {\n+\t\t\t\t\tupdate();\n+\t\t\t\t\tThread.yield();\n+\t\t\t\t}\n+\t\t\t}\n+\t\t});\n+\t\tmusicThreadActive = true;\n+\t\tmusicThread.start();\n \t}\n \n \tpublic void registerSound (String extension, Class<? extends OpenALSound> soundClass) {\n@@ -167,6 +185,18 @@ public OpenALMusic newMusic (FileHandle file) {\n \t\t}\n \t}\n \n+\tvoid addMusic (OpenALMusic music) {\n+\t\tsynchronized (musicThreadSync) {\n+\t\t\tthis.music.add(music);\n+\t\t}\n+\t}\n+\n+\tvoid removeMusic (OpenALMusic music) {\n+\t\tsynchronized (musicThreadSync) {\n+\t\t\tthis.music.removeValue(music, true);\n+\t\t}\n+\t}\n+\n \tint obtainSource (boolean isMusic) {\n \t\tif (noDevice) return 0;\n \t\tfor (int i = 0, n = idleSources.size; i < n; i++) {\n@@ -246,11 +276,27 @@ void resumeSourcesWithBuffer (int bufferID) {\n \t\t}\n \t}\n \n-\t@Override\n-\tpublic void update () {\n+\tprivate void update () {\n \t\tif (noDevice) return;\n-\t\tfor (int i = 0; i < music.size; i++)\n-\t\t\tmusic.items[i].update();\n+\t\tint index = 0;\n+\t\tboolean done = false;\n+\t\twhile (!done) {\n+\t\t\tOpenALMusic music;\n+\t\t\tsynchronized (musicThreadSync) {\n+\t\t\t\tif (index < this.music.size) {\n+\t\t\t\t\tmusic = this.music.items[index++];\n+\t\t\t\t}\n+\t\t\t\telse {\n+\t\t\t\t\tmusic = null;\n+\t\t\t\t}\n+\t\t\t}\n+\t\t\tif (music != null) {\n+\t\t\t\tmusic.update();\n+\t\t\t}\n+\t\t\telse {\n+\t\t\t\tdone = true;\n+\t\t\t}\n+\t\t}\n \t}\n \n \tpublic long getSoundId (int sourceId) {\n@@ -314,6 +360,15 @@ public void dispose () {\n \t\tsourceToSoundId.clear();\n \t\tsoundIdToSource.clear();\n \n+\t\t// waits for the music thread to stop\n+\t\tmusicThreadActive = false;\n+\t\ttry {\n+\t\t\tmusicThread.join();\n+\t\t}\n+\t\tcatch (InterruptedException e) {\n+\t\t\t// ignore\n+\t\t}\n+\n \t\talcDestroyContext(context);\n \t\talcCloseDevice(device);\n \t}"
+  },
+  {
+    "sha": "99f79c9c657cbdbc29c5d0e19cfe5e9333b4e638",
+    "filename": "backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/OpenALMusic.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 12,
+    "changes": 32,
+    "blob_url": "https://github.com/libgdx/libgdx/blob/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/OpenALMusic.java",
+    "raw_url": "https://github.com/libgdx/libgdx/raw/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/OpenALMusic.java",
+    "contents_url": "https://api.github.com/repos/libgdx/libgdx/contents/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/OpenALMusic.java?ref=b735078a5c30c21a6efe7352ce1983b569997ebb",
+    "patch": "@@ -20,6 +20,7 @@\n import java.nio.ByteBuffer;\r\n import java.nio.IntBuffer;\r\n \r\n+import com.badlogic.gdx.Gdx;\r\n import org.lwjgl.BufferUtils;\r\n import org.lwjgl.openal.AL11;\r\n \r\n@@ -67,13 +68,13 @@ protected void setup (int channels, int sampleRate) {\n \t\tmaxSecondsPerBuffer = (float)bufferSize / (bytesPerSample * channels * sampleRate);\r\n \t}\r\n \r\n-\tpublic void play () {\r\n+\tpublic synchronized void play () {\r\n \t\tif (audio.noDevice) return;\r\n \t\tif (sourceID == -1) {\r\n \t\t\tsourceID = audio.obtainSource(true);\r\n \t\t\tif (sourceID == -1) return;\r\n \r\n-\t\t\taudio.music.add(this);\r\n+\t\t\taudio.addMusic(this);\r\n \r\n \t\t\tif (buffers == null) {\r\n \t\t\t\tbuffers = BufferUtils.createIntBuffer(bufferCount);\r\n@@ -107,10 +108,10 @@ public void play () {\n \t\t}\r\n \t}\r\n \r\n-\tpublic void stop () {\r\n+\tpublic synchronized void stop () {\r\n \t\tif (audio.noDevice) return;\r\n \t\tif (sourceID == -1) return;\r\n-\t\taudio.music.removeValue(this, true);\r\n+\t\taudio.removeMusic(this);\r\n \t\treset();\r\n \t\taudio.freeSource(sourceID);\r\n \t\tsourceID = -1;\r\n@@ -119,7 +120,7 @@ public void stop () {\n \t\tisPlaying = false;\r\n \t}\r\n \r\n-\tpublic void pause () {\r\n+\tpublic synchronized void pause () {\r\n \t\tif (audio.noDevice) return;\r\n \t\tif (sourceID != -1) alSourcePause(sourceID);\r\n \t\tisPlaying = false;\r\n@@ -139,7 +140,7 @@ public boolean isLooping () {\n \t\treturn isLooping;\r\n \t}\r\n \r\n-\tpublic void setVolume (float volume) {\r\n+\tpublic synchronized void setVolume (float volume) {\r\n \t\tthis.volume = volume;\r\n \t\tif (audio.noDevice) return;\r\n \t\tif (sourceID != -1) alSourcef(sourceID, AL_GAIN, volume);\r\n@@ -149,7 +150,7 @@ public float getVolume () {\n \t\treturn this.volume;\r\n \t}\r\n \r\n-\tpublic void setPan (float pan, float volume) {\r\n+\tpublic synchronized void setPan (float pan, float volume) {\r\n \t\tthis.volume = volume;\r\n \t\tthis.pan = pan;\r\n \t\tif (audio.noDevice) return;\r\n@@ -159,7 +160,7 @@ public void setPan (float pan, float volume) {\n \t\talSourcef(sourceID, AL_GAIN, volume);\r\n \t}\r\n \r\n-\tpublic void setPosition (float position) {\r\n+\tpublic synchronized void setPosition (float position) {\r\n \t\tif (audio.noDevice) return;\r\n \t\tif (sourceID == -1) return;\r\n \t\tboolean wasPlaying = isPlaying;\r\n@@ -197,7 +198,7 @@ public void setPosition (float position) {\n \t\t}\r\n \t}\r\n \r\n-\tpublic float getPosition () {\r\n+\tpublic synchronized float getPosition () {\r\n \t\tif (audio.noDevice) return 0;\r\n \t\tif (sourceID == -1) return 0;\r\n \t\treturn renderedSeconds + alGetSourcef(sourceID, AL11.AL_SEC_OFFSET);\r\n@@ -223,7 +224,7 @@ public int getRate () {\n \t\treturn sampleRate;\r\n \t}\r\n \r\n-\tpublic void update () {\r\n+\tsynchronized void update () {\r\n \t\tif (audio.noDevice) return;\r\n \t\tif (sourceID == -1) return;\r\n \r\n@@ -241,7 +242,14 @@ public void update () {\n \t\t}\r\n \t\tif (end && alGetSourcei(sourceID, AL_BUFFERS_QUEUED) == 0) {\r\n \t\t\tstop();\r\n-\t\t\tif (onCompletionListener != null) onCompletionListener.onCompletion(this);\r\n+\t\t\tif (onCompletionListener != null) {\r\n+\t\t\t\tGdx.app.postRunnable(new Runnable() {\r\n+\t\t\t\t\t@Override\r\n+\t\t\t\t\tpublic void run() {\r\n+\t\t\t\t\t\tif (onCompletionListener != null) onCompletionListener.onCompletion(OpenALMusic.this);\r\n+\t\t\t\t\t}\r\n+\t\t\t\t});\r\n+\t\t\t}\r\n \t\t}\r\n \r\n \t\t// A buffer underflow will cause the source to stop.\r\n@@ -271,7 +279,7 @@ private boolean fill (int bufferID) {\n \t\treturn true;\r\n \t}\r\n \r\n-\tpublic void dispose () {\r\n+\tpublic synchronized void dispose () { \r\n \t\tstop();\r\n \t\tif (audio.noDevice) return;\r\n \t\tif (buffers == null) return;\r"
+  },
+  {
+    "sha": "8f1c2e47ac7ee408a93587ff568f09055261e87f",
+    "filename": "backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/mock/MockAudio.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 3,
+    "changes": 3,
+    "blob_url": "https://github.com/libgdx/libgdx/blob/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/mock/MockAudio.java",
+    "raw_url": "https://github.com/libgdx/libgdx/raw/b735078a5c30c21a6efe7352ce1983b569997ebb/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/mock/MockAudio.java",
+    "contents_url": "https://api.github.com/repos/libgdx/libgdx/contents/backends/gdx-backend-lwjgl3/src/com/badlogic/gdx/backends/lwjgl3/audio/mock/MockAudio.java?ref=b735078a5c30c21a6efe7352ce1983b569997ebb",
+    "patch": "@@ -48,9 +48,6 @@ public Music newMusic(FileHandle file) {\n \t\treturn new MockMusic();\n \t}\n \n-\t@Override\n-\tpublic void update () {}\n-\n \t@Override\n \tpublic void dispose () {}\n }"
+  }
+]

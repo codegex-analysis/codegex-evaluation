@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "762b07d51a3b8f8767a6c2c1f8323ce2ba2a29b5",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Greymerk/minecraft-roguelike/blob/4b4cbc510e53dc7391cef71e5b3bf176fcb10172/build.gradle",
+    "raw_url": "https://github.com/Greymerk/minecraft-roguelike/raw/4b4cbc510e53dc7391cef71e5b3bf176fcb10172/build.gradle",
+    "contents_url": "https://api.github.com/repos/Greymerk/minecraft-roguelike/contents/build.gradle?ref=4b4cbc510e53dc7391cef71e5b3bf176fcb10172",
+    "patch": "@@ -9,7 +9,7 @@ buildscript {\n }\n apply plugin: 'net.minecraftforge.gradle.forge'\n \n-version = \"1.12.2-1.8.0\"\n+version = \"1.12.2-1.8.1\"\n group= \"ca.rivas.roguelike\"\n archivesBaseName = \"RoguelikeDungeons\"\n "
+  },
+  {
+    "sha": "25765b742273c328dd4b21535edec24ed23fbcb8",
+    "filename": "src/main/java/greymerk/roguelike/dungeon/settings/SettingsContainer.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/Greymerk/minecraft-roguelike/blob/4b4cbc510e53dc7391cef71e5b3bf176fcb10172/src/main/java/greymerk/roguelike/dungeon/settings/SettingsContainer.java",
+    "raw_url": "https://github.com/Greymerk/minecraft-roguelike/raw/4b4cbc510e53dc7391cef71e5b3bf176fcb10172/src/main/java/greymerk/roguelike/dungeon/settings/SettingsContainer.java",
+    "contents_url": "https://api.github.com/repos/Greymerk/minecraft-roguelike/contents/src/main/java/greymerk/roguelike/dungeon/settings/SettingsContainer.java?ref=4b4cbc510e53dc7391cef71e5b3bf176fcb10172",
+    "patch": "@@ -5,6 +5,7 @@\n import java.util.HashMap;\n import java.util.List;\n import java.util.Map;\n+import java.util.stream.Collectors;\n \n import com.google.gson.JsonObject;\n import com.google.gson.JsonParser;\n@@ -108,7 +109,8 @@ public void put(DungeonSettings setting){\n \t\t\n \t\tfor(String namespace : settingsByNamespace.keySet()){\n \t\t\tif(!namespace.equals(SettingsContainer.BUILTIN_NAMESPACE)) continue;\n-\t\t\tsettings.addAll(settingsByNamespace.get(namespace).values());\n+\t\t\tsettings.addAll(settingsByNamespace.get(namespace).values().stream()\n+\t\t\t\t\t\t\t\t\t\t\t   .filter(s -> !s.getInherits().isEmpty()).collect(Collectors.toList()));\n \t\t}\n \t\t\n \t\treturn settings;\n@@ -120,7 +122,8 @@ public void put(DungeonSettings setting){\n \t\t\n \t\tfor(String namespace : settingsByNamespace.keySet()){\n \t\t\tif(namespace.equals(SettingsContainer.BUILTIN_NAMESPACE)) continue;\n-\t\t\tsettings.addAll(settingsByNamespace.get(namespace).values());\n+\t\t\tsettings.addAll(settingsByNamespace.get(namespace).values().stream()\n+\t\t\t\t\t\t\t\t\t\t\t   .filter(s -> !s.getInherits().isEmpty()).collect(Collectors.toList()));\n \t\t}\n \t\t\n \t\treturn settings;"
+  },
+  {
+    "sha": "aba7463f7af38af6e403c0adc1019f0aedd9cc20",
+    "filename": "src/main/java/greymerk/roguelike/dungeon/settings/SettingsResolver.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/Greymerk/minecraft-roguelike/blob/4b4cbc510e53dc7391cef71e5b3bf176fcb10172/src/main/java/greymerk/roguelike/dungeon/settings/SettingsResolver.java",
+    "raw_url": "https://github.com/Greymerk/minecraft-roguelike/raw/4b4cbc510e53dc7391cef71e5b3bf176fcb10172/src/main/java/greymerk/roguelike/dungeon/settings/SettingsResolver.java",
+    "contents_url": "https://api.github.com/repos/Greymerk/minecraft-roguelike/contents/src/main/java/greymerk/roguelike/dungeon/settings/SettingsResolver.java?ref=4b4cbc510e53dc7391cef71e5b3bf176fcb10172",
+    "patch": "@@ -114,6 +114,8 @@ private DungeonSettings getCustom(IWorldEditor editor, Random rand, Coord pos) t\n \t\t\t\tsettingsRandomizer.add(new WeightedChoice<DungeonSettings>(setting, setting.criteria.weight));\n \t\t\t}\n \t\t}\n+\n+\t\tif(settingsRandomizer.isEmpty()) return null;\n \t\t\n \t\tDungeonSettings chosen = settingsRandomizer.get(rand);\n \t\t"
+  },
+  {
+    "sha": "23b647c0dc407636bf1c656b7e65173e745236df",
+    "filename": "src/main/java/greymerk/roguelike/dungeon/settings/SpawnCriteria.java",
+    "status": "modified",
+    "additions": 36,
+    "deletions": 10,
+    "changes": 46,
+    "blob_url": "https://github.com/Greymerk/minecraft-roguelike/blob/4b4cbc510e53dc7391cef71e5b3bf176fcb10172/src/main/java/greymerk/roguelike/dungeon/settings/SpawnCriteria.java",
+    "raw_url": "https://github.com/Greymerk/minecraft-roguelike/raw/4b4cbc510e53dc7391cef71e5b3bf176fcb10172/src/main/java/greymerk/roguelike/dungeon/settings/SpawnCriteria.java",
+    "contents_url": "https://api.github.com/repos/Greymerk/minecraft-roguelike/contents/src/main/java/greymerk/roguelike/dungeon/settings/SpawnCriteria.java?ref=4b4cbc510e53dc7391cef71e5b3bf176fcb10172",
+    "patch": "@@ -15,12 +15,16 @@\n \tint weight;\n \tList<ResourceLocation> biomes;\n \tList<BiomeDictionary.Type> biomeTypes;\n+\tList<Integer> dimensionWL;\n+\tList<Integer> dimensionBL;\n \tboolean everywhere;\n \n \tpublic SpawnCriteria(){\n \t\tthis.weight = 1;\n \t\tthis.biomes = new ArrayList<ResourceLocation>();\n \t\tthis.biomeTypes = new ArrayList<BiomeDictionary.Type>();\n+\t\tthis.dimensionWL = new ArrayList<Integer>();\n+\t\tthis.dimensionBL = new ArrayList<Integer>();\n \t\tthis.everywhere = false;\n \t}\n \t\n@@ -47,36 +51,58 @@ public SpawnCriteria(JsonObject data){\n \t\t\t\tif(BiomeDictionary.getBiomes(t).size() > 0) this.biomeTypes.add(t);\n \t\t\t}\n \t\t}\n+\n+\t\tif(data.has(\"dimensionWL\")){\n+\t\t\tJsonArray dimensionList = data.get(\"dimensionWL\").getAsJsonArray();\n+\t\t\tthis.dimensionWL = new ArrayList<Integer>();\n+\t\t\tfor(JsonElement e : dimensionList){\n+\t\t\t\tint id = e.getAsInt();\n+\t\t\t\tthis.dimensionWL.add(id);\n+\t\t\t}\n+\t\t}\n+\n+\t\tif(data.has(\"dimensionBL\")){\n+\t\t\tJsonArray dimensionList = data.get(\"dimensionBL\").getAsJsonArray();\n+\t\t\tthis.dimensionBL = new ArrayList<Integer>();\n+\t\t\tfor(JsonElement e : dimensionList){\n+\t\t\t\tint id = e.getAsInt();\n+\t\t\t\tthis.dimensionBL.add(id);\n+\t\t\t}\n+\t\t}\n \t\t\n-\t\tthis.everywhere = this.biomes.isEmpty() && this.biomeTypes.isEmpty();\n+\t\tthis.everywhere = this.biomes.isEmpty() && this.biomeTypes.isEmpty() && this.dimensionWL.isEmpty() && this.dimensionBL.isEmpty();\n \t}\n \t\n \tpublic void setWeight(int weight){\n \t\tthis.weight = weight;\n \t}\n \t\n \tpublic void setbiomes(List<ResourceLocation> biomes){\n-\t\tthis.biomes = biomes;\n-\t\tthis.everywhere = this.biomes.isEmpty() && this.biomeTypes.isEmpty();\n+\t\tthis.biomes = biomes == null ? new ArrayList<ResourceLocation>() : biomes;\n+\t\tthis.everywhere = this.biomes.isEmpty() && this.biomeTypes.isEmpty() && this.dimensionWL.isEmpty() && this.dimensionBL.isEmpty();\n \t}\n \t\n \tpublic void setBiomeTypes(List<BiomeDictionary.Type> biomeTypes){\n-\t\tthis.biomeTypes = biomeTypes;\n-\t\tthis.everywhere = this.biomes.isEmpty() && this.biomeTypes.isEmpty();\n+\t\tthis.biomeTypes = biomeTypes == null ? new ArrayList<BiomeDictionary.Type>() : biomeTypes;\n+\t\tthis.everywhere = this.biomes.isEmpty() && this.biomeTypes.isEmpty() && this.dimensionWL.isEmpty() && this.dimensionBL.isEmpty();\n \t}\n \t\n \t\n \tpublic boolean isValid(ISpawnContext context){\n \t\t\n \t\tif(this.everywhere) return true;\n \t\t\n-\t\tboolean biomeFound = false;\n-\t\t\n-\t\tif(this.biomes != null)\tbiomeFound = context.includesBiome(biomes);\n+\t\tboolean biomeFound = true;\n+\t\tboolean dimensionFound = true;\n \t\t\n-\t\tif(this.biomeTypes != null) biomeFound = context.includesBiomeType(this.biomeTypes);\n+\t\tif(!this.biomes.isEmpty()) biomeFound = context.includesBiome(biomes);\n \t\t\n-\t\treturn biomeFound;\n+\t\tif(!this.biomeTypes.isEmpty()) biomeFound = context.includesBiomeType(this.biomeTypes);\n+\n+\t\tif(!this.dimensionWL.isEmpty()) dimensionFound = this.dimensionWL.contains(context.getDimension());\n+\t\telse if(!this.dimensionBL.isEmpty()) dimensionFound = !this.dimensionBL.contains(context.getDimension());\n+\n+\t\treturn biomeFound && dimensionFound;\n \t}\n \t\n \tpublic static boolean isValidDimension(int dim, List<Integer> wl, List<Integer> bl){"
+  }
+]

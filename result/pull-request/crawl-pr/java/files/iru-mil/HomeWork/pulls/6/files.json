@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "4036e9da037e7ea6ab01ac5d2021f4f0596686ca",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/iru-mil/HomeWork/blob/4d7e30479434deb1cccf46f4c9a88541e14b2259/pom.xml",
+    "raw_url": "https://github.com/iru-mil/HomeWork/raw/4d7e30479434deb1cccf46f4c9a88541e14b2259/pom.xml",
+    "contents_url": "https://api.github.com/repos/iru-mil/HomeWork/contents/pom.xml?ref=4d7e30479434deb1cccf46f4c9a88541e14b2259",
+    "patch": "@@ -13,6 +13,13 @@\n             <artifactId>sqlite-jdbc</artifactId>\n             <version>3.34.0</version>\n         </dependency>\n+        <dependency>\n+            <groupId>org.junit.jupiter</groupId>\n+            <artifactId>junit-jupiter</artifactId>\n+            <version>5.6.2</version>\n+            <scope>test</scope>\n+        </dependency>\n+\n     </dependencies>\n \n "
+  },
+  {
+    "sha": "f878c1189d08acd212e6ee527f46ff1503a10a29",
+    "filename": "src/main/java/ru/geekbrains/homework14/ArrayProcessing.java",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/iru-mil/HomeWork/blob/4d7e30479434deb1cccf46f4c9a88541e14b2259/src/main/java/ru/geekbrains/homework14/ArrayProcessing.java",
+    "raw_url": "https://github.com/iru-mil/HomeWork/raw/4d7e30479434deb1cccf46f4c9a88541e14b2259/src/main/java/ru/geekbrains/homework14/ArrayProcessing.java",
+    "contents_url": "https://api.github.com/repos/iru-mil/HomeWork/contents/src/main/java/ru/geekbrains/homework14/ArrayProcessing.java?ref=4d7e30479434deb1cccf46f4c9a88541e14b2259",
+    "patch": "@@ -0,0 +1,36 @@\n+package ru.geekbrains.homework14;\n+\n+import java.util.ArrayList;\n+\n+public class ArrayProcessing {\n+\n+    public ArrayList<Integer> cutArray(ArrayList<Integer> array) {\n+        ArrayList<Integer> arrayNew = new ArrayList<>();\n+        boolean flag = true;\n+        if (array.get(array.size() - 1) != 4) {\n+            for (int i = array.size() - 2; i >= 0; i--) {\n+                if (array.get(i) == 4) {\n+                    flag = false;\n+                    for (int j = 0; j < (array.size() - i - 1); j++) {\n+                        arrayNew.add(j, array.get(i + j + 1));\n+                    }\n+                    break;\n+                }\n+            }\n+        } else if (array.get(array.size() - 1) == 4)\n+            flag = false;\n+        if (flag) throw new RuntimeException(\"Массив не содержит четверок\");\n+        return arrayNew;\n+    }\n+\n+    public boolean checkArray(ArrayList<Integer> array) {\n+        boolean flagOne = false;\n+        boolean flagFour = false;\n+        for (Integer integer : array) {\n+            if (integer != 1 && integer != 4) return false;\n+            if (integer == 1) flagOne = true;\n+            if (integer == 4) flagFour = true;\n+        }\n+        return flagOne && flagFour;\n+    }\n+}"
+  },
+  {
+    "sha": "51d4db45fd28d031ca0878e742cf7d61d7b9252d",
+    "filename": "src/test/java/ru/geekbrains/homework14/ArrayProcessingTest.java",
+    "status": "added",
+    "additions": 60,
+    "deletions": 0,
+    "changes": 60,
+    "blob_url": "https://github.com/iru-mil/HomeWork/blob/4d7e30479434deb1cccf46f4c9a88541e14b2259/src/test/java/ru/geekbrains/homework14/ArrayProcessingTest.java",
+    "raw_url": "https://github.com/iru-mil/HomeWork/raw/4d7e30479434deb1cccf46f4c9a88541e14b2259/src/test/java/ru/geekbrains/homework14/ArrayProcessingTest.java",
+    "contents_url": "https://api.github.com/repos/iru-mil/HomeWork/contents/src/test/java/ru/geekbrains/homework14/ArrayProcessingTest.java?ref=4d7e30479434deb1cccf46f4c9a88541e14b2259",
+    "patch": "@@ -0,0 +1,60 @@\n+package ru.geekbrains.homework14;\n+\n+import org.junit.jupiter.api.Assertions;\n+import org.junit.jupiter.api.BeforeEach;\n+import org.junit.jupiter.api.Test;\n+import org.junit.jupiter.params.ParameterizedTest;\n+import org.junit.jupiter.params.provider.Arguments;\n+import org.junit.jupiter.params.provider.MethodSource;\n+\n+import java.util.ArrayList;\n+import java.util.Arrays;\n+import java.util.stream.Stream;\n+\n+public class ArrayProcessingTest {\n+    private ArrayProcessing ap;\n+\n+    @BeforeEach\n+    public void init() {\n+        ap = new ArrayProcessing();\n+    }\n+\n+    @ParameterizedTest\n+    @MethodSource(\"dataForCheckArrayMethod\")\n+    public void massTestCheckArray(ArrayList<Integer> arrayOr) {\n+        Assertions.assertTrue(ap.checkArray(arrayOr));\n+    }\n+\n+    public static Stream<Arguments> dataForCheckArrayMethod() {\n+        return Stream.of(\n+                Arguments.arguments(new ArrayList<>(Arrays.asList(1, 1, 4, 1, 1, 4, 4))),\n+                Arguments.arguments(new ArrayList<>(Arrays.asList(4, 4, 4, 4))),\n+                Arguments.arguments(new ArrayList<>(Arrays.asList(1, 1, 1, 1, 1))),\n+                Arguments.arguments(new ArrayList<>(Arrays.asList(1, 4, 4, 3))),\n+                Arguments.arguments(new ArrayList<>(Arrays.asList(4, 1, 4, 1, 1)))\n+        );\n+    }\n+\n+    @ParameterizedTest\n+    @MethodSource(\"dataForCutArrayMethod\")\n+    public void massTestCutArray(ArrayList<Integer> arrayEx, ArrayList<Integer> arrayOr) {\n+        Assertions.assertEquals(arrayEx, ap.cutArray(arrayOr));\n+    }\n+\n+    public static Stream<Arguments> dataForCutArrayMethod() {\n+        return Stream.of(\n+                Arguments.arguments(new ArrayList<>(Arrays.asList(1, 7)),\n+                        new ArrayList<>(Arrays.asList(1, 2, 1, 2, 2, 3, 4, 1, 7))),\n+                Arguments.arguments(new ArrayList<>(Arrays.asList(2, 3, 2, 1, 7)),\n+                        new ArrayList<>(Arrays.asList(1, 2, 1, 4, 2, 3, 2, 1, 7))),\n+                Arguments.arguments(new ArrayList<>(Arrays.asList(4, 1)),\n+                        new ArrayList<>(Arrays.asList(1, 4, 1)))\n+        );\n+    }\n+\n+    @Test\n+    public void testExceptionCutArray() {\n+        Assertions.assertThrows(RuntimeException.class, () ->\n+                ap.cutArray(new ArrayList<>(Arrays.asList(1, 2, 1, 1, 2, 3, 2, 1, 7))));\n+    }\n+}"
+  }
+]

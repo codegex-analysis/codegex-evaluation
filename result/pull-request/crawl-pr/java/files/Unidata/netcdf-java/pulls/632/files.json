@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "76a3e8f3b11c72d8f1de2eeb6bd0f8784aaac7ce",
+    "filename": "cdm/core/src/main/java/ucar/nc2/NetcdfFiles.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/Unidata/netcdf-java/blob/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/core/src/main/java/ucar/nc2/NetcdfFiles.java",
+    "raw_url": "https://github.com/Unidata/netcdf-java/raw/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/core/src/main/java/ucar/nc2/NetcdfFiles.java",
+    "contents_url": "https://api.github.com/repos/Unidata/netcdf-java/contents/cdm/core/src/main/java/ucar/nc2/NetcdfFiles.java?ref=4ae439292308807f9c98bbaf457aaecc0f00bc6c",
+    "patch": "@@ -356,7 +356,7 @@ public static boolean canOpen(String location) {\n     // look for registered RandomAccessFile Providers\n     for (RandomAccessFileProvider provider : registeredRandomAccessFileProviders) {\n       if (provider.isOwnerOf(location)) {\n-        raf = provider.open(location);\n+        raf = provider.open(location, buffer_size);\n         Preconditions.checkNotNull(raf);\n         // TODO what if resource location cannot be reliably used to determine compression\n         // TODO can provider tell if it owns it if compressed?\n@@ -371,7 +371,7 @@ public static boolean canOpen(String location) {\n       // look for dynamically loaded RandomAccessFile Providers\n       for (RandomAccessFileProvider provider : ServiceLoader.load(RandomAccessFileProvider.class)) {\n         if (provider.isOwnerOf(location)) {\n-          raf = provider.open(location);\n+          raf = provider.open(location, buffer_size);\n           Preconditions.checkNotNull(raf);\n           // TODO what if resource location cannot be reliably used to determine compression\n           if (looksCompressed(uriString)) {"
+  },
+  {
+    "sha": "b46fd20f1cdc2ef8a9c9b2ee408fa6b7e57ec7a6",
+    "filename": "cdm/core/src/main/java/ucar/unidata/io/InMemoryRandomAccessFile.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Unidata/netcdf-java/blob/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/core/src/main/java/ucar/unidata/io/InMemoryRandomAccessFile.java",
+    "raw_url": "https://github.com/Unidata/netcdf-java/raw/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/core/src/main/java/ucar/unidata/io/InMemoryRandomAccessFile.java",
+    "contents_url": "https://api.github.com/repos/Unidata/netcdf-java/contents/cdm/core/src/main/java/ucar/unidata/io/InMemoryRandomAccessFile.java?ref=4ae439292308807f9c98bbaf457aaecc0f00bc6c",
+    "patch": "@@ -85,5 +85,5 @@ public RandomAccessFile open(String location) throws IOException {\n       return new InMemoryRandomAccessFile(location, contents.get());\n     }\n   }\n-\n }\n+"
+  },
+  {
+    "sha": "b731db089317e2d95374d78fc14f8e56bb75c9ff",
+    "filename": "cdm/core/src/main/java/ucar/unidata/io/http/HTTPRandomAccessFile.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/Unidata/netcdf-java/blob/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/core/src/main/java/ucar/unidata/io/http/HTTPRandomAccessFile.java",
+    "raw_url": "https://github.com/Unidata/netcdf-java/raw/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/core/src/main/java/ucar/unidata/io/http/HTTPRandomAccessFile.java",
+    "contents_url": "https://api.github.com/repos/Unidata/netcdf-java/contents/cdm/core/src/main/java/ucar/unidata/io/http/HTTPRandomAccessFile.java?ref=4ae439292308807f9c98bbaf457aaecc0f00bc6c",
+    "patch": "@@ -241,11 +241,16 @@ public boolean isOwnerOf(String location) {\n \n     @Override\n     public RandomAccessFile open(String location) throws IOException {\n+      return this.open(location, httpBufferSize);\n+    }\n+\n+    @Override\n+    public RandomAccessFile open(String location, int bufferSize) throws IOException {\n       String scheme = location.split(\":\")[0];\n       if (!scheme.equalsIgnoreCase(\"https\") && !scheme.equalsIgnoreCase(\"http\")) {\n         location = location.replace(scheme, \"http\");\n       }\n-      return new HTTPRandomAccessFile(location);\n+      return new HTTPRandomAccessFile(location, bufferSize, httpMaxCacheSize);\n     }\n   }\n }"
+  },
+  {
+    "sha": "01af3f82e0afc27a8b8f11e9161d665ec65566db",
+    "filename": "cdm/core/src/main/java/ucar/unidata/io/spi/RandomAccessFileProvider.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/Unidata/netcdf-java/blob/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/core/src/main/java/ucar/unidata/io/spi/RandomAccessFileProvider.java",
+    "raw_url": "https://github.com/Unidata/netcdf-java/raw/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/core/src/main/java/ucar/unidata/io/spi/RandomAccessFileProvider.java",
+    "contents_url": "https://api.github.com/repos/Unidata/netcdf-java/contents/cdm/core/src/main/java/ucar/unidata/io/spi/RandomAccessFileProvider.java?ref=4ae439292308807f9c98bbaf457aaecc0f00bc6c",
+    "patch": "@@ -15,4 +15,19 @@\n \n   /** Open a location that this Provider is the owner of. */\n   RandomAccessFile open(String location) throws IOException;\n+\n+  /** Open a location that this Provider is the owner of, with the given buffer size */\n+  default RandomAccessFile open(String location, int bufferSize) throws IOException {\n+    return this.open(location); // avoid breaking an existing 3rd party implementations\n+  }\n+\n+  /** Acquire a file for a location from a cache, if available **/\n+  default RandomAccessFile acquire(String location) throws IOException {\n+    return this.open(location); // avoid breaking an existing 3rd party implementations\n+  }\n+\n+  /** Acquire a file for a location, with the given buffer size, from a cache, if available **/\n+  default RandomAccessFile acquire(String location, int bufferSize) throws IOException {\n+    return this.open(location, bufferSize); // avoid breaking an existing 3rd party implementations\n+  }\n }"
+  },
+  {
+    "sha": "3c7d049fb59dca16bccdd5ae571f92a29773b735",
+    "filename": "cdm/s3/src/main/java/ucar/unidata/io/s3/S3RandomAccessFile.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 1,
+    "changes": 12,
+    "blob_url": "https://github.com/Unidata/netcdf-java/blob/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/s3/src/main/java/ucar/unidata/io/s3/S3RandomAccessFile.java",
+    "raw_url": "https://github.com/Unidata/netcdf-java/raw/4ae439292308807f9c98bbaf457aaecc0f00bc6c/cdm/s3/src/main/java/ucar/unidata/io/s3/S3RandomAccessFile.java",
+    "contents_url": "https://api.github.com/repos/Unidata/netcdf-java/contents/cdm/s3/src/main/java/ucar/unidata/io/s3/S3RandomAccessFile.java?ref=4ae439292308807f9c98bbaf457aaecc0f00bc6c",
+    "patch": "@@ -46,7 +46,12 @@\n   private HeadObjectResponse objectHeadResponse;\n \n   private S3RandomAccessFile(String url) throws IOException {\n-    super(url, s3BufferSize, s3MaxReadCacheSize);\n+    this(url, s3BufferSize);\n+  }\n+\n+  private S3RandomAccessFile(String url, int bufferSize) throws IOException {\n+\n+    super(url, bufferSize, s3MaxReadCacheSize);\n \n     try {\n       uri = new CdmS3Uri(url);\n@@ -150,5 +155,10 @@ public boolean isOwnerOf(String location) {\n     public RandomAccessFile open(String location) throws IOException {\n       return new S3RandomAccessFile(location);\n     }\n+\n+    @Override\n+    public RandomAccessFile open(String location, int bufferSize) throws IOException {\n+      return new S3RandomAccessFile(location, bufferSize);\n+    }\n   }\n }"
+  }
+]

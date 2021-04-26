@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "5872ad8c6c80d32a3fa0e8ca5f566a82ee98605d",
+    "filename": ".github/workflows/gradle.yml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/tofikarz/Toffium-forge/blob/0023fa37edce1ff14d789b4b885ce48e73173c72/.github/workflows/gradle.yml",
+    "raw_url": "https://github.com/tofikarz/Toffium-forge/raw/0023fa37edce1ff14d789b4b885ce48e73173c72/.github/workflows/gradle.yml",
+    "contents_url": "https://api.github.com/repos/tofikarz/Toffium-forge/contents/.github/workflows/gradle.yml?ref=0023fa37edce1ff14d789b4b885ce48e73173c72",
+    "patch": "@@ -16,7 +16,7 @@ jobs:\n     - name: Ustaw JDK 11\n       uses: actions/setup-java@v1\n       with:\n-        java-version: 11\n+        java-version: 8\n         \n     - uses: actions/cache@v2\n       with:\n@@ -42,6 +42,6 @@ jobs:\n     - name: Udostępnij artefakt\n       uses: actions/upload-artifact@v2\n       with:\n-        name: Toffium-forge-B-#1-1.16.4\n-        path: '**/build/libs/Toffium-forge-B-#1-1.16.4.jar'\n+        name: Toffium-forge\n+        path: '*.jar'\n       "
+  },
+  {
+    "sha": "a91f0712d67e898d5def2799db240c36f7919852",
+    "filename": "build.gradle",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 3,
+    "changes": 19,
+    "blob_url": "https://github.com/tofikarz/Toffium-forge/blob/0023fa37edce1ff14d789b4b885ce48e73173c72/build.gradle",
+    "raw_url": "https://github.com/tofikarz/Toffium-forge/raw/0023fa37edce1ff14d789b4b885ce48e73173c72/build.gradle",
+    "contents_url": "https://api.github.com/repos/tofikarz/Toffium-forge/contents/build.gradle?ref=0023fa37edce1ff14d789b4b885ce48e73173c72",
+    "patch": "@@ -11,11 +11,24 @@ buildscript {\n apply plugin: 'net.minecraftforge.gradle'\n apply plugin: 'eclipse'\n \n-version = '1.16.4'\n+ val versionTag = System.getenv(\"BUILD_NUMBER\")\n+        ?: \"\\\"${gitCmd(\"rev-parse\", \"--short\", \"HEAD\").output}\\\"\"\n+    if(!System.getenv(\"BRANCH_NAME\").isNullOrEmpty()) {\n+        currentBranch = System.getenv(\"BRANCH_NAME\")\n+    } else if (!System.getenv(\"GITHUB_HEAD_REF\").isNullOrEmpty()) {\n+        currentBranch = System.getenv(\"GITHUB_HEAD_REF\")\n+    } else if (!System.getenv(\"GITHUB_REF\").isNullOrEmpty()) {\n+        currentBranch = System.getenv(\"GITHUB_REF\").substring(\"refs/heads/\".length)\n+    } else {\n+        currentBranch = gitCmd(\"rev-parse\", \"--abbrev-ref\", \"HEAD\").output.toString().trim()\n+        if(currentBranch == \"HEAD\") logger.warn(\"You are currently in \\'detached HEAD\\' state, branch information isn\\'t available\")\n+    }\n+    \n+minecraftversion = '1.16.4'\n group = 'net.tofikarz.toffiumforge'\n-archivesBaseName = 'Toffium-forge-B-#1'\n+archivesBaseName = 'Toffium-forge-$minecraftVersion-$versionTag'\n \n-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'\n+sourceCompatibility = 1.8\n \n minecraft {\n     mappings channel: 'snapshot', version: '20201028-1.16.3'"
+  },
+  {
+    "sha": "9fccb7a76d872d392885b4939abe60dc6c79f5d4",
+    "filename": "gradle/wrapper/gradle-wrapper.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/tofikarz/Toffium-forge/blob/0023fa37edce1ff14d789b4b885ce48e73173c72/gradle/wrapper/gradle-wrapper.properties",
+    "raw_url": "https://github.com/tofikarz/Toffium-forge/raw/0023fa37edce1ff14d789b4b885ce48e73173c72/gradle/wrapper/gradle-wrapper.properties",
+    "contents_url": "https://api.github.com/repos/tofikarz/Toffium-forge/contents/gradle/wrapper/gradle-wrapper.properties?ref=0023fa37edce1ff14d789b4b885ce48e73173c72",
+    "patch": "@@ -2,4 +2,4 @@ distributionBase=GRADLE_USER_HOME\n distributionPath=wrapper/dists\n zipStoreBase=GRADLE_USER_HOME\n zipStorePath=wrapper/dists\n-distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.3-bin.zip\n+distributionUrl=https\\://services.gradle.org/distributions/gradle-6.8.2-bin.zip"
+  }
+]

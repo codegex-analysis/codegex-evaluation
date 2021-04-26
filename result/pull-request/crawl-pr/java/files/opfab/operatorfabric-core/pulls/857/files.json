@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "9cba1ff84206a1d8ceeb053d254a0a23cae2d027",
+    "filename": "services/core/cards-publication/src/main/java/org/lfenergy/operatorfabric/cards/publication/services/CardProcessingService.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 16,
+    "changes": 16,
+    "blob_url": "https://github.com/opfab/operatorfabric-core/blob/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/services/core/cards-publication/src/main/java/org/lfenergy/operatorfabric/cards/publication/services/CardProcessingService.java",
+    "raw_url": "https://github.com/opfab/operatorfabric-core/raw/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/services/core/cards-publication/src/main/java/org/lfenergy/operatorfabric/cards/publication/services/CardProcessingService.java",
+    "contents_url": "https://api.github.com/repos/opfab/operatorfabric-core/contents/services/core/cards-publication/src/main/java/org/lfenergy/operatorfabric/cards/publication/services/CardProcessingService.java?ref=3b819edba0cc70ee4cdcaf0812881a93ab684b4f",
+    "patch": "@@ -185,10 +185,6 @@ void validate(CardPublicationData c) throws ConstraintViolationException {\n         // constraint check : process and state must not contain \".\" (because we use it as a separator)\n         if (!checkIsDotCharacterNotInProcessAndState(c))\n             throw new ConstraintViolationException(\"constraint violation : character '.' is forbidden in process and state\", null);\n-\n-        // constraint check: if it is present, entitiesRequiredToRespond should only contain entities from entitiesAllowedToRespond\n-        if(!checkEntitiesRequiredToRespondIsSubsetOfEntitiesAllowedToRespond(c))\n-            throw new ConstraintViolationException(\"constraint violation : entitiesRequiredToRespond should be a subset of entitiesAllowedToRespond\", null);\n     }\n \n     boolean checkIsParentCardIdExisting(CardPublicationData c){\n@@ -230,18 +226,6 @@ boolean checkIsAllTimeSpanEndDateAfterStartDate(CardPublicationData c) {\n         return true;\n     }\n \n-    boolean checkEntitiesRequiredToRespondIsSubsetOfEntitiesAllowedToRespond(CardPublicationData c) {\n-        List<String> entitiesRequiredToRespond = c.getEntitiesRequiredToRespond();\n-        if(entitiesRequiredToRespond == null) return true;\n-        else {\n-            List<String> entitiesAllowedToRespond = c.getEntitiesAllowedToRespond();\n-            if(entitiesAllowedToRespond == null) return false;\n-            else {\n-                return entitiesAllowedToRespond.containsAll(entitiesRequiredToRespond);\n-            }\n-        }\n-    }\n-\n     /**\n      * Save and notify card\n      *"
+  },
+  {
+    "sha": "a7822401bd898272301d1e7feccdc07dbd91f5ab",
+    "filename": "services/core/cards-publication/src/main/modeling/swagger.yaml",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/opfab/operatorfabric-core/blob/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/services/core/cards-publication/src/main/modeling/swagger.yaml",
+    "raw_url": "https://github.com/opfab/operatorfabric-core/raw/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/services/core/cards-publication/src/main/modeling/swagger.yaml",
+    "contents_url": "https://api.github.com/repos/opfab/operatorfabric-core/contents/services/core/cards-publication/src/main/modeling/swagger.yaml?ref=3b819edba0cc70ee4cdcaf0812881a93ab684b4f",
+    "patch": "@@ -350,8 +350,8 @@ definitions:\n           type: string\n         example: [\"Dispatcher\",\"Planner\"]\n         description: >-\n-          List of entities that have to respond (should be a subset of entitiesAllowedToRespond). If present and not\n-          empty, this list will be used for display in the card detail header instead of entitiesAllowedToRespond.\n+          List of entities that have to respond. If present and not empty, this list will be used for display in the\n+          card detail header instead of entitiesAllowedToRespond.\n       entityRecipients:\n         description: List of entity recipients\n         type: array\n@@ -505,8 +505,8 @@ definitions:\n           type: string\n         example: [\"Dispatcher\",\"Planner\"]\n         description: >-\n-          List of entities that have to respond (should be a subset of entitiesAllowedToRespond). If present and not\n-          empty, this list will be used for display in the card detail header instead of entitiesAllowedToRespond.\n+          List of entities that have to respond. If present and not empty, this list will be used for display in the\n+          card detail header instead of entitiesAllowedToRespond.\n       title:\n         description: Card i18n title\n         $ref: '#/definitions/I18n'"
+  },
+  {
+    "sha": "4d88b877d3308c817fcd048aaa6b2a069c8f2189",
+    "filename": "services/core/cards-publication/src/test/java/org/lfenergy/operatorfabric/cards/publication/services/CardProcessServiceShould.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/opfab/operatorfabric-core/blob/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/services/core/cards-publication/src/test/java/org/lfenergy/operatorfabric/cards/publication/services/CardProcessServiceShould.java",
+    "raw_url": "https://github.com/opfab/operatorfabric-core/raw/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/services/core/cards-publication/src/test/java/org/lfenergy/operatorfabric/cards/publication/services/CardProcessServiceShould.java",
+    "contents_url": "https://api.github.com/repos/opfab/operatorfabric-core/contents/services/core/cards-publication/src/test/java/org/lfenergy/operatorfabric/cards/publication/services/CardProcessServiceShould.java?ref=3b819edba0cc70ee4cdcaf0812881a93ab684b4f",
+    "patch": "@@ -1078,7 +1078,7 @@ void processKeepChildCardsNull() {\n     }\n \n     @Test\n-    void processCardWithEntitiesRequiredToRespondCorrectlySet() {\n+    void processCardWithEntitiesRequiredToRespondSubsetOfEntitiesAllowedToRespond() {\n \n         // Generate random card (this generator is common to all tests so it just generates a random list for\n         // entitiesAllowedToRespond and ignores entitiesRequiredToRespond\n@@ -1112,12 +1112,12 @@ void processCardWithEntitiesRequiredToRespondCorrectlySet() {\n     }\n \n     @Test\n-    void processCardWithEntitiesRequiredToRespondIncorrectlySet() {\n+    void processCardWithEntitiesRequiredToRespondNotSubsetOfEntitiesAllowedToRespond() {\n \n         // Generate random card (this generator is common to all tests so it just generates a random list for\n         // entitiesAllowedToRespond and ignores entitiesRequiredToRespond\n         EasyRandom easyRandom = instantiateRandomCardGenerator();\n-        int numberOfCards = 3;\n+        int numberOfCards = 1;\n         List<CardPublicationData> cards = instantiateSeveralRandomCards(easyRandom, numberOfCards);\n \n         cards.get(0).setParentCardId(null);\n@@ -1143,6 +1143,6 @@ void processCardWithEntitiesRequiredToRespondIncorrectlySet() {\n         Long block = cardRepository.count().block();\n         Assertions.assertThat(block).withFailMessage(\n                 \"The number of registered cards should be '%d' but is \" + \"'%d' actually\",\n-                numberOfCards, block).isEqualTo(0);\n+                numberOfCards, block).isEqualTo(numberOfCards);\n     }\n }"
+  },
+  {
+    "sha": "d21c2501d00aec0040ff3f82c0f094e2bcc7d18c",
+    "filename": "src/docs/asciidoc/reference_doc/response_cards.adoc",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/opfab/operatorfabric-core/blob/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/src/docs/asciidoc/reference_doc/response_cards.adoc",
+    "raw_url": "https://github.com/opfab/operatorfabric-core/raw/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/src/docs/asciidoc/reference_doc/response_cards.adoc",
+    "contents_url": "https://api.github.com/repos/opfab/operatorfabric-core/contents/src/docs/asciidoc/reference_doc/response_cards.adoc?ref=3b819edba0cc70ee4cdcaf0812881a93ab684b4f",
+    "patch": "@@ -194,8 +194,11 @@ NOTE: You can also set the property `entitiesRequiredToRespond` to differentiate\n If `entitiesRequiredToRespond` is set and not empty, the card detail header will use this list instead of\n `entitiesAllowedToRespond`.\n \n-IMPORTANT: If set, `entitiesRequiredToRespond` should be a subset of `entitiesAllowedToRespond` or the card will be\n-rejected.\n+IMPORTANT: If set, `entitiesRequiredToRespond` does not have to be a subset of `entitiesAllowedToRespond`. To determine\n+if a user has the right to respond, OperatorFabric consider the union of the two lists.\n+\n+WARNING: If several entities are allowed/required to respond and if the user is part of several of these entities, so\n+the ability for the user to respond to this card is desactivated.\n \n == Integrate child cards \n "
+  },
+  {
+    "sha": "fa31c7a6ec48ca4526a2a305f7098db21c6b8b21",
+    "filename": "src/test/api/karate/cards/postCardsEntitiesToRespond.feature",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 3,
+    "changes": 5,
+    "blob_url": "https://github.com/opfab/operatorfabric-core/blob/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/src/test/api/karate/cards/postCardsEntitiesToRespond.feature",
+    "raw_url": "https://github.com/opfab/operatorfabric-core/raw/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/src/test/api/karate/cards/postCardsEntitiesToRespond.feature",
+    "contents_url": "https://api.github.com/repos/opfab/operatorfabric-core/contents/src/test/api/karate/cards/postCardsEntitiesToRespond.feature?ref=3b819edba0cc70ee4cdcaf0812881a93ab684b4f",
+    "patch": "@@ -59,7 +59,6 @@ Feature: Post cards with entitiesAllowedToRespond and/or entitiesRequiredToRespo\n     Then status 201\n     And match response.count == 1\n \n-  Scenario: Push cards non-compliant values of entitiesAllowedToRespond and entitiesRequiredToRespond\n \n     * def card3 =\n \"\"\"\n@@ -84,7 +83,7 @@ Feature: Post cards with entitiesAllowedToRespond and/or entitiesRequiredToRespo\n     And request card3\n     When method post\n     Then status 201\n-    And match response.count == 0\n+    And match response.count == 1\n \n     * def card4 =\n \"\"\"\n@@ -110,4 +109,4 @@ Feature: Post cards with entitiesAllowedToRespond and/or entitiesRequiredToRespo\n     And request card4\n     When method post\n     Then status 201\n-    And match response.count == 0\n\\ No newline at end of file\n+    And match response.count == 1\n\\ No newline at end of file"
+  },
+  {
+    "sha": "e521efc96b164cfb90c9304c3eb37a23cd21abbc",
+    "filename": "ui/main/src/app/modules/cards/components/detail/detail.component.ts",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 5,
+    "changes": 17,
+    "blob_url": "https://github.com/opfab/operatorfabric-core/blob/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/ui/main/src/app/modules/cards/components/detail/detail.component.ts",
+    "raw_url": "https://github.com/opfab/operatorfabric-core/raw/3b819edba0cc70ee4cdcaf0812881a93ab684b4f/ui/main/src/app/modules/cards/components/detail/detail.component.ts",
+    "contents_url": "https://api.github.com/repos/opfab/operatorfabric-core/contents/ui/main/src/app/modules/cards/components/detail/detail.component.ts?ref=3b819edba0cc70ee4cdcaf0812881a93ab684b4f",
+    "patch": "@@ -457,22 +457,29 @@ export class DetailComponent implements OnChanges, OnInit, OnDestroy, AfterViewC\n         this._listEntitiesToRespondForHeader = new Array<EntityMessage>();\n         this._userEntitiesAllowedToRespond = [];\n \n-        if (this.card.entitiesAllowedToRespond) {\n+        let entitiesAllowedToRespondAndEntitiesRequiredToRespond = [];\n+        if (this.card.entitiesAllowedToRespond)\n+            entitiesAllowedToRespondAndEntitiesRequiredToRespond = entitiesAllowedToRespondAndEntitiesRequiredToRespond.concat(this.card.entitiesAllowedToRespond);\n+        if (this.card.entitiesRequiredToRespond)\n+            entitiesAllowedToRespondAndEntitiesRequiredToRespond = entitiesAllowedToRespondAndEntitiesRequiredToRespond.concat(this.card.entitiesRequiredToRespond);\n \n-            const entitiesAllowedToRespond = this.entitiesService.getEntitiesFromIds(this.card.entitiesAllowedToRespond);\n+        if (entitiesAllowedToRespondAndEntitiesRequiredToRespond) {\n+\n+            const entitiesAllowedToRespond = this.entitiesService.getEntitiesFromIds(entitiesAllowedToRespondAndEntitiesRequiredToRespond);\n             const allowed = this.entitiesService.resolveEntitiesAllowedToSendCards(entitiesAllowedToRespond).map(entity => entity.id).filter(x =>  x !== this.card.publisher);\n             console.log(new Date().toISOString(), ' Detail card - entities allowed to respond = ', allowed);\n \n             // This will be overwritten by the block below if entitiesRequiredToRespond is set and not empty/null\n             // This is to avoid repeating the creation of the allowed list\n             this._listEntitiesToRespondForHeader = this.createEntityHeaderFromList(allowed);\n \n-            this._userEntitiesAllowedToRespond = allowed.filter(x =>this.user.entities.includes(x));\n+            this._userEntitiesAllowedToRespond = allowed.filter(x => this.user.entities.includes(x));\n             console.log(new Date().toISOString(), ' Detail card - users entities allowed to respond = ', this._userEntitiesAllowedToRespond);\n-\n+            if (this._userEntitiesAllowedToRespond.length > 1)\n+                console.log(new Date().toISOString(), 'Warning : user can respond on behalf of more than one entities, so response is disabled');\n         }\n \n-        if(this.card.entitiesRequiredToRespond&&this.card.entitiesRequiredToRespond.length>0) {\n+        if (this.card.entitiesRequiredToRespond && this.card.entitiesRequiredToRespond.length > 0) {\n             const entitiesRequiredToRespond = this.entitiesService.getEntitiesFromIds(this.card.entitiesRequiredToRespond);\n             const required = this.entitiesService.resolveEntitiesAllowedToSendCards(entitiesRequiredToRespond).map(entity => entity.id);\n             this._listEntitiesToRespondForHeader = this.createEntityHeaderFromList(required);"
+  }
+]

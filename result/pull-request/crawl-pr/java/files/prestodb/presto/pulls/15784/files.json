@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "3711e90fcf80d509c6f5578d89b67900e604dc5d",
+    "filename": "presto-main/src/main/java/com/facebook/presto/execution/SqlStageExecution.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 10,
+    "changes": 10,
+    "blob_url": "https://github.com/prestodb/presto/blob/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/SqlStageExecution.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/SqlStageExecution.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/main/java/com/facebook/presto/execution/SqlStageExecution.java?ref=1616310b9996b9a04d99d7eebeeb73189a4d7be7",
+    "patch": "@@ -270,16 +270,6 @@ public void beginScheduling()\n         stateMachine.transitionToScheduling();\n     }\n \n-    public synchronized void transitionToFinishedTaskScheduling()\n-    {\n-        stateMachine.transitionToFinishedTaskScheduling();\n-    }\n-\n-    public synchronized void transitionToSchedulingSplits()\n-    {\n-        stateMachine.transitionToSchedulingSplits();\n-    }\n-\n     public synchronized void schedulingComplete()\n     {\n         if (!stateMachine.transitionToScheduled()) {"
+  },
+  {
+    "sha": "746eba4d81a74b7355268f28ab4091c1c1114875",
+    "filename": "presto-main/src/main/java/com/facebook/presto/execution/StageExecutionState.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 9,
+    "changes": 9,
+    "blob_url": "https://github.com/prestodb/presto/blob/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/StageExecutionState.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/StageExecutionState.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/main/java/com/facebook/presto/execution/StageExecutionState.java?ref=1616310b9996b9a04d99d7eebeeb73189a4d7be7",
+    "patch": "@@ -31,15 +31,6 @@\n      * Stage tasks are being scheduled on nodes.\n      */\n     SCHEDULING(false, false),\n-    /**\n-     * All Stage tasks have been scheduled, but no split has been scheduled.\n-     * In recoverable grouped execution, this state is not trivial because split scheduling happens after all splits are loaded.\n-     */\n-    FINISHED_TASK_SCHEDULING(false, false),\n-    /**\n-     * All stage tasks have been scheduled, but splits are still being scheduled.\n-     */\n-    SCHEDULING_SPLITS(false, false),\n     /**\n      * Stage has been scheduled on nodes and ready to execute, but all tasks are still queued.\n      */"
+  },
+  {
+    "sha": "dc564f52da4200ce40933d6fabb89ec36324ec2c",
+    "filename": "presto-main/src/main/java/com/facebook/presto/execution/StageExecutionStateMachine.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 13,
+    "changes": 14,
+    "blob_url": "https://github.com/prestodb/presto/blob/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/StageExecutionStateMachine.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/StageExecutionStateMachine.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/main/java/com/facebook/presto/execution/StageExecutionStateMachine.java?ref=1616310b9996b9a04d99d7eebeeb73189a4d7be7",
+    "patch": "@@ -40,12 +40,10 @@\n import static com.facebook.presto.execution.StageExecutionState.CANCELED;\n import static com.facebook.presto.execution.StageExecutionState.FAILED;\n import static com.facebook.presto.execution.StageExecutionState.FINISHED;\n-import static com.facebook.presto.execution.StageExecutionState.FINISHED_TASK_SCHEDULING;\n import static com.facebook.presto.execution.StageExecutionState.PLANNED;\n import static com.facebook.presto.execution.StageExecutionState.RUNNING;\n import static com.facebook.presto.execution.StageExecutionState.SCHEDULED;\n import static com.facebook.presto.execution.StageExecutionState.SCHEDULING;\n-import static com.facebook.presto.execution.StageExecutionState.SCHEDULING_SPLITS;\n import static com.facebook.presto.execution.StageExecutionState.TERMINAL_STAGE_STATES;\n import static com.google.common.base.MoreObjects.toStringHelper;\n import static com.google.common.base.Preconditions.checkArgument;\n@@ -119,20 +117,10 @@ public synchronized boolean transitionToScheduling()\n         return state.compareAndSet(PLANNED, SCHEDULING);\n     }\n \n-    public synchronized boolean transitionToFinishedTaskScheduling()\n-    {\n-        return state.compareAndSet(SCHEDULING, FINISHED_TASK_SCHEDULING);\n-    }\n-\n-    public synchronized boolean transitionToSchedulingSplits()\n-    {\n-        return state.setIf(SCHEDULING_SPLITS, currentState -> currentState == PLANNED || currentState == SCHEDULING || currentState == FINISHED_TASK_SCHEDULING);\n-    }\n-\n     public synchronized boolean transitionToScheduled()\n     {\n         schedulingComplete.compareAndSet(null, DateTime.now());\n-        return state.setIf(SCHEDULED, currentState -> currentState == PLANNED || currentState == SCHEDULING || currentState == FINISHED_TASK_SCHEDULING || currentState == SCHEDULING_SPLITS);\n+        return state.setIf(SCHEDULED, currentState -> currentState == PLANNED || currentState == SCHEDULING);\n     }\n \n     public boolean transitionToRunning()"
+  },
+  {
+    "sha": "fccb5947088b7183d8a52115932e7ed8b42b5479",
+    "filename": "presto-main/src/main/java/com/facebook/presto/execution/scheduler/FixedSourcePartitionedScheduler.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 22,
+    "changes": 26,
+    "blob_url": "https://github.com/prestodb/presto/blob/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/scheduler/FixedSourcePartitionedScheduler.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/scheduler/FixedSourcePartitionedScheduler.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/main/java/com/facebook/presto/execution/scheduler/FixedSourcePartitionedScheduler.java?ref=1616310b9996b9a04d99d7eebeeb73189a4d7be7",
+    "patch": "@@ -31,12 +31,12 @@\n import com.facebook.presto.split.SplitSource;\n import com.google.common.collect.ImmutableList;\n import com.google.common.collect.ImmutableSet;\n-import com.google.common.collect.Streams;\n import com.google.common.util.concurrent.ListenableFuture;\n \n import javax.annotation.concurrent.GuardedBy;\n \n import java.util.ArrayList;\n+import java.util.HashSet;\n import java.util.Iterator;\n import java.util.List;\n import java.util.Map;\n@@ -54,8 +54,6 @@\n import static com.google.common.base.Preconditions.checkArgument;\n import static com.google.common.base.Preconditions.checkState;\n import static com.google.common.base.Verify.verify;\n-import static com.google.common.collect.ImmutableList.toImmutableList;\n-import static java.lang.Math.toIntExact;\n import static java.util.Objects.requireNonNull;\n \n public class FixedSourcePartitionedScheduler\n@@ -68,7 +66,6 @@\n \n     private final List<SourceScheduler> sourceSchedulers;\n     private final List<ConnectorPartitionHandle> partitionHandles;\n-    private boolean scheduledTasks;\n     private boolean anySourceSchedulingFinished;\n     private final Optional<LifespanScheduler> groupedLifespanScheduler;\n \n@@ -179,21 +176,6 @@ private ConnectorPartitionHandle partitionHandleFor(Lifespan lifespan)\n     @Override\n     public ScheduleResult schedule()\n     {\n-        // schedule a task on every node in the distribution\n-        List<RemoteTask> newTasks = ImmutableList.of();\n-        if (!scheduledTasks) {\n-            newTasks = Streams.mapWithIndex(\n-                    nodes.stream(),\n-                    (node, id) -> stage.scheduleTask(node, toIntExact(id)))\n-                    .filter(Optional::isPresent)\n-                    .map(Optional::get)\n-                    .collect(toImmutableList());\n-            scheduledTasks = true;\n-\n-            // notify listeners that we have scheduled all tasks so they can set no more buffers or exchange splits\n-            stage.transitionToFinishedTaskScheduling();\n-        }\n-\n         boolean allBlocked = true;\n         List<ListenableFuture<?>> blocked = new ArrayList<>();\n         BlockedReason blockedReason = BlockedReason.NO_ACTIVE_DRIVER_GROUP;\n@@ -224,6 +206,7 @@ public ScheduleResult schedule()\n         int splitsScheduled = 0;\n         Iterator<SourceScheduler> schedulerIterator = sourceSchedulers.iterator();\n         List<Lifespan> driverGroupsToStart = ImmutableList.of();\n+        Set<RemoteTask> newTasks = new HashSet();\n         while (schedulerIterator.hasNext()) {\n             synchronized (this) {\n                 // if a source scheduler is closed while it is scheduling, we can get an error\n@@ -238,9 +221,8 @@ public ScheduleResult schedule()\n                 }\n \n                 ScheduleResult schedule = sourceScheduler.schedule();\n-                if (schedule.getSplitsScheduled() > 0) {\n-                    stage.transitionToSchedulingSplits();\n-                }\n+                newTasks.addAll(schedule.getNewTasks());\n+\n                 splitsScheduled += schedule.getSplitsScheduled();\n                 if (schedule.getBlockedReason().isPresent()) {\n                     blocked.add(schedule.getBlocked());"
+  },
+  {
+    "sha": "313d10fc8c2a3f637e847b7911b2ce22bbdcc48f",
+    "filename": "presto-main/src/main/java/com/facebook/presto/execution/scheduler/SourcePartitionedScheduler.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 3,
+    "changes": 3,
+    "blob_url": "https://github.com/prestodb/presto/blob/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/scheduler/SourcePartitionedScheduler.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/scheduler/SourcePartitionedScheduler.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/main/java/com/facebook/presto/execution/scheduler/SourcePartitionedScheduler.java?ref=1616310b9996b9a04d99d7eebeeb73189a4d7be7",
+    "patch": "@@ -487,9 +487,6 @@ public synchronized void notifyAllLifespansFinishedExecution()\n                 .flatMap(node -> stage.scheduleSplits(node, ImmutableMultimap.of(), ImmutableMultimap.of()).stream())\n                 .collect(toImmutableSet());\n \n-        // notify listeners that we have scheduled all tasks so they can set no more buffers or exchange splits\n-        stage.transitionToFinishedTaskScheduling();\n-\n         return newTasks;\n     }\n "
+  },
+  {
+    "sha": "0a10fa89b7dd7bdfb52e417a8a129e21dac20e1f",
+    "filename": "presto-main/src/main/java/com/facebook/presto/execution/scheduler/StageLinkage.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 2,
+    "changes": 2,
+    "blob_url": "https://github.com/prestodb/presto/blob/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/scheduler/StageLinkage.java",
+    "raw_url": "https://github.com/prestodb/presto/raw/1616310b9996b9a04d99d7eebeeb73189a4d7be7/presto-main/src/main/java/com/facebook/presto/execution/scheduler/StageLinkage.java",
+    "contents_url": "https://api.github.com/repos/prestodb/presto/contents/presto-main/src/main/java/com/facebook/presto/execution/scheduler/StageLinkage.java?ref=1616310b9996b9a04d99d7eebeeb73189a4d7be7",
+    "patch": "@@ -64,8 +64,6 @@ public void processScheduleResults(StageExecutionState newState, Set<RemoteTask>\n             case SCHEDULING:\n                 // workers are still being added to the query\n                 break;\n-            case FINISHED_TASK_SCHEDULING:\n-            case SCHEDULING_SPLITS:\n             case SCHEDULED:\n             case RUNNING:\n             case FINISHED:"
+  }
+]

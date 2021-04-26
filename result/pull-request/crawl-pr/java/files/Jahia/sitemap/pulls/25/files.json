@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "4641b67cb3ea6909352361025298046931bbaeec",
+    "filename": "tests/cypress/integration/digitall.home.spec.ts",
+    "status": "added",
+    "additions": 54,
+    "deletions": 0,
+    "changes": 54,
+    "blob_url": "https://github.com/Jahia/sitemap/blob/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/integration/digitall.home.spec.ts",
+    "raw_url": "https://github.com/Jahia/sitemap/raw/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/integration/digitall.home.spec.ts",
+    "contents_url": "https://api.github.com/repos/Jahia/sitemap/contents/tests/cypress/integration/digitall.home.spec.ts?ref=8edda959cb87c8cef63d877ce9eb290f96727957",
+    "patch": "@@ -0,0 +1,54 @@\n+import { siteHomePage } from '../page-object/site.home.page'\n+\n+describe('Sitemap 4.0.0', () => {\n+    it('Create sitemap for a site', function () {\n+        siteHomePage\n+            .goTo('/jahia/page-composer/default/en/sites/digitall/home.html')\n+            .editPage('Digitall')\n+            .clickOnSitemap()\n+            .validateSucessMessage()\n+            .clickBack()\n+            .publishSite('Digitall')\n+            .clickPublishAll()\n+            .flushCache()\n+\n+        // fetch the sitemap content\n+        cy.request('sites/digitall/sitemap.index.xml').then((response) => {\n+            // convert sitemap xml body to an array of urls\n+            const languageUrls = Cypress.$(response.body)\n+                .find('loc')\n+                // map to a js array\n+                .toArray()\n+                // get the text of the <loc /> node\n+                .map((el) => el.innerText)\n+            assert.equal(languageUrls.length, 3, 'There should be 3 urls, one for each language')\n+\n+            languageUrls.forEach((url) => {\n+                cy.request(url).then((response) => {\n+                    // Convert the response to an XML\n+                    const xml: XMLDocument = Cypress.$.parseXML(response.body)\n+                    // Get the node group under 'url'\n+                    const urlGroups = xml.getElementsByTagName('url')\n+                    // Go over each one and make assertions\n+                    assert.equal(urlGroups.length, 14, 'There should be 14 urls, one for each page')\n+                    Cypress.$(urlGroups).each(function () {\n+                        const pageUrl = this.getElementsByTagName('loc')\n+                        assert.equal(pageUrl.length, 1, 'There should be 1 url for each group')\n+                        expect(pageUrl.item(0)).to.contain('html')\n+                        const lastMod = this.getElementsByTagName('lastmod')\n+                        assert.equal(lastMod.length, 1, 'There should be 1 lastmod for each group')\n+                        expect(lastMod.item(0)).to.contain('-')\n+                        const links = this.getElementsByTagName('xhtml:link')\n+                        assert.equal(links.length, 3, 'There should be 3 alternative links for each group')\n+                        // go over each xhtml:link and make assertions\n+                        Cypress.$(links).each(function () {\n+                            expect(this.getAttribute('rel')).to.eq('alternate')\n+                            expect(['en', 'fr', 'de']).to.be.contain(this.getAttribute('hreflang'))\n+                            expect(this.getAttribute('href')).to.contain('html')\n+                        })\n+                    })\n+                })\n+            })\n+        })\n+    })\n+})"
+  },
+  {
+    "sha": "350ae9ccb96eda2c043101d22b423b5b50746b38",
+    "filename": "tests/cypress/integration/sitemanagment.example.spec.ts",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 20,
+    "changes": 20,
+    "blob_url": "https://github.com/Jahia/sitemap/blob/7c722b1a57a59bf588856a94c273fad6e7933b89/tests/cypress/integration/sitemanagment.example.spec.ts",
+    "raw_url": "https://github.com/Jahia/sitemap/raw/7c722b1a57a59bf588856a94c273fad6e7933b89/tests/cypress/integration/sitemanagment.example.spec.ts",
+    "contents_url": "https://api.github.com/repos/Jahia/sitemap/contents/tests/cypress/integration/sitemanagment.example.spec.ts?ref=7c722b1a57a59bf588856a94c273fad6e7933b89",
+    "patch": "@@ -1,20 +0,0 @@\n-// import { webProjectSettings } from '../page-object/webProjectSettings.page'\n-// import { manageModules } from '../page-object/manageModules.page'\n-\n-// describe('Example of creation of sample site', () => {\n-//     it('Standard flow to create a sample project', function () {\n-//         webProjectSettings.goTo().createProject()\n-//     })\n-// })\n-\n-// describe('Example of deletion of sample site', () => {\n-//     it('Standard flow to delete sample site', function () {\n-//         webProjectSettings.goTo().deleteProject()\n-//     })\n-// })\n-\n-// describe('Example of enable of module', () => {\n-//     it('Standard flow to enable a module', function () {\n-//         manageModules.goTo().selectModule('Jahia Sitemap', ['mySite'])\n-//     })\n-// })"
+  },
+  {
+    "sha": "23e711426623d6528e28046df114ed8eb11ff56d",
+    "filename": "tests/cypress/page-object/base.page.ts",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/Jahia/sitemap/blob/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/page-object/base.page.ts",
+    "raw_url": "https://github.com/Jahia/sitemap/raw/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/page-object/base.page.ts",
+    "contents_url": "https://api.github.com/repos/Jahia/sitemap/contents/tests/cypress/page-object/base.page.ts?ref=8edda959cb87c8cef63d877ce9eb290f96727957",
+    "patch": "@@ -113,4 +113,14 @@ export class BasePage {\n                 return cy.wrap($iframe.contents().find(`${elementSelector}:contains(${text})`))\n             })\n     }\n+\n+    containPageComposerIframeElement(elementSelector: string, text: string): Cypress.Chainable {\n+        return this.getIframeBody()\n+            .should(($iframe) => {\n+                expect($iframe.contents().find(`${elementSelector}:contains(${text})`)).to.exist\n+            })\n+            .then(($iframe) => {\n+                return cy.wrap($iframe.contents().find(`${elementSelector}:contains(${text})`))\n+            })\n+    }\n }"
+  },
+  {
+    "sha": "055a41d465472c4c44438fe32d4f1919dd8ce240",
+    "filename": "tests/cypress/page-object/edit.page.ts",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/Jahia/sitemap/blob/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/page-object/edit.page.ts",
+    "raw_url": "https://github.com/Jahia/sitemap/raw/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/page-object/edit.page.ts",
+    "contents_url": "https://api.github.com/repos/Jahia/sitemap/contents/tests/cypress/page-object/edit.page.ts?ref=8edda959cb87c8cef63d877ce9eb290f96727957",
+    "patch": "@@ -1,10 +1,12 @@\n import { BasePage } from './base.page'\n+import { siteHomePage } from './site.home.page'\n \n class EditPage extends BasePage {\n     elements = {\n         sitemap: \"[id='jseomix:sitemap']\",\n         save: \"[data-sel-role='submitSave']\",\n         message: '#message-id',\n+        back: \"[data-sel-role='backButton']\",\n     }\n \n     clickOnSitemap() {\n@@ -19,6 +21,10 @@ class EditPage extends BasePage {\n         cy.get(this.elements.message).should('contain', 'Content successfully saved')\n         return this\n     }\n+    clickBack() {\n+        cy.get(this.elements.back).click()\n+        return siteHomePage.waitForPageLoad()\n+    }\n }\n \n export const editPage = new EditPage()"
+  },
+  {
+    "sha": "d7b78b4bb723e8d4b7990172495fe1bb39023bfa",
+    "filename": "tests/cypress/page-object/site.home.page.ts",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 5,
+    "changes": 34,
+    "blob_url": "https://github.com/Jahia/sitemap/blob/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/page-object/site.home.page.ts",
+    "raw_url": "https://github.com/Jahia/sitemap/raw/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/page-object/site.home.page.ts",
+    "contents_url": "https://api.github.com/repos/Jahia/sitemap/contents/tests/cypress/page-object/site.home.page.ts?ref=8edda959cb87c8cef63d877ce9eb290f96727957",
+    "patch": "@@ -1,20 +1,26 @@\n import { BasePage } from './base.page'\n import { editPage } from './edit.page'\n+import { workflowDashboard } from './worflow.dashboard.page'\n \n class SiteHomePage extends BasePage {\n     elements = {\n         iframePageComposerFrame: 'iframe[id=\"page-composer-frame\"]',\n         iframeNestedSrcEditFrame: 'iframe[src*=\"editframe\"]',\n-\n         divRoleRow: 'div[role=\"row\"]',\n         imgVirtualSite: 'img[src*=\"jnt_virtualsite\"]',\n-\n-        textEdit: 'Edit',\n+        publishSiteinAllLang: \"[class*='publishsiteinalllanguages']\",\n+        editSite: \"[class*='editcontentroot']\",\n+        cacheButton: '.edit-menu-cache',\n+        flushAll: \"[class*='flushall']\",\n     }\n \n     goTo(siteHomeUrl: string) {\n         cy.goTo(siteHomeUrl)\n-        // Stabilize the nested iframe loading\n+        this.waitForPageLoad()\n+        return this\n+    }\n+\n+    waitForPageLoad() {\n         this.getIframeElement(this.elements.iframePageComposerFrame, this.elements.iframeNestedSrcEditFrame)\n \n         this.getSiteIframeBody(this.elements.iframeNestedSrcEditFrame, '0.contentDocument.body')\n@@ -32,9 +38,27 @@ class SiteHomePage extends BasePage {\n             .rightclick()\n             .should('have.class', 'context-menu-open')\n \n-        this.getIframeBody().contains(this.htmlElements.span, this.elements.textEdit).click()\n+        this.getIframeBody().find(this.elements.editSite).click()\n         return editPage\n     }\n+\n+    publishSite(site) {\n+        this.getIframeBody()\n+            .contains('div[role=\"row\"]', site)\n+            .trigger('mouseover') // Stabilize portion right before the right-click so it hover over the right element\n+            .rightclick()\n+            .should('have.class', 'context-menu-open')\n+        this.getIframeBody().find(this.elements.publishSiteinAllLang).click()\n+        return workflowDashboard\n+    }\n+\n+    flushCache() {\n+        this.getIframeBody().find(this.elements.cacheButton).click()\n+        this.getIframeBody().find(this.elements.flushAll).click()\n+        // make sure we get success message before continuing\n+        this.containPageComposerIframeElement('.x-info-body', 'All caches have been flushed')\n+        return this\n+    }\n }\n \n export const siteHomePage = new SiteHomePage()"
+  },
+  {
+    "sha": "587f24950286795e3e8d131fd6b2ec641f216815",
+    "filename": "tests/cypress/page-object/worflow.dashboard.page.ts",
+    "status": "added",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/Jahia/sitemap/blob/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/page-object/worflow.dashboard.page.ts",
+    "raw_url": "https://github.com/Jahia/sitemap/raw/8edda959cb87c8cef63d877ce9eb290f96727957/tests/cypress/page-object/worflow.dashboard.page.ts",
+    "contents_url": "https://api.github.com/repos/Jahia/sitemap/contents/tests/cypress/page-object/worflow.dashboard.page.ts?ref=8edda959cb87c8cef63d877ce9eb290f96727957",
+    "patch": "@@ -0,0 +1,17 @@\n+import { BasePage } from './base.page'\n+import { siteHomePage } from './site.home.page'\n+\n+class WorkflowDashboardPage extends BasePage {\n+    elements = {\n+        publishAll: \"[class *= 'bbar'] [class*='button-bypassworkflow']\",\n+    }\n+\n+    clickPublishAll() {\n+        this.getIframeBody().find(this.elements.publishAll).click()\n+        // make sure we get success message before continuing\n+        this.containPageComposerIframeElement('.x-info-body', 'Content published')\n+        return siteHomePage.waitForPageLoad()\n+    }\n+}\n+\n+export const workflowDashboard = new WorkflowDashboardPage()"
+  },
+  {
+    "sha": "5f7bd28ddae5caea79fdbb8a4eb775ad5102e94c",
+    "filename": "tests/warmup-manifest-build.yml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/Jahia/sitemap/blob/8edda959cb87c8cef63d877ce9eb290f96727957/tests/warmup-manifest-build.yml",
+    "raw_url": "https://github.com/Jahia/sitemap/raw/8edda959cb87c8cef63d877ce9eb290f96727957/tests/warmup-manifest-build.yml",
+    "contents_url": "https://api.github.com/repos/Jahia/sitemap/contents/tests/warmup-manifest-build.yml?ref=8edda959cb87c8cef63d877ce9eb290f96727957",
+    "patch": "@@ -1,5 +1,8 @@\n version: 1.0\n jobs:\n+  - type: webproject\n+    source: prepackaged\n+    sitekey: digitall  \n   - type: asset\n     fetch: http\n     username: NEXUS_USERNAME\n@@ -11,4 +14,8 @@ jobs:\n     filepath: /tmp/graphql-dxm-provider-LATEST.jar\n   - type: module\n     id: sitemap\n-    filepath: /tmp/artifacts/sitemap-SNAPSHOT.jar\n\\ No newline at end of file\n+    filepath: /tmp/artifacts/sitemap-SNAPSHOT.jar\n+  - type: modulesite\n+    action: enable\n+    moduleId: sitemap\n+    siteId: digitall\n\\ No newline at end of file"
+  },
+  {
+    "sha": "82b20ee9a5c09c28b36cca1dbb321a79c5334498",
+    "filename": "tests/warmup-manifest-snapshot.yml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/Jahia/sitemap/blob/8edda959cb87c8cef63d877ce9eb290f96727957/tests/warmup-manifest-snapshot.yml",
+    "raw_url": "https://github.com/Jahia/sitemap/raw/8edda959cb87c8cef63d877ce9eb290f96727957/tests/warmup-manifest-snapshot.yml",
+    "contents_url": "https://api.github.com/repos/Jahia/sitemap/contents/tests/warmup-manifest-snapshot.yml?ref=8edda959cb87c8cef63d877ce9eb290f96727957",
+    "patch": "@@ -1,5 +1,8 @@\n version: 1.0\n jobs:\n+  - type: webproject\n+    source: prepackaged\n+    sitekey: digitall \n   - type: asset\n     fetch: http\n     username: NEXUS_USERNAME\n@@ -17,4 +20,8 @@ jobs:\n     filepath: /tmp/sitemap-LATEST.jar\n   - type: module\n     id: sitemap\n-    filepath: /tmp/sitemap-LATEST.jar\n\\ No newline at end of file\n+    filepath: /tmp/sitemap-LATEST.jar\n+  - type: modulesite\n+    action: enable\n+    moduleId: sitemap\n+    siteId: digitall\n\\ No newline at end of file"
+  }
+]

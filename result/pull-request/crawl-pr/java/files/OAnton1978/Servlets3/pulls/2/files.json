@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "1df4a9846e2b752e3c0d89808a7f4d557cf77ccb",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/OAnton1978/Servlets3/blob/6f9e746ecd94f11c33530da0672294ef0544fb09/pom.xml",
+    "raw_url": "https://github.com/OAnton1978/Servlets3/raw/6f9e746ecd94f11c33530da0672294ef0544fb09/pom.xml",
+    "contents_url": "https://api.github.com/repos/OAnton1978/Servlets3/contents/pom.xml?ref=6f9e746ecd94f11c33530da0672294ef0544fb09",
+    "patch": "@@ -28,6 +28,14 @@\n             <version>2.8.6</version>\n             <scope>compile</scope>\n         </dependency>\n+\n+\n+\n+              <dependency>\n+            <groupId>org.springframework</groupId>\n+            <artifactId>spring-context</artifactId>\n+            <version>5.2.9.RELEASE</version>\n+        </dependency>\n     </dependencies>\n \n </project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "14049c7272b41ebe0a55f94fca6cc47ad79a8cf6",
+    "filename": "src/main/java/ru/netology/config/JavaConfig.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/OAnton1978/Servlets3/blob/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/config/JavaConfig.java",
+    "raw_url": "https://github.com/OAnton1978/Servlets3/raw/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/config/JavaConfig.java",
+    "contents_url": "https://api.github.com/repos/OAnton1978/Servlets3/contents/src/main/java/ru/netology/config/JavaConfig.java?ref=6f9e746ecd94f11c33530da0672294ef0544fb09",
+    "patch": "@@ -0,0 +1,28 @@\n+package ru.netology.config;\n+\n+import org.springframework.context.annotation.Bean;\n+import org.springframework.context.annotation.Configuration;\n+import ru.netology.controller.PostController;\n+import ru.netology.repository.PostRepository;\n+import ru.netology.repository.PostRepositoryStubImpl;\n+import ru.netology.service.PostService;\n+\n+@Configuration\n+public class JavaConfig {\n+    @Bean\n+    // аргумент метода и есть DI\n+    // название метода - название бина\n+    public PostController postController(PostService service) {\n+        return new PostController(service);\n+    }\n+\n+    @Bean\n+    public PostService postService(PostRepository repository) {\n+        return new PostService(repository);\n+    }\n+\n+    @Bean\n+    public PostRepository postRepository() {\n+        return new PostRepositoryStubImpl();\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "930246bf39f5d6cb510dd46ce92fa3608c2e2f9d",
+    "filename": "src/main/java/ru/netology/controller/PostController.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/OAnton1978/Servlets3/blob/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/controller/PostController.java",
+    "raw_url": "https://github.com/OAnton1978/Servlets3/raw/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/controller/PostController.java",
+    "contents_url": "https://api.github.com/repos/OAnton1978/Servlets3/contents/src/main/java/ru/netology/controller/PostController.java?ref=6f9e746ecd94f11c33530da0672294ef0544fb09",
+    "patch": "@@ -1,13 +1,16 @@\n package ru.netology.controller;\n \n import com.google.gson.Gson;\n+import org.springframework.stereotype.Controller;\n import ru.netology.model.Post;\n import ru.netology.service.PostService;\n \n import javax.servlet.http.HttpServletResponse;\n import java.io.IOException;\n import java.io.Reader;\n \n+\n+\n public class PostController {\n   public static final String APPLICATION_JSON = \"application/json\";\n   private final PostService service;"
+  },
+  {
+    "sha": "7458bb8eda8f9db881182fec0d5bc46609a3b1de",
+    "filename": "src/main/java/ru/netology/repository/PostRepository.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 39,
+    "changes": 45,
+    "blob_url": "https://github.com/OAnton1978/Servlets3/blob/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/repository/PostRepository.java",
+    "raw_url": "https://github.com/OAnton1978/Servlets3/raw/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/repository/PostRepository.java",
+    "contents_url": "https://api.github.com/repos/OAnton1978/Servlets3/contents/src/main/java/ru/netology/repository/PostRepository.java?ref=6f9e746ecd94f11c33530da0672294ef0544fb09",
+    "patch": "@@ -2,48 +2,15 @@\n \n import ru.netology.model.Post;\n \n-import java.util.ArrayList;\n import java.util.List;\n import java.util.Optional;\n-import java.util.concurrent.ConcurrentHashMap;\n-import java.util.concurrent.atomic.AtomicInteger;\n-import java.util.concurrent.atomic.AtomicLong;\n \n-// Stub\n-public class PostRepository {\n-    ConcurrentHashMap<Integer, String> postsColl = new ConcurrentHashMap<>();\n-    AtomicInteger integer = new AtomicInteger(2);\n+public interface PostRepository {\n+    List<Post> all();\n \n-    public PostRepository() {\n-        Post post1 = new Post(1, \"Первый пост\");\n-        Post post2 = new Post(2, \"Второй пост\");\n-        postsColl.put(1, post1.getContent());\n-        postsColl.put(2, post2.getContent());\n-    }\n+    Optional<Post> getById(long id);\n \n-    public List<Post> all() {\n+    Post save(Post post);\n \n-        return (List) new ArrayList(postsColl.values());\n-    }\n-\n-    public Optional<Post> getById(long id) {\n-        Optional post = Optional.ofNullable(postsColl.get(id));\n-        return post;\n-    }\n-\n-    public Post save(Post post) {\n-        if (post.getId() == 0) {\n-            postsColl.put(integer.incrementAndGet(), post.getContent());\n-        }\n-        if (post.getContent() == null) {\n-            System.out.println(\"Вероятно пост с таким id удален, обновление не возможно\");\n-        } else {\n-            postsColl.replace((int) post.getId(), post.getContent());\n-        }\n-        return post;\n-    }\n-\n-    public void removeById(long id) {\n-        postsColl.remove(id);\n-    }\n-}\n+    void removeById(long id);\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "f10c9c2e14171ab60e997dc9c970c04983a25ce7",
+    "filename": "src/main/java/ru/netology/repository/PostRepositoryStubImpl.java",
+    "status": "added",
+    "additions": 50,
+    "deletions": 0,
+    "changes": 50,
+    "blob_url": "https://github.com/OAnton1978/Servlets3/blob/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/repository/PostRepositoryStubImpl.java",
+    "raw_url": "https://github.com/OAnton1978/Servlets3/raw/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/repository/PostRepositoryStubImpl.java",
+    "contents_url": "https://api.github.com/repos/OAnton1978/Servlets3/contents/src/main/java/ru/netology/repository/PostRepositoryStubImpl.java?ref=6f9e746ecd94f11c33530da0672294ef0544fb09",
+    "patch": "@@ -0,0 +1,50 @@\n+package ru.netology.repository;\n+\n+import org.springframework.stereotype.Repository;\n+import ru.netology.model.Post;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+import java.util.Optional;\n+import java.util.concurrent.ConcurrentHashMap;\n+import java.util.concurrent.atomic.AtomicInteger;\n+\n+\n+\n+public class PostRepositoryStubImpl implements PostRepository {\n+    ConcurrentHashMap<Integer, String> postsColl = new ConcurrentHashMap<>();\n+    AtomicInteger integer = new AtomicInteger(2);\n+\n+    public PostRepositoryStubImpl() {\n+        Post post1 = new Post(1, \"Первый пост\");\n+        Post post2 = new Post(2, \"Второй пост\");\n+        postsColl.put(1, post1.getContent());\n+        postsColl.put(2, post2.getContent());\n+    }\n+\n+    public List<Post> all() {\n+\n+        return (List) new ArrayList(postsColl.values());\n+    }\n+\n+    public Optional<Post> getById(long id) {\n+        Optional post = Optional.ofNullable(postsColl.get(id));\n+        return post;\n+    }\n+\n+    public Post save(Post post) {\n+        if (post.getId() == 0) {\n+            postsColl.put(integer.incrementAndGet(), post.getContent());\n+        }\n+        if (post.getContent() == null) {\n+            System.out.println(\"Вероятно пост с таким id удален, обновление не возможно\");\n+        } else {\n+            postsColl.replace((int) post.getId(), post.getContent());\n+        }\n+        return post;\n+    }\n+\n+    public void removeById(long id) {\n+        postsColl.remove(id);\n+    }\n+}"
+  },
+  {
+    "sha": "3b84eedcf7261f3fd847a0f79ba8bdc75d79fa18",
+    "filename": "src/main/java/ru/netology/service/PostService.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/OAnton1978/Servlets3/blob/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/service/PostService.java",
+    "raw_url": "https://github.com/OAnton1978/Servlets3/raw/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/service/PostService.java",
+    "contents_url": "https://api.github.com/repos/OAnton1978/Servlets3/contents/src/main/java/ru/netology/service/PostService.java?ref=6f9e746ecd94f11c33530da0672294ef0544fb09",
+    "patch": "@@ -1,11 +1,13 @@\n package ru.netology.service;\n \n+import org.springframework.stereotype.Service;\n import ru.netology.exception.NotFoundException;\n import ru.netology.model.Post;\n import ru.netology.repository.PostRepository;\n \n import java.util.List;\n \n+\n public class PostService {\n   private final PostRepository repository;\n "
+  },
+  {
+    "sha": "b85c8530b1ef0c0b055ee374897de68cddefe3fb",
+    "filename": "src/main/java/ru/netology/servlet/MainServlet.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 3,
+    "changes": 17,
+    "blob_url": "https://github.com/OAnton1978/Servlets3/blob/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/servlet/MainServlet.java",
+    "raw_url": "https://github.com/OAnton1978/Servlets3/raw/6f9e746ecd94f11c33530da0672294ef0544fb09/src/main/java/ru/netology/servlet/MainServlet.java",
+    "contents_url": "https://api.github.com/repos/OAnton1978/Servlets3/contents/src/main/java/ru/netology/servlet/MainServlet.java?ref=6f9e746ecd94f11c33530da0672294ef0544fb09",
+    "patch": "@@ -1,5 +1,6 @@\n package ru.netology.servlet;\n \n+import ru.netology.config.JavaConfig;\n import ru.netology.controller.PostController;\n import ru.netology.repository.PostRepository;\n import ru.netology.service.PostService;\n@@ -10,16 +11,26 @@\n import javax.servlet.http.HttpServletResponse;\n import java.io.IOException;\n \n+import org.springframework.context.annotation.AnnotationConfigApplicationContext;\n+\n public class MainServlet extends HttpServlet {\n     public static final String ENDPOINT = \"/api/posts\";\n     public static final String BORDER = \"/\";\n     private PostController controller;\n \n     @Override\n     public void init() {\n-        final var repository = new PostRepository();\n-        final var service = new PostService(repository);\n-        controller = new PostController(service);\n+        final var context = new AnnotationConfigApplicationContext(JavaConfig.class);\n+\n+        // получаем по имени бина\n+        controller = (PostController) context.getBean(\"postController\");\n+\n+        // получаем по классу бина\n+        final var service = context.getBean(PostService.class);\n+\n+        // по умолчанию создаётся лишь один объект на BeanDefinition\n+        final var isSame = service == context.getBean(\"postService\");\n+\n     }\n \n     @Override"
+  }
+]

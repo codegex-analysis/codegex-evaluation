@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "cf4efbc973c5ff44f92ea34b72b39934e58b6c6f",
+    "filename": "docker/db-migration/migrations/001-rework-flow-multitable-flag.yaml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 6,
+    "changes": 14,
+    "blob_url": "https://github.com/telstra/open-kilda/blob/2413871b64febc0fdc67661737c00e5913913165/docker/db-migration/migrations/001-rework-flow-multitable-flag.yaml",
+    "raw_url": "https://github.com/telstra/open-kilda/raw/2413871b64febc0fdc67661737c00e5913913165/docker/db-migration/migrations/001-rework-flow-multitable-flag.yaml",
+    "contents_url": "https://api.github.com/repos/telstra/open-kilda/contents/docker/db-migration/migrations/001-rework-flow-multitable-flag.yaml?ref=2413871b64febc0fdc67661737c00e5913913165",
+    "patch": "@@ -29,6 +29,14 @@ databaseChangeLog:\n         - sql: >\n             UPDATE flow_path\n             SET dst_with_multi_table = in(\"owns\").dst_with_multi_table[0]\n+      rollback:\n+        - sql: >\n+            UPDATE flow\n+            SET src_with_multi_table = out(\"owns\").src_with_multi_table[0]\n+        - sql: >\n+            UPDATE flow\n+            SET dst_with_multi_table = out(\"owns\").dst_with_multi_table[0]\n+\n   - changeSet:\n       id: drop_old_flow_properties\n       author: rozdy\n@@ -42,9 +50,3 @@ databaseChangeLog:\n         - sql: \"CREATE PROPERTY flow.dst_with_multi_table IF NOT EXISTS BOOLEAN\"\n         - sql: \"CREATE INDEX flow.src_with_multi_table NOTUNIQUE_HASH_INDEX\"\n         - sql: \"CREATE INDEX flow.dst_with_multi_table NOTUNIQUE_HASH_INDEX\"\n-        - sql: >\n-            UPDATE flow\n-            SET src_with_multi_table = out(\"owns\").src_with_multi_table[0]\n-        - sql: >\n-            UPDATE flow\n-            SET dst_with_multi_table = out(\"owns\").dst_with_multi_table[0]"
+  }
+]

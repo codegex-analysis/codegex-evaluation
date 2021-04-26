@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "ff44d55f222de9d736f2f2657a72fba49fb12c8c",
+    "filename": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/AutoOpMode.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 8,
+    "changes": 20,
+    "blob_url": "https://github.com/ASchanke/FtcRobotController/blob/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/AutoOpMode.java",
+    "raw_url": "https://github.com/ASchanke/FtcRobotController/raw/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/AutoOpMode.java",
+    "contents_url": "https://api.github.com/repos/ASchanke/FtcRobotController/contents/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/AutoOpMode.java?ref=abe225ea459c6352431d9ec896fd3818756b25c3",
+    "patch": "@@ -22,18 +22,20 @@\n     private Launcher launcher;\n     private Loader loader;\n \n-    private DcMotor leftBackMotor;\n+    private DcMotor launchMotor;\n     private DcMotor leftFrontMotor;\n     private DcMotor rightBackMotor;\n     private DcMotor rightFrontMotor;\n \n-    private Servo handServo;\n+\n     private Servo armServo;\n \n     private Servo launchServo;\n-    private CRServo launchMotor;\n+    private CRServo leftBackMotor;\n \n     private CRServo loaderMotor;\n+    private CRServo loaderServo0;\n+    private CRServo loaderServo1;\n \n     private boolean loaderOn;\n     private boolean launcherOn;\n@@ -53,25 +55,27 @@ public void runOpMode() {\n         // Initialize the hardware variables. Note that the strings used here as parameters\n         // to 'get' must correspond to the names assigned during the robot configuration\n         // step (using the FTC Robot Controller app on the phone).\n-        leftBackMotor = hardwareMap.get(DcMotor.class, \"leftBackMotor\");\n+        leftBackMotor = hardwareMap.get(CRServo.class, \"leftBackMotor\");\n         leftFrontMotor = hardwareMap.get(DcMotor.class, \"leftFrontMotor\");\n         rightBackMotor = hardwareMap.get(DcMotor.class, \"rightBackMotor\");\n         rightFrontMotor = hardwareMap.get(DcMotor.class, \"rightFrontMotor\");\n \n-        handServo = hardwareMap.get(Servo.class, \"handServo\");\n+\n         armServo = hardwareMap.get(Servo.class, \"armServo\");\n \n         launchServo = hardwareMap.get(Servo.class, \"launchServo\");\n-        launchMotor = hardwareMap.get(CRServo.class, \"launchMotor\");\n+        launchMotor = hardwareMap.get(DcMotor.class, \"launchMotor\");\n \n         loaderMotor = hardwareMap.get(CRServo.class, \"loaderMotor\");\n+        loaderServo0 = hardwareMap.get(CRServo.class, \"loaderMotor\");\n+        loaderServo1 = hardwareMap.get(CRServo.class, \"loaderServo1\");\n \n         sensorColor = hardwareMap.colorSensor.get(\"sensorColor\");\n \n         drive = new MecanumWheels(leftBackMotor, leftFrontMotor, rightBackMotor, rightFrontMotor);\n-        wgoal = new WobbleGoal(armServo, handServo);\n+        wgoal = new WobbleGoal(armServo);\n         launcher = new Launcher(launchServo, launchMotor);\n-        loader = new Loader(loaderMotor);\n+        loader = new Loader(loaderMotor, loaderServo0, loaderServo1);\n         ringDetector = new RingDetection();\n \n         // Wait for the game to start (driver presses PLAY)"
+  },
+  {
+    "sha": "738643c4414fc0611933390b87fa810265acdef6",
+    "filename": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/DriverControlledOpMode.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 14,
+    "changes": 26,
+    "blob_url": "https://github.com/ASchanke/FtcRobotController/blob/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/DriverControlledOpMode.java",
+    "raw_url": "https://github.com/ASchanke/FtcRobotController/raw/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/DriverControlledOpMode.java",
+    "contents_url": "https://api.github.com/repos/ASchanke/FtcRobotController/contents/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/DriverControlledOpMode.java?ref=abe225ea459c6352431d9ec896fd3818756b25c3",
+    "patch": "@@ -60,18 +60,20 @@\n     private Launcher launcher;\n     private Loader loader;\n \n-    private DcMotor leftBackMotor;\n+    private DcMotor launchMotor;\n     private DcMotor leftFrontMotor;\n     private DcMotor rightBackMotor;\n     private DcMotor rightFrontMotor;\n \n-    private Servo handServo;\n     private Servo armServo;\n \n     private Servo launchServo;\n-    private CRServo launchMotor;\n+    private CRServo leftBackMotor;\n \n     private CRServo loaderMotor;\n+    private CRServo loaderServo0;\n+    private CRServo loaderServo1;\n+\n \n     private boolean loaderOn;\n     private boolean launcherOn;\n@@ -87,25 +89,27 @@ public void runOpMode() {\n         // Initialize the hardware variables. Note that the strings used here as parameters\n         // to 'get' must correspond to the names assigned during the robot configuration\n         // step (using the FTC Robot Controller app on the phone).\n-        leftBackMotor = hardwareMap.get(DcMotor.class, \"leftBackMotor\");\n+        leftBackMotor = hardwareMap.get(CRServo.class, \"leftBackMotor\");\n         leftFrontMotor = hardwareMap.get(DcMotor.class, \"leftFrontMotor\");\n         rightBackMotor = hardwareMap.get(DcMotor.class, \"rightBackMotor\");\n         rightFrontMotor = hardwareMap.get(DcMotor.class, \"rightFrontMotor\");\n \n-        handServo = hardwareMap.get(Servo.class, \"handServo\");\n+\n         armServo = hardwareMap.get(Servo.class, \"armServo\");\n \n         launchServo = hardwareMap.get(Servo.class, \"launchServo\");\n-        launchMotor = hardwareMap.get(CRServo.class, \"launchMotor\");\n+        launchMotor = hardwareMap.get(DcMotor.class, \"launchMotor\");\n \n         loaderMotor = hardwareMap.get(CRServo.class, \"loaderMotor\");\n+        loaderServo0 = hardwareMap.get(CRServo.class, \"loaderServo0\");\n+        loaderServo1 = hardwareMap.get(CRServo.class, \"loaderServo1\");\n \n \n \n         drive = new MecanumWheels(leftBackMotor, leftFrontMotor, rightBackMotor, rightFrontMotor);\n-        wgoal = new WobbleGoal(armServo, handServo);\n+        wgoal = new WobbleGoal(armServo);\n         launcher = new Launcher(launchServo, launchMotor);\n-        loader = new Loader(loaderMotor);\n+        loader = new Loader(loaderMotor, loaderServo0, loaderServo1);\n \n         // Wait for the game to start (driver presses PLAY)\n         waitForStart();\n@@ -145,12 +149,6 @@ public void runOpMode() {\n             if(gamepad1.dpad_down) {\n                 wgoal.lower();\n             }\n-            if(gamepad1.dpad_left) {\n-                wgoal.open();\n-            }\n-            if(gamepad1.dpad_right) {\n-                wgoal.close();\n-            }\n \n             if(gamepad1.right_bumper) {\n                 launcher.launch();"
+  },
+  {
+    "sha": "81642734940a74abe69a60b6811e923b26940e37",
+    "filename": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Launcher.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 6,
+    "changes": 15,
+    "blob_url": "https://github.com/ASchanke/FtcRobotController/blob/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Launcher.java",
+    "raw_url": "https://github.com/ASchanke/FtcRobotController/raw/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Launcher.java",
+    "contents_url": "https://api.github.com/repos/ASchanke/FtcRobotController/contents/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Launcher.java?ref=abe225ea459c6352431d9ec896fd3818756b25c3",
+    "patch": "@@ -1,5 +1,6 @@\n package org.firstinspires.ftc.teamcode;\n \n+import com.qualcomm.robotcore.hardware.CRServo;\n import com.qualcomm.robotcore.hardware.DcMotor;\n import com.qualcomm.robotcore.hardware.DcMotorSimple;\n import com.qualcomm.robotcore.hardware.Servo;\n@@ -9,15 +10,17 @@\n public class Launcher {\n     private Servo servo;\n     private ElapsedTime timer;\n-    private CRServo motor;\n+    private DcMotor motor;\n+    private DcMotor CRs;\n \n-    public Launcher(Servo servo, CRServo motor ) {\n+    public Launcher(Servo servo, DcMotor CRs) {\n         this.servo = servo;\n-        this.motor = motor;\n-        motor.setDirection(DcMotorSimple.Direction.FORWARD);\n+        this.CRs = CRs;\n+        CRs.setDirection(DcMotorSimple.Direction.FORWARD);\n+        CRs.setPower(0.0);;\n     }\n     public void on() {\n-        motor.setPower(1.0);\n+        CRs.setPower(1.0);\n     }\n \n     public void launch() {\n@@ -29,7 +32,7 @@ public void launch() {\n     }\n \n     public void off() {\n-        motor.setPower(0.0);\n+        CRs.setPower(0.0);\n     }\n \n }"
+  },
+  {
+    "sha": "150c5a32b5f4ee2df474fdeb468560642d5130b8",
+    "filename": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Loader.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 1,
+    "changes": 14,
+    "blob_url": "https://github.com/ASchanke/FtcRobotController/blob/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Loader.java",
+    "raw_url": "https://github.com/ASchanke/FtcRobotController/raw/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Loader.java",
+    "contents_url": "https://api.github.com/repos/ASchanke/FtcRobotController/contents/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Loader.java?ref=abe225ea459c6352431d9ec896fd3818756b25c3",
+    "patch": "@@ -6,15 +6,27 @@\n \n public class Loader {\n     private CRServo motor;\n-    public Loader(CRServo motor) {\n+    private CRServo servo0;\n+    private CRServo servo1;\n+    public Loader(CRServo motor, CRServo servo0, CRServo servo1) {\n         this.motor = motor;\n+        this.servo0 = servo0;\n+        this.servo1 = servo1;\n         motor.setDirection(DcMotorSimple.Direction.FORWARD);\n         motor.setPower(0.0);\n+        servo1.setDirection(DcMotorSimple.Direction.FORWARD);\n+        servo1.setPower(0.0);\n+        servo0.setDirection(DcMotorSimple.Direction.FORWARD);\n+        servo0.setPower(0.0);\n     }\n     public void on() {\n         motor.setPower(1.0);\n+        servo0.setPower(1.0);\n+        servo1.setPower(1.0);\n     }\n     public void off() {\n         motor.setPower(0.0);\n+        servo0.setPower(0.0);\n+        servo1.setPower(0.0);\n     }\n }"
+  },
+  {
+    "sha": "7a4717d04331a6c6cfe5564012fbd346a21d3589",
+    "filename": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/MecanumWheels.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/ASchanke/FtcRobotController/blob/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/MecanumWheels.java",
+    "raw_url": "https://github.com/ASchanke/FtcRobotController/raw/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/MecanumWheels.java",
+    "contents_url": "https://api.github.com/repos/ASchanke/FtcRobotController/contents/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/MecanumWheels.java?ref=abe225ea459c6352431d9ec896fd3818756b25c3",
+    "patch": "@@ -1,4 +1,5 @@\n package org.firstinspires.ftc.teamcode;\n+import com.qualcomm.robotcore.hardware.CRServo;\n import com.qualcomm.robotcore.hardware.DcMotor;\n import com.qualcomm.robotcore.hardware.DcMotorSimple.Direction;\n \n@@ -11,10 +12,10 @@\n     private double frontLeftPower = 0;\n     private DcMotor backRight;\n     private double backRightPower = 0;\n-    private DcMotor backLeft;\n+    private CRServo backLeft;\n     private double backLeftPower = 0;\n \n-    public MecanumWheels (DcMotor leftBack, DcMotor leftFront, DcMotor rightBack, DcMotor rightFront){\n+    public MecanumWheels (CRServo leftBack, DcMotor leftFront, DcMotor rightBack, DcMotor rightFront){\n     // sets the local motors to Graber's motors\n     frontRight = rightFront;\n     frontLeft = leftFront;"
+  },
+  {
+    "sha": "cbe74b2953a2af8b54820756407a6da48cd1f0e3",
+    "filename": "TeamCode/src/main/java/org/firstinspires/ftc/teamcode/WobbleGoal.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 9,
+    "changes": 11,
+    "blob_url": "https://github.com/ASchanke/FtcRobotController/blob/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/WobbleGoal.java",
+    "raw_url": "https://github.com/ASchanke/FtcRobotController/raw/abe225ea459c6352431d9ec896fd3818756b25c3/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/WobbleGoal.java",
+    "contents_url": "https://api.github.com/repos/ASchanke/FtcRobotController/contents/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/WobbleGoal.java?ref=abe225ea459c6352431d9ec896fd3818756b25c3",
+    "patch": "@@ -4,10 +4,8 @@\n \n public class WobbleGoal {\n     private Servo armServo;\n-    private Servo handServo;\n-    public WobbleGoal(Servo armServo, Servo handServo) {\n+    public WobbleGoal(Servo armServo) {\n         this.armServo = armServo;\n-        this.handServo = handServo;\n     }\n     public void raise() {\n         armServo.setPosition(0);\n@@ -18,10 +16,5 @@ public void lower() {\n         armServo.setPosition(1);\n \n     }\n-    public void open() {\n-        handServo.setPosition(0);\n-    }\n-    public void close() {\n-        handServo.setPosition(1);\n-    }\n+\n }"
+  }
+]

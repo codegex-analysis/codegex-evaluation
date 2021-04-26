@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "7aafca749c8322ef6a125d8fa9c535849e3c6eeb",
+    "filename": "modules/platform/nuxeo-liveconnect/src/main/java/org/nuxeo/ecm/liveconnect/google/drive/GoogleDriveBlobProvider.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/nuxeo/nuxeo/blob/384d2bcb0a85f4de20544945d5957278167245c7/modules/platform/nuxeo-liveconnect/src/main/java/org/nuxeo/ecm/liveconnect/google/drive/GoogleDriveBlobProvider.java",
+    "raw_url": "https://github.com/nuxeo/nuxeo/raw/384d2bcb0a85f4de20544945d5957278167245c7/modules/platform/nuxeo-liveconnect/src/main/java/org/nuxeo/ecm/liveconnect/google/drive/GoogleDriveBlobProvider.java",
+    "contents_url": "https://api.github.com/repos/nuxeo/nuxeo/contents/modules/platform/nuxeo-liveconnect/src/main/java/org/nuxeo/ecm/liveconnect/google/drive/GoogleDriveBlobProvider.java?ref=384d2bcb0a85f4de20544945d5957278167245c7",
+    "patch": "@@ -524,7 +524,11 @@ protected LiveConnectFile retrieveFile(LiveConnectFileInfo fileInfo) throws IOEx\n      * Retrieve a partial {@link File} resource.\n      */\n     protected File getPartialFile(String user, String fileId, String... fields) throws IOException {\n-        return getService(user).files().get(fileId).setFields(StringUtils.join(fields, \",\")).execute();\n+        return getService(user).files()\n+                               .get(fileId)\n+                               .setSupportsAllDrives(true)\n+                               .setFields(StringUtils.join(fields, \",\"))\n+                               .execute();\n     }\n \n     /**\n@@ -537,7 +541,7 @@ protected File getDriveFile(LiveConnectFileInfo fileInfo) throws IOException {\n         // ignore revisionId\n         String fileId = fileInfo.getFileId();\n         String cacheKey = \"file_\" + fileId;\n-        DriveRequest<File> request = getService(fileInfo.getUser()).files().get(fileId);\n+        DriveRequest<File> request = getService(fileInfo.getUser()).files().get(fileId).setSupportsAllDrives(true);\n         return executeAndCache(cacheKey, request, File.class);\n     }\n "
+  }
+]

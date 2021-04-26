@@ -1,0 +1,97 @@
+[
+  {
+    "sha": "145e6f5933be71396fa8388a3356441a8f7f1e69",
+    "filename": ".gitignore",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/SpykeX3/XMLSerialization/blob/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/.gitignore",
+    "raw_url": "https://github.com/SpykeX3/XMLSerialization/raw/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/.gitignore",
+    "contents_url": "https://api.github.com/repos/SpykeX3/XMLSerialization/contents/.gitignore?ref=0ad7c181c08adbdfba00aa40624c85ecadab9ccc",
+    "patch": "@@ -1,5 +1,5 @@\n # Ignore Gradle project-specific cache directory\n .gradle\n-\n+.idea\n # Ignore Gradle build output directory\n build"
+  },
+  {
+    "sha": "232d1e7ef835701eae5cbe690009ea54bc690de0",
+    "filename": ".idea/gradle.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/SpykeX3/XMLSerialization/blob/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/.idea/gradle.xml",
+    "raw_url": "https://github.com/SpykeX3/XMLSerialization/raw/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/.idea/gradle.xml",
+    "contents_url": "https://api.github.com/repos/SpykeX3/XMLSerialization/contents/.idea/gradle.xml?ref=0ad7c181c08adbdfba00aa40624c85ecadab9ccc",
+    "patch": "@@ -1,5 +1,6 @@\n <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n <project version=\"4\">\n+  <component name=\"GradleMigrationSettings\" migrationVersion=\"1\" />\n   <component name=\"GradleSettings\">\n     <option name=\"linkedExternalProjectsSettings\">\n       <GradleProjectSettings>"
+  },
+  {
+    "sha": "0908b5a0f1d04c55197a4d27005409ca71c3302d",
+    "filename": "lib/src/main/java/ru/nsu/fit/XMLSerialization/XMLSerializator.java",
+    "status": "added",
+    "additions": 245,
+    "deletions": 0,
+    "changes": 245,
+    "blob_url": "https://github.com/SpykeX3/XMLSerialization/blob/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/main/java/ru/nsu/fit/XMLSerialization/XMLSerializator.java",
+    "raw_url": "https://github.com/SpykeX3/XMLSerialization/raw/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/main/java/ru/nsu/fit/XMLSerialization/XMLSerializator.java",
+    "contents_url": "https://api.github.com/repos/SpykeX3/XMLSerialization/contents/lib/src/main/java/ru/nsu/fit/XMLSerialization/XMLSerializator.java?ref=0ad7c181c08adbdfba00aa40624c85ecadab9ccc",
+    "patch": "@@ -0,0 +1,245 @@\n+package ru.nsu.fit.XMLSerialization;\n+\n+import java.io.IOException;\n+import java.io.OutputStream;\n+import java.lang.reflect.Array;\n+import java.lang.reflect.Field;\n+import java.lang.reflect.Type;\n+import java.util.*;\n+import javax.xml.parsers.DocumentBuilder;\n+import javax.xml.parsers.DocumentBuilderFactory;\n+import javax.xml.parsers.ParserConfigurationException;\n+import javax.xml.transform.*;\n+import javax.xml.transform.dom.DOMSource;\n+import javax.xml.transform.stream.StreamResult;\n+\n+import org.w3c.dom.Document;\n+import org.w3c.dom.Element;\n+\n+// todo: close serializator after flush.\n+public class XMLSerializator {\n+  private int id = 0;\n+  private Queue<Object> queue = new ArrayDeque<>();\n+  private final StreamResult streamResult;\n+  private Map<Object, String> parsedObjects;\n+\n+  public XMLSerializator(OutputStream stream) {\n+    streamResult = new StreamResult(stream);\n+  }\n+\n+  private static final Set<String> primitives =\n+      new HashSet<>(\n+          Arrays.asList(\n+              \"byte\",\n+              \"short\",\n+              \"int\",\n+              \"long\",\n+              \"float\",\n+              \"double\",\n+              \"boolean\",\n+              \"char\",\n+              \"class java.lang.String\"));\n+\n+  private static final Set<String> wrappers =\n+      new HashSet<>(\n+          Arrays.asList(\n+              \"class java.lang.Byte\",\n+              \"class java.lang.Short\",\n+              \"class java.lang.Integer\",\n+              \"class java.lang.Long\",\n+              \"class java.lang.Float\",\n+              \"class java.lang.Double\",\n+              \"class java.lang.Boolean\",\n+              \"class java.lang.Character\"));\n+\n+  public void write(Object obj) throws NullPointerException {\n+    if (obj == null) throw new NullPointerException();\n+    queue.add(obj);\n+  }\n+\n+  public void flush() {\n+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();\n+    DocumentBuilder builder;\n+    try {\n+      builder = factory.newDocumentBuilder();\n+    } catch (ParserConfigurationException e) {\n+      throw new RuntimeException(e);\n+    }\n+\n+    Document doc = builder.newDocument();\n+    Element rootElement = doc.createElementNS(\"xml_stream\", \"XML_STEAM\");\n+\n+    Element objectPull = doc.createElement(\"Object_pool\");\n+    Element objectSteam = doc.createElement(\"Object_stream\");\n+    doc.appendChild(rootElement);\n+    rootElement.appendChild(objectSteam);\n+    rootElement.appendChild(objectPull);\n+\n+    TransformerFactory transformerFactory = TransformerFactory.newInstance();\n+    Transformer transformer;\n+    try {\n+      transformer = transformerFactory.newTransformer();\n+    } catch (TransformerConfigurationException e) {\n+      throw new RuntimeException(e);\n+    }\n+    parsedObjects = new IdentityHashMap<>();\n+\n+    for (Object x : queue) {\n+      parseObject(doc, x, objectPull, objectSteam);\n+    }\n+\n+    transformer.setOutputProperty(OutputKeys.INDENT, \"yes\");\n+    DOMSource source = new DOMSource(doc);\n+\n+    try {\n+      transformer.transform(source, streamResult);\n+    } catch (TransformerException e) {\n+      throw new RuntimeException(e);\n+    }\n+\n+    queue = new ArrayDeque<>();\n+    parsedObjects = new HashMap<>();\n+    id = 0;\n+\n+  }\n+\n+  private void parseObject(Document doc, Object obj, Element pull, Element stream) {\n+\n+    if (parsedObjects.containsKey(obj)) {\n+      stream.appendChild(createLink(obj, doc));\n+      return;\n+    }\n+\n+    Queue<Object> queue = new ArrayDeque<>();\n+    queue.add(obj);\n+    boolean isSteam = true;\n+    parsedObjects.put(obj, String.valueOf(++id));\n+    do {\n+      obj = queue.remove();\n+      Class objType = obj.getClass();\n+      Element currElement = doc.createElement(\"bean\");\n+      String parsedId = String.valueOf(parsedObjects.get(obj));\n+      parsedObjects.put(obj, parsedId);\n+\n+      currElement.setAttribute(\"id\", parsedId);\n+      currElement.setAttribute(\"type\", objType.toString());\n+\n+      if (objType.isArray()) {\n+\n+        if (!primitives.contains(objType.getComponentType().toString())) {\n+          Object[] array = (Object[]) obj;\n+          String[] idInArray = new String[array.length];\n+          for (int i = 0; i < array.length; ++i) {\n+            if (parsedObjects.containsKey(array[i])) {\n+              idInArray[i] = parsedObjects.get(array[i]);\n+            } else {\n+              idInArray[i] = String.valueOf(++id);\n+              parsedObjects.put(array[i], String.valueOf(id));\n+              if (array[i] == null)\n+                continue;\n+              queue.add(array[i]);\n+            }\n+          }\n+          currElement.appendChild(doc.createTextNode(Arrays.toString(idInArray)));\n+        } else {\n+          String[] arrayValues = new String[Array.getLength(obj)];\n+          for (int i = 0; i < Array.getLength(obj); ++i) {\n+            switch (objType.getComponentType().toString()) {\n+              case \"byte\":\n+                arrayValues[i] = String.valueOf(Array.getByte(obj, i));\n+                break;\n+              case \"short\":\n+                arrayValues[i] = String.valueOf(Array.getShort(obj, i));\n+                break;\n+              case \"int\":\n+                arrayValues[i] = String.valueOf(Array.getInt(obj, i));\n+                break;\n+              case \"long\":\n+                arrayValues[i] = String.valueOf(Array.getLong(obj, i));\n+                break;\n+              case \"float\":\n+                arrayValues[i] = String.valueOf(Array.getFloat(obj, i));\n+                break;\n+              case \"double\":\n+                arrayValues[i] = String.valueOf(Array.getDouble(obj, i));\n+                break;\n+              case \"boolean\":\n+                arrayValues[i] = String.valueOf(Array.getBoolean(obj, i));\n+                break;\n+              case \"class java.lang.String\":\n+                arrayValues[i] = String.valueOf(Array.get(obj, i));\n+                break;\n+              case \"char\":\n+                arrayValues[i] = String.valueOf(Array.getChar(obj, i));\n+                break;\n+            }\n+          }\n+          currElement.appendChild(doc.createTextNode(Arrays.toString(arrayValues)));\n+        }\n+      } else {\n+        for (Field field : obj.getClass().getDeclaredFields()) {\n+          if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {\n+            continue;\n+          }\n+          try{\n+          field.setAccessible(true);\n+          }\n+          catch (Exception e){\n+            continue;\n+          }\n+          Type type = field.getType();\n+          String name = field.getName();\n+          String value = null;\n+\n+          try {\n+            value = parseObjectValue(field, obj, queue);\n+          } catch (IllegalAccessException ignored) {\n+          }\n+\n+          //System.out.println(name);\n+          if (name.contains(\"$\")) continue;\n+          Element elem = doc.createElement(name);\n+\n+         // System.out.println(type);\n+          elem.setAttribute(\"type\", type.toString());\n+          elem.appendChild(doc.createTextNode(value));\n+          currElement.appendChild(elem);\n+        }\n+      }\n+      if (isSteam) {\n+        stream.appendChild(createLink(obj, doc));\n+        isSteam = false;\n+      }\n+      pull.appendChild(currElement);\n+\n+    } while (queue.size() > 0);\n+  }\n+\n+  private Element createLink(Object obj, Document doc) {\n+    Element elem = doc.createElement(\"link\");\n+    elem.setAttribute(\"id\", parsedObjects.get(obj));\n+    return elem;\n+  }\n+\n+  private String parseObjectValue(Field field, Object obj, Queue<Object> queue)\n+      throws IllegalAccessException {\n+    // if type is primitive or wrapper for primitive\n+    if (primitives.contains(field.getType().getTypeName())\n+        || wrappers.contains(field.getType().getTypeName())) {\n+      return String.valueOf(field.get(obj));\n+    }\n+    // if we parsed this object we return saved id\n+\n+    if (parsedObjects.containsKey(field.get(obj))) {\n+      return parsedObjects.get(field.get(obj));\n+    }\n+    // if obj is null value is null\n+    if (field.get(obj) == null) {\n+      return \"null\";\n+    }\n+    System.out.println(field.get(obj));\n+    queue.add(field.get(obj));\n+    parsedObjects.put(field.get(obj), String.valueOf(id + 1));\n+    return String.valueOf(++id);\n+  }\n+}"
+  },
+  {
+    "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+    "filename": "lib/src/main/resources/example.xml",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/SpykeX3/XMLSerialization/blob/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/main/resources/example.xml",
+    "raw_url": "https://github.com/SpykeX3/XMLSerialization/raw/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/main/resources/example.xml",
+    "contents_url": "https://api.github.com/repos/SpykeX3/XMLSerialization/contents/lib/src/main/resources/example.xml?ref=0ad7c181c08adbdfba00aa40624c85ecadab9ccc"
+  },
+  {
+    "sha": "c6cafec46778c9689c05dd811678d4a95a8c4a11",
+    "filename": "lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/SerializatorTest.java",
+    "status": "added",
+    "additions": 47,
+    "deletions": 0,
+    "changes": 47,
+    "blob_url": "https://github.com/SpykeX3/XMLSerialization/blob/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/SerializatorTest.java",
+    "raw_url": "https://github.com/SpykeX3/XMLSerialization/raw/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/SerializatorTest.java",
+    "contents_url": "https://api.github.com/repos/SpykeX3/XMLSerialization/contents/lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/SerializatorTest.java?ref=0ad7c181c08adbdfba00aa40624c85ecadab9ccc",
+    "patch": "@@ -0,0 +1,47 @@\n+package ru.nsu.fit.XMLSerialization.Serializator;\n+\n+import org.junit.Test;\n+import ru.nsu.fit.XMLSerialization.XMLSerializator;\n+\n+import javax.xml.transform.stream.StreamResult;\n+\n+import java.io.ByteArrayOutputStream;\n+import java.util.ArrayList;\n+import java.util.Collections;\n+import java.util.List;\n+import java.util.stream.Stream;\n+\n+public class SerializatorTest {\n+  private static class DummyClassOuter {\n+    DummyInner a;\n+    DummyInner b;\n+    DummyInner c;\n+    DummyInner d;\n+    DummyInner e;\n+\n+    DummyClassOuter() {\n+      b = new DummyInner();\n+      c = new DummyInner();\n+      d = new DummyInner();\n+      e = new DummyInner();\n+    }\n+  }\n+\n+  private static class DummyInner {}\n+\n+  @Test\n+  public void testArraySerialization() {\n+    TestClass testClass = new TestClass();\n+    TestClass testClass1 = new TestClass();\n+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();\n+    XMLSerializator serializator = new XMLSerializator(outputStream);\n+    TestClass[] objects = new TestClass[]{testClass, testClass1};\n+\n+    //serializator.write(testClass);\n+    //serializator.write(objects);\n+    //System.out.println((new String[]{\"pipiska\"}).getClass().getComponentType());\n+    serializator.write((new int[]{5, 18 , 85647}));\n+    serializator.flush();\n+    System.out.println(outputStream);\n+  }\n+}"
+  },
+  {
+    "sha": "644c14c4a72cd13a349cc96dd82f5e8c2223c31e",
+    "filename": "lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/TestClass.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/SpykeX3/XMLSerialization/blob/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/TestClass.java",
+    "raw_url": "https://github.com/SpykeX3/XMLSerialization/raw/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/TestClass.java",
+    "contents_url": "https://api.github.com/repos/SpykeX3/XMLSerialization/contents/lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/TestClass.java?ref=0ad7c181c08adbdfba00aa40624c85ecadab9ccc",
+    "patch": "@@ -0,0 +1,10 @@\n+package ru.nsu.fit.XMLSerialization.Serializator;\n+\n+class TestClass {\n+    private int intOne = 1;\n+    private Integer buuuuua = Integer.MAX_VALUE;\n+    private String str = \"Koshehka\";\n+    private TestClass2 testClass20 = new TestClass2();\n+    private TestClass2 testClass21 = testClass20;\n+\n+}"
+  },
+  {
+    "sha": "84bac68884dbff7bc2f41248417916b1002d379e",
+    "filename": "lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/TestClass2.java",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/SpykeX3/XMLSerialization/blob/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/TestClass2.java",
+    "raw_url": "https://github.com/SpykeX3/XMLSerialization/raw/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/TestClass2.java",
+    "contents_url": "https://api.github.com/repos/SpykeX3/XMLSerialization/contents/lib/src/test/java/ru/nsu/fit/XMLSerialization/Serializator/TestClass2.java?ref=0ad7c181c08adbdfba00aa40624c85ecadab9ccc",
+    "patch": "@@ -0,0 +1,5 @@\n+package ru.nsu.fit.XMLSerialization.Serializator;\n+\n+public class TestClass2 {\n+    private int la = 2;\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "4dd29bc46b5c3c75e038f50708f7e0218967b433",
+    "filename": "lib/src/test/java/ru/nsu/fit/XMLSerialization/XMLSerializatorTests.java",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/SpykeX3/XMLSerialization/blob/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/test/java/ru/nsu/fit/XMLSerialization/XMLSerializatorTests.java",
+    "raw_url": "https://github.com/SpykeX3/XMLSerialization/raw/0ad7c181c08adbdfba00aa40624c85ecadab9ccc/lib/src/test/java/ru/nsu/fit/XMLSerialization/XMLSerializatorTests.java",
+    "contents_url": "https://api.github.com/repos/SpykeX3/XMLSerialization/contents/lib/src/test/java/ru/nsu/fit/XMLSerialization/XMLSerializatorTests.java?ref=0ad7c181c08adbdfba00aa40624c85ecadab9ccc",
+    "patch": "@@ -0,0 +1,4 @@\n+package ru.nsu.fit.XMLSerialization;\n+\n+public class XMLSerializatorTests {\n+}"
+  }
+]

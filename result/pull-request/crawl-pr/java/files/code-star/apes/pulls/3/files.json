@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "82647ed35a308057042401ae6e826d83a15d7f27",
+    "filename": "apes-core/src/main/java/nl/codestar/apes/core/function/Function1Parameter.java",
+    "status": "added",
+    "additions": 55,
+    "deletions": 0,
+    "changes": 55,
+    "blob_url": "https://github.com/code-star/apes/blob/766e348713926deb3d7486b33be65ba90f0d58fc/apes-core/src/main/java/nl/codestar/apes/core/function/Function1Parameter.java",
+    "raw_url": "https://github.com/code-star/apes/raw/766e348713926deb3d7486b33be65ba90f0d58fc/apes-core/src/main/java/nl/codestar/apes/core/function/Function1Parameter.java",
+    "contents_url": "https://api.github.com/repos/code-star/apes/contents/apes-core/src/main/java/nl/codestar/apes/core/function/Function1Parameter.java?ref=766e348713926deb3d7486b33be65ba90f0d58fc",
+    "patch": "@@ -0,0 +1,55 @@\n+package nl.codestar.apes.core.function;\n+\n+import nl.codestar.apes.core.canbuild.CanBuild;\n+import nl.codestar.apes.core.hkt.Hkt;\n+import nl.codestar.apes.core.tuple.Cons;\n+import nl.codestar.apes.core.typeclass.Contravariant;\n+import nl.codestar.apes.core.typeclass.Semigroup;\n+\n+public class Function1Parameter<A, Result> implements Hkt<Function1Parameter.Mu<Result>, A> {\n+\n+  class Function1Contravariant<Result> implements Contravariant<Mu<Result>> {\n+    @Override\n+    public <A, B> Function1Parameter<B, Result> contramap(Hkt<Mu<Result>, A> fa, Function1<B, A> fn) {\n+      Function1<A, Result> myFunction = coerce(fa);\n+      return of(x -> myFunction.apply(fn.apply(x)));\n+    }\n+  }\n+\n+  class Function1ParameterCanBuild<Result> implements CanBuild<Mu<Result>> {\n+\n+    private final Semigroup<Result> resultSemigroup;\n+\n+    public Function1ParameterCanBuild(Semigroup<Result> resultSemigroup) {\n+      this.resultSemigroup = resultSemigroup;\n+    }\n+\n+    @Override\n+    public <A, B> Function1Parameter<Cons<A, B>, Result> combine(Hkt<Mu<Result>, A> left, Hkt<Mu<Result>, B> right) {\n+      Function1<A, Result> l = coerce(left);\n+      Function1<B, Result> r = coerce(right);\n+      return of(cons -> {\n+        var resultLeft = l.apply(cons.getFirst());\n+        var resultRight = r.apply(cons.getSecond());\n+        return resultSemigroup.compose(resultLeft, resultRight);\n+      });\n+    }\n+  }\n+\n+  public static class Mu<A> {}\n+\n+  private final Function1<A, Result> instance;\n+\n+  public Function1Parameter(Function1<A, Result> instance) {\n+    this.instance = instance;\n+  }\n+\n+  public static <A, Result> Function1Parameter<A, Result> of(Function1<A, Result> value) {\n+    return new Function1Parameter<>(value);\n+  }\n+\n+  public static <A, Result> Function1<A, Result> coerce(Hkt<Mu<Result>, A> hkt) {\n+    Function1Parameter<A, Result> coerced = hkt.coerce();\n+    return coerced.instance;\n+  }\n+}"
+  },
+  {
+    "sha": "8b4609c04e46018a9150e524d32ae5b9e8335f2d",
+    "filename": "apes-core/src/main/java/nl/codestar/apes/core/typeclass/Semigroup.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/code-star/apes/blob/766e348713926deb3d7486b33be65ba90f0d58fc/apes-core/src/main/java/nl/codestar/apes/core/typeclass/Semigroup.java",
+    "raw_url": "https://github.com/code-star/apes/raw/766e348713926deb3d7486b33be65ba90f0d58fc/apes-core/src/main/java/nl/codestar/apes/core/typeclass/Semigroup.java",
+    "contents_url": "https://api.github.com/repos/code-star/apes/contents/apes-core/src/main/java/nl/codestar/apes/core/typeclass/Semigroup.java?ref=766e348713926deb3d7486b33be65ba90f0d58fc",
+    "patch": "@@ -0,0 +1,7 @@\n+package nl.codestar.apes.core.typeclass;\n+\n+public interface Semigroup<A> {\n+\n+  A compose(A left, A right);\n+\n+}"
+  },
+  {
+    "sha": "1af949669cfa152fcef39675749de4190494db8b",
+    "filename": "apes-core/src/test/java/nl/codestar/apes/core/function/Function1ParameterTests.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/code-star/apes/blob/766e348713926deb3d7486b33be65ba90f0d58fc/apes-core/src/test/java/nl/codestar/apes/core/function/Function1ParameterTests.java",
+    "raw_url": "https://github.com/code-star/apes/raw/766e348713926deb3d7486b33be65ba90f0d58fc/apes-core/src/test/java/nl/codestar/apes/core/function/Function1ParameterTests.java",
+    "contents_url": "https://api.github.com/repos/code-star/apes/contents/apes-core/src/test/java/nl/codestar/apes/core/function/Function1ParameterTests.java?ref=766e348713926deb3d7486b33be65ba90f0d58fc",
+    "patch": "@@ -0,0 +1,9 @@\n+package nl.codestar.apes.core.function;\n+\n+import static org.junit.jupiter.api.Assertions.assertEquals;\n+\n+public class Function1ParameterTests {\n+\n+  //TODO\n+\n+}"
+  }
+]

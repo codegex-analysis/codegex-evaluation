@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "e9617605214bfa7cde149562c5ff57a6be389ee7",
+    "filename": "src/main/java/cat/udl/eps/softarch/academicrecruit/config/WebSecurityConfig.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/52534bf7b020b76d3d7507187e781804f0913249/src/main/java/cat/udl/eps/softarch/academicrecruit/config/WebSecurityConfig.java",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/52534bf7b020b76d3d7507187e781804f0913249/src/main/java/cat/udl/eps/softarch/academicrecruit/config/WebSecurityConfig.java",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/main/java/cat/udl/eps/softarch/academicrecruit/config/WebSecurityConfig.java?ref=52534bf7b020b76d3d7507187e781804f0913249",
+    "patch": "@@ -30,10 +30,15 @@ protected void configure(HttpSecurity http) throws Exception {\n                 .antMatchers(HttpMethod.POST, \"/users\").hasRole(\"ADMIN\")\n                 .antMatchers(HttpMethod.POST, \"/users/*\").denyAll()\n \n+                .antMatchers(HttpMethod.POST, \"/participants\").hasRole(\"ADMIN\")\n                 .antMatchers(HttpMethod.POST, \"/participants/*\").hasRole(\"ADMIN\")\n+                .antMatchers(HttpMethod.PATCH, \"/participants\").hasRole(\"ADMIN\")\n                 .antMatchers(HttpMethod.PATCH, \"/participants/*\").hasRole(\"ADMIN\")\n+                .antMatchers(HttpMethod.PUT, \"/participants\").hasRole(\"ADMIN\")\n                 .antMatchers(HttpMethod.PUT, \"/participants/*\").hasRole(\"ADMIN\")\n+                .antMatchers(HttpMethod.DELETE, \"/participants\").hasRole(\"ADMIN\")\n                 .antMatchers(HttpMethod.DELETE, \"/participants/*\").hasRole(\"ADMIN\")\n+                .antMatchers(HttpMethod.GET, \"/participants\").authenticated()\n                 .antMatchers(HttpMethod.GET, \"/participants/*\").authenticated()\n \n "
+  },
+  {
+    "sha": "9ce35202c5d060842f41bed1d6c01233c6268d28",
+    "filename": "src/test/java/cat/udl/eps/softarch/academicrecruit/steps/DeleteParticipantStepDefs.java",
+    "status": "added",
+    "additions": 53,
+    "deletions": 0,
+    "changes": 53,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/52534bf7b020b76d3d7507187e781804f0913249/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/DeleteParticipantStepDefs.java",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/52534bf7b020b76d3d7507187e781804f0913249/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/DeleteParticipantStepDefs.java",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/java/cat/udl/eps/softarch/academicrecruit/steps/DeleteParticipantStepDefs.java?ref=52534bf7b020b76d3d7507187e781804f0913249",
+    "patch": "@@ -0,0 +1,53 @@\n+package cat.udl.eps.softarch.academicrecruit.steps;\n+\n+import cat.udl.eps.softarch.academicrecruit.domain.Participant;\n+import cat.udl.eps.softarch.academicrecruit.repository.ParticipantRepository;\n+import io.cucumber.java.en.And;\n+import io.cucumber.java.en.When;\n+import org.springframework.http.MediaType;\n+\n+import static org.hamcrest.Matchers.is;\n+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\n+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;\n+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;\n+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;\n+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;\n+\n+public class DeleteParticipantStepDefs {\n+    final StepDefs stepDefs;\n+    final ParticipantRepository participantRepository;\n+    private String newResourceUri;\n+\n+    public DeleteParticipantStepDefs(StepDefs stepDefs, ParticipantRepository participantRepository) {\n+        this.stepDefs = stepDefs;\n+        this.participantRepository = participantRepository;\n+    }\n+\n+\n+    @When(\"I delete a participant with id {string}\")\n+    public void iDeleteParticipantTo(String id) throws Throwable {\n+\n+        Participant participant = new Participant();\n+        participant.setId(Long.valueOf(id));\n+\n+        newResourceUri = \"/participants/\"+ id;\n+\n+        stepDefs.result = stepDefs.mockMvc.perform(\n+                delete(newResourceUri)\n+                        .contentType(MediaType.APPLICATION_JSON)\n+                        .content(stepDefs.mapper.writeValueAsString(participant))\n+                        .accept(MediaType.APPLICATION_JSON)\n+                        .with(AuthenticationStepDefs.authenticate())\n+        ).andDo(print());\n+    }\n+\n+    @And(\"The previously deleted participant doesn't exist\")\n+    public void thePreviouslyDeletedParticipantNotInDataBase() throws Throwable {\n+        stepDefs.result = stepDefs.mockMvc.perform(\n+                get (newResourceUri)\n+                        .accept(MediaType.APPLICATION_JSON)\n+                        .with(AuthenticationStepDefs.authenticate()))\n+                .andDo(print())\n+                .andExpect(status().isNotFound());\n+    }\n+}"
+  },
+  {
+    "sha": "e6e79ca383c5090a5b0e29210d5b1177db893b61",
+    "filename": "src/test/resources/features/CreateParticipant.feature",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/52534bf7b020b76d3d7507187e781804f0913249/src/test/resources/features/CreateParticipant.feature",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/52534bf7b020b76d3d7507187e781804f0913249/src/test/resources/features/CreateParticipant.feature",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/resources/features/CreateParticipant.feature?ref=52534bf7b020b76d3d7507187e781804f0913249",
+    "patch": "@@ -5,9 +5,16 @@ Feature: Create Participant\n \n   Background:\n     Given There is a registered administrator with username \"admin\" and password \"password\" and email \"admin@sample.app\"\n+    And There is a registered user with username \"user\" and password \"password\" and email \"user@sample.app\"\n \n   Scenario: Admin Created participant\n     Given I login as \"admin\" with password \"password\"\n     When I create a participant with role \"SECRETARY\"\n     Then The response code is 201\n+    Given I login as \"admin\" with password \"password\"\n     And It has been created a participant with role \"SECRETARY\"\n+\n+  Scenario: User Created participant\n+    Given I login as \"user\" with password \"password\"\n+    When I create a participant with role \"SECRETARY\"\n+    Then The response code is 403\n\\ No newline at end of file"
+  },
+  {
+    "sha": "31b0b3d5a3bcdaaef3df90d35c0387b6d8c6955b",
+    "filename": "src/test/resources/features/DeletePaticipant.feature",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/52534bf7b020b76d3d7507187e781804f0913249/src/test/resources/features/DeletePaticipant.feature",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/52534bf7b020b76d3d7507187e781804f0913249/src/test/resources/features/DeletePaticipant.feature",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/resources/features/DeletePaticipant.feature?ref=52534bf7b020b76d3d7507187e781804f0913249",
+    "patch": "@@ -0,0 +1,22 @@\n+Feature: Delete Participant\n+  In order to delete the participants\n+  As a admin\n+  I want to delete a participant\n+\n+  Background:\n+    Given There is a registered administrator with username \"admin\" and password \"password\" and email \"admin@sample.app\"\n+    And There is a registered user with username \"user\" and password \"password\" and email \"user@sample.app\"\n+\n+  Scenario: Admin deletes participant\n+    Given I login as \"admin\" with password \"password\"\n+    And I create a participant with role \"SECRETARY\"\n+    When I delete a participant with id \"1\"\n+    Then The response code is 204\n+    And The previously deleted participant doesn't exist\n+\n+  Scenario: User deletes participant\n+    Given I login as \"admin\" with password \"password\"\n+    And I create a participant with role \"SECRETARY\"\n+    Given I login as \"user\" with password \"password\"\n+    When I delete a participant with id \"1\"\n+    Then The response code is 403\n\\ No newline at end of file"
+  },
+  {
+    "sha": "c7964114ab5daf2e21efe7b5ef64b8c795f6e5ad",
+    "filename": "src/test/resources/features/UpdateParticipant.feature",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 2,
+    "changes": 12,
+    "blob_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/blob/52534bf7b020b76d3d7507187e781804f0913249/src/test/resources/features/UpdateParticipant.feature",
+    "raw_url": "https://github.com/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/raw/52534bf7b020b76d3d7507187e781804f0913249/src/test/resources/features/UpdateParticipant.feature",
+    "contents_url": "https://api.github.com/repos/UdL-EPS-SoftArch/AcademicRecruitAPI-GEIADE/contents/src/test/resources/features/UpdateParticipant.feature?ref=52534bf7b020b76d3d7507187e781804f0913249",
+    "patch": "@@ -5,10 +5,18 @@ Feature: Update Participant\n \n   Background:\n     Given There is a registered administrator with username \"admin\" and password \"password\" and email \"admin@sample.app\"\n-    And I login as \"admin\" with password \"password\"\n-    And I create a participant with role \"SECRETARY\"\n+    And There is a registered user with username \"user\" and password \"password\" and email \"user@sample.app\"\n+\n \n   Scenario: Admin updates role\n+    Given I login as \"admin\" with password \"password\"\n+    And I create a participant with role \"SECRETARY\"\n     When I change the role of the participant with id \"1\" to \"PRESIDENT\"\n     Then The response code is 200\n     And The previously updated participant has now role \"PRESIDENT\"\n+\n+  Scenario: User updates role\n+    Given I login as \"user\" with password \"password\"\n+    And I create a participant with role \"SECRETARY\"\n+    When I change the role of the participant with id \"1\" to \"PRESIDENT\"\n+    Then The response code is 403\n\\ No newline at end of file"
+  }
+]

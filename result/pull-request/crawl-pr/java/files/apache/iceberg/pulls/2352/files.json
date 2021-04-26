@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "67dd96064082baeb334b0a1d579a9e50c77590d7",
+    "filename": "api/src/main/java/org/apache/iceberg/types/GetProjectedIds.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/apache/iceberg/blob/793cf25fcfecfd6d00bccf7dbd65c2f49004bbca/api/src/main/java/org/apache/iceberg/types/GetProjectedIds.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/793cf25fcfecfd6d00bccf7dbd65c2f49004bbca/api/src/main/java/org/apache/iceberg/types/GetProjectedIds.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/api/src/main/java/org/apache/iceberg/types/GetProjectedIds.java?ref=793cf25fcfecfd6d00bccf7dbd65c2f49004bbca",
+    "patch": "@@ -34,6 +34,11 @@\n \n   @Override\n   public Set<Integer> struct(Types.StructType struct, List<Set<Integer>> fieldResults) {\n+    // if the struct is an empty struct, we should consider itself as 'internal', thus including its id.\n+    if (struct.fields().size() == 0) {\n+      // since returning null is signaling the call to field() to add the field ID, we return null here.\n+      return null;\n+    }\n     return fieldIds;\n   }\n "
+  },
+  {
+    "sha": "34e98e09ff9baab5f1810de7617f725241daddbc",
+    "filename": "api/src/main/java/org/apache/iceberg/types/TypeUtil.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/apache/iceberg/blob/793cf25fcfecfd6d00bccf7dbd65c2f49004bbca/api/src/main/java/org/apache/iceberg/types/TypeUtil.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/793cf25fcfecfd6d00bccf7dbd65c2f49004bbca/api/src/main/java/org/apache/iceberg/types/TypeUtil.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/api/src/main/java/org/apache/iceberg/types/TypeUtil.java?ref=793cf25fcfecfd6d00bccf7dbd65c2f49004bbca",
+    "patch": "@@ -34,6 +34,7 @@\n import org.apache.iceberg.relocated.com.google.common.collect.Iterables;\n import org.apache.iceberg.relocated.com.google.common.collect.Lists;\n import org.apache.iceberg.relocated.com.google.common.collect.Maps;\n+import org.apache.iceberg.relocated.com.google.common.collect.Sets;\n \n public class TypeUtil {\n \n@@ -83,7 +84,11 @@ public static Schema select(Schema schema, Set<Integer> fieldIds) {\n   }\n \n   private static Set<Integer> getIdsInternal(Type type) {\n-    return visit(type, new GetProjectedIds());\n+    Set<Integer> res = visit(type, new GetProjectedIds());\n+    if (res == null) {\n+      return Sets.newHashSet();\n+    }\n+    return res;\n   }\n \n   public static Types.StructType selectNot(Types.StructType struct, Set<Integer> fieldIds) {"
+  },
+  {
+    "sha": "fea0297fbde517cca7e2416b939451bfa69fb37b",
+    "filename": "api/src/test/java/org/apache/iceberg/types/TestTypeUtil.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/apache/iceberg/blob/793cf25fcfecfd6d00bccf7dbd65c2f49004bbca/api/src/test/java/org/apache/iceberg/types/TestTypeUtil.java",
+    "raw_url": "https://github.com/apache/iceberg/raw/793cf25fcfecfd6d00bccf7dbd65c2f49004bbca/api/src/test/java/org/apache/iceberg/types/TestTypeUtil.java",
+    "contents_url": "https://api.github.com/repos/apache/iceberg/contents/api/src/test/java/org/apache/iceberg/types/TestTypeUtil.java?ref=793cf25fcfecfd6d00bccf7dbd65c2f49004bbca",
+    "patch": "@@ -20,10 +20,13 @@\n \n package org.apache.iceberg.types;\n \n+import java.util.Collections;\n import org.apache.iceberg.Schema;\n+import org.apache.iceberg.relocated.com.google.common.collect.ImmutableSet;\n import org.junit.Assert;\n import org.junit.Test;\n \n+import static org.apache.iceberg.types.Types.NestedField.optional;\n import static org.apache.iceberg.types.Types.NestedField.required;\n \n \n@@ -67,4 +70,25 @@ public void testValidateSchemaViaIndexByName() {\n \n     TypeUtil.indexByName(Types.StructType.of(nestedType));\n   }\n+\n+  @Test\n+  public void testSelectNot() {\n+    // iceberg schema which has an empty struct column.\n+    Schema schema = new Schema(\n+            required(1, \"a\", Types.IntegerType.get()),\n+            optional(2, \"b\", Types.StructType.of(\n+                    required(3, \"c\", Types.StringType.get()),\n+                    optional(4, \"d\", Types.StructType.of(Collections.emptyList()))))\n+    );\n+    Schema filteredSchema = TypeUtil.selectNot(schema, ImmutableSet.of());\n+    Assert.assertEquals(schema.toString(), filteredSchema.toString());\n+\n+    filteredSchema = TypeUtil.selectNot(schema, ImmutableSet.of(4));\n+    Schema expected = new Schema(\n+            required(1, \"a\", Types.IntegerType.get()),\n+            optional(2, \"b\", Types.StructType.of(\n+                    required(3, \"c\", Types.StringType.get())))\n+    );\n+    Assert.assertEquals(expected.toString(), filteredSchema.toString());\n+  }\n }"
+  }
+]

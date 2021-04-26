@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "444a3e6594e9e5ed3c78f3321b16414ca1e97416",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/controllers/AyudaController.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 16,
+    "changes": 16,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/9089ff57b63659b2768048a361d6350df80b6028/src/main/java/edu/escuelaing/eci/ieti/controllers/AyudaController.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/9089ff57b63659b2768048a361d6350df80b6028/src/main/java/edu/escuelaing/eci/ieti/controllers/AyudaController.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/controllers/AyudaController.java?ref=9089ff57b63659b2768048a361d6350df80b6028",
+    "patch": "@@ -1,16 +0,0 @@\n-package edu.escuelaing.eci.ieti.controllers;\n-\n-import org.springframework.stereotype.Controller;\n-import org.springframework.web.bind.annotation.PostMapping;\n-import org.springframework.web.bind.annotation.RequestParam;\n-\n-\n-@Controller\n-public class AyudaController {\n-    \n-    @PostMapping(\"/ayuda\")\n-    public void form_ayuda(@RequestParam(value=\"email\") String email, @RequestParam(value=\"nombre\") String nombre, @RequestParam(value=\"informacion\") String info){\n-\n-    }\n-    \n-}"
+  },
+  {
+    "sha": "e14c86c45d166d3396f221b0fffc735750c638d0",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/controllers/HelpController.java",
+    "status": "added",
+    "additions": 55,
+    "deletions": 0,
+    "changes": 55,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/controllers/HelpController.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/controllers/HelpController.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/controllers/HelpController.java?ref=0a8fe5a51e79185ede3de7f51151384daa8c90a9",
+    "patch": "@@ -0,0 +1,55 @@\n+package edu.escuelaing.eci.ieti.controllers;\n+\n+\n+import java.util.List;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.http.HttpStatus;\n+import org.springframework.http.ResponseEntity;\n+import org.springframework.web.bind.annotation.CrossOrigin;\n+import org.springframework.web.bind.annotation.RequestBody;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.bind.annotation.RequestMethod;\n+import org.springframework.web.bind.annotation.RestController;\n+\n+import edu.escuelaing.eci.ieti.services.HelpServices;\n+import edu.escuelaing.eci.ieti.models.Help;\n+\n+\n+@RestController\n+@CrossOrigin(origins=\"http://localhost:3000\")\n+@RequestMapping(\"/api/b-ayuda\")\n+public class HelpController {\n+    \n+    @Autowired\n+    HelpServices helpS;\n+\n+    @RequestMapping(value = \"/ayuda\", method = RequestMethod.GET)\n+    public ResponseEntity<List<Help>> getHelps(){\n+        List<Help> helps = null;\n+        try{\n+            helps = helpS.getHelp();\n+            for(Help h: helps){\n+                System.out.print(h.toString());\n+            }\n+            return new ResponseEntity<>(helps, HttpStatus.ACCEPTED);\n+        } catch(Exception e){\n+            return null;\n+        }\n+    }\n+\n+    @RequestMapping(value=\"/register\", method = RequestMethod.POST)\n+    public ResponseEntity<Object> saveHelp(@RequestBody Help help) {\n+        try {\n+            System.out.println(\"\\n Entra en post de help: \"+ help + \"\\n \");\n+            helpS.save(help);\n+        } catch (Exception ex) {\n+            return new ResponseEntity<>(\"Error 404\", HttpStatus.NOT_FOUND);\n+        }\n+        return new ResponseEntity<>( HttpStatus.ACCEPTED);\n+    }\n+\n+\n+\n+    \n+}"
+  },
+  {
+    "sha": "dbabf36a6ca651935d0affa64d0d92b037639835",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/models/Help.java",
+    "status": "added",
+    "additions": 77,
+    "deletions": 0,
+    "changes": 77,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/models/Help.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/models/Help.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/models/Help.java?ref=0a8fe5a51e79185ede3de7f51151384daa8c90a9",
+    "patch": "@@ -0,0 +1,77 @@\n+package edu.escuelaing.eci.ieti.models;\n+\n+import org.springframework.data.annotation.Id;\n+import org.springframework.data.mongodb.core.mapping.Document;\n+\n+@Document(collection = \"help\")\n+public class Help {\n+    \n+    \n+    @Id\n+    private String id;\n+    private String email;\n+    private String name;\n+    private String thelp;\n+    private String info;\n+\n+    public Help(){}\n+    public Help(String id, String email, String name, String thelp, String info){\n+        this.id = id;\n+        this.email = email;\n+        this.name = name;\n+        this.thelp = thelp;\n+        this.info = info; \n+    }\n+\n+    public String getId(){\n+        return id;\n+    }\n+\n+    public void setId(String id){\n+        this.id = id;\n+    }\n+\n+    public String getEmail(){\n+        return email;\n+    }\n+\n+    public void setEmail(String email){\n+        this.email = email;\n+    }\n+\n+    public String getName(){\n+        return name;\n+    }\n+\n+    public void setName(String name){\n+        this.name = name;\n+    }\n+\n+    public String getThelp(){\n+        return thelp;\n+    }\n+\n+    public void setThelp(String thelp){\n+        this.thelp = thelp;\n+    }\n+\n+    public String getInfo(){\n+        return info;\n+    }\n+\n+    public void setInfo(String info){\n+        this.info = info;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return \"Help{\" +\n+                \"ID=\" + id +\n+                \", email='\" + email + '\\'' +\n+                \", name='\" + name + '\\'' +\n+                \", thelp='\" + thelp + '\\'' +\n+                \", info='\" + info + '\\'' +\n+                '}';\n+    }\n+\n+}"
+  },
+  {
+    "sha": "9e09d0930777b0f74d199384faca3c66d49fbfaa",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/repository/HelpRepository.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/repository/HelpRepository.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/repository/HelpRepository.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/repository/HelpRepository.java?ref=0a8fe5a51e79185ede3de7f51151384daa8c90a9",
+    "patch": "@@ -0,0 +1,10 @@\n+package edu.escuelaing.eci.ieti.repository;\n+\n+\n+import edu.escuelaing.eci.ieti.models.Help;\n+import org.springframework.data.mongodb.repository.MongoRepository;\n+import org.springframework.stereotype.Repository;\n+\n+@Repository\n+public interface HelpRepository extends MongoRepository<Help, String>{    \n+}"
+  },
+  {
+    "sha": "9ba00d929d8b80b0021fc46c32700c27948a436c",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/services/HelpServices.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/services/HelpServices.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/services/HelpServices.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/services/HelpServices.java?ref=0a8fe5a51e79185ede3de7f51151384daa8c90a9",
+    "patch": "@@ -0,0 +1,11 @@\n+package edu.escuelaing.eci.ieti.services;\n+\n+import edu.escuelaing.eci.ieti.models.Help;\n+import org.springframework.stereotype.Service;\n+import java.util.List;\n+\n+@Service\n+public interface HelpServices {\n+    void save(Help help);\n+    List<Help> getHelp();\n+}"
+  },
+  {
+    "sha": "4f3f6be16f3fe8f736c9540d4e6a23382ff41516",
+    "filename": "src/main/java/edu/escuelaing/eci/ieti/services/impl/HelpServicesImpl.java",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/blob/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/services/impl/HelpServicesImpl.java",
+    "raw_url": "https://github.com/NIPONSOTES-2-0/ELECTRYRIDE-BACK/raw/0a8fe5a51e79185ede3de7f51151384daa8c90a9/src/main/java/edu/escuelaing/eci/ieti/services/impl/HelpServicesImpl.java",
+    "contents_url": "https://api.github.com/repos/NIPONSOTES-2-0/ELECTRYRIDE-BACK/contents/src/main/java/edu/escuelaing/eci/ieti/services/impl/HelpServicesImpl.java?ref=0a8fe5a51e79185ede3de7f51151384daa8c90a9",
+    "patch": "@@ -0,0 +1,25 @@\n+package edu.escuelaing.eci.ieti.services.impl;\n+\n+import edu.escuelaing.eci.ieti.models.Help;\n+import edu.escuelaing.eci.ieti.repository.HelpRepository;\n+import edu.escuelaing.eci.ieti.services.HelpServices;\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.stereotype.Component;\n+import java.util.List;\n+\n+@Component\n+public class HelpServicesImpl implements HelpServices {\n+    @Autowired\n+    HelpRepository helpR;\n+\n+    @Override\n+    public void save(Help help){\n+        helpR.insert(help);\n+    }\n+\n+    @Override\n+    public List<Help> getHelp(){\n+        return helpR.findAll();\n+    }\n+\n+}"
+  }
+]

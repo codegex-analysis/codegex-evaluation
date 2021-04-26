@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "1a2505fc8f4afacce6e64cf557174c639938d94c",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 54,
+    "deletions": 1,
+    "changes": 55,
+    "blob_url": "https://github.com/Orazalina/Java341/blob/6b043f4e3c06e5d06a250f32e1600d8f5ac45932/pom.xml",
+    "raw_url": "https://github.com/Orazalina/Java341/raw/6b043f4e3c06e5d06a250f32e1600d8f5ac45932/pom.xml",
+    "contents_url": "https://api.github.com/repos/Orazalina/Java341/contents/pom.xml?ref=6b043f4e3c06e5d06a250f32e1600d8f5ac45932",
+    "patch": "@@ -27,6 +27,59 @@\n     <properties>\n         <maven.compiler.source>11</maven.compiler.source>\n         <maven.compiler.target>11</maven.compiler.target>\n+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n     </properties>\n+    <build>\n+        <plugins>\n+            <plugin>\n+                <groupId>org.apache.maven.plugins</groupId>\n+                <artifactId>maven-surefire-plugin</artifactId>\n+                <version>2.22.2</version>\n+                <configuration>\n+                    <failIfNoTests>true</failIfNoTests>\n+                </configuration>\n+            </plugin>\n+            <plugin>\n+                <groupId>org.jacoco</groupId>\n+                <artifactId>jacoco-maven-plugin</artifactId>\n+                <version>0.8.5</version>\n+                <executions>\n+                    <execution>\n+                        <id>prepare-agent</id>\n+                        <phase>initialize</phase>\n+                        <goals>\n+                            <goal>prepare-agent</goal>\n+                        </goals>\n+                    </execution>\n+                    <execution>\n+                        <id>report</id>\n+                        <phase>verify</phase>\n+                        <goals>\n+                            <goal>report</goal>\n+                        </goals>\n+                    </execution>\n+                    <execution>\n+                        <id>check</id>\n+                        <goals>\n+                            <goal>check</goal>\n+                        </goals>\n+                    </execution>\n+                </executions>\n+                <configuration>\n+                    <rules>\n+                        <rule>\n+                            <limits>\n+                                <limit>\n+                                    <counter>BRANCH</counter>\n+                                    <value>COVEREDRATIO</value>\n+                                    <minimum>100%</minimum>\n+                                </limit>\n+                            </limits>\n+                        </rule>\n+                    </rules>\n+                </configuration>\n+            </plugin>\n+        </plugins>\n+    </build>\n \n-</project>\n\\ No newline at end of file\n+</project>"
+  },
+  {
+    "sha": "319a677f1a73a45b23002e68630da49b119cfa4c",
+    "filename": "src/main/java/ru/netology/domain/MovieItem.java",
+    "status": "added",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/Orazalina/Java341/blob/6b043f4e3c06e5d06a250f32e1600d8f5ac45932/src/main/java/ru/netology/domain/MovieItem.java",
+    "raw_url": "https://github.com/Orazalina/Java341/raw/6b043f4e3c06e5d06a250f32e1600d8f5ac45932/src/main/java/ru/netology/domain/MovieItem.java",
+    "contents_url": "https://api.github.com/repos/Orazalina/Java341/contents/src/main/java/ru/netology/domain/MovieItem.java?ref=6b043f4e3c06e5d06a250f32e1600d8f5ac45932",
+    "patch": "@@ -0,0 +1,15 @@\n+package ru.netology.domain;\n+\n+import lombok.AllArgsConstructor;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+\n+@NoArgsConstructor\n+@AllArgsConstructor\n+@Data\n+public class MovieItem {\n+    private int id;\n+    private String imageUrl;\n+    private String name;\n+    private String genre;\n+}"
+  },
+  {
+    "sha": "dce629382b08d60752e11f4142eb80c8c2b20439",
+    "filename": "src/main/java/ru/netology/domain/MovieManager.java",
+    "status": "added",
+    "additions": 48,
+    "deletions": 0,
+    "changes": 48,
+    "blob_url": "https://github.com/Orazalina/Java341/blob/6b043f4e3c06e5d06a250f32e1600d8f5ac45932/src/main/java/ru/netology/domain/MovieManager.java",
+    "raw_url": "https://github.com/Orazalina/Java341/raw/6b043f4e3c06e5d06a250f32e1600d8f5ac45932/src/main/java/ru/netology/domain/MovieManager.java",
+    "contents_url": "https://api.github.com/repos/Orazalina/Java341/contents/src/main/java/ru/netology/domain/MovieManager.java?ref=6b043f4e3c06e5d06a250f32e1600d8f5ac45932",
+    "patch": "@@ -0,0 +1,48 @@\n+package ru.netology.domain;\n+\n+import lombok.AllArgsConstructor;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+\n+@Data\n+@AllArgsConstructor\n+@NoArgsConstructor\n+public class MovieManager {\n+    private MovieItem[] items = new MovieItem[0];\n+    private int feedCount = 10;\n+\n+    public MovieManager(int feedCount) {\n+        this.feedCount = feedCount;\n+    }\n+\n+    public void add(MovieItem item) {\n+        int length = items.length + 1;\n+        MovieItem[] tmp = new MovieItem[length];\n+        System.arraycopy(items, 0, tmp, 0, items.length);\n+        int lastIndex = tmp.length - 1;\n+        tmp[lastIndex] = item;\n+        items = tmp;\n+    }\n+\n+    public MovieItem[] getMoviesForFeed() {\n+        int feed = this.feedCount;\n+        if (feed > items.length)\n+            feed = items.length;\n+        MovieItem[] result = new MovieItem[feed];\n+        for (int i = 0; i < result.length; i++) {\n+            int index = items.length - i - 1;\n+            result[i] = items[index];\n+        }\n+        return result;\n+    }\n+\n+    public MovieItem[] getAll() {\n+        MovieItem[] result = new MovieItem[items.length];\n+        for (int i = 0; i < result.length; i++) {\n+            int index = items.length - i - 1;\n+            result[i] = items[index];\n+        }\n+        return result;\n+    }\n+\n+}"
+  },
+  {
+    "sha": "a8feca2d922f49ee06f8283aa5828846794684c6",
+    "filename": "src/test/java/ru/netology/domain/MovieManagerTest.java",
+    "status": "added",
+    "additions": 67,
+    "deletions": 0,
+    "changes": 67,
+    "blob_url": "https://github.com/Orazalina/Java341/blob/6b043f4e3c06e5d06a250f32e1600d8f5ac45932/src/test/java/ru/netology/domain/MovieManagerTest.java",
+    "raw_url": "https://github.com/Orazalina/Java341/raw/6b043f4e3c06e5d06a250f32e1600d8f5ac45932/src/test/java/ru/netology/domain/MovieManagerTest.java",
+    "contents_url": "https://api.github.com/repos/Orazalina/Java341/contents/src/test/java/ru/netology/domain/MovieManagerTest.java?ref=6b043f4e3c06e5d06a250f32e1600d8f5ac45932",
+    "patch": "@@ -0,0 +1,67 @@\n+package ru.netology.domain;\n+\n+import org.junit.jupiter.api.Test;\n+\n+import static org.junit.jupiter.api.Assertions.assertArrayEquals;\n+\n+class MovieManagerTest {\n+\n+    private MovieManager manager = new MovieManager();\n+    MovieItem first = new MovieItem(1, \"Постер\", \"Бладшот\", \"Боевик\");\n+    MovieItem second = new MovieItem(2, \"Постер\", \"Вперёд\", \"Мультфильм\");\n+    MovieItem third = new MovieItem(3, \"Постер\", \"Отель Белград\", \"Комедия\");\n+    MovieItem fourth = new MovieItem(4, \"Постер\", \"Джентльмены\", \"Боевик\");\n+    MovieItem fifth = new MovieItem(5, \"Постер\", \"Человек-невидимка\", \"Ужасы\");\n+\n+    public void setUp() {\n+        manager.add(first);\n+        manager.add(second);\n+        manager.add(third);\n+        manager.add(fourth);\n+        manager.add(fifth);\n+    }\n+\n+    @Test\n+    void shouldGetEmpty() {\n+        MovieItem[] expected = new MovieItem[0];\n+        MovieItem[] actual = manager.getAll();\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void shouldAddToEmpty() {\n+        manager.add(first);\n+        MovieItem[] expected = new MovieItem[]{first};\n+        MovieItem[] actual = manager.getAll();\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void shouldAddToExisted() {\n+        manager.add(first);\n+        MovieItem[] expected = new MovieItem[]{first};\n+        MovieItem[] actual = manager.getAll();\n+        assertArrayEquals(expected, actual);\n+        manager.add(second);\n+        MovieItem[] expectedAdded = new MovieItem[]{second, first};\n+        MovieItem[] actualAdded = manager.getAll();\n+        assertArrayEquals(expectedAdded, actualAdded);\n+    }\n+\n+    @Test\n+    void shouldGetMoviesForFeed() {\n+        setUp();\n+        MovieItem[] expected = new MovieItem[]{fifth, fourth, third, second, first};\n+        MovieItem[] actual = manager.getMoviesForFeed();\n+        assertArrayEquals(expected, actual);\n+    }\n+\n+    @Test\n+    void shouldGetMoviesForFlexFeed() {\n+        manager = new MovieManager(3);\n+        setUp();\n+        MovieItem[] expected = new MovieItem[]{fifth, fourth, third};\n+        MovieItem[] actual = manager.getMoviesForFeed();\n+        assertArrayEquals(expected, actual);\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

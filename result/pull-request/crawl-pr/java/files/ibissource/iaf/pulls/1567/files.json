@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "5781b0b72e0f01d30da2d5560f7a9483fbc1d2ea",
+    "filename": "core/pom.xml",
+    "status": "modified",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/ibissource/iaf/blob/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/pom.xml",
+    "raw_url": "https://github.com/ibissource/iaf/raw/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/pom.xml",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/pom.xml?ref=20bb09ed07c866113514e2e43e3d7aa87cecc4c8",
+    "patch": "@@ -617,6 +617,39 @@\n \n \t<build>\n \t\t<plugins>\n+\t\t\t<plugin>\n+\t\t\t\t<groupId>org.codehaus.mojo</groupId>\n+\t\t\t\t<artifactId>exec-maven-plugin</artifactId>\n+\t\t\t\t<version>3.0.0</version>\n+\t\t\t\t<executions>\n+\t\t\t\t\t<execution>\n+\t\t\t\t\t\t<goals>\n+\t\t\t\t\t\t\t<goal>java</goal>\n+\t\t\t\t\t\t</goals>\n+\t\t\t\t\t\t<phase>prepare-package</phase>\n+\t\t\t\t\t</execution>\n+\t\t\t\t</executions>\n+\t\t\t\t<configuration>\n+\t\t\t\t\t<includeProjectDependencies>true</includeProjectDependencies>\n+\t\t\t\t\t<includePluginDependencies>true</includePluginDependencies>\n+\t\t\t\t\t<mainClass>nl.nn.adapterframework.cmdline.GenerateFrankDoc</mainClass>\n+\t\t\t\t\t<arguments>\n+\t\t\t\t\t\t<argument>STRICT,COMPATIBILITY</argument>\n+\t\t\t\t\t</arguments>\n+\t\t\t\t</configuration>\n+\t\t\t\t<dependencies>\n+\t\t\t\t\t<dependency>\n+\t\t\t\t\t\t<groupId>javax.servlet</groupId>\n+\t\t\t\t\t\t<artifactId>javax.servlet-api</artifactId>\n+\t\t\t\t\t\t<version>3.0.1</version>\n+\t\t\t\t\t</dependency>\n+\t\t\t\t\t<dependency>\n+\t\t\t\t\t\t<groupId>org.apache.geronimo.specs</groupId>\n+\t\t\t\t\t\t<artifactId>geronimo-jms_1.1_spec</artifactId>\n+\t\t\t\t\t\t<version>1.1</version>\n+\t\t\t\t\t</dependency>\n+\t\t\t\t</dependencies>\n+\t\t\t</plugin>\n \t\t\t<plugin>\n \t\t\t\t<groupId>org.apache.maven.plugins</groupId>\n \t\t\t\t<artifactId>maven-jar-plugin</artifactId>"
+  },
+  {
+    "sha": "55e35ee5d2b2669102bb7f7486b085552ca0c5d4",
+    "filename": "core/src/main/java/nl/nn/adapterframework/cmdline/GenerateFrankDoc.java",
+    "status": "added",
+    "additions": 86,
+    "deletions": 0,
+    "changes": 86,
+    "blob_url": "https://github.com/ibissource/iaf/blob/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/src/main/java/nl/nn/adapterframework/cmdline/GenerateFrankDoc.java",
+    "raw_url": "https://github.com/ibissource/iaf/raw/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/src/main/java/nl/nn/adapterframework/cmdline/GenerateFrankDoc.java",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/java/nl/nn/adapterframework/cmdline/GenerateFrankDoc.java?ref=20bb09ed07c866113514e2e43e3d7aa87cecc4c8",
+    "patch": "@@ -0,0 +1,86 @@\n+/*\n+   Copyright 2021 WeAreFrank!\n+\n+   Licensed under the Apache License, Version 2.0 (the \"License\");\n+   you may not use this file except in compliance with the License.\n+   You may obtain a copy of the License at\n+\n+       http://www.apache.org/licenses/LICENSE-2.0\n+\n+   Unless required by applicable law or agreed to in writing, software\n+   distributed under the License is distributed on an \"AS IS\" BASIS,\n+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+   See the License for the specific language governing permissions and\n+   limitations under the License.\n+*/\n+package nl.nn.adapterframework.cmdline;\n+\n+import java.io.BufferedWriter;\n+import java.io.File;\n+import java.io.FileWriter;\n+import java.io.IOException;\n+import java.io.Writer;\n+\n+import nl.nn.adapterframework.doc.DocWriterNew;\n+import nl.nn.adapterframework.doc.XsdVersion;\n+import nl.nn.adapterframework.doc.model.FrankDocModel;\n+\n+public class GenerateFrankDoc {\n+\n+\tpublic static void main(String[] args) throws IOException {//arg1 = XsdVersion, arg2 = outputDirectory\n+\t\tString coreModuleDirectory = System.getProperty(\"maven.multiModuleProjectDirectory\");\n+\t\tFile directory = new File(coreModuleDirectory);\n+\t\tif(!coreModuleDirectory.endsWith(\"core\") || !directory.isDirectory()) {\n+\t\t\tthrow new IllegalStateException(\"Invalid module directory [\"+coreModuleDirectory+\"]\");\n+\t\t}\n+\n+\t\tFile logDir = new File(directory, \"/target/logs/frankdoc\");\n+\t\tlog(\"Using log.dir [\"+logDir.getAbsolutePath()+\"]\");\n+\t\tSystem.setProperty(\"log.dir\", logDir.getAbsolutePath());\n+\n+\t\tString xsdVersions = XsdVersion.STRICT.name();\n+\t\tFile outputDirectory = new File(directory, \"/target/classes/xml/xsd\");\n+\t\tif(args.length == 1) {\n+\t\t\txsdVersions = args[0];\n+\t\t}\n+\t\telse if(args.length == 2) {\n+\t\t\txsdVersions = args[0];\n+\n+\t\t\toutputDirectory = new File(args[1]);\n+\t\t}\n+\t\toutputDirectory.mkdirs(); //Try and create the directory if it doesn't exist.\n+\t\tif(!outputDirectory.isDirectory()) {\n+\t\t\tthrow new IllegalStateException(\"Invalid outputDirectory [\"+outputDirectory+\"]\");\n+\t\t}\n+\n+\t\tfor(String version : xsdVersions.split(\",\")) {\n+\t\t\ttry {\n+\t\t\t\tXsdVersion xsdVersion = XsdVersion.valueOf(version);\n+\t\t\t\tgenerateFrankDoc(xsdVersion, outputDirectory);\n+\t\t\t} catch (Exception e) {\n+\t\t\t\te.printStackTrace();\n+\t\t\t}\n+\t\t}\n+\t}\n+\n+\tprivate static void generateFrankDoc(XsdVersion version, File outputDirectory) throws IOException {\n+\t\tlong startTime = System.currentTimeMillis();\n+\t\tlog(\"Generating Frank!Doc - xsdVersion [\"+version.name()+\"] outputDirectory [\"+outputDirectory+\"]\");\n+\n+\t\tFrankDocModel model = FrankDocModel.populate();\n+\t\tDocWriterNew docWriter = new DocWriterNew(model);\n+\t\tdocWriter.init(version);\n+\n+\t\tFile output = new File(outputDirectory, \"FrankConfig-\" + docWriter.getOutputFileName());\n+\t\ttry(Writer writer = new BufferedWriter(new FileWriter(output))) {\n+\t\t\twriter.append(docWriter.getSchema());\n+\t\t}\n+\n+\t\tlong duration = System.currentTimeMillis() - startTime;\n+\t\tlog(\"Generated [\"+version.name()+\"] Frank!Doc in [\"+duration+\"] seconds\");\n+\t}\n+\n+\tprivate static void log(String log) {\n+\t\tSystem.out.println(\"[INFO] \"+log);\n+\t}\n+}"
+  },
+  {
+    "sha": "06d6a8d1e86d54931ab9eff52009de439e390fef",
+    "filename": "core/src/main/java/nl/nn/adapterframework/logging/IbisLoggerConfigurationFactory.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 3,
+    "changes": 8,
+    "blob_url": "https://github.com/ibissource/iaf/blob/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/src/main/java/nl/nn/adapterframework/logging/IbisLoggerConfigurationFactory.java",
+    "raw_url": "https://github.com/ibissource/iaf/raw/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/src/main/java/nl/nn/adapterframework/logging/IbisLoggerConfigurationFactory.java",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/java/nl/nn/adapterframework/logging/IbisLoggerConfigurationFactory.java?ref=20bb09ed07c866113514e2e43e3d7aa87cecc4c8",
+    "patch": "@@ -15,10 +15,12 @@\n */\n package nl.nn.adapterframework.logging;\n \n-import java.io.BufferedReader;\n+import java.io.BufferedInputStream;\n import java.io.File;\n import java.io.IOException;\n import java.io.InputStream;\n+import java.io.InputStreamReader;\n+import java.io.Reader;\n import java.io.StringWriter;\n import java.io.Writer;\n import java.net.URL;\n@@ -35,7 +37,7 @@\n import org.apache.logging.log4j.core.config.ConfigurationFactory;\n import org.apache.logging.log4j.core.config.ConfigurationSource;\n import org.apache.logging.log4j.core.config.xml.XmlConfiguration;\n-import nl.nn.adapterframework.util.StreamUtil;\n+\n import nl.nn.adapterframework.util.StringResolver;\n \n /**\n@@ -154,7 +156,7 @@ public static String readLog4jConfiguration(InputStream stream) throws IOExcepti\n \t\tchar[] buff = new char[1024];\n \t\tWriter stringWriter = new StringWriter();\n \t\ttry {\n-\t\t\tBufferedReader reader = new BufferedReader(StreamUtil.getCharsetDetectingInputStreamReader(stream));\n+\t\t\tReader reader = new InputStreamReader(new BufferedInputStream(stream));\n \t\t\tint n;\n \t\t\tboolean checkVersionOnlyFirst1024Characters = true;\n \t\t\twhile ((n = reader.read(buff))!=-1) {"
+  },
+  {
+    "sha": "f72924c8dd84113e39401f70587472e54d08e9b2",
+    "filename": "core/src/main/java/nl/nn/adapterframework/util/JdbcUtil.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 2,
+    "changes": 15,
+    "blob_url": "https://github.com/ibissource/iaf/blob/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/src/main/java/nl/nn/adapterframework/util/JdbcUtil.java",
+    "raw_url": "https://github.com/ibissource/iaf/raw/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/src/main/java/nl/nn/adapterframework/util/JdbcUtil.java",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/java/nl/nn/adapterframework/util/JdbcUtil.java?ref=20bb09ed07c866113514e2e43e3d7aa87cecc4c8",
+    "patch": "@@ -46,6 +46,7 @@\n \n import javax.jms.JMSException;\n import javax.jms.TextMessage;\n+import javax.servlet.http.HttpServletResponse;\n \n import org.apache.commons.codec.Charsets;\n import org.apache.commons.codec.binary.Base64InputStream;\n@@ -275,7 +276,7 @@ else if (\"encode\".equalsIgnoreCase(blobBase64Direction)){\n \t\t\t}\n \t\t\treturn;\n \t\t}\n-\t\tWriter writer = StreamUtil.getWriter(target);\n+\t\tWriter writer = getWriter(target);\n \t\tif (writer !=null) {\n \t\t\tReader reader = JdbcUtil.getBlobReader(blobIntputStream, charset);\n \t\t\tStreamUtil.copyReaderToWriter(reader, writer, 50000, false, false);\n@@ -287,11 +288,21 @@ else if (\"encode\".equalsIgnoreCase(blobBase64Direction)){\n \t\tthrow new IOException(\"cannot stream Blob to [\"+target.getClass().getName()+\"]\");\n \t}\n \n+\tprivate static Writer getWriter(Object target) throws IOException {\n+\t\tif (target instanceof Writer) {\n+\t\t\treturn (Writer)target;\n+\t\t}\n+\t\tif (target instanceof HttpServletResponse) {\n+\t\t\treturn ((HttpServletResponse)target).getWriter();\n+\t\t}\n+\t\treturn null;\n+\t}\n+\n \tpublic static void streamClob(final IDbmsSupport dbmsSupport, ResultSet rs, int column, Object target, boolean close) throws JdbcException, SQLException, IOException {\n \t\tif (target==null) {\n \t\t\tthrow new NullPointerException(\"cannot stream Clob to null object\");\n \t\t}\n-\t\tWriter writer = StreamUtil.getWriter(target);\n+\t\tWriter writer = getWriter(target);\n \t\tif (writer !=null) {\n \t\t\tReader reader = dbmsSupport.getClobReader(rs, column);\n \t\t\tStreamUtil.copyReaderToWriter(reader, writer, 50000, false, false);"
+  },
+  {
+    "sha": "1289d1dbae62e8622b0fd3373a8867531ba54375",
+    "filename": "core/src/main/java/nl/nn/adapterframework/util/StreamUtil.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 10,
+    "changes": 10,
+    "blob_url": "https://github.com/ibissource/iaf/blob/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/src/main/java/nl/nn/adapterframework/util/StreamUtil.java",
+    "raw_url": "https://github.com/ibissource/iaf/raw/20bb09ed07c866113514e2e43e3d7aa87cecc4c8/core/src/main/java/nl/nn/adapterframework/util/StreamUtil.java",
+    "contents_url": "https://api.github.com/repos/ibissource/iaf/contents/core/src/main/java/nl/nn/adapterframework/util/StreamUtil.java?ref=20bb09ed07c866113514e2e43e3d7aa87cecc4c8",
+    "patch": "@@ -70,16 +70,6 @@ public static OutputStream getOutputStream(Object target) throws IOException {\n \t\treturn null;\n \t}\n \n-\tpublic static Writer getWriter(Object target) throws IOException {\n-\t\tif (target instanceof HttpServletResponse) {\n-\t\t\treturn ((HttpServletResponse)target).getWriter();\n-\t\t}\n-\t\tif (target instanceof Writer) {\n-\t\t\treturn (Writer)target;\n-\t\t}\n-\t\treturn null;\n-\t}\n-\t\n \tpublic static InputStream dontClose(InputStream stream) {\n \t\tclass NonClosingInputStreamFilter extends FilterInputStream {\n \t\t\tpublic NonClosingInputStreamFilter(InputStream in) {"
+  }
+]

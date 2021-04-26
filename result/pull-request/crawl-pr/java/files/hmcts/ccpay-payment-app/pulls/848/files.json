@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "8b9ba980bd9a4c1fba8cd1f6137034c195c9e159",
+    "filename": ".github/workflows/ci.yml",
+    "status": "added",
+    "additions": 40,
+    "deletions": 0,
+    "changes": 40,
+    "blob_url": "https://github.com/hmcts/ccpay-payment-app/blob/64539b764fdc55971028a7e3d0cbbfb04e0f8ca4/.github/workflows/ci.yml",
+    "raw_url": "https://github.com/hmcts/ccpay-payment-app/raw/64539b764fdc55971028a7e3d0cbbfb04e0f8ca4/.github/workflows/ci.yml",
+    "contents_url": "https://api.github.com/repos/hmcts/ccpay-payment-app/contents/.github/workflows/ci.yml?ref=64539b764fdc55971028a7e3d0cbbfb04e0f8ca4",
+    "patch": "@@ -0,0 +1,40 @@\n+# This workflow will have a CI flow for Payment Java(Gradle) project\n+name: payment - CI\n+on:\n+  push:\n+    branches: [ master ]\n+  pull_request:\n+    branches: [ master ]\n+\n+jobs:\n+  build:\n+    runs-on: ubuntu-latest\n+    steps:\n+      - uses: actions/checkout@v2\n+        with:\n+          fetch-depth: 0\n+      - name: Set up JDK 11\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: 11\n+      - name: Grant execute permission for gradlew\n+        run: chmod +x gradlew\n+      - name: Cache Gradle packages\n+        uses: actions/cache@v2\n+        with:\n+          path: |\n+            ~/.gradle/caches\n+            ~/.gradle/wrapper\n+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}\n+          restore-keys: |\n+            ${{ runner.os }}-gradle-\n+      - name: Build gradle application\n+        run: ./gradlew build\n+      - name: Generate code coverage report\n+        run: ./gradlew codeCoverageReport\n+      - name: Publish report to Codecov\n+        run: bash <(curl -s https://codecov.io/bash)\n+      - name: Cleanup Gradle Cache\n+        run: |\n+          rm -f ~/.gradle/caches/modules-2/modules-2.lock\n+          rm -fr ~/.gradle/caches/modules-2/*/plugin-resolution/"
+  },
+  {
+    "sha": "04608a880d09922a8c339aeabca9937d24f14cfa",
+    "filename": ".travis.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 23,
+    "changes": 23,
+    "blob_url": "https://github.com/hmcts/ccpay-payment-app/blob/7a6269b5041adaddfd6fad05fed24f63cce5052a/.travis.yml",
+    "raw_url": "https://github.com/hmcts/ccpay-payment-app/raw/7a6269b5041adaddfd6fad05fed24f63cce5052a/.travis.yml",
+    "contents_url": "https://api.github.com/repos/hmcts/ccpay-payment-app/contents/.travis.yml?ref=7a6269b5041adaddfd6fad05fed24f63cce5052a",
+    "patch": "@@ -1,23 +0,0 @@\n-sudo: required\n-\n-language: java\n-jdk:\n-  - openjdk11\n-\n-services:\n-  - docker\n-before_cache:\n-- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock\n-- rm -fr $HOME/.gradle/caches/*/plugin-resolution/\n-before_install:\n-  - curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-docs-group-dockerless.sh > publish-swagger-docs.sh\n-cache:\n-  directories:\n-  - $HOME/.gradle/caches/\n-  - $HOME/.gradle/wrapper/\n-script:\n-  - ./gradlew build\n-  - ./gradlew codeCoverageReport\n-after_success:\n-  - bash <(curl -s https://codecov.io/bash)\n-  - test \"$TRAVIS_BRANCH\" = \"master\" && test \"$TRAVIS_PULL_REQUEST\" = \"false\" && sh ./publish-swagger-docs.sh payment-external-api payment2 reference-data"
+  },
+  {
+    "sha": "f003180ce76289742b783850e26090a705f957db",
+    "filename": "api/src/main/java/uk/gov/hmcts/payment/api/controllers/PaymentController.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/hmcts/ccpay-payment-app/blob/64539b764fdc55971028a7e3d0cbbfb04e0f8ca4/api/src/main/java/uk/gov/hmcts/payment/api/controllers/PaymentController.java",
+    "raw_url": "https://github.com/hmcts/ccpay-payment-app/raw/64539b764fdc55971028a7e3d0cbbfb04e0f8ca4/api/src/main/java/uk/gov/hmcts/payment/api/controllers/PaymentController.java",
+    "contents_url": "https://api.github.com/repos/hmcts/ccpay-payment-app/contents/api/src/main/java/uk/gov/hmcts/payment/api/controllers/PaymentController.java?ref=64539b764fdc55971028a7e3d0cbbfb04e0f8ca4",
+    "patch": "@@ -273,4 +273,5 @@ public String notFound(PaymentNotFoundException ex) {\n     public String return400(PaymentException ex) {\n         return ex.getMessage();\n     }\n+    \n }"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "2bd489dd4d94617e0561cf3be465b4a57e88c8af",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/pom.xml",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/pom.xml",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/pom.xml?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -69,6 +69,16 @@\n             <artifactId>spring-boot-starter-test</artifactId>\n             <scope>test</scope>\n         </dependency>\n+\n+        <dependency>\n+            <groupId>org.springframework.security</groupId>\n+            <artifactId>spring-security-test</artifactId>\n+            <scope>test</scope>\n+        </dependency>\n+        <dependency>\n+            <groupId>org.springframework.boot</groupId>\n+            <artifactId>spring-boot-starter-security</artifactId>\n+        </dependency>\n     </dependencies>\n \n     <build>"
+  },
+  {
+    "sha": "093f7aa8ddc4635e8436f39055c0b4781b74c3a4",
+    "filename": "src/main/java/ru/trishkin/gb/lesson7/config/SecurityConfig.java",
+    "status": "added",
+    "additions": 75,
+    "deletions": 0,
+    "changes": 75,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/config/SecurityConfig.java",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/config/SecurityConfig.java",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/src/main/java/ru/trishkin/gb/lesson7/config/SecurityConfig.java?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -0,0 +1,75 @@\n+package ru.trishkin.gb.lesson7.config;\n+\n+import org.springframework.beans.factory.annotation.Autowired;\n+import org.springframework.context.ApplicationContext;\n+import org.springframework.context.annotation.Bean;\n+import org.springframework.context.annotation.Configuration;\n+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;\n+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;\n+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;\n+import org.springframework.security.config.annotation.web.builders.HttpSecurity;\n+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;\n+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;\n+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;\n+import org.springframework.security.crypto.password.PasswordEncoder;\n+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;\n+import ru.trishkin.gb.lesson7.entity.UserAuthority;\n+import ru.trishkin.gb.lesson7.entity.UserRole;\n+import ru.trishkin.gb.lesson7.service.UserService;\n+\n+@Configuration\n+@EnableWebSecurity\n+@EnableGlobalMethodSecurity(securedEnabled = true,\n+        jsr250Enabled = true,\n+        prePostEnabled = true)\n+public class SecurityConfig extends WebSecurityConfigurerAdapter {\n+\n+    @Autowired\n+    private ApplicationContext context;\n+\n+    private UserService userService;\n+\n+    @Override\n+    protected void configure(AuthenticationManagerBuilder auth){\n+        auth.authenticationProvider(authenticationProvider());\n+    }\n+\n+    @Bean\n+    public PasswordEncoder passwordEncoder(){\n+        return new BCryptPasswordEncoder();\n+    }\n+\n+    @Bean\n+    public DaoAuthenticationProvider authenticationProvider(){\n+        initializeUserService();\n+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();\n+        authenticationProvider.setUserDetailsService(userService);\n+        authenticationProvider.setPasswordEncoder(passwordEncoder());\n+        return authenticationProvider;\n+    }\n+\n+    private void initializeUserService() {\n+        this.userService = context.getBean(UserService.class);\n+    }\n+\n+    @Override\n+    protected void configure(HttpSecurity http) throws Exception {\n+        http.authorizeRequests()\n+                .antMatchers(\"/students\").hasAnyAuthority(\n+                UserAuthority.ADMIN.name())\n+                .antMatchers(\"/students\").hasAnyRole(UserRole.ROLE_ADMIN.name())\n+                .anyRequest().permitAll()\n+                .and()\n+                .formLogin()\n+                .loginPage(\"/login\")\n+                .loginProcessingUrl(\"/auth\")\n+                .failureUrl(\"/login-error\")\n+                .permitAll()\n+                .and()\n+                .logout().logoutRequestMatcher(new AntPathRequestMatcher(\"/logout\"))\n+                .logoutSuccessUrl(\"/\").deleteCookies(\"JSESSIONDID\")\n+                .invalidateHttpSession(true)\n+                .and()\n+                .csrf().disable();\n+    }\n+}"
+  },
+  {
+    "sha": "6fc18ddc42364e76ab75b0980797d3f0c23323ce",
+    "filename": "src/main/java/ru/trishkin/gb/lesson7/controller/MainController.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/controller/MainController.java",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/controller/MainController.java",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/src/main/java/ru/trishkin/gb/lesson7/controller/MainController.java?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -1,10 +1,20 @@\n package ru.trishkin.gb.lesson7.controller;\n \n+import org.springframework.security.access.prepost.PreAuthorize;\n+import org.springframework.stereotype.Controller;\n import org.springframework.web.bind.annotation.RequestMapping;\n \n+@Controller\n public class MainController {\n+\n+    @PreAuthorize(\"isAuthenticated()\")\n     @RequestMapping({\"\", \"/\"})\n     public String index(){\n         return \"index\";\n     }\n+\n+    @RequestMapping(\"/login\")\n+    public String login(){\n+        return \"login_form\";\n+    }\n }"
+  },
+  {
+    "sha": "5542775f465bef5588a39ec3dbaea14e90162b18",
+    "filename": "src/main/java/ru/trishkin/gb/lesson7/entity/User.java",
+    "status": "added",
+    "additions": 34,
+    "deletions": 0,
+    "changes": 34,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/entity/User.java",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/entity/User.java",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/src/main/java/ru/trishkin/gb/lesson7/entity/User.java?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -0,0 +1,34 @@\n+package ru.trishkin.gb.lesson7.entity;\n+\n+import lombok.AllArgsConstructor;\n+import lombok.Builder;\n+import lombok.Data;\n+import lombok.NoArgsConstructor;\n+\n+import javax.persistence.*;\n+\n+@Entity\n+@Table(name = \"users\")\n+@Data\n+@AllArgsConstructor\n+@NoArgsConstructor\n+@Builder\n+public class User {\n+\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.IDENTITY)\n+    @Column(name = \"user_id\")\n+    private Long id;\n+\n+    @Column\n+    private String login;\n+\n+    @Column\n+    private String password;\n+\n+    @Column\n+    private UserRole role;\n+\n+    @Column\n+    private UserAuthority authority;\n+}"
+  },
+  {
+    "sha": "d27e72b7f7d92adf050ccd53a01f6a32d7f666ec",
+    "filename": "src/main/java/ru/trishkin/gb/lesson7/entity/UserAuthority.java",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/entity/UserAuthority.java",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/entity/UserAuthority.java",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/src/main/java/ru/trishkin/gb/lesson7/entity/UserAuthority.java?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -0,0 +1,5 @@\n+package ru.trishkin.gb.lesson7.entity;\n+\n+public enum UserAuthority {\n+    ADMIN, STUDENT, TEACHER\n+}"
+  },
+  {
+    "sha": "b9f99e2d6d22fdc7cfcd409545dfa21d1be6682a",
+    "filename": "src/main/java/ru/trishkin/gb/lesson7/entity/UserRole.java",
+    "status": "added",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/entity/UserRole.java",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/entity/UserRole.java",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/src/main/java/ru/trishkin/gb/lesson7/entity/UserRole.java?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -0,0 +1,5 @@\n+package ru.trishkin.gb.lesson7.entity;\n+\n+public enum UserRole {\n+    ROLE_ADMIN, ROLE_STUDENT, ROLE_TEACHER\n+}"
+  },
+  {
+    "sha": "067b707dc00961c9986ee24251aa23d8a62671ad",
+    "filename": "src/main/java/ru/trishkin/gb/lesson7/repository/UserRepository.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/repository/UserRepository.java",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/repository/UserRepository.java",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/src/main/java/ru/trishkin/gb/lesson7/repository/UserRepository.java?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -0,0 +1,10 @@\n+package ru.trishkin.gb.lesson7.repository;\n+\n+import org.springframework.data.jpa.repository.JpaRepository;\n+import ru.trishkin.gb.lesson7.entity.User;\n+\n+public interface UserRepository extends JpaRepository<User, Long> {\n+    User findFirstByLogin(String login);\n+\n+    void deleteUserById(Long id);\n+}"
+  },
+  {
+    "sha": "06c10030e21ee34225ba62070954502921acbddd",
+    "filename": "src/main/java/ru/trishkin/gb/lesson7/service/UserService.java",
+    "status": "added",
+    "additions": 15,
+    "deletions": 0,
+    "changes": 15,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/service/UserService.java",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/service/UserService.java",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/src/main/java/ru/trishkin/gb/lesson7/service/UserService.java?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -0,0 +1,15 @@\n+package ru.trishkin.gb.lesson7.service;\n+\n+import org.springframework.security.core.userdetails.UserDetailsService;\n+import ru.trishkin.gb.lesson7.entity.User;\n+\n+import java.util.List;\n+\n+public interface UserService extends UserDetailsService {\n+\n+    List<User> getAll();\n+    void save(User user);\n+    User findUserById(Long id);\n+    void deleteUserById(Long id);\n+    void deleteUser(User user);\n+}"
+  },
+  {
+    "sha": "c6ea138cca74247e4e1225b891eb9bd162ee776a",
+    "filename": "src/main/java/ru/trishkin/gb/lesson7/service/UserServiceImpl.java",
+    "status": "added",
+    "additions": 80,
+    "deletions": 0,
+    "changes": 80,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/service/UserServiceImpl.java",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/java/ru/trishkin/gb/lesson7/service/UserServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/src/main/java/ru/trishkin/gb/lesson7/service/UserServiceImpl.java?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -0,0 +1,80 @@\n+package ru.trishkin.gb.lesson7.service;\n+\n+import org.springframework.security.core.GrantedAuthority;\n+import org.springframework.security.core.authority.SimpleGrantedAuthority;\n+import org.springframework.security.core.userdetails.UserDetails;\n+import org.springframework.security.core.userdetails.UsernameNotFoundException;\n+import org.springframework.security.crypto.password.PasswordEncoder;\n+import org.springframework.stereotype.Service;\n+import ru.trishkin.gb.lesson7.entity.User;\n+import ru.trishkin.gb.lesson7.entity.UserAuthority;\n+import ru.trishkin.gb.lesson7.entity.UserRole;\n+import ru.trishkin.gb.lesson7.repository.UserRepository;\n+\n+import java.util.ArrayList;\n+import java.util.Arrays;\n+import java.util.List;\n+\n+@Service\n+public class UserServiceImpl implements UserService {\n+\n+    private final UserRepository repository;\n+    private final PasswordEncoder encoder;\n+\n+    public UserServiceImpl(UserRepository repository, PasswordEncoder encoder) {\n+        this.repository = repository;\n+        this.encoder = encoder;\n+        initDB();\n+    }\n+\n+    private void initDB(){\n+        repository.saveAll(Arrays.asList(\n+                new User(null, \"admin\", encoder.encode(\"pass\"), UserRole.ROLE_ADMIN, UserAuthority.ADMIN),\n+                new User(null, \"teacher\", encoder.encode(\"pass\"), UserRole.ROLE_ADMIN, UserAuthority.TEACHER),\n+                new User(null, \"student\", encoder.encode(\"pass\"), UserRole.ROLE_STUDENT, UserAuthority.STUDENT)\n+        ));\n+    }\n+\n+    @Override\n+    public List<User> getAll() {\n+        return repository.findAll();\n+    }\n+\n+    @Override\n+    public void save(User user) {\n+        repository.save(user);\n+    }\n+\n+    @Override\n+    public User findUserById(Long id) {\n+        return repository.findById(id).orElse(null);\n+    }\n+\n+\n+    @Override\n+    public void deleteUserById(Long id) {\n+        repository.deleteUserById(id);\n+    }\n+\n+    @Override\n+    public void deleteUser(User user) {\n+        repository.delete(user);\n+    }\n+\n+    @Override\n+    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {\n+        User findUser = repository.findFirstByLogin(s);\n+        if (findUser == null){\n+            throw  new UsernameNotFoundException(\"User not found with name: \" + s);\n+        }\n+\n+        List<GrantedAuthority> roles = new ArrayList<>();\n+        roles.add(new SimpleGrantedAuthority(findUser.getRole().name()));\n+\n+        return new org.springframework.security.core.userdetails.User(\n+                findUser.getLogin(),\n+                findUser.getPassword(),\n+                roles);\n+\n+    }\n+}"
+  },
+  {
+    "sha": "ca069d314fc6848810cb4a38bc34aab9febb06e8",
+    "filename": "src/main/resources/templates/login_form.html",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/PavelTrishkin/preparing-for-interviews/blob/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/resources/templates/login_form.html",
+    "raw_url": "https://github.com/PavelTrishkin/preparing-for-interviews/raw/9747e1e29fa6bf5656d0ea72bc1b007af50e159f/src/main/resources/templates/login_form.html",
+    "contents_url": "https://api.github.com/repos/PavelTrishkin/preparing-for-interviews/contents/src/main/resources/templates/login_form.html?ref=9747e1e29fa6bf5656d0ea72bc1b007af50e159f",
+    "patch": "@@ -0,0 +1,25 @@\n+<!DOCTYPE html>\n+<html lang=\"en\" xmlns:th=\"http://www.w3.org/1999/xhtml\">\n+<head>\n+    <meta charset=\"UTF-8\">\n+    <title>Login</title>\n+</head>\n+<body>\n+\n+<p th:if=\"${loginError}\" class=\"error\">Wrong user or password</p>\n+<form th:action=\"@{/auth}\" method=\"post\">\n+    <table border=\"1\">\n+        <tr>\n+            <td>Name</td>\n+            <td><input type=\"text\" name=\"username\"/></td>\n+        </tr>\n+        <tr>\n+            <td>Password</td>\n+            <td><input type=\"password\" name=\"password\"/></td>\n+        </tr>\n+    </table>\n+    <button type=\"submit\">Login</button>\n+</form>\n+\n+</body>\n+</html>\n\\ No newline at end of file"
+  }
+]

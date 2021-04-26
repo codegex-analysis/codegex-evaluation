@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "677f3237cde6034edb9665b68aaa924cca73d1b0",
+    "filename": "base/src/org/adempiere/model/MDocumentStatus.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 9,
+    "changes": 19,
+    "blob_url": "https://github.com/adempiere/adempiere/blob/2c0d9904c9768766640f90477fb76860c423aaa0/base/src/org/adempiere/model/MDocumentStatus.java",
+    "raw_url": "https://github.com/adempiere/adempiere/raw/2c0d9904c9768766640f90477fb76860c423aaa0/base/src/org/adempiere/model/MDocumentStatus.java",
+    "contents_url": "https://api.github.com/repos/adempiere/adempiere/contents/base/src/org/adempiere/model/MDocumentStatus.java?ref=2c0d9904c9768766640f90477fb76860c423aaa0",
+    "patch": "@@ -5,6 +5,7 @@\n import java.util.ArrayList;\n import java.util.Properties;\n \n+import org.compiere.model.MRole;\n import org.compiere.model.MTable;\n import org.compiere.util.DB;\n import org.compiere.util.Env;\n@@ -14,30 +15,29 @@\n \t/**\n \t * \tGet User Goals\n \t *\t@param ctx context\n-\t *\t@param AD_User_ID user\n-\t * @param AD_Role_ID \n+\t *\t@param userId user\n+\t * @param roleId \n \t *\t@return array of goals\n \t */\n-\tpublic static IDocumentStatus[] getDocumentStatusIndicators(Properties ctx, int AD_User_ID, int AD_Role_ID)\n+\tpublic static IDocumentStatus[] getDocumentStatusIndicators(Properties ctx, int userId, int roleId)\n \t{\n-\t\tif (AD_User_ID < 0)\n+\t\tif (userId < 0)\n \t\t\treturn new IDocumentStatus[0];\n \t\t\n \t\tArrayList<IDocumentStatus> list = new ArrayList<IDocumentStatus>();\n \t\tString sql = \"SELECT * FROM PA_DocumentStatus g \"\n \t\t\t+ \"WHERE IsActive='Y'\"\n-\t\t\t+ \" AND AD_Client_ID=?\"\t\t//\t#1\n \t\t\t+ \" AND ((AD_User_ID IS NULL OR AD_User_ID=?) AND \" //#2\n \t\t\t\t+ \" ( AD_Role_ID IS NULL OR AD_Role_ID=?)) \"\t//\t#3)\n \t\t\t+ \"ORDER BY SeqNo\";\n+\t\tsql = MRole.getDefault().addAccessSQL(sql, \"g\", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);\n \t\tPreparedStatement pstmt = null;\n \t\tResultSet rs = null;\n \t\ttry\n \t\t{\n \t\t\tpstmt = DB.prepareStatement (sql, null);\n-\t\t\tpstmt.setInt (1, Env.getAD_Client_ID(ctx));\n-\t\t\tpstmt.setInt (2, AD_User_ID);\n-\t\t\tpstmt.setInt (3, AD_Role_ID);\n+\t\t\tpstmt.setInt (1, userId);\n+\t\t\tpstmt.setInt (2, roleId);\n \t\t\trs = pstmt.executeQuery ();\n \t\t\twhile (rs.next ())\n \t\t\t{\n@@ -66,7 +66,8 @@ public static int evaluate(IDocumentStatus documentStatus) {\n \t\tString where = getWhereClause(documentStatus);\n \t\tif (where != null && where.trim().length() > 0)\n \t\t\tsql.append(\" WHERE \" ).append(where);\n-\t\treturn DB.getSQLValue(null, sql.toString());\n+\t\tString parsedSql = MRole.getDefault().addAccessSQL(sql.toString(), tableName, MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);\n+\t\treturn DB.getSQLValue(null, parsedSql.toString());\n \t}\n \n \tpublic static String getWhereClause(IDocumentStatus documentStatus) {"
+  }
+]

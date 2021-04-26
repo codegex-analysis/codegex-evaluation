@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "9a3f7dcd007aa9bce7c29adbf0bea87ea4430822",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/PryPurity/WorldBorder/blob/26f970611dc71bd52082abbfee6dd2190c6a49b5/pom.xml",
+    "raw_url": "https://github.com/PryPurity/WorldBorder/raw/26f970611dc71bd52082abbfee6dd2190c6a49b5/pom.xml",
+    "contents_url": "https://api.github.com/repos/PryPurity/WorldBorder/contents/pom.xml?ref=26f970611dc71bd52082abbfee6dd2190c6a49b5",
+    "patch": "@@ -3,7 +3,7 @@\n     <modelVersion>4.0.0</modelVersion>\n     <groupId>com.wimbli.WorldBorder</groupId>\n     <artifactId>WorldBorder</artifactId>\n-    <version>2.1.0</version>\n+    <version>2.1.1</version>\n     <name>WorldBorder</name>\n     <url>https://github.com/PryPurity/WorldBorder</url>\n     <issueManagement>"
+  },
+  {
+    "sha": "3a1e40daf15f832f5f245e4ec786b84ee72fdc90",
+    "filename": "src/main/java/com/wimbli/WorldBorder/Config.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/PryPurity/WorldBorder/blob/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/java/com/wimbli/WorldBorder/Config.java",
+    "raw_url": "https://github.com/PryPurity/WorldBorder/raw/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/java/com/wimbli/WorldBorder/Config.java",
+    "contents_url": "https://api.github.com/repos/PryPurity/WorldBorder/contents/src/main/java/com/wimbli/WorldBorder/Config.java?ref=26f970611dc71bd52082abbfee6dd2190c6a49b5",
+    "patch": "@@ -39,6 +39,7 @@\n     private static boolean whooshEffect = false;\n     private static boolean portalRedirection = true;\n     private static boolean dynmapEnable = false;\n+    private static String dynmapLayerLabel;\n     private static String dynmapMessage;\n     private static int dynmapPriority = 0;\n     private static boolean dynmapHideByDefault = false;\n@@ -341,6 +342,17 @@ public static boolean DynmapBorderEnabled() {\n         return dynmapEnable;\n     }\n \n+    public static void setDynmapLayerLabel(String label) {\n+        dynmapLayerLabel = label;\n+        log(\"DynMap layer label is now set to: \" + label);\n+        save(true);\n+        DynMapFeatures.showAllBorders();\n+    }\n+\n+    public static String DynmapLayerLabel() {\n+        return dynmapLayerLabel;\n+    }\n+\n     public static void setDynmapMessage(String msg) {\n         dynmapMessage = msg;\n         log(\"DynMap border label is now set to: \" + msg);\n@@ -520,6 +532,7 @@ public static void load(WorldBorder master, boolean logIt) {    // load config f\n         timerTicks = cfg.getInt(\"timer-delay-ticks\", 5);\n         remountDelayTicks = cfg.getInt(\"remount-delay-ticks\", 0);\n         dynmapEnable = cfg.getBoolean(\"dynmap-border-enabled\", true);\n+        dynmapLayerLabel = cfg.getString(\"dynmap-border-layer-label\", \"WorldBorder\");\n         dynmapMessage = cfg.getString(\"dynmap-border-message\", \"The border of the world.\");\n         dynmapHideByDefault = cfg.getBoolean(\"dynmap-border-hideByDefault\", false);\n         dynmapPriority = cfg.getInt(\"dynmap-border-priority\", 0);\n@@ -624,6 +637,7 @@ public static void save(boolean logIt, boolean storeFillTask) {    // save confi\n         cfg.set(\"timer-delay-ticks\", timerTicks);\n         cfg.set(\"remount-delay-ticks\", remountDelayTicks);\n         cfg.set(\"dynmap-border-enabled\", dynmapEnable);\n+        cfg.set(\"dynmap-border-layer-label\", dynmapLayerLabel);\n         cfg.set(\"dynmap-border-message\", dynmapMessage);\n         cfg.set(\"dynmap-border-hideByDefault\", dynmapHideByDefault);\n         cfg.set(\"dynmap-border-priority\", dynmapPriority);"
+  },
+  {
+    "sha": "343fd840ad46b07cb2552a83436b85544698235f",
+    "filename": "src/main/java/com/wimbli/WorldBorder/DynMapFeatures.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/PryPurity/WorldBorder/blob/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/java/com/wimbli/WorldBorder/DynMapFeatures.java",
+    "raw_url": "https://github.com/PryPurity/WorldBorder/raw/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/java/com/wimbli/WorldBorder/DynMapFeatures.java",
+    "contents_url": "https://api.github.com/repos/PryPurity/WorldBorder/contents/src/main/java/com/wimbli/WorldBorder/DynMapFeatures.java?ref=26f970611dc71bd52082abbfee6dd2190c6a49b5",
+    "patch": "@@ -127,9 +127,9 @@ public static void showAllBorders() {\n         // make sure the marker set is initialized\n         markSet = markApi.getMarkerSet(\"worldborder.markerset\");\n         if (markSet == null)\n-            markSet = markApi.createMarkerSet(\"worldborder.markerset\", \"WorldBorder\", null, false);\n+            markSet = markApi.createMarkerSet(\"worldborder.markerset\", Config.DynmapLayerLabel(), null, false);\n         else\n-            markSet.setMarkerSetLabel(\"WorldBorder\");\n+            markSet.setMarkerSetLabel(Config.DynmapLayerLabel());\n         markSet.setLayerPriority(Config.DynmapPriority());\n         markSet.setHideByDefault(Config.DynmapHideByDefault());\n         Map<String, BorderData> borders = Config.getBorders();"
+  },
+  {
+    "sha": "4d6380fe780aedbc943ee500159d1ed7ae719841",
+    "filename": "src/main/java/com/wimbli/WorldBorder/WBCommand.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/PryPurity/WorldBorder/blob/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/java/com/wimbli/WorldBorder/WBCommand.java",
+    "raw_url": "https://github.com/PryPurity/WorldBorder/raw/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/java/com/wimbli/WorldBorder/WBCommand.java",
+    "contents_url": "https://api.github.com/repos/PryPurity/WorldBorder/contents/src/main/java/com/wimbli/WorldBorder/WBCommand.java?ref=26f970611dc71bd52082abbfee6dd2190c6a49b5",
+    "patch": "@@ -43,6 +43,7 @@ public WBCommand() {\n         addCmd(new CmdPreventSpawn());    // 1\n         addCmd(new CmdDelay());            // 1\n         addCmd(new CmdDynmap());        // 1\n+        addCmd(new CmdDynmaplabel());        // 1\n         addCmd(new CmdDynmapmsg());        // 1\n         addCmd(new CmdRemount());        // 1\n         addCmd(new CmdFillautosave());    // 1"
+  },
+  {
+    "sha": "2e5a602c1bfa2806ef50c0c2650a420531751cee",
+    "filename": "src/main/java/com/wimbli/WorldBorder/cmd/CmdDynmaplabel.java",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/PryPurity/WorldBorder/blob/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/java/com/wimbli/WorldBorder/cmd/CmdDynmaplabel.java",
+    "raw_url": "https://github.com/PryPurity/WorldBorder/raw/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/java/com/wimbli/WorldBorder/cmd/CmdDynmaplabel.java",
+    "contents_url": "https://api.github.com/repos/PryPurity/WorldBorder/contents/src/main/java/com/wimbli/WorldBorder/cmd/CmdDynmaplabel.java?ref=26f970611dc71bd52082abbfee6dd2190c6a49b5",
+    "patch": "@@ -0,0 +1,42 @@\n+package com.wimbli.WorldBorder.cmd;\n+\n+import com.wimbli.WorldBorder.Config;\n+import org.bukkit.command.CommandSender;\n+import org.bukkit.entity.Player;\n+\n+import java.util.List;\n+\n+\n+public class CmdDynmaplabel extends WBCmd {\n+    public CmdDynmaplabel() {\n+        name = permission = \"dynmaplabel\";\n+        minParams = 1;\n+\n+        addCmdExample(nameEmphasized() + \"<text> - DynMap border layer labels will show this.\");\n+        helpText = \"Default value: \\\"WorldBorder.\\\". If you are running the DynMap plugin and the \" +\n+                commandEmphasized(\"dynmap\") + C_DESC + \"command setting is enabled, the border layer shown in DynMap will \" +\n+                \"be labelled with this text.\";\n+    }\n+\n+    @Override\n+    public void cmdStatus(CommandSender sender) {\n+        sender.sendMessage(C_HEAD + \"DynMap border layer label is set to: \" + C_ERR + Config.DynmapLayerLabel());\n+    }\n+\n+    @Override\n+    public void execute(CommandSender sender, Player player, List<String> params, String worldName) {\n+        StringBuilder message = new StringBuilder();\n+        boolean first = true;\n+        for (String param : params) {\n+            if (!first)\n+                message.append(\" \");\n+            message.append(param);\n+            first = false;\n+        }\n+\n+        Config.setDynmapLayerLabel(message.toString());\n+\n+        if (player != null)\n+            cmdStatus(sender);\n+    }\n+}"
+  },
+  {
+    "sha": "def8543ddfac2e157e3c9c27c9b11d4c261b4c7a",
+    "filename": "src/main/resources/plugin.yml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/PryPurity/WorldBorder/blob/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/resources/plugin.yml",
+    "raw_url": "https://github.com/PryPurity/WorldBorder/raw/26f970611dc71bd52082abbfee6dd2190c6a49b5/src/main/resources/plugin.yml",
+    "contents_url": "https://api.github.com/repos/PryPurity/WorldBorder/contents/src/main/resources/plugin.yml?ref=26f970611dc71bd52082abbfee6dd2190c6a49b5",
+    "patch": "@@ -1,7 +1,7 @@\n name: WorldBorder\n authors: [Brettflan, PryPurity]\n description: Efficient, feature-rich plugin for limiting the size of your worlds.\n-version: 2.1.0\n+version: 2.1.1\n api-version: 1.16\n main: com.wimbli.WorldBorder.WorldBorder\n softdepend:\n@@ -39,6 +39,7 @@ commands:\n       /<command> wshape [world] <round|square|default> - same as above values.\n       /<command> delay <amount> - time between border checks.\n       /<command> dynmap <on/off> - turn DynMap border display on or off.\n+      /<command> dynmaplabel <text> - DynMap border layer label will show this.\n       /<command> dynmapmsg <text> - DynMap border labels will show this.\n       /<command> remount <amount> - delay before remounting after knockback.\n       /<command> fillautosave <seconds> - world save interval for Fill process."
+  }
+]

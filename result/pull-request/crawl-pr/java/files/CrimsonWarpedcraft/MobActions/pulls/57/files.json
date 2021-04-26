@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "90183a3f3d50bb998f29ca65013bbff0ebef3c1b",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/CrimsonWarpedcraft/MobActions/blob/93e4160d10f991624be2ce3380b60aa81cacb37b/README.md",
+    "raw_url": "https://github.com/CrimsonWarpedcraft/MobActions/raw/93e4160d10f991624be2ce3380b60aa81cacb37b/README.md",
+    "contents_url": "https://api.github.com/repos/CrimsonWarpedcraft/MobActions/contents/README.md?ref=93e4160d10f991624be2ce3380b60aa81cacb37b",
+    "patch": "@@ -13,15 +13,15 @@ Tested Minecraft Versions: **1.16**\n ## Features\n For a simple plugin, we pack a few powerful features!\n ### Commands\n-`/mac action create command \"command\" \"name tag text\"` - Create a new command mob action    \n-`/mac action create consolecmd \"command\" \"name tag text\"` - Create a new console command mob action  \n+`/mac action create command \"command[;command 2]\" \"name tag text\"` - Create a new command mob action    \n+`/mac action create consolecmd \"command[;command 2]\" \"name tag text\"` - Create a new console command mob action  \n `/mac action create warp <name>` - Create a new warp mob action  \n `/mac action create event <name>` - Create a new event mob action with a command or warp action  \n `/mac action remove` - Remove a mob action  \n `/mac action cancel` - Cancels the current action operation  \n-`/mac events create <event name> <wait seconds> [max players] command \"command\"` - Create a command \n+`/mac events create <event name> <wait seconds> [max players] command \"command[;command 2]\"` - Create a command \n event with an optional player limit  \n-`/mac events create <event name> <wait seconds> [max players] consolecmd \"command\"` - Create a \n+`/mac events create <event name> <wait seconds> [max players] consolecmd \"command[;command 2]\"` - Create a \n console command event with an optional player limit   \n `/mac events create <event name> <wait seconds> [max players] warp <warp name>` - Create a warp  \n event with an optional player limit  "
+  },
+  {
+    "sha": "1be46e35dab00df1693e17d442015641f96d5fe3",
+    "filename": "src/main/java/com/snowypeaksystems/mobactions/actions/CommandAction.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 3,
+    "changes": 10,
+    "blob_url": "https://github.com/CrimsonWarpedcraft/MobActions/blob/93e4160d10f991624be2ce3380b60aa81cacb37b/src/main/java/com/snowypeaksystems/mobactions/actions/CommandAction.java",
+    "raw_url": "https://github.com/CrimsonWarpedcraft/MobActions/raw/93e4160d10f991624be2ce3380b60aa81cacb37b/src/main/java/com/snowypeaksystems/mobactions/actions/CommandAction.java",
+    "contents_url": "https://api.github.com/repos/CrimsonWarpedcraft/MobActions/contents/src/main/java/com/snowypeaksystems/mobactions/actions/CommandAction.java?ref=93e4160d10f991624be2ce3380b60aa81cacb37b",
+    "patch": "@@ -56,10 +56,14 @@ public void run(MobActionsUser player) throws PlayerException {\n         user = player;\n       }\n \n-      if (!user.performCommand(commandStr)) {\n-        DebugLogger.getLogger().log(\"Command execution failed\");\n-        throw new CommandActionException();\n+      String[] commandList = commandStr.split(\"(?<!\\\\\\\\);\");\n+      for (String command : commandList) {\n+        if (!user.performCommand(command.trim())) {\n+          DebugLogger.getLogger().log(\"Command execution failed\");\n+          throw new CommandActionException();\n+        }\n       }\n+\n       DebugLogger.getLogger().log(\"Command executed\");\n     }\n   }"
+  },
+  {
+    "sha": "a415f5b247bc0edb06f5f5818837f4162e856138",
+    "filename": "src/main/java/com/snowypeaksystems/mobactions/actions/EventMobStartAction.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 5,
+    "changes": 18,
+    "blob_url": "https://github.com/CrimsonWarpedcraft/MobActions/blob/93e4160d10f991624be2ce3380b60aa81cacb37b/src/main/java/com/snowypeaksystems/mobactions/actions/EventMobStartAction.java",
+    "raw_url": "https://github.com/CrimsonWarpedcraft/MobActions/raw/93e4160d10f991624be2ce3380b60aa81cacb37b/src/main/java/com/snowypeaksystems/mobactions/actions/EventMobStartAction.java",
+    "contents_url": "https://api.github.com/repos/CrimsonWarpedcraft/MobActions/contents/src/main/java/com/snowypeaksystems/mobactions/actions/EventMobStartAction.java?ref=93e4160d10f991624be2ce3380b60aa81cacb37b",
+    "patch": "@@ -55,11 +55,19 @@ public void run(MobActionsUser player) throws PlayerException {\n       boolean isConsoleCommand = data instanceof ConsoleCommandData\n           && ((ConsoleCommandData) data).isConsoleCommand();\n \n-      if ((!isConsoleCommand && !player.performCommand(commandStr))\n-          || (isConsoleCommand && !ma.getPlayer(ma.getServer().getConsoleSender())\n-          .performCommand(commandStr))) {\n-        DebugLogger.getLogger().log(\"Command execution failed\");\n-        throw new CommandActionException();\n+      MobActionsUser user;\n+      if (isConsoleCommand) {\n+        user = ma.getPlayer(ma.getServer().getConsoleSender());\n+      } else {\n+        user = player;\n+      }\n+\n+      String[] commandList = commandStr.split(\"(?<!\\\\\\\\);\");\n+      for (String command : commandList) {\n+        if (!user.performCommand(command.trim())) {\n+          DebugLogger.getLogger().log(\"Command execution failed\");\n+          throw new CommandActionException();\n+        }\n       }\n \n       DebugLogger.getLogger().log(\"Command executed\");"
+  },
+  {
+    "sha": "6ccedbc6c97b032cb1ae78c6d29238a9cebabd8e",
+    "filename": "src/main/java/com/snowypeaksystems/mobactions/util/Messages.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 7,
+    "changes": 15,
+    "blob_url": "https://github.com/CrimsonWarpedcraft/MobActions/blob/93e4160d10f991624be2ce3380b60aa81cacb37b/src/main/java/com/snowypeaksystems/mobactions/util/Messages.java",
+    "raw_url": "https://github.com/CrimsonWarpedcraft/MobActions/raw/93e4160d10f991624be2ce3380b60aa81cacb37b/src/main/java/com/snowypeaksystems/mobactions/util/Messages.java",
+    "contents_url": "https://api.github.com/repos/CrimsonWarpedcraft/MobActions/contents/src/main/java/com/snowypeaksystems/mobactions/util/Messages.java?ref=93e4160d10f991624be2ce3380b60aa81cacb37b",
+    "patch": "@@ -144,10 +144,10 @@ public static String gm(String key, String... args) {\n \n     // Help messages\n     messages.put(\"help-usage\", \"&eUsage: /mac <subcommand>\");\n-    messages.put(\"help-command-action\", \"&e/mac action create command \\\"command\\\" \\\"name tag text\\\"\"\n-        + \" - Create a new command mob\");\n-    messages.put(\"help-consolecmd-action\", \"&e/mac action create consolecmd \\\"command\\\" \\\"name tag\"\n-        + \" text\\\" - Create a new console command mob\");\n+    messages.put(\"help-command-action\", \"&e/mac action create command \\\"command[;command 2]\\\"\"\n+        + \" \\\"name tag text\\\" - Create a new command mob\");\n+    messages.put(\"help-consolecmd-action\", \"&e/mac action create consolecmd \\\"command[;command 2]\\\"\"\n+        + \" \\\"name tag text\\\" - Create a new console command mob\");\n     messages.put(\"help-event-action\", \"&e/mac action create event <event> - Create a new event mob\"\n         + \" action\");\n     messages.put(\"help-warp-action\", \"&e/mac action create warp <warp> - Create a new warp mob\"\n@@ -156,10 +156,11 @@ public static String gm(String key, String... args) {\n     messages.put(\"help-action-cancel\", \"&e/mac action cancel - Cancels the current action\"\n         + \" operation\");\n     messages.put(\"help-command-event\", \"&e/mac events create <event name> <wait seconds> [max\"\n-        + \" players] command \\\"command\\\" - Create a command event with an optional player limit\");\n+        + \" players] command \\\"command[;command 2]\\\" - Create a command event with an optional\"\n+        + \" player limit\");\n     messages.put(\"help-consolecmd-event\", \"&e/mac events create <event name> <wait seconds> [max\"\n-        + \" players] consolecmd \\\"command\\\" - Create a consolecmd event with an optional player\"\n-        + \" limit\");\n+        + \" players] consolecmd \\\"command[;command 2]\\\" - Create a consolecmd event with an\"\n+        + \" optional player limit\");\n     messages.put(\"help-warp-event\", \"&e/mac events create <event name> <wait seconds> [max players]\"\n         + \" warp <warp name> - Create a warp event with an optional player limit\");\n     messages.put(\"help-event-open\", \"&e/mac events open <name> - Opens event, starts event timer\");"
+  },
+  {
+    "sha": "f2c657a858de087ba7e8f67c0e0cca3bf974e71d",
+    "filename": "src/test/java/com/snowypeaksystems/mobactions/data/command/CommandDataTest.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/CrimsonWarpedcraft/MobActions/blob/93e4160d10f991624be2ce3380b60aa81cacb37b/src/test/java/com/snowypeaksystems/mobactions/data/command/CommandDataTest.java",
+    "raw_url": "https://github.com/CrimsonWarpedcraft/MobActions/raw/93e4160d10f991624be2ce3380b60aa81cacb37b/src/test/java/com/snowypeaksystems/mobactions/data/command/CommandDataTest.java",
+    "contents_url": "https://api.github.com/repos/CrimsonWarpedcraft/MobActions/contents/src/test/java/com/snowypeaksystems/mobactions/data/command/CommandDataTest.java?ref=93e4160d10f991624be2ce3380b60aa81cacb37b",
+    "patch": "@@ -16,8 +16,10 @@ void replace() {\n     ICommandData data = new CommandData(\"te{}s\\\\\\\\t\");\n     assertEquals(\"test tes\\\\\\\\t\", data.getCommand(\"st te\"));\n \n-    data = new CommandData(\"{}st {}st\");\n-    assertEquals(\"test test\", data.getCommand(\"te\"));\n+    data = new CommandData(\"{}st; {}st\");\n+    assertEquals(\"test; test\", data.getCommand(\"te\"));\n+    data = new CommandData(\"{}st\\\\; {}st\");\n+    assertEquals(\"test\\\\; test\", data.getCommand(\"te\"));\n \n     data = new CommandData(\"\\\\\\\\{} \\\\{\\\\} {}\");\n     assertEquals(\"\\\\test {} test\", data.getCommand(\"test\"));"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "51398c9da6c7237fadefb46b6e2c4ec45346e32e",
+    "filename": "livingatlas/pipelines/pom.xml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 48,
+    "changes": 55,
+    "blob_url": "https://github.com/gbif/pipelines/blob/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/pom.xml",
+    "raw_url": "https://github.com/gbif/pipelines/raw/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/pom.xml",
+    "contents_url": "https://api.github.com/repos/gbif/pipelines/contents/livingatlas/pipelines/pom.xml?ref=92b62604ef6cfab4ee7f349a7776340e292b7288",
+    "patch": "@@ -22,7 +22,6 @@\n         <filtering>true</filtering>\n       </testResource>\n     </testResources>\n-\n     <plugins>\n       <!-- Download supporting shapefiles -->\n       <plugin>\n@@ -37,7 +36,7 @@\n               <goal>wget</goal>\n             </goals>\n             <configuration>\n-              <url>https://biocache.ala.org.au/archives/pipelines/pipelines-shapefiles.zip</url>\n+              <url>http://download.gbif.org/pipelines/livingatlas/pipelines-shapefiles-v2.zip</url>\n               <unpack>true</unpack>\n               <outputDirectory>/tmp/pipelines-shp</outputDirectory>\n             </configuration>\n@@ -87,6 +86,7 @@\n             <filter>\n               <artifact>*:*</artifact>\n               <excludes>\n+                <exclude>module-info.class</exclude>\n                 <exclude>META-INF/*.SF</exclude>\n                 <exclude>META-INF/*.DSA</exclude>\n                 <exclude>META-INF/*.RSA</exclude>\n@@ -104,7 +104,7 @@\n               <shadedArtifactAttached>true</shadedArtifactAttached>\n               <shadedClassifierName>shaded</shadedClassifierName>\n               <transformers>\n-                <transformer implementation=\"org.apache.maven.plugins.shade.resource.ServicesResourceTransformer\" />\n+                <transformer implementation=\"org.apache.maven.plugins.shade.resource.ServicesResourceTransformer\"/>\n                 <transformer implementation=\"org.apache.maven.plugins.shade.resource.ManifestResourceTransformer\">\n                   <mainClass>org.gbif.pipelines.ingest.pipelines.DwcaToVerbatimPipeline</mainClass>\n                 </transformer>\n@@ -153,7 +153,6 @@\n       <plugin>\n         <groupId>io.fabric8</groupId>\n         <artifactId>docker-maven-plugin</artifactId>\n-        <version>${io.fabric8.version}</version>\n         <extensions>true</extensions>\n         <executions>\n           <execution>\n@@ -291,22 +290,20 @@\n     <commons-configuration.version>1.6</commons-configuration.version>\n     <netty.version>3.9.9.Final</netty.version>\n     <netty-all.version>4.1.42.Final</netty-all.version>\n-    <ingest-hdfs-table.version>2.2.34</ingest-hdfs-table.version>\n     <snakeyaml.version>1.25</snakeyaml.version>\n     <streamex.version>0.7.2</streamex.version>\n     <!-- This is overriding GBIF mother pom which is using a 2.11.0.rc1  -->\n     <jackson.version>2.11.1</jackson.version>\n     <jackson-module-scala_2.11.version>2.11.1</jackson-module-scala_2.11.version>\n     <jcommander.version>1.78</jcommander.version>\n     <layers-store.version>2.0.3</layers-store.version>\n-    <junit.version>5.6.2</junit.version>\n     <json-simple.version>1.1.1</json-simple.version>\n+    <gbif-parsers.version>0.53</gbif-parsers.version>\n \n     <!-- GBIF parent currently using 2.4.0 -->\n     <spark.embedded.version>2.4.5</spark.embedded.version>\n \n     <!-- Plugins -->\n-    <io.fabric8.version>0.33.0</io.fabric8.version>\n     <org.jetbrains.annotations>13.0</org.jetbrains.annotations>\n \n     <download-maven-plugin.version>1.6.1</download-maven-plugin.version>\n@@ -425,49 +422,16 @@\n         </exclusion>\n       </exclusions>\n     </dependency>\n-    <dependency>\n-      <groupId>org.gbif.pipelines</groupId>\n-      <artifactId>ingest-hdfs-table</artifactId>\n-      <version>${ingest-hdfs-table.version}</version>\n-      <exclusions>\n-        <exclusion>\n-          <groupId>ch.qos.logback</groupId>\n-          <artifactId>logback-classic</artifactId>\n-        </exclusion>\n-      </exclusions>\n-    </dependency>\n-    <dependency>\n-      <groupId>org.gbif.pipelines</groupId>\n-      <artifactId>keygen</artifactId>\n-    </dependency>\n-    <dependency>\n-      <groupId>org.gbif.pipelines</groupId>\n-      <artifactId>archives-converters</artifactId>\n-    </dependency>\n-    <dependency>\n-      <groupId>org.gbif.occurrence</groupId>\n-      <artifactId>occurrence-hdfs-table</artifactId>\n-      <exclusions>\n-        <exclusion>\n-          <groupId>com.beust</groupId>\n-          <artifactId>jcommander</artifactId>\n-        </exclusion>\n-      </exclusions>\n-    </dependency>\n \n     <!-- GBIF -->\n-    <dependency>\n-      <groupId>org.gbif</groupId>\n-      <artifactId>dwca-io</artifactId>\n-    </dependency>\n     <dependency>\n       <groupId>org.gbif</groupId>\n       <artifactId>dwc-api</artifactId>\n     </dependency>\n     <dependency>\n       <groupId>org.gbif</groupId>\n       <artifactId>gbif-parsers</artifactId>\n-      <version>0.53</version>\n+      <version>${gbif-parsers.version}</version>\n     </dependency>\n     <dependency>\n       <groupId>org.gbif</groupId>\n@@ -512,10 +476,6 @@\n         </exclusion>\n       </exclusions>\n     </dependency>\n-    <dependency>\n-      <groupId>org.gbif</groupId>\n-      <artifactId>gbif-wrangler</artifactId>\n-    </dependency>\n \n     <!-- Avro -->\n     <dependency>\n@@ -843,9 +803,8 @@\n \n     <!-- Test -->\n     <dependency>\n-      <groupId>org.junit.jupiter</groupId>\n-      <artifactId>junit-jupiter-api</artifactId>\n-      <version>${junit.version}</version>\n+      <groupId>junit</groupId>\n+      <artifactId>junit</artifactId>\n       <scope>test</scope>\n     </dependency>\n     <dependency>"
+  },
+  {
+    "sha": "ea6593714cfce0eeb6d3860b80a055616779fe10",
+    "filename": "livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/SpeciesListPipelineIT.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/gbif/pipelines/blob/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/SpeciesListPipelineIT.java",
+    "raw_url": "https://github.com/gbif/pipelines/raw/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/SpeciesListPipelineIT.java",
+    "contents_url": "https://api.github.com/repos/gbif/pipelines/contents/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/SpeciesListPipelineIT.java?ref=92b62604ef6cfab4ee7f349a7776340e292b7288",
+    "patch": "@@ -2,7 +2,7 @@\n \n import static org.junit.Assert.assertEquals;\n import static org.junit.Assert.assertFalse;\n-import static org.junit.jupiter.api.Assertions.assertTrue;\n+import static org.junit.Assert.assertTrue;\n \n import au.org.ala.pipelines.options.SpeciesLevelPipelineOptions;\n import au.org.ala.util.TestUtils;"
+  },
+  {
+    "sha": "a9fde0eb4a743a32870d197097998b4f1301fa28",
+    "filename": "livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDDuplicateKeysTestIT.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/gbif/pipelines/blob/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDDuplicateKeysTestIT.java",
+    "raw_url": "https://github.com/gbif/pipelines/raw/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDDuplicateKeysTestIT.java",
+    "contents_url": "https://api.github.com/repos/gbif/pipelines/contents/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDDuplicateKeysTestIT.java?ref=92b62604ef6cfab4ee7f349a7776340e292b7288",
+    "patch": "@@ -1,7 +1,7 @@\n package au.org.ala.pipelines.beam;\n \n-import static org.junit.jupiter.api.Assertions.assertEquals;\n-import static org.junit.jupiter.api.Assertions.assertFalse;\n+import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertFalse;\n \n import au.org.ala.pipelines.options.UUIDPipelineOptions;\n import au.org.ala.util.TestUtils;\n@@ -93,7 +93,7 @@ public void loadTestDataset(String datasetID, String inputPath) throws Exception\n     ALAUUIDValidationPipeline.run(uuidOptions);\n \n     // assert count is 2\n-    assertEquals(2L, ValidationUtils.getDuplicateKeyCount(uuidOptions));\n+    assertEquals(2L, ValidationUtils.getDuplicateKeyCount(uuidOptions).longValue());\n     assertFalse(ValidationUtils.checkValidationFile(uuidOptions).getValid());\n   }\n }"
+  },
+  {
+    "sha": "0fffaa0f6ddb046f0a3054357376dc7351d33586",
+    "filename": "livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDEmptyKeysTestIT.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/gbif/pipelines/blob/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDEmptyKeysTestIT.java",
+    "raw_url": "https://github.com/gbif/pipelines/raw/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDEmptyKeysTestIT.java",
+    "contents_url": "https://api.github.com/repos/gbif/pipelines/contents/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDEmptyKeysTestIT.java?ref=92b62604ef6cfab4ee7f349a7776340e292b7288",
+    "patch": "@@ -1,7 +1,7 @@\n package au.org.ala.pipelines.beam;\n \n-import static org.junit.jupiter.api.Assertions.assertEquals;\n-import static org.junit.jupiter.api.Assertions.assertFalse;\n+import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertFalse;\n \n import au.org.ala.pipelines.options.UUIDPipelineOptions;\n import au.org.ala.util.TestUtils;\n@@ -93,7 +93,7 @@ public void loadTestDataset(String datasetID, String inputPath) throws Exception\n     ALAUUIDValidationPipeline.run(uuidOptions);\n \n     // assert count is 2\n-    assertEquals(1L, ValidationUtils.getInvalidRecordCount(uuidOptions));\n+    assertEquals(1L, ValidationUtils.getInvalidRecordCount(uuidOptions).longValue());\n     assertFalse(ValidationUtils.checkValidationFile(uuidOptions).getValid());\n   }\n }"
+  },
+  {
+    "sha": "a92f598224e1dfb8a6718d4fcaf3fb5f29340d01",
+    "filename": "livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDPipelineTestIT.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/gbif/pipelines/blob/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDPipelineTestIT.java",
+    "raw_url": "https://github.com/gbif/pipelines/raw/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDPipelineTestIT.java",
+    "contents_url": "https://api.github.com/repos/gbif/pipelines/contents/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/beam/UUIDPipelineTestIT.java?ref=92b62604ef6cfab4ee7f349a7776340e292b7288",
+    "patch": "@@ -15,9 +15,9 @@\n import org.gbif.pipelines.common.beam.options.InterpretationPipelineOptions;\n import org.gbif.pipelines.common.beam.options.PipelinesOptionsFactory;\n import org.junit.After;\n+import org.junit.Assert;\n import org.junit.Before;\n import org.junit.Test;\n-import org.junit.jupiter.api.Assertions;\n \n public class UUIDPipelineTestIT {\n \n@@ -163,6 +163,6 @@ public void loadTestDataset(String datasetID, String inputPath) throws Exception\n     ALAUUIDMintingPipeline.run(uuidOptions);\n \n     // check the UUIDs validate\n-    Assertions.assertTrue(ValidationUtils.checkValidationFile(uuidOptions).getValid());\n+    Assert.assertTrue(ValidationUtils.checkValidationFile(uuidOptions).getValid());\n   }\n }"
+  },
+  {
+    "sha": "c4c76fd87a013eadfee6574598c00fded6cb3867",
+    "filename": "livingatlas/pipelines/src/test/java/au/org/ala/pipelines/java/CompleteIngestJavaPipelineTestIT.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/gbif/pipelines/blob/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/java/CompleteIngestJavaPipelineTestIT.java",
+    "raw_url": "https://github.com/gbif/pipelines/raw/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/java/CompleteIngestJavaPipelineTestIT.java",
+    "contents_url": "https://api.github.com/repos/gbif/pipelines/contents/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/java/CompleteIngestJavaPipelineTestIT.java?ref=92b62604ef6cfab4ee7f349a7776340e292b7288",
+    "patch": "@@ -1,7 +1,7 @@\n package au.org.ala.pipelines.java;\n \n-import static org.junit.jupiter.api.Assertions.assertEquals;\n-import static org.junit.jupiter.api.Assertions.assertNotNull;\n+import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertNotNull;\n \n import au.org.ala.pipelines.beam.*;\n import au.org.ala.pipelines.beam.ALAUUIDMintingPipeline;"
+  },
+  {
+    "sha": "bec0c149b6e6cdd3ff48ff9e0d9e74ac98bad47f",
+    "filename": "livingatlas/pipelines/src/test/java/au/org/ala/pipelines/vocabulary/StateProvinceVocabTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/gbif/pipelines/blob/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/vocabulary/StateProvinceVocabTest.java",
+    "raw_url": "https://github.com/gbif/pipelines/raw/92b62604ef6cfab4ee7f349a7776340e292b7288/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/vocabulary/StateProvinceVocabTest.java",
+    "contents_url": "https://api.github.com/repos/gbif/pipelines/contents/livingatlas/pipelines/src/test/java/au/org/ala/pipelines/vocabulary/StateProvinceVocabTest.java?ref=92b62604ef6cfab4ee7f349a7776340e292b7288",
+    "patch": "@@ -1,8 +1,8 @@\n package au.org.ala.pipelines.vocabulary;\n \n import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertThrows;\n import static org.junit.Assert.assertTrue;\n-import static org.junit.jupiter.api.Assertions.assertThrows;\n \n import au.org.ala.kvs.ALAPipelinesConfig;\n import au.org.ala.kvs.LocationInfoConfig;"
+  },
+  {
+    "sha": "d93022e171a1f83fc85cd7ec1a643866063cf1e3",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 6,
+    "changes": 35,
+    "blob_url": "https://github.com/gbif/pipelines/blob/92b62604ef6cfab4ee7f349a7776340e292b7288/pom.xml",
+    "raw_url": "https://github.com/gbif/pipelines/raw/92b62604ef6cfab4ee7f349a7776340e292b7288/pom.xml",
+    "contents_url": "https://api.github.com/repos/gbif/pipelines/contents/pom.xml?ref=92b62604ef6cfab4ee7f349a7776340e292b7288",
+    "patch": "@@ -151,10 +151,12 @@\n     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>\n     <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>\n     <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>\n-    <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>\n+    <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>\n+    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>\n     <jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>\n-    <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>\n+    <sonar-maven-plugin.version>3.8.0.2131</sonar-maven-plugin.version>\n     <spotless-maven-plugin.version>2.0.1</spotless-maven-plugin.version>\n+    <io.fabric8.version>0.33.0</io.fabric8.version>\n \n     <!-- Checkstyle -->\n     <plexus-compiler-javac-errorprone.version>2.8.3</plexus-compiler-javac-errorprone.version>\n@@ -250,6 +252,13 @@\n           <groupId>org.apache.maven.plugins</groupId>\n           <artifactId>maven-failsafe-plugin</artifactId>\n           <version>${maven-failsafe-plugin.version}</version>\n+          <dependencies>\n+            <dependency>\n+              <groupId>org.apache.maven.surefire</groupId>\n+              <artifactId>surefire-junit47</artifactId>\n+              <version>${maven-failsafe-plugin.version}</version>\n+            </dependency>\n+          </dependencies>\n           <executions>\n             <execution>\n               <id>integration-test</id>\n@@ -286,13 +295,14 @@\n                 <goal>prepare-agent</goal>\n               </goals>\n               <configuration>\n+                <append>true</append>\n                 <destFile>${jacoco.ut.output.file}</destFile>\n                 <propertyName>surefireArgLine</propertyName>\n               </configuration>\n             </execution>\n             <execution>\n               <id>report-ut-coverage</id>\n-              <phase>test</phase>\n+              <phase>verify</phase>\n               <goals>\n                 <goal>report</goal>\n               </goals>\n@@ -314,7 +324,7 @@\n             </execution>\n             <execution>\n               <id>report-it-coverage</id>\n-              <phase>post-integration-test</phase>\n+              <phase>verify</phase>\n               <goals>\n                 <goal>report-integration</goal>\n               </goals>\n@@ -325,7 +335,7 @@\n             </execution>\n             <execution>\n               <id>merge-exec-files</id>\n-              <phase>post-integration-test</phase>\n+              <phase>install</phase>\n               <goals>\n                 <goal>merge</goal>\n               </goals>\n@@ -334,7 +344,7 @@\n                   <fileSet>\n                     <directory>${coverage.dir}</directory>\n                     <includes>\n-                      <include>*.exec</include>\n+                      <include>jacoco-*.exec</include>\n                     </includes>\n                   </fileSet>\n                 </fileSets>\n@@ -356,6 +366,11 @@\n             </java>\n           </configuration>\n         </plugin>\n+        <plugin>\n+          <groupId>io.fabric8</groupId>\n+          <artifactId>docker-maven-plugin</artifactId>\n+          <version>${io.fabric8.version}</version>\n+        </plugin>\n       </plugins>\n     </pluginManagement>\n     <plugins>\n@@ -373,6 +388,7 @@\n           </execution>\n         </executions>\n       </plugin>\n+\n     </plugins>\n   </build>\n \n@@ -1032,6 +1048,13 @@\n           <plugin>\n             <groupId>org.apache.maven.plugins</groupId>\n             <artifactId>maven-surefire-plugin</artifactId>\n+            <dependencies>\n+              <dependency>\n+                <groupId>org.apache.maven.surefire</groupId>\n+                <artifactId>surefire-junit47</artifactId>\n+                <version>${maven-failsafe-plugin.version}</version>\n+              </dependency>\n+            </dependencies>\n             <configuration>\n               <argLine>${surefireArgLine}</argLine>\n               <excludes>"
+  }
+]

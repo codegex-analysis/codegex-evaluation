@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "953b057f0c3e19f7b490faaefa576bf7024b081a",
+    "filename": ".changes/next-release/bugfix-AWSSDKforJavav2-b5091ac.json",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/.changes/next-release/bugfix-AWSSDKforJavav2-b5091ac.json",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/.changes/next-release/bugfix-AWSSDKforJavav2-b5091ac.json",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/.changes/next-release/bugfix-AWSSDKforJavav2-b5091ac.json?ref=43f53663dfc41dae16fa12f550a3d62c0d9a30ee",
+    "patch": "@@ -0,0 +1,6 @@\n+{\n+    \"type\": \"bugfix\",\n+    \"category\": \"AWS SDK for Java v2\",\n+    \"contributor\": \"\",\n+    \"description\": \"Expose the metadata key on SDK client interfaces for use with `ServiceMetadataProvider`\"\n+}"
+  },
+  {
+    "sha": "230a1b17fa8e0659e2a2ba0a3affa739cb592158",
+    "filename": "codegen/src/main/java/software/amazon/awssdk/codegen/poet/client/AsyncClientInterface.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/main/java/software/amazon/awssdk/codegen/poet/client/AsyncClientInterface.java",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/main/java/software/amazon/awssdk/codegen/poet/client/AsyncClientInterface.java",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/codegen/src/main/java/software/amazon/awssdk/codegen/poet/client/AsyncClientInterface.java?ref=43f53663dfc41dae16fa12f550a3d62c0d9a30ee",
+    "patch": "@@ -48,6 +48,7 @@\n import software.amazon.awssdk.core.SdkClient;\n import software.amazon.awssdk.core.async.AsyncRequestBody;\n import software.amazon.awssdk.core.async.AsyncResponseTransformer;\n+import software.amazon.awssdk.regions.ServiceMetadataProvider;\n import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;\n \n public class AsyncClientInterface implements ClassSpec {\n@@ -78,6 +79,12 @@ public TypeSpec poetSpec() {\n               .addField(FieldSpec.builder(String.class, \"SERVICE_NAME\")\n                                  .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)\n                                  .initializer(\"$S\", model.getMetadata().getSigningName())\n+                                 .build())\n+              .addField(FieldSpec.builder(String.class, \"SERVICE_METADATA_ID\")\n+                                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)\n+                                 .initializer(\"$S\", model.getMetadata().getEndpointPrefix())\n+                                 .addJavadoc(\"Value for looking up the service's metadata from the {@link $T}.\",\n+                                             ServiceMetadataProvider.class)\n                                  .build());\n \n         PoetUtils.addJavadoc(result::addJavadoc, getJavadoc());"
+  },
+  {
+    "sha": "9b4453f45ebe25ed072c84af27b20cc80c59757b",
+    "filename": "codegen/src/main/java/software/amazon/awssdk/codegen/poet/client/SyncClientInterface.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 2,
+    "changes": 11,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/main/java/software/amazon/awssdk/codegen/poet/client/SyncClientInterface.java",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/main/java/software/amazon/awssdk/codegen/poet/client/SyncClientInterface.java",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/codegen/src/main/java/software/amazon/awssdk/codegen/poet/client/SyncClientInterface.java?ref=43f53663dfc41dae16fa12f550a3d62c0d9a30ee",
+    "patch": "@@ -54,6 +54,7 @@\n import software.amazon.awssdk.core.sync.RequestBody;\n import software.amazon.awssdk.core.sync.ResponseTransformer;\n import software.amazon.awssdk.regions.ServiceMetadata;\n+import software.amazon.awssdk.regions.ServiceMetadataProvider;\n import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;\n \n public final class SyncClientInterface implements ClassSpec {\n@@ -78,7 +79,13 @@ public TypeSpec poetSpec() {\n               .addField(FieldSpec.builder(String.class, \"SERVICE_NAME\")\n                                  .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)\n                                  .initializer(\"$S\", model.getMetadata().getSigningName())\n-                                 .build());\n+                                 .build())\n+               .addField(FieldSpec.builder(String.class, \"SERVICE_METADATA_ID\")\n+                                  .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)\n+                                  .initializer(\"$S\", model.getMetadata().getEndpointPrefix())\n+                                  .addJavadoc(\"Value for looking up the service's metadata from the {@link $T}.\",\n+                                              ServiceMetadataProvider.class)\n+                                  .build());\n \n         PoetUtils.addJavadoc(result::addJavadoc, getJavadoc());\n \n@@ -148,7 +155,7 @@ private MethodSpec serviceMetadata() {\n         return MethodSpec.methodBuilder(\"serviceMetadata\")\n                          .returns(ServiceMetadata.class)\n                          .addModifiers(Modifier.STATIC, Modifier.PUBLIC)\n-                         .addStatement(\"return $T.of($S)\", ServiceMetadata.class, model.getMetadata().getEndpointPrefix())\n+                         .addStatement(\"return $T.of(SERVICE_METADATA_ID)\", ServiceMetadata.class)\n                          .build();\n     }\n "
+  },
+  {
+    "sha": "9885e9fe4e7b323d14a05db4a8e20c809ad5fbe8",
+    "filename": "codegen/src/test/resources/software/amazon/awssdk/codegen/poet/builder/test-client-builder-class.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/builder/test-client-builder-class.java",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/builder/test-client-builder-class.java",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/builder/test-client-builder-class.java?ref=43f53663dfc41dae16fa12f550a3d62c0d9a30ee",
+    "patch": "@@ -24,7 +24,7 @@\n abstract class DefaultJsonBaseClientBuilder<B extends JsonBaseClientBuilder<B, C>, C> extends AwsDefaultClientBuilder<B, C> {\n     @Override\n     protected final String serviceEndpointPrefix() {\n-        return \"json-service\";\n+        return \"json-service-endpoint\";\n     }\n \n     @Override"
+  },
+  {
+    "sha": "3b4cb21eb7eded799c543fee7d325f034e7e064f",
+    "filename": "codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/c2j/json/service-2.json",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/c2j/json/service-2.json",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/c2j/json/service-2.json",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/c2j/json/service-2.json?ref=43f53663dfc41dae16fa12f550a3d62c0d9a30ee",
+    "patch": "@@ -2,12 +2,13 @@\n   \"version\": \"2.0\",\n   \"metadata\": {\n     \"apiVersion\": \"2010-05-08\",\n-    \"endpointPrefix\": \"json-service\",\n+    \"endpointPrefix\": \"json-service-endpoint\",\n     \"globalEndpoint\": \"json-service.amazonaws.com\",\n     \"protocol\": \"rest-json\",\n     \"serviceAbbreviation\": \"Json Service\",\n     \"serviceFullName\": \"Some Service That Uses Json Protocol\",\n-    \"serviceId\":\"Json Service\",\n+    \"serviceId\": \"Json Service\",\n+    \"signingName\": \"json-service\",\n     \"signatureVersion\": \"v4\",\n     \"uid\": \"json-service-2010-05-08\",\n     \"xmlNamespace\": \"https://json-service.amazonaws.com/doc/2010-05-08/\""
+  },
+  {
+    "sha": "5220a9b5cc5520822239001054dd1495b5b71f94",
+    "filename": "codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/test-json-async-client-interface.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/test-json-async-client-interface.java",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/test-json-async-client-interface.java",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/test-json-async-client-interface.java?ref=43f53663dfc41dae16fa12f550a3d62c0d9a30ee",
+    "patch": "@@ -47,6 +47,12 @@\n public interface JsonAsyncClient extends SdkClient {\n     String SERVICE_NAME = \"json-service\";\n \n+    /**\n+     * Value for looking up the service's metadata from the\n+     * {@link software.amazon.awssdk.regions.ServiceMetadataProvider}.\n+     */\n+    String SERVICE_METADATA_ID = \"json-service-endpoint\";\n+\n     /**\n      * Create a {@link JsonAsyncClient} with the region loaded from the\n      * {@link software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain} and credentials loaded from the"
+  },
+  {
+    "sha": "9c6732f6f05666a5f2c819bb4bbb4604f0096880",
+    "filename": "codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/test-json-client-interface.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/aws/aws-sdk-java-v2/blob/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/test-json-client-interface.java",
+    "raw_url": "https://github.com/aws/aws-sdk-java-v2/raw/43f53663dfc41dae16fa12f550a3d62c0d9a30ee/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/test-json-client-interface.java",
+    "contents_url": "https://api.github.com/repos/aws/aws-sdk-java-v2/contents/codegen/src/test/resources/software/amazon/awssdk/codegen/poet/client/test-json-client-interface.java?ref=43f53663dfc41dae16fa12f550a3d62c0d9a30ee",
+    "patch": "@@ -43,6 +43,12 @@\n public interface JsonClient extends SdkClient {\n     String SERVICE_NAME = \"json-service\";\n \n+    /**\n+     * Value for looking up the service's metadata from the\n+     * {@link software.amazon.awssdk.regions.ServiceMetadataProvider}.\n+     */\n+    String SERVICE_METADATA_ID = \"json-service-endpoint\";\n+\n     /**\n      * Create a {@link JsonClient} with the region loaded from the\n      * {@link software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain} and credentials loaded from the\n@@ -1358,7 +1364,7 @@ default StreamingOutputOperationResponse streamingOutputOperation(\n     }\n \n     static ServiceMetadata serviceMetadata() {\n-        return ServiceMetadata.of(\"json-service\");\n+        return ServiceMetadata.of(SERVICE_METADATA_ID);\n     }\n \n     /**"
+  }
+]

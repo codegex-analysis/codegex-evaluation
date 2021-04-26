@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "5cced4846ba0d9cd9e338042fc9dd4799fd6e8e4",
+    "filename": "New Bank/NewBank/newbank/client/ExampleClient.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/hithesh98/NewBank/blob/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/client/ExampleClient.java",
+    "raw_url": "https://github.com/hithesh98/NewBank/raw/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/client/ExampleClient.java",
+    "contents_url": "https://api.github.com/repos/hithesh98/NewBank/contents/New%20Bank/NewBank/newbank/client/ExampleClient.java?ref=ac01f29bbf7a7750c46f20250ffee0138089e171",
+    "patch": "@@ -52,6 +52,6 @@ public void run() {\n \t}\n \t\n \tpublic static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {\n-\t\tnew ExampleClient(\"localhost\",14002).start();\n+\t\tnew ExampleClient(\"localhost\",14003).start();\n \t}\n }"
+  },
+  {
+    "sha": "9a35d7c64b4d213ae9c2241bc14df545694136b6",
+    "filename": "New Bank/NewBank/newbank/server/Customer.java",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/hithesh98/NewBank/blob/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/server/Customer.java",
+    "raw_url": "https://github.com/hithesh98/NewBank/raw/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/server/Customer.java",
+    "contents_url": "https://api.github.com/repos/hithesh98/NewBank/contents/New%20Bank/NewBank/newbank/server/Customer.java?ref=ac01f29bbf7a7750c46f20250ffee0138089e171",
+    "patch": "@@ -5,6 +5,16 @@\n public class Customer {\n \t\n \tprivate ArrayList<Account> accounts;\n+\n+\tpublic String getBankName() {\n+\t\treturn bankName;\n+\t}\n+\n+\tpublic void setBankName(String bankName) {\n+\t\tthis.bankName = bankName;\n+\t}\n+\n+\tprivate String bankName;\n \t\n \tpublic Customer() {\n \t\taccounts = new ArrayList<>();"
+  },
+  {
+    "sha": "7418513e37a012319431fd319e58fe2471a8c87e",
+    "filename": "New Bank/NewBank/newbank/server/NewBank.java",
+    "status": "modified",
+    "additions": 45,
+    "deletions": 8,
+    "changes": 53,
+    "blob_url": "https://github.com/hithesh98/NewBank/blob/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/server/NewBank.java",
+    "raw_url": "https://github.com/hithesh98/NewBank/raw/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/server/NewBank.java",
+    "contents_url": "https://api.github.com/repos/hithesh98/NewBank/contents/New%20Bank/NewBank/newbank/server/NewBank.java?ref=ac01f29bbf7a7750c46f20250ffee0138089e171",
+    "patch": "@@ -3,8 +3,9 @@\n import java.util.HashMap;\n \n public class NewBank {\n-\t\n+\n \tprivate static final NewBank bank = new NewBank();\n+\n \tprivate HashMap<String,Customer> customers;\n \n \tprivate NewBank() {\n@@ -13,23 +14,31 @@ private NewBank() {\n \t}\n \n \tprivate void addTestData() {\n+\t\t//NewBank bank = new NewBank();\n+\n \t\tCustomer bhagy = new Customer();\n \t\tbhagy.addAccount(new Account(\"Main\", 1000.0));\n \t\tcustomers.put(\"Bhagy\", bhagy);\n-\t\t\n+\t\tbhagy.setBankName(\"bank3\");\n+\n+\n \t\tCustomer christina = new Customer();\n \t\tchristina.addAccount(new Account(\"Savings\", 1500.0));\n+\t\tchristina.setBankName(\"bank2\");\n \t\tcustomers.put(\"Christina\", christina);\n-\t\t\n+\n \t\tCustomer john = new Customer();\n \t\tjohn.addAccount(new Account(\"Checking\", 250.0));\n+\t\tjohn.setBankName(\"bank1\");\n \t\tcustomers.put(\"John\", john);\n+\n+\n \t}\n-\t\n+\n \tpublic static NewBank getBank() {\n \t\treturn bank;\n \t}\n-\t\n+\n \tpublic synchronized CustomerID checkLogInDetails(String userName, String password) {\n \t\tif(customers.containsKey(userName)) {\n \t\t\treturn new CustomerID(userName);\n@@ -38,7 +47,7 @@ public synchronized CustomerID checkLogInDetails(String userName, String passwor\n \t}\n \n \t// commands from the NewBank customer are processed in this method\n-\tpublic synchronized String processRequest(CustomerID customer, String request) {\n+\tpublic synchronized String processRequest(CustomerID customer, String request, String customerId) {\n \t\tif(customers.containsKey(customer.getKey())) {\n \t\t\tString[] input = request.split(\" \"); // create an array of the parsed input string\n \t\t\tif (request.startsWith(\"NEWACCOUNT\")){\n@@ -53,9 +62,24 @@ public synchronized String processRequest(CustomerID customer, String request) {\n \t\t\t\tString to = input[3];\n \t\t\t\treturn moveFunds(customer,amount,from,to);\n \t\t\t}\n+\t\t\tif(input[0].equals(\"PAYMENT\")) {\n+\t\t\t\tif(input.length < 4) { // return fail if not enough information is provided\n+\t\t\t\t\treturn \"FAIL123\";\n+\t\t\t\t}\n+\t\t\t\tCustomer custCredit = customers.get(customer.getKey());\n+\t\t\t\tdouble amount = Double.parseDouble(input[1]);\n+\t\t\t\tString fromAccount = input[2];\n+\t\t\t\tString toAccount = input[3];\n+\t\t\t\tString debitBank = input[4];\n+\t\t\t\tString credtiBank = input[5];\n+\t\t\t\tCustomer custDebit = customers.get(customerId);\n+\t\t\t\treturn payment(custCredit,amount,fromAccount,toAccount, custDebit, debitBank, credtiBank);\n+\n+\n+\t\t\t\t}\n \t\t\tswitch(request) {\n-\t\t\tcase \"SHOWMYACCOUNTS\" : return showMyAccounts(customer);\n-\t\t\tdefault : return \"FAIL\";\n+\t\t\t\tcase \"SHOWMYACCOUNTS\" : return showMyAccounts(customer);\n+\t\t\t\tdefault : return \"FAIL\";\n \t\t\t}\n \t\t}\n \t\treturn \"FAIL\";\n@@ -82,4 +106,17 @@ private String moveFunds(CustomerID customer,double amount,String from,String to\n \t\t}\n \t\treturn \"FAIL\";\n \t}\n+\n+\tprivate String payment(Customer customer, double amount,String from,String to,  Customer custCredit, String debitBankName, String creditBankName ) {\n+\t\tif(amount > 0) { // should never need to move a negative amount\n+\t\t\tif(customer.editAccountBalance(from,-amount) && customer.getBankName().equals(debitBankName)) { // try to remove amount\n+\t\t\t\tif(custCredit.getBankName().equals(creditBankName)&&custCredit.editAccountBalance(to,amount)) { // try to add amount\n+\t\t\t\t\treturn \"SUCCESS\";\n+\t\t\t\t} else { // if adding was unsuccessful, add it back to the original account\n+\t\t\t\t\tcustomer.editAccountBalance(from,amount);\n+\t\t\t\t}\n+\t\t\t}\n+\t\t}\n+\t\treturn \"FAIL\";\n+\t}\n }"
+  },
+  {
+    "sha": "1f9c979d89e91fca199d5d63ae35467dd63e2f5e",
+    "filename": "New Bank/NewBank/newbank/server/NewBankClientHandler.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/hithesh98/NewBank/blob/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/server/NewBankClientHandler.java",
+    "raw_url": "https://github.com/hithesh98/NewBank/raw/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/server/NewBankClientHandler.java",
+    "contents_url": "https://api.github.com/repos/hithesh98/NewBank/contents/New%20Bank/NewBank/newbank/server/NewBankClientHandler.java?ref=ac01f29bbf7a7750c46f20250ffee0138089e171",
+    "patch": "@@ -31,13 +31,16 @@ public void run() {\n \t\t\tout.println(\"Checking Details...\");\n \t\t\t// authenticate user and get customer ID token from bank for use in subsequent requests\n \t\t\tCustomerID customer = bank.checkLogInDetails(userName, password);\n+\n+\t\t\tout.println(\"Enter the customer name to whom the payment needs to be made: \");\n+\t\t\tString customerPayment = in.readLine();\n \t\t\t// if the user is authenticated then get requests from the user and process them \n \t\t\tif(customer != null) {\n \t\t\t\tout.println(\"Log In Successful. What do you want to do?\");\n \t\t\t\twhile(true) {\n \t\t\t\t\tString request = in.readLine();\n \t\t\t\t\tSystem.out.println(\"Request from \" + customer.getKey());\n-\t\t\t\t\tString responce = bank.processRequest(customer, request);\n+\t\t\t\t\tString responce = bank.processRequest(customer, request, customerPayment);\n \t\t\t\t\tout.println(responce);\n \t\t\t\t}\n \t\t\t}"
+  },
+  {
+    "sha": "6ffbb0e15f8044c30ecc8a7afecaa3875b4511f8",
+    "filename": "New Bank/NewBank/newbank/server/NewBankServer.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/hithesh98/NewBank/blob/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/server/NewBankServer.java",
+    "raw_url": "https://github.com/hithesh98/NewBank/raw/ac01f29bbf7a7750c46f20250ffee0138089e171/New%20Bank/NewBank/newbank/server/NewBankServer.java",
+    "contents_url": "https://api.github.com/repos/hithesh98/NewBank/contents/New%20Bank/NewBank/newbank/server/NewBankServer.java?ref=ac01f29bbf7a7750c46f20250ffee0138089e171",
+    "patch": "@@ -36,6 +36,6 @@ public void run() {\n \t\n \tpublic static void main(String[] args) throws IOException {\n \t\t// starts a new NewBankServer thread on a specified port number\n-\t\tnew NewBankServer(14002).start();\n+\t\tnew NewBankServer(14003).start();\n \t}\n }"
+  }
+]

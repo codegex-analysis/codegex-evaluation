@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "1c69057e64909cadd6b0edd41765c0a98bb19180",
+    "filename": "base/src/org/adempiere/engine/AverageInvoiceCostingMethod.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 3,
+    "changes": 12,
+    "blob_url": "https://github.com/adempiere/adempiere/blob/4bcfe72cd8df00858f2c1d59ce419416695b6802/base/src/org/adempiere/engine/AverageInvoiceCostingMethod.java",
+    "raw_url": "https://github.com/adempiere/adempiere/raw/4bcfe72cd8df00858f2c1d59ce419416695b6802/base/src/org/adempiere/engine/AverageInvoiceCostingMethod.java",
+    "contents_url": "https://api.github.com/repos/adempiere/adempiere/contents/base/src/org/adempiere/engine/AverageInvoiceCostingMethod.java?ref=4bcfe72cd8df00858f2c1d59ce419416695b6802",
+    "patch": "@@ -47,6 +47,7 @@\n      * @param costLowLevel\n      * @param isSalesTransaction\n      */\n+\tMTransaction originalReversal = null;\n \tpublic void setCostingMethod(MAcctSchema accountSchema, MTransaction transaction, IDocumentLine model,\n                                  MCost dimension, BigDecimal costThisLevel,\n                                  BigDecimal costLowLevel, Boolean isSalesTransaction) {\n@@ -90,8 +91,11 @@ public void calculate() {\n \n \t\t// If model is reversal then no calculate cost\n \t\t//Validate if model have a reverses and processing of reverse\n-\t\tif (model.getReversalLine_ID() > 0 && costDetail == null && !model.isReversalParent())\n+\t\tif (model.getReversalLine_ID() > 0 && costDetail == null && !model.isReversalParent()) {\n+\t\t\toriginalReversal = MTransaction.getByDocumentLine(transaction);\n+\t\t\tif (originalReversal != null)\t\t\t\n \t\t\treturn;\n+\t\t}\n \t\telse if( costDetail != null && costDetail.isReversal() && model.getReversalLine_ID() > 0)\n \t    {\n             setReversalCostDetail();\n@@ -313,8 +317,10 @@ private void createCostDetail() {\n \t\t// transaction\n \t\t//Validate if model have a reverses and processing of reverse\n \t\tif (model.getReversalLine_ID() > 0 && costDetail == null && !model.isReversalParent()) {\n-\t\t\tcreateReversalCostDetail();\n-\t\t\treturn;\n+\t\t\tif (originalReversal != null) {\n+\t\t\t\tcreateReversalCostDetail();\n+\t\t\t\treturn;\t\t\t\t\n+\t\t\t}\n \t\t} \n \t\telse if (model.getReversalLine_ID() > 0 && !model.isReversalParent())\n \t\t\treturn;"
+  }
+]

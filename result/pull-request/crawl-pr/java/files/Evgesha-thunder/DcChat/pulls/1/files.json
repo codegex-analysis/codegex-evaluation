@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "94a25f7f4cb416c083d265558da75d457237d671",
+    "filename": ".idea/vcs.xml",
+    "status": "added",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/Evgesha-thunder/DcChat/blob/0d7c320876cb0ed534da08e9429df2b526fafaf5/.idea/vcs.xml",
+    "raw_url": "https://github.com/Evgesha-thunder/DcChat/raw/0d7c320876cb0ed534da08e9429df2b526fafaf5/.idea/vcs.xml",
+    "contents_url": "https://api.github.com/repos/Evgesha-thunder/DcChat/contents/.idea/vcs.xml?ref=0d7c320876cb0ed534da08e9429df2b526fafaf5",
+    "patch": "@@ -0,0 +1,6 @@\n+<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+<project version=\"4\">\n+  <component name=\"VcsDirectoryMappings\">\n+    <mapping directory=\"$PROJECT_DIR$\" vcs=\"Git\" />\n+  </component>\n+</project>\n\\ No newline at end of file"
+  },
+  {
+    "sha": "fc75bfc9cef6157908dbf49ad479e79d9f88294c",
+    "filename": "Server/src/main/java/server/ClientHandler.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 6,
+    "changes": 20,
+    "blob_url": "https://github.com/Evgesha-thunder/DcChat/blob/0d7c320876cb0ed534da08e9429df2b526fafaf5/Server/src/main/java/server/ClientHandler.java",
+    "raw_url": "https://github.com/Evgesha-thunder/DcChat/raw/0d7c320876cb0ed534da08e9429df2b526fafaf5/Server/src/main/java/server/ClientHandler.java",
+    "contents_url": "https://api.github.com/repos/Evgesha-thunder/DcChat/contents/Server/src/main/java/server/ClientHandler.java?ref=0d7c320876cb0ed534da08e9429df2b526fafaf5",
+    "patch": "@@ -2,10 +2,12 @@\n \r\n import commands.Command;\r\n \r\n+import java.awt.*;\r\n import java.io.DataInputStream;\r\n import java.io.DataOutputStream;\r\n import java.io.IOException;\r\n import java.net.Socket;\r\n+import java.net.SocketTimeoutException;\r\n \r\n public class ClientHandler {\r\n     private Server server;\r\n@@ -26,7 +28,7 @@ public ClientHandler(Server server, Socket socket) {\n             new Thread(() -> {\r\n                 try {\r\n                     // установка сокет тайм аут\r\n-//                    socket.setSoTimeout(5000);\r\n+                    socket.setSoTimeout(12000);\r\n \r\n                     // цикл аутентификации\r\n                     while (true) {\r\n@@ -54,6 +56,7 @@ public ClientHandler(Server server, Socket socket) {\n                                     server.subscribe(this);\r\n                                     System.out.println(\"client: \" + socket.getRemoteSocketAddress() +\r\n                                             \" connected with nick: \" + nickname);\r\n+                                    socket.setSoTimeout(0);\r\n                                     break;\r\n                                 } else {\r\n                                     sendMsg(\"Данная учетная запись уже используется\");\r\n@@ -100,13 +103,18 @@ public ClientHandler(Server server, Socket socket) {\n                             server.broadcastMsg(this, str);\r\n                         }\r\n                     }\r\n-                    //SocketTimeoutException\r\n-                    //обрабатываем делаем все возможное попросить клиента вежливо отключиться\r\n-                    //посылаем сообщение Command.END\r\n-                    //(Сервак нас отключает )\r\n-                    //не забываем отключить сокет таймаут после успешной аутентификации\r\n+\r\n+                } catch (SocketTimeoutException e) {\r\n+                    System.out.println(\"Будьте добры отключиться \");\r\n+                    try {\r\n+                        out.writeUTF(Command.END);\r\n+                    } catch (IOException ioException) {\r\n+                        ioException.printStackTrace();\r\n+                    }\r\n+\r\n                 } catch (RuntimeException e) {\r\n                     System.out.println(e.getMessage());\r\n+\r\n                 } catch (IOException e) {\r\n                     e.printStackTrace();\r\n                 } finally {\r"
+  }
+]

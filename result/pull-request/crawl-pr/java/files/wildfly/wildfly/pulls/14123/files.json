@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "ae51bf180aaf225d37d8dd3de2441338b78c2cb3",
+    "filename": "clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/AnyField.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/wildfly/wildfly/blob/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/AnyField.java",
+    "raw_url": "https://github.com/wildfly/wildfly/raw/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/AnyField.java",
+    "contents_url": "https://api.github.com/repos/wildfly/wildfly/contents/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/AnyField.java?ref=7eac42dd66605800ac43fbbb4c8b4501fe049aa5",
+    "patch": "@@ -201,7 +201,7 @@ public int getIndex() {\n     private static final AnyField[] VALUES = AnyField.values();\n \n     static AnyField fromIndex(int index) {\n-        return (index > 0) ? VALUES[index - 1] : null;\n+        return (index > 0) && (index <= VALUES.length) ? VALUES[index - 1] : null;\n     }\n \n     private static final Map<Class<?>, AnyField> FIELDS = new IdentityHashMap<>();"
+  },
+  {
+    "sha": "8810068626131aef0ccb9bf4d37371375afdbaed",
+    "filename": "clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/AnyMarshaller.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 12,
+    "changes": 24,
+    "blob_url": "https://github.com/wildfly/wildfly/blob/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/AnyMarshaller.java",
+    "raw_url": "https://github.com/wildfly/wildfly/raw/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/AnyMarshaller.java",
+    "contents_url": "https://api.github.com/repos/wildfly/wildfly/contents/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/AnyMarshaller.java?ref=7eac42dd66605800ac43fbbb4c8b4501fe049aa5",
+    "patch": "@@ -23,7 +23,6 @@\n package org.wildfly.clustering.marshalling.protostream;\n \n import java.io.IOException;\n-import java.io.StreamCorruptedException;\n import java.lang.reflect.Proxy;\n \n import org.infinispan.protostream.BaseMarshaller;\n@@ -45,19 +44,20 @@\n     @Override\n     public Any readFrom(ProtoStreamReader reader) throws IOException {\n         Object value = null;\n-        int tag = reader.readTag();\n-        if (tag != 0) {\n+        boolean reading = true;\n+        while (reading) {\n+            int tag = reader.readTag();\n             AnyField field = AnyField.fromIndex(WireFormat.getTagFieldNumber(tag));\n-            if (field == null) {\n-                throw new StreamCorruptedException(String.valueOf(tag));\n-            }\n-\n-            value = field.getMarshaller().readFrom(reader);\n-\n-            if (field == AnyField.REFERENCE) {\n-                value = ProtoStreamReaderContext.INSTANCE.get().findByReference((Integer) value);\n+            if (field != null) {\n+                value = field.getMarshaller().readFrom(reader);\n+\n+                if (field == AnyField.REFERENCE) {\n+                    value = ProtoStreamReaderContext.INSTANCE.get().findByReference((Integer) value);\n+                } else {\n+                    ProtoStreamReaderContext.INSTANCE.get().setReference(value);\n+                }\n             } else {\n-                ProtoStreamReaderContext.INSTANCE.get().setReference(value);\n+                reading = (tag != 0) && reader.skipField(tag);\n             }\n         }\n         return new Any(value);"
+  },
+  {
+    "sha": "b3e6e28d61534414d382516ec321b8dedcce83d8",
+    "filename": "clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ClassField.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/wildfly/wildfly/blob/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ClassField.java",
+    "raw_url": "https://github.com/wildfly/wildfly/raw/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ClassField.java",
+    "contents_url": "https://api.github.com/repos/wildfly/wildfly/contents/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ClassField.java?ref=7eac42dd66605800ac43fbbb4c8b4501fe049aa5",
+    "patch": "@@ -106,6 +106,6 @@ public int getIndex() {\n     private static final ClassField[] FIELDS = values();\n \n     static ClassField fromIndex(int index) {\n-        return (index > 0) ? FIELDS[index - 1] : null;\n+        return (index > 0) && (index <= FIELDS.length) ? FIELDS[index - 1] : null;\n     }\n }\n\\ No newline at end of file"
+  },
+  {
+    "sha": "198d447f87fff2945af43115c4486ca806babfdb",
+    "filename": "clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ClassMarshaller.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 3,
+    "changes": 11,
+    "blob_url": "https://github.com/wildfly/wildfly/blob/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ClassMarshaller.java",
+    "raw_url": "https://github.com/wildfly/wildfly/raw/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ClassMarshaller.java",
+    "contents_url": "https://api.github.com/repos/wildfly/wildfly/contents/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ClassMarshaller.java?ref=7eac42dd66605800ac43fbbb4c8b4501fe049aa5",
+    "patch": "@@ -44,11 +44,16 @@ public ClassMarshaller(ClassLoaderMarshaller marshaller) {\n     @Override\n     public Class<?> readFrom(ProtoStreamReader reader) throws IOException {\n         Class<?> result = Object.class;\n-        int tag = reader.readTag();\n-        if (tag != 0) {\n+        boolean reading = true;\n+        while (reading) {\n+            int tag = reader.readTag();\n             int index = WireFormat.getTagFieldNumber(tag);\n             Field<Class<?>> field = index == this.field.getIndex() ? this.field : ClassField.fromIndex(index);\n-            result = field.getMarshaller().readFrom(reader);\n+            if (field != null) {\n+                result = field.getMarshaller().readFrom(reader);\n+            } else {\n+                reading = (tag != 0) && reader.skipField(tag);\n+            }\n         }\n         return result;\n     }"
+  },
+  {
+    "sha": "8167693ec8d851671aa27bce8aef369ff021ae13",
+    "filename": "clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/DefaultProtoStreamReader.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 5,
+    "changes": 17,
+    "blob_url": "https://github.com/wildfly/wildfly/blob/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/DefaultProtoStreamReader.java",
+    "raw_url": "https://github.com/wildfly/wildfly/raw/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/DefaultProtoStreamReader.java",
+    "contents_url": "https://api.github.com/repos/wildfly/wildfly/contents/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/DefaultProtoStreamReader.java?ref=7eac42dd66605800ac43fbbb4c8b4501fe049aa5",
+    "patch": "@@ -23,15 +23,13 @@\n package org.wildfly.clustering.marshalling.protostream;\n \n import java.io.IOException;\n-import java.io.InputStream;\n import java.nio.ByteBuffer;\n \n import org.infinispan.protostream.EnumMarshaller;\n import org.infinispan.protostream.ImmutableSerializationContext;\n-import org.infinispan.protostream.ProtobufUtil;\n import org.infinispan.protostream.RawProtoStreamReader;\n+import org.infinispan.protostream.RawProtobufMarshaller;\n import org.infinispan.protostream.impl.RawProtoStreamReaderImpl;\n-import org.wildfly.clustering.marshalling.spi.ByteBufferInputStream;\n \n import protostream.com.google.protobuf.CodedInputStream;\n \n@@ -60,8 +58,17 @@ public ImmutableSerializationContext getSerializationContext() {\n \n     @Override\n     public <T> T readObject(Class<T> targetClass) throws IOException {\n-        try (InputStream input = new ByteBufferInputStream(this.input.readByteBuffer())) {\n-            return ProtobufUtil.readFrom(this.context, input, targetClass);\n+        int limit = this.input.readUInt32();\n+        int oldLimit = this.input.pushLimit(limit);\n+        try {\n+            RawProtobufMarshaller<T> marshaller = (RawProtobufMarshaller<T>) this.context.getMarshaller(targetClass);\n+            // Avoid redundant wrapping of the RawProtoStreamReader\n+            T result = (marshaller instanceof ProtoStreamMarshaller) ? ((ProtoStreamMarshaller<T>) marshaller).readFrom(this) : marshaller.readFrom(this.context, this);\n+            // Ensure marshaller reached limit\n+            this.input.checkLastTagWas(0);\n+            return result;\n+        } finally {\n+            this.input.popLimit(oldLimit);\n         }\n     }\n "
+  },
+  {
+    "sha": "61d37dacdc28c14250e91d559127a9afc68a8d99",
+    "filename": "clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ValueMarshaller.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/wildfly/wildfly/blob/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ValueMarshaller.java",
+    "raw_url": "https://github.com/wildfly/wildfly/raw/7eac42dd66605800ac43fbbb4c8b4501fe049aa5/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ValueMarshaller.java",
+    "contents_url": "https://api.github.com/repos/wildfly/wildfly/contents/clustering/marshalling/protostream/src/main/java/org/wildfly/clustering/marshalling/protostream/ValueMarshaller.java?ref=7eac42dd66605800ac43fbbb4c8b4501fe049aa5",
+    "patch": "@@ -53,6 +53,11 @@ public ValueMarshaller(Supplier<T> factory) {\n \n     @Override\n     public T readFrom(ProtoStreamReader reader) throws IOException {\n+        boolean reading = true;\n+        while (reading) {\n+            int tag = reader.readTag();\n+            reading = (tag != 0) && reader.skipField(tag);\n+        }\n         return this.factory.get();\n     }\n "
+  }
+]

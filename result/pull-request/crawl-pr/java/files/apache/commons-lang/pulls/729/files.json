@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "642056e2e8993fff8b96696919907dbf95ae35d1",
+    "filename": "src/changes/changes.xml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/apache/commons-lang/blob/73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3/src/changes/changes.xml",
+    "raw_url": "https://github.com/apache/commons-lang/raw/73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3/src/changes/changes.xml",
+    "contents_url": "https://api.github.com/repos/apache/commons-lang/contents/src/changes/changes.xml?ref=73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3",
+    "patch": "@@ -45,10 +45,12 @@ The <action> type attribute can be add,update,fix,remove.\n   </properties>\n   <body>\n \n-  <release version=\"3.12.1\" date=\"2021-MM-DD\" description=\"New features and bug fixes (Java 8).\">\n+  <release version=\"3.13.0\" date=\"2021-MM-DD\" description=\"New features and bug fixes (Java 8).\">\n     <!-- FIX -->\n     <action issue=\"LANG-1645\" type=\"fix\" dev=\"aherbert\" due-to=\"Alex Herbert\">NumberUtils.createNumber to recognise hex integers prefixed with +.</action>\n     <action issue=\"LANG-1646\" type=\"fix\" dev=\"aherbert\" due-to=\"Alex Herbert\">NumberUtils.createNumber to return requested floating point type for zero.</action>\n+    <!-- ADD -->\n+    <action issue=\"LANG-1647\" type=\"add\" dev=\"abernal\"  due-to=\"Arturo Bernal\">Check if an throwable is a checked exception.</action>\n   </release>\n \n   <release version=\"3.12.0\" date=\"2021-02-26\" description=\"New features and bug fixes (Java 8).\">"
+  },
+  {
+    "sha": "29d987dc8c83ee3a6cab858d7f2af11fef90ba7a",
+    "filename": "src/main/java/org/apache/commons/lang3/concurrent/ConcurrentUtils.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/apache/commons-lang/blob/73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3/src/main/java/org/apache/commons/lang3/concurrent/ConcurrentUtils.java",
+    "raw_url": "https://github.com/apache/commons-lang/raw/73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3/src/main/java/org/apache/commons/lang3/concurrent/ConcurrentUtils.java",
+    "contents_url": "https://api.github.com/repos/apache/commons-lang/contents/src/main/java/org/apache/commons/lang3/concurrent/ConcurrentUtils.java?ref=73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3",
+    "patch": "@@ -22,6 +22,7 @@\n import java.util.concurrent.TimeUnit;\n \n import org.apache.commons.lang3.Validate;\n+import org.apache.commons.lang3.exception.ExceptionUtils;\n \n /**\n  * <p>\n@@ -142,8 +143,7 @@ public static void handleCauseUnchecked(final ExecutionException ex) {\n      * checked exception\n      */\n     static Throwable checkedException(final Throwable ex) {\n-        Validate.isTrue(ex != null && !(ex instanceof RuntimeException)\n-                && !(ex instanceof Error), \"Not a checked exception: \" + ex);\n+        Validate.isTrue(ExceptionUtils.isChecked(ex), \"Not a checked exception: \" + ex);\n \n         return ex;\n     }"
+  },
+  {
+    "sha": "ea7b232701b77186cc2cc41ab00ffb5d76767314",
+    "filename": "src/main/java/org/apache/commons/lang3/exception/ExceptionUtils.java",
+    "status": "modified",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/apache/commons-lang/blob/73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3/src/main/java/org/apache/commons/lang3/exception/ExceptionUtils.java",
+    "raw_url": "https://github.com/apache/commons-lang/raw/73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3/src/main/java/org/apache/commons/lang3/exception/ExceptionUtils.java",
+    "contents_url": "https://api.github.com/repos/apache/commons-lang/contents/src/main/java/org/apache/commons/lang3/exception/ExceptionUtils.java?ref=73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3",
+    "patch": "@@ -586,6 +586,30 @@ public static int indexOfType(final Throwable throwable, final Class<? extends T\n         return indexOf(throwable, type, fromIndex, true);\n     }\n \n+    /**\n+     * Return whether the given throwable is a checked exception:\n+     * that is, neither a RuntimeException nor an Error.\n+     *\n+     * <pre>\n+     * ExceptionUtils.isChecked(new Exception())                    = true\n+     * ExceptionUtils.isChecked(new SQLException())                 = true\n+     * ExceptionUtils.isChecked(new RuntimeException())             = false\n+     * ExceptionUtils.isChecked(new IllegalArgumentException(\"\"))   = false\n+     * ExceptionUtils.isChecked(new Throwable())                    = true\n+     * ExceptionUtils.isChecked(null)                               = false\n+     * </pre>\n+     *\n+     * @param throwable the throwable to check\n+     * @return whether the throwable is a checked exception\n+     * @see java.lang.Exception\n+     * @see java.lang.RuntimeException\n+     * @see java.lang.Error\n+     * @since 3.13.0\n+     */\n+    public static boolean isChecked(final Throwable throwable) {\n+        return throwable != null && !(throwable instanceof RuntimeException || throwable instanceof Error);\n+    }\n+\n     //-----------------------------------------------------------------------\n     /**\n      * <p>Prints a compact stack trace for the root cause of a throwable"
+  },
+  {
+    "sha": "48c6ab9eefc3c0d1d2d996f463cc6b8302e1e04a",
+    "filename": "src/test/java/org/apache/commons/lang3/exception/ExceptionUtilsTest.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/apache/commons-lang/blob/73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3/src/test/java/org/apache/commons/lang3/exception/ExceptionUtilsTest.java",
+    "raw_url": "https://github.com/apache/commons-lang/raw/73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3/src/test/java/org/apache/commons/lang3/exception/ExceptionUtilsTest.java",
+    "contents_url": "https://api.github.com/repos/apache/commons-lang/contents/src/test/java/org/apache/commons/lang3/exception/ExceptionUtilsTest.java?ref=73f2b7381dc0e68e1fb8ba311434b6af1ebdd7b3",
+    "patch": "@@ -31,6 +31,7 @@\n import java.io.StringWriter;\n import java.lang.reflect.Constructor;\n import java.lang.reflect.Modifier;\n+import java.sql.SQLException;\n import java.util.List;\n \n import org.apache.commons.lang3.test.NotVisibleExceptionFactory;\n@@ -500,6 +501,17 @@ public void testIndexOfType_ThrowableClassInt() {\n         assertEquals(0, ExceptionUtils.indexOfType(withCause, Throwable.class, 0));\n     }\n \n+    @Test\n+    void isChecked() {\n+        final Exception ex = null;\n+        assertTrue(ExceptionUtils.isChecked(new Exception()));\n+        assertTrue(ExceptionUtils.isChecked(new SQLException()));\n+        assertFalse(ExceptionUtils.isChecked(new RuntimeException()));\n+        assertFalse(ExceptionUtils.isChecked(new IllegalArgumentException(\"\")));\n+        assertTrue(ExceptionUtils.isChecked(new Throwable()));\n+        assertFalse(ExceptionUtils.isChecked(ex));\n+    }\n+\n     //-----------------------------------------------------------------------\n     @Test\n     public void testPrintRootCauseStackTrace_Throwable() {"
+  }
+]

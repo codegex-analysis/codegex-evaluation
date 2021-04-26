@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "1150b43b854f81c56d801ed78d552dd81dec1665",
+    "filename": "src/jdk.javadoc/share/classes/jdk/javadoc/internal/doclint/Checker.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 2,
+    "changes": 17,
+    "blob_url": "https://github.com/openjdk/jdk/blob/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/src/jdk.javadoc/share/classes/jdk/javadoc/internal/doclint/Checker.java",
+    "raw_url": "https://github.com/openjdk/jdk/raw/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/src/jdk.javadoc/share/classes/jdk/javadoc/internal/doclint/Checker.java",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/src/jdk.javadoc/share/classes/jdk/javadoc/internal/doclint/Checker.java?ref=46cc37a6fe66ed28fbf58e206bdd1abaf7540875",
+    "patch": "@@ -269,7 +269,20 @@ private void reportReference(String code, Object... args) {\n \n     @Override @DefinedBy(Api.COMPILER_TREE)\n     public Void visitDocComment(DocCommentTree tree, Void ignore) {\n-        super.visitDocComment(tree, ignore);\n+        scan(tree.getFirstSentence(), ignore);\n+        scan(tree.getBody(), ignore);\n+        checkTagStack();\n+\n+        for (DocTree blockTag : tree.getBlockTags()) {\n+            tagStack.clear();\n+            scan(blockTag, ignore);\n+            checkTagStack();\n+        }\n+\n+        return null;\n+    }\n+\n+    private void checkTagStack() {\n         for (TagStackItem tsi: tagStack) {\n             warnIfEmpty(tsi, null);\n             if (tsi.tree.getKind() == DocTree.Kind.START_ELEMENT\n@@ -278,7 +291,6 @@ public Void visitDocComment(DocCommentTree tree, Void ignore) {\n                 env.messages.error(HTML, t, \"dc.tag.not.closed\", t.getName());\n             }\n         }\n-        return null;\n     }\n     // </editor-fold>\n \n@@ -548,6 +560,7 @@ public Void visitEndElement(EndElementTree tree, Void ignore) {\n                     done = true;\n                     break;\n                 } else if (top.tag == null || top.tag.endKind != HtmlTag.EndKind.REQUIRED) {\n+                    warnIfEmpty(top, null);\n                     tagStack.pop();\n                 } else {\n                     boolean found = false;"
+  },
+  {
+    "sha": "bec33195df5f4b1e45b227d43fff8201950938b8",
+    "filename": "test/langtools/tools/doclint/EmptyTagsTest.java",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/openjdk/jdk/blob/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/test/langtools/tools/doclint/EmptyTagsTest.java",
+    "raw_url": "https://github.com/openjdk/jdk/raw/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/test/langtools/tools/doclint/EmptyTagsTest.java",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/test/langtools/tools/doclint/EmptyTagsTest.java?ref=46cc37a6fe66ed28fbf58e206bdd1abaf7540875",
+    "patch": "@@ -0,0 +1,45 @@\n+/*\n+ * @test /nodynamiccopyright/\n+ * @bug 8258957\n+ * @summary DocLint: check for HTML start element at end of body\n+ * @modules jdk.javadoc/jdk.javadoc.internal.doclint\n+ * @build DocLintTester\n+ * @run main DocLintTester -Xmsgs:-html EmptyTagsTest.java\n+ * @run main DocLintTester -Xmsgs:html -ref EmptyTagsTest.out EmptyTagsTest.java\n+ */\n+\n+/** . */\n+public class EmptyTagsTest {\n+    /**\n+     * Comment. <p>\n+     */\n+    void simpleTrailing() { }\n+\n+    /**\n+     * Comment. <p>\n+     * <ul>\n+     *     <li>Item.\n+     * </ul>\n+     */\n+    void beforeBlock() { }\n+\n+    /**\n+     * Comment. <p>\n+     * @since 1.0\n+     */\n+    void beforeTag() { }\n+\n+    /**\n+     * Comment.\n+     * <ul>\n+     *     <li>Item. <p>\n+     * </ul>\n+     */\n+    void inBlock() { }\n+\n+    /**\n+     * Comment.\n+     * @author J. Duke<p>\n+     */\n+    void inTag() { }\n+}"
+  },
+  {
+    "sha": "34ad9389fd7ec16a1a27e36377e6585058c0b3a4",
+    "filename": "test/langtools/tools/doclint/EmptyTagsTest.out",
+    "status": "added",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/openjdk/jdk/blob/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/test/langtools/tools/doclint/EmptyTagsTest.out",
+    "raw_url": "https://github.com/openjdk/jdk/raw/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/test/langtools/tools/doclint/EmptyTagsTest.out",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/test/langtools/tools/doclint/EmptyTagsTest.out?ref=46cc37a6fe66ed28fbf58e206bdd1abaf7540875",
+    "patch": "@@ -0,0 +1,16 @@\n+EmptyTagsTest.java:14: warning: empty <p> tag\n+     * Comment. <p>\n+                ^\n+EmptyTagsTest.java:19: warning: empty <p> tag\n+     * Comment. <p>\n+                ^\n+EmptyTagsTest.java:27: warning: empty <p> tag\n+     * Comment. <p>\n+                ^\n+EmptyTagsTest.java:35: warning: empty <p> tag\n+     *     <li>Item. <p>\n+                     ^\n+EmptyTagsTest.java:42: warning: empty <p> tag\n+     * @author J. Duke<p>\n+                      ^\n+5 warnings\n\\ No newline at end of file"
+  },
+  {
+    "sha": "2455b19771824b0335a5cfe1ddc74ff9b696b3b8",
+    "filename": "test/langtools/tools/doclint/EndTagsTest.out",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/openjdk/jdk/blob/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/test/langtools/tools/doclint/EndTagsTest.out",
+    "raw_url": "https://github.com/openjdk/jdk/raw/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/test/langtools/tools/doclint/EndTagsTest.out",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/test/langtools/tools/doclint/EndTagsTest.out?ref=46cc37a6fe66ed28fbf58e206bdd1abaf7540875",
+    "patch": "@@ -1,6 +1,9 @@\n EndTagsTest.java:19: error: unexpected end tag: </a>\n     /** </a> */\n         ^\n+EndTagsTest.java:22: warning: empty <p> tag\n+    /** <p> </a> */\n+        ^\n EndTagsTest.java:22: error: unexpected end tag: </a>\n     /** <p> </a> */\n             ^\n@@ -23,3 +26,4 @@ EndTagsTest.java:37: error: unknown tag: invalid\n     /** </invalid> */\n         ^\n 8 errors\n+1 warning\n\\ No newline at end of file"
+  },
+  {
+    "sha": "8117de21dc1d08cb00f2ccf327b2c1acff6e07bf",
+    "filename": "test/langtools/tools/doclint/HtmlTagsTest.out",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 1,
+    "changes": 5,
+    "blob_url": "https://github.com/openjdk/jdk/blob/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/test/langtools/tools/doclint/HtmlTagsTest.out",
+    "raw_url": "https://github.com/openjdk/jdk/raw/46cc37a6fe66ed28fbf58e206bdd1abaf7540875/test/langtools/tools/doclint/HtmlTagsTest.out",
+    "contents_url": "https://api.github.com/repos/openjdk/jdk/contents/test/langtools/tools/doclint/HtmlTagsTest.out?ref=46cc37a6fe66ed28fbf58e206bdd1abaf7540875",
+    "patch": "@@ -16,6 +16,9 @@ HtmlTagsTest.java:29: error: element not closed: html\n HtmlTagsTest.java:34: error: block element not allowed within inline element <span>: p\n      * <span> <p> </span>\n               ^\n+HtmlTagsTest.java:34: warning: empty <p> tag\n+     * <span> <p> </span>\n+              ^\n HtmlTagsTest.java:39: error: block element not allowed within @link: p\n      * {@link java.lang.String <p> }\n                                ^\n@@ -41,4 +44,4 @@ HtmlTagsTest.java:65: error: tag not allowed here: <b>\n      * <ul> <b>text</b> <li> ... </li> </ul>\n             ^\n 13 errors\n-1 warning\n+2 warnings"
+  }
+]

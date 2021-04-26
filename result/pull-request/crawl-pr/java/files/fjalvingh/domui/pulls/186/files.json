@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "e6bbe09e93e6f25bead0d230277f7522add5c4f3",
+    "filename": "to.etc.domui/src/main/java/to/etc/domui/component/binding/ComponentPropertyBindingBidi.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/fjalvingh/domui/blob/5970a24c7be931b9960eec926d9ca43cd15b863c/to.etc.domui/src/main/java/to/etc/domui/component/binding/ComponentPropertyBindingBidi.java",
+    "raw_url": "https://github.com/fjalvingh/domui/raw/5970a24c7be931b9960eec926d9ca43cd15b863c/to.etc.domui/src/main/java/to/etc/domui/component/binding/ComponentPropertyBindingBidi.java",
+    "contents_url": "https://api.github.com/repos/fjalvingh/domui/contents/to.etc.domui/src/main/java/to/etc/domui/component/binding/ComponentPropertyBindingBidi.java?ref=5970a24c7be931b9960eec926d9ca43cd15b863c",
+    "patch": "@@ -60,6 +60,10 @@ public UIMessage getBindError() {\n \t\treturn m_bindError;\n \t}\n \n+\tpublic void setBindError(UIMessage error) {\n+\t\tm_bindError = error;\n+\t}\n+\n \t/**\n \t * Calculate the list of changes made to controls, as part one of the controlToModel\n \t * process. Each control whose value changed will be registered in a list of"
+  },
+  {
+    "sha": "3b3c71a5d8c39502607bbf442081ea75297c1e3c",
+    "filename": "to.etc.domui/src/main/java/to/etc/domui/component/binding/OldBindingHandler.java",
+    "status": "modified",
+    "additions": 53,
+    "deletions": 0,
+    "changes": 53,
+    "blob_url": "https://github.com/fjalvingh/domui/blob/5970a24c7be931b9960eec926d9ca43cd15b863c/to.etc.domui/src/main/java/to/etc/domui/component/binding/OldBindingHandler.java",
+    "raw_url": "https://github.com/fjalvingh/domui/raw/5970a24c7be931b9960eec926d9ca43cd15b863c/to.etc.domui/src/main/java/to/etc/domui/component/binding/OldBindingHandler.java",
+    "contents_url": "https://api.github.com/repos/fjalvingh/domui/contents/to.etc.domui/src/main/java/to/etc/domui/component/binding/OldBindingHandler.java?ref=5970a24c7be931b9960eec926d9ca43cd15b863c",
+    "patch": "@@ -147,4 +147,57 @@ public Object after(NodeBase n) throws Exception {\n \t\t}\n \t\treturn null;\n \t}\n+\n+\tpublic static <T> boolean bindErrors(List<UIMessage> errors, T instance, NodeBase root) throws Exception {\n+\n+\t\tfor(UIMessage error: errors) {\n+\t\t\tComponentPropertyBindingBidi<?, ?, T, ?> binding = OldBindingHandler.findInstanceBinding(root, instance, error.getErrorLocation());\n+\t\t\tif(null != binding) {\n+\t\t\t\tbinding.setBindError(error);\n+\t\t\t\terror.location(binding.m_control.getErrorLocation());\n+\t\t\t}else {\n+\t\t\t\troot.addGlobalMessage(error);\n+\t\t\t}\n+\t\t}\n+\t\treturn reportBindingErrors(root) || ! errors.isEmpty();\n+\t}\n+\n+\t@Nullable\n+\tpublic static <T> ComponentPropertyBindingBidi<?,?,T,?> findInstanceBinding(NodeBase root, T instance, String instancePropertyName) throws Exception {\n+\n+\t\tfinal List<ComponentPropertyBindingBidi<?, ?, T, ?>> foundBindings = new ArrayList<>();\n+\t\tDomUtil.walkTreeUndelegated(root, new DomUtil.IPerNode() {\n+\t\t\t@Override\n+\t\t\tpublic Object before(NodeBase n) throws Exception {\n+\t\t\t\tList<IBinding> list = n.getBindingList();\n+\t\t\t\tif(null != list) {\n+\t\t\t\t\tfor(IBinding sb : list) {\n+\t\t\t\t\t\tif(sb instanceof ComponentPropertyBindingBidi) {\n+\t\t\t\t\t\t\tComponentPropertyBindingBidi<?, ?, ?, ?> sib = (ComponentPropertyBindingBidi<?, ?, ?, ?>) sb;\n+\t\t\t\t\t\t\tif(instance.equals(sib.getInstance())){\n+\t\t\t\t\t\t\t\tIValueAccessor<?> instanceProperty = sib.getInstanceProperty();\n+\t\t\t\t\t\t\t\tif(null != instanceProperty && instanceProperty instanceof PropertyMetaModel) {\n+\t\t\t\t\t\t\t\t\tif(instancePropertyName.equals(((PropertyMetaModel<?>) instanceProperty).getName())) {\n+\t\t\t\t\t\t\t\t\t\tfoundBindings.add((ComponentPropertyBindingBidi<?, ?, T, ?>) sib);\n+\t\t\t\t\t\t\t\t\t\treturn sib;\n+\t\t\t\t\t\t\t\t\t}\n+\t\t\t\t\t\t\t\t}\n+\t\t\t\t\t\t\t}\n+\t\t\t\t\t\t}\n+\t\t\t\t\t}\n+\t\t\t\t}\n+\t\t\t\treturn null;\n+\t\t\t}\n+\n+\t\t\t@Override\n+\t\t\tpublic Object after(NodeBase n) throws Exception {\n+\t\t\t\treturn null;\n+\t\t\t}\n+\t\t});\n+\t\tif(foundBindings.isEmpty()) {\n+\t\t\treturn null;\n+\t\t}\n+\t\treturn foundBindings.get(0);\n+\t}\n+\n }"
+  }
+]

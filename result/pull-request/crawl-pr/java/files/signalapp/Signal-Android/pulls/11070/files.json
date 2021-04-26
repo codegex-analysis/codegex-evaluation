@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "f3202400df57ee40afc15dac9ad766452ce5798a",
+    "filename": "app/src/main/java/org/thoughtcrime/securesms/conversation/ConversationActivity.java",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 6,
+    "changes": 23,
+    "blob_url": "https://github.com/signalapp/Signal-Android/blob/a99b1a2d7ad4e95a1a6050f22aa852721c4c5787/app/src/main/java/org/thoughtcrime/securesms/conversation/ConversationActivity.java",
+    "raw_url": "https://github.com/signalapp/Signal-Android/raw/a99b1a2d7ad4e95a1a6050f22aa852721c4c5787/app/src/main/java/org/thoughtcrime/securesms/conversation/ConversationActivity.java",
+    "contents_url": "https://api.github.com/repos/signalapp/Signal-Android/contents/app/src/main/java/org/thoughtcrime/securesms/conversation/ConversationActivity.java?ref=a99b1a2d7ad4e95a1a6050f22aa852721c4c5787",
+    "patch": "@@ -823,9 +823,15 @@ public boolean onCreateOptionsMenu(Menu menu) {\n \n       inflater.inflate(R.menu.conversation_message_requests, menu);\n \n-      if (recipient != null && recipient.get().isMuted()) inflater.inflate(R.menu.conversation_muted, menu);\n-      else                                                inflater.inflate(R.menu.conversation_unmuted, menu);\n-\n+      if (recipient != null && recipient.get().isBlocked()) {\n+        MenuItem searchViewItem = menu.findItem(R.id.menu_search);\n+        searchViewItem.setVisible(true);\n+        configureSearchViewItem(menu, searchViewItem);\n+      } else {\n+        if (recipient != null && recipient.get().isMuted())\n+          inflater.inflate(R.menu.conversation_muted, menu);\n+        else inflater.inflate(R.menu.conversation_unmuted, menu);\n+      }\n       super.onCreateOptionsMenu(menu);\n       return true;\n     }\n@@ -928,7 +934,13 @@ public boolean onCreateOptionsMenu(Menu menu) {\n     });\n \n     searchViewItem = menu.findItem(R.id.menu_search);\n+    configureSearchViewItem(menu, searchViewItem);\n+\n+    super.onCreateOptionsMenu(menu);\n+    return true;\n+  }\n \n+  private void configureSearchViewItem(Menu menu, MenuItem searchViewItem) {\n     SearchView                     searchView    = (SearchView) searchViewItem.getActionView();\n     SearchView.OnQueryTextListener queryListener = new SearchView.OnQueryTextListener() {\n       @Override\n@@ -948,7 +960,7 @@ public boolean onQueryTextChange(String query) {\n       }\n     };\n \n-    searchViewItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {\n+        searchViewItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {\n       @Override\n       public boolean onMenuItemActionExpand(MenuItem item) {\n         searchView.setOnQueryTextListener(queryListener);\n@@ -978,8 +990,7 @@ public boolean onMenuItemActionCollapse(MenuItem item) {\n       }\n     });\n \n-    super.onCreateOptionsMenu(menu);\n-    return true;\n+\n   }\n \n   @Override"
+  },
+  {
+    "sha": "dcb71461d529f02a979c13df4af2e35fb5795ee4",
+    "filename": "app/src/main/res/menu/conversation_message_requests.xml",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/signalapp/Signal-Android/blob/a99b1a2d7ad4e95a1a6050f22aa852721c4c5787/app/src/main/res/menu/conversation_message_requests.xml",
+    "raw_url": "https://github.com/signalapp/Signal-Android/raw/a99b1a2d7ad4e95a1a6050f22aa852721c4c5787/app/src/main/res/menu/conversation_message_requests.xml",
+    "contents_url": "https://api.github.com/repos/signalapp/Signal-Android/contents/app/src/main/res/menu/conversation_message_requests.xml?ref=a99b1a2d7ad4e95a1a6050f22aa852721c4c5787",
+    "patch": "@@ -1,8 +1,15 @@\n <?xml version=\"1.0\" encoding=\"utf-8\"?>\n <menu\n-    xmlns:android=\"http://schemas.android.com/apk/res/android\">\n+    xmlns:android=\"http://schemas.android.com/apk/res/android\"\n+    xmlns:app=\"http://schemas.android.com/apk/res-auto\">\n \n     <item android:title=\"@string/conversation__menu_view_all_media\"\n         android:id=\"@+id/menu_view_media\" />\n \n+    <item android:title=\"@string/SearchToolbar_search\"\n+        android:id=\"@+id/menu_search\"\n+        android:visible=\"false\"\n+        app:actionViewClass=\"org.thoughtcrime.securesms.components.SearchView\"\n+        app:showAsAction=\"collapseActionView\"/>\n+\n </menu>\n\\ No newline at end of file"
+  }
+]

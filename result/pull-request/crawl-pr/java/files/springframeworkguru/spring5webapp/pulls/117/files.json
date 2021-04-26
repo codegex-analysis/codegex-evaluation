@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "0ed6848cda5e59ba2d1f43787f157e3f2a7a6094",
+    "filename": "src/main/java/guru/springframework/spring5webapp/Foo.java",
+    "status": "added",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/springframeworkguru/spring5webapp/blob/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/Foo.java",
+    "raw_url": "https://github.com/springframeworkguru/spring5webapp/raw/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/Foo.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/spring5webapp/contents/src/main/java/guru/springframework/spring5webapp/Foo.java?ref=8ad74f61651358f46f337eac41c23753dd0cb747",
+    "patch": "@@ -0,0 +1,4 @@\n+package guru.springframework.spring5webapp;\n+\n+public class Foo {\n+}"
+  },
+  {
+    "sha": "7a2ff196db84886b9136965d3f5b8ecab95abae8",
+    "filename": "src/main/java/guru/springframework/spring5webapp/bootstrap/BootStrapData.java",
+    "status": "added",
+    "additions": 65,
+    "deletions": 0,
+    "changes": 65,
+    "blob_url": "https://github.com/springframeworkguru/spring5webapp/blob/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/bootstrap/BootStrapData.java",
+    "raw_url": "https://github.com/springframeworkguru/spring5webapp/raw/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/bootstrap/BootStrapData.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/spring5webapp/contents/src/main/java/guru/springframework/spring5webapp/bootstrap/BootStrapData.java?ref=8ad74f61651358f46f337eac41c23753dd0cb747",
+    "patch": "@@ -0,0 +1,65 @@\n+package guru.springframework.spring5webapp.bootstrap;\n+\n+import guru.springframework.spring5webapp.domain.Author;\n+import guru.springframework.spring5webapp.domain.Book;\n+import guru.springframework.spring5webapp.domain.Publisher;\n+import guru.springframework.spring5webapp.repositories.AuthorRepository;\n+import guru.springframework.spring5webapp.repositories.BookRepository;\n+import guru.springframework.spring5webapp.repositories.PublisherRepository;\n+import org.springframework.boot.CommandLineRunner;\n+import org.springframework.stereotype.Component;\n+\n+@Component\n+public class BootStrapData implements CommandLineRunner {\n+\n+    private final AuthorRepository authorRepository;\n+    private final BookRepository bookRepository;\n+    private final PublisherRepository publisherRepository;\n+\n+    public BootStrapData(AuthorRepository authorRepository, BookRepository bookRepository, PublisherRepository publisherRepository) {\n+        this.authorRepository = authorRepository;\n+        this.bookRepository = bookRepository;\n+        this.publisherRepository = publisherRepository;\n+    }\n+\n+    @Override\n+    public void run(String... args) throws Exception {\n+\n+        System.out.println(\"Started in Bootstrap\");\n+\n+        Publisher publisher = new Publisher();\n+        publisher.setName(\"SFG Publishing\");\n+        publisher.setCity(\"St Petersburg\");\n+        publisher.setState(\"FL\");\n+\n+        publisherRepository.save(publisher);\n+\n+        System.out.println(\"Publisher Count: \" + publisherRepository.count());\n+\n+        Author eric = new Author(\"Eric\", \"Evans\");\n+        Book ddd = new Book(\"Domain Driven Design\", \"123123\");\n+        eric.getBooks().add(ddd);\n+        ddd.getAuthors().add(eric);\n+\n+        ddd.setPublisher(publisher);\n+        publisher.getBooks().add(ddd);\n+\n+        authorRepository.save(eric);\n+        bookRepository.save(ddd);\n+        publisherRepository.save(publisher);\n+\n+        Author rod = new Author(\"Rod\", \"Johnson\");\n+        Book noEJB = new Book(\"J2EE Development without EJB\", \"3939459459\");\n+        rod.getBooks().add(noEJB);\n+        noEJB.getAuthors().add(rod);\n+        noEJB.setPublisher(publisher);\n+        publisher.getBooks().add(noEJB);\n+\n+        authorRepository.save(rod);\n+        bookRepository.save(noEJB);\n+        publisherRepository.save(publisher);\n+\n+        System.out.println(\"Number of Books: \" + bookRepository.count());\n+        System.out.println(\"Publisher no  Books: \" + publisher.getBooks().size());\n+    };\n+}"
+  },
+  {
+    "sha": "fa769f494336b2055f46b4affc9e6e9a9142b676",
+    "filename": "src/main/java/guru/springframework/spring5webapp/domain/Author.java",
+    "status": "added",
+    "additions": 85,
+    "deletions": 0,
+    "changes": 85,
+    "blob_url": "https://github.com/springframeworkguru/spring5webapp/blob/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/domain/Author.java",
+    "raw_url": "https://github.com/springframeworkguru/spring5webapp/raw/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/domain/Author.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/spring5webapp/contents/src/main/java/guru/springframework/spring5webapp/domain/Author.java?ref=8ad74f61651358f46f337eac41c23753dd0cb747",
+    "patch": "@@ -0,0 +1,85 @@\n+package guru.springframework.spring5webapp.domain;\n+\n+import javax.persistence.*;\n+import java.util.HashSet;\n+import java.util.Set;\n+\n+\n+@Entity\n+public class Author {\n+\n+\n+    @Id\n+    @GeneratedValue( strategy = GenerationType.AUTO)\n+    private Long id;\n+    private String firstName;\n+    private String lastName;\n+\n+    @ManyToMany(mappedBy = \"authors\")\n+    private Set<Book>books = new HashSet<>();\n+\n+    public Long getId() {\n+        return id;\n+    }\n+\n+    public void setId(Long id) {\n+        this.id = id;\n+    }\n+\n+    public String getFirstName() {\n+        return firstName;\n+    }\n+\n+    public void setFirstName(String firstName) {\n+        this.firstName = firstName;\n+    }\n+\n+    public String getLastName() {\n+        return lastName;\n+    }\n+\n+    public void setLastName(String lastName) {\n+        this.lastName = lastName;\n+    }\n+\n+    public Set<Book> getBooks() {\n+        return books;\n+    }\n+\n+    public void setBooks(Set<Book> books) {\n+        this.books = books;\n+    }\n+\n+    public Author() {\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return \"Author{\" +\n+                \"id=\" + id +\n+                \", firstName='\" + firstName + '\\'' +\n+                \", lastName='\" + lastName + '\\'' +\n+                \", books=\" + books +\n+                '}';\n+    }\n+\n+    public Author(String firstName, String lastName) {\n+        this.firstName = firstName;\n+        this.lastName = lastName;\n+    }\n+\n+    @Override\n+    public boolean equals(Object o) {\n+        if (this == o) return true;\n+        if (o == null || getClass() != o.getClass()) return false;\n+\n+        Author author = (Author) o;\n+\n+        return id != null ? id.equals(author.id) : author.id == null;\n+    }\n+\n+    @Override\n+    public int hashCode() {\n+        return id != null ? id.hashCode() : 0;\n+    }\n+}"
+  },
+  {
+    "sha": "dbd2dc33fba2e08cc4610f749ba958ee33f1a9bd",
+    "filename": "src/main/java/guru/springframework/spring5webapp/domain/Book.java",
+    "status": "added",
+    "additions": 96,
+    "deletions": 0,
+    "changes": 96,
+    "blob_url": "https://github.com/springframeworkguru/spring5webapp/blob/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/domain/Book.java",
+    "raw_url": "https://github.com/springframeworkguru/spring5webapp/raw/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/domain/Book.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/spring5webapp/contents/src/main/java/guru/springframework/spring5webapp/domain/Book.java?ref=8ad74f61651358f46f337eac41c23753dd0cb747",
+    "patch": "@@ -0,0 +1,96 @@\n+package guru.springframework.spring5webapp.domain;\n+\n+import javax.persistence.*;\n+import java.util.HashSet;\n+import java.util.Set;\n+\n+@Entity\n+public class Book {\n+    @Id\n+    @GeneratedValue( strategy = GenerationType.AUTO)\n+    private  Long id;\n+    private String title;\n+    private String isbn;\n+\n+    @ManyToOne\n+    private Publisher publisher;\n+\n+    @ManyToMany\n+    @JoinTable( name = \"author_book\",\n+            joinColumns = @JoinColumn(name = \"book_id\"),\n+            inverseJoinColumns = @JoinColumn(name = \"author_id\") )\n+    private Set<Author> authors = new HashSet<>();\n+\n+    public Book(String title, String isbn){\n+        this.title = title;\n+        this.isbn = isbn;\n+    }\n+\n+    public Book() {\n+    }\n+\n+    public Long getId() {\n+        return id;\n+    }\n+\n+    public void setId(Long id) {\n+        this.id = id;\n+    }\n+\n+    public Publisher getPublisher() {\n+        return publisher;\n+    }\n+\n+    public void setPublisher(Publisher publisher) {\n+        this.publisher = publisher;\n+    }\n+\n+    public String getTitle() {\n+        return title;\n+    }\n+\n+    public void setTitle(String title) {\n+        this.title = title;\n+    }\n+\n+    public String getIsbn() {\n+        return isbn;\n+    }\n+\n+    public void setIsbn(String isbn) {\n+        this.isbn = isbn;\n+    }\n+\n+    public Set<Author> getAuthors() {\n+        return authors;\n+    }\n+\n+    public void setAuthors(Set<Author> authors) {\n+        this.authors = authors;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return \"Book{\" +\n+                \"id=\" + id +\n+                \", title='\" + title + '\\'' +\n+                \", isbn='\" + isbn + '\\'' +\n+                \", authors=\" + authors +\n+                '}';\n+    }\n+\n+    @Override\n+    public boolean equals(Object o) {\n+        if (this == o) return true;\n+        if (o == null || getClass() != o.getClass()) return false;\n+\n+        Book book = (Book) o;\n+\n+        return id != null ? id.equals(book.id) : book.id == null;\n+    }\n+\n+    @Override\n+    public int hashCode() {\n+        return id != null ? id.hashCode() : 0;\n+    }\n+}"
+  },
+  {
+    "sha": "6e4134c04d110e259315ed0ee8e3e990c9688283",
+    "filename": "src/main/java/guru/springframework/spring5webapp/domain/Publisher.java",
+    "status": "added",
+    "additions": 113,
+    "deletions": 0,
+    "changes": 113,
+    "blob_url": "https://github.com/springframeworkguru/spring5webapp/blob/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/domain/Publisher.java",
+    "raw_url": "https://github.com/springframeworkguru/spring5webapp/raw/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/domain/Publisher.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/spring5webapp/contents/src/main/java/guru/springframework/spring5webapp/domain/Publisher.java?ref=8ad74f61651358f46f337eac41c23753dd0cb747",
+    "patch": "@@ -0,0 +1,113 @@\n+package guru.springframework.spring5webapp.domain;\n+\n+import org.springframework.data.repository.CrudRepository;\n+\n+import javax.persistence.*;\n+import java.util.HashSet;\n+import java.util.Set;\n+\n+@Entity\n+public class Publisher  {\n+\n+    @Id\n+    @GeneratedValue(strategy = GenerationType.AUTO)\n+    private Long id;\n+\n+    private String name;\n+    private String addressLine1;\n+    private String city;\n+    private String state;\n+    private String zip;\n+\n+    @OneToMany\n+    @JoinColumn(name = \"publisher_id\")\n+    private Set<Book> books = new HashSet<>();\n+\n+\n+    public Publisher() {\n+\n+    }\n+\n+    public Set<Book> getBooks() {\n+        return books;\n+    }\n+\n+    public void setBooks(Set<Book> books) {\n+        this.books = books;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        return \"Publisher{\" +\n+                \"id=\" + id +\n+                \", name='\" + name + '\\'' +\n+                \", addressLine1='\" + addressLine1 + '\\'' +\n+                \", city='\" + city + '\\'' +\n+                \", state='\" + state + '\\'' +\n+                \", zip='\" + zip + '\\'' +\n+                '}';\n+    }\n+\n+    @Override\n+    public boolean equals(Object o) {\n+        if (this == o) return true;\n+        if (o == null || getClass() != o.getClass()) return false;\n+\n+        Publisher publisher = (Publisher) o;\n+\n+        return id != null ? id.equals(publisher.id) : publisher.id == null;\n+    }\n+\n+    @Override\n+    public int hashCode() {\n+        return id != null ? id.hashCode() : 0;\n+    }\n+\n+    public Long getId() {\n+        return id;\n+    }\n+\n+    public void setId(Long id) {\n+        this.id = id;\n+    }\n+\n+    public String getName() {\n+        return name;\n+    }\n+\n+    public void setName(String name) {\n+        this.name = name;\n+    }\n+\n+    public String getAddressLine1() {\n+        return addressLine1;\n+    }\n+\n+    public void setAddressLine1(String addressLine1) {\n+        this.addressLine1 = addressLine1;\n+    }\n+\n+    public String getCity() {\n+        return city;\n+    }\n+\n+    public void setCity(String city) {\n+        this.city = city;\n+    }\n+\n+    public String getState() {\n+        return state;\n+    }\n+\n+    public void setState(String state) {\n+        this.state = state;\n+    }\n+\n+    public String getZip() {\n+        return zip;\n+    }\n+\n+    public void setZip(String zip) {\n+        this.zip = zip;\n+    }\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "beaacd8e8351b82662851ec983274c7cdbba3f59",
+    "filename": "src/main/java/guru/springframework/spring5webapp/repositories/AuthorRepository.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/springframeworkguru/spring5webapp/blob/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/repositories/AuthorRepository.java",
+    "raw_url": "https://github.com/springframeworkguru/spring5webapp/raw/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/repositories/AuthorRepository.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/spring5webapp/contents/src/main/java/guru/springframework/spring5webapp/repositories/AuthorRepository.java?ref=8ad74f61651358f46f337eac41c23753dd0cb747",
+    "patch": "@@ -0,0 +1,8 @@\n+package guru.springframework.spring5webapp.repositories;\n+\n+import guru.springframework.spring5webapp.domain.Author;\n+import org.springframework.data.repository.CrudRepository;\n+\n+public interface AuthorRepository extends CrudRepository<Author, Long> {\n+\n+}"
+  },
+  {
+    "sha": "0653770ae2e9bf80f892951e14bd177fbcb48352",
+    "filename": "src/main/java/guru/springframework/spring5webapp/repositories/BookRepository.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/springframeworkguru/spring5webapp/blob/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/repositories/BookRepository.java",
+    "raw_url": "https://github.com/springframeworkguru/spring5webapp/raw/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/repositories/BookRepository.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/spring5webapp/contents/src/main/java/guru/springframework/spring5webapp/repositories/BookRepository.java?ref=8ad74f61651358f46f337eac41c23753dd0cb747",
+    "patch": "@@ -0,0 +1,8 @@\n+package guru.springframework.spring5webapp.repositories;\n+\n+import guru.springframework.spring5webapp.domain.Book;\n+import org.springframework.data.repository.CrudRepository;\n+\n+public interface BookRepository  extends CrudRepository<Book, Long> {\n+\n+}"
+  },
+  {
+    "sha": "94921e1608a43f4577552043a3fde1e027417c6e",
+    "filename": "src/main/java/guru/springframework/spring5webapp/repositories/PublisherRepository.java",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/springframeworkguru/spring5webapp/blob/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/repositories/PublisherRepository.java",
+    "raw_url": "https://github.com/springframeworkguru/spring5webapp/raw/8ad74f61651358f46f337eac41c23753dd0cb747/src/main/java/guru/springframework/spring5webapp/repositories/PublisherRepository.java",
+    "contents_url": "https://api.github.com/repos/springframeworkguru/spring5webapp/contents/src/main/java/guru/springframework/spring5webapp/repositories/PublisherRepository.java?ref=8ad74f61651358f46f337eac41c23753dd0cb747",
+    "patch": "@@ -0,0 +1,10 @@\n+package guru.springframework.spring5webapp.repositories;\n+\n+import guru.springframework.spring5webapp.domain.Author;\n+import guru.springframework.spring5webapp.domain.Publisher;\n+import org.springframework.data.repository.CrudRepository;\n+\n+public interface PublisherRepository extends CrudRepository<Publisher, Long> {\n+\n+\n+}"
+  }
+]

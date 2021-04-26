@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "7951c622ad6807ef7f8dd47022e1c1b0474f546c",
+    "filename": "xxl-job-core/src/main/java/com/xxl/job/core/executor/XxlJobExecutor.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/xuxueli/xxl-job/blob/fc4d41c1cfc1de6463599bfa5391b594978d1578/xxl-job-core/src/main/java/com/xxl/job/core/executor/XxlJobExecutor.java",
+    "raw_url": "https://github.com/xuxueli/xxl-job/raw/fc4d41c1cfc1de6463599bfa5391b594978d1578/xxl-job-core/src/main/java/com/xxl/job/core/executor/XxlJobExecutor.java",
+    "contents_url": "https://api.github.com/repos/xuxueli/xxl-job/contents/xxl-job-core/src/main/java/com/xxl/job/core/executor/XxlJobExecutor.java?ref=fc4d41c1cfc1de6463599bfa5391b594978d1578",
+    "patch": "@@ -154,7 +154,7 @@ private void initEmbedServer(String address, String ip, int port, String appname\n \n         // start\n         embedServer = new EmbedServer();\n-        embedServer.start(address, port, appname, accessToken);\n+        embedServer.start(address, ip, port, appname, accessToken);\n     }\n \n     private void stopEmbedServer() {"
+  },
+  {
+    "sha": "8aebcc1e2ecb375fb40b7158b610a9237311a69a",
+    "filename": "xxl-job-core/src/main/java/com/xxl/job/core/server/EmbedServer.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 3,
+    "changes": 14,
+    "blob_url": "https://github.com/xuxueli/xxl-job/blob/fc4d41c1cfc1de6463599bfa5391b594978d1578/xxl-job-core/src/main/java/com/xxl/job/core/server/EmbedServer.java",
+    "raw_url": "https://github.com/xuxueli/xxl-job/raw/fc4d41c1cfc1de6463599bfa5391b594978d1578/xxl-job-core/src/main/java/com/xxl/job/core/server/EmbedServer.java",
+    "contents_url": "https://api.github.com/repos/xuxueli/xxl-job/contents/xxl-job-core/src/main/java/com/xxl/job/core/server/EmbedServer.java?ref=fc4d41c1cfc1de6463599bfa5391b594978d1578",
+    "patch": "@@ -19,7 +19,10 @@\n import io.netty.util.CharsetUtil;\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n+import org.springframework.util.StringUtils;\n \n+import java.net.InetSocketAddress;\n+import java.net.SocketAddress;\n import java.util.concurrent.*;\n \n /**\n@@ -33,13 +36,12 @@\n     private ExecutorBiz executorBiz;\n     private Thread thread;\n \n-    public void start(final String address, final int port, final String appname, final String accessToken) {\n+    public void start(final String address, final String ip, final int port, final String appname, final String accessToken) {\n         executorBiz = new ExecutorBizImpl();\n         thread = new Thread(new Runnable() {\n \n             @Override\n             public void run() {\n-\n                 // param\n                 EventLoopGroup bossGroup = new NioEventLoopGroup();\n                 EventLoopGroup workerGroup = new NioEventLoopGroup();\n@@ -81,7 +83,13 @@ public void initChannel(SocketChannel channel) throws Exception {\n                             .childOption(ChannelOption.SO_KEEPALIVE, true);\n \n                     // bind\n-                    ChannelFuture future = bootstrap.bind(port).sync();\n+                    ChannelFuture future;\n+                    if(StringUtils.hasLength(ip)) {\n+                        InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, port);\n+                        future = bootstrap.bind(inetSocketAddress).sync();\n+                    }else {\n+                        future = bootstrap.bind(port).sync();\n+                    }\n \n                     logger.info(\">>>>>>>>>>> xxl-job remoting server start success, nettype = {}, port = {}\", EmbedServer.class, port);\n "
+  }
+]

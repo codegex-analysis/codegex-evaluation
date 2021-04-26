@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "f4cf0a63979230ac08f8734a0fbbf6baacd18fa5",
+    "filename": "sit-cv-core/src/main/java/io/sitoolkit/cv/core/domain/uml/plantuml/SequenceDiagramWriterPlantUmlImpl.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/sitoolkit/sit-cv/blob/f86271d3bc3dffb7911aa122640ff25bcd1c483a/sit-cv-core/src/main/java/io/sitoolkit/cv/core/domain/uml/plantuml/SequenceDiagramWriterPlantUmlImpl.java",
+    "raw_url": "https://github.com/sitoolkit/sit-cv/raw/f86271d3bc3dffb7911aa122640ff25bcd1c483a/sit-cv-core/src/main/java/io/sitoolkit/cv/core/domain/uml/plantuml/SequenceDiagramWriterPlantUmlImpl.java",
+    "contents_url": "https://api.github.com/repos/sitoolkit/sit-cv/contents/sit-cv-core/src/main/java/io/sitoolkit/cv/core/domain/uml/plantuml/SequenceDiagramWriterPlantUmlImpl.java?ref=f86271d3bc3dffb7911aa122640ff25bcd1c483a",
+    "patch": "@@ -128,6 +128,10 @@ protected String buildExceptionComment(MessageDef messageDef) {\n     String note =\n         messageDef.getExceptions().stream()\n             .filter(StringUtils::isNotEmpty)\n+            .map(x -> x\n+                .replace(\"\\r\\n\", \"\\\\n\")\n+                .replace(\"\\r\", \"\\\\n\")\n+                .replace(\"\\n\", \"\\\\n\"))\n             .reduce((x1, x2) -> String.join(\"\\\\n\", x1, x2))\n             .orElse(\"\");\n     return note;"
+  },
+  {
+    "sha": "3e28c6bd5fa6b5f21731d26f4fcb2c5dff6da202",
+    "filename": "sit-cv-core/src/test/java/io/sitoolkit/cv/core/domain/uml/plantuml/SequenceDiagramWriterPlantUmlImplTest.java",
+    "status": "added",
+    "additions": 59,
+    "deletions": 0,
+    "changes": 59,
+    "blob_url": "https://github.com/sitoolkit/sit-cv/blob/f86271d3bc3dffb7911aa122640ff25bcd1c483a/sit-cv-core/src/test/java/io/sitoolkit/cv/core/domain/uml/plantuml/SequenceDiagramWriterPlantUmlImplTest.java",
+    "raw_url": "https://github.com/sitoolkit/sit-cv/raw/f86271d3bc3dffb7911aa122640ff25bcd1c483a/sit-cv-core/src/test/java/io/sitoolkit/cv/core/domain/uml/plantuml/SequenceDiagramWriterPlantUmlImplTest.java",
+    "contents_url": "https://api.github.com/repos/sitoolkit/sit-cv/contents/sit-cv-core/src/test/java/io/sitoolkit/cv/core/domain/uml/plantuml/SequenceDiagramWriterPlantUmlImplTest.java?ref=f86271d3bc3dffb7911aa122640ff25bcd1c483a",
+    "patch": "@@ -0,0 +1,59 @@\n+package io.sitoolkit.cv.core.domain.uml.plantuml;\n+\n+import java.util.Set;\n+\n+import org.junit.Test;\n+\n+import io.sitoolkit.cv.core.domain.uml.MessageDef;\n+import static org.hamcrest.Matchers.is;\n+import static org.junit.Assert.assertThat;\n+\n+public class SequenceDiagramWriterPlantUmlImplTest {\n+\n+    static SequenceDiagramWriterPlantUmlImpl instance = new SequenceDiagramWriterPlantUmlImpl(\n+        new PlantUmlWriter());\n+\n+    @Test\n+    public void linefeedInException() {\n+\n+        MessageDef messageDef = new MessageDef();\n+        messageDef.setExceptions(Set.of(\"new Exception(\\nlinefeed)\"));\n+\n+        String builtComment = instance.buildExceptionComment(messageDef);\n+\n+        assertThat(builtComment, is(\"new Exception(\\\\nlinefeed)\"));\n+    }\n+\n+    @Test\n+    public void carriageReturnInException() {\n+\n+        MessageDef messageDef = new MessageDef();\n+        messageDef.setExceptions(Set.of(\"new Exception(\\rcarriageReturn)\"));\n+\n+        String builtComment = instance.buildExceptionComment(messageDef);\n+\n+        assertThat(builtComment, is(\"new Exception(\\\\ncarriageReturn)\"));\n+    }\n+\n+    @Test\n+    public void crlfInException() {\n+\n+        MessageDef messageDef = new MessageDef();\n+        messageDef.setExceptions(Set.of(\"new Exception(\\r\\ncrlf)\"));\n+\n+        String builtComment = instance.buildExceptionComment(messageDef);\n+\n+        assertThat(builtComment, is(\"new Exception(\\\\ncrlf)\"));\n+    }\n+\n+    @Test\n+    public void allLineFeedsInException() {\n+\n+        MessageDef messageDef = new MessageDef();\n+        messageDef.setExceptions(Set.of(\"new Exception(\\r\\nlinefeed1,\\nlinefeed2,\\rlinefeed3)\"));\n+\n+        String builtComment = instance.buildExceptionComment(messageDef);\n+\n+        assertThat(builtComment, is(\"new Exception(\\\\nlinefeed1,\\\\nlinefeed2,\\\\nlinefeed3)\"));\n+    }\n+}"
+  }
+]

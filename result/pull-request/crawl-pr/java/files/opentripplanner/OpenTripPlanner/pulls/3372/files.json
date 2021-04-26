@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "5ba2835770e17e6258e51f168ca2ef3f90f3e729",
+    "filename": "src/main/java/org/opentripplanner/routing/algorithm/mapping/AlertToLegMapper.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 0,
+    "changes": 12,
+    "blob_url": "https://github.com/opentripplanner/OpenTripPlanner/blob/4868ccae35ebd3a857c44d3814510111639fa9d6/src/main/java/org/opentripplanner/routing/algorithm/mapping/AlertToLegMapper.java",
+    "raw_url": "https://github.com/opentripplanner/OpenTripPlanner/raw/4868ccae35ebd3a857c44d3814510111639fa9d6/src/main/java/org/opentripplanner/routing/algorithm/mapping/AlertToLegMapper.java",
+    "contents_url": "https://api.github.com/repos/opentripplanner/OpenTripPlanner/contents/src/main/java/org/opentripplanner/routing/algorithm/mapping/AlertToLegMapper.java?ref=4868ccae35ebd3a857c44d3814510111639fa9d6",
+    "patch": "@@ -40,6 +40,18 @@ public static void addAlertPatchesToLeg(Graph graph, Leg leg, boolean isFirstLeg\n                 addAlertPatchesToLeg(leg, StopCondition.ARRIVING, alerts, requestedLocale, legStartTime, legEndTime);\n             }\n \n+            if (leg.intermediateStops != null) {\n+                for (StopArrival visit : leg.intermediateStops) {\n+                    Place place = visit.place;\n+                    if (place.stopId != null) {\n+                        Collection<TransitAlert> alerts = getAlertsForStopAndRoute(graph, place.stopId, routeId);\n+                        Date stopArrival = visit.arrival.getTime();\n+                        Date stopDepature = visit.departure.getTime();\n+                        addAlertPatchesToLeg(leg, StopCondition.PASSING, alerts, requestedLocale, stopArrival, stopDepature);\n+                    }\n+                }\n+            }\n+\n             FeedScopedId tripId = leg.getTrip().getId();\n             if (fromStopId != null) {\n                 Collection<TransitAlert> alerts = getAlertsForStopAndTrip(graph, fromStopId, tripId);"
+  }
+]

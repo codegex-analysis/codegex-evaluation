@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "5f15ea26766b8c00117f49175244b8ff32c6db5b",
+    "filename": "src/cpp/core/r_util/RToolsInfo.cpp",
+    "status": "modified",
+    "additions": 17,
+    "deletions": 12,
+    "changes": 29,
+    "blob_url": "https://github.com/rstudio/rstudio/blob/7a996c4dc0b524c9dcca5d8dda32ddc6bf394f59/src/cpp/core/r_util/RToolsInfo.cpp",
+    "raw_url": "https://github.com/rstudio/rstudio/raw/7a996c4dc0b524c9dcca5d8dda32ddc6bf394f59/src/cpp/core/r_util/RToolsInfo.cpp",
+    "contents_url": "https://api.github.com/repos/rstudio/rstudio/contents/src/cpp/core/r_util/RToolsInfo.cpp?ref=7a996c4dc0b524c9dcca5d8dda32ddc6bf394f59",
+    "patch": "@@ -206,22 +206,27 @@ RToolsInfo::RToolsInfo(const std::string& name,\n       // set clang args\n #ifdef _WIN64\n       std::string baseDir = \"mingw64\";\n-      std::string arch = \"x86_64\";\n+      std::string triple = \"x86_64-w64-mingw32\";\n #else\n       std::string baseDir = \"mingw32\";\n-      std::string arch = \"i686\";\n+      std::string triple = \"i686-w64-mingw32\";\n #endif\n \n-      // path to mingw includes\n-      boost::format mgwIncFmt(\"%1%/%2%-w64-mingw32/include\");\n-      std::string mingwIncludeSuffix = boost::str(mgwIncFmt % baseDir % arch);\n-      FilePath mingwIncludePath = installPath.completeChildPath(mingwIncludeSuffix);\n-      clangArgs.push_back(\"-I\" + mingwIncludePath.getAbsolutePath());\n-\n-      // path to C++ headers\n-      std::string cppSuffix = \"c++/8.3.0\";\n-      FilePath cppIncludePath = installPath.completeChildPath(cppSuffix);\n-      clangArgs.push_back(\"-I\" + cppIncludePath.getAbsolutePath());\n+      std::vector<std::string> stems = {\n+         \"include/c++/8.3.0\",\n+         \"include/c++/8.3.0/\" + triple,\n+         \"include/c++/8.3.0/backward\",\n+         \"lib/gcc/\" + triple + \"/8.3.0/include\",\n+         \"include\",\n+         \"lib/gcc/\" + triple + \"/8.3.0/include-fixed\",\n+         triple + \"/include\"\n+      };\n+\n+      for (auto&& stem : stems)\n+      {\n+         FilePath includePath = installPath.completeChildPath(baseDir + \"/\" + stem);\n+         clangArgs.push_back(\"-I\" + includePath.getAbsolutePath());\n+      }\n    }\n    else\n    {"
+  },
+  {
+    "sha": "ffee957ac1ca897cdac9572adc641aa3452c67f0",
+    "filename": "src/cpp/session/modules/clang/RCompilationDatabase.cpp",
+    "status": "modified",
+    "additions": 29,
+    "deletions": 2,
+    "changes": 31,
+    "blob_url": "https://github.com/rstudio/rstudio/blob/7a996c4dc0b524c9dcca5d8dda32ddc6bf394f59/src/cpp/session/modules/clang/RCompilationDatabase.cpp",
+    "raw_url": "https://github.com/rstudio/rstudio/raw/7a996c4dc0b524c9dcca5d8dda32ddc6bf394f59/src/cpp/session/modules/clang/RCompilationDatabase.cpp",
+    "contents_url": "https://api.github.com/repos/rstudio/rstudio/contents/src/cpp/session/modules/clang/RCompilationDatabase.cpp?ref=7a996c4dc0b524c9dcca5d8dda32ddc6bf394f59",
+    "patch": "@@ -977,10 +977,37 @@ std::vector<std::string> RCompilationDatabase::argsForRCmdSHLIB(\n std::vector<std::string> RCompilationDatabase::baseCompilationArgs(bool isCpp)\n                                                                           const\n {\n-   std::vector<std::string> args = clang().compileArgs(isCpp);\n+   std::vector<std::string> args;\n+\n+\n+#ifdef _WIN32\n+   // add built-in clang compiler headers\n+   // built-in headers are not required with Rtools40 (used by R 4.0.x)\n+   if (r::version_info::currentRVersion().versionMajor() < 4)\n+   {\n+      auto clArgs = clang().compileArgs(isCpp);\n+      args.insert(args.end(), clArgs.begin(), clArgs.end());\n+   }\n+#else\n+   // add built-in clang compiler headers\n+   auto clArgs = clang().compileArgs(isCpp);\n+   args.insert(args.end(), clArgs.begin(), clArgs.end());\n+#endif\n+\n+#ifdef _WIN32\n+   // disable inclusion of default system headers\n+   // otherwise, libclang will discover and use headers as provided with\n+   // an installation of Visual Studio (if available), and those headers\n+   // may not be compatible with the Rtools headers\n+   args.push_back(\"-nostdinc\");\n+\n+   // add Rtools headers\n+   auto rtArgs = rToolsArgs();\n+   args.insert(args.end(), rtArgs.begin(), rtArgs.end());\n+#endif\n \n-   // add system include headers as reported by compiler\n #ifndef _WIN32\n+   // add system include headers as reported by compiler\n    std::vector<std::string> includes;\n    discoverSystemIncludePaths(&includes);\n    for (auto include : includes)"
+  }
+]

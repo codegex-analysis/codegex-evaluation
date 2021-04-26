@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "8be1aadac9bd695d7ec75d7757e2cd6ee63f25e0",
+    "filename": "docs/scripts/example-script.md",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/docs/scripts/example-script.md",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/docs/scripts/example-script.md",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/docs/scripts/example-script.md?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -43,7 +43,8 @@ if __name__ == '__main__':\n     args = parser.parse_args()\n \n     output = {\n-        'addTags': {}\n+        'addTags': {},\n+        'useExitCodeForSuccess': True\n     }\n     angular_x_velocities = []\n     angular_y_velocities = []"
+  },
+  {
+    "sha": "2e70728a37fceef879ef67dacbea4940590ea176",
+    "filename": "docs/scripts/usage.md",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 2,
+    "changes": 14,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/docs/scripts/usage.md",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/docs/scripts/usage.md",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/docs/scripts/usage.md?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -9,7 +9,7 @@ permalink: /scripts/usage\n \n # Usage\n \n-So, you've got an idea for an script.  How do they actually work?\n+So, you've got an idea for a script.  How do they actually work?\n \n ## Running\n \n@@ -41,7 +41,8 @@ you print a JSON object with some specific keys.  For example:\n      \"longitude\" : 60\n   },\n   \"setLocation\" : \"Here\",\n-  \"setVehicle\" : \"Something\"\n+  \"setVehicle\" : \"Something\",\n+  \"useExitCodeForSuccess\": true\n }\n ```\n \n@@ -73,6 +74,15 @@ If this key is present, all processed bag files will have their location set to\n \n If this key is present, all processed bag files will have their vehicle name set to this value.\n \n+### `useExitCodeForSuccess`\n+\n+If this key is present and the value is `true`, the script's exit code will be used to determine\n+if it was successful or not; 0 means successful, any other value is failure.\n+\n+If this key is not present or if it is false, success will be determined based on whether the script\n+writes anything to stderr.  This behavior is considered deprecated, and a future release will probably\n+remove this flag and always use the exit code to determine success.\n+\n ## Advanced Usage\n \n The example presented here is just a short, single file, but you might need to do something"
+  },
+  {
+    "sha": "83541eb8893213bcd760c24ad336133822171844",
+    "filename": "src/main/java/com/github/swrirobotics/persistence/ScriptResult.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/java/com/github/swrirobotics/persistence/ScriptResult.java",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/java/com/github/swrirobotics/persistence/ScriptResult.java",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/src/main/java/com/github/swrirobotics/persistence/ScriptResult.java?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -48,6 +48,7 @@\n \n     private double durationSecs;\n     private String errorMessage;\n+    private Integer exitCode;\n     @Column(nullable = false)\n     private UUID runUuid;\n     @Column(nullable = false)\n@@ -98,6 +99,14 @@ public void setErrorMessage(String errorMessage) {\n         this.errorMessage = errorMessage;\n     }\n \n+    public Integer getExitCode() {\n+        return exitCode;\n+    }\n+\n+    public void setExitCode(Integer exitCode) {\n+        this.exitCode = exitCode;\n+    }\n+\n     public UUID getRunUuid() {\n         return runUuid;\n     }"
+  },
+  {
+    "sha": "739b9737f77e42383191d39f3f3c8fa194fdb79e",
+    "filename": "src/main/java/com/github/swrirobotics/scripts/RunnableScript.java",
+    "status": "modified",
+    "additions": 43,
+    "deletions": 9,
+    "changes": 52,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/java/com/github/swrirobotics/scripts/RunnableScript.java",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/java/com/github/swrirobotics/scripts/RunnableScript.java",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/src/main/java/com/github/swrirobotics/scripts/RunnableScript.java?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -45,14 +45,8 @@\n import org.springframework.stereotype.Component;\n import org.springframework.transaction.annotation.Transactional;\n \n-import javax.json.Json;\n-import javax.json.JsonArrayBuilder;\n-import javax.json.JsonObject;\n-import javax.json.JsonObjectBuilder;\n-import java.io.File;\n-import java.io.FileWriter;\n-import java.io.IOException;\n-import java.io.StringWriter;\n+import javax.json.*;\n+import java.io.*;\n import java.sql.Timestamp;\n import java.util.ArrayList;\n import java.util.List;\n@@ -258,18 +252,58 @@ else if (!scriptDir.isDirectory()) {\n             // Wait until the container stops, then collect its output\n             container.waitOn(\"not-running\");\n \n+            try {\n+                JsonObject status = container.inspect();\n+                if (status !=  null) {\n+                    int exitCode = status.getJsonObject(\"State\").getInt(\"ExitCode\");\n+                    myLogger.debug(\"Exit code: \" + exitCode);\n+                    result.setExitCode(exitCode);\n+                }\n+            }\n+            catch (ClassCastException e) {\n+                myLogger.warn(\"Unable to get exit code from Docker container\");\n+            }\n+\n+\n             stdout = container.logs().stdout().fetch();\n             myLogger.debug(\"Output:\\n\" + stdout);\n+\n+            /*\n+             * The original behavior here is that the script would be considered unsuccessful if its stderr output\n+             * was not empty.  Sometimes scripts can be successful and print to stderr, though, so it would be better\n+             * to use the script's exit code to determine success instead.\n+             * For the sake of preserving backwards compatibility, this will check the output for a JSON object\n+             * containing a boolean value named \"useExitCodeForSuccess\"; if that is false or doesn't exist, the old\n+             * behavior will be preserved, but if it is true, the contents of stderr will be ignored and the script\n+             * will be marked as successful if the exit code is 0.\n+             */\n+            boolean useExitCodeForSuccess = false;\n+            try (StringReader strReader = new StringReader(stdout)) {\n+                JsonReader reader = Json.createReader(strReader);\n+                JsonObject obj = reader.readObject();\n+                useExitCodeForSuccess = obj.getBoolean(\"useExitCodeForSuccess\");\n+            }\n+            catch (JsonException | IllegalStateException | ClassCastException | NullPointerException e) {\n+                // If we can't read that value, just continue\n+            }\n+\n             String stderr = container.logs().stderr().fetch();\n             if (!stderr.isEmpty()) {\n                 result.setStderr(stderr);\n                 myLogger.warn(\"Stderr:\\n\" + stderr);\n             }\n-            else {\n+\n+            if (useExitCodeForSuccess) {\n+                if (result.getExitCode() == 0) {\n+                    result.setSuccess(true);\n+                }\n+            }\n+            else if (stderr.isEmpty()){\n                 result.setSuccess(true);\n             }\n \n             result.setStdout(stdout);\n+\n         }\n         catch (IOException e) {\n             myLogger.error(\"IO Exception:\", e);"
+  },
+  {
+    "sha": "1a36334836483f89de236c695dfe525bc2888345",
+    "filename": "src/main/java/com/github/swrirobotics/support/web/ScriptResultDTO.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/java/com/github/swrirobotics/support/web/ScriptResultDTO.java",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/java/com/github/swrirobotics/support/web/ScriptResultDTO.java",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/src/main/java/com/github/swrirobotics/support/web/ScriptResultDTO.java?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -44,6 +44,7 @@\n     public String bags;\n     public double durationSecs;\n     public String errorMessage;\n+    public Integer exitCode;\n     public Long id;\n     public UUID runUuid;\n     public String script;\n@@ -60,6 +61,7 @@ public ScriptResultDTO(ScriptResult sr) {\n         bags = Joiner.on(\", \").join(bagList);\n         durationSecs = sr.getDurationSecs();\n         errorMessage = sr.getErrorMessage();\n+        exitCode = sr.getExitCode();\n         id = sr.getId();\n         runUuid = sr.getRunUuid();\n         script = sr.getScript() == null ? \"\" : sr.getScript().getName();"
+  },
+  {
+    "sha": "6693ed93632c88cb483f7f2d9a33c9bcf2629bdb",
+    "filename": "src/main/resources/db/changelog/db.changelog-2.1.yaml",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/resources/db/changelog/db.changelog-2.1.yaml",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/resources/db/changelog/db.changelog-2.1.yaml",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/src/main/resources/db/changelog/db.changelog-2.1.yaml?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -0,0 +1,11 @@\n+databaseChangeLog:\n+  - changeSet:\n+      id: add-exit-code-for-script-result\n+      author: preed\n+      changes:\n+        - addColumn:\n+            tableName: 'script_results'\n+            columns:\n+              - column:\n+                  name: exitcode\n+                  type: INTEGER"
+  },
+  {
+    "sha": "247cc7bd140b8e7caa6a07a8897d094eb7a825c9",
+    "filename": "src/main/resources/db/changelog/db.changelog-master.yaml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/resources/db/changelog/db.changelog-master.yaml",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/resources/db/changelog/db.changelog-master.yaml",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/src/main/resources/db/changelog/db.changelog-master.yaml?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -18,4 +18,6 @@ databaseChangeLog:\n   - include:\n       file: db/changelog/db.changelog-1.8.yaml\n   - include:\n-      file: db/changelog/db.changelog-2.0.yaml\n\\ No newline at end of file\n+      file: db/changelog/db.changelog-2.0.yaml\n+  - include:\n+      file: db/changelog/db.changelog-2.1.yaml\n\\ No newline at end of file"
+  },
+  {
+    "sha": "07a5d9087a84bf899fd12975cd7006ea09db5a8c",
+    "filename": "src/main/webapp/resources/js/models/ScriptResult.js",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/webapp/resources/js/models/ScriptResult.js",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/webapp/resources/js/models/ScriptResult.js",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/src/main/webapp/resources/js/models/ScriptResult.js?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -46,6 +46,8 @@ Ext.define('BagDatabase.models.ScriptResult', {\n         name: 'script'\n     }, {\n         name: 'startTime', type: 'date', dateFormat: 'time'\n+    }, {\n+        name: 'exitCode', type: 'int'\n     }, {\n         name: 'stderr', sortType: function(value) { return value ? value : ''; }\n     }, {"
+  },
+  {
+    "sha": "957da41756775b9ba12917e96b4548bfb3395641",
+    "filename": "src/main/webapp/resources/js/views/ScriptResultGrid.js",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/webapp/resources/js/views/ScriptResultGrid.js",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/main/webapp/resources/js/views/ScriptResultGrid.js",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/src/main/webapp/resources/js/views/ScriptResultGrid.js?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -49,6 +49,8 @@ Ext.define('BagDatabase.views.ScriptResultGrid', {\n     }, {\n         text: 'Duration (s)', dataIndex: 'durationSecs', flex: 1\n     }, {\n+        text: 'Exit Code', dataIndex: 'exitCode', flex: 1\n+    },{\n         text: 'Std Output', dataIndex: 'stdout', flex: 2\n     }, {\n         text: 'Std Error', dataIndex: 'stderr', flex: 2"
+  },
+  {
+    "sha": "ce0ebbce435c0c7c9914c81ceb3b4eb2b458c436",
+    "filename": "src/test/java/com/github/swrirobotics/scripts/ScriptControllerTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/swri-robotics/bag-database/blob/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/test/java/com/github/swrirobotics/scripts/ScriptControllerTest.java",
+    "raw_url": "https://github.com/swri-robotics/bag-database/raw/170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc/src/test/java/com/github/swrirobotics/scripts/ScriptControllerTest.java",
+    "contents_url": "https://api.github.com/repos/swri-robotics/bag-database/contents/src/test/java/com/github/swrirobotics/scripts/ScriptControllerTest.java?ref=170ffa3f93ff5df2ed065dc8a0583ffe23b8c1cc",
+    "patch": "@@ -92,6 +92,7 @@ public ScriptResult makeResult() {\n         result.setRunUuid(uuid);\n         result.setSuccess(true);\n         result.setErrorMessage(\"\");\n+        result.setExitCode(0);\n         result.setId(1L);\n         result.setScriptId(1L);\n         result.setStderr(\"\");\n@@ -133,6 +134,7 @@ public ScriptResult makeResult() {\n             fieldWithPath(\"bags\").description(\"The full paths to every bag that was processed during the run\"),\n             fieldWithPath(\"durationSecs\").description(\"How long the script ran\").optional(),\n             fieldWithPath(\"errorMessage\").description(\"If the script failed to run, the reason why\").optional(),\n+            fieldWithPath(\"exitCode\").description(\"Exit code returned by the script\").optional(),\n             fieldWithPath(\"runUuid\").description(\"The Run UUID of the result\"),\n             fieldWithPath(\"script\").description(\"The name of the script\"),\n             fieldWithPath(\"startTime\").description(\"The date and time when the script was started\"),"
+  }
+]

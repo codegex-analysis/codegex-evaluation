@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "b927faa3932c400ed0afbdb05066b3240e1daf42",
+    "filename": "FoodOrderingApp-api/src/main/java/com/upgrad/FoodOrderingApp/api/controller/RestaurantController.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 4,
+    "changes": 22,
+    "blob_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/blob/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-api/src/main/java/com/upgrad/FoodOrderingApp/api/controller/RestaurantController.java",
+    "raw_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/raw/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-api/src/main/java/com/upgrad/FoodOrderingApp/api/controller/RestaurantController.java",
+    "contents_url": "https://api.github.com/repos/simpleprahalad/FoodOrderingApp-Backend/contents/FoodOrderingApp-api/src/main/java/com/upgrad/FoodOrderingApp/api/controller/RestaurantController.java?ref=c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c",
+    "patch": "@@ -4,6 +4,7 @@\n import com.upgrad.FoodOrderingApp.service.businness.CategoryService;\n import com.upgrad.FoodOrderingApp.service.businness.RestaurantService;\n import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;\n+import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;\n import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;\n import org.springframework.beans.factory.annotation.Autowired;\n import org.springframework.http.HttpStatus;\n@@ -30,8 +31,8 @@\n             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)\n     public ResponseEntity<List<RestaurantList>> getAllRestaurants() {\n \n-        //Get all restaurants as a list of RestaurantEntity\n-        List<RestaurantEntity> restaurants = restaurantService.getAllRestaurants();\n+        //Get all restaurants order by rating as a list of RestaurantEntity\n+        List<RestaurantEntity> restaurants = restaurantService.restaurantsByRating();\n \n         //Declare list of RestaurantListResponse\n         return getRestaurantListResponseEntity(restaurants);\n@@ -42,8 +43,21 @@\n             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)\n     public ResponseEntity<List<RestaurantList>> getRestaurantsByName(@PathVariable(\"restaurant_name\") final String restaurantName)\n     throws RestaurantNotFoundException {\n-        //Get all restaurants as a list of RestaurantEntity\n-        List<RestaurantEntity> restaurants = restaurantService.getRestaurantsByName(restaurantName);\n+        //Get all restaurants by name order by name as a list of RestaurantEntity\n+        List<RestaurantEntity> restaurants = restaurantService.restaurantsByName(restaurantName);\n+\n+        //Declare list of RestaurantListResponse\n+        return getRestaurantListResponseEntity(restaurants);\n+    }\n+\n+\n+    @RequestMapping(method = RequestMethod.GET,\n+            value = \"/restaurant/category/{category_id}\",\n+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)\n+    public ResponseEntity<List<RestaurantList>> getRestaurantsByCategory(@PathVariable(\"category_id\") final String categoryId)\n+            throws CategoryNotFoundException {\n+        //Get all restaurants by category order by name as a list of RestaurantEntity\n+        List<RestaurantEntity> restaurants = restaurantService.restaurantsByCategory(categoryId);\n \n         //Declare list of RestaurantListResponse\n         return getRestaurantListResponseEntity(restaurants);"
+  },
+  {
+    "sha": "5a05e38fc4c571fbfefa3056c7c26fc266fabc07",
+    "filename": "FoodOrderingApp-api/src/main/java/com/upgrad/FoodOrderingApp/api/exception/RestExceptionHandler.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/blob/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-api/src/main/java/com/upgrad/FoodOrderingApp/api/exception/RestExceptionHandler.java",
+    "raw_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/raw/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-api/src/main/java/com/upgrad/FoodOrderingApp/api/exception/RestExceptionHandler.java",
+    "contents_url": "https://api.github.com/repos/simpleprahalad/FoodOrderingApp-Backend/contents/FoodOrderingApp-api/src/main/java/com/upgrad/FoodOrderingApp/api/exception/RestExceptionHandler.java?ref=c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c",
+    "patch": "@@ -46,4 +46,12 @@\n                 .message(exc.getErrorMessage()),\n                 HttpStatus.UNAUTHORIZED);\n     }\n+\n+    @ExceptionHandler(RestaurantNotFoundException.class)\n+    public ResponseEntity<ErrorResponse> RestaurantNotFoundException(RestaurantNotFoundException exc, WebRequest request) {\n+        return new ResponseEntity<ErrorResponse>(new ErrorResponse()\n+                .code(exc.getCode())\n+                .message(exc.getErrorMessage()),\n+                HttpStatus.NOT_FOUND);\n+    }\n }"
+  },
+  {
+    "sha": "c825e5bb7a020d3add6d5c9c1d021f3c9dab6fbd",
+    "filename": "FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/businness/RestaurantService.java",
+    "status": "modified",
+    "additions": 40,
+    "deletions": 4,
+    "changes": 44,
+    "blob_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/blob/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/businness/RestaurantService.java",
+    "raw_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/raw/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/businness/RestaurantService.java",
+    "contents_url": "https://api.github.com/repos/simpleprahalad/FoodOrderingApp-Backend/contents/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/businness/RestaurantService.java?ref=c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c",
+    "patch": "@@ -1,7 +1,12 @@\n package com.upgrad.FoodOrderingApp.service.businness;\n \n+import com.upgrad.FoodOrderingApp.service.dao.CategoryDao;\n+import com.upgrad.FoodOrderingApp.service.dao.RestaurantCategoryDao;\n import com.upgrad.FoodOrderingApp.service.dao.RestaurantDao;\n+import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;\n+import com.upgrad.FoodOrderingApp.service.entity.RestaurantCategoryEntity;\n import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;\n+import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;\n import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;\n import org.springframework.beans.factory.annotation.Autowired;\n import org.springframework.stereotype.Service;\n@@ -15,17 +20,23 @@\n     @Autowired\n     private RestaurantDao restaurantDao;\n \n+    @Autowired\n+    private CategoryDao categoryDao;\n+\n+    @Autowired\n+    private RestaurantCategoryDao restaurantCategoryDao;\n+\n     /**\n-     * @return List of all restaurants\n+     * @return List of all restaurants order by rating\n      */\n-    public List<RestaurantEntity> getAllRestaurants() {\n+    public List<RestaurantEntity> restaurantsByRating() {\n         return restaurantDao.getAllRestaurants();\n     }\n \n     /**\n-     * @return List of all restaurants\n+     * @return List of all restaurants by entered input order by restaurant name\n      */\n-    public List<RestaurantEntity> getRestaurantsByName(final String restaurantName)\n+    public List<RestaurantEntity> restaurantsByName(final String restaurantName)\n     throws RestaurantNotFoundException {\n         //If the restaurant name field entered by the customer is empty, throw exception\n         if(restaurantName == null || restaurantName == \"\") {\n@@ -44,5 +55,30 @@\n         }\n     }\n \n+    /**\n+     * @return List of all restaurants by category uuid order by restaurant name\n+     */\n+    public List<RestaurantEntity> restaurantsByCategory(final String categoryUuid)\n+            throws CategoryNotFoundException {\n+        //Throw exception if category is null\n+        if(categoryUuid == null) {\n+            throw new CategoryNotFoundException(\"CNF-001\", \"Category id field should not be empty\");\n+        }\n+\n+        CategoryEntity categoryEntity = categoryDao.getCategoryById(categoryUuid);\n+        if(categoryEntity == null) {\n+            //Throw exception if there are no categories available by the id provided\n+            throw new CategoryNotFoundException( \"CNF-002\", \"No category by this id\");\n+        }\n+        //Fetch all restaurants by provided name\n+        List<RestaurantCategoryEntity> restaurantCategoryEntities = restaurantCategoryDao.getRestaurantsOfCategory(categoryEntity);\n+        List<RestaurantEntity> restaurants = new ArrayList<>();\n+        //Retrieve restaurants from list of RestaurantCategoryEntity\n+        for(RestaurantCategoryEntity restaurantCategoryEntity: restaurantCategoryEntities) {\n+            restaurants.add(restaurantCategoryEntity.getRestaurant());\n+        }\n+        return restaurants;\n+    }\n+\n \n }"
+  },
+  {
+    "sha": "bb73c05d07aa3366dbf60ef04ce59f925807da86",
+    "filename": "FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/dao/RestaurantCategoryDao.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 2,
+    "changes": 17,
+    "blob_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/blob/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/dao/RestaurantCategoryDao.java",
+    "raw_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/raw/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/dao/RestaurantCategoryDao.java",
+    "contents_url": "https://api.github.com/repos/simpleprahalad/FoodOrderingApp-Backend/contents/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/dao/RestaurantCategoryDao.java?ref=c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c",
+    "patch": "@@ -21,14 +21,27 @@\n      */\n     public List<RestaurantCategoryEntity> getCategoriesOfRestaurant(final RestaurantEntity restaurant) {\n         try {\n-            List<RestaurantCategoryEntity> restaurantCategoryEntity = entityManager.createNamedQuery(\"categoriesOfRestaurant\",RestaurantCategoryEntity.class)\n+            List<RestaurantCategoryEntity> restaurantCategoryEntities = entityManager.createNamedQuery(\"categoriesOfRestaurant\",RestaurantCategoryEntity.class)\n                     .setParameter(\"restaurant\",restaurant)\n                     .getResultList();\n-            return restaurantCategoryEntity;\n+            return restaurantCategoryEntities;\n         }catch (NoResultException nre){\n             return null;\n         }\n     }\n \n+    /**\n+     * @return Get restaurants by category\n+     */\n+    public List<RestaurantCategoryEntity> getRestaurantsOfCategory(final CategoryEntity category) {\n+        try {\n+            List<RestaurantCategoryEntity> restaurantCategoryEntities = entityManager.createNamedQuery(\"restaurantsByCategory\",RestaurantCategoryEntity.class)\n+                    .setParameter(\"category\", category)\n+                    .getResultList();\n+            return restaurantCategoryEntities;\n+        }catch (NoResultException nre){\n+            return null;\n+        }\n+    }\n \n }"
+  },
+  {
+    "sha": "7f858d82b55b1927694279f99cf96dc0250b9d95",
+    "filename": "FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/dao/RestaurantDao.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/blob/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/dao/RestaurantDao.java",
+    "raw_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/raw/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/dao/RestaurantDao.java",
+    "contents_url": "https://api.github.com/repos/simpleprahalad/FoodOrderingApp-Backend/contents/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/dao/RestaurantDao.java?ref=c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c",
+    "patch": "@@ -30,7 +30,7 @@\n      */\n     public List<RestaurantEntity> getRestaurantByName(final String restaurantName) {\n         try {\n-            return entityManager.createNamedQuery(\"restaurantByName\", RestaurantEntity.class)\n+            return entityManager.createNamedQuery(\"restaurantsByName\", RestaurantEntity.class)\n                     .setParameter(\"restaurantName\", restaurantName)\n                     .getResultList();\n         } catch (NoResultException nre) {"
+  },
+  {
+    "sha": "557081dc763b8971730f709e43722c3840f33405",
+    "filename": "FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/entity/RestaurantCategoryEntity.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/blob/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/entity/RestaurantCategoryEntity.java",
+    "raw_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/raw/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/entity/RestaurantCategoryEntity.java",
+    "contents_url": "https://api.github.com/repos/simpleprahalad/FoodOrderingApp-Backend/contents/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/entity/RestaurantCategoryEntity.java?ref=c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c",
+    "patch": "@@ -9,6 +9,8 @@\n @NamedQueries({\n \n         @NamedQuery(name = \"categoriesOfRestaurant\",query = \"SELECT r FROM RestaurantCategoryEntity r WHERE r.restaurant= :restaurant ORDER BY r.category.categoryName\"),\n+        @NamedQuery(name = \"restaurantsByCategory\",query = \"SELECT r FROM RestaurantCategoryEntity r WHERE r.category= :category ORDER BY r.restaurant.restaurantName\"),\n+\n })\n public class RestaurantCategoryEntity {\n "
+  },
+  {
+    "sha": "7e31e22a10eb7865bdab0c8e384ea662ab25b7f0",
+    "filename": "FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/entity/RestaurantEntity.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/blob/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/entity/RestaurantEntity.java",
+    "raw_url": "https://github.com/simpleprahalad/FoodOrderingApp-Backend/raw/c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/entity/RestaurantEntity.java",
+    "contents_url": "https://api.github.com/repos/simpleprahalad/FoodOrderingApp-Backend/contents/FoodOrderingApp-service/src/main/java/com/upgrad/FoodOrderingApp/service/entity/RestaurantEntity.java?ref=c3f81ecefe912f9fac96e30e6b3a0a3426e7b68c",
+    "patch": "@@ -9,8 +9,8 @@\n @Table(name = \"restaurant\")\n @NamedQueries(\n         {\n-                @NamedQuery(name = \"allRestaurants\", query = \"select c from RestaurantEntity c\"),\n-                @NamedQuery(name = \"restaurantByName\", query = \"select c from RestaurantEntity c where lower(c.restaurantName) like concat('%',lower(:restaurantName),'%') order by c.restaurantName\")\n+                @NamedQuery(name = \"allRestaurants\", query = \"select c from RestaurantEntity c order by c.customerRating desc\"),\n+                @NamedQuery(name = \"restaurantsByName\", query = \"select c from RestaurantEntity c where lower(c.restaurantName) like concat('%',lower(:restaurantName),'%') order by c.restaurantName\")\n         }\n )\n public class RestaurantEntity {"
+  }
+]

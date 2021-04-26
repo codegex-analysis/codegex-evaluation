@@ -1,0 +1,48 @@
+[
+  {
+    "sha": "5f0a9da51935b3773f55d4adfceaea6d2b77b573",
+    "filename": "src/main/java/lesson6/Main.java",
+    "status": "added",
+    "additions": 53,
+    "deletions": 0,
+    "changes": 53,
+    "blob_url": "https://github.com/citizen-of-makondo/Java-Ultimate/blob/ca269895f8491c5ff8afb483e2138c53f173eb71/src/main/java/lesson6/Main.java",
+    "raw_url": "https://github.com/citizen-of-makondo/Java-Ultimate/raw/ca269895f8491c5ff8afb483e2138c53f173eb71/src/main/java/lesson6/Main.java",
+    "contents_url": "https://api.github.com/repos/citizen-of-makondo/Java-Ultimate/contents/src/main/java/lesson6/Main.java?ref=ca269895f8491c5ff8afb483e2138c53f173eb71",
+    "patch": "@@ -0,0 +1,53 @@\n+package lesson6;\n+\n+import java.util.Arrays;\n+import java.util.Collection;\n+import java.util.Collections;\n+\n+public class Main {\n+    public static void main(String[] args) {\n+        // Задание 1\n+        int[] arr = new int[]{1, 2, 4, 8, 7, 9, 6, 5, 4, 5, 7};\n+        int[] returnedArr = arrayDivide4(arr);\n+        for (int i : returnedArr) {\n+            System.out.print(i + \" \");\n+        }\n+        System.out.println();\n+        // Задание 2\n+        boolean included1or4 = included1or4(arr);\n+        System.out.println(included1or4);\n+    }\n+\n+    public static int[] arrayDivide4(int[] arr) {\n+        if (arr.length < 4) {\n+            throw new RuntimeException();\n+        }\n+        int sizeNewArr = arr.length % 4;\n+        int[] returnedArray = new int[sizeNewArr];\n+        for (int i = 0; i < sizeNewArr; i++) {\n+            returnedArray[i] = arr[arr.length - 1 - i];\n+        }\n+        returnedArray = reverse(returnedArray);\n+        return returnedArray;\n+    }\n+\n+    // Реверс массива\n+    private static int[] reverse(int[] returnedArray) {\n+        int temp;\n+        for (int i = 0; i < returnedArray.length / 2; i++) {\n+            temp = returnedArray[i];\n+            returnedArray[i] = returnedArray[returnedArray.length - 1 - i];\n+            returnedArray[returnedArray.length - 1 - i] = temp;\n+        }\n+        return returnedArray;\n+    }\n+\n+    public static boolean included1or4(int[] arr) {\n+        for (int i = 0; i < arr.length; i++) {\n+            if (arr[i] == 1 || arr[i] == 4) {\n+                return true;\n+            }\n+        }\n+        return false;\n+    }\n+}"
+  },
+  {
+    "sha": "f1038dc061143f81330dee52350cde74cb953e49",
+    "filename": "src/test/java/lesson6/MainTest.java",
+    "status": "added",
+    "additions": 65,
+    "deletions": 0,
+    "changes": 65,
+    "blob_url": "https://github.com/citizen-of-makondo/Java-Ultimate/blob/ca269895f8491c5ff8afb483e2138c53f173eb71/src/test/java/lesson6/MainTest.java",
+    "raw_url": "https://github.com/citizen-of-makondo/Java-Ultimate/raw/ca269895f8491c5ff8afb483e2138c53f173eb71/src/test/java/lesson6/MainTest.java",
+    "contents_url": "https://api.github.com/repos/citizen-of-makondo/Java-Ultimate/contents/src/test/java/lesson6/MainTest.java?ref=ca269895f8491c5ff8afb483e2138c53f173eb71",
+    "patch": "@@ -0,0 +1,65 @@\n+package lesson6;\n+\n+import org.junit.jupiter.api.Assertions;\n+import org.junit.jupiter.api.Assumptions;\n+import org.junit.jupiter.api.Test;\n+\n+import static org.junit.jupiter.api.Assertions.*;\n+\n+class MainTest {\n+\n+    @Test\n+    public void test1() {\n+        int[] array = new int[]{4, 5, 7};\n+        int[] arr1 = new int[]{1, 2, 4, 8, 7, 9, 6, 5, 4, 5, 7};\n+        for (int i = 0; i < array.length; i++) {\n+            Assertions.assertEquals(array[i], Main.arrayDivide4(arr1)[i]);\n+        }\n+    }\n+\n+    @Test\n+    public void test2() {\n+        int[] array = new int[]{2, 2};\n+        int[] arr1 = new int[]{1, 2, 4, 8, 7, 9, 6, 5, 2, 2};\n+        for (int i = 0; i < array.length; i++) {\n+            Assertions.assertEquals(array[i], Main.arrayDivide4(arr1)[i]);\n+        }\n+    }\n+\n+    @Test\n+    public void test3() {\n+        int[] array = new int[]{2};\n+        int[] arr1 = new int[]{1, 2, 4, 5, 2};\n+        for (int i = 0; i < array.length; i++) {\n+            Assertions.assertEquals(array[i], Main.arrayDivide4(arr1)[i]);\n+        }\n+    }\n+\n+    @Test\n+    public void throwRunntime() {\n+        int[] array = new int[]{4, 5, 7};\n+        int[] arr1 = new int[]{1, 2, 4};\n+        Assertions.assertThrows(RuntimeException.class, () -> {\n+            Assertions.assertEquals(array, Main.arrayDivide4(arr1));\n+        });\n+    }\n+\n+    @Test\n+    public void includedTrue1() {\n+        int[] arr = new int[]{1, 2, 5, 2};\n+        Assumptions.assumeTrue(Main.included1or4(arr));\n+    }\n+\n+    @Test\n+    public void includedTrue2() {\n+        int[] arr = new int[]{4, 5, 2};\n+        Assumptions.assumeTrue(Main.included1or4(arr));\n+    }\n+\n+    @Test\n+    public void includedFalse1() {\n+        int[] arr = new int[]{ 5, 2};\n+        Assumptions.assumeFalse(Main.included1or4(arr));\n+    }\n+\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "7284c188cfae610b01ccafdf9acde652838290d8",
+    "filename": "target/classes/lesson6/Main.class",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/citizen-of-makondo/Java-Ultimate/blob/ca269895f8491c5ff8afb483e2138c53f173eb71/target/classes/lesson6/Main.class",
+    "raw_url": "https://github.com/citizen-of-makondo/Java-Ultimate/raw/ca269895f8491c5ff8afb483e2138c53f173eb71/target/classes/lesson6/Main.class",
+    "contents_url": "https://api.github.com/repos/citizen-of-makondo/Java-Ultimate/contents/target/classes/lesson6/Main.class?ref=ca269895f8491c5ff8afb483e2138c53f173eb71"
+  },
+  {
+    "sha": "e3a61b376a7c74d80f9e7945d6176c0131eca0b0",
+    "filename": "target/test-classes/lesson6/MainTest.class",
+    "status": "added",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/citizen-of-makondo/Java-Ultimate/blob/ca269895f8491c5ff8afb483e2138c53f173eb71/target/test-classes/lesson6/MainTest.class",
+    "raw_url": "https://github.com/citizen-of-makondo/Java-Ultimate/raw/ca269895f8491c5ff8afb483e2138c53f173eb71/target/test-classes/lesson6/MainTest.class",
+    "contents_url": "https://api.github.com/repos/citizen-of-makondo/Java-Ultimate/contents/target/test-classes/lesson6/MainTest.class?ref=ca269895f8491c5ff8afb483e2138c53f173eb71"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "eb4855e8b5ddd58884c412808ff164856a75971c",
+    "filename": "liquibase-core/src/main/java/liquibase/Liquibase.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/liquibase/liquibase/blob/905d9414c23c77fbf15a46b53930b7ca9138666e/liquibase-core/src/main/java/liquibase/Liquibase.java",
+    "raw_url": "https://github.com/liquibase/liquibase/raw/905d9414c23c77fbf15a46b53930b7ca9138666e/liquibase-core/src/main/java/liquibase/Liquibase.java",
+    "contents_url": "https://api.github.com/repos/liquibase/liquibase/contents/liquibase-core/src/main/java/liquibase/Liquibase.java?ref=905d9414c23c77fbf15a46b53930b7ca9138666e",
+    "patch": "@@ -345,6 +345,7 @@ public Connection getConnection(DatabaseChangeLog changeLog) throws LiquibaseHub\n             if (hubChangeLog == null) {\n                 Scope.getCurrentScope().getLog(getClass()).warning(\n                     \"Retrieving Hub Change Log failed for Changelog ID: \" + changeLogId);\n+                Scope.getCurrentScope().getLog(getClass()).warning(\"The operation will continue but no report will be sent to Hub.\");\n                 return null;\n             }\n             Connection exampleConnection = new Connection();"
+  },
+  {
+    "sha": "234624abc363be205812dd8253150d1a1c1b22fc",
+    "filename": "liquibase-core/src/main/java/liquibase/hub/HubUpdater.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/liquibase/liquibase/blob/905d9414c23c77fbf15a46b53930b7ca9138666e/liquibase-core/src/main/java/liquibase/hub/HubUpdater.java",
+    "raw_url": "https://github.com/liquibase/liquibase/raw/905d9414c23c77fbf15a46b53930b7ca9138666e/liquibase-core/src/main/java/liquibase/hub/HubUpdater.java",
+    "contents_url": "https://api.github.com/repos/liquibase/liquibase/contents/liquibase-core/src/main/java/liquibase/hub/HubUpdater.java?ref=905d9414c23c77fbf15a46b53930b7ca9138666e",
+    "patch": "@@ -112,7 +112,7 @@ public Operation preUpdateHub(String operationType,\n                 .setOperationEventStatus(\n                     new OperationEvent.OperationEventStatus()\n                         .setOperationEventStatusType(\"PASS\")\n-                        .setStatusMessage(\"Update operation started successfully\")\n+                        .setStatusMessage(\"Operation started successfully\")\n                 )\n             );\n         } catch (LiquibaseException e) {\n@@ -178,7 +178,7 @@ public void postUpdateHub(Operation updateOperation, BufferedLogService bufferLo\n                 .setOperationEventStatus(\n                     new OperationEvent.OperationEventStatus()\n                         .setOperationEventStatusType(\"PASS\")\n-                        .setStatusMessage(\"Update operation completed successfully\")\n+                        .setStatusMessage(\"Operation completed successfully\")\n                 )\n                 .setOperationEventLog(\n                     new OperationEvent.OperationEventLog()\n@@ -231,7 +231,7 @@ public void postUpdateHubExceptionHandling(Operation updateOperation,\n                 .setOperationEventStatus(\n                     new OperationEvent.OperationEventStatus()\n                         .setOperationEventStatusType(\"FAIL\")\n-                        .setStatusMessage(\"Update operation completed with errors\")\n+                        .setStatusMessage(\"Operation completed with errors\")\n                 )\n                 .setOperationEventLog(\n                     new OperationEvent.OperationEventLog()"
+  },
+  {
+    "sha": "ca84de1433b6db156120612dc3f6b81addad84d7",
+    "filename": "liquibase-core/src/main/java/liquibase/hub/core/StandardHubService.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/liquibase/liquibase/blob/905d9414c23c77fbf15a46b53930b7ca9138666e/liquibase-core/src/main/java/liquibase/hub/core/StandardHubService.java",
+    "raw_url": "https://github.com/liquibase/liquibase/raw/905d9414c23c77fbf15a46b53930b7ca9138666e/liquibase-core/src/main/java/liquibase/hub/core/StandardHubService.java",
+    "contents_url": "https://api.github.com/repos/liquibase/liquibase/contents/liquibase-core/src/main/java/liquibase/hub/core/StandardHubService.java?ref=905d9414c23c77fbf15a46b53930b7ca9138666e",
+    "patch": "@@ -334,7 +334,14 @@ public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubExcepti\n             Scope.getCurrentScope().getUI().sendMessage(uiMessage + \": \" + message);\n             Scope.getCurrentScope().getLog(getClass()).severe(message, lbe);\n             return null;\n+        } catch (LiquibaseHubException lbhe) {\n+            final String message = lbhe.getMessage();\n+            String uiMessage = \"Retrieving Hub Change Log failed for Changelog ID \" + changeLogId.toString();\n+            Scope.getCurrentScope().getUI().sendMessage(uiMessage + \": \" + message);\n+            Scope.getCurrentScope().getLog(getClass()).warning(message, lbhe);\n+            return null;\n         }\n+\n     }\n \n     @Override"
+  }
+]

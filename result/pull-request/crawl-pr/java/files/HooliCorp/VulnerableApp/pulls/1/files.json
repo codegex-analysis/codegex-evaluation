@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "077ea76dc2a865f640386b94fbb9117f1027bbf4",
+    "filename": ".github/workflows/ngsast.yml",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/HooliCorp/VulnerableApp/blob/888ade3fa5ae927a8d8d049fd08a427b388d5fb1/.github/workflows/ngsast.yml",
+    "raw_url": "https://github.com/HooliCorp/VulnerableApp/raw/888ade3fa5ae927a8d8d049fd08a427b388d5fb1/.github/workflows/ngsast.yml",
+    "contents_url": "https://api.github.com/repos/HooliCorp/VulnerableApp/contents/.github/workflows/ngsast.yml?ref=888ade3fa5ae927a8d8d049fd08a427b388d5fb1",
+    "patch": "@@ -0,0 +1,52 @@\n+---\n+# This workflow integrates ShiftLeft NG SAST with GitHub code scanning\n+# Visit https://docs.shiftleft.io for help\n+name: ShiftLeft Code scanning\n+\n+on:\n+  pull_request:\n+  workflow_dispatch:\n+\n+jobs:\n+  NextGen-Static-Analysis:\n+    runs-on: ubuntu-20.04\n+    steps:\n+    - uses: actions/checkout@v2\n+    - name: Setup Java JDK\n+      uses: actions/setup-java@v1.4.3\n+      with:\n+        java-version: 1.8\n+    - name: Download ShiftLeft cli\n+      run: |\n+        curl https://cdn.shiftleft.io/download/sl > ${GITHUB_WORKSPACE}/sl && chmod a+rx ${GITHUB_WORKSPACE}/sl\n+    - name: Extract branch name\n+      shell: bash\n+      run: echo \"##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})\"\n+      id: extract_branch\n+    - name: Build and Analyze\n+      run: |\n+          chmod +x gradlew\n+          ./gradlew build\n+          jar_name=`ls build/libs/*.jar`\n+          ${GITHUB_WORKSPACE}/sl analyze --wait --sca --app $(basename $(pwd)) --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --java --cpg $jar_name\n+      env:\n+        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}\n+        SL_CPG_OPTS: \"-J-Xms2g -J-Xmx7g\"\n+        SHIFTLEFT_JAVA_OPTS: \"-Xms2g -Xmx7g\"\n+    - uses: actions/setup-python@v2\n+      with:\n+        python-version: '3.8'\n+    - name: Download findings using api and convert to sarif\n+      run: |\n+        mkdir -p ${GITHUB_WORKSPACE}/reports\n+        curl -H \"Authorization: Bearer ${SHIFTLEFT_ACCESS_TOKEN}\" -L \"https://www.shiftleft.io/api/v4/orgs/${SHIFTLEFT_ORG_ID}/apps/VulnerableApp/findings?per_page=249&type=secret&type=vuln&type=extscan\" -o ${GITHUB_WORKSPACE}/reports/findings.json\n+        sudo pip install joern2sarif\n+        joern2sarif -t ng-sast -i ${GITHUB_WORKSPACE}/reports/findings.json -o ${GITHUB_WORKSPACE}/reports/ngsast-findings.sarif\n+      env:\n+        WORKSPACE: \"src/main/java\"\n+        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}\n+        SHIFTLEFT_ORG_ID: ${{ secrets.SHIFTLEFT_ORG_ID }}\n+    - name: Upload sarif\n+      uses: github/codeql-action/upload-sarif@v1\n+      with:\n+        sarif_file: reports"
+  }
+]

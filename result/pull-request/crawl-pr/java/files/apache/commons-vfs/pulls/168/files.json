@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "19d243811354e506e709be72e013b5ffcf0e180f",
+    "filename": "commons-vfs2/src/test/java/org/apache/commons/vfs2/FileObjectTest.java",
+    "status": "added",
+    "additions": 89,
+    "deletions": 0,
+    "changes": 89,
+    "blob_url": "https://github.com/apache/commons-vfs/blob/2c9536dffc12aa85a336edc8dc85058edc3c5361/commons-vfs2/src/test/java/org/apache/commons/vfs2/FileObjectTest.java",
+    "raw_url": "https://github.com/apache/commons-vfs/raw/2c9536dffc12aa85a336edc8dc85058edc3c5361/commons-vfs2/src/test/java/org/apache/commons/vfs2/FileObjectTest.java",
+    "contents_url": "https://api.github.com/repos/apache/commons-vfs/contents/commons-vfs2/src/test/java/org/apache/commons/vfs2/FileObjectTest.java?ref=2c9536dffc12aa85a336edc8dc85058edc3c5361",
+    "patch": "@@ -0,0 +1,89 @@\n+/*\n+ * Licensed to the Apache Software Foundation (ASF) under one or more\n+ * contributor license agreements.  See the NOTICE file distributed with\n+ * this work for additional information regarding copyright ownership.\n+ * The ASF licenses this file to You under the Apache License, Version 2.0\n+ * (the \"License\"); you may not use this file except in compliance with\n+ * the License.  You may obtain a copy of the License at\n+ *\n+ *      http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Unless required by applicable law or agreed to in writing, software\n+ * distributed under the License is distributed on an \"AS IS\" BASIS,\n+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+ * See the License for the specific language governing permissions and\n+ * limitations under the License.\n+ */\n+\n+package org.apache.commons.vfs2;\n+\n+import java.io.File;\n+import java.io.IOException;\n+import java.io.InputStream;\n+import java.nio.charset.StandardCharsets;\n+import org.apache.commons.io.FileUtils;\n+import org.apache.commons.io.IOUtils;\n+import org.apache.commons.vfs2.impl.StandardFileSystemManager;\n+import org.junit.Test;\n+import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertNotNull;\n+\n+public class FileObjectTest {\n+\n+    interface IOExceptionThrowingFunction<T, R> {\n+        R apply(T t) throws IOException;\n+    }\n+\n+    /**\n+     * Expected contents of test files\n+     */\n+    public static final String TEST_FILE_CONTENT = \"aaa\";\n+\n+    /**\n+     * Test file paths\n+     */\n+    public static final String[] TEST_FILE_PATHS = new String[]{\n+            \"src/test/resources/test-data/1 1.txt\",\n+            \"src/test/resources/test-data/好.txt\"\n+    };\n+\n+    private static StandardFileSystemManager loadFileSystemManager() throws FileSystemException {\n+        StandardFileSystemManager fileSystemManager = new StandardFileSystemManager();\n+        fileSystemManager.setLogger(null);\n+        fileSystemManager.init();\n+        fileSystemManager.setBaseFile(new File(System.getProperty(\"user.dir\")));\n+        return fileSystemManager;\n+    }\n+\n+    @Test\n+    public void testToFile() throws IOException {\n+        testToFile(fileObject -> fileObject.getPath().toFile());\n+    }\n+\n+    @Test\n+    public void testToFile2() throws IOException {\n+        testToFile(FileObjectTest::toFile2);\n+    }\n+\n+    private void testToFile(IOExceptionThrowingFunction<FileObject, File> function) throws IOException {\n+        for (String testFilePath : TEST_FILE_PATHS) {\n+            FileSystemManager fileSystemManager = loadFileSystemManager();\n+            FileObject fileObject = fileSystemManager.resolveFile(testFilePath);\n+            assertNotNull(fileObject);\n+            try (InputStream inputStream = fileObject.getContent().getInputStream()) {\n+                assertEquals(TEST_FILE_CONTENT, IOUtils.toString(inputStream, StandardCharsets.UTF_8));\n+            }\n+            File file = function.apply(fileObject);\n+            assertNotNull(file);\n+            assertEquals(TEST_FILE_CONTENT, FileUtils.readFileToString(file, StandardCharsets.UTF_8));\n+            System.out.println(file.getAbsolutePath());\n+        }\n+    }\n+\n+    private static File toFile2(FileObject fileObject) throws FileSystemException {\n+        if (fileObject == null || !\"file\".equals(fileObject.getURL().getProtocol())) {\n+            return null;\n+        }\n+        return new File(fileObject.getName().getPathDecoded());\n+    }\n+}"
+  },
+  {
+    "sha": "7c4a013e52c76442ab80ee5572399a30373600a2",
+    "filename": "commons-vfs2/src/test/resources/test-data/1 1.txt",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/commons-vfs/blob/2c9536dffc12aa85a336edc8dc85058edc3c5361/commons-vfs2/src/test/resources/test-data/1%201.txt",
+    "raw_url": "https://github.com/apache/commons-vfs/raw/2c9536dffc12aa85a336edc8dc85058edc3c5361/commons-vfs2/src/test/resources/test-data/1%201.txt",
+    "contents_url": "https://api.github.com/repos/apache/commons-vfs/contents/commons-vfs2/src/test/resources/test-data/1%201.txt?ref=2c9536dffc12aa85a336edc8dc85058edc3c5361",
+    "patch": "@@ -0,0 +1 @@\n+aaa\n\\ No newline at end of file"
+  },
+  {
+    "sha": "7c4a013e52c76442ab80ee5572399a30373600a2",
+    "filename": "commons-vfs2/src/test/resources/test-data/好.txt",
+    "status": "added",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/apache/commons-vfs/blob/2c9536dffc12aa85a336edc8dc85058edc3c5361/commons-vfs2/src/test/resources/test-data/%E5%A5%BD.txt",
+    "raw_url": "https://github.com/apache/commons-vfs/raw/2c9536dffc12aa85a336edc8dc85058edc3c5361/commons-vfs2/src/test/resources/test-data/%E5%A5%BD.txt",
+    "contents_url": "https://api.github.com/repos/apache/commons-vfs/contents/commons-vfs2/src/test/resources/test-data/%E5%A5%BD.txt?ref=2c9536dffc12aa85a336edc8dc85058edc3c5361",
+    "patch": "@@ -0,0 +1 @@\n+aaa\n\\ No newline at end of file"
+  }
+]

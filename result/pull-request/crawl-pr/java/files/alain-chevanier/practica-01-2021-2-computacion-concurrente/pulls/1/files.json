@@ -1,0 +1,73 @@
+[
+  {
+    "sha": "2133c418b6bb09c3ef619278c131e5e9c7859bed",
+    "filename": "description.pdf",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 0,
+    "changes": 0,
+    "blob_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/blob/c78ad2742ab91e6be827325d3eb9d448c17a63b1/description.pdf",
+    "raw_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/raw/c78ad2742ab91e6be827325d3eb9d448c17a63b1/description.pdf",
+    "contents_url": "https://api.github.com/repos/alain-chevanier/practica-01-2021-2-computacion-concurrente/contents/description.pdf?ref=c78ad2742ab91e6be827325d3eb9d448c17a63b1"
+  },
+  {
+    "sha": "d0cd99c0e1f8983e8742312e109cb85663357cc6",
+    "filename": "src/main/java/unam/ciencias/computoconcurrente/App.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/blob/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/App.java",
+    "raw_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/raw/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/App.java",
+    "contents_url": "https://api.github.com/repos/alain-chevanier/practica-01-2021-2-computacion-concurrente/contents/src/main/java/unam/ciencias/computoconcurrente/App.java?ref=c78ad2742ab91e6be827325d3eb9d448c17a63b1",
+    "patch": "@@ -2,6 +2,6 @@\n \n public class App {\n \n-    public static void main(String[] a) {\n-    }\n+  public static void main(String[] a) {\n+  }\n }"
+  },
+  {
+    "sha": "29bd9fd55f3d6e988ed07b3866ccc6c377063be7",
+    "filename": "src/main/java/unam/ciencias/computoconcurrente/MatrixUtils.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 2,
+    "changes": 5,
+    "blob_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/blob/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/MatrixUtils.java",
+    "raw_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/raw/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/MatrixUtils.java",
+    "contents_url": "https://api.github.com/repos/alain-chevanier/practica-01-2021-2-computacion-concurrente/contents/src/main/java/unam/ciencias/computoconcurrente/MatrixUtils.java?ref=c78ad2742ab91e6be827325d3eb9d448c17a63b1",
+    "patch": "@@ -2,6 +2,7 @@\n \n public interface MatrixUtils {\n \n-  int findMinimum(int[][] matrix)  throws InterruptedException;\n-  int[][] multiply(int[][] matrixA)throws InterruptedException;\n+  int findMinimum(int[][] matrix) throws InterruptedException;\n+\n+  int[][] multiply(int[][] matrixA) throws InterruptedException;\n }"
+  },
+  {
+    "sha": "67ff455e713f14146874b8d95a1077007e4a9d8a",
+    "filename": "src/main/java/unam/ciencias/computoconcurrente/MultiThreadedMatrixUtils.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 30,
+    "changes": 31,
+    "blob_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/blob/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/MultiThreadedMatrixUtils.java",
+    "raw_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/raw/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/MultiThreadedMatrixUtils.java",
+    "contents_url": "https://api.github.com/repos/alain-chevanier/practica-01-2021-2-computacion-concurrente/contents/src/main/java/unam/ciencias/computoconcurrente/MultiThreadedMatrixUtils.java?ref=c78ad2742ab91e6be827325d3eb9d448c17a63b1",
+    "patch": "@@ -59,35 +59,6 @@ private void taskFindMinimum(int threadId, int[] minimums, int[][] matrix) {\n \n   @Override\n   public int[][] multiply(int[][] matrixA) throws InterruptedException {\n-    int[][] matrixC = new int[matrixA.length][matrixA.length];\n-    List<Thread> threadList = new ArrayList<>(this.threads);\n-    for (int i = 0; i < threads; i++) {\n-      int threadId = i;\n-      threadList.add(new Thread(() -> taskMultiply(threadId, matrixA, matrixC)));\n-    }\n-    threadList.forEach(Thread::start);\n-    for (Thread t : threadList) {\n-      t.join();\n-    }\n-    return matrixC;\n-  }\n-\n-  private void taskMultiply(int threadId, int[][] matrixIn, int[][] matrixOut) {\n-    int filas = matrixIn.length;\n-    int[] vector = new int[filas];\n-    for (int numFila = threadId; numFila < matrixIn.length; numFila += this.threads) {\n-      for (int col0 = 0; col0 < filas; col0++) {\n-        int c = 0;\n-        for (int filaB = 0; filaB < filas; filaB++) {\n-          c += (matrixIn[numFila][filaB] * matrixIn[filaB][col0]);\n-        }\n-        vector[col0] = c;\n-      }\n-      for (int i = 0; i < matrixOut.length; i++) {\n-        matrixOut[numFila][i] = vector[i];\n-      }\n-\n-    }\n-\n+    return new int[matrixA.length][matrixA.length];\n   }\n }"
+  },
+  {
+    "sha": "4309d58c9518da34b951e94a27138dce1f8b7d37",
+    "filename": "src/main/java/unam/ciencias/computoconcurrente/MultiThreadedWordSearch.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 158,
+    "changes": 161,
+    "blob_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/blob/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/MultiThreadedWordSearch.java",
+    "raw_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/raw/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/MultiThreadedWordSearch.java",
+    "contents_url": "https://api.github.com/repos/alain-chevanier/practica-01-2021-2-computacion-concurrente/contents/src/main/java/unam/ciencias/computoconcurrente/MultiThreadedWordSearch.java?ref=c78ad2742ab91e6be827325d3eb9d448c17a63b1",
+    "patch": "@@ -1,180 +1,25 @@\n package unam.ciencias.computoconcurrente;\n \n-import java.util.ArrayList;\n+import java.util.LinkedList;\n import java.util.List;\n-import java.util.function.Function;\n-import java.util.stream.Collectors;\n-import java.util.stream.IntStream;\n \n public class MultiThreadedWordSearch implements WordSearch {\n \n   private final int threads;\n-  private final ArrayList<List<WordSearchAnswer>> answers;\n \n   public MultiThreadedWordSearch() {\n     this(1);\n   }\n \n   public MultiThreadedWordSearch(int threads) {\n     this.threads = threads;\n-    answers = new ArrayList<>(threads);\n-    for (int i = 0; i < threads; i++) {\n-      answers.add(null);\n-    }\n+\n   }\n \n   @Override\n   public List<WordSearchAnswer> solve(char[][] board, List<String> words) throws InterruptedException {\n-    runThreads(board, words);\n-    return joinSearchResult();\n-  }\n-\n-  private void runThreads(char[][] board, List<String> words) throws InterruptedException {\n-    List<Thread> threadList = IntStream.range(0, threads)\n-      .mapToObj(i -> new Thread(() -> searchTask(i, board, words)))\n-      .collect(Collectors.toList());\n-    threadList.forEach(Thread::start);\n-    for (Thread t : threadList) {\n-      t.join();\n-    }\n-  }\n-\n-  private List<WordSearchAnswer> joinSearchResult() {\n-    List<WordSearchAnswer> searchResult = new ArrayList<>();\n-    for (List<WordSearchAnswer> l : answers) {\n-      searchResult.addAll(l);\n-    }\n-    searchResult.sort(WordSearchAnswer::compareTo);\n-    return searchResult;\n-  }\n-\n-  private void searchTask(int index, char[][] board, List<String> words) {\n-    List<WordSearchAnswer> searchResults = new ArrayList<>();\n-    searchResults.addAll(horizontalTask(index, board, words));\n-    searchResults.addAll(verticalTask(index, board, words));\n-    searchResults.addAll(rightDiagonalTask(index, board, words));\n-    searchResults.addAll(leftDiagonalTask(index, board, words));\n-    answers.set(index, searchResults);\n-  }\n-\n-  private List<WordSearchAnswer> horizontalTask(int index, char[][] board, List<String> words) {\n-    List<WordSearchAnswer> searchResults = new ArrayList<>();\n-    for (int rowNum = index; rowNum < board.length; rowNum += threads) {\n-      String row = new String(board[rowNum]);\n-      int finalElem = rowNum;\n-      searchResults.addAll(\n-        searchWord(\n-            row,\n-            words,\n-            \"E\",\n-            \"O\",\n-            i -> finalElem,\n-            i -> i\n-          )\n-      );\n-    }\n-    return searchResults;\n-  }\n-\n-  private List<WordSearchAnswer> verticalTask(int index, char[][] board, List<String> words) {\n-    List<WordSearchAnswer> searchResults = new ArrayList<>();\n-    for (int colNum = index; colNum < board[0].length; colNum += threads) {\n-      String row = getColumnString(board, colNum);\n-      int finalColNum = colNum;\n-      searchResults.addAll(\n-        searchWord(\n-          row,\n-          words,\n-          \"S\",\n-          \"N\",\n-          i -> i,\n-          i -> finalColNum\n-        )\n-      );\n-    }\n-    return searchResults;\n-  }\n-\n-  private String getColumnString(char[][] board, int column) {\n-    StringBuilder builder = new StringBuilder(board.length);\n-    for (char[] chars : board) {\n-      builder.append(chars[column]);\n-    }\n-    return builder.toString();\n-  }\n-\n-  private List<WordSearchAnswer> rightDiagonalTask(int index, char[][] board, List<String> words) {\n-    return diagonalTask(index, board, words, false);\n+    return new LinkedList<>();\n   }\n \n-  private List<WordSearchAnswer> leftDiagonalTask(int index, char[][] board, List<String> words) {\n-    return diagonalTask(index, board, words, true);\n-  }\n-\n-  private List<WordSearchAnswer> diagonalTask(int index, char[][] board, List<String> words, boolean isLeft) {\n-    List<WordSearchAnswer> searchResults = new ArrayList<>();\n-\n-    for (int diagonalNum = index; diagonalNum < board.length + board[0].length - 1; diagonalNum += threads) {\n-      int rowNum = calcDiagonalStartingRowNum(board, diagonalNum, isLeft ? 0 : board.length - 1);\n-      int colNum = calcDiagonalStartingColumnNum(board, diagonalNum);\n-      String row = getDiagonalString(board, rowNum, colNum, isLeft ? 1 : -1);\n-      searchResults.addAll(\n-        searchWord(\n-          row,\n-          words,\n-          isLeft ? \"SE\" : \"NE\",\n-          isLeft ? \"NO\" : \"SO\",\n-          i -> isLeft ? rowNum + i : rowNum - i,\n-          i -> colNum + i\n-        )\n-      );\n-    }\n-\n-    return searchResults;\n-  }\n-\n-  private int calcDiagonalStartingRowNum(char[][] board, int diagonalNum, int defaultRow) {\n-    return diagonalNum < board.length ? diagonalNum : defaultRow;\n-  }\n \n-  private int calcDiagonalStartingColumnNum(char[][] board, int diagonalNum) {\n-    return diagonalNum < board.length ? 0 : diagonalNum - board.length + 1;\n-  }\n-\n-  private String getDiagonalString(char[][] board, int rowNum, int colNum, int rowAcu) {\n-    StringBuilder builder = new StringBuilder(board.length);\n-    while (rowNum >= 0 && rowNum < board.length && colNum < board[0].length) {\n-      builder.append(board[rowNum][colNum]);\n-      rowNum += rowAcu;\n-      colNum++;\n-    }\n-    return builder.toString();\n-  }\n-\n-  private List<WordSearchAnswer> searchWord(\n-    String row,\n-    List<String> words,\n-    String direction,\n-    String reversedDirection,\n-    Function<Integer,Integer> transformRow,\n-    Function<Integer,Integer> transformColumn\n-  ) {\n-    List<WordSearchAnswer> results = new ArrayList<>();\n-    String reversedRow = new StringBuffer(row).reverse().toString();\n-\n-    words.forEach(word -> {\n-      int i = row.indexOf(word);\n-      if (i != -1) {\n-        results.add(new WordSearchAnswer(word, transformRow.apply(i), transformColumn.apply(i), direction));\n-      }\n-\n-      int iReversed = reversedRow.indexOf(word);\n-      if (iReversed != -1) {\n-        int j = row.length() - iReversed - 1;\n-        results.add(new WordSearchAnswer(word, transformRow.apply(j), transformColumn.apply(j), reversedDirection));\n-      }\n-    });\n-\n-    return results;\n-  }\n }"
+  },
+  {
+    "sha": "89568f39130ecfa265c33a7e05ba5dca3e095777",
+    "filename": "src/main/java/unam/ciencias/computoconcurrente/WordSearchAnswer.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 5,
+    "changes": 7,
+    "blob_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/blob/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/WordSearchAnswer.java",
+    "raw_url": "https://github.com/alain-chevanier/practica-01-2021-2-computacion-concurrente/raw/c78ad2742ab91e6be827325d3eb9d448c17a63b1/src/main/java/unam/ciencias/computoconcurrente/WordSearchAnswer.java",
+    "contents_url": "https://api.github.com/repos/alain-chevanier/practica-01-2021-2-computacion-concurrente/contents/src/main/java/unam/ciencias/computoconcurrente/WordSearchAnswer.java?ref=c78ad2742ab91e6be827325d3eb9d448c17a63b1",
+    "patch": "@@ -70,10 +70,7 @@ public String toString() {\n \n   @Override\n   public int compareTo(WordSearchAnswer o) {\n-    int diff = this.word.compareTo(o.word);\n-    if (diff == 0) {\n-      return this.row == o.row ? this.column - o.column : this.row - o.row;\n-    }\n-    return diff;\n+    // TODO: Implementala comparación pr\n+    return 0;\n   }\n }"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "45fe5befc5231f74e309bfc832ace70e2acbd672",
+    "filename": "job-service/server/pom.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/veraPDF/verapdf-webapp-server/blob/1c207c638108dff8b78af8e04fe2e10173226ed6/job-service/server/pom.xml",
+    "raw_url": "https://github.com/veraPDF/verapdf-webapp-server/raw/1c207c638108dff8b78af8e04fe2e10173226ed6/job-service/server/pom.xml",
+    "contents_url": "https://api.github.com/repos/veraPDF/verapdf-webapp-server/contents/job-service/server/pom.xml?ref=1c207c638108dff8b78af8e04fe2e10173226ed6",
+    "patch": "@@ -13,6 +13,7 @@\n \n     <properties>\n         <java.version>11</java.version>\n+        <springdoc-ui.version>1.5.4</springdoc-ui.version>\n     </properties>\n \n     <dependencies>\n@@ -53,6 +54,11 @@\n             <artifactId>flyway-core</artifactId>\n             <scope>runtime</scope>\n         </dependency>\n+        <dependency>\n+            <groupId>org.springdoc</groupId>\n+            <artifactId>springdoc-openapi-ui</artifactId>\n+            <version>${springdoc-ui.version}</version>\n+        </dependency>\n         <dependency>\n             <groupId>org.springframework.boot</groupId>\n             <artifactId>spring-boot-starter-test</artifactId>"
+  },
+  {
+    "sha": "31795283ddd297aaea05506edb637c3242d647fb",
+    "filename": "job-service/server/src/main/resources/application.yml",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/veraPDF/verapdf-webapp-server/blob/1c207c638108dff8b78af8e04fe2e10173226ed6/job-service/server/src/main/resources/application.yml",
+    "raw_url": "https://github.com/veraPDF/verapdf-webapp-server/raw/1c207c638108dff8b78af8e04fe2e10173226ed6/job-service/server/src/main/resources/application.yml",
+    "contents_url": "https://api.github.com/repos/veraPDF/verapdf-webapp-server/contents/job-service/server/src/main/resources/application.yml?ref=1c207c638108dff8b78af8e04fe2e10173226ed6",
+    "patch": "@@ -41,3 +41,12 @@ verapdf:\n       listening-queue:\n         name: ${amqp.server.listening.queue.name}\n         max-size: ${amqp.server.listening.queue.max.size}\n+\n+springdoc:\n+  api-docs:\n+    path: /jobs/docs\n+    enabled: true\n+  swagger-ui:\n+    path: /jobs/swagger\n+    operations-sorter: method\n+    enabled: true"
+  },
+  {
+    "sha": "797188e14ccff1149cfd9a2efe2f3ee0ebe89929",
+    "filename": "local-storage-service/server/pom.xml",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/veraPDF/verapdf-webapp-server/blob/1c207c638108dff8b78af8e04fe2e10173226ed6/local-storage-service/server/pom.xml",
+    "raw_url": "https://github.com/veraPDF/verapdf-webapp-server/raw/1c207c638108dff8b78af8e04fe2e10173226ed6/local-storage-service/server/pom.xml",
+    "contents_url": "https://api.github.com/repos/veraPDF/verapdf-webapp-server/contents/local-storage-service/server/pom.xml?ref=1c207c638108dff8b78af8e04fe2e10173226ed6",
+    "patch": "@@ -16,6 +16,7 @@\n \n     <properties>\n         <java.version>11</java.version>\n+        <springdoc-ui.version>1.5.4</springdoc-ui.version>\n     </properties>\n \n     <dependencies>\n@@ -51,6 +52,11 @@\n             <artifactId>flyway-core</artifactId>\n             <scope>runtime</scope>\n         </dependency>\n+        <dependency>\n+            <groupId>org.springdoc</groupId>\n+            <artifactId>springdoc-openapi-ui</artifactId>\n+            <version>${springdoc-ui.version}</version>\n+        </dependency>\n         <dependency>\n             <groupId>org.springframework.boot</groupId>\n             <artifactId>spring-boot-starter-test</artifactId>"
+  },
+  {
+    "sha": "3c7f2651825ae31344ffde5a2b0d3ff90c1f06b6",
+    "filename": "local-storage-service/server/src/main/java/org/verapdf/webapp/localstorageservice/server/controller/FileController.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 3,
+    "changes": 7,
+    "blob_url": "https://github.com/veraPDF/verapdf-webapp-server/blob/1c207c638108dff8b78af8e04fe2e10173226ed6/local-storage-service/server/src/main/java/org/verapdf/webapp/localstorageservice/server/controller/FileController.java",
+    "raw_url": "https://github.com/veraPDF/verapdf-webapp-server/raw/1c207c638108dff8b78af8e04fe2e10173226ed6/local-storage-service/server/src/main/java/org/verapdf/webapp/localstorageservice/server/controller/FileController.java",
+    "contents_url": "https://api.github.com/repos/veraPDF/verapdf-webapp-server/contents/local-storage-service/server/src/main/java/org/verapdf/webapp/localstorageservice/server/controller/FileController.java?ref=1c207c638108dff8b78af8e04fe2e10173226ed6",
+    "patch": "@@ -30,13 +30,14 @@ public FileController(StoredFileService storedFileService) {\n \t\tthis.storedFileService = storedFileService;\n \t}\n \n-\t@PostMapping\n+\t@PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})\n \tpublic ResponseEntity<StoredFileDTO> uploadFile(@RequestPart(\"file\") MultipartFile file,\n-\t                                @RequestPart(required = false) @Pattern(regexp = \"^[\\\\da-fA-F]{32}$\") String contentMD5) throws VeraPDFBackendException {\n+\t                                                @RequestPart(required = false)\n+\t                                                @Pattern(regexp = \"^[\\\\da-fA-F]{32}$\") String contentMD5) throws VeraPDFBackendException {\n \t\tStoredFileDTO storedFileDTO = storedFileService.saveStoredFile(file, contentMD5);\n \t\tURI uri = MvcUriComponentsBuilder\n \t\t\t\t.fromMethodName(FileController.class,\n-\t\t\t\t\t\t\"getFileData\", storedFileDTO.getId())\n+\t\t\t\t                \"getFileData\", storedFileDTO.getId())\n \t\t\t\t.build()\n \t\t\t\t.encode()\n \t\t\t\t.toUri();"
+  },
+  {
+    "sha": "d442927f4b8ea655b522c5f3ab0c87e72e0f80fb",
+    "filename": "local-storage-service/server/src/main/resources/application.yml",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/veraPDF/verapdf-webapp-server/blob/1c207c638108dff8b78af8e04fe2e10173226ed6/local-storage-service/server/src/main/resources/application.yml",
+    "raw_url": "https://github.com/veraPDF/verapdf-webapp-server/raw/1c207c638108dff8b78af8e04fe2e10173226ed6/local-storage-service/server/src/main/resources/application.yml",
+    "contents_url": "https://api.github.com/repos/veraPDF/verapdf-webapp-server/contents/local-storage-service/server/src/main/resources/application.yml?ref=1c207c638108dff8b78af8e04fe2e10173226ed6",
+    "patch": "@@ -30,3 +30,12 @@ verapdf:\n   files:\n     min-space-threshold: ${localstorage.disk.min.space.threshold:5GB}\n     base-dir: /opt/verapdf/localstorageservice/files\n+\n+springdoc:\n+  api-docs:\n+    path: /files/docs\n+    enabled: true\n+  swagger-ui:\n+    path: /files/swagger\n+    operations-sorter: method\n+    enabled: true"
+  }
+]

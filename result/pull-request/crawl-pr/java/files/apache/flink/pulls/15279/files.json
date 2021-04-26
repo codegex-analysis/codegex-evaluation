@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "3d135e713bac5c2743c21d0c42da3fc0cc0ab778",
+    "filename": "flink-core/src/main/java/org/apache/flink/core/memory/MemorySegment.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/flink/blob/88143938253855b1f9a10c80f5c41c0314f73afb/flink-core/src/main/java/org/apache/flink/core/memory/MemorySegment.java",
+    "raw_url": "https://github.com/apache/flink/raw/88143938253855b1f9a10c80f5c41c0314f73afb/flink-core/src/main/java/org/apache/flink/core/memory/MemorySegment.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-core/src/main/java/org/apache/flink/core/memory/MemorySegment.java?ref=88143938253855b1f9a10c80f5c41c0314f73afb",
+    "patch": "@@ -72,7 +72,7 @@\n             \"flink.tests.check-segment-multiple-free\";\n \n     private static final boolean checkMultipleFree =\n-            System.getenv().containsKey(CHECK_MULTIPLE_FREE_PROPERTY);\n+            System.getProperties().containsKey(CHECK_MULTIPLE_FREE_PROPERTY);\n \n     /** The unsafe handle for transparent memory copied (heap / off-heap). */\n     @SuppressWarnings(\"restriction\")"
+  },
+  {
+    "sha": "f4d779155a0a55ceca4c309a2ca07485d5e9bdd2",
+    "filename": "flink-core/src/test/java/org/apache/flink/testutils/ThrowOnDoubleMemoryFreeing.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 10,
+    "changes": 16,
+    "blob_url": "https://github.com/apache/flink/blob/88143938253855b1f9a10c80f5c41c0314f73afb/flink-core/src/test/java/org/apache/flink/testutils/ThrowOnDoubleMemoryFreeing.java",
+    "raw_url": "https://github.com/apache/flink/raw/88143938253855b1f9a10c80f5c41c0314f73afb/flink-core/src/test/java/org/apache/flink/testutils/ThrowOnDoubleMemoryFreeing.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-core/src/test/java/org/apache/flink/testutils/ThrowOnDoubleMemoryFreeing.java?ref=88143938253855b1f9a10c80f5c41c0314f73afb",
+    "patch": "@@ -19,32 +19,28 @@\n package org.apache.flink.testutils;\n \n import org.apache.flink.core.memory.MemorySegment;\n-import org.apache.flink.core.testutils.CommonTestUtils;\n import org.apache.flink.util.ExternalResource;\n \n-import java.util.Collections;\n-import java.util.HashMap;\n-import java.util.Map;\n+import java.util.Properties;\n \n /**\n  * A rule that can be used to enable throwing exception on multiple freeing of {@link\n  * MemorySegment}.\n  */\n public class ThrowOnDoubleMemoryFreeing implements ExternalResource {\n \n-    private Map<String, String> systemEnv = new HashMap<>();\n+    private Properties systemProperties;\n \n     @Override\n     public void before() throws Exception {\n-        systemEnv = System.getenv();\n-        CommonTestUtils.setEnv(\n-                Collections.singletonMap(MemorySegment.CHECK_MULTIPLE_FREE_PROPERTY, \"\"), false);\n+        systemProperties = System.getProperties();\n+        System.setProperty(MemorySegment.CHECK_MULTIPLE_FREE_PROPERTY, \"\");\n     }\n \n     @Override\n     public void afterTestSuccess() {\n-        if (systemEnv != null) {\n-            CommonTestUtils.setEnv(systemEnv, true);\n+        if (systemProperties != null) {\n+            System.setProperties(systemProperties);\n         }\n     }\n }"
+  },
+  {
+    "sha": "5fc806fdba48f06239afb7cbef09092ac52550da",
+    "filename": "flink-runtime/src/test/java/org/apache/flink/runtime/resourcemanager/active/ActiveResourceManagerFactoryTest.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 6,
+    "changes": 11,
+    "blob_url": "https://github.com/apache/flink/blob/88143938253855b1f9a10c80f5c41c0314f73afb/flink-runtime/src/test/java/org/apache/flink/runtime/resourcemanager/active/ActiveResourceManagerFactoryTest.java",
+    "raw_url": "https://github.com/apache/flink/raw/88143938253855b1f9a10c80f5c41c0314f73afb/flink-runtime/src/test/java/org/apache/flink/runtime/resourcemanager/active/ActiveResourceManagerFactoryTest.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/test/java/org/apache/flink/runtime/resourcemanager/active/ActiveResourceManagerFactoryTest.java?ref=88143938253855b1f9a10c80f5c41c0314f73afb",
+    "patch": "@@ -22,7 +22,6 @@\n import org.apache.flink.configuration.Configuration;\n import org.apache.flink.configuration.MemorySize;\n import org.apache.flink.configuration.TaskManagerOptions;\n-import org.apache.flink.core.testutils.CommonTestUtils;\n import org.apache.flink.runtime.clusterframework.types.ResourceID;\n import org.apache.flink.runtime.resourcemanager.ResourceManagerRuntimeServicesConfiguration;\n import org.apache.flink.util.ConfigurationException;\n@@ -34,7 +33,7 @@\n \n import javax.annotation.Nullable;\n \n-import java.util.Map;\n+import java.util.Properties;\n \n import static org.hamcrest.Matchers.is;\n import static org.junit.Assert.assertFalse;\n@@ -47,19 +46,19 @@\n     private static final MemorySize TOTAL_FLINK_SIZE = MemorySize.ofMebiBytes(2 * 1024);\n     private static final MemorySize TOTAL_PROCESS_SIZE = MemorySize.ofMebiBytes(3 * 1024);\n \n-    private static Map<String, String> systemEnv;\n+    private static Properties systemProperties;\n \n     @BeforeClass\n     public static void setupClass() {\n-        systemEnv = System.getenv();\n+        systemProperties = System.getProperties();\n         System.clearProperty(\"flink.tests.disable-declarative\");\n         System.clearProperty(\"flink.tests.enable-fine-grained\");\n     }\n \n     @AfterClass\n     public static void teardownClass() {\n-        if (systemEnv != null) {\n-            CommonTestUtils.setEnv(systemEnv, true);\n+        if (systemProperties != null) {\n+            System.setProperties(systemProperties);\n         }\n     }\n "
+  }
+]

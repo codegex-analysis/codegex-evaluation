@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "a832819c691448b55473e8f790b42e951ad5e187",
+    "filename": "src/main/java/draylar/magna/api/BlockBreaker.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 1,
+    "changes": 9,
+    "blob_url": "https://github.com/Draylar/magna/blob/7e51f97e3b2f8ca178a95216a9de36ab29535dc4/src/main/java/draylar/magna/api/BlockBreaker.java",
+    "raw_url": "https://github.com/Draylar/magna/raw/7e51f97e3b2f8ca178a95216a9de36ab29535dc4/src/main/java/draylar/magna/api/BlockBreaker.java",
+    "contents_url": "https://api.github.com/repos/Draylar/magna/contents/src/main/java/draylar/magna/api/BlockBreaker.java?ref=7e51f97e3b2f8ca178a95216a9de36ab29535dc4",
+    "patch": "@@ -1,6 +1,5 @@\n package draylar.magna.api;\n \n-import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;\n import draylar.magna.Magna;\n import draylar.magna.api.reach.ReachDistanceHelper;\n import draylar.magna.impl.MagnaPlayerInteractionManagerExtension;\n@@ -9,11 +8,13 @@\n import net.minecraft.block.entity.BlockEntity;\n import net.minecraft.entity.ItemEntity;\n import net.minecraft.entity.player.PlayerEntity;\n+import net.minecraft.item.Item;\n import net.minecraft.item.ItemStack;\n import net.minecraft.server.network.ServerPlayerEntity;\n import net.minecraft.server.network.ServerPlayerInteractionManager;\n import net.minecraft.server.world.ServerWorld;\n import net.minecraft.stat.Stats;\n+import net.minecraft.util.Hand;\n import net.minecraft.util.hit.BlockHitResult;\n import net.minecraft.util.hit.HitResult;\n import net.minecraft.util.math.BlockPos;\n@@ -183,6 +184,12 @@ private static void dropItems(PlayerEntity player, World world, List<ItemStack>\n \n             BlockPos origin = blockHitResult.getBlockPos();\n \n+            ItemStack handStack = playerEntity.getStackInHand(Hand.MAIN_HAND);\n+            Item item = handStack.getItem();\n+            if (item instanceof MagnaTool) {\n+                origin = ((MagnaTool) item).getCenterPosition(world, playerEntity, blockHitResult, handStack);\n+            }\n+\n             // check if each position inside the box is valid\n             for(BlockPos pos : positions) {\n                 boolean valid = false;"
+  },
+  {
+    "sha": "b8d835313e5879407ae8c42dd1a99607ec4e72dc",
+    "filename": "src/main/java/draylar/magna/api/MagnaTool.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/Draylar/magna/blob/7e51f97e3b2f8ca178a95216a9de36ab29535dc4/src/main/java/draylar/magna/api/MagnaTool.java",
+    "raw_url": "https://github.com/Draylar/magna/raw/7e51f97e3b2f8ca178a95216a9de36ab29535dc4/src/main/java/draylar/magna/api/MagnaTool.java",
+    "contents_url": "https://api.github.com/repos/Draylar/magna/contents/src/main/java/draylar/magna/api/MagnaTool.java?ref=7e51f97e3b2f8ca178a95216a9de36ab29535dc4",
+    "patch": "@@ -5,6 +5,7 @@\n import net.minecraft.block.BlockState;\n import net.minecraft.entity.player.PlayerEntity;\n import net.minecraft.item.ItemStack;\n+import net.minecraft.util.hit.BlockHitResult;\n import net.minecraft.util.math.BlockPos;\n import net.minecraft.world.BlockView;\n import net.minecraft.world.World;\n@@ -53,6 +54,21 @@ default int getDepth(ItemStack stack) {\n      */\n     boolean playBreakEffects();\n \n+    /**\n+     * Modifies which block will be considered the center of the radius.\n+     * <p>\n+     * This is useful for tools with a big radius to avoid breaking blocks under the player.\n+     *\n+     * @param world           world the block is breaking\n+     * @param player          player that is breaking\n+     * @param blockHitResult  raycast result from where the player is looking to the block being mined\n+     * @param toolStack       {@link MagnaTool} currently being held by the player\n+     * @return                a {@link BlockPos} that will define the center of the radius\n+     */\n+    default BlockPos getCenterPosition(World world, PlayerEntity player, BlockHitResult blockHitResult, ItemStack toolStack) {\n+        return blockHitResult.getBlockPos();\n+    }\n+\n     /**\n      * Defines behavior about how this {@link MagnaTool} should process block drops.\n      * <p>"
+  }
+]

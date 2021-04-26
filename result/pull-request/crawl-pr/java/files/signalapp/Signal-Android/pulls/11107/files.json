@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "fd180efcb2413c3aee94b8dc556ec7f86b0c5eae",
+    "filename": "app/src/main/java/org/thoughtcrime/securesms/mediapreview/MediaRailAdapter.java",
+    "status": "modified",
+    "additions": 18,
+    "deletions": 4,
+    "changes": 22,
+    "blob_url": "https://github.com/signalapp/Signal-Android/blob/dcb7501edc46107ec34574b44e46fda225d9811d/app/src/main/java/org/thoughtcrime/securesms/mediapreview/MediaRailAdapter.java",
+    "raw_url": "https://github.com/signalapp/Signal-Android/raw/dcb7501edc46107ec34574b44e46fda225d9811d/app/src/main/java/org/thoughtcrime/securesms/mediapreview/MediaRailAdapter.java",
+    "contents_url": "https://api.github.com/repos/signalapp/Signal-Android/contents/app/src/main/java/org/thoughtcrime/securesms/mediapreview/MediaRailAdapter.java?ref=dcb7501edc46107ec34574b44e46fda225d9811d",
+    "patch": "@@ -21,6 +21,7 @@\n \n   private static final int TYPE_MEDIA  = 1;\n   private static final int TYPE_BUTTON = 2;\n+  private static final int TYPE_CAMERA = 3;\n \n   private final GlideRequests            glideRequests;\n   private final List<Media>              media;\n@@ -51,6 +52,8 @@ public MediaRailViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int\n         return new MediaViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.mediarail_media_item, viewGroup, false));\n       case TYPE_BUTTON:\n         return new ButtonViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.mediarail_button_item, viewGroup, false));\n+      case TYPE_CAMERA:\n+        return new ButtonViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.mediarail_camera_item, viewGroup, false));\n       default:\n         throw new UnsupportedOperationException(\"Unsupported view type: \" + type);\n     }\n@@ -65,14 +68,19 @@ public void onBindViewHolder(@NonNull MediaRailViewHolder viewHolder, int i) {\n       case TYPE_BUTTON:\n         ((ButtonViewHolder) viewHolder).bind(addListener);\n         break;\n+      case TYPE_CAMERA:\n+        ((ButtonViewHolder) viewHolder).bind(addListener, true);\n+        break;\n       default:\n         throw new UnsupportedOperationException(\"Unsupported view type: \" + getItemViewType(i));\n     }\n   }\n \n   @Override\n   public int getItemViewType(int position) {\n-    if (editable && position == getItemCount() - 1) {\n+    if (editable && position == getItemCount() - 2) {\n+      return TYPE_CAMERA;\n+    }else if (editable && position == getItemCount() - 1){\n       return TYPE_BUTTON;\n     } else {\n       return TYPE_MEDIA;\n@@ -86,14 +94,16 @@ public void onViewRecycled(@NonNull MediaRailViewHolder holder) {\n \n   @Override\n   public int getItemCount() {\n-    return editable ? media.size() + 1 : media.size();\n+    return editable ? media.size() + 2 : media.size();\n   }\n \n   @Override\n   public long getItemId(int position) {\n     switch (getItemViewType(position)) {\n       case TYPE_MEDIA:\n         return stableIdGenerator.getId(media.get(position));\n+      case TYPE_CAMERA:\n+        return Long.MAX_VALUE-1;\n       case TYPE_BUTTON:\n         return Long.MAX_VALUE;\n       default:\n@@ -189,8 +199,12 @@ public ButtonViewHolder(@NonNull View itemView) {\n     }\n \n     void bind(@Nullable RailItemAddListener addListener) {\n+      bind(addListener, false);\n+    }\n+\n+    void bind(@Nullable RailItemAddListener addListener, boolean startCamera) {\n       if (addListener != null) {\n-        itemView.setOnClickListener(v -> addListener.onRailItemAddClicked());\n+        itemView.setOnClickListener(v -> addListener.onRailItemAddClicked(startCamera));\n       }\n     }\n \n@@ -206,6 +220,6 @@ void recycle() {\n   }\n \n   public interface RailItemAddListener {\n-    void onRailItemAddClicked();\n+    void onRailItemAddClicked(boolean startCamera);\n   }\n }"
+  },
+  {
+    "sha": "06466764709ca00e5209b6540ae37098b801d84d",
+    "filename": "app/src/main/java/org/thoughtcrime/securesms/mediasend/MediaSendActivity.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/signalapp/Signal-Android/blob/dcb7501edc46107ec34574b44e46fda225d9811d/app/src/main/java/org/thoughtcrime/securesms/mediasend/MediaSendActivity.java",
+    "raw_url": "https://github.com/signalapp/Signal-Android/raw/dcb7501edc46107ec34574b44e46fda225d9811d/app/src/main/java/org/thoughtcrime/securesms/mediasend/MediaSendActivity.java",
+    "contents_url": "https://api.github.com/repos/signalapp/Signal-Android/contents/app/src/main/java/org/thoughtcrime/securesms/mediasend/MediaSendActivity.java?ref=dcb7501edc46107ec34574b44e46fda225d9811d",
+    "patch": "@@ -781,7 +781,12 @@ private void initViewModel() {\n \n     viewModel.getBucketId().observe(this, bucketId -> {\n       if (bucketId == null) return;\n-      mediaRailAdapter.setAddButtonListener(() -> onAddMediaClicked(bucketId));\n+      mediaRailAdapter.setAddButtonListener((startCamera) -> {\n+        onAddMediaClicked(bucketId);\n+        if (startCamera) {\n+          onCameraSelected();\n+        }\n+      });\n     });\n \n     viewModel.getError().observe(this, error -> {"
+  },
+  {
+    "sha": "6844d12d9675daa1c40fe191cc743380f8fadcea",
+    "filename": "app/src/main/res/layout/mediarail_camera_item.xml",
+    "status": "added",
+    "additions": 17,
+    "deletions": 0,
+    "changes": 17,
+    "blob_url": "https://github.com/signalapp/Signal-Android/blob/dcb7501edc46107ec34574b44e46fda225d9811d/app/src/main/res/layout/mediarail_camera_item.xml",
+    "raw_url": "https://github.com/signalapp/Signal-Android/raw/dcb7501edc46107ec34574b44e46fda225d9811d/app/src/main/res/layout/mediarail_camera_item.xml",
+    "contents_url": "https://api.github.com/repos/signalapp/Signal-Android/contents/app/src/main/res/layout/mediarail_camera_item.xml?ref=dcb7501edc46107ec34574b44e46fda225d9811d",
+    "patch": "@@ -0,0 +1,17 @@\n+<?xml version=\"1.0\" encoding=\"utf-8\"?>\n+<FrameLayout\n+    xmlns:android=\"http://schemas.android.com/apk/res/android\"\n+    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n+    android:layout_width=\"56dp\"\n+    android:layout_height=\"56dp\"\n+    android:layout_margin=\"2dp\"\n+    android:background=\"@drawable/mediarail_button_background\">\n+\n+    <ImageView\n+        android:layout_width=\"wrap_content\"\n+        android:layout_height=\"wrap_content\"\n+        android:layout_gravity=\"center\"\n+        app:srcCompat=\"@drawable/ic_camera_24\"\n+        android:elevation=\"4dp\" />\n+\n+</FrameLayout>"
+  }
+]

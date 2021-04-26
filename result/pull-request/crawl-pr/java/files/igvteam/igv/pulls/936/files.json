@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "b2aeb1b4221bb94816e4defbe09fc57e57b0e4bb",
+    "filename": "src/main/java/org/broad/igv/batch/CommandExecutor.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/igvteam/igv/blob/23e762f7bd31b8f656bbc1642986eb74ffd43cda/src/main/java/org/broad/igv/batch/CommandExecutor.java",
+    "raw_url": "https://github.com/igvteam/igv/raw/23e762f7bd31b8f656bbc1642986eb74ffd43cda/src/main/java/org/broad/igv/batch/CommandExecutor.java",
+    "contents_url": "https://api.github.com/repos/igvteam/igv/contents/src/main/java/org/broad/igv/batch/CommandExecutor.java?ref=23e762f7bd31b8f656bbc1642986eb74ffd43cda",
+    "patch": "@@ -43,6 +43,7 @@\n import org.broad.igv.prefs.PreferencesManager;\n import org.broad.igv.renderer.DataRange;\n import org.broad.igv.sam.AlignmentTrack;\n+import org.broad.igv.track.AttributeManager;\n import org.broad.igv.track.RegionScoreType;\n import org.broad.igv.track.Track;\n import org.broad.igv.ui.IGV;\n@@ -188,6 +189,25 @@ public String execute(String command) {\n                 FrameManager.incrementZoom(-1);\n             } else if (\"oauth\".equals(cmd)) {\n                 OAuthUtils.getInstance().getProvider().setAccessToken(param1);\n+            } else if(cmd.equalsIgnoreCase(\"sortByAttribute\")) {\n+                List<String> allAttributes = AttributeManager.getInstance().getAttributeNames();\n+                int nattributes = (args.size() - 1) / 2;\n+                if (nattributes==0 || (args.size() - 1) % 2 != 0) {\n+                    return String.format(\"Error: sortByAttribute usage: sortByAttribute attributeName asc|desc\");\n+                }\n+                boolean[] ascending = new boolean[nattributes];\n+                String[] trackNames = new String[nattributes];\n+                for (int attributeIndex = 0, i = 1; attributeIndex < nattributes; attributeIndex++, i += 2) {\n+                    String trackName = args.get(i);\n+                    String order = args.get(i + 1);\n+                    ascending[attributeIndex] = order.equalsIgnoreCase(\"asc\");\n+                    if (allAttributes.indexOf(trackName) == -1) {\n+                        return String.format(\"Error: Track %s not found\", trackName);\n+                    }\n+                    trackNames[attributeIndex] = trackName;\n+                }\n+                igv.sortAllTracksByAttributes(trackNames, ascending);\n+                return \"OK\";\n             } else {\n                 result = \"UNKOWN COMMAND: \" + command;\n                 log.error(result);"
+  }
+]

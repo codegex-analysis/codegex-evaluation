@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "1fe0e6693a02869c6a86c56a1ac461b4f5c4b1a2",
+    "filename": "Main.java",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/DmitryTarakanov2000/hm5/blob/b78b9b967f0baddb0536b8d4172fcfcb6fd74c80/Main.java",
+    "raw_url": "https://github.com/DmitryTarakanov2000/hm5/raw/b78b9b967f0baddb0536b8d4172fcfcb6fd74c80/Main.java",
+    "contents_url": "https://api.github.com/repos/DmitryTarakanov2000/hm5/contents/Main.java?ref=b78b9b967f0baddb0536b8d4172fcfcb6fd74c80",
+    "patch": "@@ -0,0 +1,52 @@\n+public class Main {\r\n+ static final int SIZE =10000000;\r\n+ static final int h = SIZE / 2;\r\n+    public float[] calculate(float[] arr){\r\n+        for (int i = 0; i< arr.length; i++)\r\n+            arr[i] = (float) (arr[i] * Math.sin(0.2f + i/5)* Math.cos(0.2f +  i/5) * Math.cos(0.4f + i/2));\r\n+        return arr;}\r\n+        public void FirstThread() {\r\n+            float[] arr = new float[SIZE];\r\n+            for (int i = 0; i < arr.length; i++) arr[i] = 1.0f;\r\n+            long a = System.currentTimeMillis();\r\n+            calculate(arr);\r\n+            System.out.println(\"1 метод\" + (System.currentTimeMillis() - a));\r\n+        }\r\n+        public void SecondThread() {\r\n+        float[] arr = new float[SIZE];\r\n+            float[] arr1 = new float[h];\r\n+            float[] arr2 = new float[h];\r\n+            for (int i =0;i<arr.length;i++) arr[i]=1.0f;\r\n+\r\n+            long a = System.currentTimeMillis();\r\n+            System.arraycopy(arr,0,arr1,0,h);\r\n+            System.arraycopy(arr,h,arr2,0,h);\r\n+\r\n+\r\n+            new Thread(){\r\n+                public void run(){\r\n+                    float[] a1= calculate(arr1);\r\n+                    System.arraycopy(a1,0,arr1,0,a1.length);\r\n+                }\r\n+            }\r\n+            .start();\r\n+            new Thread(){\r\n+                public void run() {\r\n+                    float[] a2 = calculate(arr2);\r\n+                    System.arraycopy(a2,0,arr2,0,a2.length);\r\n+                }\r\n+            }\r\n+            .start();\r\n+\r\n+            System.arraycopy(arr1,0,arr,0,h);\r\n+            System.arraycopy(arr2,0,arr,h,h);\r\n+            System.out.println(\"2 метод\"+ (System.currentTimeMillis()-a));\r\n+\r\n+        }\r\n+        public static void main(String args[]){\r\n+        Main o= new Main();\r\n+        o.FirstThread();\r\n+        o.SecondThread();\r\n+        }\r\n+\r\n+        }9\n\\ No newline at end of file"
+  }
+]

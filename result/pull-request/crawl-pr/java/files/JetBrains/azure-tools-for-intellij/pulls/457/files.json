@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "f8fc9cc54051797a5e7362b2050bf1d40f7902b7",
+    "filename": "PluginsAndFeatures/azure-toolkit-for-intellij/rider/resources/META-INF/plugin.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/JetBrains/azure-tools-for-intellij/blob/7882888d80ae842346e785832fb6ee27b7c01619/PluginsAndFeatures/azure-toolkit-for-intellij/rider/resources/META-INF/plugin.xml",
+    "raw_url": "https://github.com/JetBrains/azure-tools-for-intellij/raw/7882888d80ae842346e785832fb6ee27b7c01619/PluginsAndFeatures/azure-toolkit-for-intellij/rider/resources/META-INF/plugin.xml",
+    "contents_url": "https://api.github.com/repos/JetBrains/azure-tools-for-intellij/contents/PluginsAndFeatures/azure-toolkit-for-intellij/rider/resources/META-INF/plugin.xml?ref=7882888d80ae842346e785832fb6ee27b7c01619",
+    "patch": "@@ -26,6 +26,7 @@\n         <ul>\n           <li>Compatibility with Rider 2021.1 EAP8</li>\n           <li>Allow publishing to App Service with kind \"API\" (<a href=\"https://github.com/JetBrains/azure-tools-for-intellij/issues/149\">#149</a>)</li>\n+          <li>Enable build-throttling and support compound run configurations (<a href=\"https://youtrack.jetbrains.com/issue/RIDER-57482\">RIDER-57482</a>)</li>\n         </ul>\n         <h4>Fixed bugs:</h4>\n         <ul>"
+  },
+  {
+    "sha": "8898805b005b67eb60219c3569fea2952326e8b1",
+    "filename": "PluginsAndFeatures/azure-toolkit-for-intellij/rider/src/org/jetbrains/plugins/azure/functions/buildTasks/BuildFunctionsProjectBeforeRunTaskProvider.kt",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 13,
+    "changes": 18,
+    "blob_url": "https://github.com/JetBrains/azure-tools-for-intellij/blob/7882888d80ae842346e785832fb6ee27b7c01619/PluginsAndFeatures/azure-toolkit-for-intellij/rider/src/org/jetbrains/plugins/azure/functions/buildTasks/BuildFunctionsProjectBeforeRunTaskProvider.kt",
+    "raw_url": "https://github.com/JetBrains/azure-tools-for-intellij/raw/7882888d80ae842346e785832fb6ee27b7c01619/PluginsAndFeatures/azure-toolkit-for-intellij/rider/src/org/jetbrains/plugins/azure/functions/buildTasks/BuildFunctionsProjectBeforeRunTaskProvider.kt",
+    "contents_url": "https://api.github.com/repos/JetBrains/azure-tools-for-intellij/contents/PluginsAndFeatures/azure-toolkit-for-intellij/rider/src/org/jetbrains/plugins/azure/functions/buildTasks/BuildFunctionsProjectBeforeRunTaskProvider.kt?ref=7882888d80ae842346e785832fb6ee27b7c01619",
+    "patch": "@@ -1,5 +1,5 @@\n /**\n- * Copyright (c) 2019-2020 JetBrains s.r.o.\n+ * Copyright (c) 2019-2021 JetBrains s.r.o.\n  * <p/>\n  * All rights reserved.\n  * <p/>\n@@ -34,6 +34,7 @@ import com.jetbrains.rd.platform.util.application\n import com.jetbrains.rd.platform.util.getComponent\n import com.jetbrains.rider.build.BuildHost\n import com.jetbrains.rider.build.BuildParameters\n+import com.jetbrains.rider.build.tasks.BuildTaskThrottler\n import com.jetbrains.rider.model.BuildResultKind\n import com.jetbrains.rider.model.BuildTarget\n import org.jetbrains.plugins.azure.RiderAzureBundle.message\n@@ -84,17 +85,8 @@ class BuildFunctionsProjectBeforeRunTaskProvider : BeforeRunTaskProvider<BuildFu\n         }\n         if (!buildHost.ready.value)\n             return false\n-        val finished = Semaphore()\n-        finished.down()\n-        var result = false\n-        // when false returned build was not started because another is in progress, we should not run task\n-        application.invokeLater {\n-            result = buildHost.requestBuild(BuildParameters(BuildTarget(), selectedProjectsForBuild)) {\n-                result = it == BuildResultKind.Successful || it == BuildResultKind.HasWarnings\n-                finished.up()\n-            }\n-        }\n-        finished.waitFor()\n-        return result\n+\n+        val throttler = BuildTaskThrottler.getInstance(project)\n+        return throttler.runBuildWithThrottling(BuildParameters(BuildTarget(), selectedProjectsForBuild)).get()\n     }\n }"
+  }
+]

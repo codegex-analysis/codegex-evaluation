@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "98e2337aa70016647ee0aab71f2c91e5a3102f78",
+    "filename": "pom.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/awslabs/dynamodb-streams-kinesis-adapter/blob/04d904b21af248aac5a6a6825bd33760b3569908/pom.xml",
+    "raw_url": "https://github.com/awslabs/dynamodb-streams-kinesis-adapter/raw/04d904b21af248aac5a6a6825bd33760b3569908/pom.xml",
+    "contents_url": "https://api.github.com/repos/awslabs/dynamodb-streams-kinesis-adapter/contents/pom.xml?ref=04d904b21af248aac5a6a6825bd33760b3569908",
+    "patch": "@@ -23,8 +23,8 @@\n     </licenses>\n \n     <properties>\n-        <aws-java-sdk.version>1.11.728</aws-java-sdk.version>\n-        <amazon-kinesis-client.version>1.13.3</amazon-kinesis-client.version>\n+        <aws-java-sdk.version>1.11.844</aws-java-sdk.version>\n+        <amazon-kinesis-client.version>1.14.2</amazon-kinesis-client.version>\n         <powermock.version>1.6.2</powermock.version>\n         <aws.dynamodblocal.version>[1.12,2.0)</aws.dynamodblocal.version>\n         <maven.dependency.version>3.0.0</maven.dependency.version>"
+  },
+  {
+    "sha": "c33c3c6790c2c33edb57318d7a9bf0824e5db22a",
+    "filename": "src/main/java/com/amazonaws/services/dynamodbv2/streamsadapter/DynamoDBStreamsProxy.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/awslabs/dynamodb-streams-kinesis-adapter/blob/04d904b21af248aac5a6a6825bd33760b3569908/src/main/java/com/amazonaws/services/dynamodbv2/streamsadapter/DynamoDBStreamsProxy.java",
+    "raw_url": "https://github.com/awslabs/dynamodb-streams-kinesis-adapter/raw/04d904b21af248aac5a6a6825bd33760b3569908/src/main/java/com/amazonaws/services/dynamodbv2/streamsadapter/DynamoDBStreamsProxy.java",
+    "contents_url": "https://api.github.com/repos/awslabs/dynamodb-streams-kinesis-adapter/contents/src/main/java/com/amazonaws/services/dynamodbv2/streamsadapter/DynamoDBStreamsProxy.java?ref=04d904b21af248aac5a6a6825bd33760b3569908",
+    "patch": "@@ -26,6 +26,7 @@\n import com.amazonaws.services.kinesis.model.ResourceNotFoundException;\n import com.amazonaws.services.kinesis.model.SequenceNumberRange;\n import com.amazonaws.services.kinesis.model.Shard;\n+import com.amazonaws.services.kinesis.model.ShardFilter;\n import com.amazonaws.services.kinesis.model.ShardIteratorType;\n import com.amazonaws.services.kinesis.model.StreamStatus;\n import com.google.common.annotations.VisibleForTesting;\n@@ -259,6 +260,11 @@ public Shard getShard(String shardId) {\n         return listOfShardsSinceLastGet.get();\n     }\n \n+    @Override\n+    public List<Shard> getShardListWithFilter(ShardFilter shardFilter) throws ResourceNotFoundException {\n+        return getShardList();\n+    }\n+\n     @Override\n     /**\n      * This method gets invoked from ShutdownTask when the shard consumer is shutting down."
+  },
+  {
+    "sha": "b873236b3b45b4f31952300f089c626809444ed8",
+    "filename": "src/test/java/com/amazonaws/services/dynamodbv2/streamsadapter/util/KinesisLocalFileProxy.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 0,
+    "changes": 6,
+    "blob_url": "https://github.com/awslabs/dynamodb-streams-kinesis-adapter/blob/04d904b21af248aac5a6a6825bd33760b3569908/src/test/java/com/amazonaws/services/dynamodbv2/streamsadapter/util/KinesisLocalFileProxy.java",
+    "raw_url": "https://github.com/awslabs/dynamodb-streams-kinesis-adapter/raw/04d904b21af248aac5a6a6825bd33760b3569908/src/test/java/com/amazonaws/services/dynamodbv2/streamsadapter/util/KinesisLocalFileProxy.java",
+    "contents_url": "https://api.github.com/repos/awslabs/dynamodb-streams-kinesis-adapter/contents/src/test/java/com/amazonaws/services/dynamodbv2/streamsadapter/util/KinesisLocalFileProxy.java?ref=04d904b21af248aac5a6a6825bd33760b3569908",
+    "patch": "@@ -5,6 +5,7 @@\n  */\n package com.amazonaws.services.dynamodbv2.streamsadapter.util;\n \n+import com.amazonaws.services.kinesis.model.ShardFilter;\n import java.io.BufferedReader;\n import java.io.FileInputStream;\n import java.io.IOException;\n@@ -418,6 +419,11 @@ public PutRecordResult put(String exclusiveMinimumSequenceNumber,\n         return shards;\n     }\n \n+    @Override\n+    public List<Shard> getShardListWithFilter(ShardFilter shardFilter) throws ResourceNotFoundException {\n+        return getShardList();\n+    }\n+\n     @Override\n     public ShardClosureVerificationResponse verifyShardClosure(String shardId) {\n         return () -> true; // isShardClosed -> true"
+  }
+]

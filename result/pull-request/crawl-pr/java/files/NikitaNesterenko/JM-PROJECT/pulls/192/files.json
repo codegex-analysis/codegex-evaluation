@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "3395123e9e47823b3ec08cb2a821925dba1cd4bc",
+    "filename": "webapp/src/main/java/jm/stockx/rest_controller/AdminController.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 7,
+    "changes": 21,
+    "blob_url": "https://github.com/NikitaNesterenko/JM-PROJECT/blob/68c034877d540f95c9af9f508b851e97a7a1768f/webapp/src/main/java/jm/stockx/rest_controller/AdminController.java",
+    "raw_url": "https://github.com/NikitaNesterenko/JM-PROJECT/raw/68c034877d540f95c9af9f508b851e97a7a1768f/webapp/src/main/java/jm/stockx/rest_controller/AdminController.java",
+    "contents_url": "https://api.github.com/repos/NikitaNesterenko/JM-PROJECT/contents/webapp/src/main/java/jm/stockx/rest_controller/AdminController.java?ref=68c034877d540f95c9af9f508b851e97a7a1768f",
+    "patch": "@@ -1,15 +1,15 @@\n package jm.stockx.rest_controller;\n \n+import jm.stockx.FileStorageService;\n+import jm.stockx.ItemAdminDtoException;\n import jm.stockx.ItemAdminService;\n import jm.stockx.MailService;\n import jm.stockx.dto.item.ItemDtoAdmin;\n import jm.stockx.util.Response;\n import org.springframework.beans.factory.annotation.Autowired;\n-import org.springframework.http.HttpHeaders;\n-import org.springframework.web.bind.annotation.PostMapping;\n-import org.springframework.web.bind.annotation.RequestBody;\n-import org.springframework.web.bind.annotation.RequestMapping;\n-import org.springframework.web.bind.annotation.RestController;\n+import org.springframework.web.bind.annotation.*;\n+import org.springframework.web.multipart.MultipartFile;\n+\n \n import java.util.List;\n \n@@ -20,11 +20,13 @@\n \n     // TODO: Не используется. Потенциально можено убрать.\n     private MailService mailService;\n+    private FileStorageService fileStorageService;\n \n     @Autowired\n-    public AdminController(ItemAdminService itemAdminService, MailService mailService) {\n+    public AdminController(ItemAdminService itemAdminService, MailService mailService, FileStorageService fileStorageService) {\n         this.mailService = mailService;\n         this.itemAdminService = itemAdminService;\n+        this.fileStorageService = fileStorageService;\n     }\n \n     @PostMapping(\"/add/item\")\n@@ -38,4 +40,9 @@ public AdminController(ItemAdminService itemAdminService, MailService mailServic\n         itemAdminService.addAdminListItemInfo(listItemDtoAdmin);\n         return Response.ok().build();\n     }\n-}\n\\ No newline at end of file\n+\n+    @PostMapping(\"/util\")\n+    public String uploadMainPicture(MultipartFile file) {\n+        return fileStorageService.storeFile(file);\n+    }\n+}"
+  },
+  {
+    "sha": "a055d4bd690ed73438f16f724e67fdbfd14acfa6",
+    "filename": "webapp/src/main/java/jm/stockx/rest_controller/AuthenticationRestController.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 3,
+    "changes": 15,
+    "blob_url": "https://github.com/NikitaNesterenko/JM-PROJECT/blob/68c034877d540f95c9af9f508b851e97a7a1768f/webapp/src/main/java/jm/stockx/rest_controller/AuthenticationRestController.java",
+    "raw_url": "https://github.com/NikitaNesterenko/JM-PROJECT/raw/68c034877d540f95c9af9f508b851e97a7a1768f/webapp/src/main/java/jm/stockx/rest_controller/AuthenticationRestController.java",
+    "contents_url": "https://api.github.com/repos/NikitaNesterenko/JM-PROJECT/contents/webapp/src/main/java/jm/stockx/rest_controller/AuthenticationRestController.java?ref=68c034877d540f95c9af9f508b851e97a7a1768f",
+    "patch": "@@ -5,28 +5,37 @@\n import jm.stockx.dto.UserTokenDto;\n import jm.stockx.dto.security.UserLoginDto;\n import jm.stockx.util.Response;\n+import org.springframework.http.HttpStatus;\n import org.springframework.security.core.AuthenticationException;\n import org.springframework.web.bind.annotation.PostMapping;\n import org.springframework.web.bind.annotation.RequestBody;\n import org.springframework.web.bind.annotation.RequestMapping;\n import org.springframework.web.bind.annotation.RestController;\n \n+import javax.servlet.http.HttpServletRequest;\n+\n @RestController\n @RequestMapping(\"/api/auth\")\n public class AuthenticationRestController {\n     private final UserDetailsServiceImpl userDetailsService;\n+    private final RestCustomHeaderVerificator restCustomHeaderVerificator;\n \n-    public AuthenticationRestController(UserDetailsServiceImpl userDetailsService) {\n+    public AuthenticationRestController(UserDetailsServiceImpl userDetailsService, RestCustomHeaderVerificator restCustomHeaderVerificator) {\n         this.userDetailsService = userDetailsService;\n+        this.restCustomHeaderVerificator = restCustomHeaderVerificator;\n     }\n \n     @PostMapping(\"/login\")\n-    public Response<UserTokenDto> login(@RequestBody UserLoginDto loginUser) {\n+    public Response<UserTokenDto> login(@RequestBody UserLoginDto loginUser, HttpServletRequest httpServletRequest) {\n         try {\n             String generatedToken = userDetailsService.authenticateUser(loginUser);\n \n             UserTokenDto userTokenForResponse = new UserTokenDto(generatedToken);\n-            return Response.ok(userTokenForResponse);\n+            if(restCustomHeaderVerificator.getVerificationValue(httpServletRequest)){\n+                return Response.ok(userTokenForResponse);\n+            } else{\n+                return Response.error(HttpStatus.LOCKED, \" Blocked by HeaderVerification\");\n+            }\n         } catch (AuthenticationException e) {\n             throw new AuthorizationException();\n         }"
+  },
+  {
+    "sha": "f86eb9e965db07714e4d8562d95557c0805bb326",
+    "filename": "webapp/src/main/java/jm/stockx/rest_controller/RestCustomHeaderVerificator.java",
+    "status": "added",
+    "additions": 28,
+    "deletions": 0,
+    "changes": 28,
+    "blob_url": "https://github.com/NikitaNesterenko/JM-PROJECT/blob/68c034877d540f95c9af9f508b851e97a7a1768f/webapp/src/main/java/jm/stockx/rest_controller/RestCustomHeaderVerificator.java",
+    "raw_url": "https://github.com/NikitaNesterenko/JM-PROJECT/raw/68c034877d540f95c9af9f508b851e97a7a1768f/webapp/src/main/java/jm/stockx/rest_controller/RestCustomHeaderVerificator.java",
+    "contents_url": "https://api.github.com/repos/NikitaNesterenko/JM-PROJECT/contents/webapp/src/main/java/jm/stockx/rest_controller/RestCustomHeaderVerificator.java?ref=68c034877d540f95c9af9f508b851e97a7a1768f",
+    "patch": "@@ -0,0 +1,28 @@\n+package jm.stockx.rest_controller;\n+\n+import org.springframework.stereotype.Service;\n+import org.springframework.web.bind.annotation.RequestMapping;\n+import org.springframework.web.context.request.RequestContextHolder;\n+import org.springframework.web.context.request.ServletRequestAttributes;\n+import org.springframework.web.servlet.HandlerInterceptor;\n+\n+import javax.servlet.http.HttpServletRequest;\n+import java.nio.charset.StandardCharsets;\n+import java.util.Base64;\n+@Service\n+public class RestCustomHeaderVerificator implements HandlerInterceptor {\n+\n+    public boolean getVerificationValue(HttpServletRequest request){\n+        String test = Base64.getEncoder().\n+                encodeToString(request.getRequestURI().getBytes(StandardCharsets.UTF_8));\n+        String headersEncodingString = request.getHeader(\"Token\");\n+\n+        return test.equals(headersEncodingString);\n+    }\n+\n+//    protected String getRequestSessionId() {\n+//        HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();\n+//        return request.getHeader(\"Token\");\n+//    }\n+\n+}"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "dbeed506f1680390be9cd500b7a766cb02754150",
+    "filename": "src/main/java/com/javagirls/MangoRoom/MangoRoomApplication.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/RoomMango/MangoRoom/blob/5a590a3203c3d7d045e264698d49d2e1f9583438/src/main/java/com/javagirls/MangoRoom/MangoRoomApplication.java",
+    "raw_url": "https://github.com/RoomMango/MangoRoom/raw/5a590a3203c3d7d045e264698d49d2e1f9583438/src/main/java/com/javagirls/MangoRoom/MangoRoomApplication.java",
+    "contents_url": "https://api.github.com/repos/RoomMango/MangoRoom/contents/src/main/java/com/javagirls/MangoRoom/MangoRoomApplication.java?ref=5a590a3203c3d7d045e264698d49d2e1f9583438",
+    "patch": "@@ -9,6 +9,7 @@\n public class MangoRoomApplication {\n \n \tpublic static void main(String[] args) {\n+\n \t\tSpringApplication.run(MangoRoomApplication.class, args);\n \t}\n "
+  },
+  {
+    "sha": "ce41227c06716a3dea9e5e573f7753b7dc4de88c",
+    "filename": "src/main/java/com/javagirls/MangoRoom/controller/ReservationController.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 2,
+    "changes": 28,
+    "blob_url": "https://github.com/RoomMango/MangoRoom/blob/5a590a3203c3d7d045e264698d49d2e1f9583438/src/main/java/com/javagirls/MangoRoom/controller/ReservationController.java",
+    "raw_url": "https://github.com/RoomMango/MangoRoom/raw/5a590a3203c3d7d045e264698d49d2e1f9583438/src/main/java/com/javagirls/MangoRoom/controller/ReservationController.java",
+    "contents_url": "https://api.github.com/repos/RoomMango/MangoRoom/contents/src/main/java/com/javagirls/MangoRoom/controller/ReservationController.java?ref=5a590a3203c3d7d045e264698d49d2e1f9583438",
+    "patch": "@@ -1,14 +1,24 @@\n package com.javagirls.MangoRoom.controller;\n \n+import com.javagirls.MangoRoom.dto.ReservationDto;\n+import com.javagirls.MangoRoom.entity.Reservation;\n import com.javagirls.MangoRoom.dto.ReservationDto;\n import com.javagirls.MangoRoom.entity.Reservation;\n import com.javagirls.MangoRoom.enumeration.Status;\n import com.javagirls.MangoRoom.service.ReservationService;\n import org.springframework.http.ResponseEntity;\n import org.springframework.stereotype.Controller;\n import org.springframework.web.bind.annotation.*;\n+import org.springframework.dao.EmptyResultDataAccessException;\n+import org.springframework.http.HttpStatus;\n+import org.springframework.http.ResponseEntity;\n+import org.springframework.web.bind.annotation.*;\n+\n+import javax.validation.Valid;\n+import java.util.List;\n \n-@Controller\n+//@Controller\n+@RestController\n public class ReservationController {\n \n     private ReservationService service;\n@@ -29,5 +39,19 @@ public Reservation addReservation(@RequestBody ReservationDto reservation) {\n         return ResponseEntity.ok(message);\n     }\n \n+    @DeleteMapping(\"/reservations/{id}\")\n+    public void deleteReservation(@RequestBody ReservationDto reservationDto) {\n+        service.deleteReservation(reservationDto);\n+    }\n+\n+    @PutMapping(\"/reservations/{id}\")\n+    public void editReservation(@PathVariable Long id, @RequestBody ReservationDto reservationDto) {\n+        service.editReservation(id, reservationDto);\n+    }\n+    @GetMapping(\"/reservations\")\n+    public List<Reservation> getAllRooms() {\n+        return service.findAllReservation();\n+    }\n+\n \n-}\n+}\n\\ No newline at end of file"
+  },
+  {
+    "sha": "4ea09b23e2d7d4eaa40d5aff673ef284174bda08",
+    "filename": "src/main/java/com/javagirls/MangoRoom/dto/ReservationDto.java",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/RoomMango/MangoRoom/blob/5a590a3203c3d7d045e264698d49d2e1f9583438/src/main/java/com/javagirls/MangoRoom/dto/ReservationDto.java",
+    "raw_url": "https://github.com/RoomMango/MangoRoom/raw/5a590a3203c3d7d045e264698d49d2e1f9583438/src/main/java/com/javagirls/MangoRoom/dto/ReservationDto.java",
+    "contents_url": "https://api.github.com/repos/RoomMango/MangoRoom/contents/src/main/java/com/javagirls/MangoRoom/dto/ReservationDto.java?ref=5a590a3203c3d7d045e264698d49d2e1f9583438",
+    "patch": "@@ -1,8 +1,10 @@\n package com.javagirls.MangoRoom.dto;\n \n+import com.fasterxml.jackson.annotation.JsonFormat;\n import com.javagirls.MangoRoom.enumeration.PaymentCurrency;\n import com.javagirls.MangoRoom.enumeration.Status;\n import lombok.Data;\n+import org.springframework.http.ResponseEntity;\n \n import javax.validation.constraints.NotBlank;\n import java.time.LocalDateTime;\n@@ -11,9 +13,14 @@\n public class ReservationDto {\n \n     @NotBlank\n+    private Long id;\n+\n+    @NotBlank\n+    @JsonFormat(pattern=\"yyyy-MM-dd HH:mm:ss\")\n     private LocalDateTime checkIn;\n \n     @NotBlank\n+    @JsonFormat(pattern=\"yyyy-MM-dd HH:mm:ss\")\n     private LocalDateTime checkOut;\n \n     @NotBlank"
+  },
+  {
+    "sha": "3ebc48cc58aab5f9740a82eec34e1b06e0dcb35b",
+    "filename": "src/main/java/com/javagirls/MangoRoom/service/ReservationService.java",
+    "status": "modified",
+    "additions": 34,
+    "deletions": 3,
+    "changes": 37,
+    "blob_url": "https://github.com/RoomMango/MangoRoom/blob/5a590a3203c3d7d045e264698d49d2e1f9583438/src/main/java/com/javagirls/MangoRoom/service/ReservationService.java",
+    "raw_url": "https://github.com/RoomMango/MangoRoom/raw/5a590a3203c3d7d045e264698d49d2e1f9583438/src/main/java/com/javagirls/MangoRoom/service/ReservationService.java",
+    "contents_url": "https://api.github.com/repos/RoomMango/MangoRoom/contents/src/main/java/com/javagirls/MangoRoom/service/ReservationService.java?ref=5a590a3203c3d7d045e264698d49d2e1f9583438",
+    "patch": "@@ -7,6 +7,7 @@\n import com.javagirls.MangoRoom.mapper.ReservationMapper;\n import com.javagirls.MangoRoom.repository.ReservationRepository;\n import com.javagirls.MangoRoom.repository.RoomRepository;\n+import org.springframework.stereotype.Repository;\n import org.springframework.stereotype.Service;\n import org.springframework.transaction.annotation.Transactional;\n \n@@ -21,10 +22,12 @@\n     private ReservationMapper mapper;\n     private RoomRepository roomRepository;\n \n-    public ReservationService(ReservationRepository reservationRepository) {\n+    public ReservationService(ReservationRepository reservationRepository, ReservationMapper mapper, RoomRepository roomRepository) {\n         this.reservationRepository = reservationRepository;\n+        this.mapper = mapper;\n+        this.roomRepository = roomRepository;\n     }\n-    \n+\n     @Transactional\n     public Reservation saveReservation(ReservationDto reservationDto) {\n         Reservation reservation = mapper.map(reservationDto, Reservation.class);\n@@ -49,4 +52,32 @@ public void changeReservationStatus(Long id, Status status) {\n         findById(id).setStatus(status);\n     }\n \n-}\n+    @Transactional\n+    public void deleteReservation(ReservationDto reservationDtoDelete) {\n+\n+        Reservation delete = mapper.map(reservationDtoDelete, Reservation.class);\n+        reservationRepository.deleteById(delete.getId());\n+\n+    }\n+\n+    public void editReservation(Long id, ReservationDto reservationDtoChange) {\n+\n+        Reservation editChange = mapper.map(reservationDtoChange, Reservation.class);\n+\n+        Reservation repositoryOne = reservationRepository.getOne(id);\n+        repositoryOne.setBusinessTrip(editChange.getBusinessTrip());\n+        repositoryOne.setCheckIn(editChange.getCheckIn());\n+        repositoryOne.setCheckOut(editChange.getCheckOut());\n+        repositoryOne.setNumberOfPeople(editChange.getNumberOfPeople());\n+        repositoryOne.setPaid(editChange.getPaid());\n+        repositoryOne.setPaymentCurrency(editChange.getPaymentCurrency());\n+        repositoryOne.setRoom(editChange.getRoom());\n+        reservationRepository.save(editChange);\n+\n+    }\n+\n+    public List<Reservation> findAllReservation() {\n+        return reservationRepository.findAll();\n+\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

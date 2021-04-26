@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "42ce6379e7271b75d6074714c4276dc9e1dc3e95",
+    "filename": "src/main/java/seedu/address/logic/commands/ListSessionCommand.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/AY2021S2-CS2103T-T11-1/tp/blob/5eb1fda21b366717f15ce8d8126e27f20730bcd8/src/main/java/seedu/address/logic/commands/ListSessionCommand.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103T-T11-1/tp/raw/5eb1fda21b366717f15ce8d8126e27f20730bcd8/src/main/java/seedu/address/logic/commands/ListSessionCommand.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103T-T11-1/tp/contents/src/main/java/seedu/address/logic/commands/ListSessionCommand.java?ref=5eb1fda21b366717f15ce8d8126e27f20730bcd8",
+    "patch": "@@ -0,0 +1,24 @@\n+package seedu.address.logic.commands;\n+\n+import static java.util.Objects.requireNonNull;\n+import static seedu.address.model.Model.PREDICATE_SHOW_ALL_STUDENTS;\n+\n+import seedu.address.model.Model;\n+\n+/**\n+ * Lists all sessions in the address book to the user.\n+ */\n+public class ListSessionCommand extends Command {\n+\n+    public static final String COMMAND_WORD = \"list_session\";\n+\n+    public static final String MESSAGE_SUCCESS = \"Listed all sessions\";\n+\n+\n+    @Override\n+    public CommandResult execute(Model model) {\n+        requireNonNull(model);\n+        model.updateFilteredStudentList(PREDICATE_SHOW_ALL_STUDENTS);\n+        return new CommandResult(MESSAGE_SUCCESS);\n+    }\n+}"
+  },
+  {
+    "sha": "52ce807754569d3194977c5ab8ca4583b50d716c",
+    "filename": "src/main/java/seedu/address/logic/parser/AddressBookParser.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/AY2021S2-CS2103T-T11-1/tp/blob/5eb1fda21b366717f15ce8d8126e27f20730bcd8/src/main/java/seedu/address/logic/parser/AddressBookParser.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103T-T11-1/tp/raw/5eb1fda21b366717f15ce8d8126e27f20730bcd8/src/main/java/seedu/address/logic/parser/AddressBookParser.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103T-T11-1/tp/contents/src/main/java/seedu/address/logic/parser/AddressBookParser.java?ref=5eb1fda21b366717f15ce8d8126e27f20730bcd8",
+    "patch": "@@ -17,6 +17,7 @@\n import seedu.address.logic.commands.ExitCommand;\n import seedu.address.logic.commands.FindStudentCommand;\n import seedu.address.logic.commands.HelpCommand;\n+import seedu.address.logic.commands.ListSessionCommand;\n import seedu.address.logic.commands.ListStudentCommand;\n import seedu.address.logic.parser.exceptions.ParseException;\n \n@@ -65,6 +66,9 @@ public Command parseCommand(String userInput) throws ParseException {\n         case ListStudentCommand.COMMAND_WORD:\n             return new ListStudentCommand();\n \n+        case ListSessionCommand.COMMAND_WORD:\n+            return new ListSessionCommand();\n+\n         case EmailCommand.COMMAND_WORD:\n             return new EmailCommand();\n "
+  },
+  {
+    "sha": "8b36f95bac81055e03de0290714e63a19d30775a",
+    "filename": "src/test/java/seedu/address/logic/commands/CommandTestUtil.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/AY2021S2-CS2103T-T11-1/tp/blob/5eb1fda21b366717f15ce8d8126e27f20730bcd8/src/test/java/seedu/address/logic/commands/CommandTestUtil.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103T-T11-1/tp/raw/5eb1fda21b366717f15ce8d8126e27f20730bcd8/src/test/java/seedu/address/logic/commands/CommandTestUtil.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103T-T11-1/tp/contents/src/test/java/seedu/address/logic/commands/CommandTestUtil.java?ref=5eb1fda21b366717f15ce8d8126e27f20730bcd8",
+    "patch": "@@ -133,5 +133,19 @@ public static void showStudentAtIndex(Model model, Index targetIndex) {\n \n         assertEquals(1, model.getFilteredStudentList().size());\n     }\n+    /**\n+     * Updates {@code model}'s filtered list to show only the student at the given {@code targetIndex} in the\n+     * {@code model}'s address book.\n+     */\n+    public static void showSessionAtIndex(Model model, Index targetIndex) {\n+        //TODO: List_Session Test\n+        assertTrue(targetIndex.getZeroBased() < model.getFilteredStudentList().size());\n+\n+        Student student = model.getFilteredStudentList().get(targetIndex.getZeroBased());\n+        final String[] splitName = student.getName().fullName.split(\"\\\\s+\");\n+        model.updateFilteredStudentList(new NameContainsKeywordsPredicate(Arrays.asList(splitName[0])));\n+\n+        assertEquals(1, model.getFilteredStudentList().size());\n+    }\n \n }"
+  },
+  {
+    "sha": "378364c2ae0e7d290ef077d87bc569c67c0b9474",
+    "filename": "src/test/java/seedu/address/logic/commands/ListSessionCommandTest.java",
+    "status": "added",
+    "additions": 39,
+    "deletions": 0,
+    "changes": 39,
+    "blob_url": "https://github.com/AY2021S2-CS2103T-T11-1/tp/blob/5eb1fda21b366717f15ce8d8126e27f20730bcd8/src/test/java/seedu/address/logic/commands/ListSessionCommandTest.java",
+    "raw_url": "https://github.com/AY2021S2-CS2103T-T11-1/tp/raw/5eb1fda21b366717f15ce8d8126e27f20730bcd8/src/test/java/seedu/address/logic/commands/ListSessionCommandTest.java",
+    "contents_url": "https://api.github.com/repos/AY2021S2-CS2103T-T11-1/tp/contents/src/test/java/seedu/address/logic/commands/ListSessionCommandTest.java?ref=5eb1fda21b366717f15ce8d8126e27f20730bcd8",
+    "patch": "@@ -0,0 +1,39 @@\n+package seedu.address.logic.commands;\n+\n+import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;\n+import static seedu.address.logic.commands.CommandTestUtil.showStudentAtIndex;\n+import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_STUDENT;\n+import static seedu.address.testutil.TypicalStudents.getTypicalAddressBook;\n+\n+import org.junit.jupiter.api.BeforeEach;\n+import org.junit.jupiter.api.Test;\n+\n+import seedu.address.model.Model;\n+import seedu.address.model.ModelManager;\n+import seedu.address.model.UserPrefs;\n+\n+/**\n+ * Contains integration tests (interaction with the Model) and unit tests for ListStudentCommand.\n+ */\n+public class ListSessionCommandTest {\n+\n+    private Model model;\n+    private Model expectedModel;\n+\n+    @BeforeEach\n+    public void setUp() {\n+        model = new ModelManager(getTypicalAddressBook(), new UserPrefs());\n+        expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());\n+    }\n+\n+    @Test\n+    public void execute_listIsNotFiltered_showsSameList() {\n+        assertCommandSuccess(new ListSessionCommand(), model, ListSessionCommand.MESSAGE_SUCCESS, expectedModel);\n+    }\n+\n+    @Test\n+    public void execute_listIsFiltered_showsEverything() {\n+        showStudentAtIndex(model, INDEX_FIRST_STUDENT);\n+        assertCommandSuccess(new ListSessionCommand(), model, ListSessionCommand.MESSAGE_SUCCESS, expectedModel);\n+    }\n+}"
+  }
+]

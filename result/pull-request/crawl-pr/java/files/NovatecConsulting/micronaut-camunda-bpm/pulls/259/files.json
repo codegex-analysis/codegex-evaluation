@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "62329b6dfb4256c1da3a58a1f1abea886863e331",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 0,
+    "changes": 21,
+    "blob_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/blob/d80eb55235295941ba93710c0464d1128b2e7645/README.md",
+    "raw_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/raw/d80eb55235295941ba93710c0464d1128b2e7645/README.md",
+    "contents_url": "https://api.github.com/repos/NovatecConsulting/micronaut-camunda-bpm/contents/README.md?ref=d80eb55235295941ba93710c0464d1128b2e7645",
+    "patch": "@@ -431,6 +431,27 @@ Every bean that implements the interface `org.camunda.bpm.engine.impl.cfg.Proces\n \n You can either annotate your class with `@javax.inject.Singleton` or implement a bean factory with `@io.micronaut.context.annotation.Factory` and add one or more methods annotated with a bean scope annotation.\n \n+This allows you e.g., use an LDAP for authentication very quickly:\n+\n+```java\n+@Factory\n+public class PluginConfiguration {\n+\n+  @Singleton\n+  public ProcessEnginePlugin ldap() {\n+    // Using an open online LDAP to provide an example\n+    // https://www.forumsys.com/tutorials/integration-how-to/ldap/online-ldap-test-server/\n+    // Log in e.g. with 'einstein' / 'password'\n+    LdapIdentityProviderPlugin ldap = new LdapIdentityProviderPlugin();\n+    ldap.setServerUrl(\"ldap://ldap.forumsys.com:389\");\n+    ldap.setManagerDn(\"cn=read-only-admin,dc=example,dc=com\");\n+    ldap.setManagerPassword(\"password\");\n+    ldap.setBaseDn(\"dc=example,dc=com\");\n+    return ldap;\n+  }\n+}\n+```\n+\n ## Custom Process Engine Configuration\n With the following bean it's possible to customize the process engine configuration:\n "
+  },
+  {
+    "sha": "55f4c4b289bc59ded81d3307b2c3155662e00129",
+    "filename": "micronaut-camunda-bpm-example/build.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/blob/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/build.gradle",
+    "raw_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/raw/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/build.gradle",
+    "contents_url": "https://api.github.com/repos/NovatecConsulting/micronaut-camunda-bpm/contents/micronaut-camunda-bpm-example/build.gradle?ref=d80eb55235295941ba93710c0464d1128b2e7645",
+    "patch": "@@ -15,6 +15,7 @@ micronaut {\n \n dependencies {\n     implementation(project(\":micronaut-camunda-bpm-feature\"))\n+    implementation(\"org.camunda.bpm.identity:camunda-identity-ldap:7.14.0\")\n     runtimeOnly(\"com.h2database:h2\")\n     runtimeOnly(\"ch.qos.logback:logback-classic\")\n "
+  },
+  {
+    "sha": "338a095614132c525c898d4ab9eca6f819124b96",
+    "filename": "micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/PluginConfiguration.java",
+    "status": "added",
+    "additions": 36,
+    "deletions": 0,
+    "changes": 36,
+    "blob_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/blob/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/PluginConfiguration.java",
+    "raw_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/raw/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/PluginConfiguration.java",
+    "contents_url": "https://api.github.com/repos/NovatecConsulting/micronaut-camunda-bpm/contents/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/PluginConfiguration.java?ref=d80eb55235295941ba93710c0464d1128b2e7645",
+    "patch": "@@ -0,0 +1,36 @@\n+package info.novatec.micronaut.camunda.bpm.example;\n+\n+import info.novatec.micronaut.camunda.bpm.example.customplugins.historyeventhandler.HistoryEventListenerPlugin;\n+import info.novatec.micronaut.camunda.bpm.example.customplugins.parselistener.ParseListenerPlugin;\n+import io.micronaut.context.annotation.Factory;\n+import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;\n+import org.camunda.bpm.identity.impl.ldap.plugin.LdapIdentityProviderPlugin;\n+\n+import javax.inject.Singleton;\n+\n+@Factory\n+public class PluginConfiguration {\n+\n+    @Singleton\n+    public ProcessEnginePlugin customParseListener() {\n+        return new ParseListenerPlugin();\n+    }\n+\n+    @Singleton\n+    public ProcessEnginePlugin customHistoryEventListener() {\n+        return new HistoryEventListenerPlugin();\n+    }\n+\n+    @Singleton\n+    public ProcessEnginePlugin ldap() {\n+        // Using an open online LDAP to provide an example\n+        // https://www.forumsys.com/tutorials/integration-how-to/ldap/online-ldap-test-server/\n+        // Log in e.g. with 'einstein' / 'password'\n+        LdapIdentityProviderPlugin ldap = new LdapIdentityProviderPlugin();\n+        ldap.setServerUrl(\"ldap://ldap.forumsys.com:389\");\n+        ldap.setManagerDn(\"cn=read-only-admin,dc=example,dc=com\");\n+        ldap.setManagerPassword(\"password\");\n+        ldap.setBaseDn(\"dc=example,dc=com\");\n+        return ldap;\n+    }\n+}"
+  },
+  {
+    "sha": "9a9a5c3409f5a416c57c3db0e8bf392a8c941da1",
+    "filename": "micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/historyeventhandler/CustomHistoryListener.java",
+    "status": "added",
+    "additions": 23,
+    "deletions": 0,
+    "changes": 23,
+    "blob_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/blob/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/historyeventhandler/CustomHistoryListener.java",
+    "raw_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/raw/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/historyeventhandler/CustomHistoryListener.java",
+    "contents_url": "https://api.github.com/repos/NovatecConsulting/micronaut-camunda-bpm/contents/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/historyeventhandler/CustomHistoryListener.java?ref=d80eb55235295941ba93710c0464d1128b2e7645",
+    "patch": "@@ -0,0 +1,23 @@\n+package info.novatec.micronaut.camunda.bpm.example.customplugins.historyeventhandler;\n+\n+import org.camunda.bpm.engine.impl.history.event.HistoryEvent;\n+import org.camunda.bpm.engine.impl.history.handler.HistoryEventHandler;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+\n+import java.util.List;\n+\n+public class CustomHistoryListener implements HistoryEventHandler {\n+\n+    private static final Logger log = LoggerFactory.getLogger(CustomHistoryListener.class);\n+\n+    @Override\n+    public void handleEvent(HistoryEvent historyEvent) {\n+        log.info(\"{} handling event {}\", this.getClass().getSimpleName(), historyEvent);\n+    }\n+\n+    @Override\n+    public void handleEvents(List<HistoryEvent> historyEvents) {\n+        historyEvents.forEach(this::handleEvent);\n+    }\n+}"
+  },
+  {
+    "sha": "cbc0fbd43961aff8e1417726170e84659c0f5ab4",
+    "filename": "micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/historyeventhandler/HistoryEventListenerPlugin.java",
+    "status": "added",
+    "additions": 18,
+    "deletions": 0,
+    "changes": 18,
+    "blob_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/blob/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/historyeventhandler/HistoryEventListenerPlugin.java",
+    "raw_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/raw/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/historyeventhandler/HistoryEventListenerPlugin.java",
+    "contents_url": "https://api.github.com/repos/NovatecConsulting/micronaut-camunda-bpm/contents/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/historyeventhandler/HistoryEventListenerPlugin.java?ref=d80eb55235295941ba93710c0464d1128b2e7645",
+    "patch": "@@ -0,0 +1,18 @@\n+package info.novatec.micronaut.camunda.bpm.example.customplugins.historyeventhandler;\n+\n+import org.camunda.bpm.engine.impl.cfg.AbstractProcessEnginePlugin;\n+import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;\n+import org.camunda.bpm.engine.impl.history.handler.CompositeDbHistoryEventHandler;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+\n+public class HistoryEventListenerPlugin extends AbstractProcessEnginePlugin {\n+\n+    private static final Logger log = LoggerFactory.getLogger(HistoryEventListenerPlugin.class);\n+\n+    @Override\n+    public void preInit(ProcessEngineConfigurationImpl processEngineConfiguration) {\n+        log.info(\"Registering CustomHistoryListener\");\n+        processEngineConfiguration.setHistoryEventHandler(new CompositeDbHistoryEventHandler(new CustomHistoryListener()));\n+    }\n+}"
+  },
+  {
+    "sha": "79c08bb732a1daf0efefc3bc5a0ac1b856511746",
+    "filename": "micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/parselistener/CustomParseListener.java",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/blob/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/parselistener/CustomParseListener.java",
+    "raw_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/raw/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/parselistener/CustomParseListener.java",
+    "contents_url": "https://api.github.com/repos/NovatecConsulting/micronaut-camunda-bpm/contents/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/parselistener/CustomParseListener.java?ref=d80eb55235295941ba93710c0464d1128b2e7645",
+    "patch": "@@ -0,0 +1,19 @@\n+package info.novatec.micronaut.camunda.bpm.example.customplugins.parselistener;\n+\n+import org.camunda.bpm.engine.impl.bpmn.parser.AbstractBpmnParseListener;\n+import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;\n+import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl;\n+import org.camunda.bpm.engine.impl.util.xml.Element;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+\n+public class CustomParseListener extends AbstractBpmnParseListener {\n+\n+    private static final Logger log = LoggerFactory.getLogger(CustomParseListener.class);\n+\n+    @Override\n+    public void parseStartEvent(Element startEventElement, ScopeImpl scope, ActivityImpl startEventActivity) {\n+        super.parseStartEvent(startEventElement, scope, startEventActivity);\n+        log.info(\"{} parsing startEventElement {}\", this.getClass().getSimpleName(), startEventElement);\n+    }\n+}"
+  },
+  {
+    "sha": "0e9a0a67c8bb1e843fd39a3832a01ac83f91a6fc",
+    "filename": "micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/parselistener/ParseListenerPlugin.java",
+    "status": "added",
+    "additions": 26,
+    "deletions": 0,
+    "changes": 26,
+    "blob_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/blob/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/parselistener/ParseListenerPlugin.java",
+    "raw_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/raw/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/parselistener/ParseListenerPlugin.java",
+    "contents_url": "https://api.github.com/repos/NovatecConsulting/micronaut-camunda-bpm/contents/micronaut-camunda-bpm-example/src/main/java/info/novatec/micronaut/camunda/bpm/example/customplugins/parselistener/ParseListenerPlugin.java?ref=d80eb55235295941ba93710c0464d1128b2e7645",
+    "patch": "@@ -0,0 +1,26 @@\n+package info.novatec.micronaut.camunda.bpm.example.customplugins.parselistener;\n+\n+import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener;\n+import org.camunda.bpm.engine.impl.cfg.AbstractProcessEnginePlugin;\n+import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;\n+import org.slf4j.Logger;\n+import org.slf4j.LoggerFactory;\n+\n+import java.util.ArrayList;\n+import java.util.List;\n+\n+public class ParseListenerPlugin extends AbstractProcessEnginePlugin {\n+\n+    private static final Logger log = LoggerFactory.getLogger(ParseListenerPlugin.class);\n+\n+    @Override\n+    public void preInit(ProcessEngineConfigurationImpl processEngineConfiguration) {\n+        log.info(\"Registering CustomParseListener\");\n+        List<BpmnParseListener> preParseListeners = processEngineConfiguration.getCustomPreBPMNParseListeners();\n+        if (preParseListeners == null) {\n+            preParseListeners = new ArrayList<BpmnParseListener>();\n+            processEngineConfiguration.setCustomPreBPMNParseListeners(preParseListeners);\n+        }\n+        preParseListeners.add(new CustomParseListener());\n+    }\n+}"
+  },
+  {
+    "sha": "fae4c7a678f7c3c397941b4621aac5df815a49a1",
+    "filename": "micronaut-camunda-bpm-example/src/main/resources/application.yml",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 3,
+    "changes": 13,
+    "blob_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/blob/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/resources/application.yml",
+    "raw_url": "https://github.com/NovatecConsulting/micronaut-camunda-bpm/raw/d80eb55235295941ba93710c0464d1128b2e7645/micronaut-camunda-bpm-example/src/main/resources/application.yml",
+    "contents_url": "https://api.github.com/repos/NovatecConsulting/micronaut-camunda-bpm/contents/micronaut-camunda-bpm-example/src/main/resources/application.yml?ref=d80eb55235295941ba93710c0464d1128b2e7645",
+    "patch": "@@ -2,9 +2,9 @@ micronaut:\n   application:\n     name: micronaut-camunda-example\n camunda:\n-  admin-user:\n-    id: admin\n-    password: admin\n+#  admin-user:\n+#    id: admin\n+#    password: admin\n   generic-properties:\n     properties:\n       initialize-telemetry: true\n@@ -14,3 +14,10 @@ camunda:\n     enabled: true\n   filter:\n     create: \"All tasks\"\n+\n+ldap:\n+  identity:\n+    server-url: ldap://ldap.forumsys.com:389\n+    manager-dn: cn=read-only-admin,dc=example,dc=com\n+    manager-password: password\n+    base-dn: dc=example,dc=com\n\\ No newline at end of file"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "ea4aa9cd66730ea5da10408fa4bca478010dc7c2",
+    "filename": "README.md",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 1,
+    "changes": 8,
+    "blob_url": "https://github.com/eska-ru/Algorithms/blob/05c5fdf79a879cbf26c6fac27c9c22b89c402978/README.md",
+    "raw_url": "https://github.com/eska-ru/Algorithms/raw/05c5fdf79a879cbf26c6fac27c9c22b89c402978/README.md",
+    "contents_url": "https://api.github.com/repos/eska-ru/Algorithms/contents/README.md?ref=05c5fdf79a879cbf26c6fac27c9c22b89c402978",
+    "patch": "@@ -4,4 +4,10 @@\n 2. В коде доделать проверки в местах с комментариями\n 3. Заполнить массив случайными числами.\n 4. Написать методы, реализующие рассмотренные виды сортировок, и проверить скорость выполнения каждой.(Можете в \n-   комментариях написать измеренное время)\n\\ No newline at end of file\n+   комментариях написать измеренное время)\n+   \n+### Занятие 3\n+\n+1. Создать программу, которая переворачивает вводимые строки (читает справа налево).\n+2. Создать класс для реализации дека.\n+3. Сделать возможность расширения внутреннего массива у стека и очереди.\n\\ No newline at end of file"
+  },
+  {
+    "sha": "446aca62b8a7a7461d7c4917c8df9412f61814f1",
+    "filename": "src/ru/writeway/lesson3/Main.java",
+    "status": "added",
+    "additions": 31,
+    "deletions": 0,
+    "changes": 31,
+    "blob_url": "https://github.com/eska-ru/Algorithms/blob/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/Main.java",
+    "raw_url": "https://github.com/eska-ru/Algorithms/raw/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/Main.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/Algorithms/contents/src/ru/writeway/lesson3/Main.java?ref=05c5fdf79a879cbf26c6fac27c9c22b89c402978",
+    "patch": "@@ -0,0 +1,31 @@\n+package ru.writeway.lesson3;\n+\n+public class Main {\n+    public static void main(String[] args) {\n+        System.out.println(StringInverter.invert(\"привет этот угрюмый мир\"));\n+        System.out.println(StringInverter.invert(\"а роза упала на лапу азора\"));\n+\n+        MyQueue<Integer> queue = new MyQueue<>(3);\n+        queue.insert(2);\n+        queue.insert(3);\n+        System.out.println(queue);\n+        queue.insert(4);\n+        System.out.println(queue);\n+        queue.insert(5);\n+        System.out.println(queue);\n+\n+        MyDeque<Integer> deque = new MyDeque<>(3);\n+        deque.offerLast(5);\n+        deque.offerFirst(2);\n+        deque.offerFirst(3);\n+        deque.offerLast(4);\n+        System.out.println(deque);\n+        System.out.println(deque.peekFirst());\n+        System.out.println(deque.peekLast());\n+        System.out.println(deque.pollFirst() + \" \" + deque);\n+        System.out.println(deque.pollLast() + \" \" + deque);\n+        deque.pollLast();\n+        deque.pollLast();\n+        System.out.println(deque);\n+    }\n+}"
+  },
+  {
+    "sha": "417a8df24905b5781cf6783706413ddd61d29ab5",
+    "filename": "src/ru/writeway/lesson3/MyDeque.java",
+    "status": "added",
+    "additions": 121,
+    "deletions": 0,
+    "changes": 121,
+    "blob_url": "https://github.com/eska-ru/Algorithms/blob/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/MyDeque.java",
+    "raw_url": "https://github.com/eska-ru/Algorithms/raw/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/MyDeque.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/Algorithms/contents/src/ru/writeway/lesson3/MyDeque.java?ref=05c5fdf79a879cbf26c6fac27c9c22b89c402978",
+    "patch": "@@ -0,0 +1,121 @@\n+package ru.writeway.lesson3;\n+\n+import java.util.NoSuchElementException;\n+\n+public class MyDeque<T> {\n+    private T[] list;\n+    private int size;\n+    private int capacity;\n+    private static final int DEFAULT_CAPACITY = 10;\n+    private int begin;\n+    private int end;\n+\n+    public MyDeque(int capacity) throws IllegalArgumentException {\n+        if (capacity <= 0) {\n+            throw new IllegalArgumentException(\"capacity: \" + capacity);\n+        }\n+        this.capacity = capacity;\n+        list = (T[]) new Object[capacity];\n+    }\n+\n+    public MyDeque() {\n+        this(DEFAULT_CAPACITY);\n+    }\n+\n+    public void offerLast(T item) {\n+        if (isFull()) {\n+            reCapacity(capacity * 2);\n+        }\n+        size++;\n+        list[end] = item;\n+        end = nextIndex(end);\n+    }\n+\n+    public void offerFirst(T item) {\n+        if (isFull()) {\n+            reCapacity(capacity * 2);\n+        }\n+        size++;\n+        begin = previousIndex(begin);\n+        list[begin] = item;\n+    }\n+\n+    public T peekFirst() {\n+        if (isEmpty()) {\n+            throw new NoSuchElementException();\n+        }\n+        return list[begin];\n+    }\n+\n+    public T peekLast() {\n+        if (isEmpty()) {\n+            throw new NoSuchElementException();\n+        }\n+        return list[end-1];\n+    }\n+\n+    public T pollFirst() {\n+        T temp = peekFirst();\n+        size--;\n+        list[begin] = null;\n+        begin = nextIndex(begin);\n+        return temp;\n+    }\n+\n+    public T pollLast() {\n+        T temp = peekLast();\n+        size--;\n+        list[end] = null;\n+        end = previousIndex(end);\n+        return temp;\n+    }\n+\n+    public boolean isFull() {\n+        return size == list.length;\n+    }\n+\n+    public boolean isEmpty() {\n+        return size == 0;\n+    }\n+\n+    public int size() {\n+        return size;\n+    }\n+\n+    private int nextIndex(int index) {\n+        return (index + 1) % list.length;\n+    }\n+\n+    private int previousIndex(int index) {\n+        return (list.length + index - 1) % list.length;\n+    }\n+\n+    private void reCapacity(int newCapacity){\n+        if (newCapacity <= capacity) {\n+            throw new IllegalArgumentException(\"newCapacity: \" + capacity);\n+        }\n+\n+        T[] tempArr = (T[]) new Object[newCapacity];\n+        for (int i = 0; i < size; i++) {\n+            tempArr[i] = list[(i + begin) % list.length];\n+        }\n+\n+        list = tempArr;\n+        capacity = newCapacity;\n+        begin = 0;\n+        end = size;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        StringBuilder sb = new StringBuilder(\"[ \");\n+        for (int i = begin; i < (begin+size); ++i) {\n+            sb.append(list[i % list.length]).append(\", \");\n+        }\n+        if (size > 0) {\n+            sb.setLength(sb.length() - 2);\n+        }\n+        sb.append(\" ]\");\n+        return sb.toString();\n+    }\n+}"
+  },
+  {
+    "sha": "a48b915e9d9982f31afed42f726368dd28720525",
+    "filename": "src/ru/writeway/lesson3/MyQueue.java",
+    "status": "added",
+    "additions": 94,
+    "deletions": 0,
+    "changes": 94,
+    "blob_url": "https://github.com/eska-ru/Algorithms/blob/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/MyQueue.java",
+    "raw_url": "https://github.com/eska-ru/Algorithms/raw/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/MyQueue.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/Algorithms/contents/src/ru/writeway/lesson3/MyQueue.java?ref=05c5fdf79a879cbf26c6fac27c9c22b89c402978",
+    "patch": "@@ -0,0 +1,94 @@\n+package ru.writeway.lesson3;\n+\n+import java.util.NoSuchElementException;\n+\n+public class MyQueue<T> {\n+    private T[] list;\n+    private int size;\n+    private int capacity;\n+    private static final int DEFAULT_CAPACITY = 10;\n+    private int begin;\n+    private int end;\n+\n+    public MyQueue(int capacity) throws IllegalArgumentException {\n+        if (capacity <= 0) {\n+            throw new IllegalArgumentException(\"capacity: \" + capacity);\n+        }\n+        this.capacity = capacity;\n+        list = (T[]) new Object[capacity];\n+    }\n+\n+    public MyQueue() {\n+        this(DEFAULT_CAPACITY);\n+    }\n+\n+    public void insert(T item) throws IllegalStateException {\n+        if (isFull()) {\n+            reCapacity(capacity * 2);\n+        }\n+        size++;\n+        list[end] = item;\n+        end = nextIndex(end);\n+    }\n+\n+    public T peekFront() {\n+        if (isEmpty()) {\n+            throw new NoSuchElementException();\n+        }\n+        return list[begin];\n+    }\n+\n+    public T remove() {\n+        T temp = peekFront();\n+        size--;\n+        list[begin] = null;\n+        begin = nextIndex(begin);\n+        return temp;\n+    }\n+\n+\n+    public boolean isFull() {\n+        return size == list.length;\n+    }\n+\n+    public boolean isEmpty() {\n+        return size == 0;\n+    }\n+\n+    public int size() {\n+        return size;\n+    }\n+\n+    private int nextIndex(int index) {\n+        return (index + 1) % list.length;\n+    }\n+\n+    private void reCapacity(int newCapacity){\n+        if (newCapacity <= capacity) {\n+            throw new IllegalArgumentException(\"newCapacity: \" + capacity);\n+        }\n+\n+        T[] tempArr = (T[]) new Object[newCapacity];\n+        for (int i = 0; i < size; i++) {\n+            tempArr[i] = list[(i + begin) % list.length];\n+        }\n+\n+        list = tempArr;\n+        capacity = newCapacity;\n+        begin = 0;\n+        end = size;\n+    }\n+\n+    @Override\n+    public String toString() {\n+        StringBuilder sb = new StringBuilder(\"[ \");\n+        for (int i = begin; i < (begin+size); ++i) {\n+            sb.append(list[i % list.length]).append(\", \");\n+        }\n+        if (size > 0) {\n+            sb.setLength(sb.length() - 2);\n+        }\n+        sb.append(\" ]\");\n+        return sb.toString();\n+    }\n+}"
+  },
+  {
+    "sha": "eaae9b52ed158410aeee502f1d138f3d28d0abe3",
+    "filename": "src/ru/writeway/lesson3/MyStack.java",
+    "status": "added",
+    "additions": 68,
+    "deletions": 0,
+    "changes": 68,
+    "blob_url": "https://github.com/eska-ru/Algorithms/blob/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/MyStack.java",
+    "raw_url": "https://github.com/eska-ru/Algorithms/raw/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/MyStack.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/Algorithms/contents/src/ru/writeway/lesson3/MyStack.java?ref=05c5fdf79a879cbf26c6fac27c9c22b89c402978",
+    "patch": "@@ -0,0 +1,68 @@\n+package ru.writeway.lesson3;\n+\n+import java.util.EmptyStackException;\n+\n+public class MyStack<T> {\n+    private T[] list;\n+    private int size;\n+    private int capacity;\n+    private static final int DEFAULT_CAPACITY = 10;\n+\n+    public MyStack(int capacity) {\n+        if (capacity <= 0) {\n+            throw new IllegalArgumentException(\"capacity: \" + capacity);\n+        }\n+        this.capacity = capacity;\n+        list = (T[]) new Object[capacity];\n+    }\n+\n+    public MyStack() {\n+        this(DEFAULT_CAPACITY);\n+    }\n+\n+    public void push(T item) {\n+        if (isFull()) {\n+            reCapacity(capacity * 2);\n+        }\n+        list[size]= item;\n+        size++;\n+    }\n+\n+    public T pop(){\n+        T temp = peek();\n+        size--;\n+        list[size]= null;\n+        return temp;\n+    }\n+\n+    public T peek(){\n+        if (isEmpty()){\n+            throw new EmptyStackException();\n+        }\n+        return list[size-1];\n+    }\n+\n+\n+    public boolean isFull() {\n+        return size == list.length;\n+    }\n+\n+    public boolean isEmpty() {\n+        return size == 0;\n+    }\n+\n+    public int size() {\n+        return size;\n+    }\n+\n+    private void reCapacity(int newCapacity){\n+        if (newCapacity <= capacity) {\n+            throw new IllegalArgumentException(\"newCapacity: \" + capacity);\n+        }\n+\n+        T[] tempArr = (T[]) new Object[newCapacity];\n+        System.arraycopy(list, 0, tempArr, 0, size);\n+        list = tempArr;\n+        capacity = newCapacity;\n+    }\n+}"
+  },
+  {
+    "sha": "e56c85ff2204f8396fe8b709574ed187035d7214",
+    "filename": "src/ru/writeway/lesson3/StringInverter.java",
+    "status": "added",
+    "additions": 22,
+    "deletions": 0,
+    "changes": 22,
+    "blob_url": "https://github.com/eska-ru/Algorithms/blob/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/StringInverter.java",
+    "raw_url": "https://github.com/eska-ru/Algorithms/raw/05c5fdf79a879cbf26c6fac27c9c22b89c402978/src/ru/writeway/lesson3/StringInverter.java",
+    "contents_url": "https://api.github.com/repos/eska-ru/Algorithms/contents/src/ru/writeway/lesson3/StringInverter.java?ref=05c5fdf79a879cbf26c6fac27c9c22b89c402978",
+    "patch": "@@ -0,0 +1,22 @@\n+package ru.writeway.lesson3;\n+\n+import org.jetbrains.annotations.NotNull;\n+\n+public class StringInverter {\n+    private StringInverter(){}\n+\n+    public static String invert(@NotNull String str) {\n+        MyStack<Character> stack = new MyStack<>(str.length());\n+        for (Character ch : str.toCharArray()) {\n+            stack.push(ch);\n+        }\n+\n+        StringBuilder sb = new StringBuilder();\n+        while (!stack.isEmpty()) {\n+            sb.append(stack.pop());\n+        }\n+\n+        return sb.toString();\n+    }\n+\n+}"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "8529185740661a3d7d0fc4c6b2bcac45c62f9965",
+    "filename": ".github/workflows/feature_branch_ci.yml",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/s-ayush2903/mobile-wallet/blob/c52dd42dd8f5fce81797173f4f84a8c58112995c/.github/workflows/feature_branch_ci.yml",
+    "raw_url": "https://github.com/s-ayush2903/mobile-wallet/raw/c52dd42dd8f5fce81797173f4f84a8c58112995c/.github/workflows/feature_branch_ci.yml",
+    "contents_url": "https://api.github.com/repos/s-ayush2903/mobile-wallet/contents/.github/workflows/feature_branch_ci.yml?ref=c52dd42dd8f5fce81797173f4f84a8c58112995c",
+    "patch": "@@ -0,0 +1,32 @@\n+name: Mobile-Wallet CI[Feature]\n+\n+on:\n+  push:\n+    branches:\n+      - '*'\n+      - '!dev'\n+      - '!master'\n+jobs:\n+  build:\n+    name: Build\n+    runs-on: ubuntu-latest\n+    steps:\n+      - uses: actions/checkout@v2\n+\n+        # Set up JDK\n+      - name: Set Up JDK 1.8\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: 1.8\n+\n+        # Install NDK\n+      - name: Install NDK\n+        run: echo \"y\" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install \"ndk;20.0.5594570\" --sdk_root=${ANDROID_SDK_ROOT}\n+\n+        # Update Gradle Permission\n+      - name: Change gradlew Permission\n+        run: chmod +x gradlew\n+\n+        # Build App\n+      - name: Build with Gradle\n+        run: ./gradlew assembleDebug --stacktrace"
+  },
+  {
+    "sha": "33c2c73cdc4d2b22b59e49b227fbb0df615c362b",
+    "filename": ".github/workflows/master_dev_ci.yml",
+    "status": "added",
+    "additions": 94,
+    "deletions": 0,
+    "changes": 94,
+    "blob_url": "https://github.com/s-ayush2903/mobile-wallet/blob/c52dd42dd8f5fce81797173f4f84a8c58112995c/.github/workflows/master_dev_ci.yml",
+    "raw_url": "https://github.com/s-ayush2903/mobile-wallet/raw/c52dd42dd8f5fce81797173f4f84a8c58112995c/.github/workflows/master_dev_ci.yml",
+    "contents_url": "https://api.github.com/repos/s-ayush2903/mobile-wallet/contents/.github/workflows/master_dev_ci.yml?ref=c52dd42dd8f5fce81797173f4f84a8c58112995c",
+    "patch": "@@ -0,0 +1,94 @@\n+name: Mobile-Wallet CI[Master/Dev]\n+\n+on:\n+  pull_request:\n+  push:\n+    branches:\n+      - 'dev'\n+      - 'master'\n+      - 'payment_hub'\n+\n+jobs:\n+  build:\n+    name: Build APK\n+    runs-on: ubuntu-latest\n+    steps:\n+      - uses: actions/checkout@v2\n+\n+        # Set up JDK\n+      - name: Set Up JDK 1.8\n+        uses: actions/setup-java@v1\n+        with:\n+          java-version: 1.8\n+\n+        # Install NDK | Ok\n+      - name: Install NDK\n+        run: echo \"y\" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install \"ndk;20.0.5594570\" --sdk_root=${ANDROID_SDK_ROOT}\n+\n+        # Update Gradle Permission\n+      - name: Change gradlew Permission\n+        run: chmod +x gradlew\n+\n+        # Build App\n+      - name: Build with Gradle\n+        run: ./gradlew assemble\n+\n+        # Upload Built APK\n+      - name: Upload Build Artifacts\n+        uses: actions/upload-artifact@v2.2.0\n+        with:\n+          name: mobile-wallet\n+          path: mifospay/build/outputs/apk/debug/\n+\n+  lintCheck:\n+    name: StaticAnalysis\n+    runs-on: ubuntu-latest\n+    steps:\n+      - uses: actions/checkout@v2\n+      - name: Static Analysis[Core]\n+        run: ./gradlew lint\n+\n+      - name: Upload Static Analysis Report For Core Module\n+        uses: actions/upload-artifact@v2.2.0\n+        if: ${{ failure() || success() }}\n+        with:\n+          name: Static Analysis Report[Core]\n+          path: core/build/reports/\n+\n+#       - uses: actions/checkout@v2\n+#       - name: Static Analysis[Mifospay]\n+#         run: | \n+#          ./gradlew clean\n+#          ./gradlew mifospay:lint\n+#       - name: Upload Static Analysis Report For MifosPay Module\n+#         uses: actions/upload-artifact@v2.2.0\n+#         if: ${{ failure() || success() }}\n+#         with:\n+#           name: Static Analysis Report[Mifospay]\n+#           path: mifospay/build/reports/\n+\n+  gradleCheck:\n+    name: PMD\n+    runs-on: ubuntu-latest\n+    steps:\n+      - uses: actions/checkout@v2\n+      - name: PMD Check[Core]\n+        run: ./gradlew core:pmd\n+\n+      - name: Upload PMD Report[Core]\n+        uses: actions/upload-artifact@v2.2.0\n+        if: ${{ failure() || success() }}\n+        with:\n+          name: PMD Report[Core]\n+          path: core/build/reports/\n+\n+      - uses: actions/checkout@v2\n+      - name: PMD Check[MifosPay]\n+        run: ./gradlew mifospay:pmd\n+\n+      - name: Upload PMD Report[MifosPay]\n+        uses: actions/upload-artifact@v2.2.0\n+        if: ${{ failure() || success() }}\n+        with:\n+          name: PMD Report[MifosPay]\n+          path: mifospay/build/reports/"
+  },
+  {
+    "sha": "48d51f11ef0303ff5b5fd5bb18b0218c291378cf",
+    "filename": ".travis.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 17,
+    "changes": 17,
+    "blob_url": "https://github.com/s-ayush2903/mobile-wallet/blob/8d0635d51aa4026fc0a71a51cee25149dd1acf80/.travis.yml",
+    "raw_url": "https://github.com/s-ayush2903/mobile-wallet/raw/8d0635d51aa4026fc0a71a51cee25149dd1acf80/.travis.yml",
+    "contents_url": "https://api.github.com/repos/s-ayush2903/mobile-wallet/contents/.travis.yml?ref=8d0635d51aa4026fc0a71a51cee25149dd1acf80",
+    "patch": "@@ -1,17 +0,0 @@\n-language: android\n-jdk: oraclejdk8\n-sudo: required\n-android:\n-  components:\n-    - tools\n-    - extra-android-support\n-    - extra-google-google_play_services\n-    - extra-android-m2repository\n-    - extra-google-m2repository\n-    - build-tools-26.0.2\n-    - android-26\n-\n-before_install:\n-- yes | sdkmanager \"platforms;android-27\"\n-\n-script: \"./gradlew build --stacktrace\"\n\\ No newline at end of file"
+  },
+  {
+    "sha": "476a2f56cf0db3b7eba22d1f23fe287816945ca0",
+    "filename": "codeship-services.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 7,
+    "changes": 7,
+    "blob_url": "https://github.com/s-ayush2903/mobile-wallet/blob/8d0635d51aa4026fc0a71a51cee25149dd1acf80/codeship-services.yml",
+    "raw_url": "https://github.com/s-ayush2903/mobile-wallet/raw/8d0635d51aa4026fc0a71a51cee25149dd1acf80/codeship-services.yml",
+    "contents_url": "https://api.github.com/repos/s-ayush2903/mobile-wallet/contents/codeship-services.yml?ref=8d0635d51aa4026fc0a71a51cee25149dd1acf80",
+    "patch": "@@ -1,7 +0,0 @@\n-app:\n-  build:\n-    context: .\n-    dockerfile: Dockerfile\n-    volumes:\n-      - .\n-  cached: true\n\\ No newline at end of file"
+  },
+  {
+    "sha": "263c8f5d39fb32db3a8b813b739589f9425aa4f2",
+    "filename": "codeship-steps.yml",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 3,
+    "changes": 3,
+    "blob_url": "https://github.com/s-ayush2903/mobile-wallet/blob/8d0635d51aa4026fc0a71a51cee25149dd1acf80/codeship-steps.yml",
+    "raw_url": "https://github.com/s-ayush2903/mobile-wallet/raw/8d0635d51aa4026fc0a71a51cee25149dd1acf80/codeship-steps.yml",
+    "contents_url": "https://api.github.com/repos/s-ayush2903/mobile-wallet/contents/codeship-steps.yml?ref=8d0635d51aa4026fc0a71a51cee25149dd1acf80",
+    "patch": "@@ -1,3 +0,0 @@\n-- name: build\n-  service: app\n-  command: gradle build --stacktrace\n\\ No newline at end of file"
+  },
+  {
+    "sha": "35d446db64f18055269d5080f42479094fa205c2",
+    "filename": "core/src/main/java/org/mifos/mobilewallet/core/data/fineract/api/services/AuthenticationService.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/s-ayush2903/mobile-wallet/blob/c52dd42dd8f5fce81797173f4f84a8c58112995c/core/src/main/java/org/mifos/mobilewallet/core/data/fineract/api/services/AuthenticationService.java",
+    "raw_url": "https://github.com/s-ayush2903/mobile-wallet/raw/c52dd42dd8f5fce81797173f4f84a8c58112995c/core/src/main/java/org/mifos/mobilewallet/core/data/fineract/api/services/AuthenticationService.java",
+    "contents_url": "https://api.github.com/repos/s-ayush2903/mobile-wallet/contents/core/src/main/java/org/mifos/mobilewallet/core/data/fineract/api/services/AuthenticationService.java?ref=c52dd42dd8f5fce81797173f4f84a8c58112995c",
+    "patch": "@@ -15,6 +15,6 @@\n \n     @POST(ApiEndPoints.AUTHENTICATION)\n     Observable<UserEntity> authenticate(@Query(\"username\") String username,\n-            @Query(\"password\") String password);\n+                                        @Query(\"password\") String password);\n \n }"
+  },
+  {
+    "sha": "68614f6235c0d5c1417460d599385703468b9246",
+    "filename": "mifospay/build.gradle",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/s-ayush2903/mobile-wallet/blob/c52dd42dd8f5fce81797173f4f84a8c58112995c/mifospay/build.gradle",
+    "raw_url": "https://github.com/s-ayush2903/mobile-wallet/raw/c52dd42dd8f5fce81797173f4f84a8c58112995c/mifospay/build.gradle",
+    "contents_url": "https://api.github.com/repos/s-ayush2903/mobile-wallet/contents/mifospay/build.gradle?ref=c52dd42dd8f5fce81797173f4f84a8c58112995c",
+    "patch": "@@ -7,7 +7,6 @@ apply plugin: 'kotlin-kapt'\n android {\n     compileSdkVersion rootProject.ext.compileSdkVersion\n \n-\n     defaultConfig {\n         applicationId \"org.mifos.mobilewallet.mifospay\"\n         minSdkVersion rootProject.ext.minSdkVersion"
+  },
+  {
+    "sha": "24cc4995841d5111669184f5c4c676320bf858c5",
+    "filename": "mifospay/src/main/java/org/mifos/mobilewallet/mifospay/home/ui/FinanceFragment.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/s-ayush2903/mobile-wallet/blob/c52dd42dd8f5fce81797173f4f84a8c58112995c/mifospay/src/main/java/org/mifos/mobilewallet/mifospay/home/ui/FinanceFragment.java",
+    "raw_url": "https://github.com/s-ayush2903/mobile-wallet/raw/c52dd42dd8f5fce81797173f4f84a8c58112995c/mifospay/src/main/java/org/mifos/mobilewallet/mifospay/home/ui/FinanceFragment.java",
+    "contents_url": "https://api.github.com/repos/s-ayush2903/mobile-wallet/contents/mifospay/src/main/java/org/mifos/mobilewallet/mifospay/home/ui/FinanceFragment.java?ref=c52dd42dd8f5fce81797173f4f84a8c58112995c",
+    "patch": "@@ -9,8 +9,8 @@\n import android.view.ViewGroup;\n \n import org.mifos.mobilewallet.mifospay.R;\n-import org.mifos.mobilewallet.mifospay.base.BaseFragment;\n import org.mifos.mobilewallet.mifospay.bank.ui.AccountsFragment;\n+import org.mifos.mobilewallet.mifospay.base.BaseFragment;\n import org.mifos.mobilewallet.mifospay.home.adapter.TabLayoutAdapter;\n import org.mifos.mobilewallet.mifospay.kyc.ui.KYCDescriptionFragment;\n import org.mifos.mobilewallet.mifospay.merchants.ui.MerchantsFragment;\n@@ -36,7 +36,7 @@ public static FinanceFragment newInstance() {\n \n     @Override\n     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,\n-            Bundle savedInstanceState) {\n+                             Bundle savedInstanceState) {\n         View rootView = inflater.inflate(R.layout.fragment_finance, container, false);\n         ButterKnife.bind(this, rootView);\n "
+  }
+]

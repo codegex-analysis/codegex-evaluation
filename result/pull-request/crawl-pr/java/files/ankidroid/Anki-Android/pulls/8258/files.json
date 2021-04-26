@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "c294f6fc021a773fba0de61c987a442397891507",
+    "filename": "AnkiDroid/build.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/ankidroid/Anki-Android/blob/2001c5ad1b44856ce165ea4e27bad8091e682e5f/AnkiDroid/build.gradle",
+    "raw_url": "https://github.com/ankidroid/Anki-Android/raw/2001c5ad1b44856ce165ea4e27bad8091e682e5f/AnkiDroid/build.gradle",
+    "contents_url": "https://api.github.com/repos/ankidroid/Anki-Android/contents/AnkiDroid/build.gradle?ref=2001c5ad1b44856ce165ea4e27bad8091e682e5f",
+    "patch": "@@ -240,6 +240,7 @@ dependencies {\n \n     // == Rust conversion (from Anki-Android-Backend on GitHub) ==\n     String backendVersion = \"0.1.2\" // We want both testing and implementation on the same version\n+\n     // build with ./gradlew rsdroid:assembleRelease\n     // In my experience, using `files()` currently requires a reindex operation, which is slow.\n     // implementation files(\"C:\\\\GitHub\\\\Rust-Test\\\\rsdroid\\\\build\\\\outputs\\\\aar\\\\rsdroid-release.aar\")"
+  },
+  {
+    "sha": "88f80d39673e7b46fba1b58e72bb32a6481920a3",
+    "filename": "AnkiDroid/src/main/java/com/ichi2/anki/AnkiDroidApp.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/ankidroid/Anki-Android/blob/2001c5ad1b44856ce165ea4e27bad8091e682e5f/AnkiDroid/src/main/java/com/ichi2/anki/AnkiDroidApp.java",
+    "raw_url": "https://github.com/ankidroid/Anki-Android/raw/2001c5ad1b44856ce165ea4e27bad8091e682e5f/AnkiDroid/src/main/java/com/ichi2/anki/AnkiDroidApp.java",
+    "contents_url": "https://api.github.com/repos/ankidroid/Anki-Android/contents/AnkiDroid/src/main/java/com/ichi2/anki/AnkiDroidApp.java?ref=2001c5ad1b44856ce165ea4e27bad8091e682e5f",
+    "patch": "@@ -212,6 +212,9 @@ public static boolean isAcraEnbled(Context context, boolean defaultValue) {\n     }\n \n \n+\n+\n+\n     /**\n      * Get the ACRA ConfigurationBuilder - use this followed by setting it to modify the config\n      * @return ConfigurationBuilder for the current ACRA config\n@@ -604,6 +607,7 @@ public static String getManualUrl() {\n         }\n     }\n \n+\n     /**\n      * Check whether l is the currently set language code\n      * @param l ISO2 language code"
+  },
+  {
+    "sha": "3be308951635f20e40ee93eb1336ba5b73891fb4",
+    "filename": "AnkiDroid/src/main/java/com/ichi2/anki/dialogs/HelpDialog.java",
+    "status": "modified",
+    "additions": 70,
+    "deletions": 2,
+    "changes": 72,
+    "blob_url": "https://github.com/ankidroid/Anki-Android/blob/2001c5ad1b44856ce165ea4e27bad8091e682e5f/AnkiDroid/src/main/java/com/ichi2/anki/dialogs/HelpDialog.java",
+    "raw_url": "https://github.com/ankidroid/Anki-Android/raw/2001c5ad1b44856ce165ea4e27bad8091e682e5f/AnkiDroid/src/main/java/com/ichi2/anki/dialogs/HelpDialog.java",
+    "contents_url": "https://api.github.com/repos/ankidroid/Anki-Android/contents/AnkiDroid/src/main/java/com/ichi2/anki/dialogs/HelpDialog.java?ref=2001c5ad1b44856ce165ea4e27bad8091e682e5f",
+    "patch": "@@ -16,10 +16,15 @@\n \n package com.ichi2.anki.dialogs;\n \n+import android.annotation.SuppressLint;\n+import android.app.Dialog;\n import android.content.Context;\n+import android.content.res.AssetManager;\n import android.net.Uri;\n import android.os.Parcel;\n import android.os.Parcelable;\n+import android.util.Log;\n+import android.webkit.WebView;\n \n import com.ichi2.anki.AnkiActivity;\n import com.ichi2.anki.AnkiDroidApp;\n@@ -28,31 +33,64 @@\n import com.ichi2.anki.dialogs.RecursivePictureMenu.ItemHeader;\n import com.ichi2.utils.IntentUtil;\n \n+import java.io.BufferedReader;\n+import java.io.InputStream;\n+import java.io.InputStreamReader;\n import java.io.Serializable;\n import java.util.ArrayList;\n import java.util.Arrays;\n \n import androidx.annotation.DrawableRes;\n import androidx.annotation.StringRes;\n import androidx.fragment.app.DialogFragment;\n+import timber.log.Timber;\n \n public class HelpDialog {\n \n+\n+\n+\n+\n     private static void openManual(AnkiActivity ankiActivity) {\n         ankiActivity.openUrl(Uri.parse(AnkiDroidApp.getManualUrl()));\n     }\n \n+    @SuppressLint(\"SetJavaScriptEnabled\")\n     private static void openFeedback(AnkiActivity ankiActivity) {\n-        ankiActivity.openUrl(Uri.parse(AnkiDroidApp.getFeedbackUrl()));\n+        WebView view = new WebView(ankiActivity);\n+        view.getSettings().setJavaScriptEnabled(true);\n+        view.loadUrl(\"file:///assets/AnkiDroidSupport.html\");\n+        ankiActivity.setContentView(view);\n+\n+        try {\n+\n+            AssetManager assetManager = ankiActivity.getAssets();\n+            InputStream stream = assetManager.open(\"AnkiDroidSupport.html\");\n+            BufferedReader r = new BufferedReader(new InputStreamReader(stream));\n+            StringBuilder total = new StringBuilder();\n+            String line;\n+            while ((line = r.readLine()) != null) {\n+                total.append(line).append(\"\\n\");\n+            }\n+            view.loadDataWithBaseURL(null, total.toString(), \"text/html\", \"UTF-8\", null);\n+        } catch (Exception xxx) {\n+            Timber.e(xxx, \"Load assets/AnkiDroidSupport.html\");\n+        }\n+        ankiActivity.dismissAllDialogFragments();\n+\n+\n     }\n \n+\n+\n     public static DialogFragment createInstance(Context context) {\n \n         RateAppItem rateAppItem = new RateAppItem(R.string.help_item_support_rate_ankidroid, R.drawable.ic_star_black_24);\n+\n         Item[] allItems = {\n                 new ItemHeader(R.string.help_title_using_ankidroid, R.drawable.ic_manual_black_24dp,\n                         new FunctionItem(R.string.help_item_ankidroid_manual, R.drawable.ic_manual_black_24dp, HelpDialog::openManual),\n-                        new LinkItem(R.string.help_item_anki_manual, R.drawable.ic_manual_black_24dp, R.string.link_anki_manual),\n+                        new FunctionItem(R.string.help_item_anki_manual, R.drawable.ic_manual_black_24dp,HelpDialog::openAnkiManual),\n                         new LinkItem(R.string.help_item_ankidroid_faq, R.drawable.ic_help_black_24dp, R.string.link_ankidroid_faq)\n                 ),\n                 new ItemHeader(R.string.help_title_get_help, R.drawable.ic_help_black_24dp,\n@@ -86,6 +124,36 @@ public static DialogFragment createInstance(Context context) {\n         return RecursivePictureMenu.createInstance(itemList, R.string.help);\n     }\n \n+\n+\n+    @SuppressLint(\"SetJavaScriptEnabled\")\n+    private static void openAnkiManual(AnkiActivity ankiActivity) {\n+        WebView view = new WebView(ankiActivity);\n+        view.getSettings().setJavaScriptEnabled(true);\n+        view.loadUrl(\"file:///assets/AnkiManual.html\");\n+        ankiActivity.setContentView(view);\n+\n+        try {\n+\n+            AssetManager assetManager = ankiActivity.getAssets();\n+            InputStream stream = assetManager.open(\"AnkiManual.html\");\n+            BufferedReader r = new BufferedReader(new InputStreamReader(stream));\n+            StringBuilder total = new StringBuilder();\n+            String line;\n+            while ((line = r.readLine()) != null) {\n+                total.append(line).append(\"\\n\");\n+            }\n+            view.loadDataWithBaseURL(null, total.toString(), \"text/html\", \"UTF-8\", null);\n+        } catch (Exception xxx) {\n+            Timber.e(xxx, \"Load assets/AnkiManual.html\");\n+        }\n+        ankiActivity.dismissAllDialogFragments();\n+\n+\n+\n+    }\n+\n+\n     public static class RateAppItem extends Item implements Parcelable {\n \n         public RateAppItem(@StringRes int titleRes, @DrawableRes int iconRes) {"
+  },
+  {
+    "sha": "286cd31a0d376783e66c0012f43d0b930133fe3d",
+    "filename": "tools/chromeos/release.sh",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/ankidroid/Anki-Android/blob/2001c5ad1b44856ce165ea4e27bad8091e682e5f/tools/chromeos/release.sh",
+    "raw_url": "https://github.com/ankidroid/Anki-Android/raw/2001c5ad1b44856ce165ea4e27bad8091e682e5f/tools/chromeos/release.sh",
+    "contents_url": "https://api.github.com/repos/ankidroid/Anki-Android/contents/tools/chromeos/release.sh?ref=2001c5ad1b44856ce165ea4e27bad8091e682e5f",
+    "patch": "@@ -53,5 +53,6 @@ done\n echo \"`jq 'del(.file_handlers.any.types) | .file_handlers.any.extensions = [\"apkg\"]' cws/unpacked/manifest.json`\" > cws/unpacked/manifest.json\n \n # Prepare release package\n+# shellcheck disable=SC2164\n cd cws/unpacked\n zip -q -r -o ../../cws/release.zip *"
+  }
+]

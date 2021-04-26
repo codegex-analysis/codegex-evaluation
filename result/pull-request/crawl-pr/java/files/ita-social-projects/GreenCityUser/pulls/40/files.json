@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "df838937691756f8b2160467f69123801c404084",
+    "filename": "core/src/main/resources/application-dev.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/ita-social-projects/GreenCityUser/blob/0e5c7863813f786b8222c79530592f81a0ef8216/core/src/main/resources/application-dev.properties",
+    "raw_url": "https://github.com/ita-social-projects/GreenCityUser/raw/0e5c7863813f786b8222c79530592f81a0ef8216/core/src/main/resources/application-dev.properties",
+    "contents_url": "https://api.github.com/repos/ita-social-projects/GreenCityUser/contents/core/src/main/resources/application-dev.properties?ref=0e5c7863813f786b8222c79530592f81a0ef8216",
+    "patch": "@@ -68,3 +68,4 @@ spring.thymeleaf.cache=false\n \n #RestTemplate\n greencity.server.address = http://localhost:8080\n+greencitychat.server.address = http://localhost:8070"
+  },
+  {
+    "sha": "4774fb74612ea9e054c1788e86d95084877309f0",
+    "filename": "core/src/main/resources/application-prod.properties",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/ita-social-projects/GreenCityUser/blob/0e5c7863813f786b8222c79530592f81a0ef8216/core/src/main/resources/application-prod.properties",
+    "raw_url": "https://github.com/ita-social-projects/GreenCityUser/raw/0e5c7863813f786b8222c79530592f81a0ef8216/core/src/main/resources/application-prod.properties",
+    "contents_url": "https://api.github.com/repos/ita-social-projects/GreenCityUser/contents/core/src/main/resources/application-prod.properties?ref=0e5c7863813f786b8222c79530592f81a0ef8216",
+    "patch": "@@ -65,3 +65,4 @@ greencity.time.after.last.activity=300000\n \n #RestTemplate\n greencity.server.address = ${GREENCITY_SERVER_ADDRESS}\n+greencitychat.server.address = ${GREENCITY_CHAT_SERVER_ADDRESS}"
+  },
+  {
+    "sha": "31d91c2013453602c34a4ca52c03036072634272",
+    "filename": "service-api/src/main/java/greencity/client/RestClient.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/ita-social-projects/GreenCityUser/blob/0e5c7863813f786b8222c79530592f81a0ef8216/service-api/src/main/java/greencity/client/RestClient.java",
+    "raw_url": "https://github.com/ita-social-projects/GreenCityUser/raw/0e5c7863813f786b8222c79530592f81a0ef8216/service-api/src/main/java/greencity/client/RestClient.java",
+    "contents_url": "https://api.github.com/repos/ita-social-projects/GreenCityUser/contents/service-api/src/main/java/greencity/client/RestClient.java?ref=0e5c7863813f786b8222c79530592f81a0ef8216",
+    "patch": "@@ -29,6 +29,8 @@\n     @Value(\"${greencity.server.address}\")\n     private String greenCityServerAddress;\n     private final HttpServletRequest httpServletRequest;\n+    @Value(\"${greencitychat.server.address}\")\n+    private String greenCityChatServerAddress;\n \n     /**\n      * Method for finding all custom shopping list items.\n@@ -173,6 +175,13 @@ public Long findAmountOfHabitsInProgress(Long userId) {\n         return Arrays.asList(restTemplateForObject);\n     }\n \n+    /**\n+     * Method for add new user to system chat.\n+     */\n+    public void addUserToSystemChat(Long userId) {\n+        restTemplate.postForEntity(greenCityChatServerAddress + \"/chat/user\", userId, Long.class);\n+    }\n+\n     /**\n      * Method makes headers for RestTemplate.\n      *"
+  },
+  {
+    "sha": "ec8b728c7518f3d28a5733af082c13cc91d69f5e",
+    "filename": "service-api/src/test/java/greencity/client/RestClientTest.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 0,
+    "changes": 14,
+    "blob_url": "https://github.com/ita-social-projects/GreenCityUser/blob/0e5c7863813f786b8222c79530592f81a0ef8216/service-api/src/test/java/greencity/client/RestClientTest.java",
+    "raw_url": "https://github.com/ita-social-projects/GreenCityUser/raw/0e5c7863813f786b8222c79530592f81a0ef8216/service-api/src/test/java/greencity/client/RestClientTest.java",
+    "contents_url": "https://api.github.com/repos/ita-social-projects/GreenCityUser/contents/service-api/src/test/java/greencity/client/RestClientTest.java?ref=0e5c7863813f786b8222c79530592f81a0ef8216",
+    "patch": "@@ -7,6 +7,7 @@\n import org.junit.jupiter.api.extension.ExtendWith;\n import org.mockito.InjectMocks;\n import org.mockito.Mock;\n+import static org.mockito.Mockito.verify;\n import org.mockito.junit.jupiter.MockitoExtension;\n import org.springframework.beans.factory.annotation.Value;\n import org.springframework.http.HttpEntity;\n@@ -34,6 +35,8 @@\n     private HttpServletRequest httpServletRequest;\n     @Value(\"${greencity.server.address}\")\n     private String greenCityServerAddress;\n+    @Value(\"${greencitychat.server.address}\")\n+    private String greenCityChatServerAddress;\n     @InjectMocks\n     private RestClient restClient;\n \n@@ -196,4 +199,15 @@ void getAllLanguageCodes() {\n \n         assertEquals(Arrays.asList(allLanguageCodes), restClient.getAllLanguageCodes());\n     }\n+\n+    @Test\n+    void addUserToSystemChat() {\n+        Long userId = 1L;\n+        ResponseEntity<Long> responseEntity = ResponseEntity.ok().body(userId);\n+        when(restTemplate.postForEntity(greenCityChatServerAddress + \"/chat/user\", 1L, Long.class))\n+            .thenReturn(responseEntity);\n+        restClient.addUserToSystemChat(userId);\n+        verify(restTemplate).postForEntity(greenCityChatServerAddress + \"/chat/user\", 1L, Long.class);\n+\n+    }\n }"
+  },
+  {
+    "sha": "3be9fd75386fce9b286a5974823519e7756cf6c3",
+    "filename": "service/src/main/java/greencity/security/service/VerifyEmailServiceImpl.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/ita-social-projects/GreenCityUser/blob/0e5c7863813f786b8222c79530592f81a0ef8216/service/src/main/java/greencity/security/service/VerifyEmailServiceImpl.java",
+    "raw_url": "https://github.com/ita-social-projects/GreenCityUser/raw/0e5c7863813f786b8222c79530592f81a0ef8216/service/src/main/java/greencity/security/service/VerifyEmailServiceImpl.java",
+    "contents_url": "https://api.github.com/repos/ita-social-projects/GreenCityUser/contents/service/src/main/java/greencity/security/service/VerifyEmailServiceImpl.java?ref=0e5c7863813f786b8222c79530592f81a0ef8216",
+    "patch": "@@ -1,5 +1,6 @@\n package greencity.security.service;\n \n+import greencity.client.RestClient;\n import greencity.constant.ErrorMessage;\n import greencity.entity.VerifyEmail;\n import greencity.exception.exceptions.BadVerifyEmailTokenException;\n@@ -20,15 +21,17 @@\n @Slf4j\n public class VerifyEmailServiceImpl implements VerifyEmailService {\n     private final VerifyEmailRepo verifyEmailRepo;\n+    private final RestClient restClient;\n \n     /**\n      * Constructor.\n      *\n      * @param verifyEmailRepo {@link VerifyEmailRepo}\n      */\n     @Autowired\n-    public VerifyEmailServiceImpl(VerifyEmailRepo verifyEmailRepo) {\n+    public VerifyEmailServiceImpl(VerifyEmailRepo verifyEmailRepo, RestClient restClient) {\n         this.verifyEmailRepo = verifyEmailRepo;\n+        this.restClient = restClient;\n     }\n \n     /**\n@@ -43,6 +46,8 @@ public Boolean verifyByToken(Long userId, String token) {\n         if (isNotExpired(verifyEmail.getExpiryDate())) {\n             int rows = verifyEmailRepo.deleteVerifyEmailByTokenAndUserId(userId, token);\n             log.info(\"User has successfully verify the email by token {}. Records deleted {}.\", token, rows);\n+            restClient.addUserToSystemChat(userId);\n+            log.info(\"The user has been added to the system chats\");\n             return true;\n         } else {\n             log.info(\"User didn't verify his/her email on time with token {}.\", token);"
+  },
+  {
+    "sha": "26870f2da4fa90d8ee4e9758df4583edddcff055",
+    "filename": "service/src/test/java/greencity/security/service/OwnSecurityServiceImplTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/ita-social-projects/GreenCityUser/blob/0e5c7863813f786b8222c79530592f81a0ef8216/service/src/test/java/greencity/security/service/OwnSecurityServiceImplTest.java",
+    "raw_url": "https://github.com/ita-social-projects/GreenCityUser/raw/0e5c7863813f786b8222c79530592f81a0ef8216/service/src/test/java/greencity/security/service/OwnSecurityServiceImplTest.java",
+    "contents_url": "https://api.github.com/repos/ita-social-projects/GreenCityUser/contents/service/src/test/java/greencity/security/service/OwnSecurityServiceImplTest.java?ref=0e5c7863813f786b8222c79530592f81a0ef8216",
+    "patch": "@@ -1,5 +1,6 @@\n package greencity.security.service;\n \n+import greencity.client.RestClient;\n import static org.junit.jupiter.api.Assertions.assertThrows;\n import static org.mockito.ArgumentMatchers.*;\n import static org.mockito.Mockito.*;"
+  },
+  {
+    "sha": "3e39c7a412276de70cab1886d5d6539c06b5f36d",
+    "filename": "service/src/test/java/greencity/security/service/VerifyEmailServiceImplTest.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 0,
+    "changes": 4,
+    "blob_url": "https://github.com/ita-social-projects/GreenCityUser/blob/0e5c7863813f786b8222c79530592f81a0ef8216/service/src/test/java/greencity/security/service/VerifyEmailServiceImplTest.java",
+    "raw_url": "https://github.com/ita-social-projects/GreenCityUser/raw/0e5c7863813f786b8222c79530592f81a0ef8216/service/src/test/java/greencity/security/service/VerifyEmailServiceImplTest.java",
+    "contents_url": "https://api.github.com/repos/ita-social-projects/GreenCityUser/contents/service/src/test/java/greencity/security/service/VerifyEmailServiceImplTest.java?ref=0e5c7863813f786b8222c79530592f81a0ef8216",
+    "patch": "@@ -1,5 +1,6 @@\n package greencity.security.service;\n \n+import greencity.client.RestClient;\n import greencity.entity.VerifyEmail;\n import greencity.exception.exceptions.UserActivationEmailTokenExpiredException;\n import greencity.security.repository.VerifyEmailRepo;\n@@ -19,6 +20,8 @@\n class VerifyEmailServiceImplTest {\n     @Mock\n     private VerifyEmailRepo verifyEmailRepo;\n+    @Mock\n+    RestClient restClient;\n \n     @InjectMocks\n     private VerifyEmailServiceImpl verifyEmailService;\n@@ -28,6 +31,7 @@ void verifyByTokenNotExpiredTokenTest() {\n         VerifyEmail verifyEmail = new VerifyEmail();\n         verifyEmail.setExpiryDate(LocalDateTime.MAX);\n         when(verifyEmailRepo.findByTokenAndUserId(1L, \"token\")).thenReturn(Optional.of(verifyEmail));\n+        doNothing().when(restClient).addUserToSystemChat(1L);\n         verifyEmailService.verifyByToken(1L, \"token\");\n         verify(verifyEmailRepo).deleteVerifyEmailByTokenAndUserId(1L, \"token\");\n     }"
+  }
+]

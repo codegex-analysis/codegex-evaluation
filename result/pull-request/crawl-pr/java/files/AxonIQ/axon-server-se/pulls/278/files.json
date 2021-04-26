@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "18bbb01f34775bae640776913ac22a99c4be9392",
+    "filename": "axonserver/src/main/java/io/axoniq/axonserver/config/FileSystemMonitor.java",
+    "status": "modified",
+    "additions": 22,
+    "deletions": 17,
+    "changes": 39,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/main/java/io/axoniq/axonserver/config/FileSystemMonitor.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/main/java/io/axoniq/axonserver/config/FileSystemMonitor.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/main/java/io/axoniq/axonserver/config/FileSystemMonitor.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -14,8 +14,8 @@\n import java.nio.file.FileStore;\n import java.nio.file.Files;\n import java.nio.file.Path;\n-import java.util.ArrayList;\n-import java.util.List;\n+import java.util.HashMap;\n+import java.util.Map;\n \n /**\n  *\n@@ -35,7 +35,7 @@\n \n     private final MeterRegistry meterRegistry;\n \n-    private final List<Path> fileSystems = new ArrayList<>();\n+    private final Map<String, Path> fileSystems = new HashMap<>();\n \n     public FileSystemMonitor(DiskSpaceHealthIndicatorProperties diskSpaceHealthProperties,\n                              MeterRegistry meterRegistry) {\n@@ -49,18 +49,18 @@ public FileSystemMonitor(DiskSpaceHealthIndicatorProperties diskSpaceHealthPrope\n      * for health monitoring and disk metrics biding\n      *\n      * */\n-    public void registerPath(Path fileSystemPath) {\n-        logger.info(\"Monitoring file path '{}'\",fileSystemPath.toString());\n-        fileSystems.add(fileSystemPath);\n+    public void registerPath(final String name, final Path fileSystemPath) {\n+        logger.info(\"Monitoring file store '{}' at path '{}'\",name, fileSystemPath);\n+        fileSystems.put(name, fileSystemPath);\n         bindToMetrics(fileSystemPath);\n     }\n \n     /**\n      * Unregisters file path from health monitoring\n      * */\n-    public void unregisterPath(Path fileSystemPath) {\n-        logger.info(\"Stopped monitoring file path '{}'\",fileSystemPath.toString());\n-        fileSystems.removeIf(fs-> fs.compareTo(fileSystemPath) == 0);\n+    public void unregisterPath(final String name) {\n+        logger.info(\"Stopped monitoring file store '{}'\",name);\n+        fileSystems.remove(name);\n     }\n \n     private void bindToMetrics(Path fileSystemPath) {\n@@ -93,7 +93,7 @@ private Path mountOf(Path p) throws IOException {\n     @Override\n     protected void doHealthCheck(Health.Builder builder) {\n         builder.up();\n-        fileSystems.forEach(path -> {\n+        fileSystems.forEach((name, path) -> {\n             try {\n                 FileStore store = Files.getFileStore(path);\n                 long diskFreeInBytes = store.getUsableSpace();\n@@ -104,9 +104,9 @@ protected void doHealthCheck(Health.Builder builder) {\n                     builder.status(HealthStatus.WARN_STATUS);\n                 }\n \n-                builder.withDetail(mountOf(path).toString(),\n+                builder.withDetail(name,\n                         new Details(\n-                                store.getUsableSpace(),store.getTotalSpace()\n+                                mountOf(path).toString(), store.getUsableSpace(), store.getTotalSpace()\n                         )\n                 );\n \n@@ -116,21 +116,26 @@ protected void doHealthCheck(Health.Builder builder) {\n                 logger.error(\"Failed to retrieve file store for {}\", path, e);\n                 builder.down();\n                 builder.withDetail(\"path\", path.toString());\n-                return;\n             }\n         });\n \n     }\n \n-    public class Details {\n-        long free;\n-        long total;\n+    public static class Details {\n+        private final String path;\n+        private final long free;\n+        private final long total;\n \n-        public Details(long free, long total) {\n+        public Details(String path, long free, long total) {\n+            this.path = path;\n             this.free = free;\n             this.total = total;\n         }\n \n+        public String getPath() {\n+            return path;\n+        }\n+\n         public long getFree() {\n             return free;\n         }"
+  },
+  {
+    "sha": "7ff3b5cb8cf1ff48290a6ca8dd36a0742be17ac9",
+    "filename": "axonserver/src/main/java/io/axoniq/axonserver/localstorage/file/PrimaryEventStore.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/main/java/io/axoniq/axonserver/localstorage/file/PrimaryEventStore.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/main/java/io/axoniq/axonserver/localstorage/file/PrimaryEventStore.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/main/java/io/axoniq/axonserver/localstorage/file/PrimaryEventStore.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -95,7 +95,7 @@ public void initSegments(long lastInitialized, long defaultFirstIndex) {\n         eventTransformer = eventTransformerFactory.get(storageProperties.getFlags());\n         initLatestSegment(lastInitialized, Long.MAX_VALUE, storageDir, defaultFirstIndex);\n \n-        fileSystemMonitor.registerPath(storageDir.toPath());\n+        fileSystemMonitor.registerPath(storeName(), storageDir.toPath());\n     }\n \n     private void initLatestSegment(long lastInitialized, long nextToken, File storageDir, long defaultFirstIndex) {\n@@ -247,7 +247,7 @@ protected boolean containsSegment(long segment) {\n     @Override\n     public void close(boolean deleteData) {\n         File storageDir = new File(storageProperties.getStorage(context));\n-        fileSystemMonitor.unregisterPath(storageDir.toPath());\n+        fileSystemMonitor.unregisterPath(storeName());\n \n         synchronizer.shutdown(true);\n         readBuffers.forEach((s, source) -> {\n@@ -486,4 +486,8 @@ private int eventBlockSize(List<ProcessedEvent> eventList) {\n         }\n         return size;\n     }\n+\n+    private String storeName() {\n+        return context + \"-\" + type.getEventType().name().toLowerCase();\n+    }\n }"
+  },
+  {
+    "sha": "f8f2c1a4f4c6e2191cb24bf9cf1506e1c4faf710",
+    "filename": "axonserver/src/test/java/io/axoniq/axonserver/config/FileSystemMonitorTest.java",
+    "status": "modified",
+    "additions": 21,
+    "deletions": 17,
+    "changes": 38,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/config/FileSystemMonitorTest.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/config/FileSystemMonitorTest.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/test/java/io/axoniq/axonserver/config/FileSystemMonitorTest.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -20,6 +20,10 @@\n  */\n public class FileSystemMonitorTest {\n \n+    public static final String STORE_EVENTS_UNIX = \"/store/events\";\n+    public static final String STORE_NAME = \"store\";\n+    public static final String STORE_EVENTS_OSX = \"/store/store\";\n+    public static final String STORE_EVENTS_WIN = \"C:\\\\store\\\\events\";\n     FileSystemMonitor testSubject;\n \n     DiskSpaceHealthIndicatorProperties diskSpaceHealthProperties = mock(DiskSpaceHealthIndicatorProperties.class);\n@@ -39,15 +43,15 @@ public void whenFileSystemNotMountedThenStatusIsDown() {\n         FileSystem mockFileSystem = mock(FileSystem.class);\n         Path pathMock = mock(Path.class);\n \n-        when(mockFileSystem.getPath(\"/store/events\")).thenReturn(pathMock);\n-        when(pathMock.toString()).thenReturn(\"/store/events\");\n+        when(mockFileSystem.getPath(STORE_EVENTS_UNIX)).thenReturn(pathMock);\n+        when(pathMock.toString()).thenReturn(STORE_EVENTS_UNIX);\n \n-        Path path = mockFileSystem.getPath(\"/store/events\");\n+        Path path = mockFileSystem.getPath(STORE_EVENTS_UNIX);\n \n-        testSubject.registerPath(path);\n+        testSubject.registerPath(STORE_NAME, path);\n \n         when(diskSpaceHealthProperties.getThreshold()).thenReturn(THRESHOLD);\n-        when(diskSpaceHealthProperties.getPath()).thenReturn(new File(\"/store/events\"));\n+        when(diskSpaceHealthProperties.getPath()).thenReturn(new File(STORE_EVENTS_UNIX));\n \n         Health.Builder builder = mock(Health.Builder.class);\n         testSubject.doHealthCheck(builder);\n@@ -69,9 +73,9 @@ public void unixWhenSizeAboveThresholdThenStatusIsUp() {\n                 .setMaxSize(DISK_SIZE.toBytes())\n                 .build()\n                 );\n-        Path path = fileSystem.getPath(\"/store/events\");\n+        Path path = fileSystem.getPath(STORE_EVENTS_UNIX);\n \n-        testSubject.registerPath(path);\n+        testSubject.registerPath(STORE_NAME, path);\n \n         when(diskSpaceHealthProperties.getThreshold()).thenReturn(THRESHOLD);\n         when(diskSpaceHealthProperties.getPath()).thenReturn(new File(path.toString()));\n@@ -94,9 +98,9 @@ public void unixWhenSizeBelowThresholdThenStatusIsWarn() {\n                         .setMaxSize(DISK_SIZE.toBytes())\n                         .build()\n         );\n-        Path path = fileSystem.getPath(\"/store/events\");\n+        Path path = fileSystem.getPath(STORE_EVENTS_UNIX);\n \n-        testSubject.registerPath(path);\n+        testSubject.registerPath(STORE_NAME, path);\n \n         when(diskSpaceHealthProperties.getThreshold()).thenReturn(THRESHOLD);\n         when(diskSpaceHealthProperties.getPath()).thenReturn(new File(path.toString()));\n@@ -121,9 +125,9 @@ public void osXWhenSizeAboveThresholdThenStatusIsUp() {\n                         .setMaxSize(DISK_SIZE.toBytes())\n                         .build()\n         );\n-        Path path = fileSystem.getPath(\"/store/store\");\n+        Path path = fileSystem.getPath(STORE_EVENTS_OSX);\n \n-        testSubject.registerPath(path);\n+        testSubject.registerPath(STORE_NAME, path);\n \n         when(diskSpaceHealthProperties.getThreshold()).thenReturn(THRESHOLD);\n         when(diskSpaceHealthProperties.getPath()).thenReturn(new File(path.toString()));\n@@ -146,9 +150,9 @@ public void osXWhenSizeBelowThresholdThenStatusIsWarn() {\n                         .setMaxSize(DISK_SIZE.toBytes())\n                         .build()\n         );\n-        Path path = fileSystem.getPath(\"/store/store\");\n+        Path path = fileSystem.getPath(STORE_EVENTS_OSX);\n \n-        testSubject.registerPath(path);\n+        testSubject.registerPath(STORE_NAME, path);\n \n         when(diskSpaceHealthProperties.getThreshold()).thenReturn(THRESHOLD);\n         when(diskSpaceHealthProperties.getPath()).thenReturn(new File(path.toString()));\n@@ -172,9 +176,9 @@ public void windowsWhenSizeAboveThresholdThenStatusIsUp() {\n                         .setMaxSize(DISK_SIZE.toBytes())\n                         .build()\n         );\n-        Path path = fileSystem.getPath(\"C:\\\\store\\\\events\");\n+        Path path = fileSystem.getPath(STORE_EVENTS_WIN);\n \n-        testSubject.registerPath(path);\n+        testSubject.registerPath(STORE_NAME, path);\n \n         when(diskSpaceHealthProperties.getThreshold()).thenReturn(THRESHOLD);\n         when(diskSpaceHealthProperties.getPath()).thenReturn(new File(path.toString()));\n@@ -197,9 +201,9 @@ public void windowsWhenSizeBelowThresholdThenStatusIsWarn() {\n                         .setMaxSize(DISK_SIZE.toBytes())\n                         .build()\n         );\n-        Path path = fileSystem.getPath(\"C:\\\\store\\\\events\");\n+        Path path = fileSystem.getPath(STORE_EVENTS_WIN);\n \n-        testSubject.registerPath(path);\n+        testSubject.registerPath(STORE_NAME, path);\n \n         when(diskSpaceHealthProperties.getThreshold()).thenReturn(THRESHOLD);\n         when(diskSpaceHealthProperties.getPath()).thenReturn(new File(path.toString()));"
+  },
+  {
+    "sha": "71ba9e385c30dd2ab76574f2376206ce5865489a",
+    "filename": "axonserver/src/test/java/io/axoniq/axonserver/localstorage/TestInputStreamStorageContainer.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/TestInputStreamStorageContainer.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/TestInputStreamStorageContainer.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/test/java/io/axoniq/axonserver/localstorage/TestInputStreamStorageContainer.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -57,7 +57,7 @@ public TestInputStreamStorageContainer(File location) throws IOException {\n         embeddedDBProperties.getSnapshot().setSegmentSize(512 * 1024L);\n         MeterFactory meterFactory = new MeterFactory(new SimpleMeterRegistry(), new DefaultMetricCollector());\n \n-        doNothing().when(fileSystemMonitor).registerPath(any());\n+        doNothing().when(fileSystemMonitor).registerPath(any(), any());\n \n         EventStoreFactory eventStoreFactory = new StandardEventStoreFactory(embeddedDBProperties,\n                                                                             new DefaultEventTransformerFactory(),"
+  },
+  {
+    "sha": "21303f6b66c9c29f5dadd19caa6c64dd7118c871",
+    "filename": "axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/MultipleSnapshotSegments.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/MultipleSnapshotSegments.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/MultipleSnapshotSegments.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/MultipleSnapshotSegments.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -39,7 +39,7 @@\n     public void init() {\n         MeterFactory meterFactory = new MeterFactory(new SimpleMeterRegistry(), new DefaultMetricCollector());\n \n-        doNothing().when(fileSystemMonitor).registerPath(any());\n+        doNothing().when(fileSystemMonitor).registerPath(any(), any());\n \n         StorageProperties storageProperties = new StorageProperties(new SystemInfoProvider() {\n             @Override"
+  },
+  {
+    "sha": "aa6b728cbaca339926a1e22a578dc4fd976f5ad9",
+    "filename": "axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/PrimaryEventStoreTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/PrimaryEventStoreTest.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/PrimaryEventStoreTest.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/PrimaryEventStoreTest.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -83,7 +83,7 @@ private PrimaryEventStore primaryEventStore(IndexManager indexManager) {\n                                                                  embeddedDBProperties.getEvent(),\n                                                                  meterFactory);\n \n-        doNothing().when(fileSystemMonitor).registerPath(any());\n+        doNothing().when(fileSystemMonitor).registerPath(any(), any());\n \n         PrimaryEventStore testSubject = new PrimaryEventStore(new EventTypeContext(context, EventType.EVENT),\n                                             indexManager,\n@@ -92,7 +92,7 @@ private PrimaryEventStore primaryEventStore(IndexManager indexManager) {\n                                             second,\n                                             meterFactory, fileSystemMonitor);\n         testSubject.init(false);\n-        verify(fileSystemMonitor).registerPath(any(Path.class));\n+        verify(fileSystemMonitor).registerPath(any(String.class), any(Path.class));\n         return testSubject;\n     }\n "
+  },
+  {
+    "sha": "1f4fe17bdcc1a11b436612f0b6cbfa2e040eb400",
+    "filename": "axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/RecreateIndexTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/RecreateIndexTest.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/RecreateIndexTest.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/RecreateIndexTest.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -61,7 +61,7 @@ public String getHostName() throws UnknownHostException {\n                                                                               storageProperties,\n                                                                               meterFactory);\n \n-        doNothing().when(fileSystemMonitor).registerPath(any());\n+        doNothing().when(fileSystemMonitor).registerPath(any(), any());\n \n         testSubject = new PrimaryEventStore(new EventTypeContext(\"default\", EventType.EVENT),\n                                             indexManager,"
+  },
+  {
+    "sha": "07bf6dcc990dd21be010497d1489c90b79b8cf33",
+    "filename": "axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/StandardEventStoreFactoryTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/StandardEventStoreFactoryTest.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/StandardEventStoreFactoryTest.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/StandardEventStoreFactoryTest.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -69,7 +69,7 @@ public void setUp() throws Exception {\n         embeddedDBProperties.getSnapshot().setUseMmapIndex(false);\n         embeddedDBProperties.getSnapshot().setForceCleanMmapIndex(true);\n         MeterFactory meterFactory = new MeterFactory(new SimpleMeterRegistry(), new DefaultMetricCollector());\n-        doNothing().when(fileSystemMonitor).registerPath(any());\n+        doNothing().when(fileSystemMonitor).registerPath(any(), any());\n         testSubject = new StandardEventStoreFactory(embeddedDBProperties,\n                                                     new DefaultEventTransformerFactory(),\n                                                     new DefaultStorageTransactionManagerFactory(), meterFactory, fileSystemMonitor);"
+  },
+  {
+    "sha": "155b71c03e666147c2f6a09b9e541a1434f041bb",
+    "filename": "axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/TokenAtTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/TokenAtTest.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/TokenAtTest.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/TokenAtTest.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -59,7 +59,7 @@ public String getHostName() throws UnknownHostException {\n                                                                               storageProperties,\n                                                                               meterFactory);\n \n-        doNothing().when(fileSystemMonitor).registerPath(any());\n+        doNothing().when(fileSystemMonitor).registerPath(any(), any());\n \n         testSubject = new PrimaryEventStore(new EventTypeContext(\"default\", EventType.EVENT),\n                                             indexManager,"
+  },
+  {
+    "sha": "a58164b1ccafd3950457269d4add25dd8f24d2ac",
+    "filename": "axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/ValidLastIndexTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/AxonIQ/axon-server-se/blob/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/ValidLastIndexTest.java",
+    "raw_url": "https://github.com/AxonIQ/axon-server-se/raw/9ffc16b39822ff33a016fdfa45510042abeefde1/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/ValidLastIndexTest.java",
+    "contents_url": "https://api.github.com/repos/AxonIQ/axon-server-se/contents/axonserver/src/test/java/io/axoniq/axonserver/localstorage/file/ValidLastIndexTest.java?ref=9ffc16b39822ff33a016fdfa45510042abeefde1",
+    "patch": "@@ -37,7 +37,7 @@\n     @Before\n     public void init() {\n         MeterFactory meterFactory = new MeterFactory(new SimpleMeterRegistry(), new DefaultMetricCollector());\n-        doNothing().when(fileSystemMonitor).registerPath(any());\n+        doNothing().when(fileSystemMonitor).registerPath(any(), any());\n \n         StorageProperties storageProperties = new StorageProperties(new SystemInfoProvider() {\n             @Override"
+  }
+]

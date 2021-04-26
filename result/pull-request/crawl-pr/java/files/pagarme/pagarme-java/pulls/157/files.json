@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "6cf1cc2f7bff843d506767347cbf8c3e5fe8a1f4",
+    "filename": "src/main/java/me/pagar/model/Transfer.java",
+    "status": "modified",
+    "additions": 28,
+    "deletions": 6,
+    "changes": 34,
+    "blob_url": "https://github.com/pagarme/pagarme-java/blob/7d2e9dcfe03aaa29575d11395913b54f6b317546/src/main/java/me/pagar/model/Transfer.java",
+    "raw_url": "https://github.com/pagarme/pagarme-java/raw/7d2e9dcfe03aaa29575d11395913b54f6b317546/src/main/java/me/pagar/model/Transfer.java",
+    "contents_url": "https://api.github.com/repos/pagarme/pagarme-java/contents/src/main/java/me/pagar/model/Transfer.java?ref=7d2e9dcfe03aaa29575d11395913b54f6b317546",
+    "patch": "@@ -17,12 +17,19 @@\n \n     @Expose(serialize=false)\n     private Type type;\n+\n     @Expose(serialize=false)\n     private Status status;\n+\n     @Expose(serialize=false)\n     private Integer fee;\n+\n+    @Expose(serialize=false)\n+    private DateTime fundingDate;\n+\n     @Expose(serialize=false)\n     private DateTime fundingEstimatedDate;\n+\n     @Expose(serialize=false)\n     private BankAccount bankAccount;\n \n@@ -31,20 +38,21 @@\n \n     @Expose(deserialize=false)\n     private Integer bankAccountId;\n+\n     @Expose(deserialize=false)\n     private String recipientId;\n \n     public Transfer(){\n         super();\n     }\n \n-    public Transfer(Integer amount, String recipientId){\n+    public Transfer(Integer amount, String recipientId) {\n         super();\n         this.recipientId = recipientId;\n         this.amount = amount;\n     }\n \n-    public Transfer(Integer amount, String recipientId, Integer bankAccountId){\n+    public Transfer(Integer amount, String recipientId, Integer bankAccountId) {\n         super();\n         this.amount = amount;\n         this.recipientId = recipientId;\n@@ -63,6 +71,14 @@ public Integer getFee() {\n         return fee;\n     }\n \n+    public DateTime getFundingDate() {\n+        return fundingDate;\n+    }\n+\n+    public void setFundingDate(DateTime fundingDate) {\n+        this.fundingDate = fundingDate;\n+    }\n+\n     public DateTime getFundingEstimatedDate() {\n         return fundingEstimatedDate;\n     }\n@@ -99,14 +115,14 @@ public void setRecipientId(String recipientId) {\n         this.recipientId = recipientId;\n     }\n \n-    public Transfer save() throws PagarMeException{\n+    public Transfer save() throws PagarMeException {\n         final Transfer saved = super.save(getClass());\n         copy(saved);\n \n         return saved;\n     }\n \n-    public Transfer cancel() throws PagarMeException{\n+    public Transfer cancel() throws PagarMeException {\n         validateId();\n \n         final PagarMeRequest request = new PagarMeRequest(HttpMethod.POST,\n@@ -122,7 +138,7 @@ public Transfer cancel() throws PagarMeException{\n         return other;\n     }\n \n-    public Transfer find(String id) throws PagarMeException{\n+    public Transfer find(String id) throws PagarMeException {\n         final PagarMeRequest request = new PagarMeRequest(HttpMethod.GET, String.format(\"/%s/%s\", getClassName(), id));\n \n         final Transfer other = JSONUtils.getAsObject((JsonObject) request.execute(), Transfer.class);\n@@ -137,7 +153,7 @@ public Transfer find(String id) throws PagarMeException{\n         }.getType());\n     }\n \n-    private void copy(Transfer other){\n+    private void copy(Transfer other) {\n         super.copy(other);\n         this.amount = other.amount;\n         this.bankAccount = other.bankAccount;\n@@ -150,21 +166,27 @@ private void copy(Transfer other){\n     public enum Status{\n         @SerializedName(\"pending_transfer\")\n         PENDING_TRANSFER,\n+\n         @SerializedName(\"transferred\")\n         TRANSFERRED,\n+\n         @SerializedName(\"failed\")\n         FAILED,\n+\n         @SerializedName(\"processing\")\n         PROCESSING,\n+\n         @SerializedName(\"canceled\")\n         CANCELED\n     }\n \n     public enum Type{\n         @SerializedName(\"ted\")\n         TED,\n+\n         @SerializedName(\"doc\")\n         DOC,\n+\n         @SerializedName(\"credito_em_conta\")\n         CREDITO_EM_CONTA\n     }"
+  },
+  {
+    "sha": "ed5347ecc001284095ddc1a2e31fd8ec75095c47",
+    "filename": "src/test/java/me/pagarme/TransferTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/pagarme/pagarme-java/blob/7d2e9dcfe03aaa29575d11395913b54f6b317546/src/test/java/me/pagarme/TransferTest.java",
+    "raw_url": "https://github.com/pagarme/pagarme-java/raw/7d2e9dcfe03aaa29575d11395913b54f6b317546/src/test/java/me/pagarme/TransferTest.java",
+    "contents_url": "https://api.github.com/repos/pagarme/pagarme-java/contents/src/test/java/me/pagarme/TransferTest.java?ref=7d2e9dcfe03aaa29575d11395913b54f6b317546",
+    "patch": "@@ -107,6 +107,7 @@ public void testTransferFind() throws PagarMeException{\n         Assert.assertEquals(transfer.getFundingEstimatedDate(), foundTransfer.getFundingEstimatedDate());\n         Assert.assertEquals(transfer.getStatus(), foundTransfer.getStatus());\n         Assert.assertEquals(transfer.getType(), foundTransfer.getType());\n+        Assert.assertEquals(transfer.getFundingDate(), foundTransfer.getFundingDate());\n     }\n \n     @Test"
+  }
+]

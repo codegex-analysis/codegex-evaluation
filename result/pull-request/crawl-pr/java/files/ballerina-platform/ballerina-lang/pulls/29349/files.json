@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "b2d49af6f75eacc8ce7cd5108d6700d068593203",
+    "filename": "cli/ballerina-cli/src/main/java/io/ballerina/cli/cmd/PushCommand.java",
+    "status": "modified",
+    "additions": 12,
+    "deletions": 2,
+    "changes": 14,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/f64a6cd6212c39fcb9ec67e9c8052214ac058bf3/cli/ballerina-cli/src/main/java/io/ballerina/cli/cmd/PushCommand.java",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/f64a6cd6212c39fcb9ec67e9c8052214ac058bf3/cli/ballerina-cli/src/main/java/io/ballerina/cli/cmd/PushCommand.java",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/cli/ballerina-cli/src/main/java/io/ballerina/cli/cmd/PushCommand.java?ref=f64a6cd6212c39fcb9ec67e9c8052214ac058bf3",
+    "patch": "@@ -22,6 +22,7 @@\n import io.ballerina.projects.PackageManifest;\n import io.ballerina.projects.PackageName;\n import io.ballerina.projects.PackageOrg;\n+import io.ballerina.projects.PackageVersion;\n import io.ballerina.projects.ProjectEnvironmentBuilder;\n import io.ballerina.projects.ProjectException;\n import io.ballerina.projects.bala.BalaProject;\n@@ -212,20 +213,29 @@ private static Path validateBala(BuildProject project, CentralAPIClient client)\n     private static Path validateBalaFile(BuildProject project) {\n         final PackageName pkgName = project.currentPackage().packageName();\n         final PackageOrg orgName = project.currentPackage().packageOrg();\n+        PackageVersion packageVersion = project.currentPackage().packageVersion();\n \n         // Get bala output path\n         Path balaOutputDir = project.currentPackage().project().sourceRoot().resolve(ProjectConstants.TARGET_DIR_NAME)\n                 .resolve(ProjectConstants.TARGET_BALA_DIR_NAME);\n \n         if (Files.notExists(balaOutputDir)) {\n             throw new ProjectException(\"cannot find bala file for the package: \" + pkgName + \". Run \"\n-                    + \"'bal build' to compile and generate the bala.\");\n+                    + \"'bal build -c' to compile and generate the bala.\");\n         }\n \n         Path packageBalaFile = findBalaFile(pkgName, orgName, balaOutputDir);\n         if (null == packageBalaFile) {\n             throw new ProjectException(\"cannot find bala file for the package: \" + pkgName + \". Run \"\n-                    + \"'bal build' to compile and generate the bala.\");\n+                    + \"'bal build -c' to compile and generate the bala.\");\n+        }\n+\n+        if (!packageBalaFile.toString().endsWith(\n+                packageVersion.toString() + ProjectConstants.BLANG_COMPILED_PKG_BINARY_EXT)) {\n+            throw new ProjectException(\n+                    \"'\" + packageBalaFile + \"' does not match with the package version '\" + packageVersion.toString()\n+                            + \"' in \" + ProjectConstants.BALLERINA_TOML\n+                            + \" file. Run 'bal build -c' to recompile and generate the bala.\");\n         }\n \n         // bala file path"
+  },
+  {
+    "sha": "00014b3e52a1031cce556a90a184d2672077eac2",
+    "filename": "cli/ballerina-cli/src/test/java/io/ballerina/cli/cmd/PushCommandTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/ballerina-platform/ballerina-lang/blob/f64a6cd6212c39fcb9ec67e9c8052214ac058bf3/cli/ballerina-cli/src/test/java/io/ballerina/cli/cmd/PushCommandTest.java",
+    "raw_url": "https://github.com/ballerina-platform/ballerina-lang/raw/f64a6cd6212c39fcb9ec67e9c8052214ac058bf3/cli/ballerina-cli/src/test/java/io/ballerina/cli/cmd/PushCommandTest.java",
+    "contents_url": "https://api.github.com/repos/ballerina-platform/ballerina-lang/contents/cli/ballerina-cli/src/test/java/io/ballerina/cli/cmd/PushCommandTest.java?ref=f64a6cd6212c39fcb9ec67e9c8052214ac058bf3",
+    "patch": "@@ -82,7 +82,7 @@ public void testPushWithTooManyArgs() throws IOException {\n     @Test(description = \"Push package without bala directory\")\n     public void testPushWithoutBalaDir() throws IOException {\n         String expected = \"cannot find bala file for the package: winery. Run \"\n-                + \"'bal build' to compile and generate the bala.\";\n+                + \"'bal build -c' to compile and generate the bala.\";\n \n         Path validBalProject = this.testResources.resolve(VALID_PROJECT);\n         PushCommand pushCommand = new PushCommand(validBalProject, printStream, printStream);\n@@ -114,7 +114,7 @@ public void testPushWithoutBala() throws IOException {\n \n         // Push\n         String expected = \"cannot find bala file for the package: winery. Run \"\n-                + \"'bal build' to compile and generate the bala.\";\n+                + \"'bal build -c' to compile and generate the bala.\";\n         PushCommand pushCommand = new PushCommand(projectPath, printStream, printStream);\n         new CommandLine(pushCommand).parse();\n         pushCommand.execute();"
+  }
+]

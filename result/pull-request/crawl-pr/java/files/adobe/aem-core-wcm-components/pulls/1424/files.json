@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "b2dd4676ef7ecb5d1017ef82cf15f0b9022d3fc6",
+    "filename": "content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v1/experiencefragment/_cq_dialog/.content.xml",
+    "status": "modified",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/adobe/aem-core-wcm-components/blob/245d4f51dabae921f2a8388e97d5dea95b51ce82/content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v1/experiencefragment/_cq_dialog/.content.xml",
+    "raw_url": "https://github.com/adobe/aem-core-wcm-components/raw/245d4f51dabae921f2a8388e97d5dea95b51ce82/content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v1/experiencefragment/_cq_dialog/.content.xml",
+    "contents_url": "https://api.github.com/repos/adobe/aem-core-wcm-components/contents/content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v1/experiencefragment/_cq_dialog/.content.xml?ref=245d4f51dabae921f2a8388e97d5dea95b51ce82",
+    "patch": "@@ -64,6 +64,13 @@\n                                                 fieldDescription=\"HTML ID attribute to apply to the component.\"\n                                                 fieldLabel=\"ID\"\n                                                 name=\"./id\"/>\n+                                            <useFragmentAsRemoteOffer\n+                                                jcr:primaryType=\"nt:unstructured\"\n+                                                sling:resourceType=\"granite/ui/components/coral/foundation/form/checkbox\"\n+                                                fieldDescription=\"When checked, the experience fragment can be used as a remote offer and the experience can be replaced with a different content from Adobe Target using the id provided above.\"\n+                                                name=\"./enableRemoteOffer\"\n+                                                text=\"Enable Remote Offer with Adobe Target\"\n+                                                value=\"{Boolean}true\"/>\n                                         </items>\n                                     </column>\n                                 </items>"
+  },
+  {
+    "sha": "318ea72d7c7b3029a1269cedfd1b8567c4f31b31",
+    "filename": "content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v1/experiencefragment/experiencefragment.html",
+    "status": "modified",
+    "additions": 19,
+    "deletions": 2,
+    "changes": 21,
+    "blob_url": "https://github.com/adobe/aem-core-wcm-components/blob/245d4f51dabae921f2a8388e97d5dea95b51ce82/content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v1/experiencefragment/experiencefragment.html",
+    "raw_url": "https://github.com/adobe/aem-core-wcm-components/raw/245d4f51dabae921f2a8388e97d5dea95b51ce82/content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v1/experiencefragment/experiencefragment.html",
+    "contents_url": "https://api.github.com/repos/adobe/aem-core-wcm-components/contents/content/src/content/jcr_root/apps/core/wcm/components/experiencefragment/v1/experiencefragment/experiencefragment.html?ref=245d4f51dabae921f2a8388e97d5dea95b51ce82",
+    "patch": "@@ -20,6 +20,23 @@\n      data-sly-set.selector=\"content.${request.requestPathInfo.selectorString}\"\n      data-sly-resource=\"${@path=fragment.localizedFragmentVariationPath, selectors=selector, wcmmode='disabled'}\"\n      id=\"${component.id}\"\n-     class=\"cmp-experiencefragment cmp-experiencefragment--${fragment.name}\">\n+     class=\"cmp-experiencefragment cmp-experiencefragment--${fragment.name} ${properties.enableRemoteOffer ? ' mboxDefault' : ''}\">\n </div>\n-<sly data-sly-call=\"${template.placeholder @ isEmpty=!fragment.configured, classAppend='cmp-dd-experiencefragment'}\"></sly>\n\\ No newline at end of file\n+<sly data-sly-call=\"${template.placeholder @ isEmpty=!fragment.configured, classAppend='cmp-dd-experiencefragment'}\"></sly>\n+\n+<script data-sly-test=\"${properties.enableRemoteOffer && properties.id}\" data-sly-set.mboxId=\"${properties.id}\">\n+    adobe.target.getOffer({\n+        mbox: \"${mboxId @ context='scriptString'}\",\n+        success: function (offer) {\n+            adobe.target.applyOffer({\n+                mbox: \"${mboxId @ context='scriptString'}\",\n+                selector: \"#${mboxId @ context='scriptString'}\",\n+                offer: offer\n+            });\n+        },\n+        error: function (error) {\n+            var el = document.getElementById(\"${mboxId @ context='scriptString'}\");\n+            el.style.visibility = \"visible\";\n+        }\n+    });\n+</script>\n\\ No newline at end of file"
+  }
+]

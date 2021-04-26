@@ -1,0 +1,122 @@
+[
+  {
+    "sha": "de9b4043514926a5220459a97fef39e1c2ecca54",
+    "filename": "axelor-account/src/main/java/com/axelor/apps/account/db/repo/InvoiceManagementRepository.java",
+    "status": "modified",
+    "additions": 16,
+    "deletions": 0,
+    "changes": 16,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/java/com/axelor/apps/account/db/repo/InvoiceManagementRepository.java",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/java/com/axelor/apps/account/db/repo/InvoiceManagementRepository.java",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/axelor-account/src/main/java/com/axelor/apps/account/db/repo/InvoiceManagementRepository.java?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -20,8 +20,10 @@\n import com.axelor.apps.account.db.Invoice;\n import com.axelor.apps.account.db.InvoicePayment;\n import com.axelor.apps.account.db.SubrogationRelease;\n+import com.axelor.apps.account.service.app.AppAccountService;\n import com.axelor.apps.account.service.invoice.InvoiceService;\n import com.axelor.apps.account.service.invoice.InvoiceToolService;\n+import com.axelor.apps.account.service.invoice.workflow.validate.ValidateState;\n import com.axelor.exception.service.TraceBackService;\n import com.axelor.inject.Beans;\n import java.time.LocalDate;\n@@ -43,6 +45,7 @@ public Invoice copy(Invoice entity, boolean deep) {\n   @Override\n   public Invoice save(Invoice invoice) {\n     try {\n+      AppAccountService appAccountService = Beans.get(AppAccountService.class);\n       List<InvoicePayment> invoicePayments = invoice.getInvoicePaymentList();\n       if (CollectionUtils.isNotEmpty(invoicePayments)) {\n         LocalDate latestPaymentDate =\n@@ -57,6 +60,19 @@ public Invoice save(Invoice invoice) {\n         invoice.setPaymentDate(latestPaymentDate);\n       }\n \n+      if ((invoice\n+                  .getOperationTypeSelect()\n+                  .equals(InvoiceRepository.OPERATION_TYPE_SUPPLIER_PURCHASE)\n+              || invoice\n+                  .getOperationTypeSelect()\n+                  .equals(InvoiceRepository.OPERATION_TYPE_SUPPLIER_REFUND))\n+          && appAccountService.isApp(\"budget\")\n+          && !appAccountService.getAppBudget().getManageMultiBudget()\n+          && !invoice.getStatusSelect().equals(InvoiceRepository.STATUS_DRAFT)\n+          && !invoice.getStatusSelect().equals(InvoiceRepository.STATUS_CANCELED)) {\n+        Beans.get(ValidateState.class).generateBudgetDistribution(invoice);\n+      }\n+\n       invoice = super.save(invoice);\n       Beans.get(InvoiceService.class).setDraftSequence(invoice);\n "
+  },
+  {
+    "sha": "b1efcc0d935257a1398b2ab0a4381c994dc50c7b",
+    "filename": "axelor-account/src/main/java/com/axelor/apps/account/service/invoice/workflow/validate/ValidateState.java",
+    "status": "modified",
+    "additions": 49,
+    "deletions": 7,
+    "changes": 56,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/java/com/axelor/apps/account/service/invoice/workflow/validate/ValidateState.java",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/java/com/axelor/apps/account/service/invoice/workflow/validate/ValidateState.java",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/axelor-account/src/main/java/com/axelor/apps/account/service/invoice/workflow/validate/ValidateState.java?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -17,6 +17,7 @@\n  */\n package com.axelor.apps.account.service.invoice.workflow.validate;\n \n+import com.axelor.apps.account.db.Budget;\n import com.axelor.apps.account.db.BudgetDistribution;\n import com.axelor.apps.account.db.Invoice;\n import com.axelor.apps.account.db.InvoiceLine;\n@@ -36,6 +37,9 @@\n import com.axelor.exception.db.repo.TraceBackRepository;\n import com.axelor.i18n.I18n;\n import com.google.inject.Inject;\n+import java.util.ArrayList;\n+import java.util.List;\n+import org.apache.commons.collections.CollectionUtils;\n \n public class ValidateState extends WorkflowInvoice {\n \n@@ -123,18 +127,56 @@ public void process() throws AxelorException {\n     workflowValidationService.afterValidation(invoice);\n   }\n \n-  private void generateBudgetDistribution(Invoice invoice) {\n-    if (invoice.getInvoiceLineList() != null) {\n-      for (InvoiceLine invoiceLine : invoice.getInvoiceLineList()) {\n-        if (invoiceLine.getBudget() != null\n-            && (invoiceLine.getBudgetDistributionList() == null\n-                || invoiceLine.getBudgetDistributionList().isEmpty())) {\n+  public void generateBudgetDistribution(Invoice invoice) {\n+    List<InvoiceLine> invoiceLines = invoice.getInvoiceLineList();\n+    List<Budget> updateBudgetList = new ArrayList<>();\n+\n+    if (!CollectionUtils.isEmpty(invoiceLines)) {\n+\n+      for (InvoiceLine invoiceLine : invoiceLines) {\n+        List<BudgetDistribution> budgetDistributions = invoiceLine.getBudgetDistributionList();\n+        Budget invoiceLineBudget = invoiceLine.getBudget();\n+\n+        if (!CollectionUtils.isEmpty(budgetDistributions)) {\n+          BudgetDistribution tempBudgetDistribution = null;\n+\n+          for (BudgetDistribution budgetDistribution : budgetDistributions) {\n+            Budget budget = budgetDistribution.getBudget();\n+\n+            if (invoiceLineBudget != null) {\n+\n+              if (!invoiceLineBudget.equals(budget)) {\n+                updateBudgetList.add(budget);\n+                updateBudgetList.add(invoiceLineBudget);\n+                budgetDistribution.setBudget(invoiceLineBudget);\n+                budgetDistribution.setAmount(invoiceLine.getCompanyExTaxTotal());\n+              }\n+\n+              tempBudgetDistribution = budgetDistribution;\n+            } else {\n+              updateBudgetList.add(budget);\n+            }\n+          }\n+          invoiceLine.clearBudgetDistributionList();\n+\n+          if (tempBudgetDistribution != null) {\n+            invoiceLine.addBudgetDistributionListItem(tempBudgetDistribution);\n+          }\n+        } else if (invoiceLineBudget != null) {\n           BudgetDistribution budgetDistribution = new BudgetDistribution();\n-          budgetDistribution.setBudget(invoiceLine.getBudget());\n+          budgetDistribution.setBudget(invoiceLineBudget);\n           budgetDistribution.setAmount(invoiceLine.getCompanyExTaxTotal());\n           invoiceLine.addBudgetDistributionListItem(budgetDistribution);\n+          updateBudgetList.add(invoiceLineBudget);\n         }\n       }\n     }\n+\n+    if (!CollectionUtils.isEmpty(updateBudgetList)) {\n+      for (Budget budget : updateBudgetList) {\n+        budgetService.updateLines(budget);\n+        budgetService.computeTotalAmountRealized(budget);\n+      }\n+    }\n   }\n }"
+  },
+  {
+    "sha": "5abaf423842bf1e202671fed0f0a00703f3cd152",
+    "filename": "axelor-account/src/main/resources/views/BudgetDistribution.xml",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/resources/views/BudgetDistribution.xml",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/resources/views/BudgetDistribution.xml",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/axelor-account/src/main/resources/views/BudgetDistribution.xml?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -37,7 +37,7 @@\n \n \t<form name=\"invoice-budget-distribution-form\" title=\"Budget distribution\" model=\"com.axelor.apps.account.db.BudgetDistribution\" width=\"large\" onLoad=\"action-budget-distribution-attrs-budget-amount-available\">\n \t\t<panel name=\"mainPanel\" >\n-\t\t\t<field name=\"budget\" readonly=\"true\"/>\n+\t\t\t<field name=\"budget\" readonly=\"true\" domain=\"self.statusSelect = 2 and self.budgetLineList IS NOT EMPTY\"/>\n \t\t\t<field name=\"invoiceLine.product\" readonly=\"true\" domain=\"self.dtype = 'Product'\"/>\n \t\t\t<field name=\"budgetAmountAvailable\" readonly=\"true\"/>\n \t\t\t<field name=\"amount\" readonly=\"true\"/>\n@@ -48,7 +48,7 @@\n \n \t<form name=\"invoice-budget-distribution-complete-form\" title=\"Budget distribution\" model=\"com.axelor.apps.account.db.BudgetDistribution\" width=\"large\" onLoad=\"action-budget-distribution-attrs-budget-amount-available\">\n \t\t<panel name=\"mainPanel\" >\n-\t\t\t<field name=\"budget\" readonly=\"true\"/>\n+\t\t\t<field name=\"budget\" readonly=\"true\" domain=\"self.statusSelect = 2 and self.budgetLineList IS NOT EMPTY\"/>\n \t\t\t<field name=\"invoiceLine.product\" readonly=\"true\" domain=\"self.dtype = 'Product'\"/>\n \t\t\t<field name=\"invoiceLine.invoice\" readonly=\"true\"/>\n \t\t\t<field name=\"invoiceLine.invoice.validatedDate\" readonly=\"true\"/>"
+  },
+  {
+    "sha": "0dba507fc4a82e74880d681680c957d44e4aaa70",
+    "filename": "axelor-account/src/main/resources/views/Invoice.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/resources/views/Invoice.xml",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/resources/views/Invoice.xml",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/axelor-account/src/main/resources/views/Invoice.xml?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -314,7 +314,7 @@\n \n \t\t<panel-tabs name=\"mainPanelTab\" hideIf=\"partner == null\">\n \t\t\t<panel name=\"invoiceContentPanel\" title=\"Content\" showTitle=\"false\">\n-\t\t\t\t<panel-related name=\"invoiceLineListPanel\" field=\"invoiceLineList\" canNew=\"statusSelect == 1\" canRemove=\"statusSelect == 1\" readonlyIf=\"statusSelect == 3 || partner == null\" colSpan=\"12\" form-view=\"invoice-line-form\" grid-view=\"invoice-line-grid\" onChange=\"action-invoice-group-invoice-line-list-on-change\" canMove=\"true\" orderBy=\"sequence\"  height=\"30\" />\n+\t\t\t\t<panel-related name=\"invoiceLineListPanel\" field=\"invoiceLineList\" canNew=\"statusSelect == 1\" canRemove=\"statusSelect == 1\" readonlyIf=\"partner == null\" colSpan=\"12\" form-view=\"invoice-line-form\" grid-view=\"invoice-line-grid\" onChange=\"action-invoice-group-invoice-line-list-on-change\" canMove=\"true\" orderBy=\"sequence\"  height=\"30\" />\n \t\t\t</panel>\n \t\t\t<panel name=\"invoiceTaxPanel\" title=\"Tax\" showTitle=\"false\">\n \t\t\t\t<panel-related name=\"invoiceLineTaxListPanel\" field=\"invoiceLineTaxList\" colSpan=\"12\" form-view=\"invoice-line-tax-form\" grid-view=\"invoice-line-tax-grid\"/>"
+  },
+  {
+    "sha": "170af0d22b990e215bfafa763b2ad14b4f94c5cf",
+    "filename": "axelor-account/src/main/resources/views/InvoiceLine.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/resources/views/InvoiceLine.xml",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/axelor-account/src/main/resources/views/InvoiceLine.xml",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/axelor-account/src/main/resources/views/InvoiceLine.xml?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -209,7 +209,7 @@\n \t\t<attribute name=\"readonly\" for=\"description\" expr=\"eval: __parent__?.statusSelect &gt; 1\"/>\n \t\t<attribute name=\"readonly\" for=\"projectPanel\" expr=\"eval: __parent__?.statusSelect &gt; 1\"/>\n \t\t<attribute name=\"readonly\" for=\"analyticDistributionPanel\" expr=\"eval: __parent__?.statusSelect &gt; 2\"/>\n-\t\t<attribute name=\"readonly\" for=\"budgetPanel\" expr=\"eval: __parent__?.statusSelect &gt; 1\"/>\n+\t\t<attribute name=\"readonly\" for=\"configurationPanel\" expr=\"eval: __parent__?.statusSelect &gt; 2\"/>\n \n \t\t<attribute name=\"readonly\" for=\"accountingPanel\" expr=\"eval: __parent__?.statusSelect &gt; 2\"/>\n \t</action-attrs>"
+  },
+  {
+    "sha": "b1977315e582cb16ee967ed6be4eae94edd2e81f",
+    "filename": "axelor-purchase/src/main/resources/views/PurchaseOrder.xml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/axelor-purchase/src/main/resources/views/PurchaseOrder.xml",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/axelor-purchase/src/main/resources/views/PurchaseOrder.xml",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/axelor-purchase/src/main/resources/views/PurchaseOrder.xml?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -155,7 +155,7 @@\n \t\t\t\t<panel-related name=\"timetableListPanel\" field=\"timetableList\" colSpan=\"12\" grid-view=\"timetable-grid-purchase\" form-view=\"timetable-form-purchase\" onChange=\"action-purchase-order-method-update-amount-to-be-spread-over-the-timetable\" if-module=\"axelor-supplychain\"/>\n \t\t\t</panel>\n \t\t\t<panel name=\"budgetDistributionPanel\" title=\"Budget distribution\" if=\"__config__.app.isApp('budget')\" if-module=\"axelor-supplychain\" showIf=\"statusSelect &lt;= 4\">\n-\t\t\t\t<field name=\"budget\" showIf=\"statusSelect &lt;= 2\"/>\n+\t\t\t\t<field name=\"budget\" showIf=\"statusSelect &lt;= 2\" domain=\"self.statusSelect = 2 and self.budgetLineList IS NOT EMPTY\"/>\n \t\t\t\t<button name=\"applyToAllBtn\" title=\"Apply to all\" onClick=\"save,action-purchase-order-budget-distribution-apply-to-all,save\" readonlyIf=\"!budget\" showIf=\"statusSelect &lt;= 2\"/>\n \t\t\t    <panel-dashlet name=\"budgetDistributionPanel\" action=\"action-supplychain-budget-distribuion-view-budget-distribution\" colSpan=\"12\" showIf=\"statusSelect &gt;= 3 &amp;&amp; statusSelect &lt;= 4\" readonly=\"true\"/>\n \t\t\t</panel>"
+  },
+  {
+    "sha": "cd9153fa83bfd29e19eb3a3ce593ff6f96ab9880",
+    "filename": "axelor-purchase/src/main/resources/views/PurchaseOrderLine.xml",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 1,
+    "changes": 1,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/axelor-purchase/src/main/resources/views/PurchaseOrderLine.xml",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/axelor-purchase/src/main/resources/views/PurchaseOrderLine.xml",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/axelor-purchase/src/main/resources/views/PurchaseOrderLine.xml?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -425,7 +425,6 @@\n \t<action-attrs name=\"action-purchase-order-line-attrs-readonly-form\">\n \t\t<attribute name=\"readonly\" for=\"informationsPanel\" expr=\"eval: __parent__?.statusSelect &gt; 2\"/>\n \t\t<attribute name=\"readonly\" for=\"supplierRequestsPanel\" expr=\"eval: __parent__?.statusSelect &gt; 2\"/>\n-\t\t<attribute name=\"readonly\" for=\"budgetDistributionPanel\" expr=\"eval: __parent__?.statusSelect &gt; 2\"/>\n \t\t<attribute name=\"readonly\" for=\"projectPanel\" expr=\"eval: __parent__?.statusSelect &gt; 3\"/>\n \t\t<attribute name=\"readonly\" for=\"budgetPanel\" expr=\"eval: __parent__?.statusSelect &gt; 2\"/>\n \t\t<attribute name=\"readonly\" for=\"deliveryInformationPanel\" expr=\"eval: __parent__?.statusSelect &gt; 3\"/>"
+  },
+  {
+    "sha": "8230517152ad60743d8ce74158b7eca353a39bcd",
+    "filename": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/db/repo/PurchaseOrderSupplychainRepository.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 2,
+    "changes": 7,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/db/repo/PurchaseOrderSupplychainRepository.java",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/db/repo/PurchaseOrderSupplychainRepository.java",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/db/repo/PurchaseOrderSupplychainRepository.java?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -17,6 +17,7 @@\n  */\n package com.axelor.apps.supplychain.db.repo;\n \n+import com.axelor.apps.account.service.app.AppAccountService;\n import com.axelor.apps.base.service.app.AppService;\n import com.axelor.apps.purchase.db.PurchaseOrder;\n import com.axelor.apps.purchase.db.PurchaseOrderLine;\n@@ -56,8 +57,10 @@ public PurchaseOrder copy(PurchaseOrder entity, boolean deep) {\n \n   @Override\n   public PurchaseOrder save(PurchaseOrder purchaseOrder) {\n-\n-    if (appService.isApp(\"supplychain\")) {\n+    AppAccountService appAccountService = Beans.get(AppAccountService.class);\n+    if (appService.isApp(\"supplychain\")\n+        && appAccountService.isApp(\"budget\")\n+        && !appAccountService.getAppBudget().getManageMultiBudget()) {\n       Beans.get(PurchaseOrderSupplychainService.class).generateBudgetDistribution(purchaseOrder);\n     }\n     return super.save(purchaseOrder);"
+  },
+  {
+    "sha": "087116ec5ff0ef061939ab18848bf9454739f60c",
+    "filename": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/PurchaseOrderServiceSupplychainImpl.java",
+    "status": "modified",
+    "additions": 49,
+    "deletions": 7,
+    "changes": 56,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/PurchaseOrderServiceSupplychainImpl.java",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/PurchaseOrderServiceSupplychainImpl.java",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/PurchaseOrderServiceSupplychainImpl.java?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -59,6 +59,7 @@\n import java.util.HashMap;\n import java.util.List;\n import java.util.Map;\n+import org.apache.commons.collections.CollectionUtils;\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n \n@@ -156,19 +157,60 @@ public PurchaseOrder createPurchaseOrder(\n   @Transactional\n   @Override\n   public void generateBudgetDistribution(PurchaseOrder purchaseOrder) {\n-    if (purchaseOrder.getPurchaseOrderLineList() != null) {\n-      for (PurchaseOrderLine purchaseOrderLine : purchaseOrder.getPurchaseOrderLineList()) {\n-        if (purchaseOrderLine.getBudget() != null\n-            && (purchaseOrderLine.getBudgetDistributionList() == null\n-                || purchaseOrderLine.getBudgetDistributionList().isEmpty())) {\n+    List<PurchaseOrderLine> purchaseOrderLines = purchaseOrder.getPurchaseOrderLineList();\n+    List<Budget> updateBudgetList = new ArrayList<>();\n+\n+    if (!CollectionUtils.isEmpty(purchaseOrderLines)) {\n+\n+      for (PurchaseOrderLine purchaseOrderLine : purchaseOrderLines) {\n+        Budget purchaseOrderLineBudget = purchaseOrderLine.getBudget();\n+        List<BudgetDistribution> budgetDistributions =\n+            purchaseOrderLine.getBudgetDistributionList();\n+\n+        if (!CollectionUtils.isEmpty(budgetDistributions)) {\n+          BudgetDistribution tempBudgetDistribution = null;\n+\n+          for (BudgetDistribution budgetDistribution : budgetDistributions) {\n+            Budget budget = budgetDistribution.getBudget();\n+\n+            if (purchaseOrderLineBudget != null) {\n+\n+              if (!purchaseOrderLineBudget.equals(budget)) {\n+                updateBudgetList.add(budget);\n+                updateBudgetList.add(purchaseOrderLineBudget);\n+                budgetDistribution.setBudget(purchaseOrderLineBudget);\n+                budgetDistribution.setAmount(purchaseOrderLine.getCompanyExTaxTotal());\n+              }\n+\n+              tempBudgetDistribution = budgetDistribution;\n+            } else {\n+              updateBudgetList.add(budget);\n+            }\n+          }\n+          purchaseOrderLine.clearBudgetDistributionList();\n+\n+          if (tempBudgetDistribution != null) {\n+            purchaseOrderLine.addBudgetDistributionListItem(tempBudgetDistribution);\n+          }\n+        } else if (purchaseOrderLineBudget != null) {\n           BudgetDistribution budgetDistribution = new BudgetDistribution();\n-          budgetDistribution.setBudget(purchaseOrderLine.getBudget());\n+          budgetDistribution.setBudget(purchaseOrderLineBudget);\n           budgetDistribution.setAmount(purchaseOrderLine.getCompanyExTaxTotal());\n           purchaseOrderLine.addBudgetDistributionListItem(budgetDistribution);\n+          updateBudgetList.add(purchaseOrderLineBudget);\n         }\n       }\n-      // purchaseOrderRepo.save(purchaseOrder);\n     }\n+\n+    if (!CollectionUtils.isEmpty(updateBudgetList)\n+        && !purchaseOrder.getStatusSelect().equals(PurchaseOrderRepository.STATUS_DRAFT)\n+        && !purchaseOrder.getStatusSelect().equals(PurchaseOrderRepository.STATUS_REQUESTED)) {\n+      for (Budget budget : updateBudgetList) {\n+        budgetSupplychainService.updateLines(budget);\n+        budgetSupplychainService.computeTotalAmountCommitted(budget);\n+      }\n+    }\n+    // purchaseOrderRepo.save(purchaseOrder);\n   }\n \n   @Transactional(rollbackOn = {Exception.class})"
+  },
+  {
+    "sha": "20b0f8e25be47d69503ffcaa449716e749dab2d8",
+    "filename": "changelogs/unreleased/change-budget-repartition-on-validated-PO-and-invoice.yml",
+    "status": "added",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/axelor/axelor-open-suite/blob/db971940a76e4c8d429de651b013087df49e5fd9/changelogs/unreleased/change-budget-repartition-on-validated-PO-and-invoice.yml",
+    "raw_url": "https://github.com/axelor/axelor-open-suite/raw/db971940a76e4c8d429de651b013087df49e5fd9/changelogs/unreleased/change-budget-repartition-on-validated-PO-and-invoice.yml",
+    "contents_url": "https://api.github.com/repos/axelor/axelor-open-suite/contents/changelogs/unreleased/change-budget-repartition-on-validated-PO-and-invoice.yml?ref=db971940a76e4c8d429de651b013087df49e5fd9",
+    "patch": "@@ -0,0 +1,3 @@\n+---\n+title: \"BUDGET : make budget editable on already validated PO or invoice.\"\n+type: change"
+  }
+]

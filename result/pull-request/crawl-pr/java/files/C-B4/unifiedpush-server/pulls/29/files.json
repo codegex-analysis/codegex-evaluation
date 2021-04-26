@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "303f2e0a1480197afda1d4e120ad756aa147dbf2",
+    "filename": "jaxrs/src/main/java/org/jboss/aerogear/unifiedpush/rest/registry/applications/ApplicationInfoEndpoint.java",
+    "status": "added",
+    "additions": 41,
+    "deletions": 0,
+    "changes": 41,
+    "blob_url": "https://github.com/C-B4/unifiedpush-server/blob/3d30a0f5d3d1628eb6ab1095a769a960509e9eaa/jaxrs/src/main/java/org/jboss/aerogear/unifiedpush/rest/registry/applications/ApplicationInfoEndpoint.java",
+    "raw_url": "https://github.com/C-B4/unifiedpush-server/raw/3d30a0f5d3d1628eb6ab1095a769a960509e9eaa/jaxrs/src/main/java/org/jboss/aerogear/unifiedpush/rest/registry/applications/ApplicationInfoEndpoint.java",
+    "contents_url": "https://api.github.com/repos/C-B4/unifiedpush-server/contents/jaxrs/src/main/java/org/jboss/aerogear/unifiedpush/rest/registry/applications/ApplicationInfoEndpoint.java?ref=3d30a0f5d3d1628eb6ab1095a769a960509e9eaa",
+    "patch": "@@ -0,0 +1,41 @@\n+package org.jboss.aerogear.unifiedpush.rest.registry.applications;\n+\n+import javax.inject.Inject;\n+import javax.servlet.http.HttpServletRequest;\n+import javax.ws.rs.GET;\n+import javax.ws.rs.Path;\n+import javax.ws.rs.Produces;\n+import javax.ws.rs.core.Context;\n+import javax.ws.rs.core.MediaType;\n+import javax.ws.rs.core.Response;\n+\n+import org.jboss.aerogear.unifiedpush.api.PushApplication;\n+import org.jboss.aerogear.unifiedpush.rest.util.PushAppAuthHelper;\n+import org.jboss.aerogear.unifiedpush.service.PushApplicationService;\n+import org.springframework.stereotype.Component;\n+\n+import com.qmino.miredot.annotations.ReturnType;\n+\n+@Component\n+@Path(\"/application\")\n+public class ApplicationInfoEndpoint {\n+\n+    @Inject\n+    private PushApplicationService pushApplicationService;\n+\n+    @GET\n+    @Path(\"/info\")\n+    @Produces(MediaType.APPLICATION_JSON)\n+    @ReturnType(\"org.jboss.aerogear.unifiedpush.api.PushApplication\")\n+    public Response findById(@Context HttpServletRequest request) {\n+        PushApplication pushApplication = PushAppAuthHelper.loadPushApplicationWhenAuthorized(request, pushApplicationService);\n+        if (pushApplication == null) {\n+            return Response.status(Response.Status.UNAUTHORIZED)\n+                .header(\"WWW-Authenticate\", \"Basic realm=\\\"AeroGear UnifiedPush Server\\\"\")\n+                .entity(\"Unauthorized Request\")\n+                .build();\n+        }\n+\n+        return Response.ok(pushApplication).build();\n+    }\n+}"
+  },
+  {
+    "sha": "03ac3b57b125c6c58f35b7a6fe26ce705d64c528",
+    "filename": "servers/src/main/java/org/jboss/aerogear/unifiedpush/auth/SecurityConfig.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/C-B4/unifiedpush-server/blob/3d30a0f5d3d1628eb6ab1095a769a960509e9eaa/servers/src/main/java/org/jboss/aerogear/unifiedpush/auth/SecurityConfig.java",
+    "raw_url": "https://github.com/C-B4/unifiedpush-server/raw/3d30a0f5d3d1628eb6ab1095a769a960509e9eaa/servers/src/main/java/org/jboss/aerogear/unifiedpush/auth/SecurityConfig.java",
+    "contents_url": "https://api.github.com/repos/C-B4/unifiedpush-server/contents/servers/src/main/java/org/jboss/aerogear/unifiedpush/auth/SecurityConfig.java?ref=3d30a0f5d3d1628eb6ab1095a769a960509e9eaa",
+    "patch": "@@ -92,10 +92,11 @@ public void init(WebSecurity web) throws Exception {\n \t\tweb.ignoring().antMatchers(\"/rest/sender\");\n \t\tweb.ignoring().antMatchers(\"/rest/sender/*\");\n \t\tweb.ignoring().antMatchers(\"/rest/database/*/aliases\");\n+\t\tweb.ignoring().antMatchers(\"/rest/application/info\");\n \n \t\t// Variant Level Basic Authentication\n \t\tweb.ignoring().antMatchers(\"/rest/registry/device/**\");\n-\t\n+\n \t\t// Either Application or Variant Level Basic Authentication\n \t\t// 1) /rest/database/**\n \t\tweb.ignoring().requestMatchers(DATABASE_REQUEST_MATCHER);"
+  }
+]

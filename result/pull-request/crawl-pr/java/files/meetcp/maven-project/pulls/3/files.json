@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "b56b35de9e5d0c61c558e1410d5f8aa37d36020a",
+    "filename": "Jenkinsfile",
+    "status": "added",
+    "additions": 42,
+    "deletions": 0,
+    "changes": 42,
+    "blob_url": "https://github.com/meetcp/maven-project/blob/6ce16044b660f3255be140eddb8185480345aa24/Jenkinsfile",
+    "raw_url": "https://github.com/meetcp/maven-project/raw/6ce16044b660f3255be140eddb8185480345aa24/Jenkinsfile",
+    "contents_url": "https://api.github.com/repos/meetcp/maven-project/contents/Jenkinsfile?ref=6ce16044b660f3255be140eddb8185480345aa24",
+    "patch": "@@ -0,0 +1,42 @@\n+pipeline {\n+    agent any\n+\n+    parameters {\n+         string(name: 'tomcat_dev', defaultValue: '35.166.210.154', description: 'Staging Server')\n+         string(name: 'tomcat_prod', defaultValue: '34.209.233.6', description: 'Production Server')\n+    }\n+\n+    triggers {\n+         pollSCM('* * * * *')\n+     }\n+\n+stages{\n+        stage('Build'){\n+            steps {\n+                sh 'mvn clean package'\n+            }\n+            post {\n+                success {\n+                    echo 'Now Archiving...'\n+                    archiveArtifacts artifacts: '**/target/*.war'\n+                }\n+            }\n+        }\n+\n+        stage ('Deployments'){\n+            parallel{\n+                stage ('Deploy to Staging'){\n+                    steps {\n+                        sh \"scp -i /home/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_dev}:/var/lib/tomcat7/webapps\"\n+                    }\n+                }\n+\n+                stage (\"Deploy to Production\"){\n+                    steps {\n+                        sh \"scp -i /home/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_prod}:/var/lib/tomcat7/webapps\"\n+                    }\n+                }\n+            }\n+        }\n+    }\n+}"
+  }
+]

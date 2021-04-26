@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "12d3a8c8eebdcdd13298b4fa6d52f184961bbecb",
+    "filename": "sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/config/MetricsRepositoryConfiguration.java",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/3286a3b0acede78b7ba650c95afc69c5b8e1064d/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/config/MetricsRepositoryConfiguration.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/3286a3b0acede78b7ba650c95afc69c5b8e1064d/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/config/MetricsRepositoryConfiguration.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/config/MetricsRepositoryConfiguration.java?ref=3286a3b0acede78b7ba650c95afc69c5b8e1064d",
+    "patch": "@@ -0,0 +1,24 @@\n+package com.alibaba.csp.sentinel.dashboard.config;\n+\n+import com.alibaba.csp.sentinel.dashboard.datasource.entity.MetricEntity;\n+import com.alibaba.csp.sentinel.dashboard.repository.metric.InMemoryMetricsRepository;\n+import com.alibaba.csp.sentinel.dashboard.repository.metric.MetricsRepository;\n+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;\n+import org.springframework.context.annotation.Bean;\n+import org.springframework.context.annotation.Configuration;\n+\n+/**\n+ * {@link MetricsRepository}'s implementation bean configuration.\n+ *\n+ * @author wxq\n+ */\n+@Configuration\n+public class MetricsRepositoryConfiguration {\n+\n+    @Bean\n+    @ConditionalOnMissingBean\n+    public MetricsRepository<MetricEntity> metricEntityMetricsRepository() {\n+        return new InMemoryMetricsRepository();\n+    }\n+\n+}"
+  },
+  {
+    "sha": "56b7b3415a8d3f243cdc36667adb0aeed9060e65",
+    "filename": "sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/controller/MetricController.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 7,
+    "changes": 16,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/3286a3b0acede78b7ba650c95afc69c5b8e1064d/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/controller/MetricController.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/3286a3b0acede78b7ba650c95afc69c5b8e1064d/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/controller/MetricController.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/controller/MetricController.java?ref=3286a3b0acede78b7ba650c95afc69c5b8e1064d",
+    "patch": "@@ -28,7 +28,6 @@\n import com.alibaba.csp.sentinel.dashboard.repository.metric.MetricsRepository;\n import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n-import org.springframework.beans.factory.annotation.Autowired;\n import org.springframework.http.MediaType;\n import org.springframework.stereotype.Controller;\n import org.springframework.web.bind.annotation.RequestMapping;\n@@ -46,12 +45,15 @@\n @RequestMapping(value = \"/metric\", produces = MediaType.APPLICATION_JSON_VALUE)\n public class MetricController {\n \n-    private static Logger logger = LoggerFactory.getLogger(MetricController.class);\n+    private static final Logger logger = LoggerFactory.getLogger(MetricController.class);\n \n     private static final long maxQueryIntervalMs = 1000 * 60 * 60;\n \n-    @Autowired\n-    private MetricsRepository<MetricEntity> metricStore;\n+    private final MetricsRepository<MetricEntity> metricsRepository;\n+\n+    public MetricController(MetricsRepository<MetricEntity> metricsRepository) {\n+        this.metricsRepository = metricsRepository;\n+    }\n \n     @ResponseBody\n     @RequestMapping(\"/queryTopResourceMetric.json\")\n@@ -84,7 +86,7 @@\n         if (endTime - startTime > maxQueryIntervalMs) {\n             return Result.ofFail(-1, \"time intervalMs is too big, must <= 1h\");\n         }\n-        List<String> resources = metricStore.listResourcesOfApp(app);\n+        List<String> resources = this.metricsRepository.listResourcesOfApp(app);\n         logger.debug(\"queryTopResourceMetric(), resources.size()={}\", resources.size());\n \n         if (resources == null || resources.isEmpty()) {\n@@ -112,7 +114,7 @@\n         logger.debug(\"topResource={}\", topResource);\n         long time = System.currentTimeMillis();\n         for (final String resource : topResource) {\n-            List<MetricEntity> entities = metricStore.queryByAppAndResourceBetween(\n+            List<MetricEntity> entities = this.metricsRepository.queryByAppAndResourceBetween(\n                 app, resource, startTime, endTime);\n             logger.debug(\"resource={}, entities.size()={}\", resource, entities == null ? \"null\" : entities.size());\n             List<MetricVo> vos = MetricVo.fromMetricEntities(entities, resource);\n@@ -153,7 +155,7 @@\n         if (endTime - startTime > maxQueryIntervalMs) {\n             return Result.ofFail(-1, \"time intervalMs is too big, must <= 1h\");\n         }\n-        List<MetricEntity> entities = metricStore.queryByAppAndResourceBetween(\n+        List<MetricEntity> entities = this.metricsRepository.queryByAppAndResourceBetween(\n             app, identity, startTime, endTime);\n         List<MetricVo> vos = MetricVo.fromMetricEntities(entities, identity);\n         return Result.ofSuccess(sortMetricVoAndDistinct(vos));"
+  },
+  {
+    "sha": "a195de430ebb15c4b0f5d481e5bf8633168f1bdb",
+    "filename": "sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/repository/metric/InMemoryMetricsRepository.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 3,
+    "changes": 4,
+    "blob_url": "https://github.com/alibaba/Sentinel/blob/3286a3b0acede78b7ba650c95afc69c5b8e1064d/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/repository/metric/InMemoryMetricsRepository.java",
+    "raw_url": "https://github.com/alibaba/Sentinel/raw/3286a3b0acede78b7ba650c95afc69c5b8e1064d/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/repository/metric/InMemoryMetricsRepository.java",
+    "contents_url": "https://api.github.com/repos/alibaba/Sentinel/contents/sentinel-dashboard/src/main/java/com/alibaba/csp/sentinel/dashboard/repository/metric/InMemoryMetricsRepository.java?ref=3286a3b0acede78b7ba650c95afc69c5b8e1064d",
+    "patch": "@@ -18,7 +18,6 @@\n import com.alibaba.csp.sentinel.dashboard.datasource.entity.MetricEntity;\n import com.alibaba.csp.sentinel.util.StringUtil;\n import com.alibaba.csp.sentinel.util.TimeUtil;\n-import org.springframework.stereotype.Component;\n \n import java.util.ArrayList;\n import java.util.HashMap;\n@@ -36,15 +35,14 @@\n  * @author Carpenter Lee\n  * @author Eric Zhao\n  */\n-@Component\n public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity> {\n \n     private static final long MAX_METRIC_LIVE_TIME_MS = 1000 * 60 * 5;\n \n     /**\n      * {@code app -> resource -> timestamp -> metric}\n      */\n-    private Map<String, Map<String, LinkedHashMap<Long, MetricEntity>>> allMetrics = new ConcurrentHashMap<>();\n+    private final Map<String, Map<String, LinkedHashMap<Long, MetricEntity>>> allMetrics = new ConcurrentHashMap<>();\n \n     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();\n "
+  }
+]

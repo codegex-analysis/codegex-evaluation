@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "7598d84bd1638008bb51884158a597149206a702",
+    "filename": "src/main/java/core/basesyntax/SalaryInfo.java",
+    "status": "modified",
+    "additions": 40,
+    "deletions": 1,
+    "changes": 41,
+    "blob_url": "https://github.com/mate-academy/jv-salary-info/blob/8057cbe5db712762ba5903e9cbb9fb557b86c0c9/src/main/java/core/basesyntax/SalaryInfo.java",
+    "raw_url": "https://github.com/mate-academy/jv-salary-info/raw/8057cbe5db712762ba5903e9cbb9fb557b86c0c9/src/main/java/core/basesyntax/SalaryInfo.java",
+    "contents_url": "https://api.github.com/repos/mate-academy/jv-salary-info/contents/src/main/java/core/basesyntax/SalaryInfo.java?ref=8057cbe5db712762ba5903e9cbb9fb557b86c0c9",
+    "patch": "@@ -1,8 +1,47 @@\n package core.basesyntax;\n \n+import java.text.SimpleDateFormat;\n+import java.util.Date;\n+\n public class SalaryInfo {\n \n     public String getSalaryInfo(String[] names, String[] data, String dateFrom, String dateTo) {\n-        return null;\n+        StringBuilder monthReport = new StringBuilder();\n+        monthReport\n+                .append(\"Report for period \")\n+                .append(dateFrom)\n+                .append(\" - \")\n+                .append(dateTo)\n+                .append(\"\\n\");\n+\n+        for (String name : names) {\n+            int salary = 0;\n+            for (String dataItem : data) {\n+                String[] dataParts = dataItem.split(\" \");\n+\n+                try {\n+                    Date from = new SimpleDateFormat(\"dd.MM.yyyy\").parse(dateFrom);\n+                    Date to = new SimpleDateFormat(\"dd.MM.yyyy\").parse(dateTo);\n+                    Date personDate = new SimpleDateFormat(\"dd.MM.yyyy\").parse(dataParts[0]);\n+\n+                    if (personDate.getTime() >= from.getTime()\n+                            && personDate.getTime() <= to.getTime()\n+                            && dataParts[1].equals(name)) {\n+                        salary += Integer.parseInt(dataParts[2]) * Integer.parseInt(dataParts[3]);\n+                    }\n+                } catch (Exception e) {\n+                    System.out.println(\"Can't format string to date\");\n+                }\n+            }\n+            monthReport\n+                    .append(name)\n+                    .append(\" - \")\n+                    .append(salary)\n+                    .append(\"\\n\");\n+        }\n+\n+        monthReport.setLength(monthReport.length() - 1);\n+\n+        return monthReport.toString();\n     }\n }"
+  }
+]

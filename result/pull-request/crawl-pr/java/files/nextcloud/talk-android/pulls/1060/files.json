@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "3ef9c06c4bf103fdf43fe064a74a5f481574eff8",
+    "filename": "app/build.gradle",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 3,
+    "changes": 6,
+    "blob_url": "https://github.com/nextcloud/talk-android/blob/59b0088371b4f973cb8a4203535cfae8f9c9e4e9/app/build.gradle",
+    "raw_url": "https://github.com/nextcloud/talk-android/raw/59b0088371b4f973cb8a4203535cfae8f9c9e4e9/app/build.gradle",
+    "contents_url": "https://api.github.com/repos/nextcloud/talk-android/contents/app/build.gradle?ref=59b0088371b4f973cb8a4203535cfae8f9c9e4e9",
+    "patch": "@@ -40,8 +40,8 @@ android {\n \n         // mayor.minor.hotfix.increment (for increment: 1-50=Alpha / 51-89=RC / 90-99=stable)\n         // xx   .xxx  .xx    .xx\n-        versionCode 120000003\n-        versionName \"12.0.0 Alpha 03\"\n+        versionCode 120000004\n+        versionName \"12.0.0 Alpha 04\"\n \n         flavorDimensions \"default\"\n         renderscriptTargetApi 19\n@@ -142,7 +142,7 @@ configurations.all {\n \n dependencies {\n     implementation fileTree(include: ['*'], dir: 'libs')\n-    implementation 'androidx.appcompat:appcompat:1.2.0-alpha01'\n+    implementation 'androidx.appcompat:appcompat:1.3.0-beta01'\n     implementation 'com.google.android.material:material:1.3.0'\n     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'\n     implementation 'com.github.vanniktech:Emoji:0.6.0'"
+  },
+  {
+    "sha": "ce059de71b2d33ea9bb46226776d456a143603a9",
+    "filename": "app/src/main/java/com/nextcloud/talk/activities/MainActivity.kt",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/nextcloud/talk-android/blob/59b0088371b4f973cb8a4203535cfae8f9c9e4e9/app/src/main/java/com/nextcloud/talk/activities/MainActivity.kt",
+    "raw_url": "https://github.com/nextcloud/talk-android/raw/59b0088371b4f973cb8a4203535cfae8f9c9e4e9/app/src/main/java/com/nextcloud/talk/activities/MainActivity.kt",
+    "contents_url": "https://api.github.com/repos/nextcloud/talk-android/contents/app/src/main/java/com/nextcloud/talk/activities/MainActivity.kt?ref=59b0088371b4f973cb8a4203535cfae8f9c9e4e9",
+    "patch": "@@ -171,8 +171,8 @@ class MainActivity : BaseActivity(), ActionBarProvider {\n \n             when (intent.type) {\n                 \"vnd.android.cursor.item/vnd.com.nextcloud.talk2.chat\" -> {\n-                    val user = userId.split(\"@\")[0]\n-                    val baseUrl = userId.split(\"@\")[1]\n+                    val user = userId.substringBeforeLast(\"@\")\n+                    val baseUrl = userId.substringAfterLast(\"@\")\n                     if (userUtils.currentUser?.baseUrl?.endsWith(baseUrl) == true) {\n                         startConversation(user)\n                     } else {"
+  },
+  {
+    "sha": "69d7e63d31e5643bc4d605878c8db62b99f7f810",
+    "filename": "app/src/main/java/com/nextcloud/talk/jobs/ContactAddressBookWorker.kt",
+    "status": "modified",
+    "additions": 30,
+    "deletions": 30,
+    "changes": 60,
+    "blob_url": "https://github.com/nextcloud/talk-android/blob/59b0088371b4f973cb8a4203535cfae8f9c9e4e9/app/src/main/java/com/nextcloud/talk/jobs/ContactAddressBookWorker.kt",
+    "raw_url": "https://github.com/nextcloud/talk-android/raw/59b0088371b4f973cb8a4203535cfae8f9c9e4e9/app/src/main/java/com/nextcloud/talk/jobs/ContactAddressBookWorker.kt",
+    "contents_url": "https://api.github.com/repos/nextcloud/talk-android/contents/app/src/main/java/com/nextcloud/talk/jobs/ContactAddressBookWorker.kt?ref=59b0088371b4f973cb8a4203535cfae8f9c9e4e9",
+    "patch": "@@ -86,45 +86,45 @@ class ContactAddressBookWorker(val context: Context, workerParameters: WorkerPar\n             }\n         }\n \n-        AccountManager.get(context).addAccountExplicitly(Account(ACCOUNT_NAME, ACCOUNT_TYPE), \"\", null)\n+        if(AccountManager.get(context).getAccountsByType(ACCOUNT_TYPE).isEmpty()){\n+            AccountManager.get(context).addAccountExplicitly(Account(ACCOUNT_NAME, ACCOUNT_TYPE), \"\", null)\n+        }\n \n         // collect all contacts with phone number\n         val contactsWithNumbers = collectPhoneNumbers()\n \n-        val currentLocale = ConfigurationCompat.getLocales(context.resources.configuration)[0].country\n-\n-        val map = mutableMapOf<String, Any>()\n-        map[\"location\"] = currentLocale\n-        map[\"search\"] = contactsWithNumbers\n+        if(contactsWithNumbers.isNotEmpty()){\n+            val currentLocale = ConfigurationCompat.getLocales(context.resources.configuration)[0].country\n \n-        val json = Gson().toJson(map)\n+            val map = mutableMapOf<String, Any>()\n+            map[\"location\"] = currentLocale\n+            map[\"search\"] = contactsWithNumbers\n \n-        ncApi.searchContactsByPhoneNumber(\n-                ApiUtils.getCredentials(currentUser.username, currentUser.token),\n-                ApiUtils.getUrlForSearchByNumber(currentUser.baseUrl),\n-                RequestBody.create(MediaType.parse(\"application/json\"), json))\n-                .subscribeOn(Schedulers.io())\n-                .observeOn(AndroidSchedulers.mainThread())\n-                .subscribe(object : Observer<ContactsByNumberOverall> {\n-                    override fun onComplete() {\n-                    }\n+            val json = Gson().toJson(map)\n \n-                    override fun onSubscribe(d: Disposable) {\n-                    }\n+            ncApi.searchContactsByPhoneNumber(\n+                    ApiUtils.getCredentials(currentUser.username, currentUser.token),\n+                    ApiUtils.getUrlForSearchByNumber(currentUser.baseUrl),\n+                    RequestBody.create(MediaType.parse(\"application/json\"), json))\n+                    .subscribeOn(Schedulers.io())\n+                    .observeOn(AndroidSchedulers.mainThread())\n+                    .subscribe(object : Observer<ContactsByNumberOverall> {\n+                        override fun onComplete() {\n+                        }\n \n-                    override fun onNext(foundContacts: ContactsByNumberOverall) {\n-                        Log.d(javaClass.simpleName, \"next\")\n+                        override fun onSubscribe(d: Disposable) {\n+                        }\n \n-                        // todo update\n-                        up(foundContacts)\n-                    }\n+                        override fun onNext(foundContacts: ContactsByNumberOverall) {\n+                            up(foundContacts)\n+                        }\n \n-                    override fun onError(e: Throwable) {\n-                        // TODO error handling\n-                        Log.d(javaClass.simpleName, \"error\")\n-                    }\n+                        override fun onError(e: Throwable) {\n+                            Log.e(javaClass.simpleName, \"Failed to searchContactsByPhoneNumber\", e)\n+                        }\n \n-                })\n+                    })\n+        }\n \n         // store timestamp \n         appPreferences.setPhoneBookIntegrationLastRun(System.currentTimeMillis())\n@@ -321,9 +321,9 @@ class ContactAddressBookWorker(val context: Context, workerParameters: WorkerPar\n                 try {\n                     context.contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)\n                 } catch (e: OperationApplicationException) {\n-                    e.printStackTrace()\n+                    Log.e(javaClass.simpleName, \"\", e)\n                 } catch (e: RemoteException) {\n-                    e.printStackTrace()\n+                    Log.e(javaClass.simpleName, \"\", e)\n                 }\n             }\n "
+  },
+  {
+    "sha": "5d104dc4f32906c1d89b49b2729ee79ad75fb56a",
+    "filename": "scripts/analysis/lint-results.txt",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/nextcloud/talk-android/blob/59b0088371b4f973cb8a4203535cfae8f9c9e4e9/scripts/analysis/lint-results.txt",
+    "raw_url": "https://github.com/nextcloud/talk-android/raw/59b0088371b4f973cb8a4203535cfae8f9c9e4e9/scripts/analysis/lint-results.txt",
+    "contents_url": "https://api.github.com/repos/nextcloud/talk-android/contents/scripts/analysis/lint-results.txt?ref=59b0088371b4f973cb8a4203535cfae8f9c9e4e9",
+    "patch": "@@ -1,2 +1,2 @@\n DO NOT TOUCH; GENERATED BY DRONE\n-      <span class=\"mdl-layout-title\">Lint Report: 3 errors and 133 warnings</span>\n+      <span class=\"mdl-layout-title\">Lint Report: 3 errors and 131 warnings</span>"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "a6c789d1f9041056d6013dd726a9b4b4d9a37d5c",
+    "filename": "OpenEdXMobile/src/main/java/org/edx/mobile/base/MainApplication.java",
+    "status": "modified",
+    "additions": 0,
+    "deletions": 4,
+    "changes": 4,
+    "blob_url": "https://github.com/edx/edx-app-android/blob/b28b3b96b7dc507a8a55a0d58cfb869fc4e1fed4/OpenEdXMobile/src/main/java/org/edx/mobile/base/MainApplication.java",
+    "raw_url": "https://github.com/edx/edx-app-android/raw/b28b3b96b7dc507a8a55a0d58cfb869fc4e1fed4/OpenEdXMobile/src/main/java/org/edx/mobile/base/MainApplication.java",
+    "contents_url": "https://api.github.com/repos/edx/edx-app-android/contents/OpenEdXMobile/src/main/java/org/edx/mobile/base/MainApplication.java?ref=b28b3b96b7dc507a8a55a0d58cfb869fc4e1fed4",
+    "patch": "@@ -159,10 +159,6 @@ private void init() {\n             FacebookSdk.setApplicationId(config.getFacebookConfig().getFacebookAppId());\n             FacebookSdk.sdkInitialize(getApplicationContext());\n         }\n-\n-        if (PermissionsUtil.checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, this)) {\n-            deleteExtraDownloadedFiles();\n-        }\n     }\n \n     private void checkIfAppVersionUpgraded(Context context) {"
+  },
+  {
+    "sha": "4653245d11b2d03a3784a11d2027bfd0b6381211",
+    "filename": "OpenEdXMobile/src/main/java/org/edx/mobile/task/EnqueueDownloadTask.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 38,
+    "changes": 38,
+    "blob_url": "https://github.com/edx/edx-app-android/blob/2c0c4d2b65cee47ab3a4bf767cc7591979e71356/OpenEdXMobile/src/main/java/org/edx/mobile/task/EnqueueDownloadTask.java",
+    "raw_url": "https://github.com/edx/edx-app-android/raw/2c0c4d2b65cee47ab3a4bf767cc7591979e71356/OpenEdXMobile/src/main/java/org/edx/mobile/task/EnqueueDownloadTask.java",
+    "contents_url": "https://api.github.com/repos/edx/edx-app-android/contents/OpenEdXMobile/src/main/java/org/edx/mobile/task/EnqueueDownloadTask.java?ref=2c0c4d2b65cee47ab3a4bf767cc7591979e71356",
+    "patch": "@@ -1,38 +0,0 @@\n-package org.edx.mobile.task;\n-\n-import android.content.Context;\n-import androidx.annotation.NonNull;\n-\n-import com.google.inject.Inject;\n-\n-import org.edx.mobile.model.db.DownloadEntry;\n-import org.edx.mobile.player.TranscriptManager;\n-\n-import java.util.List;\n-\n-public abstract class EnqueueDownloadTask extends Task<Long> {\n-    @Inject\n-    @NonNull\n-    TranscriptManager transcriptManager;\n-    @NonNull\n-    List<DownloadEntry> downloadList;\n-\n-    public EnqueueDownloadTask(@NonNull Context context, @NonNull List<DownloadEntry> downloadList) {\n-        super(context);\n-        this.downloadList = downloadList;\n-    }\n-\n-    @Override\n-    public Long call() {\n-        int count = 0;\n-        for (DownloadEntry downloadEntry : downloadList) {\n-            if (environment.getStorage().addDownload(downloadEntry) != -1) {\n-                count++;\n-                for (String value : downloadEntry.transcript.values()) {\n-                    transcriptManager.downloadTranscriptsForVideo(value, null);\n-                }\n-            }\n-        }\n-        return (long) count;\n-    }\n-}"
+  },
+  {
+    "sha": "f60f1e1311a90e9830bb89d3a3a1638dfaf4687b",
+    "filename": "OpenEdXMobile/src/main/java/org/edx/mobile/task/EnqueueDownloadTask.kt",
+    "status": "added",
+    "additions": 32,
+    "deletions": 0,
+    "changes": 32,
+    "blob_url": "https://github.com/edx/edx-app-android/blob/b28b3b96b7dc507a8a55a0d58cfb869fc4e1fed4/OpenEdXMobile/src/main/java/org/edx/mobile/task/EnqueueDownloadTask.kt",
+    "raw_url": "https://github.com/edx/edx-app-android/raw/b28b3b96b7dc507a8a55a0d58cfb869fc4e1fed4/OpenEdXMobile/src/main/java/org/edx/mobile/task/EnqueueDownloadTask.kt",
+    "contents_url": "https://api.github.com/repos/edx/edx-app-android/contents/OpenEdXMobile/src/main/java/org/edx/mobile/task/EnqueueDownloadTask.kt?ref=b28b3b96b7dc507a8a55a0d58cfb869fc4e1fed4",
+    "patch": "@@ -0,0 +1,32 @@\n+package org.edx.mobile.task\n+\n+import android.content.Context\n+import com.google.inject.Inject\n+import org.edx.mobile.model.db.DownloadEntry\n+import org.edx.mobile.player.TranscriptManager\n+\n+abstract class EnqueueDownloadTask(context: Context,\n+                                   private var downloadList: List<DownloadEntry>) : Task<Long?>(context) {\n+    @Inject\n+    lateinit var transcriptManager: TranscriptManager\n+\n+    override fun call(): Long {\n+        var count = 0\n+        for (downloadEntry in downloadList) {\n+            if (environment.storage.addDownload(downloadEntry) != -1L) {\n+                count++\n+                downloadEntry.transcript?.run {\n+                    for (value in this.values) {\n+                        transcriptManager.downloadTranscriptsForVideo(value, null)\n+                    }\n+                }\n+            }\n+        }\n+        return count.toLong()\n+    }\n+\n+    override fun onException(ex: Exception) {\n+        super.onException(ex)\n+        logger.error(ex)\n+    }\n+}"
+  }
+]

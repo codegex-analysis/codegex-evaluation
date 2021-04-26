@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "391c3d61fa81ff3556f951624088e16a3fdf66fe",
+    "filename": "settings.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/seeseemelk/MockBukkit/blob/97b9b77f5602f4590f3766ff049cbce58b49e6e0/settings.gradle",
+    "raw_url": "https://github.com/seeseemelk/MockBukkit/raw/97b9b77f5602f4590f3766ff049cbce58b49e6e0/settings.gradle",
+    "contents_url": "https://api.github.com/repos/seeseemelk/MockBukkit/contents/settings.gradle?ref=97b9b77f5602f4590f3766ff049cbce58b49e6e0",
+    "patch": "@@ -1,5 +1,5 @@\n gradle.ext.apiVersion = '1.16'\n gradle.ext.apiVersionFull = '1.16.5-R0.1-SNAPSHOT'\n-gradle.ext.version = '0.31.0'\n+gradle.ext.version = '0.32.0'\n \n rootProject.name = 'MockBukkit-' + gradle.ext.apiVersion"
+  },
+  {
+    "sha": "e603e203837516125ce71004dee389d7aef134a1",
+    "filename": "src/main/java/be/seeseemelk/mockbukkit/entity/LivingEntityMock.java",
+    "status": "modified",
+    "additions": 39,
+    "deletions": 39,
+    "changes": 78,
+    "blob_url": "https://github.com/seeseemelk/MockBukkit/blob/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/main/java/be/seeseemelk/mockbukkit/entity/LivingEntityMock.java",
+    "raw_url": "https://github.com/seeseemelk/MockBukkit/raw/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/main/java/be/seeseemelk/mockbukkit/entity/LivingEntityMock.java",
+    "contents_url": "https://api.github.com/repos/seeseemelk/MockBukkit/contents/src/main/java/be/seeseemelk/mockbukkit/entity/LivingEntityMock.java?ref=97b9b77f5602f4590f3766ff049cbce58b49e6e0",
+    "patch": "@@ -39,17 +39,19 @@\n import be.seeseemelk.mockbukkit.ServerMock;\n import be.seeseemelk.mockbukkit.UnimplementedOperationException;\n import be.seeseemelk.mockbukkit.attribute.AttributeInstanceMock;\n+import org.jetbrains.annotations.Nullable;\n \n public abstract class LivingEntityMock extends EntityMock implements LivingEntity\n {\n \n \tprivate static final double MAX_HEALTH = 20.0;\n-\tprivate double health;\n+\tprotected double health;\n \tprivate double maxHealth = MAX_HEALTH;\n \tprivate int maxAirTicks = 300;\n \tprivate int remainingAirTicks = 300;\n \tprotected boolean alive = true;\n \tprotected Map<Attribute, AttributeInstanceMock> attributes;\n+\tprotected Player killer;\n \n \tprivate final Set<ActivePotionEffect> activeEffects = new HashSet<>();\n \n@@ -78,44 +80,38 @@ public boolean isDead()\n \t@Override\n \tpublic void setHealth(double health)\n \t{\n-\t\tif (health <= 0)\n-\t\t{\n-\t\t\tthis.health = 0;\n+\t\tif (health <= 0) this.kill();\n+\t\telse this.health = Math.min(health, getMaxHealth());\n+\t}\n \n-\t\t\tif (this instanceof Player)\n-\t\t\t{\n-\t\t\t\tPlayer player = (Player) this;\n-\t\t\t\tList<ItemStack> drops = new ArrayList<>();\n-\t\t\t\tdrops.addAll(Arrays.asList(player.getInventory().getContents()));\n-\t\t\t\tPlayerDeathEvent event = new PlayerDeathEvent(player, drops, 0, getName() + \" got killed\");\n-\t\t\t\tBukkit.getPluginManager().callEvent(event);\n-\n-\t\t\t\t// Terminate any InventoryView and the cursor item\n-\t\t\t\tplayer.closeInventory();\n-\n-\t\t\t\t// Clear the Inventory if keep-inventory is not enabled\n-\t\t\t\tif (!getWorld().getGameRuleValue(GameRule.KEEP_INVENTORY).booleanValue())\n-\t\t\t\t{\n-\t\t\t\t\tplayer.getInventory().clear();\n-\t\t\t\t\t// Should someone try to provoke a RespawnEvent, they will now find the Inventory to be empty\n-\t\t\t\t}\n-\n-\t\t\t\tplayer.setLevel(0);\n-\t\t\t\tplayer.setExp(0);\n-\t\t\t\tplayer.setFoodLevel(0);\n-\t\t\t}\n-\t\t\telse\n-\t\t\t{\n-\t\t\t\tEntityDeathEvent event = new EntityDeathEvent(this, new ArrayList<>(), 0);\n-\t\t\t\tBukkit.getPluginManager().callEvent(event);\n-\t\t\t}\n+\t/**\n+\t * Simulates a kill by setting the killer of this entity and propagating the necessary event\n+\t * @param player the player who killed this entity\n+\t */\n+\tpublic void simulateKilledBy(@Nullable Player player)\n+\t{\n+\t\tthis.setKiller(player);\n+\t\tthis.kill();\n+\t}\n \n-\t\t\talive = false;\n-\t\t}\n-\t\telse\n-\t\t{\n-\t\t\tthis.health = Math.min(health, getMaxHealth());\n-\t\t}\n+\t/*\n+\t * Kills this entity and propagates the necessary event\n+\t */\n+\tpublic void kill()\n+\t{\n+\t\tthis.health = 0;\n+\t\tif (!this.alive) return;\n+\t\tEntityDeathEvent event = new EntityDeathEvent(this, getDrops(), getDroppedExp());\n+\t\tBukkit.getPluginManager().callEvent(event);\n+\t\talive = false;\n+\t}\n+\n+\tpublic List<ItemStack> getDrops() {\n+\t\treturn new ArrayList<>();\n+\t}\n+\n+\tpublic int getDroppedExp() {\n+\t\treturn 0;\n \t}\n \n \t@Override\n@@ -341,11 +337,15 @@ public void setNoDamageTicks(int ticks)\n \t\tthrow new UnimplementedOperationException();\n \t}\n \n+\tpublic void setKiller(@Nullable Player killer)\n+\t{\n+\t\tthis.killer = killer;\n+\t}\n+\n \t@Override\n \tpublic Player getKiller()\n \t{\n-\t\t// TODO Auto-generated method stub\n-\t\tthrow new UnimplementedOperationException();\n+\t\treturn this.killer;\n \t}\n \n \t@Override"
+  },
+  {
+    "sha": "59908403fc6d137cf8e92164ea50214aeecfd5dc",
+    "filename": "src/main/java/be/seeseemelk/mockbukkit/entity/PlayerMock.java",
+    "status": "modified",
+    "additions": 35,
+    "deletions": 3,
+    "changes": 38,
+    "blob_url": "https://github.com/seeseemelk/MockBukkit/blob/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/main/java/be/seeseemelk/mockbukkit/entity/PlayerMock.java",
+    "raw_url": "https://github.com/seeseemelk/MockBukkit/raw/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/main/java/be/seeseemelk/mockbukkit/entity/PlayerMock.java",
+    "contents_url": "https://api.github.com/repos/seeseemelk/MockBukkit/contents/src/main/java/be/seeseemelk/mockbukkit/entity/PlayerMock.java?ref=97b9b77f5602f4590f3766ff049cbce58b49e6e0",
+    "patch": "@@ -23,6 +23,7 @@\n import org.bukkit.event.block.BlockBreakEvent;\n import org.bukkit.event.block.BlockDamageEvent;\n import org.bukkit.event.block.BlockPlaceEvent;\n+import org.bukkit.event.entity.PlayerDeathEvent;\n import org.bukkit.event.inventory.InventoryCloseEvent;\n import org.bukkit.event.inventory.InventoryType;\n import org.bukkit.event.player.AsyncPlayerChatEvent;\n@@ -622,10 +623,41 @@ public void setNoDamageTicks(int ticks)\n \t}\n \n \t@Override\n-\tpublic Player getKiller()\n+\tpublic void kill()\n \t{\n-\t\t// TODO Auto-generated method stub\n-\t\tthrow new UnimplementedOperationException();\n+\t\tthis.health = 0;\n+\n+\t\tif (!this.alive) return;\n+\n+\t\tPlayerDeathEvent event = new PlayerDeathEvent(this, getDrops(), getDroppedExp(), getName() + \" got killed\");\n+\t\tBoolean keepInventory = getWorld().getGameRuleValue(GameRule.KEEP_INVENTORY);\n+\t\tevent.setKeepInventory(keepInventory != null && keepInventory);\n+\t\tevent.setKeepLevel(keepInventory != null && keepInventory);\n+\t\tBukkit.getPluginManager().callEvent(event);\n+\n+\t\t// Terminate any InventoryView and the cursor item\n+\t\tthis.closeInventory();\n+\n+\t\t// Clear the Inventory if keep-inventory is not enabled\n+\t\tif (!event.getKeepInventory())\n+\t\t{\n+\t\t\tthis.getInventory().clear();\n+\t\t\t// Should someone try to provoke a RespawnEvent, they will now find the Inventory to be empty\n+\t\t}\n+\n+\t\tif (!event.getKeepLevel())\n+\t\t{\n+\t\t\tthis.setLevel(0);\n+\t\t\tthis.setExp(0);\n+\t\t}\n+\n+\t\tthis.setFoodLevel(0);\n+\t\tthis.alive = false;\n+\t}\n+\n+\t@Override\n+\tpublic List<ItemStack> getDrops() {\n+\t\treturn Arrays.asList(this.getInventory().getContents());\n \t}\n \n \t@Override"
+  },
+  {
+    "sha": "ab9c713c5480a5f8ea40e22d9a3f3588b2f978eb",
+    "filename": "src/test/java/be/seeseemelk/mockbukkit/entity/EntityMockTest.java",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 16,
+    "changes": 31,
+    "blob_url": "https://github.com/seeseemelk/MockBukkit/blob/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/test/java/be/seeseemelk/mockbukkit/entity/EntityMockTest.java",
+    "raw_url": "https://github.com/seeseemelk/MockBukkit/raw/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/test/java/be/seeseemelk/mockbukkit/entity/EntityMockTest.java",
+    "contents_url": "https://api.github.com/repos/seeseemelk/MockBukkit/contents/src/test/java/be/seeseemelk/mockbukkit/entity/EntityMockTest.java?ref=97b9b77f5602f4590f3766ff049cbce58b49e6e0",
+    "patch": "@@ -1,17 +1,9 @@\n package be.seeseemelk.mockbukkit.entity;\n \n-import static org.junit.Assert.assertEquals;\n-import static org.junit.Assert.assertFalse;\n-import static org.junit.Assert.assertNotEquals;\n-import static org.junit.Assert.assertNotNull;\n-import static org.junit.Assert.assertNotSame;\n-import static org.junit.Assert.assertTrue;\n-\n-import java.util.Optional;\n-import java.util.Set;\n-import java.util.UUID;\n-import java.util.stream.Collectors;\n-\n+import be.seeseemelk.mockbukkit.MockBukkit;\n+import be.seeseemelk.mockbukkit.MockPlugin;\n+import be.seeseemelk.mockbukkit.ServerMock;\n+import be.seeseemelk.mockbukkit.WorldMock;\n import org.bukkit.Location;\n import org.bukkit.Material;\n import org.bukkit.World;\n@@ -30,10 +22,17 @@\n import org.junit.Before;\n import org.junit.Test;\n \n-import be.seeseemelk.mockbukkit.MockBukkit;\n-import be.seeseemelk.mockbukkit.MockPlugin;\n-import be.seeseemelk.mockbukkit.ServerMock;\n-import be.seeseemelk.mockbukkit.WorldMock;\n+import java.util.Optional;\n+import java.util.Set;\n+import java.util.UUID;\n+import java.util.stream.Collectors;\n+\n+import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertFalse;\n+import static org.junit.Assert.assertNotEquals;\n+import static org.junit.Assert.assertNotNull;\n+import static org.junit.Assert.assertNotSame;\n+import static org.junit.Assert.assertTrue;\n \n public class EntityMockTest\n {"
+  },
+  {
+    "sha": "110fb27646e5a5a27d1efa940a7a322859ba9c7b",
+    "filename": "src/test/java/be/seeseemelk/mockbukkit/entity/PlayerMockTest.java",
+    "status": "modified",
+    "additions": 46,
+    "deletions": 0,
+    "changes": 46,
+    "blob_url": "https://github.com/seeseemelk/MockBukkit/blob/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/test/java/be/seeseemelk/mockbukkit/entity/PlayerMockTest.java",
+    "raw_url": "https://github.com/seeseemelk/MockBukkit/raw/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/test/java/be/seeseemelk/mockbukkit/entity/PlayerMockTest.java",
+    "contents_url": "https://api.github.com/repos/seeseemelk/MockBukkit/contents/src/test/java/be/seeseemelk/mockbukkit/entity/PlayerMockTest.java?ref=97b9b77f5602f4590f3766ff049cbce58b49e6e0",
+    "patch": "@@ -18,6 +18,7 @@\n import java.util.concurrent.TimeoutException;\n import java.util.concurrent.atomic.AtomicBoolean;\n import java.util.concurrent.atomic.AtomicInteger;\n+import java.util.concurrent.atomic.AtomicReference;\n \n import org.bukkit.Bukkit;\n import org.bukkit.GameMode;\n@@ -218,6 +219,51 @@ public void resetMaxHealth_MaxHealthChanged_ResetsBackTo20()\n \t\tassertEquals(20.0, player.getHealth(), 0);\n \t}\n \n+\t@Test\n+\tpublic void kill_PLayerDeathEventDispatched()\n+\t{\n+\t\tTestPlugin plugin = MockBukkit.load(TestPlugin.class);\n+\t\tplayer.kill();\n+\t\tserver.getPluginManager().assertEventFired(PlayerDeathEvent.class);\n+\t}\n+\n+\t@Test\n+\tpublic void kill_NoKeepInventory_PlayerReset()\n+\t{\n+\t\tplayer.getWorld().setGameRule(GameRule.KEEP_INVENTORY, false);\n+\t\tplayer.kill();\n+\n+\t\tassertEquals(0, player.getLevel());\n+\t\tassertEquals(0, player.getExp(), 0);\n+\t\tassertEquals(0, player.getFoodLevel());\n+\t\tassertTrue(player.getInventory().isEmpty());\n+\t\tassertTrue(player.getOpenInventory() instanceof SimpleInventoryViewMock);\n+\t}\n+\n+\t@Test\n+\tpublic void kill_KeepInventory_inventoryKept()\n+\t{\n+\t\tplayer.getWorld().setGameRule(GameRule.KEEP_INVENTORY, true);\n+\t\tplayer.getInventory().addItem(new ItemStack(Material.DIRT));\n+\t\tplayer.kill();\n+\n+\t\tassertFalse(player.getInventory().isEmpty());\n+\t}\n+\n+\t@Test\n+\tpublic void getKiller_Default_null()\n+\t{\n+\t\tassertNull(player.getKiller());\n+\t}\n+\n+\t@Test\n+\tpublic void getKiller_SomeValue_SetExactly()\n+\t{\n+\t\tPlayerMock killer = server.addPlayer();\n+\t\tplayer.setKiller(killer);\n+\t\tassertEquals(killer, player.getKiller());\n+\t}\n+\n \t@Test\n \tpublic void damage_LessThanHealth_DamageTaken()\n \t{"
+  },
+  {
+    "sha": "a477fe89910d7cd3b61ff32393779f5c7dc7a6c3",
+    "filename": "src/test/java/be/seeseemelk/mockbukkit/entity/ZombieMockTest.java",
+    "status": "added",
+    "additions": 52,
+    "deletions": 0,
+    "changes": 52,
+    "blob_url": "https://github.com/seeseemelk/MockBukkit/blob/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/test/java/be/seeseemelk/mockbukkit/entity/ZombieMockTest.java",
+    "raw_url": "https://github.com/seeseemelk/MockBukkit/raw/97b9b77f5602f4590f3766ff049cbce58b49e6e0/src/test/java/be/seeseemelk/mockbukkit/entity/ZombieMockTest.java",
+    "contents_url": "https://api.github.com/repos/seeseemelk/MockBukkit/contents/src/test/java/be/seeseemelk/mockbukkit/entity/ZombieMockTest.java?ref=97b9b77f5602f4590f3766ff049cbce58b49e6e0",
+    "patch": "@@ -0,0 +1,52 @@\n+package be.seeseemelk.mockbukkit.entity;\n+\n+import be.seeseemelk.mockbukkit.MockBukkit;\n+import be.seeseemelk.mockbukkit.ServerMock;\n+import org.bukkit.event.entity.EntityDeathEvent;\n+import org.junit.After;\n+import org.junit.Before;\n+import org.junit.Test;\n+\n+import java.util.UUID;\n+\n+import static org.junit.Assert.assertEquals;\n+import static org.junit.Assert.assertNull;\n+import static org.junit.Assert.assertTrue;\n+\n+public class ZombieMockTest\n+{\n+\tprivate ServerMock server;\n+\tprivate ZombieMock zombie;\n+\n+\t@Before\n+\tpublic void setUp()\n+\t{\n+\t\tserver = MockBukkit.mock();\n+\t\tzombie = new ZombieMock(server, UUID.randomUUID());\n+\t}\n+\n+\t@After\n+\tpublic void tearDown()\n+\t{\n+\t\tMockBukkit.unmock();\n+\t}\n+\n+\t@Test\n+\tpublic void simulateKilledBy_GivenPlayer()\n+\t{\n+\t\tPlayerMock player = server.addPlayer();\n+\n+\t\tzombie.simulateKilledBy(player);\n+\n+\t\tserver.getPluginManager().assertEventFired(EntityDeathEvent.class);\n+\t\tassertEquals(player, zombie.getKiller());\n+\t}\n+\n+\t@Test\n+\tpublic void simulateKilledBy_NoPlayer()\n+\t{\n+\t\tzombie.simulateKilledBy(null);\n+\t\tassertNull(zombie.getKiller());\n+\t\tassertTrue(zombie.isDead());\n+\t}\n+}"
+  }
+]

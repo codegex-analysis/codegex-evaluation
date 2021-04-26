@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "90a53dc29b049fefa6d6bd9c32d8e0889f52fa41",
+    "filename": "modules/jdbc/src/main/java/org/testcontainers/containers/JdbcDatabaseContainer.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 3,
+    "changes": 12,
+    "blob_url": "https://github.com/testcontainers/testcontainers-java/blob/19684b69c3c536896f9a20c0c40a4eb24cefe3d0/modules/jdbc/src/main/java/org/testcontainers/containers/JdbcDatabaseContainer.java",
+    "raw_url": "https://github.com/testcontainers/testcontainers-java/raw/19684b69c3c536896f9a20c0c40a4eb24cefe3d0/modules/jdbc/src/main/java/org/testcontainers/containers/JdbcDatabaseContainer.java",
+    "contents_url": "https://api.github.com/repos/testcontainers/testcontainers-java/contents/modules/jdbc/src/main/java/org/testcontainers/containers/JdbcDatabaseContainer.java?ref=19684b69c3c536896f9a20c0c40a4eb24cefe3d0",
+    "patch": "@@ -36,6 +36,7 @@\n \n     private int startupTimeoutSeconds = 120;\n     private int connectTimeoutSeconds = 120;\n+    private int retryTimeoutMs = 100;\n \n     private static final String QUERY_PARAM_SEPARATOR = \"&\";\n \n@@ -130,6 +131,11 @@ public SELF withInitScript(String initScriptPath) {\n         return self();\n     }\n \n+    public SELF withRetryTimeout(int retryTimeoutMs) {\n+        this.retryTimeoutMs = retryTimeoutMs;\n+        return self();\n+    }\n+\n     @Override\n     protected void waitUntilContainerStarted() {\n         logger().info(\"Waiting for database connection to become available at {} using query '{}'\", getJdbcUrl(), getTestQueryString());\n@@ -140,7 +146,7 @@ protected void waitUntilContainerStarted() {\n             while (System.currentTimeMillis() < start + (1000 * startupTimeoutSeconds)) {\n                 try {\n                     if (!isRunning()) {\n-                        Thread.sleep(100L);\n+                        Thread.sleep(retryTimeoutMs);\n                         continue; // Don't attempt to connect yet\n                     }\n \n@@ -156,7 +162,7 @@ protected void waitUntilContainerStarted() {\n                 } catch (Exception e) {\n                     // ignore so that we can try again\n                     logger().debug(\"Failure when trying test query\", e);\n-                    Thread.sleep(100L);\n+                    Thread.sleep(retryTimeoutMs);\n                 }\n             }\n         } catch (InterruptedException e) {\n@@ -219,7 +225,7 @@ public Connection createConnection(String queryString) throws SQLException, NoDr\n                     return jdbcDriverInstance.connect(url, info);\n                 } catch (SQLException e) {\n                     lastException = e;\n-                    Thread.sleep(100L);\n+                    Thread.sleep(retryTimeoutMs);\n                 }\n             }\n         } catch (InterruptedException e) {"
+  }
+]

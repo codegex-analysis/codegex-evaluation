@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "0f74286b0b03966ab39506166f662ecb284d97cf",
+    "filename": "hazelcast/src/main/java/com/hazelcast/config/MulticastConfig.java",
+    "status": "modified",
+    "additions": 27,
+    "deletions": 0,
+    "changes": 27,
+    "blob_url": "https://github.com/hazelcast/hazelcast/blob/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/main/java/com/hazelcast/config/MulticastConfig.java",
+    "raw_url": "https://github.com/hazelcast/hazelcast/raw/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/main/java/com/hazelcast/config/MulticastConfig.java",
+    "contents_url": "https://api.github.com/repos/hazelcast/hazelcast/contents/hazelcast/src/main/java/com/hazelcast/config/MulticastConfig.java?ref=4e192b9c5461c4f49c38e9cb972f9f4672e51a48",
+    "patch": "@@ -58,6 +58,11 @@\n      * is turned on or off.\n      */\n     public static final boolean DEFAULT_LOOPBACK_MODE_ENABLED = true;\n+    /**\n+     * Default flag that indicates if the setInterface method\n+     * is called or not.\n+     */\n+    public static final boolean DEFAULT_SET_INTERFACE = true;\n \n     private static final int MULTICAST_TTL_UPPER_BOUND = 255;\n \n@@ -75,6 +80,8 @@\n \n     private boolean loopbackModeEnabled = DEFAULT_LOOPBACK_MODE_ENABLED;\n \n+    private boolean enableSetInterface = DEFAULT_SET_INTERFACE;\n+\n     /**\n      * Check if the multicast discovery mechanism has been enabled.\n      *\n@@ -265,6 +272,26 @@ public MulticastConfig setLoopbackModeEnabled(boolean enabled) {\n         return this;\n     }\n \n+    /**\n+     * Check if setInterface is enabled.\n+     *\n+     * @return {@code true} if setInterface is enabled, {@code false} otherwise\n+     */\n+    public boolean isSetInterfaceEnabled() {\n+        return enableSetInterface;\n+    }\n+\n+    /**\n+     * Enables or disables the call to setInterface in multicast setting.\n+     *\n+     * @param enabled {@code true} to enable setInterface call, {@code false} to disable\n+     * @return the updated MulticastConfig\n+     */\n+    public MulticastConfig setEnableSetInterface(boolean enabled) {\n+        this.enableSetInterface = enabled;\n+        return this;\n+    }\n+\n     @Override\n     @SuppressWarnings({\"checkstyle:cyclomaticcomplexity\", \"checkstyle:npathcomplexity\"})\n     public final boolean equals(Object o) {"
+  },
+  {
+    "sha": "66c6584cf3092e0f5beb07119ec6ca8dd9e2b302",
+    "filename": "hazelcast/src/main/java/com/hazelcast/internal/cluster/impl/MulticastService.java",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/hazelcast/hazelcast/blob/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/main/java/com/hazelcast/internal/cluster/impl/MulticastService.java",
+    "raw_url": "https://github.com/hazelcast/hazelcast/raw/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/main/java/com/hazelcast/internal/cluster/impl/MulticastService.java",
+    "contents_url": "https://api.github.com/repos/hazelcast/hazelcast/contents/hazelcast/src/main/java/com/hazelcast/internal/cluster/impl/MulticastService.java?ref=4e192b9c5461c4f49c38e9cb972f9f4672e51a48",
+    "patch": "@@ -118,7 +118,9 @@ public static MulticastService createMulticastService(Address bindAddress, Node\n             multicastSocket.bind(new InetSocketAddress(multicastConfig.getMulticastPort()));\n             multicastSocket.setTimeToLive(multicastConfig.getMulticastTimeToLive());\n             try {\n-                multicastSocket.setInterface(bindAddress.getInetAddress());\n+                if (multicastConfig.isSetInterfaceEnabled()) {\n+                    multicastSocket.setInterface(bindAddress.getInetAddress());\n+                }\n                 if (bindAddress.getInetAddress().isLoopbackAddress()) {\n                     // the parameter of the setLoopbackMode method is \"disable: true to disable the LoopbackMode\"!\n                     multicastSocket.setLoopbackMode(! multicastConfig.isLoopbackModeEnabled());"
+  },
+  {
+    "sha": "68ad603ae55ac42bcfaa94c8d568cf04b68a89ea",
+    "filename": "hazelcast/src/test/java/com/hazelcast/client/cache/ClientCacheConfigTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/hazelcast/hazelcast/blob/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/test/java/com/hazelcast/client/cache/ClientCacheConfigTest.java",
+    "raw_url": "https://github.com/hazelcast/hazelcast/raw/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/test/java/com/hazelcast/client/cache/ClientCacheConfigTest.java",
+    "contents_url": "https://api.github.com/repos/hazelcast/hazelcast/contents/hazelcast/src/test/java/com/hazelcast/client/cache/ClientCacheConfigTest.java?ref=4e192b9c5461c4f49c38e9cb972f9f4672e51a48",
+    "patch": "@@ -171,6 +171,7 @@ public void createCacheConfigOnAllNodes() {\n \n         try {\n             Config config = new Config();\n+            disableSetInterfaceIfSolaris(config);\n             CacheSimpleConfig cacheSimpleConfig = new CacheSimpleConfig()\n                     .setName(CACHE_NAME)\n                     .setBackupCount(1); // Be sure that cache put operation is mirrored to backup node"
+  },
+  {
+    "sha": "d64711b9527b5373e929d5ef138415e4f69c1540",
+    "filename": "hazelcast/src/test/java/com/hazelcast/client/impl/spi/impl/discovery/ClientAutoDetectionDiscoveryTest.java",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 2,
+    "changes": 6,
+    "blob_url": "https://github.com/hazelcast/hazelcast/blob/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/test/java/com/hazelcast/client/impl/spi/impl/discovery/ClientAutoDetectionDiscoveryTest.java",
+    "raw_url": "https://github.com/hazelcast/hazelcast/raw/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/test/java/com/hazelcast/client/impl/spi/impl/discovery/ClientAutoDetectionDiscoveryTest.java",
+    "contents_url": "https://api.github.com/repos/hazelcast/hazelcast/contents/hazelcast/src/test/java/com/hazelcast/client/impl/spi/impl/discovery/ClientAutoDetectionDiscoveryTest.java?ref=4e192b9c5461c4f49c38e9cb972f9f4672e51a48",
+    "patch": "@@ -40,8 +40,10 @@ public void tearDown() {\n \n     @Test\n     public void defaultDiscovery() {\n-        Hazelcast.newHazelcastInstance();\n-        Hazelcast.newHazelcastInstance();\n+        Config config = new Config();\n+        disableSetInterfaceIfSolaris(config);\n+        Hazelcast.newHazelcastInstance(config);\n+        Hazelcast.newHazelcastInstance(config);\n \n         HazelcastInstance client = HazelcastClient.newHazelcastClient();\n         assertClusterSizeEventually(2, client);"
+  },
+  {
+    "sha": "16b45c51da06dba7331d52181afa4a9b29786edb",
+    "filename": "hazelcast/src/test/java/com/hazelcast/cluster/MulticastDeserializationTest.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/hazelcast/hazelcast/blob/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/test/java/com/hazelcast/cluster/MulticastDeserializationTest.java",
+    "raw_url": "https://github.com/hazelcast/hazelcast/raw/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/test/java/com/hazelcast/cluster/MulticastDeserializationTest.java",
+    "contents_url": "https://api.github.com/repos/hazelcast/hazelcast/contents/hazelcast/src/test/java/com/hazelcast/cluster/MulticastDeserializationTest.java?ref=4e192b9c5461c4f49c38e9cb972f9f4672e51a48",
+    "patch": "@@ -18,6 +18,8 @@\n \n import static com.hazelcast.internal.nio.IOUtil.closeResource;\n import static com.hazelcast.test.HazelcastTestSupport.assertTrueEventually;\n+import static com.hazelcast.test.HazelcastTestSupport.disableSetInterfaceIfSolaris;\n+import static com.hazelcast.test.HazelcastTestSupport.isSolaris;\n import static com.hazelcast.test.HazelcastTestSupport.smallInstanceConfig;\n import static org.junit.Assert.assertFalse;\n import static org.junit.Assert.assertTrue;\n@@ -121,6 +123,7 @@ private Config createConfig(boolean withFilter) {\n                 .setMulticastPort(MULTICAST_PORT)\n                 .setMulticastGroup(MULTICAST_GROUP)\n                 .setMulticastTimeToLive(MULTICAST_TTL);\n+        disableSetInterfaceIfSolaris(config);\n         return config;\n     }\n \n@@ -136,7 +139,9 @@ private void sendJoinDatagram(Object object) throws IOException {\n         MulticastSocket multicastSocket = null;\n         try {\n             multicastSocket = new MulticastSocket(MULTICAST_PORT);\n-            multicastSocket.setInterface(InetAddress.getByName(\"127.0.0.1\"));\n+            if (!isSolaris()) {\n+                multicastSocket.setInterface(InetAddress.getByName(\"127.0.0.1\"));\n+            }\n             multicastSocket.setTimeToLive(MULTICAST_TTL);\n             InetAddress group = InetAddress.getByName(MULTICAST_GROUP);\n             multicastSocket.joinGroup(group);"
+  },
+  {
+    "sha": "f78fdc1a3b3db54557e94dfea289aecf9e98498a",
+    "filename": "hazelcast/src/test/java/com/hazelcast/test/HazelcastTestSupport.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/hazelcast/hazelcast/blob/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/test/java/com/hazelcast/test/HazelcastTestSupport.java",
+    "raw_url": "https://github.com/hazelcast/hazelcast/raw/4e192b9c5461c4f49c38e9cb972f9f4672e51a48/hazelcast/src/test/java/com/hazelcast/test/HazelcastTestSupport.java",
+    "contents_url": "https://api.github.com/repos/hazelcast/hazelcast/contents/hazelcast/src/test/java/com/hazelcast/test/HazelcastTestSupport.java?ref=4e192b9c5461c4f49c38e9cb972f9f4672e51a48",
+    "patch": "@@ -1683,4 +1683,15 @@ public static void destroyAllDistributedObjects(HazelcastInstance hz) {\n             object.destroy();\n         }\n     }\n+\n+    public static Config disableSetInterfaceIfSolaris(Config c) {\n+        if (isSolaris()) {\n+            c.getNetworkConfig().getJoin().getMulticastConfig().setEnableSetInterface(false);\n+        }\n+        return c;\n+    }\n+\n+    public static boolean isSolaris() {\n+        return System.getProperty(\"os.name\").startsWith(\"SunOS\");\n+    }\n }"
+  }
+]

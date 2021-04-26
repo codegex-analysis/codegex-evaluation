@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "145801fb961512b3e7863fffbefa19d6e3448794",
+    "filename": "hw06-atm/build.gradle",
+    "status": "added",
+    "additions": 10,
+    "deletions": 0,
+    "changes": 10,
+    "blob_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/blob/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/build.gradle",
+    "raw_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/raw/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/build.gradle",
+    "contents_url": "https://api.github.com/repos/LunevAE/2020-12-otus-java-Lunev/contents/hw06-atm/build.gradle?ref=ea09577aac5372ac7b26ed32e43de8b105eb42a4",
+    "patch": "@@ -0,0 +1,10 @@\n+plugins {\n+    id 'java'\n+}\n+\n+sourceCompatibility = JavaVersion.VERSION_13\n+targetCompatibility = JavaVersion.VERSION_13\n+\n+dependencies {\n+    implementation 'com.google.guava:guava'\n+}"
+  },
+  {
+    "sha": "f75aca5e37809cc5dbc3f775c6da719ac7a75cda",
+    "filename": "hw06-atm/src/main/java/ru.otus/Atm.java",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/blob/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/Atm.java",
+    "raw_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/raw/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/Atm.java",
+    "contents_url": "https://api.github.com/repos/LunevAE/2020-12-otus-java-Lunev/contents/hw06-atm/src/main/java/ru.otus/Atm.java?ref=ea09577aac5372ac7b26ed32e43de8b105eb42a4",
+    "patch": "@@ -0,0 +1,9 @@\n+package ru.otus;\n+\n+import java.util.Stack;\n+\n+public interface Atm {\n+    void deposit(Banknote banknote) throws AtmException;\n+    Stack<Banknote> withdraw(int value) throws AtmException;\n+    int balanceEnquiry();\n+}"
+  },
+  {
+    "sha": "d3a8ea9c6b058ec3acac9da05153a113a943367b",
+    "filename": "hw06-atm/src/main/java/ru.otus/AtmException.java",
+    "status": "added",
+    "additions": 7,
+    "deletions": 0,
+    "changes": 7,
+    "blob_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/blob/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/AtmException.java",
+    "raw_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/raw/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/AtmException.java",
+    "contents_url": "https://api.github.com/repos/LunevAE/2020-12-otus-java-Lunev/contents/hw06-atm/src/main/java/ru.otus/AtmException.java?ref=ea09577aac5372ac7b26ed32e43de8b105eb42a4",
+    "patch": "@@ -0,0 +1,7 @@\n+package ru.otus;\n+\n+public class AtmException extends RuntimeException {\n+    public AtmException(final String message) {\n+        super(message);\n+    }\n+}"
+  },
+  {
+    "sha": "5a84e2579eb16e5fcfeb03b968cf530b665343aa",
+    "filename": "hw06-atm/src/main/java/ru.otus/AtmImpl.java",
+    "status": "added",
+    "additions": 66,
+    "deletions": 0,
+    "changes": 66,
+    "blob_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/blob/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/AtmImpl.java",
+    "raw_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/raw/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/AtmImpl.java",
+    "contents_url": "https://api.github.com/repos/LunevAE/2020-12-otus-java-Lunev/contents/hw06-atm/src/main/java/ru.otus/AtmImpl.java?ref=ea09577aac5372ac7b26ed32e43de8b105eb42a4",
+    "patch": "@@ -0,0 +1,66 @@\n+package ru.otus;\n+\n+import java.util.Map;\n+import java.util.Stack;\n+\n+public class AtmImpl implements Atm{\n+    private final Map<Banknote, Cell> balance;\n+\n+    public AtmImpl(final Map<Banknote, Cell> balance) {\n+        this.balance = balance;\n+    }\n+\n+    //принимать банкноты разных номиналов (на каждый номинал должна быть своя ячейка)\n+    @Override\n+    public void deposit(final Banknote banknote) throws AtmException {\n+        Cell cell = balance.get(banknote);\n+        try {\n+            cell.addBanknote(banknote);\n+        } catch (IllegalArgumentException e) {\n+            throw new AtmException(e.getMessage());\n+        }\n+    }\n+\n+    //выдавать запрошенную сумму минимальным количеством банкнот или ошибку если сумму нельзя выдать\n+    @Override\n+    public Stack<Banknote> withdraw(int value) throws AtmException {\n+        int balance = balanceEnquiry();\n+\n+        if (value > balance) {\n+            throw new AtmException(\"Requested amount is greater than your balance\");\n+        }\n+\n+        Stack<Banknote> debitedBanknotes = new Stack<>();\n+        int requestedAmount = value;\n+\n+        for (Map.Entry<Banknote, Cell> entry : this.balance.entrySet()) {\n+            int cash = entry.getKey().getValue();\n+            Cell cell = entry.getValue();\n+\n+            if (requestedAmount < cash) {\n+                continue;\n+            }\n+\n+            while (Math.abs(requestedAmount / cash) > 0 && requestedAmount > 0 && cell.size() > 0) {\n+                Banknote banknote = cell.getBanknote();\n+\n+                debitedBanknotes.push(banknote);\n+                cell.removeBanknote();\n+                requestedAmount -= cash;\n+            }\n+        }\n+\n+        if (requestedAmount > 0){\n+            throw new AtmException(\"ATM does not have enough money\");\n+        }\n+        return debitedBanknotes;\n+    }\n+\n+    //выдавать сумму остатка денежных средств\n+    @Override\n+    public int balanceEnquiry() {\n+        return balance.values().stream()\n+                .mapToInt(Cell::calculateBalance)\n+                .sum();\n+    }\n+}"
+  },
+  {
+    "sha": "fcdb649c2b051ddb337e9d2d7837ecb22ec13293",
+    "filename": "hw06-atm/src/main/java/ru.otus/Banknote.java",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/blob/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/Banknote.java",
+    "raw_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/raw/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/Banknote.java",
+    "contents_url": "https://api.github.com/repos/LunevAE/2020-12-otus-java-Lunev/contents/hw06-atm/src/main/java/ru.otus/Banknote.java?ref=ea09577aac5372ac7b26ed32e43de8b105eb42a4",
+    "patch": "@@ -0,0 +1,19 @@\n+package ru.otus;\n+\n+public enum Banknote {\n+    FIFTY(50),\n+    HUNDRED(100),\n+    FIVE_HUNDRED(500),\n+    THOUSAND(1000),\n+    FIVE_THOUSAND(5000);\n+\n+    private final int value;\n+\n+    Banknote(final int value) {\n+        this.value = value;\n+    }\n+\n+    public int getValue() {\n+        return value;\n+    }\n+}"
+  },
+  {
+    "sha": "1c3144d3f68bdedb6080055c499ac2c999256689",
+    "filename": "hw06-atm/src/main/java/ru.otus/Cell.java",
+    "status": "added",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/blob/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/Cell.java",
+    "raw_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/raw/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/Cell.java",
+    "contents_url": "https://api.github.com/repos/LunevAE/2020-12-otus-java-Lunev/contents/hw06-atm/src/main/java/ru.otus/Cell.java?ref=ea09577aac5372ac7b26ed32e43de8b105eb42a4",
+    "patch": "@@ -0,0 +1,11 @@\n+package ru.otus;\n+\n+import java.util.NoSuchElementException;\n+\n+public interface Cell {\n+    void removeBanknote() throws NoSuchElementException;\n+    void addBanknote(Banknote banknote) throws IllegalArgumentException;\n+    int calculateBalance();\n+    int size();\n+    Banknote getBanknote();\n+}"
+  },
+  {
+    "sha": "0963c8deea80fccd6485171d7939d9db9467cf26",
+    "filename": "hw06-atm/src/main/java/ru.otus/CellImpl.java",
+    "status": "added",
+    "additions": 44,
+    "deletions": 0,
+    "changes": 44,
+    "blob_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/blob/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/CellImpl.java",
+    "raw_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/raw/ea09577aac5372ac7b26ed32e43de8b105eb42a4/hw06-atm/src/main/java/ru.otus/CellImpl.java",
+    "contents_url": "https://api.github.com/repos/LunevAE/2020-12-otus-java-Lunev/contents/hw06-atm/src/main/java/ru.otus/CellImpl.java?ref=ea09577aac5372ac7b26ed32e43de8b105eb42a4",
+    "patch": "@@ -0,0 +1,44 @@\n+package ru.otus;\n+\n+import java.util.NoSuchElementException;\n+import java.util.Stack;\n+\n+public class CellImpl implements Cell{\n+    private final Stack<Banknote> banknotes;\n+\n+    public CellImpl(Stack<Banknote> banknotes) {\n+        this.banknotes = banknotes;\n+    }\n+\n+    @Override\n+    public void removeBanknote() throws NoSuchElementException {\n+        if (banknotes.isEmpty()) {\n+            throw new NoSuchElementException();\n+        }\n+\n+        banknotes.pop();\n+    }\n+\n+    @Override\n+    public void addBanknote(Banknote banknote) throws IllegalArgumentException {\n+        banknotes.push(banknote);\n+    }\n+\n+    @Override\n+    public int calculateBalance() {\n+        return banknotes.stream()\n+                .mapToInt(Banknote::getValue)\n+                .sum();\n+    }\n+\n+    @Override\n+    public int size() {\n+        return banknotes.size();\n+    }\n+\n+\n+    @Override\n+    public Banknote getBanknote () {\n+        return banknotes.peek();\n+    }\n+}"
+  },
+  {
+    "sha": "f7d3dc2c29dfee10f90eab117ec1c6dac3131189",
+    "filename": "settings.gradle",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/blob/ea09577aac5372ac7b26ed32e43de8b105eb42a4/settings.gradle",
+    "raw_url": "https://github.com/LunevAE/2020-12-otus-java-Lunev/raw/ea09577aac5372ac7b26ed32e43de8b105eb42a4/settings.gradle",
+    "contents_url": "https://api.github.com/repos/LunevAE/2020-12-otus-java-Lunev/contents/settings.gradle?ref=ea09577aac5372ac7b26ed32e43de8b105eb42a4",
+    "patch": "@@ -3,4 +3,5 @@ include 'hw01-gradle'\n include 'hw02-generics'\n include 'hw03-reflection'\n include 'hw04-gc'\n-include 'hw05-aop'\n\\ No newline at end of file\n+include 'hw05-aop'\n+include 'hw06-atm'\n\\ No newline at end of file"
+  }
+]

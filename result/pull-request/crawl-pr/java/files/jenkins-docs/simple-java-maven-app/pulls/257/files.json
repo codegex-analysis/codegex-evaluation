@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "c8aeb3a27781a0967c540ad88cb0a4911c04ba41",
+    "filename": ".github/workflows/maven.yml",
+    "status": "added",
+    "additions": 24,
+    "deletions": 0,
+    "changes": 24,
+    "blob_url": "https://github.com/jenkins-docs/simple-java-maven-app/blob/28369f1ebad4c67201205d1238e8747ff1cbb174/.github/workflows/maven.yml",
+    "raw_url": "https://github.com/jenkins-docs/simple-java-maven-app/raw/28369f1ebad4c67201205d1238e8747ff1cbb174/.github/workflows/maven.yml",
+    "contents_url": "https://api.github.com/repos/jenkins-docs/simple-java-maven-app/contents/.github/workflows/maven.yml?ref=28369f1ebad4c67201205d1238e8747ff1cbb174",
+    "patch": "@@ -0,0 +1,24 @@\n+# This workflow will build a Java project with Maven\n+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven\n+\n+name: Java CI with Maven\n+\n+on:\n+  push:\n+    branches: [ master ]\n+  pull_request:\n+    branches: [ master ]\n+\n+jobs:\n+  build:\n+\n+    runs-on: ubuntu-latest\n+\n+    steps:\n+    - uses: actions/checkout@v2\n+    - name: Set up JDK 1.8\n+      uses: actions/setup-java@v1\n+      with:\n+        java-version: 1.8\n+    - name: Build with Maven\n+      run: mvn -B package --file pom.xml"
+  },
+  {
+    "sha": "ec93b60619461873a200b87dead598dca00d6a00",
+    "filename": "Jenkinsfile",
+    "status": "added",
+    "additions": 33,
+    "deletions": 0,
+    "changes": 33,
+    "blob_url": "https://github.com/jenkins-docs/simple-java-maven-app/blob/28369f1ebad4c67201205d1238e8747ff1cbb174/Jenkinsfile",
+    "raw_url": "https://github.com/jenkins-docs/simple-java-maven-app/raw/28369f1ebad4c67201205d1238e8747ff1cbb174/Jenkinsfile",
+    "contents_url": "https://api.github.com/repos/jenkins-docs/simple-java-maven-app/contents/Jenkinsfile?ref=28369f1ebad4c67201205d1238e8747ff1cbb174",
+    "patch": "@@ -0,0 +1,33 @@\n+pipeline {\n+    agent {\n+        docker {\n+            image 'maven:3-alpine'\n+            args '-v /root/.m2:/root/.m2'\n+        }\n+    }\n+    options {\n+        skipStagesAfterUnstable()\n+    }\n+    stages {\n+        stage('Build') {\n+            steps {\n+                sh 'mvn -B -DskipTests clean package'\n+            }\n+        }\n+        stage('Test') {\n+            steps {\n+                sh 'mvn test'\n+            }\n+            post {\n+                always {\n+                    junit 'target/surefire-reports/*.xml'\n+                }\n+            }\n+        }\n+        stage('Deliver') { \n+            steps {\n+                sh './jenkins/scripts/deliver.sh' \n+            }\n+        }\n+    }\n+}\n\\ No newline at end of file"
+  }
+]

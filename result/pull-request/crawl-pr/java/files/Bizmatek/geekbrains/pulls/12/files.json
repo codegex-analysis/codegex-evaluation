@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "d6fd574c88b517f53688fb1577310511f7505c15",
+    "filename": "src/ru/geekbrains/pavel_loginov/java2/lesson_5/Application.java",
+    "status": "added",
+    "additions": 60,
+    "deletions": 0,
+    "changes": 60,
+    "blob_url": "https://github.com/Bizmatek/geekbrains/blob/2ac84f288783d4ba090b34224a3b3b251502382d/src/ru/geekbrains/pavel_loginov/java2/lesson_5/Application.java",
+    "raw_url": "https://github.com/Bizmatek/geekbrains/raw/2ac84f288783d4ba090b34224a3b3b251502382d/src/ru/geekbrains/pavel_loginov/java2/lesson_5/Application.java",
+    "contents_url": "https://api.github.com/repos/Bizmatek/geekbrains/contents/src/ru/geekbrains/pavel_loginov/java2/lesson_5/Application.java?ref=2ac84f288783d4ba090b34224a3b3b251502382d",
+    "patch": "@@ -0,0 +1,60 @@\n+package ru.geekbrains.pavel_loginov.java2.lesson_5;\n+\n+public class Application {\n+    private static final int size = 1000000;\n+    private static final int h = size / 2;\n+    private float[] arr = new float[size];\n+\n+    public static void main(String[] args) {\n+        Application app = new Application();\n+        app.calculateArraySerial();\n+        app.calculateArrayParallel();\n+    }\n+\n+    public void calculateArraySerial() {\n+        for (int i = 0; i < size; i++) {\n+            arr[i] = 1;\n+        }\n+        long a = System.currentTimeMillis();\n+        for (int i = 0; i < size; i++) {\n+            arr[i] = (float) (arr[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));\n+        }\n+        long endTime = System.currentTimeMillis();\n+        System.out.println(\"serial time spent: \" + (endTime - a));\n+    }\n+\n+    public void calculateArrayParallel() {\n+        for (int i = 0; i < size; i++) {\n+            arr[i] = 1;\n+        }\n+\n+        float[] a1 = new float[size];\n+        float[] a2 = new float[size];\n+\n+        long startTime = System.currentTimeMillis();\n+\n+        System.arraycopy(arr, 0, a1, 0, h);\n+        System.arraycopy(arr, h, a2, 0, h);\n+\n+        Thread t1 = new Thread(() -> {\n+            for (int i = 0; i < h; i++) {\n+                a1[i] = (float) (arr[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));\n+            }\n+        });\n+\n+        Thread t2 = new Thread(() -> {\n+            for (int i = h; i < size; i++) {\n+                a1[i] = (float) (arr[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));\n+            }\n+        });\n+\n+        t1.start();\n+        t2.start();\n+\n+        System.arraycopy(a1, 0, arr, 0, h);\n+        System.arraycopy(a2, 0, arr, h, h);\n+\n+        long endTime = System.currentTimeMillis();\n+        System.out.println(\"parallel time spent: \" + (endTime - startTime));\n+    }\n+}"
+  }
+]

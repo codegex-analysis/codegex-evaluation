@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "56aba09ddca4fb82d0c7ac987300157322306493",
+    "filename": "flink-runtime/src/main/java/org/apache/flink/runtime/metrics/util/MetricUtils.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 1,
+    "changes": 7,
+    "blob_url": "https://github.com/apache/flink/blob/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/util/MetricUtils.java",
+    "raw_url": "https://github.com/apache/flink/raw/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/util/MetricUtils.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-runtime/src/main/java/org/apache/flink/runtime/metrics/util/MetricUtils.java?ref=b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f",
+    "patch": "@@ -109,13 +109,18 @@ public static JobManagerMetricGroup instantiateJobManagerMetricGroup(\n         return jobManagerMetricGroup;\n     }\n \n+    public static TaskManagerMetricGroup createTaskManagerMetricGroup(\n+            MetricRegistry metricRegistry, String hostName, ResourceID resourceID) {\n+        return new TaskManagerMetricGroup(metricRegistry, hostName, resourceID.toString());\n+    }\n+\n     public static Tuple2<TaskManagerMetricGroup, MetricGroup> instantiateTaskManagerMetricGroup(\n             MetricRegistry metricRegistry,\n             String hostName,\n             ResourceID resourceID,\n             Optional<Time> systemResourceProbeInterval) {\n         final TaskManagerMetricGroup taskManagerMetricGroup =\n-                new TaskManagerMetricGroup(metricRegistry, hostName, resourceID.toString());\n+                createTaskManagerMetricGroup(metricRegistry, hostName, resourceID);\n \n         MetricGroup statusGroup = createAndInitializeStatusMetricGroup(taskManagerMetricGroup);\n "
+  },
+  {
+    "sha": "31dcc2125be8fea685c1e197c363d257ad5acd5f",
+    "filename": "flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/MultipleInputStreamTaskTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/apache/flink/blob/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/MultipleInputStreamTaskTest.java",
+    "raw_url": "https://github.com/apache/flink/raw/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/MultipleInputStreamTaskTest.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/MultipleInputStreamTaskTest.java?ref=b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f",
+    "patch": "@@ -812,7 +812,7 @@ public OperatorMetricGroup getOrAddOperator(OperatorID id, String name) {\n     public void testCheckpointBarrierMetrics() throws Exception {\n         final Map<String, Metric> metrics = new ConcurrentHashMap<>();\n         final TaskMetricGroup taskMetricGroup =\n-                new StreamTaskTestHarness.TestTaskMetricGroup(metrics);\n+                StreamTaskTestHarness.createTaskMetricGroup(metrics);\n \n         try (StreamTaskMailboxTestHarness<String> testHarness =\n                 new StreamTaskMailboxTestHarnessBuilder<>(\n@@ -837,7 +837,7 @@ public void testCheckpointBarrierMetrics() throws Exception {\n     public void testLatencyMarker() throws Exception {\n         final Map<String, Metric> metrics = new ConcurrentHashMap<>();\n         final TaskMetricGroup taskMetricGroup =\n-                new StreamTaskTestHarness.TestTaskMetricGroup(metrics);\n+                StreamTaskTestHarness.createTaskMetricGroup(metrics);\n \n         try (StreamTaskMailboxTestHarness<String> testHarness =\n                 new StreamTaskMailboxTestHarnessBuilder<>("
+  },
+  {
+    "sha": "6766a78751182e5656fce1c5a192f6b7df1f944c",
+    "filename": "flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/OneInputStreamTaskTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/flink/blob/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/OneInputStreamTaskTest.java",
+    "raw_url": "https://github.com/apache/flink/raw/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/OneInputStreamTaskTest.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/OneInputStreamTaskTest.java?ref=b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f",
+    "patch": "@@ -945,7 +945,7 @@ public void testCheckpointBarrierMetrics() throws Exception {\n \n         final Map<String, Metric> metrics = new ConcurrentHashMap<>();\n         final TaskMetricGroup taskMetricGroup =\n-                new StreamTaskTestHarness.TestTaskMetricGroup(metrics);\n+                StreamTaskTestHarness.createTaskMetricGroup(metrics);\n         final StreamMockEnvironment environment = testHarness.createEnvironment();\n         environment.setTaskMetricGroup(taskMetricGroup);\n "
+  },
+  {
+    "sha": "b7603094ca0d739f52acb7415e04cc4d3116932a",
+    "filename": "flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/SourceStreamTaskTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/flink/blob/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/SourceStreamTaskTest.java",
+    "raw_url": "https://github.com/apache/flink/raw/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/SourceStreamTaskTest.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/SourceStreamTaskTest.java?ref=b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f",
+    "patch": "@@ -155,7 +155,7 @@ public void testMetrics() throws Exception {\n \n         final Map<String, Metric> metrics = new ConcurrentHashMap<>();\n         final TaskMetricGroup taskMetricGroup =\n-                new StreamTaskTestHarness.TestTaskMetricGroup(metrics);\n+                StreamTaskTestHarness.createTaskMetricGroup(metrics);\n \n         StreamTaskMailboxTestHarness<String> harness =\n                 builder.setupOutputForSingletonOperatorChain("
+  },
+  {
+    "sha": "6a7277d21d7d68fe77d675c1ff779e95e8fe86ea",
+    "filename": "flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/StreamTaskTestHarness.java",
+    "status": "modified",
+    "additions": 13,
+    "deletions": 16,
+    "changes": 29,
+    "blob_url": "https://github.com/apache/flink/blob/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/StreamTaskTestHarness.java",
+    "raw_url": "https://github.com/apache/flink/raw/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/StreamTaskTestHarness.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/StreamTaskTestHarness.java?ref=b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f",
+    "patch": "@@ -26,6 +26,7 @@\n import org.apache.flink.core.memory.ManagedMemoryUseCase;\n import org.apache.flink.metrics.Metric;\n import org.apache.flink.runtime.checkpoint.TaskStateSnapshot;\n+import org.apache.flink.runtime.clusterframework.types.ResourceID;\n import org.apache.flink.runtime.event.AbstractEvent;\n import org.apache.flink.runtime.execution.CancelTaskException;\n import org.apache.flink.runtime.execution.Environment;\n@@ -38,7 +39,7 @@\n import org.apache.flink.runtime.metrics.NoOpMetricRegistry;\n import org.apache.flink.runtime.metrics.groups.AbstractMetricGroup;\n import org.apache.flink.runtime.metrics.groups.TaskMetricGroup;\n-import org.apache.flink.runtime.metrics.groups.UnregisteredMetricGroups;\n+import org.apache.flink.runtime.metrics.util.MetricUtils;\n import org.apache.flink.runtime.operators.testutils.MockInputSplitProvider;\n import org.apache.flink.runtime.state.LocalRecoveryConfig;\n import org.apache.flink.runtime.state.LocalRecoveryDirectoryProviderImpl;\n@@ -509,21 +510,17 @@ public Throwable getError() {\n         }\n     }\n \n-    /**\n-     * The task metric group for implementing the custom registry to store the registered metrics.\n-     */\n-    static class TestTaskMetricGroup extends TaskMetricGroup {\n-\n-        TestTaskMetricGroup(Map<String, Metric> metrics) {\n-            super(\n-                    new TestMetricRegistry(metrics),\n-                    new UnregisteredMetricGroups.UnregisteredTaskManagerJobMetricGroup(),\n-                    new JobVertexID(0, 0),\n-                    new ExecutionAttemptID(),\n-                    \"test\",\n-                    0,\n-                    0);\n-        }\n+    static TaskMetricGroup createTaskMetricGroup(Map<String, Metric> metrics) {\n+        return MetricUtils.createTaskManagerMetricGroup(\n+                        new TestMetricRegistry(metrics), \"localhost\", ResourceID.generate())\n+                .addTaskForJob(\n+                        new JobID(),\n+                        \"jobName\",\n+                        new JobVertexID(0, 0),\n+                        new ExecutionAttemptID(),\n+                        \"test\",\n+                        0,\n+                        0);\n     }\n \n     /** The metric registry for storing the registered metrics to verify in tests. */"
+  },
+  {
+    "sha": "62928a40e27d7d96372c656ffb9a1d829cf7257a",
+    "filename": "flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/TwoInputStreamTaskTest.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/apache/flink/blob/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/TwoInputStreamTaskTest.java",
+    "raw_url": "https://github.com/apache/flink/raw/b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/TwoInputStreamTaskTest.java",
+    "contents_url": "https://api.github.com/repos/apache/flink/contents/flink-streaming-java/src/test/java/org/apache/flink/streaming/runtime/tasks/TwoInputStreamTaskTest.java?ref=b3112ce7fa1b1955362ef7b3a0b2de15bb1a197f",
+    "patch": "@@ -740,7 +740,7 @@ public void testCheckpointBarrierMetrics() throws Exception {\n \n         final Map<String, Metric> metrics = new ConcurrentHashMap<>();\n         final TaskMetricGroup taskMetricGroup =\n-                new StreamTaskTestHarness.TestTaskMetricGroup(metrics);\n+                StreamTaskTestHarness.createTaskMetricGroup(metrics);\n         final StreamMockEnvironment environment = testHarness.createEnvironment();\n         environment.setTaskMetricGroup(taskMetricGroup);\n "
+  }
+]

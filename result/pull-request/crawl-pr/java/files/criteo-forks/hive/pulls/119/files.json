@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "6d1a0ccc5701acd7f3b410de309f9288cb22a84c",
+    "filename": "ql/src/java/org/apache/hadoop/hive/ql/exec/mr/MapredLocalTask.java",
+    "status": "modified",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/criteo-forks/hive/blob/956fb9d0534e59de7526fd185c7dba2619bb4e40/ql/src/java/org/apache/hadoop/hive/ql/exec/mr/MapredLocalTask.java",
+    "raw_url": "https://github.com/criteo-forks/hive/raw/956fb9d0534e59de7526fd185c7dba2619bb4e40/ql/src/java/org/apache/hadoop/hive/ql/exec/mr/MapredLocalTask.java",
+    "contents_url": "https://api.github.com/repos/criteo-forks/hive/contents/ql/src/java/org/apache/hadoop/hive/ql/exec/mr/MapredLocalTask.java?ref=956fb9d0534e59de7526fd185c7dba2619bb4e40",
+    "patch": "@@ -45,6 +45,7 @@\n import org.apache.hadoop.hive.common.io.CachingPrintStream;\n import org.apache.hadoop.hive.common.metrics.common.Metrics;\n import org.apache.hadoop.hive.common.metrics.common.MetricsConstant;\n+import org.apache.hadoop.hive.common.metrics.common.MetricsFactory;\n import org.apache.hadoop.hive.conf.HiveConf;\n import org.apache.hadoop.hive.conf.HiveConf.ConfVars;\n import org.apache.hadoop.hive.ql.CompilationOpContext;\n@@ -100,6 +101,7 @@\n   private JobConf job;\n   public static transient final Logger l4j = LoggerFactory.getLogger(MapredLocalTask.class);\n   static final String HIVE_LOCAL_TASK_CHILD_OPTS_KEY = \"HIVE_LOCAL_TASK_CHILD_OPTS\";\n+  static final String MAPRED_LOCAL_TASK_CHILD_JVM_METRIC = \"mapred_local_task_child_jvm\";\n   public static MemoryMXBean memoryMXBean;\n   private static final Logger LOG = LoggerFactory.getLogger(MapredLocalTask.class);\n \n@@ -162,6 +164,7 @@ public int execute(DriverContext driverContext) {\n   }\n \n   public int executeInChildVM(DriverContext driverContext) {\n+    Metrics metrics = MetricsFactory.getInstance();\n     // execute in child jvm\n     try {\n       // generate the cmd line to run in the child jvm\n@@ -324,6 +327,9 @@ public int executeInChildVM(DriverContext driverContext) {\n \n       // Run ExecDriver in another JVM\n       executor = Runtime.getRuntime().exec(cmdLine, env, new File(workDir));\n+      if (metrics != null) {\n+        metrics.incrementCounter(MAPRED_LOCAL_TASK_CHILD_JVM_METRIC);\n+      }\n \n       CachingPrintStream errPrintStream = new CachingPrintStream(System.err);\n \n@@ -356,6 +362,9 @@ public int executeInChildVM(DriverContext driverContext) {\n       if (secureDoAs != null) {\n         secureDoAs.close();\n       }\n+      if (metrics != null) {\n+        metrics.decrementCounter(MAPRED_LOCAL_TASK_CHILD_JVM_METRIC);\n+      }\n     }\n   }\n "
+  }
+]

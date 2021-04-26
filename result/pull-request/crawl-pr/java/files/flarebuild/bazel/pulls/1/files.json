@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "eb07ee75e5591816676ed6b9ecb2b0e903a1e870",
+    "filename": "src/main/java/com/google/devtools/build/lib/buildeventservice/BUILD",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/flarebuild/bazel/blob/df142097e9e7f90de1dcfafa0d00f2e13c74f528/src/main/java/com/google/devtools/build/lib/buildeventservice/BUILD",
+    "raw_url": "https://github.com/flarebuild/bazel/raw/df142097e9e7f90de1dcfafa0d00f2e13c74f528/src/main/java/com/google/devtools/build/lib/buildeventservice/BUILD",
+    "contents_url": "https://api.github.com/repos/flarebuild/bazel/contents/src/main/java/com/google/devtools/build/lib/buildeventservice/BUILD?ref=df142097e9e7f90de1dcfafa0d00f2e13c74f528",
+    "patch": "@@ -50,6 +50,8 @@ java_library(\n         \"//src/main/java/com/google/devtools/build/lib/network:connectivity_status\",\n         \"//src/main/java/com/google/devtools/build/lib/profiler\",\n         \"//src/main/java/com/google/devtools/build/lib/profiler:google-auto-profiler-utils\",\n+        \"//src/main/java/com/google/devtools/build/lib/remote/options\",\n+        \"//src/main/java/com/google/devtools/build/lib/remote/util\",\n         \"//src/main/java/com/google/devtools/build/lib/util\",\n         \"//src/main/java/com/google/devtools/build/lib/util:abrupt_exit_exception\",\n         \"//src/main/java/com/google/devtools/build/lib/util:detailed_exit_code\","
+  },
+  {
+    "sha": "8c001c2a872bac1edfe66895e8cb1ffedbc1d7ea",
+    "filename": "src/main/java/com/google/devtools/build/lib/buildeventservice/BazelBuildEventServiceModule.java",
+    "status": "modified",
+    "additions": 20,
+    "deletions": 4,
+    "changes": 24,
+    "blob_url": "https://github.com/flarebuild/bazel/blob/df142097e9e7f90de1dcfafa0d00f2e13c74f528/src/main/java/com/google/devtools/build/lib/buildeventservice/BazelBuildEventServiceModule.java",
+    "raw_url": "https://github.com/flarebuild/bazel/raw/df142097e9e7f90de1dcfafa0d00f2e13c74f528/src/main/java/com/google/devtools/build/lib/buildeventservice/BazelBuildEventServiceModule.java",
+    "contents_url": "https://api.github.com/repos/flarebuild/bazel/contents/src/main/java/com/google/devtools/build/lib/buildeventservice/BazelBuildEventServiceModule.java?ref=df142097e9e7f90de1dcfafa0d00f2e13c74f528",
+    "patch": "@@ -22,9 +22,14 @@\n import com.google.devtools.build.lib.authandtls.GoogleAuthUtils;\n import com.google.devtools.build.lib.buildeventservice.client.BuildEventServiceClient;\n import com.google.devtools.build.lib.buildeventservice.client.BuildEventServiceGrpcClient;\n+import com.google.devtools.build.lib.remote.options.RemoteOptions;\n+import com.google.devtools.build.lib.remote.util.TracingMetadataUtils;\n import io.grpc.ManagedChannel;\n+import io.grpc.ClientInterceptor;\n import java.io.IOException;\n+import java.util.ArrayList;\n import java.util.Objects;\n+import java.util.List;\n import java.util.Set;\n \n /**\n@@ -50,7 +55,9 @@\n \n   @Override\n   protected BuildEventServiceClient getBesClient(\n-      BuildEventServiceOptions besOptions, AuthAndTLSOptions authAndTLSOptions) throws IOException {\n+      BuildEventServiceOptions besOptions,\n+      AuthAndTLSOptions authAndTLSOptions, \n+      RemoteOptions remoteOptions) throws IOException {\n     BackendConfig newConfig =\n         new AutoValue_BazelBuildEventServiceModule_BackendConfig(\n             besOptions.besBackend, authAndTLSOptions);\n@@ -59,7 +66,7 @@ protected BuildEventServiceClient getBesClient(\n       config = newConfig;\n       client =\n           new BuildEventServiceGrpcClient(\n-              newGrpcChannel(besOptions, authAndTLSOptions),\n+              newGrpcChannel(besOptions, authAndTLSOptions, remoteOptions),\n               GoogleAuthUtils.newCallCredentials(authAndTLSOptions));\n     }\n     return client;\n@@ -68,9 +75,18 @@ protected BuildEventServiceClient getBesClient(\n   // newGrpcChannel is only defined so it can be overridden in tests to not use a real network link.\n   @VisibleForTesting\n   protected ManagedChannel newGrpcChannel(\n-      BuildEventServiceOptions besOptions, AuthAndTLSOptions authAndTLSOptions) throws IOException {\n+      BuildEventServiceOptions besOptions, \n+      AuthAndTLSOptions authAndTLSOptions, \n+      RemoteOptions remoteOptions) throws IOException {\n+    List<ClientInterceptor> interceptors = new ArrayList<>();\n+    if (remoteOptions != null) {\n+      interceptors.add(TracingMetadataUtils.newBESHeadersInterceptor(remoteOptions));\n+    }\n     return GoogleAuthUtils.newChannel(\n-        besOptions.besBackend, besOptions.besProxy, authAndTLSOptions, /* interceptors= */ null);\n+        besOptions.besBackend,\n+        besOptions.besProxy, \n+        authAndTLSOptions,\n+        interceptors);\n   }\n \n   @Override"
+  },
+  {
+    "sha": "e18c5f967974fbb0af2c5b2bf418e7579fc3cfa4",
+    "filename": "src/main/java/com/google/devtools/build/lib/buildeventservice/BuildEventServiceModule.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 2,
+    "changes": 8,
+    "blob_url": "https://github.com/flarebuild/bazel/blob/df142097e9e7f90de1dcfafa0d00f2e13c74f528/src/main/java/com/google/devtools/build/lib/buildeventservice/BuildEventServiceModule.java",
+    "raw_url": "https://github.com/flarebuild/bazel/raw/df142097e9e7f90de1dcfafa0d00f2e13c74f528/src/main/java/com/google/devtools/build/lib/buildeventservice/BuildEventServiceModule.java",
+    "contents_url": "https://api.github.com/repos/flarebuild/bazel/contents/src/main/java/com/google/devtools/build/lib/buildeventservice/BuildEventServiceModule.java?ref=df142097e9e7f90de1dcfafa0d00f2e13c74f528",
+    "patch": "@@ -52,6 +52,7 @@\n import com.google.devtools.build.lib.network.ConnectivityStatusProvider;\n import com.google.devtools.build.lib.profiler.AutoProfiler;\n import com.google.devtools.build.lib.profiler.GoogleAutoProfilerUtils;\n+import com.google.devtools.build.lib.remote.options.RemoteOptions;\n import com.google.devtools.build.lib.runtime.BlazeModule;\n import com.google.devtools.build.lib.runtime.BuildEventArtifactUploaderFactory;\n import com.google.devtools.build.lib.runtime.BuildEventStreamer;\n@@ -104,6 +105,7 @@\n \n   private BuildEventProtocolOptions bepOptions;\n   private AuthAndTLSOptions authTlsOptions;\n+  private RemoteOptions remoteOptions;\n   private BuildEventStreamOptions besStreamOptions;\n   private boolean isRunsPerTestOverTheLimit;\n   private BuildEventArtifactUploaderFactory uploaderFactoryToCleanup;\n@@ -174,6 +176,7 @@ private void reportError(\n         optionsClass(),\n         AuthAndTLSOptions.class,\n         BuildEventStreamOptions.class,\n+        RemoteOptions.class,\n         BuildEventProtocolOptions.class);\n   }\n \n@@ -302,6 +305,7 @@ public void beforeCommand(CommandEnvironment cmdEnv) {\n         Preconditions.checkNotNull(parsingResult.getOptions(BuildEventProtocolOptions.class));\n     this.authTlsOptions =\n         Preconditions.checkNotNull(parsingResult.getOptions(AuthAndTLSOptions.class));\n+    this.remoteOptions = parsingResult.getOptions(RemoteOptions.class);\n     this.besStreamOptions =\n         Preconditions.checkNotNull(parsingResult.getOptions(BuildEventStreamOptions.class));\n     this.isRunsPerTestOverTheLimit =\n@@ -676,7 +680,7 @@ private BuildEventServiceTransport createBesTransport(\n \n     final BuildEventServiceClient besClient;\n     try {\n-      besClient = getBesClient(besOptions, authTlsOptions);\n+      besClient = getBesClient(besOptions, authTlsOptions, remoteOptions);\n     } catch (IOException | OptionsParsingException e) {\n       reportError(\n           reporter,\n@@ -821,7 +825,7 @@ private static AbruptExitException createAbruptExitException(\n   protected abstract Class<BESOptionsT> optionsClass();\n \n   protected abstract BuildEventServiceClient getBesClient(\n-      BESOptionsT besOptions, AuthAndTLSOptions authAndTLSOptions)\n+      BESOptionsT besOptions, AuthAndTLSOptions authAndTLSOptions, RemoteOptions remoteOptions)\n       throws IOException, OptionsParsingException;\n \n   protected abstract void clearBesClient();"
+  },
+  {
+    "sha": "ae4e8c323952e7f229133e41e7d0b712570d7afd",
+    "filename": "src/main/java/com/google/devtools/build/lib/remote/util/TracingMetadataUtils.java",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 0,
+    "changes": 5,
+    "blob_url": "https://github.com/flarebuild/bazel/blob/df142097e9e7f90de1dcfafa0d00f2e13c74f528/src/main/java/com/google/devtools/build/lib/remote/util/TracingMetadataUtils.java",
+    "raw_url": "https://github.com/flarebuild/bazel/raw/df142097e9e7f90de1dcfafa0d00f2e13c74f528/src/main/java/com/google/devtools/build/lib/remote/util/TracingMetadataUtils.java",
+    "contents_url": "https://api.github.com/repos/flarebuild/bazel/contents/src/main/java/com/google/devtools/build/lib/remote/util/TracingMetadataUtils.java?ref=df142097e9e7f90de1dcfafa0d00f2e13c74f528",
+    "patch": "@@ -115,6 +115,11 @@ public static ClientInterceptor newDownloaderHeadersInterceptor(RemoteOptions op\n     return MetadataUtils.newAttachHeadersInterceptor(metadata);\n   }\n \n+  public static ClientInterceptor newBESHeadersInterceptor(RemoteOptions options) {\n+    Metadata metadata = newMetadataForHeaders(options.remoteHeaders);\n+    return MetadataUtils.newAttachHeadersInterceptor(metadata);\n+  }\n+\n   public static ClientInterceptor newExecHeadersInterceptor(RemoteOptions options) {\n     Metadata metadata = newMetadataForHeaders(options.remoteHeaders);\n     metadata.merge(newMetadataForHeaders(options.remoteExecHeaders));"
+  }
+]

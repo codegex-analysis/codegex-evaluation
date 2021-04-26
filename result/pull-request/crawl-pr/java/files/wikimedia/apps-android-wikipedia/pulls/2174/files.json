@@ -1,0 +1,50 @@
+[
+  {
+    "sha": "5f2734ba1a8a102bcee36369ca2221be4bd62352",
+    "filename": "app/build.gradle",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/wikimedia/apps-android-wikipedia/blob/8e5903175e2d9eb3f8f86abb3acd2ac01d9028cf/app/build.gradle",
+    "raw_url": "https://github.com/wikimedia/apps-android-wikipedia/raw/8e5903175e2d9eb3f8f86abb3acd2ac01d9028cf/app/build.gradle",
+    "contents_url": "https://api.github.com/repos/wikimedia/apps-android-wikipedia/contents/app/build.gradle?ref=8e5903175e2d9eb3f8f86abb3acd2ac01d9028cf",
+    "patch": "@@ -1,6 +1,7 @@\n apply plugin: 'com.android.application'\n apply plugin: 'com.google.gms.google-services'\n apply plugin: 'kotlin-android'\n+apply plugin: 'kotlin-parcelize'\n \n // Copy the signing.properties.sample file to ~/.sign/signing.properties and adjust the values.\n final File PROD_PROPS_FILE = new File(System.getProperty('user.home'), '.sign/signing.properties')"
+  },
+  {
+    "sha": "a6fc558d34b03ff505bf449eac937f9a29192bab",
+    "filename": "app/src/main/java/org/wikipedia/pageimages/PageImage.java",
+    "status": "removed",
+    "additions": 0,
+    "deletions": 119,
+    "changes": 119,
+    "blob_url": "https://github.com/wikimedia/apps-android-wikipedia/blob/9c31558f47e265a07faf728dead068459cfcdfe3/app/src/main/java/org/wikipedia/pageimages/PageImage.java",
+    "raw_url": "https://github.com/wikimedia/apps-android-wikipedia/raw/9c31558f47e265a07faf728dead068459cfcdfe3/app/src/main/java/org/wikipedia/pageimages/PageImage.java",
+    "contents_url": "https://api.github.com/repos/wikimedia/apps-android-wikipedia/contents/app/src/main/java/org/wikipedia/pageimages/PageImage.java?ref=9c31558f47e265a07faf728dead068459cfcdfe3",
+    "patch": "@@ -1,119 +0,0 @@\n-package org.wikipedia.pageimages;\n-\n-import android.os.Parcel;\n-import android.os.Parcelable;\n-import android.text.TextUtils;\n-\n-import androidx.annotation.NonNull;\n-import androidx.collection.ArrayMap;\n-\n-import org.wikipedia.dataclient.WikiSite;\n-import org.wikipedia.dataclient.mwapi.MwQueryPage;\n-import org.wikipedia.page.PageTitle;\n-\n-import java.util.List;\n-import java.util.Map;\n-\n-public class PageImage implements Parcelable {\n-    public static final PageImageDatabaseTable DATABASE_TABLE = new PageImageDatabaseTable();\n-\n-    private final PageTitle title;\n-    private final String imageName;\n-\n-    public PageImage(PageTitle title, String imageName) {\n-        this.title = title;\n-        this.imageName = imageName;\n-    }\n-\n-    public PageTitle getTitle() {\n-        return title;\n-    }\n-\n-    public String getImageName() {\n-        return imageName;\n-    }\n-\n-    @Override\n-    public boolean equals(Object o) {\n-        if (!(o instanceof PageImage)) {\n-            return false;\n-        }\n-        PageImage other = (PageImage) o;\n-        return title.equals(other.title)\n-                && imageName.equals(other.imageName);\n-    }\n-\n-    @Override\n-    public int hashCode() {\n-        int result = title.hashCode();\n-        result = 31 * result + imageName.hashCode();\n-        return result;\n-    }\n-\n-    @Override\n-    public String toString() {\n-        return \"PageImage{\"\n-                + \"title=\" + title\n-                + \", imageName='\" + imageName + '\\''\n-                + '}';\n-    }\n-\n-    @Override\n-    public int describeContents() {\n-        return 0;\n-    }\n-\n-    @Override\n-    public void writeToParcel(Parcel dest, int flags) {\n-        dest.writeParcelable(getTitle(), flags);\n-        dest.writeString(getImageName());\n-    }\n-\n-    private PageImage(Parcel in) {\n-        this.title = in.readParcelable(PageTitle.class.getClassLoader());\n-        this.imageName = in.readString();\n-    }\n-\n-    public static final Parcelable.Creator<PageImage> CREATOR\n-            = new Parcelable.Creator<PageImage>() {\n-        @Override\n-        public PageImage createFromParcel(Parcel in) {\n-            return new PageImage(in);\n-        }\n-\n-        @Override\n-        public PageImage[] newArray(int size) {\n-            return new PageImage[size];\n-        }\n-    };\n-\n-    public static Map<PageTitle, PageImage> imageMapFromPages(@NonNull WikiSite wiki, @NonNull List<PageTitle> titles, @NonNull List<MwQueryPage> pages) {\n-        Map<PageTitle, PageImage> pageImagesMap = new ArrayMap<>();\n-        // nominal case\n-        Map<String, PageTitle> titlesMap = new ArrayMap<>();\n-        for (PageTitle title : titles) {\n-            titlesMap.put(title.getPrefixedText(), title);\n-        }\n-        Map<String, String> thumbnailSourcesMap = new ArrayMap<>();\n-\n-        // noinspection ConstantConditions\n-        for (MwQueryPage page : pages) {\n-            thumbnailSourcesMap.put(new PageTitle(null, page.title(), wiki).getPrefixedText(), page.thumbUrl());\n-            if (!TextUtils.isEmpty(page.convertedFrom())) {\n-                PageTitle pageTitle = new PageTitle(null, page.convertedFrom(), wiki);\n-                thumbnailSourcesMap.put(pageTitle.getPrefixedText(), page.thumbUrl());\n-            }\n-            if (!TextUtils.isEmpty(page.redirectFrom())) {\n-                thumbnailSourcesMap.put(new PageTitle(null, page.redirectFrom(), wiki).getPrefixedText(), page.thumbUrl());\n-            }\n-        }\n-\n-        for (String key : titlesMap.keySet()) {\n-            if (thumbnailSourcesMap.containsKey(key)) {\n-                PageTitle title = titlesMap.get(key);\n-                pageImagesMap.put(title, new PageImage(title, thumbnailSourcesMap.get(key)));\n-            }\n-        }\n-        return pageImagesMap;\n-    }\n-}"
+  },
+  {
+    "sha": "d05ca33161199995e5e9846de68fcc2dc7ab5acc",
+    "filename": "app/src/main/java/org/wikipedia/pageimages/PageImage.kt",
+    "status": "added",
+    "additions": 45,
+    "deletions": 0,
+    "changes": 45,
+    "blob_url": "https://github.com/wikimedia/apps-android-wikipedia/blob/8e5903175e2d9eb3f8f86abb3acd2ac01d9028cf/app/src/main/java/org/wikipedia/pageimages/PageImage.kt",
+    "raw_url": "https://github.com/wikimedia/apps-android-wikipedia/raw/8e5903175e2d9eb3f8f86abb3acd2ac01d9028cf/app/src/main/java/org/wikipedia/pageimages/PageImage.kt",
+    "contents_url": "https://api.github.com/repos/wikimedia/apps-android-wikipedia/contents/app/src/main/java/org/wikipedia/pageimages/PageImage.kt?ref=8e5903175e2d9eb3f8f86abb3acd2ac01d9028cf",
+    "patch": "@@ -0,0 +1,45 @@\n+package org.wikipedia.pageimages\n+\n+import android.os.Parcelable\n+import kotlinx.parcelize.Parcelize\n+import org.wikipedia.dataclient.WikiSite\n+import org.wikipedia.dataclient.mwapi.MwQueryPage\n+import org.wikipedia.page.PageTitle\n+\n+@Parcelize\n+data class PageImage(val title: PageTitle, val imageName: String) : Parcelable {\n+\n+    companion object {\n+        @JvmField\n+        val DATABASE_TABLE = PageImageDatabaseTable()\n+\n+        @JvmStatic\n+        fun imageMapFromPages(wiki: WikiSite, titles: MutableList<PageTitle>, pages: MutableList<MwQueryPage>): Map<PageTitle?, PageImage> {\n+            val pageImagesMap = mutableMapOf<PageTitle?, PageImage>()\n+            // nominal case\n+            val titlesMap = mutableMapOf<String, PageTitle>()\n+            titles.forEach { title ->\n+                titlesMap[title.prefixedText] = title\n+            }\n+            val thumbnailSourcesMap = mutableMapOf<String, String?>()\n+\n+            // noinspection ConstantConditions\n+            pages.forEach {\n+                thumbnailSourcesMap[PageTitle(null, it.title(), wiki).prefixedText] = it.thumbUrl()\n+                if (!it.convertedFrom().isNullOrEmpty()) {\n+                    thumbnailSourcesMap[PageTitle(null, it.convertedFrom()!!, wiki).prefixedText] = it.thumbUrl()\n+                }\n+                if (!it.redirectFrom().isNullOrEmpty()) {\n+                    thumbnailSourcesMap[PageTitle(null, it.redirectFrom()!!, wiki).prefixedText] = it.thumbUrl()\n+                }\n+            }\n+\n+            titlesMap.keys.forEach { key ->\n+                if (thumbnailSourcesMap.containsKey(key)) {\n+                    pageImagesMap[titlesMap[key]] = PageImage(titlesMap[key]!!, thumbnailSourcesMap[key]!!)\n+                }\n+            }\n+            return pageImagesMap\n+        }\n+    }\n+}"
+  },
+  {
+    "sha": "f63ba4a4cf651102d9a81c8d71a5cc76790f157f",
+    "filename": "app/src/test/java/org/wikipedia/test/ParcelableTest.java",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/wikimedia/apps-android-wikipedia/blob/8e5903175e2d9eb3f8f86abb3acd2ac01d9028cf/app/src/test/java/org/wikipedia/test/ParcelableTest.java",
+    "raw_url": "https://github.com/wikimedia/apps-android-wikipedia/raw/8e5903175e2d9eb3f8f86abb3acd2ac01d9028cf/app/src/test/java/org/wikipedia/test/ParcelableTest.java",
+    "contents_url": "https://api.github.com/repos/wikimedia/apps-android-wikipedia/contents/app/src/test/java/org/wikipedia/test/ParcelableTest.java?ref=8e5903175e2d9eb3f8f86abb3acd2ac01d9028cf",
+    "patch": "@@ -36,7 +36,8 @@\n         TestParcelUtil.test(historyEntry);\n     }\n \n-    @Test public void testPageImage() throws Throwable {\n+    @Test\n+    public void testPageImage() throws Throwable {\n         WikiSite wiki = WikiSite.forLanguageCode(\"en\");\n         PageTitle title = new PageTitle(\"Talk\", \"India\", wiki);\n         PageImage pageImage = new PageImage(title, \"Testing image\");"
+  }
+]

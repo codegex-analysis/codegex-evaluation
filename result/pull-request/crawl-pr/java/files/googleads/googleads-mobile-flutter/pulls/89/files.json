@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "7956199bddd4b9431d9d1632c7490de0a137c875",
+    "filename": "packages/google_mobile_ads/android/src/main/java/io/flutter/plugins/googlemobileads/FlutterBannerAd.java",
+    "status": "modified",
+    "additions": 26,
+    "deletions": 1,
+    "changes": 27,
+    "blob_url": "https://github.com/googleads/googleads-mobile-flutter/blob/9373fe8aad48dd263030276235be20d81e0c2f45/packages/google_mobile_ads/android/src/main/java/io/flutter/plugins/googlemobileads/FlutterBannerAd.java",
+    "raw_url": "https://github.com/googleads/googleads-mobile-flutter/raw/9373fe8aad48dd263030276235be20d81e0c2f45/packages/google_mobile_ads/android/src/main/java/io/flutter/plugins/googlemobileads/FlutterBannerAd.java",
+    "contents_url": "https://api.github.com/repos/googleads/googleads-mobile-flutter/contents/packages/google_mobile_ads/android/src/main/java/io/flutter/plugins/googlemobileads/FlutterBannerAd.java?ref=9373fe8aad48dd263030276235be20d81e0c2f45",
+    "patch": "@@ -20,6 +20,15 @@\n import com.google.android.gms.ads.AdView;\n import io.flutter.plugin.platform.PlatformView;\n \n+import android.content.res.Configuration;\n+import android.os.Bundle;\n+import android.util.DisplayMetrics;\n+import android.view.Display;\n+import android.widget.FrameLayout;\n+\n+import com.google.android.gms.ads.AdRequest;\n+import com.google.android.gms.ads.AdSize;\n+\n class FlutterBannerAd extends FlutterAd implements PlatformView, FlutterDestroyableAd {\n   @NonNull private final AdInstanceManager manager;\n   @NonNull private final String adUnitId;\n@@ -79,7 +88,8 @@ private FlutterBannerAd(\n   void load() {\n     view = new AdView(manager.activity);\n     view.setAdUnitId(adUnitId);\n-    view.setAdSize(size.size);\n+    //view.setAdSize(size.size);\n+    view.setAdSize(getAdSize());\n     view.setAdListener(new FlutterAdListener(manager, this));\n \n     if (request != null) {\n@@ -89,6 +99,21 @@ void load() {\n     }\n   }\n \n+  private AdSize getAdSize() {\n+    // Step 2 - Determine the screen width (less decorations) to use for the ad width.\n+    Display display = manager.activity.getWindowManager().getDefaultDisplay();\n+    DisplayMetrics outMetrics = new DisplayMetrics();\n+    display.getMetrics(outMetrics);\n+\n+    float widthPixels = outMetrics.widthPixels;\n+    float density = outMetrics.density;\n+\n+    int adWidth = (int) (widthPixels / density);\n+\n+    // Step 3 - Get adaptive ad size and return for setting on the ad view.\n+    return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(manager.activity, adWidth);\n+  }\n+\n   @Override\n   @Nullable\n   public View getView() {"
+  }
+]

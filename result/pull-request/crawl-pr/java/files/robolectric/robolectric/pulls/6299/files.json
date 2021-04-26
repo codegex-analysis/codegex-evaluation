@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "ddaee348f62a20f3aa5fcc9b9a50ae9fabcf20bf",
+    "filename": "shadows/framework/src/main/java/org/robolectric/shadows/ImageUtil.java",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 7,
+    "changes": 15,
+    "blob_url": "https://github.com/robolectric/robolectric/blob/440a59d3654ef4d577d5a25007e9b0f1f9d660fb/shadows/framework/src/main/java/org/robolectric/shadows/ImageUtil.java",
+    "raw_url": "https://github.com/robolectric/robolectric/raw/440a59d3654ef4d577d5a25007e9b0f1f9d660fb/shadows/framework/src/main/java/org/robolectric/shadows/ImageUtil.java",
+    "contents_url": "https://api.github.com/repos/robolectric/robolectric/contents/shadows/framework/src/main/java/org/robolectric/shadows/ImageUtil.java?ref=440a59d3654ef4d577d5a25007e9b0f1f9d660fb",
+    "patch": "@@ -20,6 +20,7 @@\n import javax.imageio.ImageWriter;\n import javax.imageio.stream.ImageInputStream;\n import javax.imageio.stream.ImageOutputStream;\n+import org.robolectric.shadow.api.Shadow;\n \n public class ImageUtil {\n   private static final String FORMAT_NAME_JPEG = \"jpg\";\n@@ -102,16 +103,16 @@ public static boolean writeToStream(\n         ImageWriteParam iwparam = writer.getDefaultWriteParam();\n         iwparam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);\n         iwparam.setCompressionQuality((quality / 100f));\n+        int width = realBitmap.getWidth();\n+        int height = realBitmap.getHeight();\n         BufferedImage bufferedImage =\n             new BufferedImage(\n-                realBitmap.getWidth(),\n-                realBitmap.getHeight(),\n+                width,\n+                height,\n                 getBufferedImageType(realBitmap.getConfig(), needAlphaChannel(format)));\n-        for (int x = 0; x < realBitmap.getWidth(); x++) {\n-          for (int y = 0; y < realBitmap.getHeight(); y++) {\n-            bufferedImage.setRGB(x, y, realBitmap.getPixel(x, y));\n-          }\n-        }\n+        ShadowBitmap shadowBitmap = Shadow.extract(realBitmap);\n+        int[] pixels = shadowBitmap.getPixelsInternal();\n+        bufferedImage.setRGB(0, 0, width, height, pixels, 0, width);\n         writer.write(null, new IIOImage(bufferedImage, null, null), iwparam);\n         ios.flush();\n         writer.dispose();"
+  },
+  {
+    "sha": "c3065f5b0203af3f313e601daa745151a535836e",
+    "filename": "shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmap.java",
+    "status": "modified",
+    "additions": 11,
+    "deletions": 0,
+    "changes": 11,
+    "blob_url": "https://github.com/robolectric/robolectric/blob/440a59d3654ef4d577d5a25007e9b0f1f9d660fb/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmap.java",
+    "raw_url": "https://github.com/robolectric/robolectric/raw/440a59d3654ef4d577d5a25007e9b0f1f9d660fb/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmap.java",
+    "contents_url": "https://api.github.com/repos/robolectric/robolectric/contents/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmap.java?ref=440a59d3654ef4d577d5a25007e9b0f1f9d660fb",
+    "patch": "@@ -736,6 +736,17 @@ private void internalCheckPixelAccess(int x, int y) {\n     }\n   }\n \n+  /**\n+   * Get pixels array internal.\n+   *\n+   * <p>Don't update the result directly. It is only used internal.\n+   *\n+   * @return The pixels array.\n+   */\n+  int[] getPixelsInternal() {\n+    return colors;\n+  }\n+\n   void drawRect(Rect r, Paint paint) {\n     if (colors == null) {\n       return;"
+  },
+  {
+    "sha": "f3e26efdf2994ed7cb8075f4bf0823017424dbb2",
+    "filename": "shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmapFactory.java",
+    "status": "modified",
+    "additions": 6,
+    "deletions": 6,
+    "changes": 12,
+    "blob_url": "https://github.com/robolectric/robolectric/blob/440a59d3654ef4d577d5a25007e9b0f1f9d660fb/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmapFactory.java",
+    "raw_url": "https://github.com/robolectric/robolectric/raw/440a59d3654ef4d577d5a25007e9b0f1f9d660fb/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmapFactory.java",
+    "contents_url": "https://api.github.com/repos/robolectric/robolectric/contents/shadows/framework/src/main/java/org/robolectric/shadows/ShadowBitmapFactory.java?ref=440a59d3654ef4d577d5a25007e9b0f1f9d660fb",
+    "patch": "@@ -237,12 +237,12 @@ private static void initColorArray(\n     }\n     boolean mutable = shadowBitmap.isMutable();\n     shadowBitmap.setMutable(true);\n-    // There are provided width and height that less than real size\n-    for (int x = 0; x < shadowBitmap.getWidth() && x < image.getWidth(); x++) {\n-      for (int y = 0; y < shadowBitmap.getHeight() && y < image.getHeight(); y++) {\n-        shadowBitmap.setPixel(x, y, image.getRGB(x, y));\n-      }\n-    }\n+    // There are provided width and height that less than real size.\n+    int width = Math.min(shadowBitmap.getWidth(), image.getWidth());\n+    int height = Math.min(shadowBitmap.getHeight(), image.getHeight());\n+    int[] pixels = new int[width * height];\n+    image.getRGB(0, 0, width, height, pixels, 0, width);\n+    shadowBitmap.setPixels(pixels, 0, width, 0, 0, width, height);\n     shadowBitmap.setMutable(mutable);\n   }\n "
+  }
+]

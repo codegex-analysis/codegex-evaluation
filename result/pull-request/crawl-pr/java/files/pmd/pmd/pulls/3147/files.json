@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "2cf5cd9abb2a5a6cd933ef42533528cfac07d0ac",
+    "filename": "docs/pages/release_notes.md",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 0,
+    "changes": 3,
+    "blob_url": "https://github.com/pmd/pmd/blob/b942c5063160ce56594f94f19704f2657727b0ce/docs/pages/release_notes.md",
+    "raw_url": "https://github.com/pmd/pmd/raw/b942c5063160ce56594f94f19704f2657727b0ce/docs/pages/release_notes.md",
+    "contents_url": "https://api.github.com/repos/pmd/pmd/contents/docs/pages/release_notes.md?ref=b942c5063160ce56594f94f19704f2657727b0ce",
+    "patch": "@@ -16,6 +16,9 @@ This is a {{ site.pmd.release_type }} release.\n \n ### Fixed Issues\n \n+*   java-errorprone\n+    *   [#2977](https://github.com/pmd/pmd/issues/2977): \\[java] CloseResource: false positive with reassignment detection\n+\n ### API Changes\n \n ### External Contributions"
+  },
+  {
+    "sha": "8cef5b3e7d3b7c50091101196228f6058352359f",
+    "filename": "pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/errorprone/CloseResourceRule.java",
+    "status": "modified",
+    "additions": 14,
+    "deletions": 9,
+    "changes": 23,
+    "blob_url": "https://github.com/pmd/pmd/blob/b942c5063160ce56594f94f19704f2657727b0ce/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/errorprone/CloseResourceRule.java",
+    "raw_url": "https://github.com/pmd/pmd/raw/b942c5063160ce56594f94f19704f2657727b0ce/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/errorprone/CloseResourceRule.java",
+    "contents_url": "https://api.github.com/repos/pmd/pmd/contents/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/errorprone/CloseResourceRule.java?ref=b942c5063160ce56594f94f19704f2657727b0ce",
+    "patch": "@@ -736,16 +736,21 @@ private boolean isAssignmentForVariable(ASTStatementExpression statement, ASTVar\n         if (statement == null || variable == null) {\n             return false;\n         }\n-        ASTName name = statement.getFirstDescendantOfType(ASTName.class);\n-        if (name == null) {\n-            return false;\n-        }\n-        NameDeclaration statementVariable = name.getNameDeclaration();\n-        if (statementVariable == null) {\n-            return false;\n+\n+        List<ASTAssignmentOperator> assignments = statement.findDescendantsOfType(ASTAssignmentOperator.class);\n+        for (ASTAssignmentOperator assignment : assignments) {\n+            // The sibling before the operator is the left hand side\n+            JavaNode lhs = assignment.getParent().getChild(assignment.getIndexInParent() - 1);\n+\n+            ASTName name = lhs.getFirstDescendantOfType(ASTName.class);\n+            if (name != null) {\n+                NameDeclaration statementVariable = name.getNameDeclaration();\n+                if (statementVariable != null && statementVariable.equals(variable.getVariableId().getNameDeclaration())) {\n+                    return true;\n+                }\n+            }\n         }\n \n-        return statement.hasDescendantOfType(ASTAssignmentOperator.class)\n-                && statementVariable.equals(variable.getVariableId().getNameDeclaration());\n+        return false;\n     }\n }"
+  },
+  {
+    "sha": "cf1adefab8bf6a7254f87e0bd019cd0716855dde",
+    "filename": "pmd-java/src/test/resources/net/sourceforge/pmd/lang/java/rule/errorprone/xml/CloseResource.xml",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 5,
+    "changes": 8,
+    "blob_url": "https://github.com/pmd/pmd/blob/b942c5063160ce56594f94f19704f2657727b0ce/pmd-java/src/test/resources/net/sourceforge/pmd/lang/java/rule/errorprone/xml/CloseResource.xml",
+    "raw_url": "https://github.com/pmd/pmd/raw/b942c5063160ce56594f94f19704f2657727b0ce/pmd-java/src/test/resources/net/sourceforge/pmd/lang/java/rule/errorprone/xml/CloseResource.xml",
+    "contents_url": "https://api.github.com/repos/pmd/pmd/contents/pmd-java/src/test/resources/net/sourceforge/pmd/lang/java/rule/errorprone/xml/CloseResource.xml?ref=b942c5063160ce56594f94f19704f2657727b0ce",
+    "patch": "@@ -1479,21 +1479,19 @@ public class Foo {\n     </test-code>\n \n     <test-code>\n-        <description>#2977 6.30.0 introduces new false positive in CloseResource rule</description>\n+        <description>[java] CloseResource: false positive with reassignment detection #2977</description>\n         <expected-problems>0</expected-problems>\n         <code><![CDATA[\n import java.io.RandomAccessFile;\n-import java.io.IOException;\n \n public class FalsePositive {\n+    private boolean isHundredBytes = false;\n \n     public void bar() throws Exception {\n         RandomAccessFile file = null;\n         try {\n             file = new RandomAccessFile(\"name\", \"r\");\n-            boolean isHundredBytes = file.length() == 100;\n-        } catch (IOException e) {\n-            // no-op\n+            this.isHundredBytes = file.length() == 100;  /* violation here... */\n         } finally {\n             file.close();\n         }"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "sha": "4ad1ab0cd0507e7a8600b85020c477f2b259dfa6",
+    "filename": "kodilla-testing/build.gradle",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/Kamil-Krol/Modul-6/blob/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/build.gradle",
+    "raw_url": "https://github.com/Kamil-Krol/Modul-6/raw/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/build.gradle",
+    "contents_url": "https://api.github.com/repos/Kamil-Krol/Modul-6/contents/kodilla-testing/build.gradle?ref=ab2f9373cd19b53385cd27e98651f39706c467aa",
+    "patch": "@@ -10,9 +10,11 @@ repositories {\n }\n \n dependencies {\n-    implementation 'junit:junit:4.12'\n     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'\n     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'\n+    // https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter\n+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.8.0'\n+\n }\n \n test {"
+  },
+  {
+    "sha": "437e8c3e453c3243cb48a9eda12eda5fed6cc14b",
+    "filename": "kodilla-testing/src/main/java/com/kodilla/testing/weather/stub/Temperatures.java",
+    "status": "added",
+    "additions": 8,
+    "deletions": 0,
+    "changes": 8,
+    "blob_url": "https://github.com/Kamil-Krol/Modul-6/blob/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/main/java/com/kodilla/testing/weather/stub/Temperatures.java",
+    "raw_url": "https://github.com/Kamil-Krol/Modul-6/raw/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/main/java/com/kodilla/testing/weather/stub/Temperatures.java",
+    "contents_url": "https://api.github.com/repos/Kamil-Krol/Modul-6/contents/kodilla-testing/src/main/java/com/kodilla/testing/weather/stub/Temperatures.java?ref=ab2f9373cd19b53385cd27e98651f39706c467aa",
+    "patch": "@@ -0,0 +1,8 @@\n+package com.kodilla.testing.weather.stub;\n+\n+import java.util.Map;\n+\n+public interface Temperatures {\n+\n+    Map<String, Double> getTemperatures();\n+}"
+  },
+  {
+    "sha": "988cb9035ddbdb336d2f74fafad8f38a62e35fee",
+    "filename": "kodilla-testing/src/main/java/com/kodilla/testing/weather/stub/WeatherForecast.java",
+    "status": "added",
+    "additions": 118,
+    "deletions": 0,
+    "changes": 118,
+    "blob_url": "https://github.com/Kamil-Krol/Modul-6/blob/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/main/java/com/kodilla/testing/weather/stub/WeatherForecast.java",
+    "raw_url": "https://github.com/Kamil-Krol/Modul-6/raw/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/main/java/com/kodilla/testing/weather/stub/WeatherForecast.java",
+    "contents_url": "https://api.github.com/repos/Kamil-Krol/Modul-6/contents/kodilla-testing/src/main/java/com/kodilla/testing/weather/stub/WeatherForecast.java?ref=ab2f9373cd19b53385cd27e98651f39706c467aa",
+    "patch": "@@ -0,0 +1,118 @@\n+package com.kodilla.testing.weather.stub;\n+\n+import java.util.*;\n+\n+public class WeatherForecast {\n+    private Temperatures temperatures;\n+\n+    public WeatherForecast(Temperatures temperatures) {\n+        this.temperatures = temperatures;\n+    }\n+\n+    public Map<String, Double> calculateForecast() {\n+        Map<String, Double> resultMap = new HashMap<>();\n+\n+        for (Map.Entry<String, Double> temperature :\n+                temperatures.getTemperatures().entrySet()) {\n+\n+            // adding 1 celsius degree to current value\n+            // as a temporary weather forecast\n+            resultMap.put(temperature.getKey(), temperature.getValue() + 1.0); // [1]\n+        }\n+        return resultMap;\n+    }\n+\n+    public double calculateAverageTemperature()\n+    {\n+        double average = 0;\n+        for (Map.Entry<String, Double> temperature :\n+                temperatures.getTemperatures().entrySet())\n+        {\n+            average = average + temperature.getValue();\n+        }\n+\n+        return average;\n+\n+    }\n+\n+    public double calculateMedianTemperature()\n+    {\n+        //List<Double> employeeById = new ArrayList<>(temperatures.values());\n+        List<Double> list = new ArrayList<>();\n+        for (Map.Entry<String, Double> temperature :\n+                temperatures.getTemperatures().entrySet())\n+        {\n+            list.add(temperature.getValue());\n+        }\n+\n+        Collections.sort(list);\n+        int sizeOfTheList = list.size();\n+        if(sizeOfTheList%2==1)\n+        {\n+            return list.get(sizeOfTheList/2);\n+        }\n+\n+        else\n+        {\n+            return (list.get(sizeOfTheList/2) + list.get(sizeOfTheList/2+1))/2;\n+        }\n+\n+\n+    }\n+\n+\n+}\n+\n+\n+//    int numberOfMeasurements = 0;\n+//    Double min = null;\n+//    double median = 0;\n+//    Map<String, Double> sortedMap = new HashMap<>();\n+//        for (Map.Entry<String, Double> temperature :\n+//        temperatures.getTemperatures().entrySet())\n+//        {\n+//        numberOfMeasurements++;\n+//        }\n+//        if(numberOfMeasurements%2==1) {\n+//        for (int i = 0; i < numberOfMeasurements / 2 + 1; i++) {\n+//        min = null;\n+//        for (Map.Entry<String, Double> temperature :\n+//        temperatures.getTemperatures().entrySet()) {\n+//        if (min == null) {\n+//        min = temperature.getValue();\n+//        }\n+//        if (min > temperature.getValue()) {\n+//        min = temperature.getValue();\n+//        }\n+//        }\n+//        if(i<=numberOfMeasurements/2)\n+//        {\n+//\n+//        }\n+//\n+//        }\n+//        System.out.println(min);\n+//        return min;\n+//        }\n+//        else {\n+//        for (int i = 0; i < numberOfMeasurements / 2 + 1; i++) {\n+//        min = null;\n+//        for (Map.Entry<String, Double> temperature :\n+//        temperatures.getTemperatures().entrySet()) {\n+//        if (min == null) {\n+//        min = temperature.getValue();\n+//        }\n+//        if (min > temperature.getValue()) {\n+//        min = temperature.getValue();\n+//        }\n+//        }\n+//        if(i==numberOfMeasurements/2 || i==numberOfMeasurements/2+1)\n+//        {\n+//        median = median + min;\n+//        }\n+//\n+//\n+//        }\n+//\n+//        return median/2;\n+//        }"
+  },
+  {
+    "sha": "00e5a512cedc6e6014aa9761b7db68d5a8a2f647",
+    "filename": "kodilla-testing/src/test/java/com/kodilla/testing/collection/CollectionTestSuite.java",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/Kamil-Krol/Modul-6/blob/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/test/java/com/kodilla/testing/collection/CollectionTestSuite.java",
+    "raw_url": "https://github.com/Kamil-Krol/Modul-6/raw/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/test/java/com/kodilla/testing/collection/CollectionTestSuite.java",
+    "contents_url": "https://api.github.com/repos/Kamil-Krol/Modul-6/contents/kodilla-testing/src/test/java/com/kodilla/testing/collection/CollectionTestSuite.java?ref=ab2f9373cd19b53385cd27e98651f39706c467aa",
+    "patch": "@@ -1,6 +1,6 @@\n package com.kodilla.testing.collection;\n \n-import org.junit.Test;\n+\n \n import com.kodilla.testing.collection.OddNumbersExterminator;\n import org.junit.jupiter.api.*;"
+  },
+  {
+    "sha": "a1eb027899b617fe5cd657309ed821dd67ed1bb2",
+    "filename": "kodilla-testing/src/test/java/com/kodilla/testing/weather/mock/WeatherForecastTestSuite.java",
+    "status": "added",
+    "additions": 88,
+    "deletions": 0,
+    "changes": 88,
+    "blob_url": "https://github.com/Kamil-Krol/Modul-6/blob/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/test/java/com/kodilla/testing/weather/mock/WeatherForecastTestSuite.java",
+    "raw_url": "https://github.com/Kamil-Krol/Modul-6/raw/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/test/java/com/kodilla/testing/weather/mock/WeatherForecastTestSuite.java",
+    "contents_url": "https://api.github.com/repos/Kamil-Krol/Modul-6/contents/kodilla-testing/src/test/java/com/kodilla/testing/weather/mock/WeatherForecastTestSuite.java?ref=ab2f9373cd19b53385cd27e98651f39706c467aa",
+    "patch": "@@ -0,0 +1,88 @@\n+package com.kodilla.testing.weather.mock;\n+\n+import com.kodilla.testing.weather.stub.Temperatures;\n+import com.kodilla.testing.weather.stub.WeatherForecast;\n+import org.junit.jupiter.api.Assertions;\n+import org.junit.jupiter.api.Test;\n+import org.junit.jupiter.api.extension.ExtendWith;\n+import org.mockito.Mock;\n+import org.mockito.junit.jupiter.MockitoExtension;\n+\n+import java.util.HashMap;\n+import java.util.Map;\n+\n+import static org.mockito.Mockito.mock;\n+import static org.mockito.Mockito.when;\n+\n+@ExtendWith(MockitoExtension.class)\n+public class WeatherForecastTestSuite {\n+    @Mock\n+    private Temperatures temperaturesMock;\n+    @Test\n+        // [8]\n+    void testCalculateForecastWithMock() {                                     // [9]\n+        //Given\n+\n+        Map<String, Double> temperaturesMap = new HashMap<>();                     // [14]\n+        temperaturesMap.put(\"Rzeszow\", 25.5);                                      // [15]\n+        temperaturesMap.put(\"Krakow\", 26.2);                                       // [16]\n+        temperaturesMap.put(\"Wroclaw\", 24.8);                                      // [17]\n+        temperaturesMap.put(\"Warszawa\", 25.2);                                     // [18]\n+        temperaturesMap.put(\"Gdansk\", 26.1);                                       // [19]\n+        when(temperaturesMock.getTemperatures()).thenReturn(temperaturesMap);\n+        WeatherForecast weatherForecast = new WeatherForecast(temperaturesMock);// [11]\n+\n+        //When\n+        int quantityOfSensors = weatherForecast.calculateForecast().size();     // [12]\n+\n+        //Then\n+        Assertions.assertEquals(5, quantityOfSensors);                          // [13]\n+    }\n+\n+\n+    @Test\n+    void testAverageTemperature()\n+    {\n+        //Given\n+        Map<String, Double> temperaturesMap = new HashMap<>();                     // [14]\n+        temperaturesMap.put(\"Rzeszow\", 25.5);                                      // [15]\n+        temperaturesMap.put(\"Krakow\", 26.2);                                       // [16]\n+        temperaturesMap.put(\"Wroclaw\", 24.8);                                      // [17]\n+        temperaturesMap.put(\"Warszawa\", 25.2);                                     // [18]\n+        temperaturesMap.put(\"Gdansk\", 26.1);\n+        when(temperaturesMock.getTemperatures()).thenReturn(temperaturesMap);\n+        WeatherForecast weatherForecast = new WeatherForecast(temperaturesMock);\n+        int sizeOfTheMap = temperaturesMap.size();\n+\n+\n+        //When\n+        double averageTemperature = weatherForecast.calculateAverageTemperature();     // [12]\n+\n+        //Then\n+        Assertions.assertEquals(25.56,averageTemperature/sizeOfTheMap);\n+    }\n+\n+    @Test\n+    void testMedianTemperatures()\n+    {\n+        //Given\n+        Map<String, Double> temperaturesMap = new HashMap<>();                     // [14]\n+        temperaturesMap.put(\"Rzeszow\", 25.5);                                      // [15]\n+        temperaturesMap.put(\"Krakow\", 26.2);                                       // [16]\n+        temperaturesMap.put(\"Wroclaw\", 24.8);                                      // [17]\n+        temperaturesMap.put(\"Warszawa\", 25.2);                                     // [18]\n+        temperaturesMap.put(\"Gdansk\", 26.1);\n+        when(temperaturesMock.getTemperatures()).thenReturn(temperaturesMap);\n+        WeatherForecast weatherForecast = new WeatherForecast(temperaturesMock);\n+\n+\n+\n+\n+        //When\n+       double medianTemperature = weatherForecast.calculateMedianTemperature();     // [12]\n+\n+        //Then\n+        Assertions.assertEquals(25.5,medianTemperature);\n+    }\n+\n+}"
+  },
+  {
+    "sha": "5198740cf32a1aebdfd2c3bcfd424c0ccc3c994a",
+    "filename": "kodilla-testing/src/test/java/com/kodilla/testing/weather/stub/TemperaturesStub.java",
+    "status": "added",
+    "additions": 20,
+    "deletions": 0,
+    "changes": 20,
+    "blob_url": "https://github.com/Kamil-Krol/Modul-6/blob/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/test/java/com/kodilla/testing/weather/stub/TemperaturesStub.java",
+    "raw_url": "https://github.com/Kamil-Krol/Modul-6/raw/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/test/java/com/kodilla/testing/weather/stub/TemperaturesStub.java",
+    "contents_url": "https://api.github.com/repos/Kamil-Krol/Modul-6/contents/kodilla-testing/src/test/java/com/kodilla/testing/weather/stub/TemperaturesStub.java?ref=ab2f9373cd19b53385cd27e98651f39706c467aa",
+    "patch": "@@ -0,0 +1,20 @@\n+package com.kodilla.testing.weather.stub;\n+\n+import java.util.HashMap;\n+import java.util.Map;\n+\n+public class TemperaturesStub implements Temperatures{\n+    @Override\n+    public Map<String, Double> getTemperatures() {\n+        Map<String, Double> stubResult = new HashMap<>();\n+\n+        // dummy data\n+        stubResult.put(\"Rzeszow\", 25.5);\n+        stubResult.put(\"Krakow\", 26.2);\n+        stubResult.put(\"Wroclaw\", 24.8);\n+        stubResult.put(\"Warszawa\", 25.2);\n+        stubResult.put(\"Gdansk\", 26.1);\n+\n+        return stubResult;\n+    }\n+}"
+  },
+  {
+    "sha": "e2a96103a4c7afbc071912cadf53fc803aa25bea",
+    "filename": "kodilla-testing/src/test/java/com/kodilla/testing/weather/stub/WeatherForecastTestSuite.java",
+    "status": "added",
+    "additions": 19,
+    "deletions": 0,
+    "changes": 19,
+    "blob_url": "https://github.com/Kamil-Krol/Modul-6/blob/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/test/java/com/kodilla/testing/weather/stub/WeatherForecastTestSuite.java",
+    "raw_url": "https://github.com/Kamil-Krol/Modul-6/raw/ab2f9373cd19b53385cd27e98651f39706c467aa/kodilla-testing/src/test/java/com/kodilla/testing/weather/stub/WeatherForecastTestSuite.java",
+    "contents_url": "https://api.github.com/repos/Kamil-Krol/Modul-6/contents/kodilla-testing/src/test/java/com/kodilla/testing/weather/stub/WeatherForecastTestSuite.java?ref=ab2f9373cd19b53385cd27e98651f39706c467aa",
+    "patch": "@@ -0,0 +1,19 @@\n+package com.kodilla.testing.weather.stub;\n+\n+import org.junit.jupiter.api.Assertions;\n+import org.junit.jupiter.api.Test;\n+\n+public class WeatherForecastTestSuite {\n+    @Test\n+    void testCalculateForecastWithStub() {\n+        //Given\n+        Temperatures temperatures = new TemperaturesStub();\n+        WeatherForecast weatherForecast = new WeatherForecast(temperatures);\n+\n+        //When\n+        int quantityOfSensors = weatherForecast.calculateForecast().size();\n+\n+        //Then\n+        Assertions.assertEquals(5, quantityOfSensors);\n+    }\n+}"
+  },
+  {
+    "sha": "61b8860792feef727b64c14bc957955de9f67a7a",
+    "filename": "s",
+    "status": "added",
+    "additions": 9,
+    "deletions": 0,
+    "changes": 9,
+    "blob_url": "https://github.com/Kamil-Krol/Modul-6/blob/ab2f9373cd19b53385cd27e98651f39706c467aa/s",
+    "raw_url": "https://github.com/Kamil-Krol/Modul-6/raw/ab2f9373cd19b53385cd27e98651f39706c467aa/s",
+    "contents_url": "https://api.github.com/repos/Kamil-Krol/Modul-6/contents/s?ref=ab2f9373cd19b53385cd27e98651f39706c467aa",
+    "patch": "@@ -0,0 +1,9 @@\n+  ZAD.6.4\u001B[m\n+* \u001B[32mZAD.6.5\u001B[m\n+  Zadanie6.4\u001B[m\n+  Zadanie_6.5\u001B[m\n+  branch\u001B[m\n+  fgffgg\u001B[m\n+  hh\u001B[m\n+  main\u001B[m\n+  zadanie_6.4\u001B[m"
+  }
+]
