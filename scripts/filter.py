@@ -14,7 +14,7 @@ def analyze_rbugs_report():
     pattern_dict = dict()
     for proj in proj_list:
         spotbugs_report_path = os.path.join(proj, 'spotbugs.csv')
-        rbugs_report_path = os.path.join(proj, 'rbugs.csv')
+        rbugs_report_path = os.path.join(proj, '{}.csv'.format(proj))
         if os.path.exists(spotbugs_report_path):
             continue
         if not os.path.exists(rbugs_report_path):
@@ -234,19 +234,19 @@ def convert_time(t):
 if __name__ == '__main__':
     md = match()
     get_result(md)
-    # analyze_rbugs_report()
-    write_rbugs_execute_result()
-    write_speed_up()
+    analyze_rbugs_report()
+    # write_rbugs_execute_result()
+    # write_speed_up()
     write_match_result(md)
 
-    # sum
-    sum_rbugs = 0
-    sum_spotbugs = 0
-    for key, value in csv_content_dict.items():
-        sum_rbugs += len(value['rbugs_csv'])
-        sum_spotbugs += len(value['spotbugs_csv'])
-    print('sum_rbugs', sum_rbugs)
-    print('sum_spotbugs', sum_spotbugs)
-    print('sum_both', len(csv_content_dict.keys()))
+    # # sum
+    # sum_rbugs = 0
+    # sum_spotbugs = 0
+    # for key, value in csv_content_dict.items():
+    #     sum_rbugs += len(value['rbugs_csv'])
+    #     sum_spotbugs += len(value['spotbugs_csv'])
+    # print('sum_rbugs', sum_rbugs)
+    # print('sum_spotbugs', sum_spotbugs)
+    # print('sum_both', len(csv_content_dict.keys()))
 
 

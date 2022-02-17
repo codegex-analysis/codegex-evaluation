@@ -9,10 +9,9 @@ path_base = None
 log_execute = None
 log_report = None
 collect_list = None
-is_filter = None
 
 def parse_args():
-    global path_base, log_execute, log_report, collect_list, is_filter
+    global path_base, log_execute, log_report, collect_list
     parser = argparse.ArgumentParser()
     parser.add_argument('-cl', '--collects', help='list project names that need to collect bug reports. "," as delimiter')
     parser.add_argument('-ca', '--clear-all', dest='clear_all', action='store_true', help='clear history data.')
@@ -20,19 +19,13 @@ def parse_args():
     parser.add_argument('-f', '--force', dest='force', action='store_true', help='forcely execute no matter whether '
                                                                                  'compile successfully before.')
     parser.set_defaults(force=False)
-    parser.add_argument('-nf', '--no-filter', dest='filter', action='store_false')
-    parser.set_defaults(filter=True)
     args = parser.parse_args()
     clear_all = args.clear_all
-    is_filter = args.filter
 
     path_base = utils.get_path_base()
     log_base = utils.get_log_base()
     log_execute = os.path.join(log_base, "execute")
-    if is_filter:
-        log_report = os.path.join(log_base, "report", 'spotbugs')
-    else:
-        log_report = os.path.join(log_base, "report", 'spotbugs_')
+    log_report = os.path.join(log_base, "report", 'spotbugs')
     utils.clear_data(clear_all, log_report)
     if not os.path.exists(log_report):
         os.mkdir(log_report)

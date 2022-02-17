@@ -12,10 +12,9 @@ skip_list = None
 execute_list = None
 is_force = None
 exepath = None
-is_filter = None
 
 def parse_args():
-    global path_base, log_execute, skip_list, execute_list, is_force, exepath, is_filter
+    global path_base, log_execute, skip_list, execute_list, is_force, exepath
     parser = argparse.ArgumentParser()
     parser.add_argument('-el', '--executes', help='list project names that need to executes. "," as delimiter')
     parser.add_argument('-ca', '--clear-all', dest='clear_all', action='store_true', help='clear history data.')
@@ -28,14 +27,11 @@ def parse_args():
     args = parser.parse_args()
     clear_all = args.clear_all
     is_force = args.force
-    is_filter = args.filter
     path_base = utils.get_path_base()
     log_base = utils.get_log_base()
     exepath = args.exepath
     if args.exepath:
         log_execute = os.path.join(log_base, 'exepath')
-    elif not is_filter:
-        log_execute = os.path.join(log_base, 'execute_')
     else:
         log_execute = os.path.join(log_base, 'execute')
     execute_list = utils.get_list(args.executes, path_base, 'execute')

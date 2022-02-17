@@ -3,12 +3,9 @@ import xml.etree.ElementTree as ET
 import subprocess
 import csv
 import shutil
-is_filter = False
 
-if is_filter:
-    SpotBugs_XML_BASE = '/home/codegex/Documents/workspace/rbugs/experiment/log/report/spotbugs'
-else:
-    SpotBugs_XML_BASE = '/home/codegex/Documents/workspace/rbugs/experiment/log/report/spotbugs_'
+
+SpotBugs_XML_BASE = '/home/codegex/Documents/workspace/rbugs/experiment/log/report/spotbugs'
 RBugs_REPORT_BASE = '/home/codegex/Documents/workspace/rbugs/experiment/log/report/rbugs'
 # RBUGS_REPORT_BASE = '/home/codegex/Documents/workspace/rbugs/experiment/log/report/rbugs'
 CSV_BASE = '/home/codegex/Documents/workspace/rbugs/experiment/log/report/csv'
@@ -56,10 +53,7 @@ def gen_csv_from_xml(project_name: str):
     if len(bugs) > 0:
         write_path = path.join(CSV_BASE, project_name)
         makedirs(write_path, exist_ok=True)
-        if is_filter:
-            write_path = path.join(write_path, 'spotbugs.csv')
-        else:
-            write_path = path.join(write_path, 'spotbugs_.csv')
+        write_path = path.join(write_path, 'spotbugs.csv')
         with open(write_path, 'w') as f:
             writer = csv.writer(f)
             writer.writerows(bugs)
@@ -123,7 +117,7 @@ def col_csv_from_rbugs(project_name: str):
 
 if __name__ == '__main__':
     # shutil.rmtree(CSV_BASE)
-    #Generate csv from xml reports
+    # #Generate csv from xml reports
     # spotbugs_proj_list = listdir(SpotBugs_XML_BASE)
     # for project in spotbugs_proj_list:
     #     gen_csv_from_xml(project)

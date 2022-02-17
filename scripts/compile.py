@@ -32,9 +32,9 @@ def parse_args():
     is_force = args.force
     is_purge = args.purge
     if is_purge:
-        log_compile = os.path.join(log_base, 'compile')
-    else:
         log_compile = os.path.join(log_base, 'compile_')
+    else:
+        log_compile = os.path.join(log_base, 'compile')
     skip_list = utils.get_skips('compile')
     utils.clear_data(clear_all, log_compile)
     if not os.path.exists(log_compile):

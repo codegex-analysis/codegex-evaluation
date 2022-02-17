@@ -1,15 +1,22 @@
-
+#%%
 import shutil
 import configparser
 import os
 from subprocess import Popen, PIPE
+from pathlib import PurePath
 import csv
+
 
 configParser = configparser.ConfigParser()
 configFilePath = "config.txt"
 configParser.read(configFilePath)
 path_base = configParser.get('general', 'path')
 log_base = configParser.get('general', 'log')
+
+path_root = PurePath(__file__).parent.parent  # path_root represents the path of this repository
+path_top100_repos = path_root / "top100repos"   # parent dir for the downloaded 100 repositories
+os.makedirs(path_top100_repos, exist_ok=True)
+
 
 def get_skips(type):
     skips = configParser.get('general', "{}_skips".format(type))

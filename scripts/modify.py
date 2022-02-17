@@ -8,22 +8,17 @@ from subprocess import Popen, PIPE
 ET.register_namespace('', 'http://maven.apache.org/POM/4.0.0')
 path_base = None
 modify_list = None
-is_filter = None
 is_debug = None
 
 def parse_args():
-    global path_base, modify_list, is_filter, is_debug
+    global path_base, modify_list, is_debug
     parser = argparse.ArgumentParser()
     parser.add_argument('-ml', '--modifies', help='list project names that need to modify. "," as delimiter')
-    parser.add_argument('--filter', dest='filter', action='store_true')
-    parser.add_argument('--no-filter', dest='filter', action='store_false')
-    parser.set_defaults(filter=True)
     parser.add_argument('--debug', dest='debug', action='store_true')
     parser.set_defaults(debug=False)
     args = parser.parse_args()
     path_base = get_path_base()
     modify_list = get_list(args.modifies, path_base, 'modify')
-    is_filter = args.filter
     is_debug = args.debug
 
 def modify_pom(path):
@@ -60,11 +55,10 @@ def modify_pom(path):
     version = ET.SubElement(plugin, '{http://maven.apache.org/POM/4.0.0}version')
     version.text = '4.2.3-SNAPSHOT'
     configuration = ET.SubElement(plugin, '{http://maven.apache.org/POM/4.0.0}configuration')
-    if is_filter:
-        visitors = ET.SubElement(configuration, '{http://maven.apache.org/POM/4.0.0}visitors')
-        visitors.text = 'QuestionableBooleanAssignment,BadSyntaxForRegularExpression,IncompatMask,OverridingEqualsNotSymmetrical,DumbMethods,FindFloatEquality,MethodReturnCheck,FindFieldSelfAssignment,FindLocalSelfAssignment2,DontCatchIllegalMonitorStateException,Naming,FindSelfComparison,FindSelfComparison2,FindRoughConstants,InheritanceUnsafeGetResource,StaticCalendarDetector,FindRefComparison,InfiniteRecursiveLoop,FindDeadLocalStores,SerializableIdiom,FindUnrelatedTypesInGenericContainer,FindBadCast2,FormatStringChecker,FindFinalizeInvocations,FindPuzzlers,DontUseEnum'
-        include_filter_file = ET.SubElement(configuration, '{http://maven.apache.org/POM/4.0.0}includeFilterFile')
-        include_filter_file.text = '/home/codegex/git/rbugs/spotbugs-includeFilter.xml'
+    visitors = ET.SubElement(configuration, '{http://maven.apache.org/POM/4.0.0}visitors')
+    visitors.text = 'FindFieldSelfAssignment,FindLocalSelfAssignment2,BadUseOfReturnValue,FindFloatEquality,VolatileUsage,DontUseEnum,InheritanceUnsafeGetResource,IncompatMask,SynchronizeOnClassLiteralNotGetClass,SerializableIdiom,FindSelfComparison,FindSelfComparison2,DontCatchIllegalMonitorStateException,FindRoughConstants,Naming,MethodReturnCheck,InefficientIndexOf,FindDeadLocalStores,FindUselessControlFlow,URLProblems,DumbMethodInvocations,OverridingEqualsNotSymmetrical,QuestionableBooleanAssignment,UnnecessaryMath,FormatStringChecker,FindFinalizeInvocations,BadSyntaxForRegularExpression,NumberConstructor,FindRefComparison,StaticCalendarDetector,InfiniteRecursiveLoop,FindPuzzlers,WaitInLoop,FindBadCast2,FindUnrelatedTypesInGenericContainer,DumbMethods,TestASM'
+    include_filter_file = ET.SubElement(configuration, '{http://maven.apache.org/POM/4.0.0}includeFilterFile')
+    include_filter_file.text = '/home/codegex/git/codegex/spotbugs-includeFilter.xml'
     effort = ET.SubElement(configuration, '{http://maven.apache.org/POM/4.0.0}effort')
     effort.text = 'Default'
     threshold = ET.SubElement(configuration, '{http://maven.apache.org/POM/4.0.0}threshold')
@@ -113,7 +107,7 @@ def is_success(filename):
 
 if __name__ == '__main__':
     parse_args()
-    print('[Modify] start modifying {} projects. is_filter: {}, is_debug: {}'.format(str(len(modify_list)), str(is_filter), str(is_debug)))
+    print('[Modify] start modifying {} projects. is_debug: {}'.format(str(len(modify_list)), str(is_debug)))
     for filename in modify_list:
         cwd = os.path.join(path_base, filename)
         pipe = Popen(['find', cwd, '-name', 'pom.xml', '-not', '-path', '*/target/*'], stdout=PIPE, cwd=cwd);
