@@ -12,7 +12,7 @@
 
 ## Evaluation on open-source projects
 
--   [Selected projects](https://codegex-analysis.github.io/exp_comparison/)
+-   [Selected projects](https://codegex-analysis.github.io/comparison/)
 -   [Manual labels of the comparison results](result/compare-spotbugs/csv/manual_label)
 -   [Analysis scripts](result/compare-spotbugs/scripts)
 
